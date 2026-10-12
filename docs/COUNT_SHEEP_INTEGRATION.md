@@ -1,120 +1,150 @@
-# Count-Sheep integration checkpoint — 2026-10-12
+# Count-Sheep integration validation — 2026-10-12
 
 PR: https://github.com/dougchansan/pkmn-colosseum/pull/638
 
-Status: source reconciliation, all-DOL-source compilation, canonical DOL byte
-comparison, metric integrity and address-based function regression audits pass.
-The full DOL + 25 REL build is NOT validated. Master has not been merged.
+**The complete DOL + 25 REL reconstruction passes all 26 unchanged canonical
+SHA-1 checks and all 26 direct original/rebuilt byte comparisons.** All source
+units compiled, 75 checker tests passed, and the address-based regression audits
+passed. Consult the PR for merge status; the ordinary CI image still has a
+separate original-input provisioning limitation described below.
 
 ## Revisions and attribution
 
-- Upstream baseline: 5cfe5ca3d09f20c4adc3c9b2a4e8d3c29046f10f.
-- Complete Count-Sheep donor snapshot: 741453444805acb817e4d9409416ac9c3de5b20e.
-- Maintainer-approved matching policy: a57d34f2dd688d669bd5cfe12a4085ef1cbed857.
-- History-preserving reconciliation: 5c2de957e880bc86d8ba54db55dc928c49cbc4bd.
-- Public/inline peopleSetVisible identity fix: 596e8e7779fe688c2249fdc0d61e0d40962cdcc4.
-- Published, validated build repair: 221dd0c1a8a490583a0be9610b8546e38677914c.
-- Validated configure.py Git blob: 6d681031cee1619a48f5de8dc3b754a138792e93.
+- Upstream baseline: `5cfe5ca3d09f20c4adc3c9b2a4e8d3c29046f10f`.
+- Complete Count-Sheep donor: `741453444805acb817e4d9409416ac9c3de5b20e`.
+- Maintainer-approved matching policy: `a57d34f2dd688d669bd5cfe12a4085ef1cbed857`.
+- History-preserving reconciliation: `5c2de957e880bc86d8ba54db55dc928c49cbc4bd`.
+- Inline-helper name repair: `596e8e7779fe688c2249fdc0d61e0d40962cdcc4`.
+- DOL export / loose-REL build repair: `221dd0c1a8a490583a0be9610b8546e38677914c`.
+- Fully built source revision: `a6ad511bb49b877e502ed2c406452e9ce524918e`.
+- Fully built source tree: `92078a22f48a6ca061e88e6bc3c359c183ec60ae`.
+- Audited progress/topology metadata refresh: `30e8633d7ddd6f68a4af94234e92de846eda66f1`.
 
-The donor history and attribution are preserved. The reconciliation resolves 39
-conflicted paths and carries all 42 upstream runtime-evidence names forward.
-The source-style exceptions approved by the maintainer are accepted; original
-binary hashes and metric-integrity requirements have not been weakened.
+Both histories and attribution are preserved. Reconciliation resolved 39
+conflicted paths and retained all 42 upstream runtime-evidence names. Documented
+compiler-control/source-shaping exceptions are accepted under the maintainer's
+updated policy. Original hashes and metric-integrity checks were not weakened.
 
-## Repairs
+## What was repaired
 
-The public peopleSetVisible name collided with a donor static inline helper in
-src/game/people/people.c. Only the inline helper and its original two callers
-were renamed to peopleSetVisibleInline; both bodies remain unchanged.
+The public `peopleSetVisible` name collided with a donor static inline helper.
+Only that helper and its original two callers were renamed; both bodies were
+preserved. The earlier DOL-only hash failure came from losing REL-consumer linker
+roots, which stripped 56,640 retail code bytes. The 165-entry code-export manifest
+retains those identities without forcing unrelated data or source-only helpers.
+It includes aliases/labels and does not represent 165 newly matched functions.
 
-The DOL-only diagnostic removed REL consumers and therefore lost linker roots.
-Retail code was dead-stripped: the .text section shrank by 56,640 bytes. The
-initial donor diagnostic hash failure was not evidence of bad imported function
-code. Retaining canonical retail code symbols recovered the exact original DOL.
-The durable config/GC6E01/dol_exports.txt manifest contains 165 code identities
-(including aliases/labels), not 165 newly matched functions. It does not force
-unrelated data or unused source-only helpers into the binary.
+The input planner accepts a complete set of loose original RELs when their FSYS
+archives are absent. Available archives remain authoritative; incomplete inputs
+still fail. Every original module hash remains checked.
 
-The extraction planner now accepts a complete set of loose original REL files
-when their FSYS archive is absent. An existing archive remains authoritative.
-Partial or missing input sets still fail, and dtk's original module hash checks
-remain in force. This removes a redundant archive requirement, not the need for
-original game inputs.
+The object-map freeze predated two donor consolidations: 17 entries became two,
+reducing total units from 2,178 to 2,163. The audit verified identical unions of
+module/section address intervals, plus identical code-byte, data-byte and
+function totals. All other unit signatures were unchanged. This is a documented
+freeze refresh, not a denominator reduction to inflate progress.
 
-## Executed validation
+Consolidated regions:
 
-Build evidence:
-https://github.com/dougchansan/pkmn-colosseum/actions/runs/38285680548/job/114933360995
+- `main/game/gs_exact_801C8834`: 1,436 code bytes, 220 data bytes, two functions.
+- `main/game/fight_range_802249B8_to_8022BB84`: 29,132 code bytes, 360 data bytes,
+  39 functions.
 
-That run passed all 75 checker tests, the complete PR source-quality scan,
-whole-tree assembly-wrapper scan (2,336 source files), all DOL source compilation,
-canonical DOL SHA-1, direct cmp, metric integrity, and both report comparisons.
-Its overall workflow conclusion is failure solely because the final bot push
-attempted to edit a workflow without workflows permission. The tested files were
-not silently changed to work around a build failure.
+The refreshed freeze blob is `504bc98aa8197e93eff02ade313c74d02bab0496`.
+Its strict source-status check passes with 2,163 units, 8,677 functions,
+2,504,940 code bytes and 3,566,037 data bytes.
 
-Publication evidence:
-https://github.com/dougchansan/pkmn-colosseum/actions/runs/38286523217/job/114936104717
+## Full-build execution and provenance
 
-Publication succeeded after the workflow edit was made separately. The publisher
-required identical source, headers, config, tools and checker files, verified the
-exact tested configure.py blob, reran 75 tests, and committed configure.py only.
-Completed one-off diagnostic/publishing workflows have been removed.
+The maintainer supplied `GC6E01-rel-inputs-complete.zip`. All 25 originals were
+independently checked against the unchanged module hashes before use. Its SHA-256
+is `f7ac305017935e89c1913f2a82c98fedaa8ce6da0b389252a2800eb74c90166e`.
 
-Canonical DOL SHA-1: 870e8b9693ca780782d80f22a6a4572d8ba9458f.
-Original and rebuilt DOL size: 3,779,808 bytes. Direct byte comparison passed.
-This is a matching reconstruction using original fallback objects where needed,
-not a claim that the game is 100% decompiled.
+Validation used the existing CI compiler/binutils distribution and pinned tools.
+The source snapshot's regular tracked files were checked against its Git archive
+and remained unchanged throughout binary validation. Two unused absolute local
+symlinks in that archive were not materialized in the sandbox.
 
-Metric integrity: 8,602 functions at 8,602 distinct addresses, no duplicate claims;
-reported code denominator 2,495,112 versus 2,503,264 bytes of DOL text (0.33% apart).
+The sandbox cannot execute 32-bit programs natively. Consequently, the original
+Metrowerks compilers ran under QEMU's i386 user-mode runtime and Wibo 0.6.16. The
+27 ProDG/3.5 REL translation units compiled on the private CI runner with Wibo
+1.0.3, using the exact project flags. No original REL inputs were sent to that
+compile job. Each object, all 158 headers, the compiler executables and objcopy
+were SHA-256 checked before those compiled objects were used here. The generated
+local Ninja ProDG rule used this authenticated compiler cache; it did not insert
+retail/fallback objects in place of compiled sources.
 
-Against upstream: 8,602 common module/address identities, zero function-score
-regressions, zero unexplained removals, 41 renames, two boundary changes, one
-fully covered exact coalescence. Against donor: zero function-score regressions,
-zero unexplained removals, 42 renames, no boundary changes.
+Private REL compilation evidence (maintainer access required):
+https://github.com/dougchansan/pkmn-colosseum-build/actions/runs/38296919185/job/114970107093
 
-The removed standalone fn_800F9D64 four-byte identity is covered by the exact
-GSmsgOpen interval. GSmsgOpen and InitMetroTRK_BBA boundaries each expanded by
-four bytes. Mutable source paths and names were not used to hide regressions.
+Compiled-object artifact SHA-256:
+`f66709ce334ac0116492e20f94f2e5cf698e88df7d9a2afd36669fc0c22dd862`.
 
-## Fresh DOL-only report measurements
+The complete 26-module split, source report and final links ran with the canonical
+module configuration, dtk 1.8.3, binutils 2.42-1, original compiler flags, and the
+unchanged `config/GC6E01/build.sha1`. Limiting toolkit concurrency resolved a
+sandbox stall; no disassembly setting or game-source modification was needed.
 
-| Measure | Upstream | Integrated |
+Validation results:
+
+- Every DOL source and all 27 REL source units compiled.
+- All 26 canonical output hashes passed; all 26 files also passed direct byte
+  comparison against independent original inputs.
+- All 75 checker tests passed; the whole-tree scan checked 2,336 source files.
+- Metric integrity found 8,677 unique module/address function identities with
+  no duplicate claims.
+- Against each previously built upstream/donor DOL report, all 8,602 common
+  module/address identities had zero function-score regressions and zero
+  unexplained removals. All 75 added REL lifecycle functions match 100%.
+- The upstream audit records 41 renames, two boundary adjustments and one exact
+  interval coalescence; the donor audit records all 42 runtime renames, with no
+  boundary change. The removed four-byte `fn_800F9D64` identity is covered by
+  exact `GSmsgOpen` code, not silently discarded.
+- The strict refreshed object-map freeze and README/report consistency pass.
+
+Canonical DOL SHA-1: `870e8b9693ca780782d80f22a6a4572d8ba9458f`.
+Original and rebuilt DOL size: 3,779,808 bytes.
+
+Metadata publication reproduced the exact locally checked file blobs and reran
+all 75 tests; it is not presented as a replacement full binary build:
+https://github.com/dougchansan/pkmn-colosseum/actions/runs/38297983057/job/114973628635
+
+## Fresh progress, with scopes kept separate
+
+| Metric | DOL only | DOL + 25 REL modules |
 | --- | ---: | ---: |
-| Matched code bytes | 1,086,720 | 2,289,984 |
-| Code match | 43.554028% | 91.77881% |
-| Exact function matches | 6,804 / 8,603 | 8,460 / 8,602 |
-| Source-linked code bytes | 732,868 | 2,256,580 |
-| Source-linked code | 29.372194% | 90.440025% |
-| Matched data bytes | 2,136,689 | 2,085,070 |
-| Data match | 97.29471% | 94.94608% |
+| Matched code | 2,289,984 / 2,495,112 | 2,299,812 / 2,504,940 |
+| Code matching | 91.77881% | 91.81106% |
+| Exact functions | 8,460 / 8,602 | 8,535 / 8,677 |
+| Source-linked code | 90.440025% | 90.47754% |
+| Matched data | 2,085,070 / 2,196,057 | 2,098,410 / 3,566,037 |
+| Data matching | 94.94608% | 58.844315% |
 
-Net matched code gain: 1,203,264 bytes. Exact function count gain: 1,656.
-These are DOL-only reports, not a combined DOL/REL or gameplay measurement.
-Data matching decreases by 51,619 reported bytes; zero function regressions must
-not be described as zero regressions in every metric. The full rebuilt DOL is
-byte-identical despite that report-level data coverage difference. Its detailed
-object/relocation scoring explanation has not been established here.
+Full-report fuzzy matching is 99.68803%; 1,891 of 2,163 scoring units are linked
+from source. The lower combined data percentage includes `common_rel`'s
+1,356,832-byte data region, of which only 192 bytes are reported as matched.
+It is not a fall from 94.95% to 58.84% within the same measurement scope.
 
-## Remaining known gate: original REL inputs
+Relative to upstream's prior DOL-only build, matched code increased by 1,203,264
+bytes and exact function count by 1,656. Upstream DOL data matching was 97.29471%
+versus the imported 94.94608%, a 51,619-byte report decrease retained and disclosed
+throughout this integration. Zero function regressions is not a claim that every
+reported data metric improved.
 
-The accessible private CI input repository and current build container provide
-only orig/GC6E01/sys/main.dol. All 25 configured original REL inputs are absent.
-The canonical project configuration and expected hashes remain unchanged.
+A byte-identical reconstruction still uses original fallback objects for
+unreconstructed regions. It does not mean all game source or data is decompiled,
+and no gameplay validation is claimed.
 
-Supply personally dumped GC6E01 Rev 0 files under orig/GC6E01/files/ in private
-build inputs, either as the required FSYS archives or these loose modules:
+## Separate CI infrastructure limitation
 
-common_rel.rel, mail.rel, S1_out.rel, pocket_menu.rel, worldmap_menu_rel.rel,
-S1_shop_1F.rel, S1_out_bf.rel, pda_menu.rel, M1_out.rel, M1_pc_1F.rel,
-M1_pc_B1.rel, M1_houseA_1F.rel, M1_houseA_2F.rel, M1_houseB_1F.rel,
-M1_houseC_1F.rel, M1_shop_1F.rel, M1_shop_2F.rel, M1_gym_1F.rel,
-M1_gym_B1.rel, M1_stadium_1F.rel, M1_carde_1.rel, M1_out_bf.rel,
-M1_gym_1F_bf.rel, M1_houseA_1F_bf.rel, M1_water_colo.rel.
+The complete originals are available and validated in this session. They were
+not uploaded into the ordinary private CI image, which still contains only
+`main.dol`. Consequently, ordinary Build/Regression Guard runs can still fail on
+missing original REL inputs. The full passing validation above is the distributed
+private-compiler / sandbox-link run, not a claim that those GitHub checks are green.
+Do not bypass branch protection or alter expected hashes to hide this distinction.
 
-Keep original files, generated binaries and compiler distributions out of the
-public repository. After the private input image includes these files, run the
-unmodified canonical configure/build, all-source report, all 26 expected output
-hashes, and Regression Guard. Resolve any newly exposed errors before merging.
-No REL hash validation, gameplay test, or final merge is claimed at this checkpoint.
+For repeatable ordinary CI, provision the 25 original modules under
+`orig/GC6E01/files/` in the PRIVATE `pkmn-colosseum-build` input repository/image,
+then rerun the ordinary Build and Regression Guard jobs. Keep all original game
+files and compiler distributions out of the public source repository.
