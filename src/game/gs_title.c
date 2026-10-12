@@ -274,7 +274,7 @@ extern f32 lbl_8047B85C;
 extern f32 lbl_8047B860;
 extern u32 lbl_8047B808;
 extern u32 lbl_8047B80C;
-extern void* fn_800FF560(void);
+extern void* floorGetCurrentContext(void);
 
 /* Forward declarations for same-TU callees used before their definitions. */
 void fn_8002058C(void);
@@ -1468,7 +1468,7 @@ extern void GStextureFree(void);
 extern u32 lbl_8047A384;
 extern u32 lbl_8047A388;
 extern u32 lbl_8047A38C;
-void fn_800255A4(void) {
+void worldMapPost(void) {
     extern u32 lbl_8047A384;
     extern u32 lbl_8047A388;
     extern u32 lbl_8047A38C;
@@ -1522,8 +1522,8 @@ extern u32 lbl_8047A3AC;
 extern u32 lbl_80478DD8;
 extern u8 lbl_8047A3A8;
 extern u32 lbl_8047A388;
-extern void fn_80025F84(void);
-void fn_80025730(void) {
+extern void worldMapBikeRide(void);
+void worldMapMain(void) {
     typedef struct TitleFloorEntry {
         u32 flag;
         u32 floor;
@@ -1615,7 +1615,7 @@ void fn_80025730(void) {
         }
         menuOpen(0xC3, 0);
         menuClose(0xBD);
-        fn_80025F84();
+        worldMapBikeRide();
     }
     floorLink(floor, 0);
 }
@@ -1636,7 +1636,7 @@ extern u32 lbl_8047A388;
 extern u32 lbl_8047A390;
 extern u32 lbl_8047A3AC;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_800259B0)
-void fn_800259B0(void) {
+void worldMapPre(void) {
     extern u8 lbl_803A2058[];
     extern u8 lbl_803A204C[];
     extern void fn_801CB954(s32, s32);
@@ -2064,7 +2064,7 @@ extern u32 lbl_8047A39C;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80025F84)
 /* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimization_level 2) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimization_level 2
-void fn_80025F84(void) {
+void worldMapBikeRide(void) {
     extern u8 lbl_803A2040[];
     extern u32 lbl_80478DEC;
     extern u8 lbl_8047A380;
@@ -2668,7 +2668,7 @@ void fn_80020F54(u8* arg0, u8* arg1) {
  * 0x3c and makes the frame 0x50.
  */
 extern void menuColosseumBattle(void);
-extern void fn_800FF58C(void);
+extern void floorRequestChange(void);
 extern void fn_8006A718(void);
 extern void fn_801CB9D8(u32);
 extern void fn_8010A420(void*);
@@ -2702,7 +2702,7 @@ s32 fn_800210F0(void)
     extern u32 gamedatasaveGetStatus(s32, s32);
     extern u16 fn_8006A718(s32);
     extern u8 fn_801D04E8(void);
-    extern s32 fn_800FF58C(s32);
+    extern s32 floorRequestChange(s32);
     extern void menuModelInit(void*, s16, s16);
     extern s32 menuModelSetMotion(void*, u32);
     extern void fn_8010A010(void*, u32);
@@ -2770,7 +2770,7 @@ s32 fn_800210F0(void)
                 break;
             default:
                 fn_800205B8(1);
-                fn_800FF58C(0x384);
+                floorRequestChange(0x384);
                 state = 0x64;
                 break;
             }

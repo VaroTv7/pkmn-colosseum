@@ -247,7 +247,7 @@ extern u32 gamedatasaveGetStatus(void* data, s32 kind);
 extern void gamedatasaveSetStatus(void* data, s32 kind, s32 value);
 extern void* heroGetStatus(void* hero, s32 kind, s32 index);
 extern void heroSetStatus(void* hero, s32 kind, void* data);
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 
 typedef void (*CARDCallback)(s32 chan, s32 result);
 typedef struct MemcardFileInfo MemcardFileInfo;
@@ -1531,7 +1531,7 @@ static inline void memcardSetSaveId(void* data, u64 serial)
 static inline void memcardFillRandom(u8* random, s32 count)
 {
     while (count-- != 0) {
-        *random++ = fn_800E0C54();
+        *random++ = GSrand();
     }
 }
 

@@ -99,7 +99,7 @@ extern void  fn_8017B3E4(u32 fileGroupId);
 extern s32   fn_8017B2CC(u32 fileGroupId);
 extern void  fn_8017B1CC(u32 fileGroupId);
 extern u8    fn_80100B24(GSFloorContext* ctx);
-extern void  fn_800F7274(u16 handle);
+extern void  floorTerminateScriptThreads(u16 handle);
 extern u8    floorCheckFightKind(s32 floorIndex);
 extern void  floorCheckFade(void);
 extern void  fn_80117C84(void);
@@ -199,7 +199,7 @@ static inline void floorReleaseResources(s32 pool, u32 floorId, s32 status) {
             continue;
         }
         if (res->status == GSFLOOR_RES_LOADED && res->modelHandle != NULL) {
-            fn_800F7274(res->textureHandle);
+            floorTerminateScriptThreads(res->textureHandle);
         }
         res->active = 0;
         if (res->prev != NULL) {

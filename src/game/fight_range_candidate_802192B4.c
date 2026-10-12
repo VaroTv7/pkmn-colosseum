@@ -40,7 +40,7 @@ void fn_802192B4(void)
 
 void fn_80219354(void)
 {
-    extern u32 fn_800E0C54();
+    extern u32 GSrand();
     extern u32 GSmsgGetGSchar();
     extern void fn_8010C4D4();
     extern u32 wazaGetStatus();
@@ -95,7 +95,7 @@ void fn_80219354(void)
         if ((count & 0xffff) == 0) {
             lbl_8047B610 = (u8*)*(u32*)(lbl_8047B610 + 1);
         } else {
-            random = fn_800E0C54();
+            random = GSrand();
             p = typeArray;
             p += (u16)((u16)random % (s32)(u16)count);
             random = *p;

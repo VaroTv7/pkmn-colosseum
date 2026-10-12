@@ -88,7 +88,7 @@ u32 fn_8022BE2C(u32 ctx, u8 mode) {
     extern u32 fightOutPokemonGetTasteLike();
     extern u8  fn_802025B8();
     extern void fn_8020248C();
-    extern u16 fn_800E0C54(void);
+    extern u16 GSrand(void);
     extern void fightOutPokemonWriteJoutaiDataId();
     extern u8  fightOutPokemonIsJoutaiNormal();
     extern void fn_80119F50();
@@ -472,7 +472,7 @@ u32 fn_8022BE2C(u32 ctx, u8 mode) {
             if (t3 < 1) {
                 break;
             }
-            pick = fn_800E0C54() % t3;
+            pick = GSrand() % t3;
             ap = avail;
             ap += pick;
             sel = *ap;

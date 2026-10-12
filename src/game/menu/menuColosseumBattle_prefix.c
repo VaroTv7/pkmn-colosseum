@@ -37,7 +37,7 @@ extern u32 pokemonGetStatus(void*, u32, u32, u32);
 extern u32 pokemonGetAnnonKatati(u32);
 extern void scriptStoreTemochiPokemon(s32);
 extern u8 scriptCheckTemochiPokemon(s32);
-extern u32 fn_800FF560(void);
+extern u32 floorGetCurrentContext(void);
 extern void fn_80057E70(void);
 extern void fn_80055B98(s32);
 extern void fn_800F915C(s32);
@@ -177,7 +177,7 @@ void fn_80058150(void) {
         lbl_8047A590 = NULL;
     }
 
-    GSthreadCreate(1, fn_800FF560(), 0x4000, 1, 1, fn_80057E70);
+    GSthreadCreate(1, floorGetCurrentContext(), 0x4000, 1, 1, fn_80057E70);
     menuClose(0x19);
     menuClose(0x1A);
     menuClose(0x1B);

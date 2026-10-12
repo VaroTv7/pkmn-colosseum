@@ -1845,6 +1845,27 @@
         "stwu"
       ],
       "evidence": "docs/asm_evidence/gs_math_init.md"
+    },
+    {
+      "path": "src/dolphin/os/OSReset_exact.c",
+      "function": "Reset_8009FF50",
+      "mnemonics": [
+        "b",
+        "blt",
+        "cmplwi",
+        "isync",
+        "li",
+        "lis",
+        "mfspr",
+        "mftb",
+        "mtspr",
+        "nop",
+        "ori",
+        "stw",
+        "subf",
+        "sync"
+      ],
+      "evidence": "docs/asm_evidence/os_reset.md"
     }
   ]
 }

@@ -192,7 +192,7 @@ extern u32 heroBiosGetNamePtr(void* ptr);
 extern u32 lbl_80478EBC;
 extern u32 lbl_80478EB8;
 extern void* fn_80113F48(void);
-extern void fn_8018C1E8(void*, u32, u32);
+extern void peopleSetVisible(void*, u32, u32);
 extern void fn_801653CC(u32, u32, u32);
 extern void msgctrlSetValue(u32, u32);
 extern void winMsgOpen(u32, u32, u32, u32);
@@ -201,7 +201,7 @@ extern u16 pcboxDelItem(u8*, u16, u16);
 extern s8 fn_8001E184(void);
 s32 floorEventGetTresure(u8, u32, s32);
 extern void fn_8018B76C(void*, u32, u32, u32, u32);
-extern void fn_8018C7C8(void*, u32, u32);
+extern void peopleSetFlagsByIndex(void*, u32, u32);
 extern u8 fn_801902E0(u16);
 extern void fn_80166A28(u32);
 extern void peopleWaitSyncMotion(void*, u32, u32);
@@ -222,7 +222,7 @@ extern void fn_8018AACC(u32, u32, u32, void*);
 extern u32 peopleMoveCheck(u32 groupId, u32 index, u8 waitFlag);
 extern void fn_8018805C(u32, u32, f32, f32);
 extern void fn_80184470(u32, u32);
-extern void fn_8018C0A8(u32, u32, void*);
+extern void peopleSetPositionByIndex(u32, u32, void*);
 extern void fn_801669BC(u32);
 extern u8 GSmodelCanAnimate(void*);
 extern void fn_801845E4(u32, u32, u32, u32, u8);
@@ -431,7 +431,7 @@ void pokemonToMenuPokemonStatus(void);
 extern void GSmsgGetGSchar(void);
 extern void fn_8010C4D4(void);
 extern void fn_8010C46C(void);
-extern void fn_800E0C54(void);
+extern void GSrand(void);
 extern u8 lbl_8027296C[];
 void pokemonCheckSetMonohiroi(void);
 void pokemonAllKaihuku(void);
@@ -493,7 +493,7 @@ extern void jumptable_803634F0();
 extern void jumptable_80363558();
 extern u8 lbl_80426BD0[];
 extern void fadeEffectDokuStart(void);
-extern void fn_8018C69C(void);
+extern void peopleClearFlagsByIndex(void);
 extern void fn_8018CA20(void);
 extern void winMsgOpenField(void);
 extern void winMsgCloseField(void);
@@ -533,7 +533,7 @@ extern void fn_8018790C(void);
 extern void fn_800F7D38(void);
 extern void fn_800F7C8C(void);
 extern void fn_8018BA04(void);
-extern void fn_80187D48(void);
+extern void peopleTurnToPoint(void);
 extern void fn_8018D7D0(void);
 extern void fn_80183730(void);
 extern void fn_8018397C(void);
@@ -606,7 +606,7 @@ extern void peopleOpen(void);
 extern void GSmodelEnableAnimBlend(void);
 extern void fn_8018CB5C(void);
 extern void fn_80189328(void);
-extern void fn_8018BF24(void);
+extern void peopleSetRotation(void);
 void heroMoveInit(void);
 void heroMoveSyncWithHero(void);
 void fn_8013024C(void);
@@ -1479,7 +1479,7 @@ void floorEventSetTresureDisp(u32 rawIndex, u32 display)
     }
 
     if (index != *(u32*)lbl_80478EB8) {
-        fn_8018C1E8(fn_80113F48(), encoded, display);
+        peopleSetVisible(fn_80113F48(), encoded, display);
     }
 }
 
@@ -1657,11 +1657,11 @@ s32 floorEventCtrlTresure(void* character, u32 param, u8 mode)
         switch ((entry->flags >> 5) & 7) {
         case 1:
             fn_8018B76C(character, param, 2, 0, 1);
-            fn_8018C7C8(character, param, 1);
+            peopleSetFlagsByIndex(character, param, 1);
             break;
         case 2:
         case 3:
-            fn_8018C1E8(character, param, 0);
+            peopleSetVisible(character, param, 0);
             break;
         }
         break;
@@ -1698,11 +1698,11 @@ s32 floorEventCtrlTresure(void* character, u32 param, u8 mode)
             switch ((displayEntry->flags >> 5) & 7) {
             case 1:
                 fn_8018B76C(character, param, 2, 0, 1);
-                fn_8018C7C8(character, param, 1);
+                peopleSetFlagsByIndex(character, param, 1);
                 break;
             case 2:
             case 3:
-                fn_8018C1E8(character, param, 0);
+                peopleSetVisible(character, param, 0);
                 break;
             }
         }
@@ -1846,7 +1846,7 @@ s32 floorEventCtrlElevator(void* floor, u32 index, u16 command,
             part = GSmodelGetPart(model, elevator->partIndex);
             GSpartGetTransform(part, &position, 0, 0);
             GSpartFree(part);
-            fn_8018C0A8(group, person, &position);
+            peopleSetPositionByIndex(group, person, &position);
             position.z += 25.0f;
             fn_8018AACC(group, person, 1, &position);
             peopleMoveCheck(group, person, 1);

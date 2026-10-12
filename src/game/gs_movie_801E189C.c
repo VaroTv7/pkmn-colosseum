@@ -76,7 +76,7 @@ extern BOOL fn_801E4A6C(void);
 /* Loader thread entry: opens the THP file and prepares playback. */
 void* fn_801E1924(void* param);
 
-void fn_801E189C(const char* path, u8 onMemory)
+void GSmovieOpen(const char* path, u8 onMemory)
 {
     lbl_8047B444 = 0;
     lbl_8047B448.onMemory = onMemory;

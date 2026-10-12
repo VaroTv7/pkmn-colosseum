@@ -404,7 +404,7 @@ extern u8 menuGetOffScreenFlag();
 extern void fn_801661D0(void);
 extern void fn_800D3074(void);
 extern void* fn_801906A0();
-extern u32 fn_800FF560();
+extern u32 floorGetCurrentContext();
 extern void fn_80130CD8(void);
 extern void GSgappBlock(void);
 extern void GSthreadBlockGroup(void);
@@ -448,7 +448,7 @@ u32 fn_8000D710(u32 mode) {
     extern void fn_801661D0(s32, s32, s32, s32);
     extern void fn_800D3074(s32);
     extern void* fn_801906A0(s32);
-    extern u32 fn_800FF560(void);
+    extern u32 floorGetCurrentContext(void);
     extern void fn_80130CD8(void);
     extern void GSgappBlock(void);
     extern void GSthreadBlockGroup(u32);
@@ -505,7 +505,7 @@ u32 fn_8000D710(u32 mode) {
         do {
             fn_800D3074(1);
             lbl_8047A2A4 = dialogId;
-            lbl_8047A2A8 = fn_800FF560();
+            lbl_8047A2A8 = floorGetCurrentContext();
             fn_80130CD8();
             GSgappBlock();
             GSthreadBlockGroup(lbl_8047A2A8);

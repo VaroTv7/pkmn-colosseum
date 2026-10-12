@@ -209,7 +209,7 @@ extern void _threadSwitch();
 extern void GSresGetResource();
 extern void fn_800F9AEC();
 extern void fn_800F9C04();
-extern void fn_800FF58C();
+extern void floorRequestChange();
 extern void floorSetFadeScript();
 extern void fn_80113F48();
 extern void fn_80118874();
@@ -460,9 +460,9 @@ void fn_800896E0(u32 v) {
 s32 fn_800896E8(void* work, void* arg) {
     extern void msgctrlSetValue(s32 id, void* value);
     extern void fn_80189990(void* work, void* arg, s32 size);
-    extern void fn_8018C1E8(void* work, u8 kind, s32 flag);
+    extern void peopleSetVisible(void* work, u8 kind, s32 flag);
     extern void fadeCheck(s32 mode);
-    extern s32 fn_801CA5C4(s32 id, s32 a, s32 b);
+    extern s32 fieldStartEncount(s32 id, s32 a, s32 b);
     extern u8 fn_801EEAD0(u8 id);
     extern void fightTrainerPokemonDataBiosSetPokemonDataId(u8* pokemon, s32 id);
     extern u8* fightTrainerPokemonDataBiosGetPtr(void);
@@ -533,7 +533,7 @@ s32 fn_800896E8(void* work, void* arg) {
     *(u8**)&lbl_8047A670 = ctx + 0x4118;
     *(u32*)&lbl_80478960 = 9;
     *(u8**)&lbl_8047A674 = ctx + 0x40BC;
-    result = fn_801CA5C4(0x231, 1, 0);
+    result = fieldStartEncount(0x231, 1, 0);
     if (result == 2) {
         if (ctx[0x41E1] != 0 && fn_801EEAD0(ctx[0x41E1]) == 1) {
             ok = 1;
@@ -561,7 +561,7 @@ s32 fn_800896E8(void* work, void* arg) {
             }
             kind = ((GbaMiscKindPair*)lbl_802EEB98)[0].kind;
         found:
-            fn_8018C1E8(work, kind, 0);
+            peopleSetVisible(work, kind, 0);
         }
     }
     fadeCheck(1);
@@ -2208,7 +2208,7 @@ void fn_8008C7B0(void) {
     r3 = 0x8d0;
     fn_80190528();
     r3 = 0x1;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -2416,7 +2416,7 @@ void fn_8008CACC(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -2607,7 +2607,7 @@ void fn_8008CDD8(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -2789,7 +2789,7 @@ void fn_8008D0A0(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -3198,7 +3198,7 @@ void fn_8008D348(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -3864,7 +3864,7 @@ void fn_8008D938(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -4189,7 +4189,7 @@ void fn_8008E320(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -4489,7 +4489,7 @@ void fn_8008E7D4(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -4671,7 +4671,7 @@ void fn_8008EC28(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -4860,7 +4860,7 @@ void fn_8008EED0(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -5105,7 +5105,7 @@ void fn_8008F190(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -5382,7 +5382,7 @@ void fn_8008F524(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -5584,7 +5584,7 @@ void fn_8008F91C(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -5765,7 +5765,7 @@ void fn_8008FBF4(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -5933,7 +5933,7 @@ void fn_8008FE94(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -6358,7 +6358,7 @@ void fn_80090100(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -6549,7 +6549,7 @@ void fn_80090720(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -6781,7 +6781,7 @@ void fn_800909E4(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -6982,7 +6982,7 @@ void fn_80090D34(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -7351,7 +7351,7 @@ void fn_8009100C(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -7494,7 +7494,7 @@ void fn_80091564(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x81;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -7637,7 +7637,7 @@ void fn_80091774(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x82;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -7780,7 +7780,7 @@ void fn_80091984(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x82;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -7923,7 +7923,7 @@ void fn_80091B94(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x82;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -8037,7 +8037,7 @@ void fn_80091DA4(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x82;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -8180,7 +8180,7 @@ void fn_80091F48(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -8416,7 +8416,7 @@ void fn_80092140(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x83;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -8540,7 +8540,7 @@ void fn_80092498(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x83;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -8776,7 +8776,7 @@ void fn_80092664(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x87;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -8877,7 +8877,7 @@ void fn_800929BC(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x83;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();
@@ -8975,7 +8975,7 @@ void fn_80092B2C(void) {
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x87;
-    ((void(*)(void))fn_800FF58C)();
+    ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
     r4 = 0x0;
     ((void(*)(void))floorSetFadeScript)();

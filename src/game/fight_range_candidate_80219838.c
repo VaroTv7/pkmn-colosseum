@@ -13,7 +13,7 @@
 #include "dolphin/types.h"
 
 extern u8* lbl_8047B610;
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 
 extern u32 pokemonGetStatus();
 extern void pokemonSetStatus();
@@ -157,7 +157,7 @@ void fn_80219CF4(void)
     attacker = fightTargetGetPtrAsNowFightType(0x11, 0);
     move = pokemonGetStatus(attacker, 0, 0xd9, 0);
     level = figthOutPokemonGetLevel(attacker);
-    rng = fn_800E0C54();
+    rng = GSrand();
     wazaSetStatus(move, 0, 0x2d, 0, (s32)(level * ((rng % 11) * 10 + 50)) / 100);
     lbl_8047B610++;
 }

@@ -9,7 +9,7 @@
 #include "dolphin/types.h"
 
 extern u8 lbl_80478D78[1];
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 extern void fn_80211B94(void*, void*, u8);
 
 u32 fn_8022D6BC(u32 attacker, u32 defender)
@@ -116,8 +116,8 @@ u32 fn_8022D6BC(u32 attacker, u32 defender)
         if (moveHit == 1 && fightOutPokemonCheckFightOut(attacker) == 1 &&
             status107 == 0 && (status11C != 0 || status11E != 0) &&
             moveStatus13 != 0) {
-            if (fn_800E0C54() % 10 == 0) {
-                u32 pick = (u16)fn_800E0C54();
+            if (GSrand() % 10 == 0) {
+                u32 pick = (u16)GSrand();
                 u32 pickDivisor = 3;
                 lbl_80478D78[3] = values[(u8)(pick % pickDivisor)];
                 lbl_8047B618 |= 0x2000;
@@ -132,7 +132,7 @@ u32 fn_8022D6BC(u32 attacker, u32 defender)
         if (moveHit == 1 && fightOutPokemonCheckFightOut(attacker) == 1 &&
             status107 == 0 && (status11C != 0 || status11E != 0) &&
             moveStatus13 != 0) {
-            if (fn_800E0C54() % 3 == 0) {
+            if (GSrand() % 3 == 0) {
                 u32 value = 0x42;
                 lbl_80478D78[3] = value;
                 lbl_8047B618 = lbl_8047B618 | 0x2000;
@@ -147,7 +147,7 @@ u32 fn_8022D6BC(u32 attacker, u32 defender)
         if (moveHit == 1 && fightOutPokemonCheckFightOut(attacker) == 1 &&
             status107 == 0 && (status11C != 0 || status11E != 0) &&
             moveStatus13 != 0) {
-            if (fn_800E0C54() % 3 == 0) {
+            if (GSrand() % 3 == 0) {
                 u32 value = 0x45;
                 lbl_80478D78[3] = value;
                 lbl_8047B618 = lbl_8047B618 | 0x2000;
@@ -162,7 +162,7 @@ u32 fn_8022D6BC(u32 attacker, u32 defender)
         if (moveHit == 1 && fightOutPokemonCheckFightOut(attacker) == 1 &&
             status107 == 0 && moveStatus13 != 0 &&
             (status11C != 0 || status11E != 0)) {
-            if (fn_800E0C54() % 3 == 0) {
+            if (GSrand() % 3 == 0) {
                 u32 value = 0x43;
                 lbl_80478D78[3] = value;
                 lbl_8047B618 = lbl_8047B618 | 0x2000;
@@ -178,7 +178,7 @@ u32 fn_8022D6BC(u32 attacker, u32 defender)
             status107 == 0 && moveStatus13 != 0 &&
             (status11C != 0 || status11E != 0) &&
             fightOutPokemonCheckFightOut(defender) == 1) {
-            if (fn_800E0C54() % 3 == 0 &&
+            if (GSrand() % 3 == 0 &&
                 (u16)attackerAbility != 0xC &&
                 attackerSex != defenderSex && fn_802025B8(attacker, 0xA) == 2 &&
                 attackerSex != 2 && defenderSex != 2) {

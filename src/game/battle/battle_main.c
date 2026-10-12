@@ -10,7 +10,7 @@
  * battle_GetStatusFlags, battle_IsFightInProgress, battle_FightReset,
  * battle_FightEnd, battle_FightCleanup, battle_FightStart). None of these
  * names appear in config/GC6E01/symbols.txt. The first five duplicated the
- * real, already-matched accessor scaffolds (fn_801EF61C/624/62C/634/63C).
+ * real, already-matched accessor scaffolds (fightSetEncountId/624/62C/634/63C).
  * The remaining four claimed to be the bodies of real unmatched symbols
  * (fn_801EF5C0, _fightFinalize__FUi14FloorEnterMode, fn_801EF488,
  * _fightInitialize__FUi14FloorEnterMode) but used (void) signatures that
@@ -152,7 +152,7 @@ extern u32 lbl_80279B78[3]; /* function pointers for scene callbacks */
 void _fightInitialize__FUi14FloorEnterMode(u32 unused, s32 enterMode)
 {
     extern u8 fn_800FF548(void);
-    extern void* fn_800FF560(void);
+    extern void* floorGetCurrentContext(void);
     extern void fn_801EFA08(void);
     extern void* GSthreadCreate(s32 priority, void* userData, u32 stackSize,
                                 s32 arg3, s32 arg4, void (*entry)(void));
@@ -178,7 +178,7 @@ void _fightInitialize__FUi14FloorEnterMode(u32 unused, s32 enterMode)
     fightActionCreateAndFlowFifo(lbl_8046D730, 0, 0, 3, 5, lbl_80375CC8);
     fightActionCreateAndFlowFifo(lbl_8046D730, 0, 0, 3, 4, lbl_80375CC8);
     fightActionDispFifoAll();
-    lbl_8047B5D0 = (u32)GSthreadCreate(0x14, fn_800FF560(), 0x4000, 1, 0,
+    lbl_8047B5D0 = (u32)GSthreadCreate(0x14, floorGetCurrentContext(), 0x4000, 1, 0,
                                       fn_801EFA08);
 }
 
@@ -360,8 +360,8 @@ void _fightFinalize__FUi14FloorEnterMode(u32 floor, u32 enterMode) {
     s32 objID;
     u32 soundID;
 
-    GSthreadTerminateGroup(fn_800FF560());
-    GSthreadTerminateGroup(fn_800FF560());
+    GSthreadTerminateGroup(floorGetCurrentContext());
+    GSthreadTerminateGroup(floorGetCurrentContext());
 
     ids = *(const BattleSceneIdList*)lbl_80279B84;
     for (i = 0; i < BATTLE_SCENE_OBJ_COUNT; i++) {
@@ -418,7 +418,7 @@ void fn_801EF5C0(void) {
  * =================================================================== */
 
 /* Address: 0x801EF61C | Size: 0x8 | Pattern: sda_setter */
-void fn_801EF61C(u16 val) {
+void fightSetEncountId(u16 val) {
     lbl_8047B5D6 = val;
 }
 
@@ -438,7 +438,7 @@ u16 fn_801EF634(void) {
 }
 
 /* Address: 0x801EF63C | Size: 0x8 | Pattern: sda_getter */
-u8 fn_801EF63C(void) {
+u8 fightIsBattleActive(void) {
     return lbl_8047B5DA;
 }
 

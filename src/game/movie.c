@@ -39,10 +39,10 @@ extern u32 VIGetDTVStatus(void);
 extern void* memset(void* dst, int val, u32 n);
 
 /* ===== THP Player SDK functions ===== */
-extern u8   fn_801E1874(void);                        /* THPPlayerGetState */
-extern void fn_801E189C(const char* path, u32 loop);  /* THPPlayerOpen */
-extern s32  fn_801E16D0(void);                        /* THPPlayerGetFrame */
-extern void fn_801E1810(void);
+extern u8   GSmovieIsActive(void);                        /* THPPlayerGetState */
+extern void GSmovieOpen(const char* path, u32 loop);  /* THPPlayerOpen */
+extern s32  GSmovieGetFrame(void);                        /* THPPlayerGetFrame */
+extern void GSmovieClose(void);
 
 /* ===== GS Engine external functions ===== */
 extern void _threadSwitch(void);                        /* GSthread yield / step */
@@ -60,7 +60,7 @@ extern u32  fn_801902E0(u32 flagId);                   /* GSflagGet */
 extern void floorLink(u32 a, u32 b);
 extern void floorSetFadeScript(u32 a, u32 b);
 extern u32  floorGetPrevFloorID(void);
-extern void fn_800FF58C(u32 a);
+extern void floorRequestChange(u32 a);
 extern void* savedataGetStatus(void* data, u32 kind);
 extern void gamedatasaveSetStatus(void* data, u32 id, u32 value);
 extern u32  gamedatasaveGetStatus(void* data, u32 id);
@@ -155,7 +155,7 @@ static inline u32 moviePlayCues(const MovieCue* cues, u32 count, u32 index)
     if (index >= count) {
         return next;
     }
-    frame = fn_801E16D0();
+    frame = GSmovieGetFrame();
     if (frame < 0) {
         return next;
     }
@@ -253,7 +253,7 @@ void* fn_8003708C(void* param)
  * Boot loader: settle the progressive-scan choice, wait for the file TOC
  * load (fn_8017B2CC), then load the first menu-sound wave bank.
  */
-void fn_8003686C(void)
+void bootWaitLogo(void)
 {
     s32 status;
 
@@ -328,7 +328,7 @@ void fn_800366A8(void)
 
     fn_8017B370(0xA);
     memset((void*)0x80001801, 0, 0x17FF);
-    fn_8003686C();
+    bootWaitLogo();
 
     lbl_8047A460++;
     sWaveArgs[0] = 2;
@@ -429,25 +429,25 @@ void fn_800366A0(void) {}
 void fn_8003669C(void) {}
 
 /* tpc: start */
-void fn_80036640(void)
+void movieTpcStart(void)
 {
     lbl_8047A468 = 0;
     fadeSet(2, 0.0f);
     fadeCheck(1);
-    fn_801E189C("movie/tpc.thp", 1);
+    GSmovieOpen("movie/tpc.thp", 1);
     memset((void*)0x80001803, 0, 0x17FD);
 }
 
 /* tpc: play */
-void fn_800365E0(void)
+void movieTpcWait(void)
 {
     if (lbl_8047A468 != 1) {
         fn_80165F40();
-        while ((u8)fn_801E1874() == 1) {
+        while ((u8)GSmovieIsActive() == 1) {
             _threadSwitch();
         }
     }
-    fn_800FF58C(0x39A);
+    floorRequestChange(0x39A);
     floorSetFadeScript(0, 0);
     lbl_8047A468 = 1;
 }
@@ -460,7 +460,7 @@ void fn_800365B0(void)
 }
 
 /* gs_logo: start */
-void fn_800364C8(void)
+void movieGsLogoStart(void)
 {
     lbl_8047A468 = 0;
 
@@ -479,20 +479,20 @@ void fn_800364C8(void)
 
     fadeSet(2, 0.0f);
     fadeCheck(1);
-    fn_801E189C("movie/gs_logo.thp", 0);
+    GSmovieOpen("movie/gs_logo.thp", 0);
     fn_80165A20(0x04D1, 0, 0x7F);
     memset((void*)0x80001805, 0, 0x17FB);
 }
 
 /* gs_logo: play */
-void fn_80036468(void)
+void movieGsLogoWait(void)
 {
     if (lbl_8047A468 != 1) {
-        while ((u8)fn_801E1874() == 1) {
+        while ((u8)GSmovieIsActive() == 1) {
             _threadSwitch();
         }
     }
-    fn_800FF58C(0x384);
+    floorRequestChange(0x384);
     floorSetFadeScript(0, 0x5960008);
     lbl_8047A468 = 1;
 }
@@ -524,11 +524,11 @@ void fn_800363B4(void) {}
 void fn_800363B0(void) {}
 
 /* autodemo01: start */
-void fn_80036360(void)
+void movieStartAttract(void)
 {
     fadeSet(2, 0.0f);
     fadeCheck(1);
-    fn_801E189C("movie/autodemo01.thp", 0);
+    GSmovieOpen("movie/autodemo01.thp", 0);
     fn_80165A20(0x0494, 0, 0x7F);
 }
 
@@ -551,7 +551,7 @@ void fn_80036240(void)
     u32 cueIndex = 0;
     s32 state;
 
-    while ((u32)(fn_801E1874() & 0xFF) == THP_STATE_PLAYING) {
+    while ((u32)(GSmovieIsActive() & 0xFF) == THP_STATE_PLAYING) {
         state = fn_8017B1AC();
         if (state == 11 || state == 5) {
             _threadSwitch();
@@ -560,14 +560,14 @@ void fn_80036240(void)
         /* Retail calls fn_800F7AF0 first; MWCC evaluates the right-hand
          * call of an & first. */
         if ((fn_800F7BC4(1) & fn_800F7AF0(1) & 0x1300) != 0) {
-            fn_801E1810();
+            GSmovieClose();
             break;
         }
         cueIndex = moviePlayCues(cues, 0x21, cueIndex);
         _threadSwitch();
     }
     fn_8016597C(1, 1000, 0, 0x7F);
-    fn_800FF58C(0x384);
+    floorRequestChange(0x384);
     floorSetFadeScript(0, 0x5960008);
 }
 
@@ -583,7 +583,7 @@ void fn_800361C0(void)
 {
     fadeSet(2, 0.0f);
     fadeCheck(1);
-    fn_801E189C("movie/staffroll.thp", 0);
+    GSmovieOpen("movie/staffroll.thp", 0);
     fn_80165A20(0x04C9, 0, 0x7F);
 }
 
@@ -601,7 +601,7 @@ void fn_80035F64(void)
     u32 savedHero;
     s32 answer;
 
-    while ((u8)fn_801E1874() == 1) {
+    while ((u8)GSmovieIsActive() == 1) {
         _threadSwitch();
     }
     fn_80165A20(1, 0, 0x7F);
@@ -646,11 +646,11 @@ void fn_80035F34(void)
 }
 
 /* openingdemo: start */
-void fn_80035EE4(void)
+void movieOpeningStart(void)
 {
     fadeSet(2, 0.0f);
     fadeCheck(1);
-    fn_801E189C("movie/openingdemo.thp", 0);
+    GSmovieOpen("movie/openingdemo.thp", 0);
     fn_80165A20(0x0495, 0, 0x7F);
 }
 
@@ -663,7 +663,7 @@ void fn_80035E04(void)
     };
     u32 cueIndex = 0;
 
-    while ((u32)(fn_801E1874() & 0xFF) == THP_STATE_PLAYING) {
+    while ((u32)(GSmovieIsActive() & 0xFF) == THP_STATE_PLAYING) {
         cueIndex = moviePlayCues(cues, 5, cueIndex);
         _threadSwitch();
     }

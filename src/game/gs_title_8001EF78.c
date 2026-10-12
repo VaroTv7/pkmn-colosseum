@@ -105,7 +105,7 @@ extern void winMsgClose(s32 wait);
 extern void GSthreadTerminate(void* threadCtx);
 extern void* GSthreadCreate(s32 priority, void* stack, s32 stackSize,
                             s32 flags, s32 p5, void (*entry)(void));
-extern void* fn_800FF560(void);
+extern void* floorGetCurrentContext(void);
 extern u8 fn_800FF548(void);
 extern void floorSetFadeScript(s32 p1, s32 p2);
 void fn_8002058C(void);
@@ -601,7 +601,7 @@ void fn_8002049C(void)
     void* ctx;
 
     lbl_8047A32C = 0;
-    ctx = fn_800FF560();
+    ctx = floorGetCurrentContext();
     lbl_8047A330 = GSthreadCreate(0x14, ctx, 0x2000, 1, 0, fn_8002058C);
     lbl_8047A314 = 0;
     lbl_8047A344 = 0.0f;

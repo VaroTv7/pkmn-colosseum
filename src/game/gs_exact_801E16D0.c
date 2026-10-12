@@ -7,7 +7,7 @@ extern u16 fn_800E202C(void* ptr); /* GSmemFindHandle */
 extern void* fn_800E24B0(u16 handle); /* GSmemLock */
 extern void fn_800E209C(u16 handle); /* GSmemFree */
 
-s32 fn_801E16D0(void)
+s32 GSmovieGetFrame(void)
 {
     extern s32 fn_801E25C8(void);
 
@@ -75,7 +75,7 @@ void fn_801E17A8(void)
     }
 }
 
-void fn_801E1810(void)
+void GSmovieClose(void)
 {
     extern u8 lbl_8047B441;
     extern void* lbl_8047B450;
@@ -97,7 +97,7 @@ void fn_801E1810(void)
     }
 }
 
-u8 fn_801E1874(void)
+u8 GSmovieIsActive(void)
 {
     extern u8 lbl_8047B440;
     extern u8 lbl_8047B441;

@@ -1,9 +1,9 @@
 #include "dolphin/types.h"
 
-extern void fn_800FF58C(u32);
+extern void floorRequestChange(u32);
 
 s32 fn_801CBA90(void)
 {
-    fn_800FF58C(0x395);
+    floorRequestChange(0x395);
     return 0;
 }

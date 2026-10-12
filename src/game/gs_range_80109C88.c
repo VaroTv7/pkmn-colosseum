@@ -45,7 +45,7 @@ typedef struct FaceModel {
     u32 thread;
 } FaceModel;
 
-extern u32 fn_800FF560(void);
+extern u32 floorGetCurrentContext(void);
 extern u32 GSthreadCreate(s32 priority, void* stack, u32 stackSize,
                           s32 unk1, s32 unk2, void* entry);
 extern void GSthreadSetArgs(u32 task, u32 count, ...);
@@ -157,7 +157,7 @@ s32 fn_80109C88(FaceModel* m, void* pokemon)
         }
         GSthreadClose(m->thread);
     }
-    m->thread = GSthreadCreate(1, (void*)fn_800FF560(), 0x4000, 1, 1,
+    m->thread = GSthreadCreate(1, (void*)floorGetCurrentContext(), 0x4000, 1, 1,
                                (void*)fn_8010A88C);
     if (m->thread != 0) {
         GSthreadSetArgs(m->thread, 1, m);
@@ -194,7 +194,7 @@ s32 fn_8010A010(FaceModel* m, u32 id)
         }
         GSthreadClose(m->thread);
     }
-    m->thread = GSthreadCreate(1, (void*)fn_800FF560(), 0x4000, 1, 1,
+    m->thread = GSthreadCreate(1, (void*)floorGetCurrentContext(), 0x4000, 1, 1,
                                (void*)fn_8010A88C);
     if (m->thread != 0) {
         GSthreadSetArgs(m->thread, 1, m);

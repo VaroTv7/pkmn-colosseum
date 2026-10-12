@@ -653,17 +653,17 @@ extern void GSmsgInitRuby(void);
 
 extern f64 lbl_8047D0E0;
 
-extern void fn_801E1810(void);
+extern void GSmovieClose(void);
 
 extern void _threadSwitch(void);
 
-extern u8 fn_801E1874(void);
+extern u8 GSmovieIsActive(void);
 
 extern s32 menuOpen(u32, u32);
 
 extern void sprintf(u8*, u8*, ...);
 
-extern void fn_801E189C(u8*, u32);
+extern void GSmovieOpen(u8*, u32);
 
 extern u8 lbl_80272AA8[];
 

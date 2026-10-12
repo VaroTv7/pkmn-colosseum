@@ -5,7 +5,7 @@
 #include "dolphin/types.h"
 
 extern u32 fightOutPokemonGetPokemonPtr();
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 extern s32 fightTrainerAiGetValueAryMaxBanme(s32*, u16, u8);
 extern s32 fightTrainerAiAddValue(s32, s32);
 
@@ -317,7 +317,7 @@ value_done:
         }
 
         if (fn_8000815C() == 1) {
-            delta = (u16)fn_800E0C54() % randomRange - randomBase;
+            delta = (u16)GSrand() % randomRange - randomBase;
             score[i] = fightTrainerAiAddValue(score[i], delta);
             fn_8023A118(0xEC64, 0xEC2C, 0xEC32,
                         trainerPtr, fightOutPokemonGetPokemonPtr(pokemon), 0,

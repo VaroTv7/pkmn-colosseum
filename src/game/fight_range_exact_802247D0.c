@@ -23,7 +23,7 @@ extern u8 lbl_80378A8E[];
 extern u32 fn_80232024();
 extern void fn_80234A0C();
 extern u32 fightOutPokemonGetPokemonPtr();
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 extern u8* fn_801440A0(u16 idx);
 extern u8* itemDataBiosGetPtr(u16 idx);
 extern u8   fn_80143DFC(u8* p);
@@ -64,7 +64,7 @@ extern u8  lbl_8047B626;
 extern void fn_80207448(void* p);
 extern void fightOutPokemonInitOneSelfTurn(void* p);
 extern void fn_802249B8();
-extern void fn_802271E0(char, char);
+extern void fightApplyDamageVariance(char, char);
 extern void fn_802274F0(u32, char, char, char);
 extern void* fn_801F025C();
 extern u8 fn_802624CC();
@@ -252,7 +252,7 @@ void fn_80224820(void) {
     extern u8   fn_8000817C(void);
     extern u8   fn_802096E8();
     extern void fn_802249B8();
-    extern u16  fn_800E0C54(void);
+    extern u16  GSrand(void);
     extern u8   lbl_8047B625;
 
     u32 ctx;
@@ -285,7 +285,7 @@ void fn_80224820(void) {
         goto skipIncrement;
     }
 
-    if ((u16)fn_800E0C54() % 100 <= power) {
+    if ((u16)GSrand() % 100 <= power) {
         if (lbl_80478D78[3] != 0 && (u8)fn_802096E8(fieldD9) == 1) {
             if (power >= 100) {
                 fn_802249B8(0, 0x80);

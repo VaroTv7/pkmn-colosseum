@@ -435,7 +435,7 @@ typedef struct GStexture GStexture;
 /* fn_801C9C9C */ s32  fn_801C9C9C(void);
 /* fn_801C9F5C */ void fn_801C9F5C(void);
 /* fn_801CA358 */ u8   fn_801CA358(void);
-/* fn_801CA5C4 */ void fn_801CA5C4(s32 effectID, f32 x, f32 y, f32 z);
+/* fn_801CA5C4 */ void fieldStartEncount(s32 effectID, f32 x, f32 y, f32 z);
 
 /* Scene transitions & mega-functions */
 /* fn_801CBF64 */ void fn_801CBF64(void);                        /* complex anim controller 0x41C */

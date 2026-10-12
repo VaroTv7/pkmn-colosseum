@@ -11,7 +11,7 @@ extern u64 OSGetTime(void);
 extern u32 fn_801ADCD8(void);
 extern u32* lbl_80478C94;
 
-u16 fn_800E0C54(void)
+u16 GSrand(void)
 {
     return fn_801ADCD8();
 }

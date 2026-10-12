@@ -32,7 +32,7 @@ extern void fn_801E17A8(void);
 extern void fn_801B25C4(u32);
 extern s32 HSD_CObjSetCurrent(void*);
 extern void GSlightSetupLights(void*);
-extern void fn_800E3604(u32, u32);
+extern void GSmodelDrawAll(u32, u32);
 extern void fn_80118104(u32, u32);
 extern void fn_80195A48(void);
 extern void fn_800D87AC(s32);
@@ -474,7 +474,7 @@ static inline void gfxSetupLayerCamera(u32 layer, u8 pass) {
         fn_801B25C4(0x7F);
         if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
             GSlightSetupLights(*(void**)(camera + 0x0C));
-            fn_800E3604(layer, pass);
+            GSmodelDrawAll(layer, pass);
             fn_80118104(layer, pass);
             HSD_FogSet(lbl_8047AA8C);
             fn_80195A48();

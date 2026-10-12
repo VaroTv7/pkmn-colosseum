@@ -250,7 +250,7 @@ extern u32 fn_800D3088(void);
 extern void _threadSwitch(void);
 extern u32 fn_800F0374(GSThread* thread);
 extern void GSthreadTerminate(GSThread* thread);
-extern u32 fn_800FF560(void);
+extern u32 floorGetCurrentContext(void);
 extern void GSthreadSetArgs(void* thread, s32 count, ...);
 extern u16 _toolentryAlloc__FUl(u32 size);   /* GSmemAllocRaw */
 extern void* fn_800E27B0(u16 handle);         /* GSmemGetPtr */
@@ -1445,7 +1445,7 @@ s32 fn_800F716C(u32 group)
 }
 
 /* 0x800F7274 | 0xA4: stop the script with `key`. */
-s32 fn_800F7274(u16 key)
+s32 floorTerminateScriptThreads(u16 key)
 {
     return GSvmStopByKey(key);
 }
@@ -1472,7 +1472,7 @@ u16 fn_800F7318(u32 affinity, u32 script, u32 stackSize, u32 autoStart,
 
     va_start(args, argc);
     ctx = fn_800F6D18(script, argc, args);
-    priority = fn_800FF560();
+    priority = floorGetCurrentContext();
     if (ctx == NULL) {
         return 0;
     }

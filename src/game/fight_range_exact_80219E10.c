@@ -39,7 +39,7 @@ static inline u32 fn_80219E10_checkMove(u16 move)
 void fn_80219E10(void)
 {
     extern u32 fn_8000814C();
-    extern u32 fn_800E0C54();
+    extern u32 GSrand();
     extern u32 wazaGetStatus();
     extern u32 fightTargetGetPtrAsNowFightType();
     extern void fightFloorSetStatus();
@@ -84,7 +84,7 @@ void fn_80219E10(void)
         }
     }
 
-    random = (u16)fn_800E0C54();
+    random = (u16)GSrand();
     selected = local_338[random % count];
     result = fn_8000814C();
     if ((u16)result != 0) {

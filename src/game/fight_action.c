@@ -754,7 +754,7 @@ u32 _fightActionFlowFightTrainerSelectFightAction__FPvUsPv(void* ctx, u32 param)
 u32 fightActionFlowKaisiPost(void* ctx) {
     extern FightActionData lbl_80375CC8[];
     extern u8 lbl_80378AA0[];
-    extern u16 fn_800E0C54();
+    extern u16 GSrand();
     extern void fn_801DA7AC();
     extern void fightFloorCreateFightPokemonEnemyAryEnemySideAll();
     extern void fightFloorRegistFightTrainerEnemyPokemonFightSideAll();
@@ -791,7 +791,7 @@ u32 fightActionFlowKaisiPost(void* ctx) {
     fightFloorSetMeetEnemyFightPokemonEnemySideAll(0);
     fightFloorRegistFightTrainerEnemyPokemonFightSideAll(0);
     fightFloorCreateFightPokemonEnemyAryEnemySideAll(0);
-    fightFloorSetStatus(0, 0, 0x5B, 0, fn_800E0C54());
+    fightFloorSetStatus(0, 0, 0x5B, 0, GSrand());
     fn_801DA7AC();
     return 1;
 }
@@ -828,12 +828,12 @@ s32 _fightActionFlowKaisiPostSubFightOutPokemonTokuseiCheckAppear__FPvUsPv(void)
 
 /* _fightActionFlowKaisiPostSubFightOutPokemonDarkCheckAppear__FPvUsPv | Size: 0x54 | Apply effect with optional data parameter */
 s32 _fightActionFlowKaisiPostSubFightOutPokemonDarkCheckAppear__FPvUsPv(void* ctx, u32 unused, u8* data) {
-    extern void fn_8022E6F0(void* ctx, u32 value);
+    extern void fightCheckRuiShadowSense(void* ctx, u32 value);
     if (data != NULL) {
-        fn_8022E6F0(ctx, data[0]);
+        fightCheckRuiShadowSense(ctx, data[0]);
     } else {
-        fn_8022E6F0(ctx, 0);
-        fn_8022E6F0(ctx, 1);
+        fightCheckRuiShadowSense(ctx, 0);
+        fightCheckRuiShadowSense(ctx, 1);
     }
     return 1;
 }
@@ -1070,7 +1070,7 @@ void fightActionFlowKaisiPreSubLoad(void)
     extern u32 fightEncountDataBiosGetSyoukaiWzxDataId(void);
     extern u8 fn_801F1888(u32 floor);
     extern void fn_801DDD28(u32 owner, u16 id, u32 type, u32 arg);
-    extern u16 fn_800E0C54(void);
+    extern u16 GSrand(void);
     extern u8 lbl_80478D18;
     extern u16 lbl_80375970[];
     extern u16 lbl_8047B5F8;
@@ -1108,7 +1108,7 @@ void fightActionFlowKaisiPreSubLoad(void)
             }
             fn_801DDD28(enemyOwner, (u16)introResource, 4, 0);
             if ((u8)fightFloorGetStatus(0, 0, 0x33, 0) == 1) {
-                u16 index = fn_800E0C54() % lbl_80478D18;
+                u16 index = GSrand() % lbl_80478D18;
                 lbl_8047B5F8 = index;
                 lbl_8047B5F8 = lbl_80375970[index];
                 fn_801DDD28(enemyOwner, lbl_8047B5F8, 4, 0);

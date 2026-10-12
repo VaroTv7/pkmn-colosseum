@@ -14,7 +14,7 @@
 #include "game/gs_vm.h"
 
 /* 0x800F7274 | 0xA4: stop the script with `key`. */
-s32 fn_800F7274(u16 key)
+s32 floorTerminateScriptThreads(u16 key)
 {
     return GSvmStopByKey(key);
 }

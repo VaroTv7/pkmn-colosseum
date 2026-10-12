@@ -128,7 +128,7 @@ extern u8 fn_8021A80C[];
 extern u8 fn_8021A878[];
 extern u8 fn_8021A984[];
 extern u8 fn_8021AB9C[];
-extern u8 fn_8021AC1C[];
+extern u8 fightCheckOneHitKO[];
 extern u8 fn_8021AFAC[];
 extern u8 fn_8021B0B0[];
 extern u8 fn_8021B1A4[];
@@ -251,7 +251,7 @@ extern u8 fn_80227490[];
 extern u8 fn_80227C40[];
 extern u8 fn_8022808C[];
 extern u8 fn_802282D8[];
-extern u8 fn_802284B0[];
+extern u8 fightCheckAccuracy[];
 extern u8 fn_80229C90[];
 extern u8 fightGSfloorGetPushDataSize[];
 extern u8 fightGSfloorPushData[];
@@ -479,7 +479,7 @@ const u8 lbl_80279FF8[20] = {
 
 const void* lbl_8027A00C[255] = {
     (void*)WS_HITCHECK,
-    (void*)fn_802284B0,
+    (void*)fightCheckAccuracy,
     (void*)fn_802282D8,
     (void*)fn_8022808C,
     (void*)WS_CRITICAL_CHECK,
@@ -625,7 +625,7 @@ const void* lbl_8027A00C[255] = {
     (void*)fn_8021B1A4,
     (void*)fn_8021B0B0,
     (void*)fn_8021AFAC,
-    (void*)fn_8021AC1C,
+    (void*)fightCheckOneHitKO,
     (void*)fn_8021AB9C,
     (void*)WS_WEATHER_CHANGE,
     (void*)fn_8021A984,

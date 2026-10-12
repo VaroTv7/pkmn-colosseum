@@ -70,7 +70,7 @@ typedef struct AbilityVec {
 extern u32* lbl_80478EB0;
 extern AbilityItemWeight* lbl_80478EB4;
 
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 extern void* fn_8018D998(s32, s32);
 extern void* peopleSearchID(void*);
 extern void* peopleGetPosition(void*);
@@ -113,7 +113,7 @@ void fn_801DF474(s32 slot, s32 abilityID) {
         totalWeight += (weights++)->weight;
     }
 
-    randomValue = (u16)fn_800E0C54() % totalWeight;
+    randomValue = (u16)GSrand() % totalWeight;
     cumulative = 0;
     {
         AbilityItemWeight* entry = lbl_80478EB4;
@@ -562,7 +562,7 @@ void fn_801DFC30(void) {
     extern void heroDecPokedoru(void*, u32);
     extern void winMsgOpenField(u32, s32, s32);
     extern void fn_80183350(u32, u32);
-    extern void fn_8018C69C(u32, u32, u32);
+    extern void peopleClearFlagsByIndex(u32, u32, u32);
     extern void fn_8018B76C(u32, u32, u32, u32, u32);
     extern void fn_80183018(u32, u32);
     extern void fn_801ECFE0(s32, void*);
@@ -740,7 +740,7 @@ void fn_801DFC30(void) {
             state = 8;
             fn_801ECFE0(0, heroBiosGetPokemonPtr(savedataGetStatus(0, 2), (u16)fieldFindEmptySlot()));
             fn_80183350(0x4D, 1);
-            fn_8018C69C(0x4D, 1, 8);
+            peopleClearFlagsByIndex(0x4D, 1, 8);
             fn_8018B76C(0x4D, 1, 5, 0, 1);
             fn_80183018(0x4D, 1);
             break;

@@ -4268,7 +4268,7 @@ void fn_8007581C(void)
     extern s32 fn_80062948(void*);
     extern u8 fn_800FF52C(void);
     extern void fn_800FF660(void);
-    extern void fn_800FF58C(s32);
+    extern void floorRequestChange(s32);
     extern void floorSetFadeScript(s32, u32);
     extern char lbl_802688F8[];
     extern char lbl_8026890C[];
@@ -4341,7 +4341,7 @@ done:
             break;
         }
     } else {
-        fn_800FF58C(0x395);
+        floorRequestChange(0x395);
     }
 }
 #endif /* !MENU_RANGE_CARVE || MENU_80075390_ONLY */

@@ -26,7 +26,7 @@ extern u8 lbl_80378A8E[];
 extern u32 fn_80232024();
 extern void fn_80234A0C();
 extern u32 fightOutPokemonGetPokemonPtr();
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 extern u8* fn_801440A0(u16 idx);
 extern u8* itemDataBiosGetPtr(u16 idx);
 extern u8   fn_80143DFC(u8* p);
@@ -67,7 +67,7 @@ extern u8  lbl_8047B626;
 extern void fn_80207448(void* p);
 extern void fightOutPokemonInitOneSelfTurn(void* p);
 extern void fn_802249B8();
-extern void fn_802271E0(char, char);
+extern void fightApplyDamageVariance(char, char);
 extern void fn_802274F0(u32, char, char, char);
 extern void* fn_801F025C();
 extern u8 fn_802624CC();
@@ -377,7 +377,7 @@ void fn_8022DF08(u32 ctx)
 
     case 0x3D:
         if (fightOutPokemonIsJoutaiNormal(ctx) == 0) {
-            u16 random = fn_800E0C54();
+            u16 random = GSrand();
             s32 divisor = 3;
             if (random % divisor == 0) {
                 fightFloorSetStatus(0, 0, 0x4B, 0, ctx);
@@ -681,7 +681,7 @@ void fn_8022E410(int r3)
 #define fn_8026246C fightMenuCloseMsg
 #define fn_802624CC fightMenuOpenMsg
 #define fn_802653FC fightMenuFightOutPokemonRenewStatusMenu
-void fn_8022E6F0(u32 r3, u8 r4)
+void fightCheckRuiShadowSense(u32 r3, u8 r4)
 
 {
     extern void _threadSwitch();
@@ -997,7 +997,7 @@ u8 fn_8022EC40(void* ctx) {
 u32 fn_8022EDEC(u32 r3, u8 r4)
 
 {
-    extern u32 fn_800E0C54();
+    extern u32 GSrand();
     extern u32 fn_8011F6D8();
     extern u8 fn_8011FC74();
     extern void fn_801F4C14();
@@ -1065,7 +1065,7 @@ u32 fn_8022EDEC(u32 r3, u8 r4)
               fn_80205B8C(r3);
               uVar2 = fn_8011F6D8();
               sVar5 = fn_80205184((void*)r3);
-              uVar3 = fn_800E0C54();
+              uVar3 = GSrand();
               if (((int)((uVar3 & 0xffff) % 100) < (int)(uVar2 & 0xff)) &&
                   ((sVar5 & 0xffff) == 0x164)) {
                 fn_80208404(r3,1,1,0);
@@ -1114,7 +1114,7 @@ u32 fn_8022EDEC(u32 r3, u8 r4)
               if (cVar6 == 0) {
                 return 0;
               }
-              randomResult = (u16)fn_800E0C54();
+              randomResult = (u16)GSrand();
               if ((randomResult % 0x100) != 0) {
                 return 0;
               }

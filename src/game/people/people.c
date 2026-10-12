@@ -477,14 +477,14 @@ u32 fn_8018397C(u32 groupId, u32 index);
 s32 fn_801839A0(u32 groupId, u32 index, f32 field88, f32 field8C);
 s32 fn_80183B44(u32 groupId, u32 index, f32 field80);
 s32 fn_80183CE0(u32 groupId, u32 index);
-BOOL fn_80183E5C(u32 groupId, u32 index, u32 loop);
+BOOL peopleStartWalkList(u32 groupId, u32 index, u32 loop);
 s32 peopleAddWalkList(u32 groupId, u32 index, f32 x, f32 y, f32 z);
-u8 fn_80184190(u32 groupId, u32 index, u16 count);
+u8 peopleReserveWalkList(u32 groupId, u32 index, u16 count);
 void fn_80184450(void);
 void fn_80184470(u32 groupId, u32 index);
 void fn_801845E4(u32 groupId, u32 index, s32 group, s32 id, s32 partIndex);
 void fn_801848D0(void* model, s32 group, s32 id, s32 partIndex);
-void fn_80184948(u32 groupId, u32 index, f32 speed);
+void peopleSetWalkSpeed(u32 groupId, u32 index, f32 speed);
 void fn_80184A90(PeopleEntry* entry);
 void fn_80184D80(PeopleEntry* entry);
 void fn_8018524C(PeopleEntry* entry, u8 loop);
@@ -492,7 +492,7 @@ void fn_801858C4(PeopleEntry* entry);
 s32 fn_80185AAC(PeopleEntry* entry);
 void fn_80185B90(PeopleEntry* entry, f32 speed);
 void fn_80185EE8(u32 groupId, u32 index, u8 keepFacing, f32 x, f32 y, f32 z);
-void fn_80185F44(u32 groupId, u32 index, f32 x, f32 y, f32 z);
+void peopleSetRotationDeg(u32 groupId, u32 index, f32 x, f32 y, f32 z);
 void fn_801860F8(u32 groupId, u32 index, f32 x, f32 y, f32 z);
 u8 peopleGazeHeroCheck(u32 groupId, u32 index);
 u8 fn_80186284(u32 groupId, u32 index, f32 range, u32 targetGroupId, u32 targetIndex, f32 fov);
@@ -502,7 +502,7 @@ u8 fn_801870E8(GSvec* position, GSvec* point, GSvec* start, GSvec* end, void* no
 u8 fn_801874BC(u32 groupId, u32 index, f32 x0, f32 z0, f32 x1, f32 z1);
 void fn_8018790C(u32 groupId, u32 index);
 void fn_80187A60(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex, f32 speed);
-void fn_80187D48(u32 groupId, u32 index, f32 x, f32 y, f32 z, f32 speed);
+void peopleTurnToPoint(u32 groupId, u32 index, f32 x, f32 y, f32 z, f32 speed);
 void fn_8018805C(u32 groupId, u32 index, f32 yaw, f32 speed);
 u8 fn_80188214(u32 groupId, u32 index, f32 speed);
 void fn_801885C4(u32 groupId, u32 index, GSvec* offset, u8 face);
@@ -526,15 +526,15 @@ void fn_8018B368(u32 groupId, u32 index, s32 animIndex, s32 frame, u8 looping);
 u8 fn_8018B558(u32 groupId, u32 index, s32 blendAnimation, s32 animation, u32 frames);
 u8 fn_8018B76C(u32 groupId, u32 index, s32 animIndex, s32 frame, u8 loop);
 void fn_8018BA04(u32 groupId, u32 index, GSvec* position);
-void fn_8018BC88(u32 groupId, u32 index, s32 partIndex, GSvec* position);
+void peopleGetPositionByIndex(u32 groupId, u32 index, s32 partIndex, GSvec* position);
 void fn_8018BDF4(u32 groupId, u32 index, GSvec* position);
-void fn_8018BF24(u32 groupId, u32 index, GSvec* rotation);
-void fn_8018C0A8(u32 groupId, u32 index, void* position);
-void fn_8018C1E8(u32 groupId, u32 index, u8 visible);
+void peopleSetRotation(u32 groupId, u32 index, GSvec* rotation);
+void peopleSetPositionByIndex(u32 groupId, u32 index, void* position);
+void peopleSetVisible(u32 groupId, u32 index, u8 visible);
 u8 fn_8018C424(u32 groupId, u32 index, u32 mask);
 u32 fn_8018C558(u32 groupId, u32 index);
-void fn_8018C69C(u32 groupId, u32 index, u32 mask);
-void fn_8018C7C8(u32 groupId, u32 index, u32 mask);
+void peopleClearFlagsByIndex(u32 groupId, u32 index, u32 mask);
+void peopleSetFlagsByIndex(u32 groupId, u32 index, u32 mask);
 void fn_8018C8F4(u32 groupId, u32 index, u32 flags);
 void fn_8018CA20(u32 groupId, u32 index, u8 visible);
 void fn_8018CB5C(u32 groupId, u32 index);
@@ -550,7 +550,7 @@ void fn_8018DCA8(PeopleEntry* entry, u8 releaseWalkList);
 void* peopleOpen(u32 groupId, u32 index, s32 objectId);
 u8 peopleOpenSub(PeopleEntry* entry, u32 groupId, u32 index, s32 objectId);
 void fn_8018E920(u32 maxPeople);
-u8 fn_8018E9B4(PeopleEntry* entry, GSvec* position, GSvec* transform);
+u8 peopleMoveCommit(PeopleEntry* entry, GSvec* position, GSvec* transform);
 void fn_8018ECEC(PeopleEntry* entry, f32 step);
 void fn_8018F08C(PeopleEntry* entry, s32 motionIndex);
 void fn_8018F30C(void);
@@ -1384,7 +1384,7 @@ void fn_8018ECEC(PeopleEntry* entry, f32 step)
  * the collision checks its flags ask for; `position` receives the result
  * and the model is placed there. Always returns 1.
  */
-u8 fn_8018E9B4(PeopleEntry* entry, GSvec* position, GSvec* transform)
+u8 peopleMoveCommit(PeopleEntry* entry, GSvec* position, GSvec* transform)
 {
     u8 events[0xD0];
     PeopleFloorHit hits[8];
@@ -1983,7 +1983,7 @@ void fn_8018C8F4(u32 groupId, u32 index, u32 flags)
     }
 }
 
-void fn_8018C7C8(u32 groupId, u32 index, u32 mask)
+void peopleSetFlagsByIndex(u32 groupId, u32 index, u32 mask)
 {
     PeopleEntry* entry;
 
@@ -1993,7 +1993,7 @@ void fn_8018C7C8(u32 groupId, u32 index, u32 mask)
     }
 }
 
-void fn_8018C69C(u32 groupId, u32 index, u32 mask)
+void peopleClearFlagsByIndex(u32 groupId, u32 index, u32 mask)
 {
     PeopleEntry* entry;
 
@@ -2021,7 +2021,7 @@ u8 fn_8018C424(u32 groupId, u32 index, u32 mask)
 }
 
 /* Show or hide a person; its shadow follows (fn_8018CA20, expanded inline). */
-void fn_8018C1E8(u32 groupId, u32 index, u8 visible)
+void peopleSetVisible(u32 groupId, u32 index, u8 visible)
 {
     PeopleEntry* entry;
 
@@ -2034,7 +2034,7 @@ void fn_8018C1E8(u32 groupId, u32 index, u8 visible)
 }
 
 /* Move a person's model to `position` and record it as the transform. */
-void fn_8018C0A8(u32 groupId, u32 index, void* position)
+void peopleSetPositionByIndex(u32 groupId, u32 index, void* position)
 {
     PeopleEntry* entry;
 
@@ -2046,7 +2046,7 @@ void fn_8018C0A8(u32 groupId, u32 index, void* position)
 }
 
 /* Set a person's model rotation (angles wrapped to one turn) and facing. */
-void fn_8018BF24(u32 groupId, u32 index, GSvec* rotation)
+void peopleSetRotation(u32 groupId, u32 index, GSvec* rotation)
 {
     PeopleEntry* entry;
 
@@ -2078,7 +2078,7 @@ void fn_8018BDF4(u32 groupId, u32 index, GSvec* position)
  * The world position of part `partIndex` of a person's model, or of the
  * model itself for a negative part.
  */
-void fn_8018BC88(u32 groupId, u32 index, s32 partIndex, GSvec* position)
+void peopleGetPositionByIndex(u32 groupId, u32 index, s32 partIndex, GSvec* position)
 {
     PeopleEntry* entry;
     void* part;
@@ -2681,7 +2681,7 @@ void fn_801885C4(u32 groupId, u32 index, GSvec* offset, u8 face)
     fn_8018FC98(entry, &position);
     position.x += offset->x;
     position.z += offset->z;
-    fn_8018E9B4(entry, &position, peopleGetTransform(entry));
+    peopleMoveCommit(entry, &position, peopleGetTransform(entry));
     if (face) {
         angle = peopleTurnTo(offset, &origin, 0.0f);
         entry->pad22 = 1;
@@ -2759,7 +2759,7 @@ static inline u8 peopleMoveAlongAngle(u32 groupId, u32 index, f32 yaw, f32 speed
     ticks = (f32)fn_800D3088();
     position.x += worldStep.x * ticks;
     position.z += worldStep.z * ticks;
-    return fn_8018E9B4(entry, &position, (GSvec*)entry->transform);
+    return peopleMoveCommit(entry, &position, (GSvec*)entry->transform);
 }
 
 /* Step a person along its own facing (XD's peopleMoveForward). */
@@ -2792,7 +2792,7 @@ void fn_8018805C(u32 groupId, u32 index, f32 yaw, f32 speed)
 }
 
 /* Turn a person toward the point (x, y, z). */
-void fn_80187D48(u32 groupId, u32 index, f32 x, f32 y, f32 z, f32 speed)
+void peopleTurnToPoint(u32 groupId, u32 index, f32 x, f32 y, f32 z, f32 speed)
 {
     PeopleEntry* entry;
     GSvec delta;
@@ -3279,7 +3279,7 @@ void fn_801860F8(u32 groupId, u32 index, f32 x, f32 y, f32 z)
     peoplePlaceAt(groupId, index, &position);
 }
 
-void fn_80185F44(u32 groupId, u32 index, f32 x, f32 y, f32 z) {
+void peopleSetRotationDeg(u32 groupId, u32 index, f32 x, f32 y, f32 z) {
     PeopleEntry* entry;
     GSvec rotation;
     f32 radians = 0.017453292f;
@@ -3361,7 +3361,7 @@ s32 fn_80185AAC(PeopleEntry* entry)
     fn_800E0168(&delta, entry->field_5C, fn_8018FCBC(entry));
     if (fn_800E008C(&delta) > oldLength) {
         fn_8018FC74(entry, entry->field_5C);
-        fn_8018E9B4(entry, fn_8018FCBC(entry), peopleGetTransform(entry));
+        peopleMoveCommit(entry, fn_8018FCBC(entry), peopleGetTransform(entry));
         return 1;
     }
     return 0;
@@ -3471,7 +3471,7 @@ void fn_8018524C(PeopleEntry* entry, u8 loop)
         fn_800E0168(&delta, entry->field_5C, entry->transform);
         fn_800E013C(&delta, &delta, remaining / distance);
         GSvecAdd(&delta, entry->transform, &delta);
-        fn_8018E9B4(entry, &delta, (GSvec*)entry->transform);
+        peopleMoveCommit(entry, &delta, (GSvec*)entry->transform);
         break;
     }
 }
@@ -3600,7 +3600,7 @@ void fn_80184A90(PeopleEntry* entry)
     entry->pad22 = turning;
 }
 
-void fn_80184948(u32 groupId, u32 index, f32 speed) {
+void peopleSetWalkSpeed(u32 groupId, u32 index, f32 speed) {
     PeopleEntry* entry;
 
     entry = peopleFindBySelf(peopleFindSelf(groupId, index));
@@ -3688,7 +3688,7 @@ void fn_80184450(void) {
 }
 
 /* Give a person a new, empty walk list with room for `count` points. */
-u8 fn_80184190(u32 groupId, u32 index, u16 count)
+u8 peopleReserveWalkList(u32 groupId, u32 index, u16 count)
 {
     PeopleEntry* entry;
 
@@ -3733,7 +3733,7 @@ s32 peopleAddWalkList(u32 groupId, u32 index, f32 x, f32 y, f32 z) {
 }
 
 /* Start a person walking its walk list from the first point (looping or once). */
-BOOL fn_80183E5C(u32 groupId, u32 index, u32 loop)
+BOOL peopleStartWalkList(u32 groupId, u32 index, u32 loop)
 {
     PeopleEntry* entry;
 

@@ -142,7 +142,7 @@ s32 fightTrainerAiSelectIrekaeDasuFightPokemon(void* ctx, u32 param1, u32 param2
     extern u16 fightFloorGetFightTrainerFightOutPokemonPtrAry(u32, void*, u32*, u32, u32);
     extern u16 fightFloorGetFightTrainerFightPokemonPtrAry(u32, void*, u32*, u32, u32);
     extern void fn_8023A118(u32, u32, u32, void*, u32, u32, u32, u32, u32, u32, s32);
-    extern u16 fn_800E0C54(void);
+    extern u16 GSrand(void);
     extern void* fightFloorGetFightPokemonPtrToFightTrainerPtr(u32, u32);
     extern u32 fightPokemonGetPokemonPtr(u32);
     extern u8 fn_80238600(void* ctx, u32 pokemon);
@@ -229,7 +229,7 @@ s32 fightTrainerAiSelectIrekaeDasuFightPokemon(void* ctx, u32 param1, u32 param2
 
     if ((u8)fightTrainerGetStatus(0, aiId, 0x1F, 0) == 1) {
         fn_8023A118(0xEC62, 0xEC04, 0xEC1D, ctx, 0, 0, 0, 0, 0, 0, 0);
-        p = pokemon[(u16)(fn_800E0C54() % count)];
+        p = pokemon[(u16)(GSrand() % count)];
         if (p != 0) {
             trainer = fightFloorGetFightPokemonPtrToFightTrainerPtr(0, p);
             fn_8023A118(0xEC63, 0xEC04, 0xEC1D, trainer, fightPokemonGetPokemonPtr(p),
@@ -248,7 +248,7 @@ s32 fightTrainerAiSelectIrekaeDasuFightPokemon(void* ctx, u32 param1, u32 param2
             }
         }
         if (found != 0) {
-            p = candidates[(u16)(fn_800E0C54() % found)];
+            p = candidates[(u16)(GSrand() % found)];
             if (p != 0) {
                 trainer = fightFloorGetFightPokemonPtrToFightTrainerPtr(0, p);
                 fn_8023A118(0xEC63, 0xEC04, 0xEC1D, trainer, fightPokemonGetPokemonPtr(p),
@@ -498,7 +498,7 @@ s32 fightTrainerAiSelectIrekaeDasuFightPokemon(void* ctx, u32 param1, u32 param2
             }
         }
         if (fn_8000815C() == 1) {
-            rnd = fn_800E0C54() % rangeSize - randRange;
+            rnd = GSrand() % rangeSize - randRange;
             values[i] = fightTrainerAiAddValue(values[i], rnd);
             fn_8023A118(0xEC63, 0xEC04, 0xEC1D, trainer, fightPokemonGetPokemonPtr(p),
                         0, 0, 0, 0, 0x225, rnd);

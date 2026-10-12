@@ -63,7 +63,7 @@ extern u32 fn_8010C4D4(u16 id);
 extern u8 wazaGetMaxPP(u16 id, u8 up);
 extern u32 wazaGetStatus(u32 obj, u16 id, u32 status, u32 index);
 extern void* memset(void* dst, int val, u32 size);
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 extern const u16 lbl_8027296C[20];
 /* Defined below: with deferred inlining their bodies are expanded into the
  * functions written above them. */
@@ -239,8 +239,8 @@ s32 pokemonCheckSetMonohiroi(u8* pokemon)
      * pokemonGetEffortFromPokemon table 0x80272948 of the same TU. */
     *(MonohiroiTable*)table = *(const MonohiroiTable*)lbl_8027296C;
     if (pokemonGetTokusei(pokemon) == 0x35 && (u16)pokemonGetStatus(pokemon, 0, 0x82, 0) == 0 &&
-        fn_800E0C54() % 10 == 0) {
-        roll = fn_800E0C54() % 100;
+        GSrand() % 10 == 0) {
+        roll = GSrand() % 100;
         item = 0;
         for (i = 0; (s32)i < 20; i += 2) {
             if (table[i + 1] > roll) {

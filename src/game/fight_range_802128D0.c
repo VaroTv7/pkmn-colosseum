@@ -14,7 +14,7 @@ extern s32 _fightSeqTurnCheckSubFightOutPokemon__FPvUsPv(void* ctx, u16 param2, 
 void fn_80213270(void)
 
 {
-    extern u32 fn_800E0C54();
+    extern u32 GSrand();
     extern void fn_801DA7AC();
     extern u16 fn_801EF634();
     extern void fightFloorInitFightOutPokemonPtrAryFightWazaJoutai();
@@ -91,7 +91,7 @@ void fn_80213270(void)
       sVar2 = 0xff;
     }
     fightFloorSetStatus(0,0,0xc,0,sVar2);
-    uVar4 = fn_800E0C54();
+    uVar4 = GSrand();
     fightFloorSetStatus(0,0,0x5b,0,uVar4);
     fn_801DA7AC();
     fightMenuAllFightTrainerCloseStatusMenu(0);

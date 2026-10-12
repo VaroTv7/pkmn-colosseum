@@ -87,7 +87,7 @@ extern void fn_800D6A00();
 extern void fn_800D7820();
 extern void fn_800D888C();
 extern void fn_800D88DC();
-extern u16 fn_800E0C54();
+extern u16 GSrand();
 extern void _threadSwitch();
 extern void GScharMakeFromSJIS();
 extern u32 GSmsgGetGSchar();
@@ -650,9 +650,9 @@ s32 fn_80069C0C(MenuCBBattle* p) {
             __assert(menuCB_BattleFile, 0x222, menuCB_BattleAssertCpuMode);
         }
         cpu = (u8*)staCPU[p->m_eBattleType][p->cpuRank];
-        first = menuCB_GetColosseumBattleTrainerID(p->m_eBattleType, 6, cpu[fn_800E0C54() & 7] - 1);
+        first = menuCB_GetColosseumBattleTrainerID(p->m_eBattleType, 6, cpu[GSrand() & 7] - 1);
         do {
-            second = menuCB_GetColosseumBattleTrainerID(p->m_eBattleType, 6, cpu[fn_800E0C54() & 7] - 1);
+            second = menuCB_GetColosseumBattleTrainerID(p->m_eBattleType, 6, cpu[GSrand() & 7] - 1);
         } while (first == second);
         fn_8006AABC(&p->trainers[1], first);
         fn_8006A81C(&p->trainers[1], 0);
@@ -662,7 +662,7 @@ s32 fn_80069C0C(MenuCBBattle* p) {
         for (i = 0; i < 6; i++) {
             pokemonBiosSetItemDataId(heroBiosGetPokemonPtr(p->trainers[1].rental, i), 0);
         }
-        src = (u16*)GSmsgGetGSchar(((u16*)&lbl_8047C028)[(u32)fn_800E0C54() % 3]);
+        src = (u16*)GSmsgGetGSchar(((u16*)&lbl_8047C028)[(u32)GSrand() % 3]);
         dst = name;
         for (; *src != 0; src++, dst++) {
             *dst = *src;

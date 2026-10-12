@@ -191,7 +191,7 @@ extern void _threadSwitch();
 extern void GSresGetResource();
 extern void fn_800F9AEC();
 extern void fn_800F9C04();
-extern void fn_800FF58C();
+extern void floorRequestChange();
 extern void floorSetFadeScript();
 extern void fn_80113F48();
 extern void fn_80118874();

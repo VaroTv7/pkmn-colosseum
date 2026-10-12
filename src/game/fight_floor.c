@@ -706,14 +706,14 @@ s32 fightFloorGetEnemyFightSideLittleNokoriHpRate(u32 floor, void* pkmn) {
 /* 0x801F2598 | size: 0xBC | medium */
 void* fightFloorGetFightOutPokemonPtrRandom(u32 param_1, u32 param_2, u32 param_3, u32 param_4) {
     extern u32 _fightFloorCreateFightOutPokemonPtrAry__FP11FIGHT_FLOORPP15FightOutPokemonbUcP15FightOutPokemon(u32 a, void* arr, u32 b, u32 c, u32 d);
-    extern u32 fn_800E0C54(void);
+    extern u32 GSrand(void);
     void* arr[8];
     u32 count;
     u16 idx;
     _fightFloorInitFightOutPokemonPtrAry(arr);
     count = _fightFloorCreateFightOutPokemonPtrAry__FP11FIGHT_FLOORPP15FightOutPokemonbUcP15FightOutPokemon(param_1, arr, param_2, param_3, param_4);
     if ((u16)count == 0) return 0;
-    idx = (u16)fn_800E0C54() % (u16)count;
+    idx = (u16)GSrand() % (u16)count;
     if (idx >= 8) return 0;
     if (arr[idx] == 0) return 0;
     return arr[idx];
@@ -922,7 +922,7 @@ void fightFloorLoopValidFightTrainer(u32 floor, void (*func)(u32, u32, u32), u32
     extern void _threadSwitch(void);
     extern u8 GSthreadIsRunning(u32 thread);
     extern void GSthreadClose(u32 thread);
-    extern u32 fn_800FF560(void);
+    extern u32 floorGetCurrentContext(void);
     extern u32 GSthreadCreate(u32, u32, u32, u32, u32, void*);
     extern void GSthreadSetArgs(u32 thread, ...);
     extern u32 fightFloorGetStatus(void*, u32, u32, u16);
@@ -953,7 +953,7 @@ void fightFloorLoopValidFightTrainer(u32 floor, void (*func)(u32, u32, u32), u32
                         aiId = fightTrainerGetStatus(0, (u16)fightTrainerGetStatus(trainer, 0, 0x43, 0), 2, 0);
                         fightTrainerGetStatus(trainer, 0, 0x4b, 0);
                         if (aiId == 0 && count < 4) {
-                            thread[count] = GSthreadCreate(0x12, fn_800FF560(), 0x2000, 1, 0, (void*)func);
+                            thread[count] = GSthreadCreate(0x12, floorGetCurrentContext(), 0x2000, 1, 0, (void*)func);
                             if (thread != NULL) {
                                 GSthreadSetArgs(thread[count], 3, trainer, type, work);
                                 count++;
@@ -1714,7 +1714,7 @@ s32 fightFloorCmpfightOutPokemonNimbleness(void* floor, void* p1, void* p2, u8 u
     extern u32 fightOutPokemonGetNowNimbleness(void*, u8, s32, u16, void*);
     extern u32 fightOutPokemonGetCmpNimblenessWazaDataId(void*);
     extern s32 wazaGetStatus(u32, u32, u32, u32);
-    extern s32 fn_800E0C54(void);
+    extern s32 GSrand(void);
     s32 tenkou;
     u8 badge;
     u16 rnd;
@@ -1751,7 +1751,7 @@ s32 fightFloorCmpfightOutPokemonNimbleness(void* floor, void* p1, void* p2, u8 u
         return 1;
     if (nimble1 < nimble2)
         return 0;
-    if ((fn_800E0C54() & 1) == 0)
+    if ((GSrand() & 1) == 0)
         goto lose;
     return 1;
 lose:

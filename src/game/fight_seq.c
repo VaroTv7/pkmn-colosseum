@@ -61,7 +61,7 @@ extern ColosseumEventPairRow lbl_80375A08[]; /* 0x18-byte pair rows */
 
 #if !defined(PR424_FIGHT_SEQ_SPLIT) || \
     defined(PR424_FIGHT_SEQ_80211170_802117FC)
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 extern void wazaSetStatus();
 extern void* fightTargetGetPtrAsNowFightType();
 extern void fightFloorSetStatus();
@@ -78,7 +78,7 @@ extern void fightWazaInit();
 extern u32 fightWazaCriticalDataBiosGetBunbo();
 extern u8* fightWazaCriticalDataBiosGetPtr(u16 index);
 extern void fightWazaBiosCopy();
-extern void fn_802271E0();
+extern void fightApplyDamageVariance();
 extern void fn_802274F0();
 extern int fn_80232110(void* attacker, void* defender, void* side, u16 wazaId,
                        u16 power, u16 type);
@@ -134,9 +134,9 @@ static inline void fightSeqCriticalCheck(void)
         fightOutPokemonGetTokuseiDataId(def) != 0x4b &&
         (u8)fightFloorGetStatus(0, 0, 0x29, 0) == 1) {
         bunbo = fightWazaCriticalDataBiosGetBunbo(fightWazaCriticalDataBiosGetPtr(crit));
-        if (fn_800E0C54() % bunbo == 0 ||
+        if (GSrand() % bunbo == 0 ||
             (fn_802026E4(atk, 0x3e) == 1 && wazaId == 0x164 &&
-             fn_800E0C54() % 100 < 90)) {
+             GSrand() % 100 < 90)) {
             wazaSetStatus(atkWaza, 0, 0x2b, 0, 2);
         } else {
             wazaSetStatus(atkWaza, 0, 0x2b, 0, 1);
@@ -223,7 +223,7 @@ fightSeqGetNromalWazaDamage(u32 r3, u32 r4, u32 r5, u32 r6, u8 r7, u8 r8, void *
     fightSeqDamageCalc();
     fn_802274F0(1, 1, 1, 0);
     if (r8 == 1) {
-        fn_802271E0(1, 1);
+        fightApplyDamageVariance(1, 1);
         lbl_8047B610++;
     }
     if (r10 != NULL) {

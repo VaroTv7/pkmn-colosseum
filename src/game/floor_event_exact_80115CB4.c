@@ -14,7 +14,7 @@
 extern void GSlogWrite(const char* fmt, ...);
 extern void* fn_800FF56C(void);
 extern void* fn_80113F48(void);
-extern void fn_8018C1E8(void*, u32, u32);
+extern void peopleSetVisible(void*, u32, u32);
 
 extern u32 lbl_80478EBC; /* treasure table */
 extern u32 lbl_80478EB8; /* treasure count */
@@ -78,7 +78,7 @@ void floorEventSetTresureDisp(u32 rawIndex, u32 display)
     }
 
     if (index != *(u32*)lbl_80478EB8) {
-        fn_8018C1E8(fn_80113F48(), encoded, display);
+        peopleSetVisible(fn_80113F48(), encoded, display);
     }
 }
 

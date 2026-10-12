@@ -5,7 +5,7 @@
 #include "dolphin/types.h"
 #include "game/gs_floor.h"
 
-extern u32 fn_800F7274(u16 handle);
+extern u32 floorTerminateScriptThreads(u16 handle);
 extern void floorSetFadeScript(u32 a, u32 b);
 
 extern u32 lbl_80478B18;
@@ -34,7 +34,7 @@ void fn_800FF660(void)
                 if ((s32)resource->active != 0 &&
                     (s32)resource->status == 1 &&
                     resource->floorId == currentFloor->floorId) {
-                    fn_800F7274(resource->textureHandle);
+                    floorTerminateScriptThreads(resource->textureHandle);
                 }
                 resource++;
             }

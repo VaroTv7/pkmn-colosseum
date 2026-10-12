@@ -1348,7 +1348,7 @@ extern void fn_801FCB40(s32, u8, u16);
 extern void fn_801FCC3C(s32);
 extern u8*  fightTrainerPokemonDataBiosGetPtr(void);
 extern void fightTrainerPokemonDataBiosSetPokemonDataId(s32, u16);
-extern u8*  fn_801CA5C4(s32, s32, s32);
+extern u8*  fieldStartEncount(s32, s32, s32);
 extern u32  fn_801653C4(void);
 extern void fn_80165A20(s32, s32, s32);
 extern u32 lbl_8047A444;
@@ -1407,7 +1407,7 @@ u8* fn_80032ED8(s32 arg0, s32 arg1, u8* arg2) {
         fightTrainerPokemonDataBiosSetPokemonDataId((s32)(base + j * 0x50), 0);
     }
 
-    result = fn_801CA5C4(arg1, 1, 0);
+    result = fieldStartEncount(arg1, 1, 0);
     cameraPlayAnime((s32)fn_80113F48(), 0x11171800, 0, 0);
 
     sfx_id = (lbl_8047A439 != 0) ? 0x446 : 0x4CD;
@@ -1528,7 +1528,7 @@ void fn_80032ED8_legacy_disabled(void) {
     r3 = r30;
     r4 = 0x1;
     r5 = 0x0;
-    fn_801CA5C4();
+    fieldStartEncount();
     r26 = r3;
     fn_80113F48();
     r4 = 0x11170000;

@@ -11,7 +11,7 @@
 
 typedef struct FightKindData FightKindData;
 
-u32 fn_8020DAD0(u32 p1) {
+u32 fightStartEncount(u32 p1) {
     extern void _threadSwitch();
     extern u32 fn_800FF56C();
     extern void fn_800FF730();
@@ -35,7 +35,7 @@ u32 fn_8020DAD0(u32 p1) {
     extern void fadeSet(f32, u32);
     extern void fn_801D0AFC();
     extern void mailMainReceiveTerminate();
-    extern void fn_801EF61C();
+    extern void fightSetEncountId();
     extern void fn_801EF62C();
     extern u32 fn_801EF634();
     extern void fn_801EF7B4();
@@ -79,7 +79,7 @@ u32 fn_8020DAD0(u32 p1) {
         uVar1 = fightEncountDataBiosGetPtr();
         fn_801EF62C(0);
         fn_801903B0(0x9b0);
-        fn_801EF61C(p1);
+        fightSetEncountId(p1);
         uVar2 = fn_800FF56C();
         fightFloorSetStatus(0, 0, 0x4a, 0, uVar2);
         uVar4 = fightEncountDataBiosGetFightFloorDataId(uVar1);
@@ -119,7 +119,7 @@ u32 fn_8020DAD0(u32 p1) {
             uVar1 = fn_801EF634();
             cVar10 = fightFloorIsGcHeroWin(0, uVar1);
             if (cVar10 == 0) {
-                fn_801EF61C(0);
+                fightSetEncountId(0);
                 fn_801903B0(0xe05);
                 uVar6 = heroGetStatus(0, 0xc, 0);
                 heroDecPokedoru(0, (s32)uVar6 / 2);
@@ -140,7 +140,7 @@ u32 fn_8020DAD0(u32 p1) {
             fadeSet(0.5f, 2);
             fadeCheck(1);
         }
-        fn_801EF61C(0);
+        fightSetEncountId(0);
         uVar1 = fn_801EF634();
     }
     return uVar1;

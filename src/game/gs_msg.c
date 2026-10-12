@@ -1372,7 +1372,7 @@ void fn_800FBD88(u32 key) {
 }
 
 /* 0x800FBE7C | 0x94 */
-s32 fn_800FBE7C(u32 key, u32 state, u32 flag) {
+s32 winMsgDrawMessage(u32 key, u32 state, u32 flag) {
     u8* head;
     u8* entry;
 

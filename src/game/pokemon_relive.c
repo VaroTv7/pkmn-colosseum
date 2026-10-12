@@ -432,7 +432,7 @@ skip_cleanup:
 void preReliveDisplayHokoraParticle(void)
 {
     extern int GSthreadCreate();
-    extern u32 fn_800FF560();
+    extern u32 floorGetCurrentContext();
     extern void _preReliveDisplayHokoraParticleThreadFunc__Fv();
     extern u32 scriptGetDarkPointZeroPokemonNum();
   u32 uVar1;
@@ -440,7 +440,7 @@ void preReliveDisplayHokoraParticle(void)
 
   uVar1 = scriptGetDarkPointZeroPokemonNum();
   if ((uVar1 & 0xFFFF) != 0) {
-    uVar2 = fn_800FF560();
+    uVar2 = floorGetCurrentContext();
     GSthreadCreate(1, uVar2, 0x4000, 1, 1, (u32)_preReliveDisplayHokoraParticleThreadFunc__Fv);
   }
 }

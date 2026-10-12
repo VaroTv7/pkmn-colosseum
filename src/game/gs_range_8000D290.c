@@ -188,7 +188,7 @@ s32 fn_8000D710(u8 mode)
     extern void fn_801661D0(s32, s32, s32, s32);
     extern void fn_800D3074(s32);
     extern u32 fn_801906A0(u32 flag);
-    extern void* fn_800FF560(void);
+    extern void* floorGetCurrentContext(void);
     extern u32 fn_80130CD8(void);
     extern void GSgappBlock(u32 task);
     extern void GSgappUnblock(u32 task);
@@ -251,7 +251,7 @@ s32 fn_8000D710(u8 mode)
             for (;;) {
                 fn_800D3074(1);
                 lbl_8047A2A4 = menuId;
-                lbl_8047A2A8 = fn_800FF560();
+                lbl_8047A2A8 = floorGetCurrentContext();
                 GSgappBlock(fn_80130CD8());
                 GSthreadBlockGroup(lbl_8047A2A8);
                 lbl_8047A2AC = (u8*)lbl_8047A2A8 - 0x20;
@@ -291,7 +291,7 @@ s32 fn_8000D710(u8 mode)
             for (;;) {
                 fn_800D3074(1);
                 lbl_8047A2A4 = menuId;
-                lbl_8047A2A8 = fn_800FF560();
+                lbl_8047A2A8 = floorGetCurrentContext();
                 GSgappBlock(fn_80130CD8());
                 GSthreadBlockGroup(lbl_8047A2A8);
                 lbl_8047A2AC = (u8*)lbl_8047A2A8 - 0x20;

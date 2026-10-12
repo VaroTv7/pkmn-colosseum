@@ -192,7 +192,7 @@ extern u32 heroBiosGetNamePtr(void* ptr);
 extern u32 lbl_80478EBC;
 extern u32 lbl_80478EB8;
 extern void fn_80113F48(void);
-extern void fn_8018C1E8(void);
+extern void peopleSetVisible(void);
 extern void fn_801653CC(void);
 extern void msgctrlSetValue(void);
 extern void winMsgOpen(void);
@@ -201,7 +201,7 @@ extern void pcboxDelItem(void);
 extern void fn_8001E184(void);
 void floorEventGetTresure(void);
 extern void fn_8018B76C(void);
-extern void fn_8018C7C8(void);
+extern void peopleSetFlagsByIndex(void);
 extern void fn_801902E0(void);
 extern void fn_80166A28(void);
 extern void peopleWaitSyncMotion(void);
@@ -222,7 +222,7 @@ extern void fn_8018AACC(void);
 extern void peopleMoveCheck(u32 groupId, u32 index, u8 waitFlag);
 extern void fn_8018805C(void);
 extern void fn_80184470(void);
-extern void fn_8018C0A8(void);
+extern void peopleSetPositionByIndex(void);
 extern void fn_801669BC(void);
 extern void GSmodelCanAnimate(void);
 extern void fn_801845E4(void);
@@ -438,7 +438,7 @@ void pokemonToMenuPokemonStatus();
 extern u32 GSmsgGetGSchar();
 extern void fn_8010C4D4(void);
 extern void fn_8010C46C(void);
-extern u32 fn_800E0C54(void);
+extern u32 GSrand(void);
 extern u8 lbl_8027296C[];
 s32 pokemonCheckSetMonohiroi(u8* pokemon);
 void pokemonAllKaihuku(u8* pokemon);
@@ -499,7 +499,7 @@ extern void jumptable_803634F0();
 extern void jumptable_80363558();
 extern u8 lbl_80426BD0[];
 extern void fadeEffectDokuStart(void);
-extern void fn_8018C69C(void);
+extern void peopleClearFlagsByIndex(void);
 extern void fn_8018CA20(void);
 extern void winMsgOpenField(void);
 extern void winMsgCloseField(void);
@@ -539,7 +539,7 @@ extern void fn_8018790C(void);
 extern void fn_800F7D38(void);
 extern void fn_800F7C8C(void);
 extern void fn_8018BA04(void);
-extern void fn_80187D48(void);
+extern void peopleTurnToPoint(void);
 extern void fn_8018D7D0(void);
 extern void fn_80183730(void);
 extern void fn_8018397C(void);
@@ -612,7 +612,7 @@ extern void peopleOpen(void);
 extern void GSmodelEnableAnimBlend(void);
 extern void fn_8018CB5C(void);
 extern void fn_80189328(void);
-extern void fn_8018BF24(void);
+extern void peopleSetRotation(void);
 void heroMoveInit(void);
 void heroMoveSyncWithHero(void);
 void fn_8013024C(void);
@@ -2977,7 +2977,7 @@ validity_done:
     }
 
     if ((u16)filter_id == 5) {
-        if (fn_800E0C54() & 1) {
+        if (GSrand() & 1) {
             return;
         }
     }
@@ -3790,18 +3790,18 @@ void pokemonCreate(u8* ptr, u32 pokemon_data_id, u32 level, const void* attest) 
     pokemonInit(ptr);
     pokemonSetStatus(ptr, 0, 0x6E, 0, pokemon_data_id & 0xFFFF);
 
-    pokemonSetStatus(ptr, 0, 0x6F, 0, (fn_800E0C54() & 0xFFFF) | (fn_800E0C54() << 16));
+    pokemonSetStatus(ptr, 0, 0x6F, 0, (GSrand() & 0xFFFF) | (GSrand() << 16));
 
     gamedataAttestBiosCopy((void*)pokemonGetStatus(ptr, 0, 0x70, 0), attest);
     pokemonSetStatus(ptr, 0, 0x77, 0,
                      GSmsgGetGSchar(pokemonGetStatus(NULL, pokemon_data_id, 1, 0)));
     pokemonSetStatus(ptr, 0, 0x7A, 0, level & 0xFF);
 
-    pokemonSetStatus(ptr, 0, 0x93, 0, (random = fn_800E0C54()) & 0x1F);
+    pokemonSetStatus(ptr, 0, 0x93, 0, (random = GSrand()) & 0x1F);
     pokemonSetStatus(ptr, 0, 0x94, 0, (u8)((random >> 5) & 0x1F));
     pokemonSetStatus(ptr, 0, 0x95, 0, (u8)((random >> 10) & 0x1F));
 
-    pokemonSetStatus(ptr, 0, 0x98, 0, (random2 = fn_800E0C54()) & 0x1F);
+    pokemonSetStatus(ptr, 0, 0x98, 0, (random2 = GSrand()) & 0x1F);
     pokemonSetStatus(ptr, 0, 0x96, 0, (random2 >> 5) & 0x1F);
     pokemonSetStatus(ptr, 0, 0x97, 0, (random2 >> 10) & 0x1F);
 
@@ -3817,7 +3817,7 @@ void pokemonCreate(u8* ptr, u32 pokemon_data_id, u32 level, const void* attest) 
     pokemonSetStatus(ptr, 0, 0x79, 0, experience);
     friendship = pokemonGetStatus(NULL, pokemon_data_id, 0x14, 0);
     pokemonSetStatus(ptr, 0, 0x99, 0, friendship);
-    if (fn_800E0C54() & 1) {
+    if (GSrand() & 1) {
         u32 ability_flag = 1;
         u16 species;
 
@@ -3854,7 +3854,7 @@ void pokemonCreate(u8* ptr, u32 pokemon_data_id, u32 level, const void* attest) 
  * Exact with GC/1.3.2 only; see the RULE-EXCEPTION notes below.
  */
 static inline u32 pokemonCreateRndFitRand32(void) {
-    return (fn_800E0C54() & 0xFFFF) | (fn_800E0C54() << 16);
+    return (GSrand() & 0xFFFF) | (GSrand() << 16);
 }
 
 /*

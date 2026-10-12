@@ -4,7 +4,7 @@ extern u8* lbl_8047B610;
 
 void fn_80218D24(void)
 {
-    extern u32 fn_800E0C54();
+    extern u32 GSrand();
     extern void wazaSetStatus();
     extern u32 wazaGetStatus();
     extern u8 pokemonWazaCheckValid();
@@ -86,7 +86,7 @@ failed:
     goto done;
 
 choose_move:
-    uVar5 = fn_800E0C54();
+    uVar5 = GSrand();
     sVar10 = *(s16*)((int)local_28 +
                      (((uVar5 & 0xffff) -
                        ((s32)(uVar5 & 0xffff) / (s32)(u8)bVar9) * (u8)bVar9) *
