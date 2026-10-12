@@ -295,7 +295,7 @@ s32 kaisuuBiosGetMin(u32 index) {
 #pragma dont_inline reset
 
 /* 0x80101AC4 | 0x70 */
-extern u32 fn_800E0C54(void);  /* random or tick */
+extern u32 GSrand(void);  /* random or tick */
 s32 kaisuuGetKaisuu(register u32 param) {
     s32 max;
     int base;
@@ -309,7 +309,7 @@ s32 kaisuuGetKaisuu(register u32 param) {
         min = base;
         if (max == min)
             return min;
-        tick = fn_800E0C54();
+        tick = GSrand();
         range = max - min;
         mod = (s32)(u16)tick % (s32)(range + 1);
         return base + mod;

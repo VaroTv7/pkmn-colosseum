@@ -110,7 +110,7 @@ void fn_8018ECEC(PeopleEntry* entry, f32 step);
 s32 fn_80185AAC(PeopleEntry* entry);
 void* peopleInfoBiosGetPtr(void* scriptObj);
 u8 fn_80188214(u32 groupId, u32 index, f32 distance);
-void fn_8018E9B4(PeopleEntry* entry, void* position, void* transform);
+void peopleMoveCommit(PeopleEntry* entry, void* position, void* transform);
 void fn_8018DCA8(PeopleEntry*, u8);
 void fn_8018AACC(u32, u32, u8, GSvec*);
 BOOL peopleWaitSyncMotion(u32 groupId, u32 index, u8 wait);
@@ -968,7 +968,7 @@ extern void GSpartFree(void* part);
 /* Find a people entry by (groupId, index) and either copy its world
  * transform into *target (motionId < 0), or fetch the transform of a
  * specific model part (motionId >= 0) via the GS "part" API. */
-void fn_8018BC88(u32 groupId, u32 index, s32 motionId, void* target) {
+void peopleGetPositionByIndex(u32 groupId, u32 index, s32 motionId, void* target) {
     PeopleEntry* found;
     PeopleEntry* entry;
     void* part;
@@ -1786,7 +1786,7 @@ s32 fn_80183CE0(u32 groupId, u32 index) {
  * a special motion/interact state: resets a u16 field at +0x6A, sets
  * moveSpeed to 1.0, and enters state 3 (flag set) or state 2 (flag clear). */
 #pragma optimization_level 4
-BOOL fn_80183E5C(u32 groupId, u32 index, u8 flag) {
+BOOL peopleStartWalkList(u32 groupId, u32 index, u8 flag) {
     s32 i;
     s32 j;
     void* found;
@@ -1871,7 +1871,7 @@ asm void fn_80184190(void) {
 #include "src/game/people/people_fn_80184190.inc"
 }
 #else
-u8 fn_80184190(u32 groupId, u32 index, u16 count) {
+u8 peopleReserveWalkList(u32 groupId, u32 index, u16 count) {
     PeopleEntry* entry;
     PeopleEntry* cleanup;
     u32 size;
@@ -1926,7 +1926,7 @@ asm void fn_80184948(void) {
 #include "src/game/people/people_fn_80184948.inc"
 }
 #else
-void fn_80184948(u32 groupId, u32 index, f32 speed) {
+void peopleSetWalkSpeed(u32 groupId, u32 index, f32 speed) {
     PeopleEntry* entry;
 
     entry = peopleFindBySelf(peopleFindSelf(groupId, index));
@@ -2258,7 +2258,7 @@ void fn_8018524C(PeopleEntry* entry, u8 loopPath)
         fn_800E0168(&target, entry->field_5C, entry->transform);
         fn_800E013C(&target, &target, moveDistance / distance);
         fn_800E019C(&target, entry->transform, &target);
-        fn_8018E9B4(entry, &target, entry->transform);
+        peopleMoveCommit(entry, &target, entry->transform);
         return;
     }
 }
@@ -2325,13 +2325,13 @@ s32 fn_80185AAC(PeopleEntry* entry) {
     fn_800E0168(vec, entry->field_5C, fn_8018FCBC(entry));
     if (fn_800E008C(vec) > oldLength) {
         fn_8018FC74(entry, entry->field_5C);
-        fn_8018E9B4(entry, fn_8018FCBC(entry), peopleGetTransform(entry));
+        peopleMoveCommit(entry, fn_8018FCBC(entry), peopleGetTransform(entry));
         return 1;
     }
     return 0;
 }
 
-void fn_8018E9B4(PeopleEntry* entry, void* positionArg, void* transformArg) {
+void peopleMoveCommit(PeopleEntry* entry, void* positionArg, void* transformArg) {
     u8 eventList[0xD0];
     GSvec* position = positionArg;
     GSvec* transform = transformArg;
@@ -2547,7 +2547,7 @@ asm void fn_80185F44(void) {
 #include "src/game/people/people_fn_80185F44.inc"
 }
 #else
-void fn_80185F44(u32 groupId, u32 index, f32 x, f32 y, f32 z) {
+void peopleSetRotationDeg(u32 groupId, u32 index, f32 x, f32 y, f32 z) {
     PeopleEntry* entry;
     GSvec rotation;
     f32 radians = lbl_8047D814;
@@ -4118,8 +4118,8 @@ void fn_8018790C(u32 groupId, u32 index) {
     }
 }
 
-/* fn_80187D48 -- turn a person toward a world-space position */
-void fn_80187D48(u32 groupId, u32 index, f32 targetX, f32 targetY,
+/* peopleTurnToPoint -- turn a person toward a world-space position */
+void peopleTurnToPoint(u32 groupId, u32 index, f32 targetX, f32 targetY,
                  f32 targetZ, f32 turnSpeed) {
     PeopleEntry* entry;
     GSvec direction;
@@ -4222,13 +4222,13 @@ u8 fn_80188214(u32 groupId, u32 index, f32 distance) {
     ticks = (f32)fn_800D3088();
     position.x += worldStep.x * ticks;
     position.z += worldStep.z * ticks;
-    fn_8018E9B4(entry, &position, entry->transform);
+    peopleMoveCommit(entry, &position, entry->transform);
     return 1;
 }
 
 extern f32 lbl_80273FA8[];
 void fn_801885C4(u32 groupId, u32 index, GSvec* offset, u8 faceOffset) {
-    extern void fn_8018E9B4(PeopleEntry*, void*, void*);
+    extern void peopleMoveCommit(PeopleEntry*, void*, void*);
     PeopleEntry* entry;
     GSvec position;
     GSvec direction;
@@ -4245,7 +4245,7 @@ void fn_801885C4(u32 groupId, u32 index, GSvec* offset, u8 faceOffset) {
     fn_8018FC98(entry, &position);
     position.x += offset->x;
     position.z += offset->z;
-    fn_8018E9B4(entry, &position, peopleGetTransform(entry));
+    peopleMoveCommit(entry, &position, peopleGetTransform(entry));
     if (faceOffset != 0) {
         fn_800E0168(&direction, offset, &origin);
         angle = (f32)atan2(direction.x, direction.z);
@@ -4787,10 +4787,10 @@ void fn_8018BDF4(u32 groupId, u32 index, void* pos) {
     }
 }
 
-/* fn_8018BF24 -- find a people entry by (groupId, index), angle-wrap a
+/* peopleSetRotation -- find a people entry by (groupId, index), angle-wrap a
  * caller-supplied Vec3 of angles in place, then feed it to fn_8018FC08 and
  * stash the Y component into entry->field_40. */
-void fn_8018BF24(u32 groupId, u32 index, f32* vec) {
+void peopleSetRotation(u32 groupId, u32 index, f32* vec) {
     PeopleEntry* found;
     PeopleEntry* entry;
 
@@ -4805,9 +4805,9 @@ void fn_8018BF24(u32 groupId, u32 index, f32* vec) {
     }
 }
 
-/* fn_8018C0A8 -- find a people entry by (groupId, index), fetch its scale
+/* peopleSetPositionByIndex -- find a people entry by (groupId, index), fetch its scale
  * into *vec, then copy vec into the entry's transform. */
-void fn_8018C0A8(u32 groupId, u32 index, void* vec) {
+void peopleSetPositionByIndex(u32 groupId, u32 index, void* vec) {
     PeopleEntry* found;
     PeopleEntry* entry;
 
@@ -4819,7 +4819,7 @@ void fn_8018C0A8(u32 groupId, u32 index, void* vec) {
     }
 }
 
-void fn_8018C1E8(u32 groupId, u32 index, u8 animation) {
+void peopleSetVisible(u32 groupId, u32 index, u8 animation) {
     PeopleEntry* entry;
 
     entry = peopleFindBySelf(peopleFindSelf(groupId, index));
@@ -4861,8 +4861,8 @@ u32 fn_8018C558(u32 groupId, u32 index) {
     return entry->flags;
 }
 
-/* fn_8018C69C -- find a people entry by (groupId, index) and clear flags. */
-void fn_8018C69C(u32 groupId, u32 index, u32 mask) {
+/* peopleClearFlagsByIndex -- find a people entry by (groupId, index) and clear flags. */
+void peopleClearFlagsByIndex(u32 groupId, u32 index, u32 mask) {
     PeopleEntry* found;
     PeopleEntry* entry;
 
@@ -4873,8 +4873,8 @@ void fn_8018C69C(u32 groupId, u32 index, u32 mask) {
     }
 }
 
-/* fn_8018C7C8 -- find a people entry by (groupId, index) and set flags. */
-void fn_8018C7C8(u32 groupId, u32 index, u32 mask) {
+/* peopleSetFlagsByIndex -- find a people entry by (groupId, index) and set flags. */
+void peopleSetFlagsByIndex(u32 groupId, u32 index, u32 mask) {
     PeopleEntry* found;
     PeopleEntry* entry;
 
@@ -5674,7 +5674,7 @@ void fn_8018FB60(PeopleEntry* entry, u8 animId) {
 }
 
 /* fn_8018FC08 = fn_8018FC08 (see people.h) -- not recovered, gap in archive campaign
- * (2-arg signature corrected from caller fn_8018BF24's disassembly: r3=entry,
+ * (2-arg signature corrected from caller peopleSetRotation's disassembly: r3=entry,
  * r4=vec -- the 1-arg forward decl was a placeholder). */
 void fn_8018FC08(PeopleEntry* entry, void* vec) {
     extern void GSmodelSetRotation(void*, void*);
@@ -5688,7 +5688,7 @@ void fn_8018FC2C(PeopleEntry* entry, void* rotation) {
 }
 
 /* fn_8018FC74 = fn_8018FC74 (see people.h) -- not recovered, gap in archive campaign
- * (2-arg signature corrected from caller fn_8018C0A8's disassembly). */
+ * (2-arg signature corrected from caller peopleSetPositionByIndex's disassembly). */
 void fn_8018FC74(PeopleEntry* entry, void* vec) {
     extern void GSmodelSetPosition(void*, void*);
     GSmodelSetPosition(entry->modelHandle, vec);

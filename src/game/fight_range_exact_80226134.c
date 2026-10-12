@@ -15,7 +15,7 @@ extern u8 lbl_80379F58[];
 extern u8 lbl_80379A22[];
 extern void fn_80211B94(void*, void*, u8);
 extern void fn_802274F0(u32, char, char, char);
-extern void fn_802271E0(char, char);
+extern void fightApplyDamageVariance(char, char);
 
 #pragma optimize_for_size reset
 #pragma dont_inline reset
@@ -645,13 +645,13 @@ void fn_80226FD4(void)
 #pragma dont_inline reset
 #pragma optimization_level reset
 #pragma opt_propagation reset
-void WS_DAMAGE_LOSS_ONLY(void) { fn_802271E0(0, 1); lbl_8047B610 = lbl_8047B610 + 1; }
+void WS_DAMAGE_LOSS_ONLY(void) { fightApplyDamageVariance(0, 1); lbl_8047B610 = lbl_8047B610 + 1; }
 
 #pragma optimize_for_size reset
 #pragma dont_inline reset
 #pragma optimization_level reset
 #pragma opt_propagation reset
-void WS_DAMAGE_LOSS(void) { fn_802271E0(1, 1); lbl_8047B610 = lbl_8047B610 + 1; }
+void WS_DAMAGE_LOSS(void) { fightApplyDamageVariance(1, 1); lbl_8047B610 = lbl_8047B610 + 1; }
 
 #pragma optimize_for_size reset
 #pragma dont_inline reset
@@ -672,9 +672,9 @@ void WS_DAMAGE_LOSS(void) { fn_802271E0(1, 1); lbl_8047B610 = lbl_8047B610 + 1; 
 #define fn_8020981C fightWazaCheckWriteJoutaiDataId
 #define fn_802097C8 fightWazaWriteJoutaiDataId
 #define fn_801F4C14 fightFloorSetStatus
-void fn_802271E0(char r3, char r4)
+void fightApplyDamageVariance(char r3, char r4)
 {
-    extern u32 fn_800E0C54();
+    extern u32 GSrand();
     extern void fn_8011BBD8();
     extern int fn_8011BEB4();
     extern u32 fn_801F025C();
@@ -710,7 +710,7 @@ void fn_802271E0(char r3, char r4)
   uVar6 = fn_80205B8C(uVar4);
   uVar7 = (int)fn_8012640C(uVar6,0,0x83,0) & 0xffff;
   if (r4 == 1) {
-    uVar8 = fn_800E0C54();
+    uVar8 = GSrand();
     uVar8 = (100 - uVar8 % 16) & 0xffff;
     if (iVar3 != 0) {
       iVar3 *= uVar8;
@@ -721,7 +721,7 @@ void fn_802271E0(char r3, char r4)
       fn_8011BBD8(uVar1,0,0x2d,0,iVar3);
     }
   }
-  if ((sVar10 == 0x27) && (uVar8 = fn_800E0C54(), (int)(uVar8 % 100) < iVar5)) {
+  if ((sVar10 == 0x27) && (uVar8 = GSrand(), (int)(uVar8 % 100) < iVar5)) {
     fn_801254B4((void*)uVar4,0,0x11a,0,1);
   }
   cVar11 = fn_802026E4(uVar4,0x14);

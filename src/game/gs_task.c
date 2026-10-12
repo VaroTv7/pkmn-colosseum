@@ -128,7 +128,7 @@ extern void* fn_8000868C(u32 id);   /* Validate scene item index */
 extern void* fn_800085D8(s32 difficulty);   /* Validate encounter difficulty */
 extern void* _dbgMenuFightGetZokuseiDataIdSub(u32 id);
 extern void* fn_800087FC(u32 id);
-extern u8 fn_801EF63C(void);
+extern u8 fightIsBattleActive(void);
 extern u32 lbl_8047A278;
 extern u32 lbl_80478F00;
 extern u32 lbl_80478F40;
@@ -952,14 +952,14 @@ void menuFightButtonNormal(u8* ctx) {
 #endif
 
 /* dbgMenuFightStopTimeOut - 0x80007088 | size: 0x44 */
-extern u8   fn_801EF63C(void);
+extern u8   fightIsBattleActive(void);
 extern void fightFloorSetTimeOutAllFightResult(s32 mode);
 extern void dbgMenuClose(void);
 #if 1
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightStopTimeOut(void) {
-    if (fn_801EF63C() == 0) {
+    if (fightIsBattleActive() == 0) {
         return -1;
     }
     fightFloorSetTimeOutAllFightResult(0);
@@ -975,7 +975,7 @@ extern void fn_801EF62C(s32 mode);
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightStopHostLose(void) {
-    if (fn_801EF63C() == 0) {
+    if (fightIsBattleActive() == 0) {
         return -1;
     }
     fn_801EF62C(3);
@@ -990,7 +990,7 @@ s32 dbgMenuFightStopHostLose(void) {
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightStopHostWin(void) {
-    if (fn_801EF63C() == 0) {
+    if (fightIsBattleActive() == 0) {
         return -1;
     }
     fn_801EF62C(2);
@@ -1009,7 +1009,7 @@ extern u32  lbl_8047A27C;
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightFightPokemonSelect5(void) {
-    if (fn_801EF63C() == 0) return -1;
+    if (fightIsBattleActive() == 0) return -1;
     lbl_8047A27C = fightTrainerGetValidFightPokemonPtr(lbl_8047A278, 5);
     if (lbl_8047A27C == 0) return -1;
     return menuFightPokemonSelectSub();
@@ -1022,7 +1022,7 @@ s32 dbgMenuFightFightPokemonSelect5(void) {
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightFightPokemonSelect4(void) {
-    if (fn_801EF63C() == 0) return -1;
+    if (fightIsBattleActive() == 0) return -1;
     lbl_8047A27C = fightTrainerGetValidFightPokemonPtr(lbl_8047A278, 4);
     if (lbl_8047A27C == 0) return -1;
     return menuFightPokemonSelectSub();
@@ -1035,7 +1035,7 @@ s32 dbgMenuFightFightPokemonSelect4(void) {
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightFightPokemonSelect3(void) {
-    if (fn_801EF63C() == 0) return -1;
+    if (fightIsBattleActive() == 0) return -1;
     lbl_8047A27C = fightTrainerGetValidFightPokemonPtr(lbl_8047A278, 3);
     if (lbl_8047A27C == 0) return -1;
     return menuFightPokemonSelectSub();
@@ -1048,7 +1048,7 @@ s32 dbgMenuFightFightPokemonSelect3(void) {
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightFightPokemonSelect2(void) {
-    if (fn_801EF63C() == 0) return -1;
+    if (fightIsBattleActive() == 0) return -1;
     lbl_8047A27C = fightTrainerGetValidFightPokemonPtr(lbl_8047A278, 2);
     if (lbl_8047A27C == 0) return -1;
     return menuFightPokemonSelectSub();
@@ -1061,7 +1061,7 @@ s32 dbgMenuFightFightPokemonSelect2(void) {
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightFightPokemonSelect1(void) {
-    if (fn_801EF63C() == 0) return -1;
+    if (fightIsBattleActive() == 0) return -1;
     lbl_8047A27C = fightTrainerGetValidFightPokemonPtr(lbl_8047A278, 1);
     if (lbl_8047A27C == 0) return -1;
     return menuFightPokemonSelectSub();
@@ -1074,7 +1074,7 @@ s32 dbgMenuFightFightPokemonSelect1(void) {
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightFightPokemonSelect0(void) {
-    if (fn_801EF63C() == 0) return -1;
+    if (fightIsBattleActive() == 0) return -1;
     lbl_8047A27C = fightTrainerGetValidFightPokemonPtr(lbl_8047A278, 0);
     if (lbl_8047A27C == 0) return -1;
     return menuFightPokemonSelectSub();
@@ -1226,7 +1226,7 @@ s32 dbgMenuFightFightTrainerPokemonPartDataEdit(void) {
     u32 result;
     s32 val;
 
-    if (fn_801EF63C() == 0) {
+    if (fightIsBattleActive() == 0) {
         return -1;
     }
 
@@ -1259,7 +1259,7 @@ s32 dbgMenuFightFightTrainerAiDataEdit(void) {
     u16 slot;
     tmp  = (u16)(u32)fightTrainerGetStatus((s32)lbl_8047A278, 0, 0x43, 0);
     slot = (u16)(u32)fightTrainerGetStatus(0, tmp, 2, 0);
-    if (fn_801EF63C() == 0) return -1;
+    if (fightIsBattleActive() == 0) return -1;
     return fn_80051E38(slot);
 }
 #pragma peephole on
@@ -1357,7 +1357,7 @@ extern u32  lbl_8047A274;
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightFightTrainerSelect1(void) {
-    if (fn_801EF63C() == 0) return -1;
+    if (fightIsBattleActive() == 0) return -1;
     lbl_8047A278 = fightSideGetValidFightTrainerPtr(lbl_8047A274, 1);
     if (lbl_8047A278 == 0) return -1;
     return 1;
@@ -1370,7 +1370,7 @@ s32 dbgMenuFightFightTrainerSelect1(void) {
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightFightTrainerSelect0(void) {
-    if (fn_801EF63C() == 0) return -1;
+    if (fightIsBattleActive() == 0) return -1;
     lbl_8047A278 = fightSideGetValidFightTrainerPtr(lbl_8047A274, 0);
     if (lbl_8047A278 == 0) return -1;
     return 1;
@@ -1384,7 +1384,7 @@ extern u32  fightTargetGetPtrAsNowFightType(s32 a, s32 b);
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightFightSideSelectHostEnemy(void) {
-    if (fn_801EF63C() == 0) return -1;
+    if (fightIsBattleActive() == 0) return -1;
     lbl_8047A274 = fightTargetGetPtrAsNowFightType(5, 0);
     if (lbl_8047A274 == 0) return -1;
     return 1;
@@ -1397,7 +1397,7 @@ s32 dbgMenuFightFightSideSelectHostEnemy(void) {
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightFightSideSelectHost(void) {
-    if (fn_801EF63C() == 0) return -1;
+    if (fightIsBattleActive() == 0) return -1;
     lbl_8047A274 = fightTargetGetPtrAsNowFightType(4, 0);
     if (lbl_8047A274 == 0) return -1;
     return 1;
@@ -1410,7 +1410,7 @@ s32 dbgMenuFightFightSideSelectHost(void) {
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightFightFloorEditTenkou(void) {
-    if (fn_801EF63C() == 0) return -1;
+    if (fightIsBattleActive() == 0) return -1;
     return 1;
 }
 #pragma pop
@@ -1426,7 +1426,7 @@ s32 dbgMenuFightWazaEdit(void) {
     u32 result;
     s32 val;
 
-    if (fn_801EF63C() == 0) {
+    if (fightIsBattleActive() == 0) {
         return -1;
     }
 
@@ -1615,7 +1615,7 @@ s32 fn_80007B30(void) {
         }
 
         if (evt == 0x77a) {
-            if (fn_801EF63C() != 0) {
+            if (fightIsBattleActive() != 0) {
                 s32 maxVal;
                 s32 sid;
                 u32 tmp;
@@ -1664,7 +1664,7 @@ s32 fn_80007B30(void) {
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightStop(void) {
-    if (fn_801EF63C() == 0) return -1;
+    if (fightIsBattleActive() == 0) return -1;
     return 1;
 }
 #pragma pop
@@ -1675,15 +1675,15 @@ s32 dbgMenuFightStop(void) {
 #pragma push
 #pragma peephole off
 s32 dbgMenuFightFightFloorEdit(void) {
-    if (fn_801EF63C() == 0) return -1;
+    if (fightIsBattleActive() == 0) return -1;
     return 1;
 }
 #pragma pop
 #endif
 
 /* fn_8000804C - 0x8000804C | size: 0xf8 */
-extern void* fn_800FF560(void);
-extern void fn_8020DAD0(void);
+extern void* floorGetCurrentContext(void);
+extern void fightStartEncount(void);
 extern void* GSthreadCreate(s32 a, void* b, s32 c, s32 d, s32 e, void* f);
 extern void GSthreadSetArgs(void* task, s32 a, ...);
 extern u16 lbl_8047882C;
@@ -1714,14 +1714,14 @@ s32 fn_8000804C(void) {
         if (fn_80006908((u16)val) < 0) {
             continue;
         }
-        if (fn_801EF63C() != 0) {
+        if (fightIsBattleActive() != 0) {
             break;
         }
         {
             u16 saved;
             void* taskPtr;
             saved = lbl_8047882C;
-            taskPtr = GSthreadCreate(1, fn_800FF560(), 0x4000, 1, 1, (void*)fn_8020DAD0);
+            taskPtr = GSthreadCreate(1, floorGetCurrentContext(), 0x4000, 1, 1, (void*)fightStartEncount);
             if (taskPtr != 0) {
                 GSthreadSetArgs(taskPtr, 1, saved);
             }

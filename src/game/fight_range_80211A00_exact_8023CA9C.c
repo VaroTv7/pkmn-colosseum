@@ -9,7 +9,7 @@
 #include "dolphin/types.h"
 
 extern f32 lbl_8047E630;
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 extern int fn_802373B0(u32, u32, int, f32);
 
 /* 0x8023CA9C size 0xC4: fn_8023CA9C */
@@ -1738,7 +1738,7 @@ s32 fightTrainerAiWazaValueRandamuSentaku(void* ctx, u32 param1, u32 param2) {
     u16 rng;
 
     scale = fn_801FB1C0(0, 0x1cb, 0x3e, 0);
-    rng = fn_800E0C54();
+    rng = GSrand();
     mod = rng % (scale + 1);
     handle = fightTrainerAiAddValue(0, mod);
     fn_80239CCC(0xEC64, ctx, fn_80205B8C(param1), 0, 0, param2, 0, 0x1cb, mod);

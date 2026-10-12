@@ -41,7 +41,7 @@ s32 fn_8023B498(void* ctx, u32 userPoke, u16 moveCount, u16* moveList,
     extern u32 fightTrainerAiAddValue(s32 value, s32 delta);
     extern s32 fightTrainerAiGetValueAryMaxBanme(s32* valueAry, u16 count, u8 useRandom);
     extern s32 fightTrainerAiWazaDamageNull(void*, u32, u16, u32);
-    extern u16 fn_800E0C54(void);
+    extern u16 GSrand(void);
 
     typedef s32 (*Handler)();
 
@@ -108,7 +108,7 @@ s32 fn_8023B498(void* ctx, u32 userPoke, u16 moveCount, u16* moveList,
                 }
             }
             if ((s16)countWork > 0) {
-                val = candArr[fn_800E0C54() % (s16)countWork];
+                val = candArr[GSrand() % (s16)countWork];
                 if (outMoveId) *outMoveId = cur;
                 if (valueWork) *(s16*)valueWork = val;
                 return -1;
@@ -125,7 +125,7 @@ s32 fn_8023B498(void* ctx, u32 userPoke, u16 moveCount, u16* moveList,
                 }
             }
             if ((s16)scanWork > 0) {
-                val = candArr[fn_800E0C54() % (s16)scanWork];
+                val = candArr[GSrand() % (s16)scanWork];
                 if (outMoveId) *outMoveId = cur;
                 if (valueWork) *(s16*)valueWork = val;
                 return -1;
@@ -334,7 +334,7 @@ damage_two_done:
                             fightOutPokemonGetPokemonPtr(allyH), 0, 0, 0x3b);
             }
             if ((u8)fn_8000815C() == 1) {
-                u16 rngVal = fn_800E0C54();
+                u16 rngVal = GSrand();
                 s32 delta = (s32)(rngVal % countWork) - flag_10c;
                 valueAry[k] = fightTrainerAiAddValue(valueAry[k], delta);
                 fn_8023A118(0xEC6C, 0xEC2C, 0xEC2D, poke2Ctx, fightOutPokemonGetPokemonPtr(userPoke),

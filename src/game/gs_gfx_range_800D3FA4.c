@@ -31,7 +31,7 @@ extern void fn_801E17A8(void);
 extern void fn_801B25C4(u32);
 extern s32 HSD_CObjSetCurrent(void*);
 extern void GSlightSetupLights(void*);
-extern void fn_800E3604(u32, u32);
+extern void GSmodelDrawAll(u32, u32);
 extern void fn_80118104(u32, u32);
 extern void fn_80195A48(void);
 extern void fn_800D87AC(s32);
@@ -510,7 +510,7 @@ void fn_800D3FA4(u32 flags, u8 setupCamera, u8 resetQueue) {
                 fn_801B25C4(0x7F);
                 if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
                     GSlightSetupLights(*(void**)(camera + 0x0C));
-                    fn_800E3604(0x10, 0);
+                    GSmodelDrawAll(0x10, 0);
                     fn_80118104(0x10, 0);
                     HSD_FogSet(lbl_8047AA8C);
                     fn_80195A48();
@@ -534,7 +534,7 @@ void fn_800D3FA4(u32 flags, u8 setupCamera, u8 resetQueue) {
                 fn_801B25C4(0x7F);
                 if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
                     GSlightSetupLights(*(void**)(camera + 0x0C));
-                    fn_800E3604(0x1000, 0);
+                    GSmodelDrawAll(0x1000, 0);
                     fn_80118104(0x1000, 0);
                     HSD_FogSet(lbl_8047AA8C);
                     fn_80195A48();
@@ -554,7 +554,7 @@ void fn_800D3FA4(u32 flags, u8 setupCamera, u8 resetQueue) {
                 fn_801B25C4(0x7F);
                 if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
                     GSlightSetupLights(*(void**)(camera + 0x0C));
-                    fn_800E3604(0x2000, 0);
+                    GSmodelDrawAll(0x2000, 0);
                     fn_80118104(0x2000, 0);
                     HSD_FogSet(lbl_8047AA8C);
                     fn_80195A48();
@@ -617,7 +617,7 @@ void fn_800D3FA4(u32 flags, u8 setupCamera, u8 resetQueue) {
                 fn_801B25C4(0x7F);
                 if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
                     GSlightSetupLights(*(void**)(camera + 0x0C));
-                    fn_800E3604(0x10, 1);
+                    GSmodelDrawAll(0x10, 1);
                     fn_80118104(0x10, 1);
                     HSD_FogSet(lbl_8047AA8C);
                     fn_80195A48();
@@ -641,7 +641,7 @@ void fn_800D3FA4(u32 flags, u8 setupCamera, u8 resetQueue) {
                 fn_801B25C4(0x7F);
                 if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
                     GSlightSetupLights(*(void**)(camera + 0x0C));
-                    fn_800E3604(0x1000, 1);
+                    GSmodelDrawAll(0x1000, 1);
                     fn_80118104(0x1000, 1);
                     HSD_FogSet(lbl_8047AA8C);
                     fn_80195A48();
@@ -661,7 +661,7 @@ void fn_800D3FA4(u32 flags, u8 setupCamera, u8 resetQueue) {
                 fn_801B25C4(0x7F);
                 if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
                     GSlightSetupLights(*(void**)(camera + 0x0C));
-                    fn_800E3604(0x2000, 1);
+                    GSmodelDrawAll(0x2000, 1);
                     fn_80118104(0x2000, 1);
                     HSD_FogSet(lbl_8047AA8C);
                     fn_80195A48();

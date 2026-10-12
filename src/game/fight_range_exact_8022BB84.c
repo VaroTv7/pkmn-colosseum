@@ -4,7 +4,7 @@
  */
 #include "dolphin/types.h"
 
-extern u32 fn_800E0C54(void);
+extern u32 GSrand(void);
 extern u8 lbl_80379B61[];
 extern u8 lbl_80478D78[8];
 extern u8* lbl_8047B610;
@@ -64,7 +64,7 @@ u32 fn_8022BB84(u32 attacker, u32 target)
     switch ((u16)itemType) {
     case 0x1E:
         if (hit == 1 && (value11C != 0 || value11E != 0) && moveFlag == 1 &&
-            ((s32)(fn_800E0C54() & 0xFFFF) % 100) < itemBuff &&
+            ((s32)(GSrand() & 0xFFFF) % 100) < itemBuff &&
             fightOutPokemonCheckFightOut(target) == 1) {
             lbl_80478D78[3] = 8;
             saved = lbl_8047B610;

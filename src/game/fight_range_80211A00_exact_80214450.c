@@ -26,7 +26,7 @@ extern u8 lbl_80378A8E[];
 extern u32 fn_80232024();
 extern void fn_80234A0C();
 extern u32 fightOutPokemonGetPokemonPtr();
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 extern u8* fn_801440A0(u16 idx);
 extern u8* itemDataBiosGetPtr(u16 idx);
 extern u8   fn_80143DFC(u8* p);
@@ -67,7 +67,7 @@ extern u8  lbl_8047B626;
 extern void fn_80207448(void* p);
 extern void fightOutPokemonInitOneSelfTurn(void* p);
 extern void fn_802249B8();
-extern void fn_802271E0(char, char);
+extern void fightApplyDamageVariance(char, char);
 extern void fn_802274F0(u32, char, char, char);
 extern void* fn_801F025C();
 extern u8 fn_802624CC();
@@ -917,7 +917,7 @@ void fn_80214F10(void) {
     trainerCtx = fn_801F4354(0, ctx11);
     divisor = fn_80215008(trainerCtx, buf, 0x18, ctx11);
     if (divisor != 0) {
-        val = buf[(u16)fn_800E0C54() % divisor];
+        val = buf[(u16)GSrand() % divisor];
         lbl_8047B618 = lbl_8047B618 & ~0x400;
         lbl_8047B60C = val;
         result = fn_8022B2CC(ctx11, val, id, 0, 1, 1, -1);

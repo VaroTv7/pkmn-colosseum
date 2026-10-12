@@ -3,13 +3,13 @@
  * @brief GSfloor -- Floor-data table walkers and small state helpers.
  *
  * This unit spans 0x800FF0A0-0x800FF788 (15 functions, 0x6E8 bytes total)
- * and sits between the GStexture/resource layer (fn_800F7274 etc.) and
+ * and sits between the GStexture/resource layer (floorTerminateScriptThreads etc.) and
  * gs_floor.c's GSfloorOpen (0x800FF788+). It contains only:
  *   - 4 floor-resource table walkers (fn_800FF0A0, fn_800FF178,
  *     fn_800FF2A0, fn_800FF3C0). fn_800FF0A0 is exact pure C; the other
  *     three remain honest TODO stubs. No rodata string references exist
  *     for any of the four, and no evidence supports semantic names.
- *     fn_800FF0A0 calls fn_800F7274 only; the other three call nothing.
+ *     fn_800FF0A0 calls floorTerminateScriptThreads only; the other three call nothing.
  *   - 11 small floor-state accessors/helpers (fn_800FF4D4 through
  *     fn_800FF784), all matched at 100% -- must stay byte-identical.
  *
@@ -36,7 +36,7 @@
 
 /* ===== External engine functions used by the table walkers below ===== */
 extern void  memcpy(void* dst, const void* src, u32 n);
-extern u32   fn_800F7274(u16 handle);
+extern u32   floorTerminateScriptThreads(u16 handle);
 extern void  floorSetFadeScript(u32 a, u32 b);
 
 /* ===== SDA/SBSS globals (floor context / resource pool state) ===== */
@@ -87,7 +87,7 @@ void fn_800FF0A0(u32 callback) {
 found:
     if (resource != NULL) {
         if ((s32)resource->status == 1 && resource->modelHandle != NULL) {
-            fn_800F7274(resource->textureHandle);
+            floorTerminateScriptThreads(resource->textureHandle);
         }
         resource->active = 0;
         if (resource->prev != NULL) {
@@ -331,7 +331,7 @@ u8 fn_800FF554(void) {
 }
 
 /* 0x800FF560 | 0xC | sda_deref_getter */
-u32 fn_800FF560(void) {
+u32 floorGetCurrentContext(void) {
     return *(u32*)((u8*)lbl_8047ACC8 + 0x4);
 }
 
@@ -352,7 +352,7 @@ u32 fn_800FF56C(void) {
     defined(GS_FLOOR_DATA_RESIDUAL_MIDDLE_800FF58C_ONLY)
 
 /* 0x800FF58C | 0xD4 */
-void fn_800FF58C(u32 floorId) {
+void floorRequestChange(u32 floorId) {
     GSFloorContext* currentFloor;
     GSFloorResource* resource;
     u32 remaining;
@@ -367,7 +367,7 @@ void fn_800FF58C(u32 floorId) {
             if ((s32)resource->active != 0 &&
                 (s32)resource->status == 1 &&
                 resource->floorId == currentFloor->floorId) {
-                fn_800F7274(resource->textureHandle);
+                floorTerminateScriptThreads(resource->textureHandle);
             }
             resource++;
         }
@@ -399,7 +399,7 @@ void fn_800FF660(void) {
                 if ((s32)resource->active != 0 &&
                     (s32)resource->status == 1 &&
                     resource->floorId == currentFloor->floorId) {
-                    fn_800F7274(resource->textureHandle);
+                    floorTerminateScriptThreads(resource->textureHandle);
                 }
                 resource++;
             }

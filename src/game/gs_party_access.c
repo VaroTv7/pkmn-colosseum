@@ -18,7 +18,7 @@ extern void memoInitDebug(u32);
 extern void fn_80190528(u32);
 extern void fn_800884BC(u32, u32, u32);
 extern void fn_800FF660(void);
-extern u32 fn_800FF560(void);
+extern u32 floorGetCurrentContext(void);
 extern u32 GSthreadCreate(s32, u32, s32, s32, s32, u32);
 extern u32 savedataGetStatus(s32, s32);
 extern u32 heroBiosGetPokemonPtr(u32, s32);
@@ -149,7 +149,7 @@ u32 dbgMenuMenuTestD2Present(u32 arg) {
         }
     }
     val = table[idx * 2 + 1];
-    r = GSthreadCreate(1, fn_800FF560(), 0x4000, 1, 1, (u32)(void(*)(void))fn_8000CB54);
+    r = GSthreadCreate(1, floorGetCurrentContext(), 0x4000, 1, 1, (u32)(void(*)(void))fn_8000CB54);
     GSthreadSetArgs(r, 1, val);
     return 0;
 }
@@ -224,7 +224,7 @@ void testEvolution__Fv(void) {
 /* 0x8000CE18 */
 s32 dbgMenuMenuTestEvolution(void) {
     u32 r;
-    r = (u32)fn_800FF560();
+    r = (u32)floorGetCurrentContext();
     GSthreadCreate(1, r, 0x4000, 1, 1, (u32)testEvolution__Fv);
     return 0;
 }

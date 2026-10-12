@@ -1139,7 +1139,7 @@ void GSthreadTerminateGroup(u32 priority) {
  * fn_800E209C (GSmemFree).
  *
  * Parameter kept as u32 (not GSThread*) to match this file's other
- * GSthreadTerminate extern declarations/call sites (fn_800F716C, fn_800F7274),
+ * GSthreadTerminate extern declarations/call sites (fn_800F716C, floorTerminateScriptThreads),
  * which pass a raw GSThread* value stored in a u32 slot.
  */
 void GSthreadTerminate(u32 ctxArg) {
@@ -3815,7 +3815,7 @@ asm void fn_800FBE7C(void) {
 }
 #else
 #pragma optimization_level 2
-s32 fn_800FBE7C(u32 key, u32 r4arg) {
+s32 winMsgDrawMessage(u32 key, u32 r4arg) {
     u8* head;
     u32 count;
     u8* entry;
@@ -8290,7 +8290,7 @@ asm u32 fn_800F7274(key)
 }
 #else
 #pragma optimization_level 2
-u32 fn_800F7274(key)
+u32 floorTerminateScriptThreads(key)
     u16 key;
 {
     u8* head;
@@ -8323,7 +8323,7 @@ u32 fn_800F7274(key)
     return 0;
 }
 #endif
-extern u32 fn_800FF560(void);
+extern u32 floorGetCurrentContext(void);
 extern GSThread* GSthreadCreate(u32, u32, u32, u32, u32, void*);
 extern void GSthreadSetArgs(void*, s32, ...);
 extern u8 lbl_80271294[];
@@ -8357,7 +8357,7 @@ u32 fn_800F7318(u32 r27, void* callback, u32 r28, u32 r29, u32 r30, u32 r8, ...)
     list[0].reg_save_area = (u32*)((u8*)list - 0x60);
     listPtr = list;
     entry = fn_800F6D18(callback, r8, listPtr);
-    current = fn_800FF560();
+    current = floorGetCurrentContext();
     if (entry == NULL) {
         return 0;
     }

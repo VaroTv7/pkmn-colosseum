@@ -2,17 +2,17 @@
  * @file movie.c
  * @brief THP movie playback system for Pokemon Colosseum.
  *
- * fn_80035E04, fn_80035EE4, fn_80035F34, and fn_80035F64 (0x80035E04 -
+ * fn_80035E04, movieOpeningStart, fn_80035F34, and fn_80035F64 (0x80035E04 -
  * 0x800361C0, size/address confirmed against config/GC6E01/symbols.txt)
  * implement movie stop/cleanup, opening-demo playback, auto-demo setup,
  * and the staff-roll sequence respectively. Their "wait for THP playback
- * to finish" loop (poll fn_801E1874, yield via _threadSwitch) is inlined
+ * to finish" loop (poll GSmovieIsActive, yield via _threadSwitch) is inlined
  * at each call site in the retail binary -- there is no standalone helper
  * function for it, so none is kept here either.
  *
  * An earlier campaign transplant had also left two invented functions,
  * moviePlayGSLogo and moviePlayTPCLogo, duplicating logic that is really
- * inlined into fn_800364C8 and fn_80036640 (both already 100%-scaffolded
+ * inlined into movieGsLogoStart and movieTpcStart (both already 100%-scaffolded
  * below); those had no callers anywhere in the tree and have been removed.
  *
  * Movie files referenced:
@@ -34,8 +34,8 @@
 #include "game/movie.h"
 
 /* ===== THP Player SDK functions ===== */
-extern u8   fn_801E1874(void);                        /* THPPlayerGetState */
-extern void fn_801E189C(const char* path, u32 loop);  /* THPPlayerOpen */
+extern u8   GSmovieIsActive(void);                        /* THPPlayerGetState */
+extern void GSmovieOpen(const char* path, u32 loop);  /* THPPlayerOpen */
 
 /* ===== GS Engine external functions ===== */
 extern void _threadSwitch(void);                        /* GSthread yield / step */
@@ -56,7 +56,7 @@ extern void winMsgOpen(u32 a, u32 b, u32 c, u32 d);  /* floor transition trigger
 extern s8   fn_8001E074(u32 a, u32 b, u32 c, u32 d);  /* input poll / wait */
 extern void* fn_801D036C(void);                        /* battle state query */
 extern u32  fn_801D0748(u32 a, u32 b, u32 c);         /* battle mode set */
-extern void fn_800FF58C(u32 a);                        /* floor cleanup helper */
+extern void floorRequestChange(u32 a);                        /* floor cleanup helper */
 
 /* ===== String constants (rodata) ===== */
 extern const char lbl_80266FE8[]; /* "movie/openingdemo.thp" */
@@ -69,7 +69,7 @@ extern const char lbl_80267040[]; /* "movie/tpc.thp" */
 extern f32 lbl_8047BA30; /* 1.0f -- fade speed */
 
 /* =======================================================================
- *  fn_80035EE4 (moviePlayOpeningDemo)
+ *  movieOpeningStart (moviePlayOpeningDemo)
  *  Address: 0x80035EE4, Size: 0x50
  *
  *  Assembly:
@@ -81,7 +81,7 @@ extern f32 lbl_8047BA30; /* 1.0f -- fade speed */
  *    lis r3, lbl_80266FE8@ha
  *    li r4, 0
  *    addi r3, r3, lbl_80266FE8@l    ; "movie/openingdemo.thp"
- *    bl fn_801E189C                  ; THPPlayerOpen(path, loop=0)
+ *    bl GSmovieOpen                  ; THPPlayerOpen(path, loop=0)
  *    li r3, 0x495
  *    li r4, 0
  *    li r5, 0x7F
@@ -90,13 +90,13 @@ extern f32 lbl_8047BA30; /* 1.0f -- fade speed */
  * ======================================================================= */
 #pragma push
 #pragma peephole off
-void fn_80035EE4(void) {
+void movieOpeningStart(void) {
     /* Set up screen fade: mode 2 (fade-in from black), speed 1.0 */
     fadeSet(2, lbl_8047BA30);
     fadeCheck(1);
 
     /* Open and start the opening demo THP movie (no loop) */
-    fn_801E189C(lbl_80266FE8, 0);
+    GSmovieOpen(lbl_80266FE8, 0);
 
     /* Start opening BGM: sound ID 0x0495, no fade, max volume */
     fn_80165A20(0x0495, 0, 0x7F);
@@ -140,7 +140,7 @@ void fn_80035F34(void) {
  *    ; Wait loop for THP player
  *    .wait:
  *      bl _threadSwitch            ; yield
- *      bl fn_801E1874            ; THPPlayerGetState
+ *      bl GSmovieIsActive            ; THPPlayerGetState
  *      clrlwi r0, r3, 24
  *      cmplwi r0, 1
  *      beq .wait
@@ -173,16 +173,16 @@ void fn_80035E04(void) {
         u16 sound1;
     } MovieCue;
     extern const MovieCue lbl_802E51A8[5];
-    extern s32 fn_801E16D0(void);
+    extern s32 GSmovieGetFrame(void);
     extern void fn_80166A28(u32);
     u32 nextIndex;
     u32 cueIndex = 0;
 
-    while ((u32)(fn_801E1874() & 0xFF) == THP_STATE_PLAYING) {
+    while ((u32)(GSmovieIsActive() & 0xFF) == THP_STATE_PLAYING) {
         nextIndex = cueIndex;
 
         if (cueIndex < 5) {
-            s32 frame = fn_801E16D0();
+            s32 frame = GSmovieGetFrame();
             if (frame >= 0 && frame >= lbl_802E51A8[cueIndex].frame) {
                 if (lbl_802E51A8[cueIndex].sound0 != 0) {
                     fn_80166A28(lbl_802E51A8[cueIndex].sound0);
@@ -232,7 +232,7 @@ void fn_80035E04(void) {
  *    .waitLoop:
  *      bl _threadSwitch
  *    .checkState:
- *      bl fn_801E1874
+ *      bl GSmovieIsActive
  *      cmplwi r0, 1
  *      beq .waitLoop
  *
@@ -269,7 +269,7 @@ void fn_80035E04(void) {
  *    lis r3, lbl_80267000@ha
  *    addi r3, r3, lbl_80267000@l  ; "movie/staffroll.thp"
  *    li r4, 0
- *    bl fn_801E189C
+ *    bl GSmovieOpen
  *    ...
  * ======================================================================= */
 void fn_80035F64(void) {
@@ -284,7 +284,7 @@ void fn_80035F64(void) {
     /* Step 1: Wait for any current THP playback (inlined) */
     do {
         _threadSwitch();
-        state = fn_801E1874();
+        state = GSmovieIsActive();
     } while ((u32)(state & 0xFF) == THP_STATE_PLAYING);
 
     /* Step 2: Stop BGM */
@@ -400,12 +400,12 @@ postCheck:
 
 openMovie:
     /* Open the staff roll THP movie */
-    fn_801E189C(lbl_80267000, 0);
+    GSmovieOpen(lbl_80267000, 0);
 
     /* Wait for staff roll to finish playing (inlined) */
     do {
         _threadSwitch();
-        state = fn_801E1874();
+        state = GSmovieIsActive();
     } while ((u32)(state & 0xFF) == THP_STATE_PLAYING);
 
     /* Stop sound and restore state */
@@ -491,7 +491,7 @@ asm void fn_800361C0(void) {
 void fn_800361C0(void) {
     fadeSet(2, lbl_8047BA30);
     fadeCheck(1);
-    fn_801E189C(lbl_80267000, 0);
+    GSmovieOpen(lbl_80267000, 0);
     fn_80165A20(0x04C9, 0, 0x7F);
 }
 #pragma pop
@@ -516,8 +516,8 @@ void fn_80036210(void) {
 extern s32 fn_8017B1AC();
 extern u32 fn_800F7AF0(u32);
 extern u32 fn_800F7BC4(u32);
-extern void fn_801E1810();
-extern s32 fn_801E16D0();
+extern void GSmovieClose();
+extern s32 GSmovieGetFrame();
 extern void fn_80166A28(u32);
 extern void fn_8016597C(u32, u32, u32, u32);
 extern u8 lbl_802E50E0[];
@@ -547,12 +547,12 @@ void fn_80036240(void) {
     r3 = fn_800F7BC4(1);
     r0 = (r3 & r31) & 0x1300;
     if (r0 != 0) {
-        fn_801E1810();
+        GSmovieClose();
         goto loop_exit;
     }
     r31 = r30;
     if (r30 < 0x21) {
-        r3 = fn_801E16D0();
+        r3 = GSmovieGetFrame();
         if (r3 >= 0) {
             r30_tbl = lbl_802E50E0 + r30 * 6;
             if (r3 >= (s32)*(u16*)(r30_tbl + 0x0)) {
@@ -572,18 +572,18 @@ void fn_80036240(void) {
     _threadSwitch();
 
     loop_check:
-    r3 = fn_801E1874();
+    r3 = GSmovieIsActive();
     if ((u8)r3 == 1) goto loop_body;
 
     loop_exit:
     fn_8016597C(1, 0x3e8, 0, 0x7f);
-    fn_800FF58C(0x384);
+    floorRequestChange(0x384);
     floorSetFadeScript(0, 0x5960008);
 }
 #pragma peephole reset
 #endif
 
-/* fn_80036360 - 0x80036360 | size: 0x50 */
+/* movieStartAttract - 0x80036360 | size: 0x50 */
 #if 0
 asm void fn_80036360(void) {
 #include "src/game/movie_fn_80036360.inc"
@@ -591,10 +591,10 @@ asm void fn_80036360(void) {
 #else
 #pragma push
 #pragma peephole off
-void fn_80036360(void) {
+void movieStartAttract(void) {
     fadeSet(2, lbl_8047BA30);
     fadeCheck(1);
-    fn_801E189C(lbl_80267014, 0);
+    GSmovieOpen(lbl_80267014, 0);
     fn_80165A20(0x0494, 0, 0x7F);
 }
 #pragma pop
@@ -635,7 +635,7 @@ void fn_800363BC(void) {
 }
 #endif
 
-/* fn_80036468 - 0x80036468 | size: 0x60 */
+/* movieGsLogoWait - 0x80036468 | size: 0x60 */
 extern u8 lbl_8047A468;
 #if 0
 asm void fn_80036468(void) {
@@ -644,27 +644,27 @@ asm void fn_80036468(void) {
 #else
 #pragma push
 #pragma peephole off
-void fn_80036468(void) {
+void movieGsLogoWait(void) {
     if (lbl_8047A468 != 1) {
-        while ((u8)fn_801E1874() == 1) {
+        while ((u8)GSmovieIsActive() == 1) {
             _threadSwitch();
         }
     }
-    fn_800FF58C(0x384);
+    floorRequestChange(0x384);
     floorSetFadeScript(0, 0x5960008);
     lbl_8047A468 = 1;
 }
 #pragma pop
 #endif
 
-/* fn_800364C8 - 0x800364C8 | size: 0xe8 */
+/* movieGsLogoStart - 0x800364C8 | size: 0xe8 */
 extern void* memset(void* dst, int val, u32 n);
 #if 0
 asm void fn_800364C8(void) {
 #include "src/game/movie_fn_800364C8.inc"
 }
 #else
-void fn_800364C8(void) {
+void movieGsLogoStart(void) {
     u8* ctx;
     u32* args;
 
@@ -687,7 +687,7 @@ void fn_800364C8(void) {
 
     fadeSet(2, lbl_8047BA30);
     fadeCheck(1);
-    fn_801E189C(lbl_8026702C, 0);
+    GSmovieOpen(lbl_8026702C, 0);
     fn_80165A20(0x04D1, 0, 0x7F);
     memset((void*)0x80001805, 0, 0x17FB);
 }
@@ -708,7 +708,7 @@ void fn_800365B0(void) {
 #pragma pop
 #endif
 
-/* fn_800365E0 - 0x800365E0 | size: 0x60 */
+/* movieTpcWait - 0x800365E0 | size: 0x60 */
 extern void fn_80165F40(void);
 #if 0
 asm void fn_800365E0(void) {
@@ -717,21 +717,21 @@ asm void fn_800365E0(void) {
 #else
 #pragma push
 #pragma peephole off
-void fn_800365E0(void) {
+void movieTpcWait(void) {
     if (lbl_8047A468 != 1) {
         fn_80165F40();
-        while ((u8)fn_801E1874() == 1) {
+        while ((u8)GSmovieIsActive() == 1) {
             _threadSwitch();
         }
     }
-    fn_800FF58C(0x39A);
+    floorRequestChange(0x39A);
     floorSetFadeScript(0, 0);
     lbl_8047A468 = 1;
 }
 #pragma pop
 #endif
 
-/* fn_80036640 - 0x80036640 | size: 0x5c */
+/* movieTpcStart - 0x80036640 | size: 0x5c */
 extern u8 lbl_8047A468;
 #if 0
 asm void fn_80036640(void) {
@@ -740,11 +740,11 @@ asm void fn_80036640(void) {
 #else
 #pragma push
 #pragma peephole off
-void fn_80036640(void) {
+void movieTpcStart(void) {
     lbl_8047A468 = 0;
     fadeSet(2, lbl_8047BA30);
     fadeCheck(1);
-    fn_801E189C(lbl_80267040, 1);
+    GSmovieOpen(lbl_80267040, 1);
     memset((void*)0x80001803, 0, 0x17FD);
 }
 #pragma pop
@@ -754,7 +754,7 @@ void fn_80036640(void) {
 extern u32 menuOpen(u32 sceneId, u32 arg);
 extern s32 fn_8003708C(void);
 extern void fn_8017B370(u32 arg);
-extern void fn_8003686C(void);
+extern void bootWaitLogo(void);
 extern void menuClose(u32 sceneId);
 extern s32 fn_800D37CC(void);
 extern u32 __cvt_fp2unsigned(f32 value);
@@ -789,7 +789,7 @@ void fn_800366A8(void) {
 
     fn_8017B370(0xA);
     memset((void*)0x80001801, 0, 0x17FF);
-    fn_8003686C();
+    bootWaitLogo();
 
     args = (u32*)(ctx + 0x1318);
     args[0] = 2;

@@ -806,7 +806,7 @@ void fn_801CA4F8(f32 frames)
     }
 }
 
-u16 fn_801CA5C4(u32 arg0, u8 arg1, s32 arg2)
+u16 fieldStartEncount(u32 arg0, u8 arg1, s32 arg2)
 {
     extern void fn_80112700(void);
     extern void fn_801903B0(u32 flagId);
@@ -814,7 +814,7 @@ u16 fn_801CA5C4(u32 arg0, u8 arg1, s32 arg2)
     extern u16 fn_8006A65C(void);
     extern void fn_801CBA90(s32 value);
     extern void floorSetFadeScript(s32 a, s32 b);
-    extern u32 fn_8020DAD0(u32 arg0);
+    extern u32 fightStartEncount(u32 arg0);
     extern u8 fightEncountDataBiosGetZenmetuFlag(void* ptr);
     extern u32 fn_801EF634(void);
     extern u8 fightFloorIsGcHeroWin(u32 obj, u32 side);
@@ -845,7 +845,7 @@ u16 fn_801CA5C4(u32 arg0, u8 arg1, s32 arg2)
         }
 
         old = result;
-        result = fn_8020DAD0(arg0);
+        result = fightStartEncount(arg0);
 
         if (fightEncountDataBiosGetZenmetuFlag((void*)old)) {
             input = fn_801EF634();
@@ -921,7 +921,7 @@ s32 fn_801C7730(s32 side, s32 slot)
     extern void fn_8018AACC();
     extern u8 peopleMoveCheck();
     extern void fn_8018BA04();
-    extern void fn_80187D48();
+    extern void peopleTurnToPoint();
     extern void fn_80183018();
     extern f64 cos(f64);
     extern f64 sin(f64);
@@ -1052,7 +1052,7 @@ s32 fn_801C7730(s32 side, s32 slot)
         }
         if (done == 0) {
             fn_8018BA04(resId, floorId, &saved);
-            fn_80187D48(resId, floorId, saved.x, saved.y, saved.z,
+            peopleTurnToPoint(resId, floorId, saved.x, saved.y, saved.z,
                         lbl_8047E100);
             WAIT_MOVE(done);
             fn_80183018(resId, floorId);
@@ -1102,7 +1102,7 @@ s32 fn_801C7730(s32 side, s32 slot)
         WAIT_MOVE(done);
         if (done == 0) {
             fn_8018BA04(resId, floorId, &saved);
-            fn_80187D48(resId, floorId, saved.x, saved.y, saved.z,
+            peopleTurnToPoint(resId, floorId, saved.x, saved.y, saved.z,
                         lbl_8047E100);
             WAIT_MOVE(done);
             fn_80183018(resId, floorId);
@@ -1158,7 +1158,7 @@ s32 fn_801C8E14(s32 floorDataId, u32 actorIndex, u16 mode, u8 direction)
     extern void fn_80188F78();
     extern void fn_8018805C();
     extern void fn_8018AACC();
-    extern void fn_8018C0A8();
+    extern void peopleSetPositionByIndex();
     extern u8 peopleMoveCheck();
     extern void fn_80166A28();
     extern void fn_801669BC();
@@ -1344,8 +1344,8 @@ s32 fn_801C8E14(s32 floorDataId, u32 actorIndex, u16 mode, u8 direction)
             secondPos = transform.position;
             firstPos.z += lbl_8047E130;
             secondPos.z -= lbl_8047E130;
-            fn_8018C0A8(0, 0x64, &firstPos);
-            fn_8018C0A8(0, 0x65, &secondPos);
+            peopleSetPositionByIndex(0, 0x64, &firstPos);
+            peopleSetPositionByIndex(0, 0x65, &secondPos);
             firstPos.z += lbl_8047E140;
             secondPos.z += lbl_8047E140;
             fn_8018AACC(0, 0x64, 1, &firstPos);

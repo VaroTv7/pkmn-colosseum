@@ -715,7 +715,7 @@ s32 fn_8010B9E8(u8* context, void* srcNode, u16 key)
 #pragma pop
 s32 fn_8010A010(void* objPtr, u32 key)
 {
-    extern u32 fn_800FF560(void);
+    extern u32 floorGetCurrentContext(void);
     extern u32 GSthreadCreate(s32 priority, void* stack, u32 stackSize,
                                s32 unk1, s32 unk2, void* entry);
     extern void GSthreadSetArgs(u32 task, u32 count, ...);
@@ -774,7 +774,7 @@ s32 fn_8010A010(void* objPtr, u32 key)
         GSthreadClose(threadHandle);
     }
 
-    threadHandle = GSthreadCreate(1, (void*)fn_800FF560(), 0x4000, 1, 1,
+    threadHandle = GSthreadCreate(1, (void*)floorGetCurrentContext(), 0x4000, 1, 1,
                                    (void*)fn_8010A88C);
     *(u32*)(obj + 0x28) = threadHandle;
     if (threadHandle != 0) {
@@ -847,7 +847,7 @@ s32 fn_80109C88(void* objPtr, void* pokemon)
     extern void GSthreadSetArgs(u32 task, u32 count, ...);
     extern u32 GSthreadIsRunning(u32 task);
     extern void GSthreadClose(u32 task);
-    extern u32 fn_800FF560(void);
+    extern u32 floorGetCurrentContext(void);
     extern void fn_8010A88C(void);
     extern u8 fn_80121ADC(void* pokemon, u32 slot);
 
@@ -925,7 +925,7 @@ s32 fn_80109C88(void* objPtr, void* pokemon)
         GSthreadClose(threadHandle);
     }
 
-    threadHandle = GSthreadCreate(1, (void*)fn_800FF560(), 0x4000, 1, 1,
+    threadHandle = GSthreadCreate(1, (void*)floorGetCurrentContext(), 0x4000, 1, 1,
                                    (void*)fn_8010A88C);
     *(u32*)(obj + 0x28) = threadHandle;
     if (threadHandle != 0) {

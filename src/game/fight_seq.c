@@ -66,7 +66,7 @@ u32
 fightSeqGetNromalWazaDamage(u32 r3, u32 r4, u32 r5, u32 r6, u8 r7, u8 r8, void *r9, void *r10)
 
 {
-    extern u16 fn_800E0C54();
+    extern u16 GSrand();
     extern void wazaSetStatus();
     extern u32 wazaGetStatus();
     extern u32 fightTargetGetPtrAsNowFightType();
@@ -84,7 +84,7 @@ fightSeqGetNromalWazaDamage(u32 r3, u32 r4, u32 r5, u32 r6, u8 r7, u8 r8, void *
     extern u8 fightWazaCriticalDataBiosGetBunbo();
     extern void fightWazaCriticalDataBiosGetPtr();
     extern void fightWazaBiosCopy();
-    extern void fn_802271E0();
+    extern void fightApplyDamageVariance();
     extern void fn_802274F0();
     extern int fn_80232110();
     extern u32 lbl_80478D60;
@@ -189,11 +189,11 @@ fightSeqGetNromalWazaDamage(u32 r3, u32 r4, u32 r5, u32 r6, u8 r7, u8 r8, void *
       (cVar18 = fightFloorGetStatus(0,0,0x29,0), cVar18 == 1)) {
     fightWazaCriticalDataBiosGetPtr(uVar8);
     uVar8 = fightWazaCriticalDataBiosGetBunbo();
-    uVar9 = fn_800E0C54();
+    uVar9 = GSrand();
     if (((s32)(uVar9 & 0xffff) % (s32)(uVar8 & 0xff) == 0) ||
         (((u8)fn_802026E4(uVar4,0x3e) == 1) &&
          ((uVar6 & 0xffff) == 0x164) &&
-         ((s32)(fn_800E0C54() & 0xffff) % 100 < 0x5a))) {
+         ((s32)(GSrand() & 0xffff) % 100 < 0x5a))) {
       wazaSetStatus(uVar5,0,0x2b,0,2);
     }
     else {
@@ -229,7 +229,7 @@ LAB_0020e58c:
   lbl_8047B610 = (int)lbl_8047B610 + 1;
   fn_802274F0(1,1,1,0);
   if (r8 == 1) {
-    fn_802271E0(1,1);
+    fightApplyDamageVariance(1,1);
     lbl_8047B610 = (int)lbl_8047B610 + 1;
   }
   if (r10 != (void *)0) {

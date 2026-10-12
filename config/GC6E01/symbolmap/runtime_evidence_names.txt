@@ -1,0 +1,44 @@
+# Names from runtime evidence (recomp mods/staging, 2026-10). Format:
+# fn_OLD -> NewName  // evidence
+fn_8020DAD0 -> fightStartEncount  // launches encounter id (r3) in a GSthread; verified starting 0xA4/0x20B battles
+fn_801CA5C4 -> fieldStartEncount  // story wrapper around fightStartEncount (field/event/defeat handling)
+fn_801EF63C -> fightIsBattleActive  // returns byte 0x8047B5DA; verified 0 in field, 1 in battle
+fn_801EF61C -> fightSetEncountId  // stores u16 0x8047B5D6
+fn_800E0C54 -> GSrand  // game integer RNG: next = seed*0x343FD + 0x269EC3, returns next >> 16; verified via forced rolls
+fn_8022E6F0 -> fightCheckRuiShadowSense  // Shadow appearance check: Rui's sensing animation + 0x7717/0x770A text; verified Miror B. encounter
+fn_8021AC1C -> fightCheckOneHitKO  // OHKO hit roll R%100+1 < 30 + level difference; verified Sheer Cold forcing
+fn_802271E0 -> fightApplyDamageVariance  // scales damage by 100-(R%16) percent
+fn_802284B0 -> fightCheckAccuracy  // R%100+1 vs adjusted accuracy
+fn_801129CC -> floorResolveEntryPosition  // spawn index -> position/rotation from the floor's position list
+fn_800FF58C -> floorRequestChange  // terminates floor script threads, requests floor id
+fn_800FF560 -> floorGetCurrentContext  // floor context used for GSthreadCreate of the battle launcher
+fn_800F7274 -> floorTerminateScriptThreads  // GSthreadTerminate over the script task table
+fn_8018C0A8 -> peopleSetPositionByIndex  // (group, index, GSvec*); verified placing Wes/Rui
+fn_8018BF24 -> peopleSetRotation  // (group, index, GSvec* radians)
+fn_80185F44 -> peopleSetRotationDeg  // same in degrees
+fn_80187D48 -> peopleTurnToPoint  // (g, i, x, y, z, turnSpeed)
+fn_8018C1E8 -> peopleSetVisible  // (group, index, visible); verified hiding Rui
+fn_8018C7C8 -> peopleSetFlagsByIndex  // ORs people flags
+fn_8018C69C -> peopleClearFlagsByIndex  // clears people flags
+fn_80184190 -> peopleReserveWalkList  // (g, i, points) before peopleAddWalkList; verified scripted walks
+fn_80183E5C -> peopleStartWalkList  // (g, i, run); resets walk speed to 1.0 (verified)
+fn_80184948 -> peopleSetWalkSpeed  // (g, i, f1 speed); verified 1.75/2.5 pacing
+fn_8018BC88 -> peopleGetPositionByIndex  // (g, i, -1, out)
+fn_8018E9B4 -> peopleMoveCommit  // collision + commit of a people step (entry, GSvec* new, GSvec* old)
+fn_800259B0 -> worldMapPre  // world map floor 0x38E pre callback (stores previous floor 0x8047A3AC)
+fn_80025730 -> worldMapMain  // destination menu 0xBD, bike ride, floorLink(dest, 0)
+fn_800255A4 -> worldMapPost  // world map post callback
+fn_80025F84 -> worldMapBikeRide  // bike ride; camera variant U32(0x8047A394) cycles 0..9
+fn_80036360 -> movieStartAttract  // opens movie/autodemo01.thp + BGM 0x494; verified with the attract replacement
+fn_801E189C -> GSmovieOpen  // threaded open: filename 0x8047B448, done flag 0x8047B444
+fn_801E1874 -> GSmovieIsActive  // bytes 0x8047B440 && 0x8047B441
+fn_801E1810 -> GSmovieClose  // stop, cancel reader, free buffer 0x8047B450, clear active
+fn_801E16D0 -> GSmovieGetFrame  // displayed THP frame (or -1); verified driving the attract sync
+fn_80036640 -> movieTpcStart  // opens movie/tpc.thp (boot floor 0x399)
+fn_800365E0 -> movieTpcWait  // waits, then requests floor 0x39A
+fn_800364C8 -> movieGsLogoStart  // opens movie/gs_logo.thp, BGM 0x4D1
+fn_80036468 -> movieGsLogoWait  // waits, then requests floor 0x384 (title)
+fn_80035EE4 -> movieOpeningStart  // opens movie/openingdemo.thp (new-game floor 0x3A0)
+fn_8003686C -> bootWaitLogo  // 2.0 s logo dwell timer at 0x8047BA34; verified by skip intro
+fn_800E3604 -> GSmodelDrawAll  // draws every visible GSmodel of a layer slot (array 0x8047AB74); verified via object IDs
+fn_800FBE7C -> winMsgDrawMessage  // renders a message task by message id; verified as battle text log

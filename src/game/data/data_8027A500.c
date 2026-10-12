@@ -141,19 +141,19 @@ extern u8 fn_801821B8[];
 extern u8 fn_80183018[];
 extern u8 fn_80183350[];
 extern u8 fn_80183CE0[];
-extern u8 fn_80183E5C[];
-extern u8 fn_80184190[];
+extern u8 peopleStartWalkList[];
+extern u8 peopleReserveWalkList[];
 extern u8 fn_80184450[];
 extern u8 fn_80184470[];
 extern u8 fn_801845E4[];
-extern u8 fn_80184948[];
+extern u8 peopleSetWalkSpeed[];
 extern u8 fn_80185EE8[];
-extern u8 fn_80185F44[];
+extern u8 peopleSetRotationDeg[];
 extern u8 fn_801860F8[];
 extern u8 fn_80186620[];
 extern u8 fn_801874BC[];
 extern u8 fn_80187A60[];
-extern u8 fn_80187D48[];
+extern u8 peopleTurnToPoint[];
 extern u8 fn_80188984[];
 extern u8 fn_80188AF4[];
 extern u8 fn_80188CA0[];
@@ -167,11 +167,11 @@ extern u8 fn_8018B220[];
 extern u8 fn_8018B368[];
 extern u8 fn_8018B558[];
 extern u8 fn_8018B76C[];
-extern u8 fn_8018BC88[];
+extern u8 peopleGetPositionByIndex[];
 extern u8 fn_8018BDF4[];
-extern u8 fn_8018C1E8[];
-extern u8 fn_8018C69C[];
-extern u8 fn_8018C7C8[];
+extern u8 peopleSetVisible[];
+extern u8 peopleClearFlagsByIndex[];
+extern u8 peopleSetFlagsByIndex[];
 extern u8 fn_8018CA20[];
 extern u8 fn_8018DB68[];
 extern u8 fn_8018E050[];
@@ -197,7 +197,7 @@ extern u8 fn_801C9F00[];
 extern u8 fn_801C9F5C[];
 extern u8 fn_801CA358[];
 extern u8 fn_801CA4F8[];
-extern u8 fn_801CA5C4[];
+extern u8 fieldStartEncount[];
 extern u8 fn_801CA708[];
 extern u8 fn_801CA728[];
 extern u8 fn_801CA7AC[];
@@ -232,7 +232,7 @@ extern u8 fn_801EE67C[];
 extern u8 fn_801EF634[];
 extern u8 fn_801EF6FC[];
 extern u8 fn_801EF758[];
-extern u8 fn_8020DAD0[];
+extern u8 fightStartEncount[];
 extern u8 fn_8025E1BC[];
 extern u8 preReliveDisplayHokoraParticle[];
 extern u8 reliveMain[];
@@ -93946,7 +93946,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)cameraUpdate),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_8018C1E8),
+    (void*)((u8*)peopleSetVisible),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)((u8*)fn_8018B76C),
@@ -93976,7 +93976,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)fn_801860F8),
     (void*)0x01010202,
     (void*)0x02000000,
-    (void*)((u8*)fn_80185F44),
+    (void*)((u8*)peopleSetRotationDeg),
     (void*)0x01010202,
     (void*)0x02000000,
     (void*)((u8*)fn_80185EE8),
@@ -93985,10 +93985,10 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)peopleMoveCheck),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_8018C7C8),
+    (void*)((u8*)peopleSetFlagsByIndex),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_8018C69C),
+    (void*)((u8*)peopleClearFlagsByIndex),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)((u8*)fn_80188F78),
@@ -94003,7 +94003,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)fn_8018A44C),
     (void*)0x01010200,
     (void*)0x00000000,
-    (void*)((u8*)fn_80184948),
+    (void*)((u8*)peopleSetWalkSpeed),
     (void*)0x01010200,
     (void*)0x00000000,
     (void*)((u8*)fn_801845E4),
@@ -94012,13 +94012,13 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)fn_80184450),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80184190),
+    (void*)((u8*)peopleReserveWalkList),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)((u8*)peopleAddWalkList),
     (void*)0x01010202,
     (void*)0x02000000,
-    (void*)((u8*)fn_80183E5C),
+    (void*)((u8*)peopleStartWalkList),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)((u8*)fn_80183CE0),
@@ -94102,7 +94102,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)floorCharacterSetPos),
     (void*)0x01020202,
     (void*)0x00000000,
-    (void*)((u8*)fn_8020DAD0),
+    (void*)((u8*)fightStartEncount),
     (void*)0x01000000,
     (void*)0x00000000,
     (void*)((u8*)fn_801EF634),
@@ -94252,7 +94252,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)fn_8018CA20),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CA5C4),
+    (void*)((u8*)fieldStartEncount),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)((u8*)scriptSoundStop),
@@ -94288,7 +94288,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)fn_80022B3C),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80187D48),
+    (void*)((u8*)peopleTurnToPoint),
     (void*)0x01010202,
     (void*)0x02020000,
     (void*)((u8*)fn_80187A60),
@@ -94426,7 +94426,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)fn_801CB4A8),
     (void*)0x01010101,
     (void*)0x01000000,
-    (void*)((u8*)fn_8018BC88),
+    (void*)((u8*)peopleGetPositionByIndex),
     (void*)0x01010101,
     (void*)0x00000000,
     (void*)((u8*)fn_801CA358),

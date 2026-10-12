@@ -527,15 +527,15 @@ u32 heroCheckValid(u8* ptr) {
 /* 0x8012A1A4 | 0xA4 */
 void heroCreate(u8* ptr, u32 trainer_id, u8 sex) {
     extern void heroInit(u8*);
-    extern u32 fn_800E0C54(void);
+    extern u32 GSrand(void);
     extern void heroSetStatus(u8*, u32, u32);
     extern u32 GSmsgGetGSchar(u32);
     u32 random_low;
     u32 random_high;
 
     heroInit(ptr);
-    random_low = fn_800E0C54() & 0xFFFF;
-    random_high = fn_800E0C54() << 16;
+    random_low = GSrand() & 0xFFFF;
+    random_high = GSrand() << 16;
     heroSetStatus(ptr, 2, random_high | random_low);
     heroSetStatus(ptr, 1, trainer_id);
     heroSetStatus(ptr, 0xB, sex);

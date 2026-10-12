@@ -26,7 +26,7 @@ extern u8 lbl_80378A8E[];
 extern u32 fn_80232024();
 extern void fn_80234A0C();
 extern u32 fightOutPokemonGetPokemonPtr();
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 extern u8* fn_801440A0(u16 idx);
 extern u8* itemDataBiosGetPtr(u16 idx);
 extern u8   fn_80143DFC(u8* p);
@@ -67,7 +67,7 @@ extern u8  lbl_8047B626;
 extern void fn_80207448(void* p);
 extern void fightOutPokemonInitOneSelfTurn(void* p);
 extern void fn_802249B8();
-extern void fn_802271E0(char, char);
+extern void fightApplyDamageVariance(char, char);
 extern void fn_802274F0(u32, char, char, char);
 extern void* fn_801F025C();
 extern u8 fn_802624CC();
@@ -447,7 +447,7 @@ void fn_802342CC(u32 trainer, u32 fightType) {
     species = (u16)fightTrainerGetStatus(trainer, 0, 0x43, 0);
     species = (u16)fightTrainerGetStatus(0, species, 2, 0);
     j = (u8)fightTrainerGetStatus(0, species, 0x26, 0);
-    if ((s32)j > (fn_800E0C54() % 100)) {
+    if ((s32)j > (GSrand() % 100)) {
         msgctrlSetValue(0xd, GSmsgGetGSchar(0xec04));
         if (trainer != 0) {
             msgctrlSetValue(0x13, fightTrainerGetNamePtr(trainer));
@@ -488,7 +488,7 @@ void fn_802342CC(u32 trainer, u32 fightType) {
         species = (u16)fightTrainerGetStatus(trainer, 0, 0x43, 0);
         species = (u16)fightTrainerGetStatus(0, species, 2, 0);
         j = (u8)fightTrainerGetStatus(0, species, 0x27, 0);
-        if ((s32)j > (fn_800E0C54() % 100)) {
+        if ((s32)j > (GSrand() % 100)) {
             msgctrlSetValue(0xd, GSmsgGetGSchar(0xec46));
             if (trainer != 0) {
                 msgctrlSetValue(0x13, fightTrainerGetNamePtr(trainer));
@@ -529,7 +529,7 @@ void fn_802342CC(u32 trainer, u32 fightType) {
     species = (u16)fightTrainerGetStatus(trainer, 0, 0x43, 0);
     species = (u16)fightTrainerGetStatus(0, species, 2, 0);
     j = (u8)fightTrainerGetStatus(0, species, 0x25, 0);
-    if ((s32)j > (fn_800E0C54() % 100)) {
+    if ((s32)j > (GSrand() % 100)) {
         msgctrlSetValue(0xd, GSmsgGetGSchar(0xec47));
         if (trainer != 0) {
             msgctrlSetValue(0x13, fightTrainerGetNamePtr(trainer));

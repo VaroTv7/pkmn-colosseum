@@ -26,7 +26,7 @@ extern u8 lbl_80378A8E[];
 extern u32 fn_80232024();
 extern void fn_80234A0C();
 extern u32 fightOutPokemonGetPokemonPtr();
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 extern u8* fn_801440A0(u16 idx);
 extern u8* itemDataBiosGetPtr(u16 idx);
 extern u8   fn_80143DFC(u8* p);
@@ -67,7 +67,7 @@ extern u8  lbl_8047B626;
 extern void fn_80207448(void* p);
 extern void fightOutPokemonInitOneSelfTurn(void* p);
 extern void fn_802249B8();
-extern void fn_802271E0(char, char);
+extern void fightApplyDamageVariance(char, char);
 extern void fn_802274F0(u32, char, char, char);
 extern void* fn_801F025C();
 extern u8 fn_802624CC();
@@ -327,7 +327,7 @@ void fn_8021CC5C(void) {
 void fn_8021CCE0(void)
 
 {
-    extern u32 fn_800E0C54();
+    extern u32 GSrand();
     extern u32 fn_8011BEB4();
     extern u32 fn_8012640C();
     extern void fn_801254B4();
@@ -366,7 +366,7 @@ LAB_main:
 LAB_else:
   bVar6 = fn_80201248(uVar1,auStack_18);
   if ((u8)bVar6 != 0) {
-    uVar3 = (u16)fn_800E0C54();
+    uVar3 = (u16)GSrand();
     uVar5 = auStack_18[(u8)((int)uVar3 % (int)(u8)bVar6)];
     if (uVar5 == 0) goto LAB_217848;
     if (uVar5 != 0x165) goto LAB_main;
@@ -619,7 +619,7 @@ void fn_8021D090(void)
 void fn_8021D224(void) {
     extern u16 lbl_8047E5F8[4];
     extern u32 fn_801F025C();
-    extern u16 fn_800E0C54(void);
+    extern u16 GSrand(void);
     extern u16 fn_80205184();
     extern u32 fn_8012640C();
     extern s32 fn_8011BEB4(void*, u16, u32, u32);
@@ -649,7 +649,7 @@ void fn_8021D224(void) {
         canRoll = 0;
     }
 
-    roll = (u16)fn_800E0C54();
+    roll = (u16)GSrand();
     if (lbl_8047E5F8[fieldFC] > roll && canRoll != 0) {
         if (effectId == 0x6f) {
             if (fn_802025B8(ctx1, 0x2b) == 2) {

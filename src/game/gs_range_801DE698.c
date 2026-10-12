@@ -610,7 +610,7 @@ void fn_801DF474(s32 slot, s32 abilityID) {
     extern u32* lbl_80478EB0;
     extern AbilityItemWeight* lbl_80478EB4;
     extern f32 lbl_8047E3F0;
-    extern u16 fn_800E0C54(void);
+    extern u16 GSrand(void);
     extern void* fn_8018D998(s32, s32);
     extern void* peopleSearchID(void*);
     extern void* peopleGetPosition(void*);
@@ -653,7 +653,7 @@ void fn_801DF474(s32 slot, s32 abilityID) {
         totalWeight += weights[i].weight;
     }
 
-    randomValue = (u16)fn_800E0C54() % totalWeight;
+    randomValue = (u16)GSrand() % totalWeight;
     cumulative = 0;
     for (i = 0; i < count; i++) {
         cumulative += weights[i].weight;

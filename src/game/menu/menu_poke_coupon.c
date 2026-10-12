@@ -11,7 +11,7 @@
 extern s32 lbl_80478940;
 extern void __assert(const char* file, u32 line, const char* msg);
 extern void menuShopOpen(u32 flag);
-extern void fn_800FF58C(u32 id);
+extern void floorRequestChange(u32 id);
 extern const char lbl_80268B38[];
 extern const char lbl_80268B4C[];
 
@@ -32,7 +32,7 @@ void menuPokeCouponMain(void) {
         break;
     }
 
-    fn_800FF58C(0x395);
+    floorRequestChange(0x395);
 }
 
 void menuPokeCouponInit(void) {

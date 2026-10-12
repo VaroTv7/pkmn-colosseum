@@ -261,7 +261,7 @@ void fn_8008D348(u32 ctx) {
     fn_801CB834(h06be0400e, 0xA, 0, 1);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 #pragma pop
@@ -444,7 +444,7 @@ void fn_80090100(u32 ctx) {
     fn_801CB834(h0d240400c, 4, 0, 1);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 #pragma pop
@@ -467,7 +467,7 @@ void fn_8008CACC(u32 ctx) {
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
-    extern void fn_800FF58C(u32 id);
+    extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
     extern void fn_80118874(void *texture, u32 flag);
     extern void GSmodelSetAnimIndex(u32 handle, u32 val);
@@ -558,7 +558,7 @@ void fn_8008CACC(u32 ctx) {
     fn_801CB834(iconHandle, 4, 0, 1);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 
@@ -579,7 +579,7 @@ void fn_8008FE94(u32 ctx) {
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
-    extern void fn_800FF58C(u32 id);
+    extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
     extern void fn_80118874(void *texture, u32 flag);
     extern void GSmodelSetAnimIndex(u32 handle, u32 val);
@@ -654,7 +654,7 @@ void fn_8008FE94(u32 ctx) {
     fn_801CB834(iconHandle, 2, 0, 1);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 
@@ -678,7 +678,7 @@ void fn_8008CDD8(u32 ctx) {
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
-    extern void fn_800FF58C(u32 id);
+    extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
     extern void fn_80118874(void *texture, u32 flag);
     extern void GSmodelSetAnimIndex(u32 handle, u32 val);
@@ -758,7 +758,7 @@ void fn_8008CDD8(u32 ctx) {
     fn_801CB834(iconHandle, 0xC, 0, 0);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 
@@ -781,7 +781,7 @@ void fn_8008D0A0(u32 ctx) {
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
-    extern void fn_800FF58C(u32 id);
+    extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
     extern void fn_80118874(void *texture, u32 flag);
     extern void GSmodelSetAnimIndex(u32 handle, u32 val);
@@ -859,7 +859,7 @@ void fn_8008D0A0(u32 ctx) {
     fn_801CB834(iconHandle, 9, 0, 1);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 
@@ -881,7 +881,7 @@ void fn_8008E320(u32 ctx) {
     extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void cameraWaitSyncAnime(s32 sync);
-    extern void fn_800FF58C(u32 id);
+    extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
 
     u32 elapsed1;
@@ -1006,7 +1006,7 @@ void fn_8008E320(u32 ctx) {
     fn_801CB834(h06be0400b, 0xE, 0, 1);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 
@@ -1028,7 +1028,7 @@ void fn_8008E7D4(u32 ctx) {
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void scriptWaitSyncMotion(u32 id, u32 val);
-    extern void fn_800FF58C(u32 id);
+    extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
 
     u32 elapsed1;
@@ -1145,7 +1145,7 @@ void fn_8008E7D4(u32 ctx) {
     fn_801CB834(h06be0400, 0xE, 0, 1);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 
@@ -1170,7 +1170,7 @@ void fn_8008D938(u32 ctx) {
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 arg2, u32 arg3);
     extern void fn_801845E4(u32 ctx, u32 model, u32 ctx2, u32 motion, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
-    extern void fn_800FF58C(u32 id);
+    extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 arg0, u32 arg1);
     extern void fn_80118874(void *texture, u32 flag);
     extern void GSmodelSetAnimIndex(u32 model, u32 index);
@@ -1380,7 +1380,7 @@ void fn_8008D938(u32 ctx) {
     fn_801CB834(model8, 0xB, 0, 0);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 
@@ -1404,7 +1404,7 @@ void fn_8008EC28(u32 ctx) {
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
-    extern void fn_800FF58C(u32 id);
+    extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
     extern void fn_80118874(void *texture, u32 flag);
     extern void GSmodelSetAnimIndex(u32 handle, u32 val);
@@ -1482,7 +1482,7 @@ void fn_8008EC28(u32 ctx) {
     fn_801CB834(iconHandle, 7, 0, 1);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 
@@ -1506,7 +1506,7 @@ void fn_8008EED0(u32 ctx) {
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
-    extern void fn_800FF58C(u32 id);
+    extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
     extern void fn_80118874(void *texture, u32 flag);
     extern void GSmodelSetAnimIndex(u32 handle, u32 val);
@@ -1586,7 +1586,7 @@ void fn_8008EED0(u32 ctx) {
     fn_801CB834(iconHandle, 5, 0, 0);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 
@@ -1610,7 +1610,7 @@ void fn_8008F190(u32 ctx) {
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
-    extern void fn_800FF58C(u32 id);
+    extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
     extern void fn_80118874(void *texture, u32 flag);
     extern void GSmodelSetAnimIndex(u32 handle, u32 val);
@@ -1709,7 +1709,7 @@ void fn_8008F190(u32 ctx) {
     fn_801CB834(iconHandle, 3, 0, 0);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 
@@ -1732,7 +1732,7 @@ void fn_8008F524(u32 ctx) {
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
-    extern void fn_800FF58C(u32 id);
+    extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
     extern void fn_80118874(void *texture, u32 flag);
     extern void GSmodelSetAnimIndex(u32 handle, u32 val);
@@ -1849,7 +1849,7 @@ void fn_8008F524(u32 ctx) {
     fn_801CB834(modelC, 4, 0, 1);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 
@@ -1870,7 +1870,7 @@ void fn_8008F91C(u32 ctx) {
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
-    extern void fn_800FF58C(u32 id);
+    extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
     extern void fn_80118874(void *texture, u32 flag);
     extern void GSmodelSetAnimIndex(u32 handle, u32 val);
@@ -1961,7 +1961,7 @@ void fn_8008F91C(u32 ctx) {
     fn_801CB834(modelA, 2, 0, 1);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 
@@ -1984,7 +1984,7 @@ void fn_8008FBF4(u32 ctx) {
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
-    extern void fn_800FF58C(u32 id);
+    extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
     extern void fn_80118874(void *texture, u32 flag);
     extern void GSmodelSetAnimIndex(u32 handle, u32 val);
@@ -2062,7 +2062,7 @@ void fn_8008FBF4(u32 ctx) {
     fn_801845E4(ctx, iconHandle, ctx, finalResult, 0);
 
     cameraWaitSyncAnime(1);
-    fn_800FF58C(0x89);
+    floorRequestChange(0x89);
     floorSetFadeScript(0, 0);
 }
 /* 0x8008C7B0 | size: 0x31C */
@@ -2085,7 +2085,7 @@ void fn_8008C7B0(u32 ctx) {
     extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void fn_80190528(u32 id);
-    extern void fn_800FF58C(u32 id);
+    extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
     extern void fn_80118874(void *texture, u32 flag);
     extern void GSmodelSetAnimIndex(u32 handle, u32 val);
@@ -2176,6 +2176,6 @@ void fn_8008C7B0(u32 ctx) {
 
     cameraWaitSyncAnime(1);
     fn_80190528(0x8D0);
-    fn_800FF58C(1);
+    floorRequestChange(1);
     floorSetFadeScript(0, 0);
 }

@@ -19,7 +19,7 @@ typedef struct SawaguContext {
 extern u32 fightTrainerGetStatus(void*, u32, u32, u32);
 extern u8 fn_80229C28(u32, u32);
 extern u32 pokemonGetStatus(u32, u32, u32, u32);
-extern u32 fn_800E0C54(void);
+extern u32 GSrand(void);
 extern u8 fightOutPokemonGetFightOutPokemonEnemyOumuWazaDataIdAry(u32, u16*);
 extern u32 fightFloorLoopValidFightOutPokemon(u32, FightFloorCallback, void*, u32);
 extern u32 fightOutPokemonCheckFightOut(void*);
@@ -57,7 +57,7 @@ u16 fightTrainerAiCheckOumu(void* trainer, u32 pokemon, u32 unused)
     }
     count = fightOutPokemonGetFightOutPokemonEnemyOumuWazaDataIdAry(pokemon, choices);
     if (count != 0) {
-        random = fn_800E0C54() & 0xFFFF;
+        random = GSrand() & 0xFFFF;
         index = random % (s32)(u8)count;
         actionId = choices[(u8)index];
         if (actionId != 0 && actionId != 0x165) {
