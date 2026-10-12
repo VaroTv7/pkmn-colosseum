@@ -336,7 +336,7 @@ u32 floorGetCurrentContext(void) {
 }
 
 /* 0x800FF56C | 0x20 */
-u32 fn_800FF56C(void) {
+u32 std092_getCurrentRoomID(void) {
     void* floorData;
 
     floorData = ((GSFloorContext*)lbl_8047ACC8)->floorDataEntry;
@@ -416,7 +416,7 @@ void fn_800FF660(void) {
     defined(GS_FLOOR_DATA_RESIDUAL_SUFFIX_800FF730_ONLY)
 
 /* 0x800FF730 | 0x54 */
-void fn_800FF730(u32 floorId) {
+void std098_mapWarpToMenuRoom(u32 floorId) {
     floorSetFadeScript(0x05960009, 0x05960008);
     if (lbl_8047ACC4 < lbl_8047ACA8) {
         lbl_8047ACD8 = 4;

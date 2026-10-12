@@ -6,7 +6,7 @@
 
 extern u32 lbl_803135E0[];
 
-void fn_800BC6F0(u32 stage, u32 coord, u32 map, u32 color)
+void GXSetTevOrder(u32 stage, u32 coord, u32 map, u32 color)
 {
     u32* ptref;
     u32 tmap;

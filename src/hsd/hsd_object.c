@@ -50,16 +50,16 @@ extern void fn_800E0560(void* dst, f32* src);
 extern void fn_800E0290(void* dst, void* lhs, void* rhs);
 extern void GSvecTransform(void* dst, void* mtx, void* vec);
 extern void _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID(void);
-extern void fn_800D88DC(s32 mode);
-extern void fn_800D888C(s32 mode);
-extern void fn_800DA028(s32 mode);
-extern void fn_800DA4C4(s32 a, s32 b, s32 c);
-extern void fn_800D7820(void* handle);
-extern void fn_800D6A00(s32 prim_type);
-extern void fn_800D67BC(s32 count);
-extern void fn_800D6680(f32 x, f32 y, f32 z);
+extern void gfxSetFlags(s32 mode);
+extern void gfxClearFlags(s32 mode);
+extern void gfxSetCullMode(s32 mode);
+extern void gfxSetBlendMode(s32 a, s32 b, s32 c);
+extern void gfxSetVtxDesc(void* handle);
+extern void gfxSetPrimitive(s32 prim_type);
+extern void gfxBegin(s32 count);
+extern void gfxVtxPos(f32 x, f32 y, f32 z);
 extern void fn_800D5CB8(s32 idx, s32 r, s32 g, s32 b, s32 a);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 extern u8 lbl_80314638[];
 #if 0
 asm void fn_80190E60(void) {
@@ -90,35 +90,35 @@ void fn_80190E60(HSD_ObjectTransformData* data) {
     GSvecTransform(corner1, mtx, data->corner1);
 
     _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800DA028(0);
-    fn_800DA4C4(1, 6, 7);
-    fn_800D7820(lbl_80314638);
-    fn_800D6A00(4);
-    fn_800D67BC(10);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetCullMode(0);
+    gfxSetBlendMode(1, 6, 7);
+    gfxSetVtxDesc(lbl_80314638);
+    gfxSetPrimitive(4);
+    gfxBegin(10);
 
-    fn_800D6680(corner0[0], corner0[1], corner0[2]);
+    gfxVtxPos(corner0[0], corner0[1], corner0[2]);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0x80);
-    fn_800D6680(corner0[0], corner1[1], corner0[2]);
+    gfxVtxPos(corner0[0], corner1[1], corner0[2]);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0x80);
-    fn_800D6680(corner1[0], corner0[1], corner0[2]);
+    gfxVtxPos(corner1[0], corner0[1], corner0[2]);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0x80);
-    fn_800D6680(corner1[0], corner1[1], corner0[2]);
+    gfxVtxPos(corner1[0], corner1[1], corner0[2]);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0x80);
-    fn_800D6680(corner1[0], corner0[1], corner1[2]);
+    gfxVtxPos(corner1[0], corner0[1], corner1[2]);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0x80);
-    fn_800D6680(corner1[0], corner1[1], corner1[2]);
+    gfxVtxPos(corner1[0], corner1[1], corner1[2]);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0x80);
-    fn_800D6680(corner0[0], corner0[1], corner1[2]);
+    gfxVtxPos(corner0[0], corner0[1], corner1[2]);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0x80);
-    fn_800D6680(corner0[0], corner1[1], corner1[2]);
+    gfxVtxPos(corner0[0], corner1[1], corner1[2]);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0x80);
-    fn_800D6680(corner0[0], corner0[1], corner0[2]);
+    gfxVtxPos(corner0[0], corner0[1], corner0[2]);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0x80);
-    fn_800D6680(corner0[0], corner1[1], corner0[2]);
+    gfxVtxPos(corner0[0], corner1[1], corner0[2]);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0x80);
-    fn_800D6728();
+    gfxEnd();
 }
 #endif
 #pragma pop
@@ -127,7 +127,7 @@ void fn_80190E60(HSD_ObjectTransformData* data) {
 #pragma push
 #pragma optimization_level 0
 #pragma optimizewithasm off
-extern s32 fn_800D2F34(void* pos, void* out);
+extern s32 gfxWorldToScreen(void* pos, void* out);
 extern const f32 lbl_8047D8B8;
 extern const f32 lbl_8047D8BC;
 extern const f32 lbl_8047D8C0;
@@ -168,8 +168,8 @@ s32 fn_80191118(HSD_ObjectTransformData* data) {
     GSvecTransform(corner0, mtx, data->corner0);
     GSvecTransform(corner1, mtx, data->corner1);
 
-    result0 = fn_800D2F34(corner0, screen0);
-    result1 = fn_800D2F34(corner1, screen1);
+    result0 = gfxWorldToScreen(corner0, screen0);
+    result1 = gfxWorldToScreen(corner1, screen1);
     if (result0 == 0 || result1 == 0) {
         return 2;
     }
@@ -217,7 +217,7 @@ s32 fn_80191118(HSD_ObjectTransformData* data) {
 #pragma optimization_level 0
 #pragma optimizewithasm off
 extern void set__5GSvecFfff(void* vec, f32 x, f32 y, f32 z);
-extern void fn_800E0168(void* dst, void* max, void* min);
+extern void GSvecSub(void* dst, void* max, void* min);
 #if 0
 asm void fn_80191358(void) {
 #include "src/hsd/hsd_object_fn_80191358.inc"
@@ -237,7 +237,7 @@ void fn_80191358(HSD_BBox* bbox, f32 x, f32 y, f32 z) {
         if (y > bbox->max[1]) { bbox->max[1] = y; }
         if (z > bbox->max[2]) { bbox->max[2] = z; }
     }
-    fn_800E0168(bbox->field28, bbox->max, bbox->min);
+    GSvecSub(bbox->field28, bbox->max, bbox->min);
 }
 #endif
 #pragma pop

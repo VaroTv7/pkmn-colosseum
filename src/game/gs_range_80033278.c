@@ -16,12 +16,12 @@ extern u8* windowGetKeyInfo(void);
 extern void fn_8007AAFC(void);
 extern void fn_8007AAA8(void);
 extern s32 fn_8007AB10(s32, s32*);
-extern void fn_80166A28(u32);
+extern void soundStartSE(u32);
 extern void winMsgClose(s32);
 extern void winMsgOpen(s32, u32, s32, s32);
 extern void _threadSwitch(void);
 extern s32 fn_800D37CC(void);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern void fn_80080310(void*, const void*, u32);
 extern u8 lbl_803A3334[];
 extern u8 lbl_803F7A30[];
@@ -83,11 +83,11 @@ extern void fn_80082CF0(void*, void*, s32);
 extern void fn_80082BA4(void*, void*, s32);
 extern void fn_80082960(void*, void*, s32);
 
-extern void fn_80166A28(u32);
+extern void soundStartSE(u32);
 
 extern void _threadSwitch(void);
 extern s32 fn_800D37CC(void);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 
 extern void fn_801D0AFC(s32);
 extern void* savedataGetStatus(s32, s32);
@@ -103,13 +103,13 @@ extern u8 fn_80082738(void*, void*, s32);
 extern void fn_8007C634(void);
 extern void fn_80082650(void*);
 
-extern void fn_80166AB8(s32, s32, s32);
+extern void soundStartRaw(s32, s32, s32);
 extern void heroAddPokecoupon(s32, s32);
 
 extern s32 heroItemAddItemDataId(s32, u16, s32, s32);
 extern u16 pcboxDelItem(s32, u16, s32);
 
-extern void fn_80165668(s32, s32, s32);
+extern void std130_soundUnk_801653cc(s32, s32, s32);
 extern void fn_800832C8(s32, void*, s32);
 
 #pragma push
@@ -121,7 +121,7 @@ static void sysvarsWaitForTransfer(void)
     progress = lbl_8047B9F8;
     while (progress < lbl_8047BA18) {
         _threadSwitch();
-        progress += (f32)fn_800D3088() / (f32)fn_800D37CC();
+        progress += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
 }
 
@@ -497,7 +497,7 @@ restart:
         sv[0x26],
         1);
 
-    fn_80166A28(0x4C5);
+    soundStartSE(0x4C5);
 
     sysvarsWaitForTransfer();
 
@@ -566,7 +566,7 @@ first_menu:
             sv[0x26],
             7);
 
-        fn_80166A28(0x4C6);
+        soundStartSE(0x4C6);
 
         sysvarsWaitForTransfer();
 
@@ -609,11 +609,11 @@ first_menu:
         sv[0x26],
         4);
 
-    fn_80166A28(0x3C6);
+    soundStartSE(0x3C6);
 
     sysvarsWaitForTransfer();
 
-    fn_80166AB8(0x3CC, 0, 0);
+    soundStartRaw(0x3CC, 0, 0);
 
     heroAddPokecoupon(0, 0x32);
 
@@ -663,7 +663,7 @@ first_menu:
         -1,
         1);
 
-    fn_80166A28(0x4C5);
+    soundStartSE(0x4C5);
 
     sysvarsWaitForTransfer();
 
@@ -705,7 +705,7 @@ first_menu:
             -1,
             7);
 
-        fn_80166A28(0x4C6);
+        soundStartSE(0x4C6);
 
         sysvarsWaitForTransfer();
 
@@ -721,7 +721,7 @@ first_menu:
             sv[0x26],
             8);
 
-        fn_80166A28(0x4C6);
+        soundStartSE(0x4C6);
 
         sysvarsWaitForTransfer();
 
@@ -786,11 +786,11 @@ first_menu:
         -1,
         4);
 
-    fn_80166A28(0x3C6);
+    soundStartSE(0x3C6);
 
     sysvarsWaitForTransfer();
 
-    fn_80166AB8(0x3CC, 0, 0);
+    soundStartRaw(0x3CC, 0, 0);
 
     /*
      * This branch awards 80, versus the earlier branch's 50.
@@ -899,7 +899,7 @@ validation_done:
         return 2;
     }
 
-    fn_80165668(
+    std130_soundUnk_801653cc(
         0x4CF,
         0,
         0xFF);
@@ -956,7 +956,7 @@ s32 fn_80034280(void)
                 if (transferActive != 0) {
                     fn_8007AAA8();
                 }
-                fn_80166A28(0x3C7);
+                soundStartSE(0x3C7);
                 winMsgClose(1);
                 winMsgOpen(8, 0x44ED, 1, 0);
                 winMsgClose(1);
@@ -980,7 +980,7 @@ s32 fn_80034280(void)
             sysvarsWaitForTransfer();
             /* fallthrough */
         case 19:
-            fn_80166A28(0x3C7);
+            soundStartSE(0x3C7);
             if (transferActive != 0) {
                 fn_8007AAA8();
             }
@@ -998,7 +998,7 @@ s32 fn_80034280(void)
             if (transferActive != 0) {
                 fn_8007AAA8();
             }
-            fn_80166A28(0x3C7);
+            soundStartSE(0x3C7);
             winMsgClose(1);
             winMsgOpen(8, 0x44ED, 1, 0);
             winMsgClose(1);
@@ -1116,9 +1116,9 @@ void fn_800347B8(void) {
 #pragma push
 #pragma scheduling off
 void fn_800347C4(void) {
-    extern void fn_80166A28(u32);
+    extern void soundStartSE(u32);
 
-    fn_80166A28(0x26);
+    soundStartSE(0x26);
 }
 #pragma pop
 
@@ -1126,9 +1126,9 @@ void fn_800347C4(void) {
 #pragma push
 #pragma scheduling off
 void fn_800347E8(void) {
-    extern void fn_80166A28(u32);
+    extern void soundStartSE(u32);
 
-    fn_80166A28(0x26);
+    soundStartSE(0x26);
 }
 #pragma pop
 
@@ -1136,9 +1136,9 @@ void fn_800347E8(void) {
 #pragma push
 #pragma scheduling off
 void fn_8003480C(void) {
-    extern void fn_80166A28(u32);
+    extern void soundStartSE(u32);
 
-    fn_80166A28(0x26);
+    soundStartSE(0x26);
 }
 #pragma pop
 
@@ -1477,7 +1477,7 @@ void fn_80034FB4(void)
     extern u16 pokemonBiosGetItemDataId(void*);
     extern void pokemonBiosSetItemDataId(void*, u16);
     extern void fn_801D0AFC(s32);
-    extern void fn_80165668(u32, s32, u32);
+    extern void std130_soundUnk_801653cc(u32, s32, u32);
     extern void fadeSet(f32, u32);
     extern void fadeCheck(u32);
     extern void floorLink(u32, s32);
@@ -1540,7 +1540,7 @@ void fn_80034FB4(void)
                 break;
             }
             if (lbl_8047A458 == 0) {
-                fn_80166A28(0x3C7);
+                soundStartSE(0x3C7);
                 winMsgOpen(8, 0x3B54, 1, 0);
                 winMsgClose(1);
             } else {
@@ -1573,7 +1573,7 @@ void fn_80034FB4(void)
                 lbl_8047A458 = 0;
             }
             if (lbl_8047A458 != 0) {
-                fn_80166A28(0x3C7);
+                soundStartSE(0x3C7);
                 fadeSet(lbl_8047BA00, 3);
                 fadeCheck(1);
                 menuClose(0xA6);
@@ -1620,7 +1620,7 @@ void fn_80034FB4(void)
                 fn_801D0AFC(0);
             }
             if (lbl_8047A450 > lbl_8047A44C) {
-                fn_80165668(0x4CE, 0, 0xFF);
+                std130_soundUnk_801653cc(0x4CE, 0, 0xFF);
                 amount = lbl_8047A450;
                 amount = amount <= 0x98967F ? amount : 0x98967F;
                 lbl_8047A44C = amount;
@@ -1630,7 +1630,7 @@ void fn_80034FB4(void)
                 progress = lbl_8047B9F8;
                 while (progress < lbl_8047B9FC) {
                     _threadSwitch();
-                    progress += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                    progress += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                 }
             }
             winMsgOpen(8, 0x3B54, 1, 1);
@@ -1759,7 +1759,7 @@ void fn_80034FB4(void)
                 break;
             }
             if (lbl_8047A450 > lbl_8047A44C) {
-                fn_80165668(0x4CE, 0, 0xFF);
+                std130_soundUnk_801653cc(0x4CE, 0, 0xFF);
                 amount = lbl_8047A450;
                 amount = amount <= 0x98967F ? amount : 0x98967F;
                 lbl_8047A44C = amount;
@@ -1769,7 +1769,7 @@ void fn_80034FB4(void)
                 progress = lbl_8047B9F8;
                 while (progress < lbl_8047B9FC) {
                     _threadSwitch();
-                    progress += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                    progress += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                 }
             }
             if (lbl_8047A449 != 0) {
@@ -1845,7 +1845,7 @@ void fn_80034FB4(void)
         case 12:
             lbl_8047A44A = 0;
             if (lbl_8047A450 > lbl_8047A44C) {
-                fn_80165668(0x4CE, 0, 0xFF);
+                std130_soundUnk_801653cc(0x4CE, 0, 0xFF);
                 amount = lbl_8047A450;
                 amount = amount <= 0x98967F ? amount : 0x98967F;
                 lbl_8047A44C = amount;
@@ -1892,7 +1892,7 @@ void fn_80034FB4(void)
             progress = lbl_8047B9F8;
             while (progress < lbl_8047B9FC) {
                 _threadSwitch();
-                progress += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                progress += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
             }
             save = savedataGetStatus(0, 2);
             heldItems = (u16*)(work + 0xB0);
@@ -1951,10 +1951,10 @@ void fn_80035C48(void) {
     extern void* fn_80083AF4(s32, s32);
     extern s32 fn_80083BF8(s32);
     extern u32 GSmsgGetGSchar(u32);
-    extern u32 fn_80113F48(void);
+    extern u32 std093_getCurrentGroupID(void);
     extern u8* savedataGetStatus(s32, s32);
-    extern u32 fn_801653C4(void);
-    extern void fn_80165A20(u32, s32, s32);
+    extern u32 std228_soundGetCurrentBackgroundMusic(void);
+    extern void std104_soundSetBackgroundMusic(u32, s32, s32);
     extern void cameraPlayAnime(u32, u32, s32, s32);
     extern void GScharLenCpy(void*, u32, s32);
     u8* work;
@@ -1967,14 +1967,14 @@ void fn_80035C48(void) {
         } else {
             lbl_8047A458 = 1;
         }
-        cameraPlayAnime(fn_80113F48(), 0x11171800, 0, 0);
+        cameraPlayAnime(std093_getCurrentGroupID(), 0x11171800, 0, 0);
         if (lbl_8047A439 != 0) {
             soundId = 0x446;
         } else {
             soundId = 0x4CD;
         }
-        if (soundId != fn_801653C4()) {
-            fn_80165A20(soundId, 0, 0x7F);
+        if (soundId != std228_soundGetCurrentBackgroundMusic()) {
+            std104_soundSetBackgroundMusic(soundId, 0, 0x7F);
         }
         lbl_8047A454 = 0;
         lbl_8047A449 = 0;
@@ -1998,15 +1998,15 @@ void fn_80035C48(void) {
 /* fn_80035D70 - 0x80035D70 | size: 0x30 */
 #pragma push
 #pragma peephole off
-void fn_80035D70(void) {
-    extern void fn_800FF730(u32);
+void std202_warpToMenuRoom393(void) {
+    extern void std098_mapWarpToMenuRoom(u32);
     extern void _threadSwitch(void);
     extern u8 lbl_8047A439;
     u32 flag;
 
     flag = 1;
     lbl_8047A439 = flag;
-    fn_800FF730(0x393);
+    std098_mapWarpToMenuRoom(0x393);
     _threadSwitch();
 }
 #pragma pop

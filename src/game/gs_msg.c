@@ -52,42 +52,42 @@ extern void fn_80080ED8(void);
 extern void fn_800DBEB4(u32 a, void* b);
 extern void fn_800D5CB8(s32 a, s32 b, s32 c, s32 d, s32 e);
 extern void fn_800D61E4(s16 x, s16 y);
-extern void fn_800D6728(void);
-extern void fn_800D67BC(s32 a);
-extern void fn_800D6A00(s32 a);
-extern void fn_800D7820(void* ptr);
-extern void fn_800D85D4(void);
-extern void fn_800D888C(u32 mask, ...);
-extern void fn_800D88DC(u32 mask);
+extern void gfxEnd(void);
+extern void gfxBegin(s32 a);
+extern void gfxSetPrimitive(s32 a);
+extern void gfxSetVtxDesc(void* ptr);
+extern void gfxLoadTexture(void);
+extern void gfxClearFlags(u32 mask, ...);
+extern void gfxSetFlags(u32 mask);
 extern void fn_800D9ED8(void);
 extern void fn_800DC1D4(s32 a);
 extern void logVsnprintf_float(void);
 extern void GStextureUnlockImage(void* ctx);
 extern void GStextureLockImage(void);
-extern void fn_801669BC(u32 type);
+extern void soundStopSE(u32 type);
 extern void* GStextureCreate(u16 width, u16 height, u32 format, u32 tlutFormat, u8 mipLevels);
 extern void fn_800CDBE0(void);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern void fn_800DBF78(void);
 extern void fn_800DBFD4(void);
 extern void fn_800DC04C(void);
 extern void fn_800DC0D4(void);
 extern void fn_800DC14C(void);
-extern void fn_800DC224(void);
+extern void gfxSetTevStage(void);
 extern void windowDrawSprite(void);
-extern void fn_80166A28(void);
-extern void fn_800D59B8(s32 slot, f32 xScale, f32 yScale);
+extern void soundStartSE(void);
+extern void gfxVtxTexCoord(s32 slot, f32 xScale, f32 yScale);
 extern void fn_800D5BA0(s32 slot, u32 color);
 extern void fn_800D9D68(u16 a, u16 b, u16 c, u16 d);
 extern f64 tan(void);
 extern void fn_800D7FE4(void* mtx);
 extern void fn_800D834C(void);
 extern void fn_800D9BD0(f32 a, f32 b, f32 c, f32 d);
-extern void fn_800DA028(s32 a);
+extern void gfxSetCullMode(s32 a);
 extern void fn_800DA100(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f);
-extern void fn_800DA1E8(s32 a, s32 b, s32 c);
-extern void fn_800DA2BC(s32 a, s32 b, s32 c);
-extern void fn_800DA4C4(s32 a, s32 b, s32 c);
+extern void gfxSetZMode(s32 a, s32 b, s32 c);
+extern void gfxSetUpdates(s32 a, s32 b, s32 c);
+extern void gfxSetBlendMode(s32 a, s32 b, s32 c);
 extern void set__5GSvecFfff(void* dst, f32 x, f32 y, f32 z);
 extern void fn_800E0218(void* dst, void* a, void* b, void* c);
 extern void* memset(void* dest, int val, u32 n);
@@ -213,7 +213,7 @@ extern void GSmsgSetColor(void* obj);
 extern s32 GSmsgGetRect();
 extern void GSmsgInitRuby();
 extern void fn_800FAEF8(s32, s32, u32, const char*, ...);
-extern s32 fn_800FB43C();
+extern s32 std001_messageFormatLookup();
 extern s32 fn_800FB680();
 extern s32 fn_800FB8C8();
 extern s32 fn_800FBB34();
@@ -224,7 +224,7 @@ extern u32 fn_800FC2A8(void* ptr);
 extern void* GSmsgFontOpen();
 extern s32 GSmsgSetCtrlFunc(u32 val);
 extern s32 GSmsgInit();
-extern s32 fn_800FC7E0();
+extern s32 msgTaskDraw();
 extern void fn_800FD348();
 extern void fn_800FD69C();
 extern u16 * _msgGetCodeInfo__FP13MSG_TASK_WORKUsPP12tagFONT_INFO();
@@ -1459,17 +1459,17 @@ void fn_800FAEF8(s32 x, s32 y, u32 color, const char* fmt, ...) {
     extern void fn_80080ED8(void* dst);
     extern void fn_800FE4D4(void);
     extern void fn_800D9ED8(s32 arg);
-    extern void fn_800D88DC(s32 arg);
-    extern void fn_800D888C(u32 mask);
-    extern void fn_800D7820(void* tex);
-    extern void fn_800D85D4(s32 index, void* texture);
+    extern void gfxSetFlags(s32 arg);
+    extern void gfxClearFlags(u32 mask);
+    extern void gfxSetVtxDesc(void* tex);
+    extern void gfxLoadTexture(s32 index, void* texture);
     extern void* fn_800EF548(void* texture, s32 arg);
     extern void fn_800EF504(void* texture);
-    extern void fn_800D6A00(s32 mode);
-    extern void fn_800D67BC(s32 mode);
+    extern void gfxSetPrimitive(s32 mode);
+    extern void gfxBegin(s32 mode);
     extern void fn_800D61E4(s16 x, s16 y);
     extern void fn_800D5CB8(s32 a, s32 b, s32 c, s32 d, u32 color);
-    extern void fn_800D6728(void);
+    extern void gfxEnd(void);
     extern void fn_800DC1D4(s32 arg);
 
     u8* base;
@@ -1539,11 +1539,11 @@ void fn_800FAEF8(s32 x, s32 y, u32 color, const char* fmt, ...) {
 
     fn_800FE4D4();
     fn_800D9ED8(1);
-    fn_800D88DC(3);
-    fn_800D888C(4);
-    fn_800D7820(lbl_80314F98);
+    gfxSetFlags(3);
+    gfxClearFlags(4);
+    gfxSetVtxDesc(lbl_80314F98);
     messageHead = (u8*)lbl_80478B08;
-    fn_800D85D4(0, *(void**)(messageHead + 0x0C + ((s8)messageHead[0x1D] * 4)));
+    gfxLoadTexture(0, *(void**)(messageHead + 0x0C + ((s8)messageHead[0x1D] * 4)));
     *(u32*)(messageHead + 0x14) = (u32)fn_800EF548(*(void**)(messageHead + 0x0C + ((s8)messageHead[0x1D] * 4)), 0);
     *(f32*)(work + 0x0C) = *(f32*)(work + 0x04);
     *(f32*)(work + 0x10) = *(f32*)(work + 0x08);
@@ -1574,17 +1574,17 @@ void fn_800FAEF8(s32 x, s32 y, u32 color, const char* fmt, ...) {
                 drawY0 = (s16)((s16)*(f32*)(work + 0x10) + 2);
                 drawX1 = (s16)((f32)*(u8*)(work + 0x22) * *(f32*)(work + 0x60) + (f32)drawX0);
                 drawY1 = (s16)((f32)*(u8*)(work + 0x23) * *(f32*)(work + 0x64) + (f32)drawY0);
-                fn_800D888C(0x80000002u);
-                fn_800D6A00(7);
-                fn_800D7820(lbl_80314E08);
-                fn_800D67BC(2);
+                gfxClearFlags(0x80000002u);
+                gfxSetPrimitive(7);
+                gfxSetVtxDesc(lbl_80314E08);
+                gfxBegin(2);
                 fn_800D61E4(drawX0, drawY0);
                 fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
                 fn_800D61E4(drawX1, drawY1);
                 fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-                fn_800D6728();
-                fn_800D88DC(0x80000002u);
-                fn_800D7820(lbl_80314F98);
+                gfxEnd();
+                gfxSetFlags(0x80000002u);
+                gfxSetVtxDesc(lbl_80314F98);
                 fn_800DC1D4(1);
                 *(f32*)(work + 0x14) = 2.0f + ((f32)*(u8*)(work + 0x22) * *(f32*)(work + 0x60));
             } else {
@@ -1613,7 +1613,7 @@ asm void fn_800FB43C(void) {
 }
 #else
 #pragma peephole on
-s32 fn_800FB43C(arg0, arg1, arg2)
+s32 std001_messageFormatLookup(arg0, arg1, arg2)
     s32 arg0;
     s32 arg1;
     u32 arg2;
@@ -1726,7 +1726,7 @@ loop_19:
             }
         }
     }
-    return fn_800FC7E0((u8 *)&lbl_80402418, M2C_FIELD((u8 *)&lbl_80402418, u8 *, 0x44), 0, 0, var_f2);
+    return msgTaskDraw((u8 *)&lbl_80402418, M2C_FIELD((u8 *)&lbl_80402418, u8 *, 0x44), 0, 0, var_f2);
 }
 #endif
 #pragma pop
@@ -1854,7 +1854,7 @@ loop_19:
             }
         }
     }
-    return fn_800FC7E0((u8 *)&lbl_80402418, M2C_FIELD((u8 *)&lbl_80402418, u8 *, 0x44), 0, 0, var_f2);
+    return msgTaskDraw((u8 *)&lbl_80402418, M2C_FIELD((u8 *)&lbl_80402418, u8 *, 0x44), 0, 0, var_f2);
 }
 #endif
 #pragma pop
@@ -1986,7 +1986,7 @@ loop_19:
             }
         }
     }
-    return fn_800FC7E0((u8 *)&lbl_80402418, M2C_FIELD((u8 *)&lbl_80402418, u8 *, 0x44), 0, 0, var_f2);
+    return msgTaskDraw((u8 *)&lbl_80402418, M2C_FIELD((u8 *)&lbl_80402418, u8 *, 0x44), 0, 0, var_f2);
 }
 #endif
 #pragma pop
@@ -2118,7 +2118,7 @@ loop_19:
             }
         }
     }
-    return fn_800FC7E0(work, M2C_FIELD(work, u8 *, 0x44), 0, 0, var_f2);
+    return msgTaskDraw(work, M2C_FIELD(work, u8 *, 0x44), 0, 0, var_f2);
 }
 #endif
 #pragma pop
@@ -2133,7 +2133,7 @@ asm void fn_800FBD88(void) {
 }
 #else
 #pragma optimization_level 2
-void fn_800FBD88(u32 key) {
+void GSmsgFree(u32 key) {
     u8* head;
     u8* entry;
     u8 type;
@@ -2161,7 +2161,7 @@ void fn_800FBD88(u32 key) {
         r3 = 0x498;
         break;
     }
-    if (r3 != 0) fn_801669BC(r3);
+    if (r3 != 0) soundStopSE(r3);
     *(u8*)(entry + 0x0) = 0;
 }
 #endif
@@ -2184,7 +2184,7 @@ s32 winMsgDrawMessage(u32 key, u32 r4arg) {
     head = (u8*)lbl_80478B08;
     entry = GSmsgFindCheck(head, key);
     if (entry == NULL) return -1;
-    return fn_800FC7E0(entry, *(u8*)(entry + 0x44), r4arg);
+    return msgTaskDraw(entry, *(u8*)(entry + 0x44), r4arg);
 }
 #endif
 #pragma pop
@@ -2661,15 +2661,15 @@ asm s32 fn_800FC7E0(entry, type, arg)
 #include "src/game/gs_thread_fn_800FC7E0.inc"
 }
 #else
-s32 fn_800FC7E0(arg0, arg1, arg2, arg3)
+s32 msgTaskDraw(arg0, arg1, arg2, arg3)
     u8 *arg0;
     u8 arg1;
     s32 arg2;
     u8 arg3;
 {
     typedef u32 (*MsgCtrlFunc)(u8*);
-    extern void fn_800D85D4(s32, u32);
-    extern void fn_800DC224(s32, s32, s32, s32, s32);
+    extern void gfxLoadTexture(s32, u32);
+    extern void gfxSetTevStage(s32, s32, s32, s32, s32);
     extern void fn_800DBF78(s32, s32);
     extern void fn_800DC0D4(s32, s32, s32, s32, s32);
     extern void fn_800DC14C(s32, s32, s32, s32, s32, s32);
@@ -2721,14 +2721,14 @@ s32 fn_800FC7E0(arg0, arg1, arg2, arg3)
     }
 
     spriteSetEnv();
-    fn_800D88DC(0x80000003);
-    fn_800D888C(4);
-    fn_800D7820(lbl_80314F98);
+    gfxSetFlags(0x80000003);
+    gfxClearFlags(4);
+    gfxSetVtxDesc(lbl_80314F98);
 
     mgr = (u8*)lbl_80478B08;
-    fn_800D85D4(0, *(u32*)(mgr + ((s8)mgr[0x1D] * 4) + 0x0C));
+    gfxLoadTexture(0, *(u32*)(mgr + ((s8)mgr[0x1D] * 4) + 0x0C));
     fn_800DC1D4(1);
-    fn_800DC224(0, 0, 0, 0, 0);
+    gfxSetTevStage(0, 0, 0, 0, 0);
     texHandle = lbl_8047CD00;
     fn_800DBEB4(0, &texHandle);
     fn_800DBF78(0, 0x0C);
@@ -2750,7 +2750,7 @@ s32 fn_800FC7E0(arg0, arg1, arg2, arg3)
     continueFlag = 0;
 
     if ((u8)arg3 == 0) {
-        for (loopCount = 0; (u32)loopCount < fn_800D3088(); loopCount++) {
+        for (loopCount = 0; (u32)loopCount < msgGetCharsPerFrame(); loopCount++) {
             for (;;) {
                 cursor = *(u16**)(arg0 + 0x30);
                 code = *cursor;
@@ -2965,17 +2965,17 @@ s32 fn_800FC7E0(arg0, arg1, arg2, arg3)
                     s16 x1 = (s16)(((f32)arg0[0x22] * *(f32*)(arg0 + 0x60)) + (f32)x0);
                     s16 y1 = (s16)(((f32)arg0[0x23] * *(f32*)(arg0 + 0x64)) + (f32)y0);
 
-                    fn_800D888C(0x80000002);
-                    fn_800D6A00(7);
-                    fn_800D7820(lbl_80314E08);
-                    fn_800D67BC(2);
+                    gfxClearFlags(0x80000002);
+                    gfxSetPrimitive(7);
+                    gfxSetVtxDesc(lbl_80314E08);
+                    gfxBegin(2);
                     fn_800D61E4(x0, y0);
                     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
                     fn_800D61E4(x1, y1);
                     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-                    fn_800D6728();
-                    fn_800D88DC(0x80000002);
-                    fn_800D7820(lbl_80314F98);
+                    gfxEnd();
+                    gfxSetFlags(0x80000002);
+                    gfxSetVtxDesc(lbl_80314F98);
                     fn_800DC1D4(1);
                     *(f32*)(arg0 + 0x14) = lbl_8047CD30 + ((f32)arg0[0x22] * *(f32*)(arg0 + 0x60));
                 } else {
@@ -3015,9 +3015,9 @@ s32 fn_800FC7E0(arg0, arg1, arg2, arg3)
         }
         if (soundId != 0) {
             if (normalFlag != 0) {
-                fn_80166A28();
+                soundStartSE();
             } else {
-                fn_801669BC(soundId);
+                soundStopSE(soundId);
             }
         }
         arg0[0x47] = normalFlag;
@@ -3030,13 +3030,13 @@ s32 fn_800FC7E0(arg0, arg1, arg2, arg3)
         amp = ((f64 (*)(f64))cos)(angle);
         drawX = (s16)fx;
         drawY = (s16)(fy + (lbl_8047CD48 * (f32)amp));
-        lbl_8047AC68 += fn_800D3088();
+        lbl_8047AC68 += msgGetCharsPerFrame();
         lbl_8047AC68 %= 0x32;
-        fn_800D888C(0x80000000);
-        fn_800D7820(lbl_80314E08);
+        gfxClearFlags(0x80000000);
+        gfxSetVtxDesc(lbl_80314E08);
         ((void (*)(s16, s16, s32, s32, s32))windowDrawSprite)(drawX, drawY, 0, 0xB9, 0);
-        fn_800D88DC(0x80000000);
-        fn_800D7820(lbl_80314F98);
+        gfxSetFlags(0x80000000);
+        gfxSetVtxDesc(lbl_80314F98);
         fn_800DC1D4(1);
     }
 
@@ -3048,7 +3048,7 @@ s32 fn_800FC7E0(arg0, arg1, arg2, arg3)
 
     mgr = (u8*)lbl_80478B08;
     GStextureUnlockImage(*(void**)(mgr + ((s8)mgr[0x1D] * 4) + 0x0C));
-    fn_800D888C(0x80000000);
+    gfxClearFlags(0x80000000);
     return 0;
 }
 
@@ -3123,17 +3123,17 @@ void fn_800FD348(arg0, farg1)
                 x1 = (s16)((arg0[0x22] * scaleX) + (f32)x0);
                 y1 = (s16)(((f32)glyphHeight * scaleY) + (f32)y0);
 
-                fn_800D888C(0x80000002, glyphHeight, scaleY, (f32)glyphHeight, (f32)arg0[0x22]);
-                fn_800D6A00(7);
-                fn_800D7820(lbl_80314E08);
-                fn_800D67BC(2);
+                gfxClearFlags(0x80000002, glyphHeight, scaleY, (f32)glyphHeight, (f32)arg0[0x22]);
+                gfxSetPrimitive(7);
+                gfxSetVtxDesc(lbl_80314E08);
+                gfxBegin(2);
                 fn_800D61E4(x0, y0);
                 fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
                 fn_800D61E4(x1, y1);
                 fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-                fn_800D6728();
-                fn_800D88DC(0x80000002);
-                fn_800D7820(lbl_80314F98);
+                gfxEnd();
+                gfxSetFlags(0x80000002);
+                gfxSetVtxDesc(lbl_80314F98);
                 fn_800DC1D4(1);
 
                 spaceBias = lbl_8047CD28;
@@ -3282,59 +3282,59 @@ void fn_800FD69C(arg0, arg1, arg2, arg3, arg4)
     color = *(u32 *)(arg0 + 0x24);
     outlineAlpha = (((s32)(color & 0xFF) * 0xC0) / 0xFF) & 0xFF;
 
-    fn_800D6A00(7);
+    gfxSetPrimitive(7);
 
     switch (arg0[2]) {
     case 1:
-        fn_800D67BC(4);
+        gfxBegin(4);
         fn_800D61E4(drawX0 + 1, drawY0 + 1);
         fn_800D5CB8(0, 0, 0, 0, outlineAlpha);
-        fn_800D59B8(0, u0, v0);
+        gfxVtxTexCoord(0, u0, v0);
         fn_800D61E4(drawX1 + 1, drawY1 + 1);
         fn_800D5CB8(0, 0, 0, 0, outlineAlpha);
-        fn_800D59B8(0, u1, v1);
+        gfxVtxTexCoord(0, u1, v1);
         break;
 
     case 2:
-        fn_800D67BC(0xA);
+        gfxBegin(0xA);
         fn_800D61E4(drawX0 - 1, drawY0);
         fn_800D5CB8(0, 0, 0, 0, outlineAlpha);
-        fn_800D59B8(0, u0, v0);
+        gfxVtxTexCoord(0, u0, v0);
         fn_800D61E4(drawX1 - 1, drawY1);
         fn_800D5CB8(0, 0, 0, 0, outlineAlpha);
-        fn_800D59B8(0, u1, v1);
+        gfxVtxTexCoord(0, u1, v1);
         fn_800D61E4(drawX0 + 1, drawY0);
         fn_800D5CB8(0, 0, 0, 0, outlineAlpha);
-        fn_800D59B8(0, u0, v0);
+        gfxVtxTexCoord(0, u0, v0);
         fn_800D61E4(drawX1 + 1, drawY1);
         fn_800D5CB8(0, 0, 0, 0, outlineAlpha);
-        fn_800D59B8(0, u1, v1);
+        gfxVtxTexCoord(0, u1, v1);
         fn_800D61E4(drawX0, drawY0 - 1);
         fn_800D5CB8(0, 0, 0, 0, outlineAlpha);
-        fn_800D59B8(0, u0, v0);
+        gfxVtxTexCoord(0, u0, v0);
         fn_800D61E4(drawX1, drawY1 - 1);
         fn_800D5CB8(0, 0, 0, 0, outlineAlpha);
-        fn_800D59B8(0, u1, v1);
+        gfxVtxTexCoord(0, u1, v1);
         fn_800D61E4(drawX0, drawY0 + 1);
         fn_800D5CB8(0, 0, 0, 0, outlineAlpha);
-        fn_800D59B8(0, u0, v0);
+        gfxVtxTexCoord(0, u0, v0);
         fn_800D61E4(drawX1, drawY1 + 1);
         fn_800D5CB8(0, 0, 0, 0, outlineAlpha);
-        fn_800D59B8(0, u1, v1);
+        gfxVtxTexCoord(0, u1, v1);
         break;
 
     default:
-        fn_800D67BC(2);
+        gfxBegin(2);
         break;
     }
 
     fn_800D61E4(drawX0, drawY0);
     fn_800D5BA0(0, color);
-    fn_800D59B8(0, u0, v0);
+    gfxVtxTexCoord(0, u0, v0);
     fn_800D61E4(drawX1, drawY1);
     fn_800D5BA0(0, color);
-    fn_800D59B8(0, u1, v1);
-    fn_800D6728();
+    gfxVtxTexCoord(0, u1, v1);
+    gfxEnd();
 
     xEnd = (s16)(curX + (widthRounded * 2) + 2);
     *(s16 *)(mgr + 0x18) = xEnd;

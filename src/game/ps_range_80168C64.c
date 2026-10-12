@@ -193,7 +193,7 @@ extern u8* getFloat(u8* stream, f32* out);
 extern u8* getTime(u8* stream, u16* out);
 extern void psApplyOffsetLocalRotation(PSParticle* pp, f32* vec3);      /* 0x801729EC */
 extern void psApplyVelocityLocalRotation(PSParticle* pp);               /* 0x80172AE0 */
-extern f32 fn_801ADC7C(void);                                           /* psRandom, 0x801ADC7C */
+extern f32 HSD_Randf(void);                                           /* psRandom, 0x801ADC7C */
 extern PSParticle* psGenerateParticleID0(PSParticle* pp, s32 linkNo,
                                          s32 bankIdx, s32 scriptId,
                                          void* arg);                    /* 0x80169A48 */
@@ -204,8 +204,8 @@ extern s32 psAttachParticleAppSRT(PSParticle* pp, PSAppSRT* parentObj);
 extern s32 psChangeGeneratorAppSRT(PSGeneratorState* gen, PSAppSRT* parentObj); /* 0x8016A79C */
 extern s32 psAttachGeneratorAppSRT(PSGeneratorState* gen, PSAppSRT* parentObj);
 extern void genPosUpdate(void* obj);                                    /* 0x80175E88 */
-extern void fn_800BA6B0(u32 numChannels);
-extern void fn_800BA6F4(u32 chan, u32 enable, u32 ambSrc, u32 matSrc,
+extern void GXSetNumChans(u32 numChannels);
+extern void GXSetChanCtrl(u32 chan, u32 enable, u32 ambSrc, u32 matSrc,
                         u32 lightMask, u32 diffuseFn, u32 attnFn);
 extern void modifyDir(PSParticle* pp, f32 param);                       /* 0x80172FA8 */
 extern void modifyDirGenBase(PSParticle* pp, f32 a, f32 b, f32 c, f32 d); /* 0x801732A0 */
@@ -263,12 +263,12 @@ extern double atan2(double y, double x);
 extern void particleSort(s32 linkNo, PSParticle** first, PSParticle** second);
 extern void fn_800BC8C8(s32 count);
 extern void fn_800B884C(s32 count);
-extern void fn_800BC6F0(s32 stage, s32 map, s32 coord, s32 color);
-extern void fn_800BC1A0(s32 stage, s32 a, s32 b, s32 c, s32 d);
-extern void fn_800BC1E4(s32 stage, s32 a, s32 b, s32 c, s32 d);
-extern void fn_800BC228(s32 stage, s32 a, s32 b, s32 c, s32 d, s32 e);
-extern void fn_800BC290(s32 stage, s32 a, s32 b, s32 c, s32 d, s32 e);
-extern void fn_800BC52C(s32 stage, s32 a, s32 b);
+extern void GXSetTevOrder(s32 stage, s32 map, s32 coord, s32 color);
+extern void GXSetTevColorIn(s32 stage, s32 a, s32 b, s32 c, s32 d);
+extern void GXSetTevAlphaIn(s32 stage, s32 a, s32 b, s32 c, s32 d);
+extern void GXSetTevColorOp(s32 stage, s32 a, s32 b, s32 c, s32 d, s32 e);
+extern void GXSetTevAlphaOp(s32 stage, s32 a, s32 b, s32 c, s32 d, s32 e);
+extern void GXSetTevSwapMode(s32 stage, s32 a, s32 b);
 void psDispSub(PSParticle* pp, void* polygonData);
 void psDispSubAppSRT(PSParticle* pp, Mtx parentMatrix);
 void psDispSubAPPSRTPoint(PSParticle* pp);
@@ -378,8 +378,8 @@ void psSetGeneratorAngleRadiusScale(PSGeneratorState* gen, f32* scale,
 
 #endif
 
-extern void fn_800BA4C8(s32 channel, PSColor color);
-extern void fn_800BA5BC(s32 channel, PSColor color);
+extern void GXSetChanAmbColor(s32 channel, PSColor color);
+extern void GXSetChanMatColor(s32 channel, PSColor color);
 extern void fn_800BC2F8(s32 reg, PSColor color);
 
 #if !defined(PR410_PS_SPLIT) || defined(PR410_PS_PREFIX)
@@ -1200,7 +1200,7 @@ s32 psInitAppSRT(s32 count, s32 size) {
  */
 #pragma push
 #pragma optimization_level 2
-void fn_8016AB94(u32 linkMask, s32 mode) {
+void psDispMain(u32 linkMask, s32 mode) {
     s32 linkNo;
     s32 needsInit = TRUE;
     s32 cachedAlphaMode = -1;
@@ -1264,8 +1264,8 @@ void fn_8016AB94(u32 linkMask, s32 mode) {
                     lbl_8047B13C.g = 0xFF;
                     lbl_8047B13C.b = 0xFF;
                     lbl_8047B13C.a = 0xFF;
-                    fn_800BA5BC(4, lbl_8047B140);
-                    fn_800BA4C8(4, lbl_8047B13C);
+                    GXSetChanMatColor(4, lbl_8047B140);
+                    GXSetChanAmbColor(4, lbl_8047B13C);
                     psSetupTevInvalidState();
                     psSetupTevCommon();
 
@@ -1418,29 +1418,29 @@ void fn_8016AB94(u32 linkMask, s32 mode) {
                         u32 diffuse;
 
                         lbl_8047B144 = lighting;
-                        fn_800BA6B0(1);
+                        GXSetNumChans(1);
                         switch (lighting) {
                         case 0x00100000:
-                            fn_800BA6F4(4, 0, 1, 1, 0, 0, 2);
+                            GXSetChanCtrl(4, 0, 1, 1, 0, 0, 2);
                             break;
                         case 0:
                         case 0x80000000:
                             attn = HSD_LObjGetLightMaskAttnFunc() != 0 ? 1 : 2;
                             diffuse = HSD_LObjGetLightMaskDiffuse();
-                            fn_800BA6F4(0, 1, 0, 0, diffuse, 0, attn);
-                            fn_800BA6F4(2, 0, 0, 0, 0, 0, 2);
+                            GXSetChanCtrl(0, 1, 0, 0, diffuse, 0, attn);
+                            GXSetChanCtrl(2, 0, 0, 0, 0, 0, 2);
                             break;
                         case 0x80100000:
                             attn = HSD_LObjGetLightMaskAttnFunc() != 0 ? 1 : 2;
                             diffuse = HSD_LObjGetLightMaskDiffuse();
-                            fn_800BA6F4(0, 1, 0, 0, diffuse, 0, attn);
-                            fn_800BA6F4(2, 0, 1, 1, 0, 0, 2);
+                            GXSetChanCtrl(0, 1, 0, 0, diffuse, 0, attn);
+                            GXSetChanCtrl(2, 0, 1, 1, 0, 0, 2);
                             break;
                         default:
-                            fn_800BA6F4(4, 0, 0, 0, 0, 0, 2);
+                            GXSetChanCtrl(4, 0, 0, 0, 0, 0, 2);
                             break;
                         }
-                        fn_800BA6F4(5, 0, 0, 0, 0, 0, 2);
+                        GXSetChanCtrl(5, 0, 0, 0, 0, 0, 2);
                     }
                 }
                 setupChanReg(pp);
@@ -1913,9 +1913,9 @@ void psSetupTev(PSParticle* pp) {
     if (state == 0 || state == 0x80) {
         fn_800BC8C8(1);
         fn_800B884C(0);
-        fn_800BC6F0(0, 0xFF, 0xFF, 4);
-        fn_800BC1A0(0, 2, 0xF, 0xF, 0xF);
-        fn_800BC1E4(0, 1, 7, 7, 7);
+        GXSetTevOrder(0, 0xFF, 0xFF, 4);
+        GXSetTevColorIn(0, 2, 0xF, 0xF, 0xF);
+        GXSetTevAlphaIn(0, 1, 7, 7, 7);
     } else if (state == (s32)0x80000000 ||
                state == (s32)0x80000080) {
         if (state == (s32)0x80000080) {
@@ -1925,21 +1925,21 @@ void psSetupTev(PSParticle* pp) {
 
         fn_800BC8C8(2);
         fn_800B884C(0);
-        fn_800BC6F0(0, 0xFF, 0xFF, 4);
-        fn_800BC1A0(0, 0xF, 6, 0xA, 0xF);
-        fn_800BC1E4(0, 3, 7, 7, 7);
-        fn_800BC1A0(1, 0xF, 2, 0, 0xF);
-        fn_800BC1E4(1, 7, 1, 0, 7);
+        GXSetTevOrder(0, 0xFF, 0xFF, 4);
+        GXSetTevColorIn(0, 0xF, 6, 0xA, 0xF);
+        GXSetTevAlphaIn(0, 3, 7, 7, 7);
+        GXSetTevColorIn(1, 0xF, 2, 0, 0xF);
+        GXSetTevAlphaIn(1, 7, 1, 0, 7);
     } else if (state == 0x400 || state == 0x480) {
         fn_800BC8C8(1);
         fn_800B884C(1);
-        fn_800BC6F0(0, 0, 0, 4);
-        fn_800BC1A0(0, 4, 2, 8, 0xF);
-        fn_800BC1E4(0, 2, 1, 4, 7);
+        GXSetTevOrder(0, 0, 0, 4);
+        GXSetTevColorIn(0, 4, 2, 8, 0xF);
+        GXSetTevAlphaIn(0, 2, 1, 4, 7);
     } else if (state == 0x100400) {
         fn_800BC8C8(1);
         fn_800B884C(1);
-        fn_800BC6F0(0, 0, 0, 4);
+        GXSetTevOrder(0, 0, 0, 4);
         GXSetTevOp(0, 0);
     } else if (state == 0x100000 || state == 0x100080) {
         if (state == 0x100080) {
@@ -1948,53 +1948,53 @@ void psSetupTev(PSParticle* pp) {
         }
         fn_800BC8C8(1);
         fn_800B884C(0);
-        fn_800BC6F0(0, 0xFF, 0xFF, 4);
-        fn_800BC1A0(0, 0xA, 0xF, 0xF, 0xF);
-        fn_800BC1E4(0, 5, 7, 7, 7);
+        GXSetTevOrder(0, 0xFF, 0xFF, 4);
+        GXSetTevColorIn(0, 0xA, 0xF, 0xF, 0xF);
+        GXSetTevAlphaIn(0, 5, 7, 7, 7);
     } else if (state == 0x100480) {
         fn_800BC8C8(2);
         fn_800B884C(1);
-        fn_800BC6F0(0, 0, 0, 4);
-        fn_800BC1A0(0, 4, 2, 8, 0xF);
-        fn_800BC1E4(0, 2, 1, 4, 7);
-        fn_800BC1A0(1, 0xF, 0, 0xF, 0xF);
-        fn_800BC1E4(1, 7, 5, 0, 7);
+        GXSetTevOrder(0, 0, 0, 4);
+        GXSetTevColorIn(0, 4, 2, 8, 0xF);
+        GXSetTevAlphaIn(0, 2, 1, 4, 7);
+        GXSetTevColorIn(1, 0xF, 0, 0xF, 0xF);
+        GXSetTevAlphaIn(1, 7, 5, 0, 7);
     } else if (state == (s32)0x80000400) {
         fn_800BC8C8(2);
         fn_800B884C(1);
-        fn_800BC6F0(0, 0, 0, 4);
-        fn_800BC1A0(0, 0xF, 6, 0xA, 0xF);
-        fn_800BC1E4(0, 3, 7, 7, 7);
-        fn_800BC1A0(1, 0xF, 8, 0, 0xF);
-        fn_800BC1E4(1, 7, 4, 0, 7);
+        GXSetTevOrder(0, 0, 0, 4);
+        GXSetTevColorIn(0, 0xF, 6, 0xA, 0xF);
+        GXSetTevAlphaIn(0, 3, 7, 7, 7);
+        GXSetTevColorIn(1, 0xF, 8, 0, 0xF);
+        GXSetTevAlphaIn(1, 7, 4, 0, 7);
     } else if (state == (s32)0x80000480) {
         fn_800BC8C8(3);
         fn_800B884C(1);
-        fn_800BC6F0(0, 0, 0, 4);
-        fn_800BC1A0(0, 4, 2, 8, 0xF);
-        fn_800BC1E4(0, 2, 1, 4, 7);
-        fn_800BC1A0(1, 0xF, 6, 0, 0xF);
-        fn_800BC1E4(1, 7, 3, 0, 7);
-        fn_800BC1A0(2, 0xF, 0xA, 0, 0xF);
-        fn_800BC1E4(2, 0, 7, 7, 7);
+        GXSetTevOrder(0, 0, 0, 4);
+        GXSetTevColorIn(0, 4, 2, 8, 0xF);
+        GXSetTevAlphaIn(0, 2, 1, 4, 7);
+        GXSetTevColorIn(1, 0xF, 6, 0, 0xF);
+        GXSetTevAlphaIn(1, 7, 3, 0, 7);
+        GXSetTevColorIn(2, 0xF, 0xA, 0, 0xF);
+        GXSetTevAlphaIn(2, 0, 7, 7, 7);
     } else if (state == (s32)0x80100400) {
         fn_800BC8C8(2);
         fn_800B884C(1);
-        fn_800BC6F0(0, 0, 0, 4);
-        fn_800BC1A0(0, 0xF, 6, 0xA, 0xF);
-        fn_800BC1E4(0, 7, 3, 5, 7);
-        fn_800BC1A0(1, 0xF, 8, 0, 0xF);
-        fn_800BC1E4(1, 7, 4, 0, 7);
+        GXSetTevOrder(0, 0, 0, 4);
+        GXSetTevColorIn(0, 0xF, 6, 0xA, 0xF);
+        GXSetTevAlphaIn(0, 7, 3, 5, 7);
+        GXSetTevColorIn(1, 0xF, 8, 0, 0xF);
+        GXSetTevAlphaIn(1, 7, 4, 0, 7);
     } else if (state == (s32)0x80100480) {
         fn_800BC8C8(3);
         fn_800B884C(1);
-        fn_800BC6F0(0, 0, 0, 4);
-        fn_800BC1A0(0, 4, 2, 8, 0xF);
-        fn_800BC1E4(0, 2, 1, 4, 7);
-        fn_800BC1A0(1, 0xF, 6, 0, 0xF);
-        fn_800BC1E4(1, 7, 3, 0, 7);
-        fn_800BC1A0(2, 0xF, 0xA, 0, 0xF);
-        fn_800BC1E4(2, 7, 5, 0, 7);
+        GXSetTevOrder(0, 0, 0, 4);
+        GXSetTevColorIn(0, 4, 2, 8, 0xF);
+        GXSetTevAlphaIn(0, 2, 1, 4, 7);
+        GXSetTevColorIn(1, 0xF, 6, 0, 0xF);
+        GXSetTevAlphaIn(1, 7, 3, 0, 7);
+        GXSetTevColorIn(2, 0xF, 0xA, 0, 0xF);
+        GXSetTevAlphaIn(2, 7, 5, 0, 7);
     } else if (state == (s32)0x80100000 ||
                state == (s32)0x80100080) {
         if (state == (s32)0x80100080) {
@@ -2003,30 +2003,30 @@ void psSetupTev(PSParticle* pp) {
         }
         fn_800BC8C8(2);
         fn_800B884C(0);
-        fn_800BC6F0(0, 0xFF, 0xFF, 4);
-        fn_800BC1A0(0, 0xF, 6, 0xA, 0xF);
-        fn_800BC1E4(0, 7, 3, 5, 7);
-        fn_800BC1A0(1, 0xF, 2, 0, 0xF);
-        fn_800BC1E4(1, 7, 1, 0, 7);
+        GXSetTevOrder(0, 0xFF, 0xFF, 4);
+        GXSetTevColorIn(0, 0xF, 6, 0xA, 0xF);
+        GXSetTevAlphaIn(0, 7, 3, 5, 7);
+        GXSetTevColorIn(1, 0xF, 2, 0, 0xF);
+        GXSetTevAlphaIn(1, 7, 1, 0, 7);
     }
 }
 
 void psSetupTevCommon(void) {
-    fn_800BC6F0(0, 0, 0, 4);
-    fn_800BC228(0, 0, 0, 0, 1, 0);
-    fn_800BC290(0, 0, 0, 0, 1, 0);
+    GXSetTevOrder(0, 0, 0, 4);
+    GXSetTevColorOp(0, 0, 0, 0, 1, 0);
+    GXSetTevAlphaOp(0, 0, 0, 0, 1, 0);
 
-    fn_800BC6F0(1, 0, 0, 4);
-    fn_800BC228(1, 0, 0, 0, 1, 0);
-    fn_800BC290(1, 0, 0, 0, 1, 0);
+    GXSetTevOrder(1, 0, 0, 4);
+    GXSetTevColorOp(1, 0, 0, 0, 1, 0);
+    GXSetTevAlphaOp(1, 0, 0, 0, 1, 0);
 
-    fn_800BC6F0(2, 0, 0, 4);
-    fn_800BC228(2, 0, 0, 0, 1, 0);
-    fn_800BC290(2, 0, 0, 0, 1, 0);
+    GXSetTevOrder(2, 0, 0, 4);
+    GXSetTevColorOp(2, 0, 0, 0, 1, 0);
+    GXSetTevAlphaOp(2, 0, 0, 0, 1, 0);
 
-    fn_800BC52C(0, 0, 0);
-    fn_800BC52C(1, 0, 0);
-    fn_800BC52C(2, 0, 0);
+    GXSetTevSwapMode(0, 0, 0);
+    GXSetTevSwapMode(1, 0, 0);
+    GXSetTevSwapMode(2, 0, 0);
 }
 
 void HSD_MTXSRT(void* dst, void* scale, void* rot, void* trans, void* order) {
@@ -2238,7 +2238,7 @@ void modifyDir(PSParticle* pp, f32 angle) {
 
     magnitude = psSetVelSqrtf(velocityX * velocityX + velocityY * velocityY +
                              velocityZ * velocityZ);
-    azimuth = lbl_8047D6A0 * lbl_8047D6A8 * fn_801ADC7C();
+    azimuth = lbl_8047D6A0 * lbl_8047D6A8 * HSD_Randf();
     radial = magnitude * sin(angle);
     radialX = radial * cos(azimuth);
     radialY = radial * sin(azimuth);
@@ -2294,7 +2294,7 @@ void modifyDirGenBase(PSParticle* pp, f32 angle, f32 offsetX,
     magnitude = psSetVelSqrtf(pp->velocityX * pp->velocityX +
                              pp->velocityY * pp->velocityY +
                              pp->velocityZ * pp->velocityZ);
-    azimuth = lbl_8047D6A0 * lbl_8047D6A8 * fn_801ADC7C();
+    azimuth = lbl_8047D6A0 * lbl_8047D6A8 * HSD_Randf();
     radial = magnitude * sin(angle);
     radialX = radial * cos(azimuth);
     radialY = radial * sin(azimuth);
@@ -2848,7 +2848,7 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                         u16 range = ((u16)stream[2] << 8) | stream[3];
                         f32 rng;
                         stream += 4;
-                        rng = fn_801ADC7C();
+                        rng = HSD_Randf();
                         pp->repeatCount = (u16)(base + (s32)((f32)range * rng));
                         break;
                     }
@@ -2856,7 +2856,7 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                     /* ---- 0xA7: random threshold -> yield (verified @ 0x80170658) ---- */
                     case 0xA7: {
                         u8 threshold = *stream++;
-                        f32 rng = fn_801ADC7C();
+                        f32 rng = HSD_Randf();
                         if (threshold < (s32)(lbl_8047D63C * rng)) break;
                         pp->repeatCount = 1;
                         delay = 1;
@@ -2868,13 +2868,13 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                     case 0xA8: {
                         stream = getFloat(stream, &scratch[3]);
                         scratch[0] = scratch[3] -
-                            2.0f * scratch[3] * fn_801ADC7C();
+                            2.0f * scratch[3] * HSD_Randf();
                         stream = getFloat(stream, &scratch[3]);
                         scratch[1] = scratch[3] -
-                            2.0f * scratch[3] * fn_801ADC7C();
+                            2.0f * scratch[3] * HSD_Randf();
                         stream = getFloat(stream, &scratch[3]);
                         scratch[2] = scratch[3] -
-                            2.0f * scratch[3] * fn_801ADC7C();
+                            2.0f * scratch[3] * HSD_Randf();
                         psApplyOffsetLocalRotation(pp, scratch);
                         pp->positionX += scratch[0];
                         pp->positionY += scratch[1];
@@ -2929,7 +2929,7 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                         u32* bank;
 
                         stream += 4;
-                        scriptId += (s32)((f32)range * fn_801ADC7C());
+                        scriptId += (s32)((f32)range * HSD_Randf());
                         bank = (u32*)lbl_804527C8[pp->bankIndex];
                         if (bank != NULL) {
                             scriptId = bank[scriptId];
@@ -2979,7 +2979,7 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                         stream = getTime(stream, &pp->lerpTimer);
                         stream = getFloat(stream, &pp->lerpTarget);
                         stream = getFloat(stream, &scratch[0]);
-                        pp->lerpTarget += scratch[0] * fn_801ADC7C();
+                        pp->lerpTarget += scratch[0] * HSD_Randf();
                         if (pp->lerpTimer == 0) {
                             pp->lerpValue = pp->lerpTarget;
                         }
@@ -3203,16 +3203,16 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                             pp->color1.a = (u8)(((pp->color1Target.a << 16) +
                                 scale * (pp->color1.a - pp->color1Target.a)) >> 16);
                         }
-                        scratch[0] = fn_801ADC7C();
+                        scratch[0] = HSD_Randf();
                         pp->color1Target.r = U8ClampAdd(pp->color1Target.r,
                             (s8)stream[0] * 2 * scratch[0]);
-                        scratch[0] = fn_801ADC7C();
+                        scratch[0] = HSD_Randf();
                         pp->color1Target.g = U8ClampAdd(pp->color1Target.g,
                             (s8)stream[1] * 2 * scratch[0]);
-                        scratch[0] = fn_801ADC7C();
+                        scratch[0] = HSD_Randf();
                         pp->color1Target.b = U8ClampAdd(pp->color1Target.b,
                             (s8)stream[2] * 2 * scratch[0]);
-                        scratch[0] = fn_801ADC7C();
+                        scratch[0] = HSD_Randf();
                         pp->color1Target.a = U8ClampAdd(pp->color1Target.a,
                             (s8)stream[3] * 2 * scratch[0]);
                         stream += 4;
@@ -3237,16 +3237,16 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                             pp->color2.a = (u8)(((pp->color2Target.a << 16) +
                                 scale * (pp->color2.a - pp->color2Target.a)) >> 16);
                         }
-                        scratch[0] = fn_801ADC7C();
+                        scratch[0] = HSD_Randf();
                         pp->color2Target.r = U8ClampAdd(pp->color2Target.r,
                             (s8)stream[0] * 2 * scratch[0]);
-                        scratch[0] = fn_801ADC7C();
+                        scratch[0] = HSD_Randf();
                         pp->color2Target.g = U8ClampAdd(pp->color2Target.g,
                             (s8)stream[1] * 2 * scratch[0]);
-                        scratch[0] = fn_801ADC7C();
+                        scratch[0] = HSD_Randf();
                         pp->color2Target.b = U8ClampAdd(pp->color2Target.b,
                             (s8)stream[2] * 2 * scratch[0]);
-                        scratch[0] = fn_801ADC7C();
+                        scratch[0] = HSD_Randf();
                         pp->color2Target.a = U8ClampAdd(pp->color2Target.a,
                             (s8)stream[3] * 2 * scratch[0]);
                         stream += 4;
@@ -3267,7 +3267,7 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                         range = stream[1];
                         stream += 2;
                         pp->objRefIndex = (u8)
-                            ((f32)range * fn_801ADC7C() + pp->objRefIndex);
+                            ((f32)range * HSD_Randf() + pp->objRefIndex);
                         bankData = (void**)lbl_804529C8[pp->bankIndex];
                         objTable = bankData != NULL ?
                             ((void**)bankData)[pp->animIndex] : NULL;
@@ -3295,7 +3295,7 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                             scratch[0] *= scale;
                             scratch[1] *= scale;
                         }
-                        scratch[0] += scratch[1] * fn_801ADC7C();
+                        scratch[0] += scratch[1] * HSD_Randf();
                         magnitude = sqrtf(pp->velocityX * pp->velocityX +
                                           pp->velocityY * pp->velocityY +
                                           pp->velocityZ * pp->velocityZ);
@@ -3449,22 +3449,22 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                             pp->color2.a = (u8)(((pp->color2Target.a << 16) +
                                 scale * (pp->color2.a - pp->color2Target.a)) >> 16);
                         }
-                        scratch[0] = (s8)stream[0] * 2 * fn_801ADC7C();
+                        scratch[0] = (s8)stream[0] * 2 * HSD_Randf();
                         pp->color1Target.r = U8ClampAdd(pp->color1Target.r,
                                                        scratch[0]);
                         pp->color2Target.r = U8ClampAdd(pp->color2Target.r,
                                                        scratch[0]);
-                        scratch[0] = (s8)stream[1] * 2 * fn_801ADC7C();
+                        scratch[0] = (s8)stream[1] * 2 * HSD_Randf();
                         pp->color1Target.g = U8ClampAdd(pp->color1Target.g,
                                                        scratch[0]);
                         pp->color2Target.g = U8ClampAdd(pp->color2Target.g,
                                                        scratch[0]);
-                        scratch[0] = (s8)stream[2] * 2 * fn_801ADC7C();
+                        scratch[0] = (s8)stream[2] * 2 * HSD_Randf();
                         pp->color1Target.b = U8ClampAdd(pp->color1Target.b,
                                                        scratch[0]);
                         pp->color2Target.b = U8ClampAdd(pp->color2Target.b,
                                                        scratch[0]);
-                        scratch[0] = (s8)stream[3] * 2 * fn_801ADC7C();
+                        scratch[0] = (s8)stream[3] * 2 * HSD_Randf();
                         pp->color1Target.a = U8ClampAdd(pp->color1Target.a,
                                                        scratch[0]);
                         pp->color2Target.a = U8ClampAdd(pp->color2Target.a,
@@ -3498,7 +3498,7 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                             pp->flags |= 0x40000;
                         } else if (mode == 2) {
                             pp->flags ^= 0x40000;
-                        } else if (fn_801ADC7C() < lbl_8047D648) {
+                        } else if (HSD_Randf() < lbl_8047D648) {
                             pp->flags &= ~0x40000;
                         } else {
                             pp->flags |= 0x40000;
@@ -3515,7 +3515,7 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                             pp->flags |= 0x80000;
                         } else if (mode == 2) {
                             pp->flags ^= 0x80000;
-                        } else if (fn_801ADC7C() < lbl_8047D648) {
+                        } else if (HSD_Randf() < lbl_8047D648) {
                             pp->flags &= ~0x80000;
                         } else {
                             pp->flags |= 0x80000;
@@ -3576,10 +3576,10 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                         stream += 2;
                         if (count != 0) {
                             random = (f32)(s32)
-                                ((count + 1) * fn_801ADC7C()) /
+                                ((count + 1) * HSD_Randf()) /
                                 (f32)count;
                         } else {
-                            random = fn_801ADC7C();
+                            random = HSD_Randf();
                         }
                         scratch[1] = random;
 
@@ -3619,11 +3619,11 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                         if (mask & 8) {
                             if (count != 0) {
                                 scratch[1] = (s8)*stream++ * 2 *
-                                    (s32)((count + 1) * fn_801ADC7C()) /
+                                    (s32)((count + 1) * HSD_Randf()) /
                                     (f32)count;
                             } else {
                                 scratch[1] = (s8)*stream++ * 2 *
-                                    fn_801ADC7C();
+                                    HSD_Randf();
                             }
                             if (mask & 0x10) {
                                 pp->color1Target.a = U8ClampAdd(
@@ -3712,9 +3712,9 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
                         count = *stream++;
                         if (count != 0) {
                             scratch[0] += scratch[1] *
-                                (s32)((count + 1) * fn_801ADC7C()) / count;
+                                (s32)((count + 1) * HSD_Randf()) / count;
                         } else {
-                            scratch[0] += scratch[1] * fn_801ADC7C();
+                            scratch[0] += scratch[1] * HSD_Randf();
                         }
                         pp->headingSpeed += scratch[0];
                         pp->heading += scratch[0];
@@ -4946,7 +4946,7 @@ PSGeneratorState* psCreateGeneratorID(s32 linkNo, s32 bankIdx, s32 scriptId) {
     } else if (*(f32*) (raw + 0x08) < lbl_8047D6B0) {
         gen->lifetime = lbl_8047D6B0;
     } else {
-        gen->lifetime = fn_801ADC7C();
+        gen->lifetime = HSD_Randf();
     }
 
     textureEntry = ((u8**) lbl_804529C8[bankIdx])[scriptId];
@@ -5134,7 +5134,7 @@ void setupChanReg(PSParticle* pp) {
     if (mat.r != lbl_8047B140.r || mat.g != lbl_8047B140.g ||
         mat.b != lbl_8047B140.b) {
         lbl_8047B140 = mat;
-        fn_800BA5BC(0, mat);
+        GXSetChanMatColor(0, mat);
     }
 
     lobj = HSD_LObjGetActiveByID(0x100);
@@ -5147,7 +5147,7 @@ void setupChanReg(PSParticle* pp) {
     if (amb.r != lbl_8047B13C.r || amb.g != lbl_8047B13C.g ||
         amb.b != lbl_8047B13C.b) {
         lbl_8047B13C = amb;
-        fn_800BA4C8(0, amb);
+        GXSetChanAmbColor(0, amb);
     }
 }
 
@@ -5635,7 +5635,7 @@ void psExecGenerator(u32 linkMask) {
         if (*(f32*)(raw + 0x08) < 0.0f) {
             gen->lifetime -= *(f32*)(raw + 0x08);
         } else {
-            gen->lifetime += *(f32*)(raw + 0x08) * fn_801ADC7C();
+            gen->lifetime += *(f32*)(raw + 0x08) * HSD_Randf();
         }
 
         if (gen->lifetime >= 1.0f) {
@@ -5880,12 +5880,12 @@ f32 generateParticle_8017424C(PSGeneratorState* gen) {
         case 7:
             angleStep = (gen->shape.cone.maxAngle -
                          gen->shape.cone.minAngle) / (s32)gen->lifetime;
-            currentAngle = angleStep * fn_801ADC7C() +
+            currentAngle = angleStep * HSD_Randf() +
                            gen->shape.cone.minAngle;
             break;
         default:
             currentAngle = (f32)(lbl_8047D6A0 * lbl_8047D6A8 *
-                                 fn_801ADC7C());
+                                 HSD_Randf());
             angleStep = (f32)(lbl_8047D6A0 * lbl_8047D6A8 /
                               (s32)gen->lifetime);
             break;
@@ -5909,7 +5909,7 @@ f32 generateParticle_8017424C(PSGeneratorState* gen) {
                 radius = -gen->radius;
                 radiusFactor = 0.0f;
             } else {
-                radiusFactor = fn_801ADC7C();
+                radiusFactor = HSD_Randf();
                 if (mode == 3 || mode == 4) {
                     radiusFactor = psSetVelSqrtf(radiusFactor);
                 }
@@ -5931,7 +5931,7 @@ f32 generateParticle_8017424C(PSGeneratorState* gen) {
                 } else {
                     currentAngle = gen->shape.cone.minAngle +
                         (gen->shape.cone.maxAngle -
-                         gen->shape.cone.minAngle) * fn_801ADC7C();
+                         gen->shape.cone.minAngle) * HSD_Randf();
                     coneAngle = radiusFactor * gen->angle;
                     if (fabsf(radius) < lbl_80478AC8) {
                         coneAngle = gen->shape.cone.height >= 0.0f
@@ -5950,7 +5950,7 @@ f32 generateParticle_8017424C(PSGeneratorState* gen) {
                 } else {
                     currentAngle = gen->shape.cone.minAngle +
                         (gen->shape.cone.maxAngle -
-                         gen->shape.cone.minAngle) * fn_801ADC7C();
+                         gen->shape.cone.minAngle) * HSD_Randf();
                     coneAngle = (f32)(lbl_8047D6A8 + gen->angle);
                 }
             } else if (gen->angle < 0.0f) {
@@ -5959,14 +5959,14 @@ f32 generateParticle_8017424C(PSGeneratorState* gen) {
             } else {
                 currentAngle = gen->shape.cone.minAngle +
                     (gen->shape.cone.maxAngle -
-                     gen->shape.cone.minAngle) * fn_801ADC7C();
+                     gen->shape.cone.minAngle) * HSD_Randf();
                 coneAngle = radiusFactor * gen->angle;
             }
 
             emissionPosition.x = radius * cos(currentAngle);
             emissionPosition.y = radius * sin(currentAngle);
             if (mode == 6 || mode == 7) {
-                emissionPosition.z = fn_801ADC7C();
+                emissionPosition.z = HSD_Randf();
                 if (mode == 6) {
                     emissionPosition.x *= 1.0f - emissionPosition.z;
                     emissionPosition.y *= 1.0f - emissionPosition.z;
@@ -6005,7 +6005,7 @@ f32 generateParticle_8017424C(PSGeneratorState* gen) {
         }
 
         case 1: {
-            f32 random = fn_801ADC7C();
+            f32 random = HSD_Randf();
 
             emissionPosition.x = random * gen->shape.line.x;
             emissionPosition.y = random * gen->shape.line.y;
@@ -6030,13 +6030,13 @@ f32 generateParticle_8017424C(PSGeneratorState* gen) {
             if (gen->radius < 0.0f) {
                 forward.x = 0.0f;
             } else {
-                forward.x = fn_801ADC7C();
+                forward.x = HSD_Randf();
             }
             if (gen->angle < 0.0f) {
                 currentAngle += angleStep;
             } else {
                 currentAngle =
-                    (f32)(lbl_8047D6A0 * lbl_8047D6A8 * fn_801ADC7C());
+                    (f32)(lbl_8047D6A0 * lbl_8047D6A8 * HSD_Randf());
             }
             gen->shape.line.x = magnitude;
             psGenerateParticle(
@@ -6050,9 +6050,9 @@ f32 generateParticle_8017424C(PSGeneratorState* gen) {
             f32 random;
             f32 axisMagnitude;
 
-            emissionPosition.x = fn_801ADC7C();
-            emissionPosition.y = fn_801ADC7C();
-            emissionPosition.z = fn_801ADC7C();
+            emissionPosition.x = HSD_Randf();
+            emissionPosition.y = HSD_Randf();
+            emissionPosition.z = HSD_Randf();
             switch (gen->shapeFlags) {
             case 1:
                 emissionPosition.x =
@@ -6063,7 +6063,7 @@ f32 generateParticle_8017424C(PSGeneratorState* gen) {
                     emissionPosition.y > 0.5f ? 1.0f : 0.0f;
                 break;
             case 3:
-                random = fn_801ADC7C();
+                random = HSD_Randf();
                 if (random > gen->shape.rect.x /
                     (gen->shape.rect.x + gen->shape.rect.y)) {
                     emissionPosition.y =
@@ -6078,7 +6078,7 @@ f32 generateParticle_8017424C(PSGeneratorState* gen) {
                     emissionPosition.z > 0.5f ? 1.0f : 0.0f;
                 break;
             case 5:
-                random = fn_801ADC7C();
+                random = HSD_Randf();
                 if (random > gen->shape.rect.x /
                     (gen->shape.rect.x + gen->shape.rect.z)) {
                     emissionPosition.z =
@@ -6089,7 +6089,7 @@ f32 generateParticle_8017424C(PSGeneratorState* gen) {
                 }
                 break;
             case 6:
-                random = fn_801ADC7C();
+                random = HSD_Randf();
                 if (random > gen->shape.rect.y /
                     (gen->shape.rect.y + gen->shape.rect.z)) {
                     emissionPosition.z =
@@ -6106,7 +6106,7 @@ f32 generateParticle_8017424C(PSGeneratorState* gen) {
                     (gen->shape.rect.y + gen->shape.rect.z) + yz;
                 f32 inverse = 1.0f / total;
 
-                random = fn_801ADC7C();
+                random = HSD_Randf();
                 if (random < inverse * xy) {
                     emissionPosition.z =
                         emissionPosition.z > 0.5f ? 1.0f : 0.0f;
@@ -6170,20 +6170,20 @@ f32 generateParticle_8017424C(PSGeneratorState* gen) {
             if (gen->shape.cone.height == 0.0f ||
                 fabsf(gen->shape.cone.height - (f32)lbl_8047D6A8) < 0.001f) {
                 latitude = (f32)lbl_8047D6A8 *
-                           sqrtf(fn_801ADC7C());
-                if (fn_801ADC7C() < 0.5f) {
+                           sqrtf(HSD_Randf());
+                if (HSD_Randf() < 0.5f) {
                     latitude = (f32)lbl_8047D6A8 - latitude;
                 }
             } else {
                 latitude = gen->shape.cone.height *
-                           sqrtf(fn_801ADC7C());
+                           sqrtf(HSD_Randf());
             }
             longitude = (f32)(lbl_8047D6A0 * lbl_8047D6A8 *
-                              fn_801ADC7C());
+                              HSD_Randf());
             if (gen->radius < 0.0f) {
                 radial = -gen->radius;
             } else {
-                radial = gen->radius * sqrtf(fn_801ADC7C());
+                radial = gen->radius * sqrtf(HSD_Randf());
             }
 
             particleVelocity.x = sin(latitude) * cos(longitude);

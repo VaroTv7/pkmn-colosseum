@@ -52,7 +52,7 @@ extern void psSetParticleVisibility();
 extern void sin();
 extern void statusGetStatus();
 /* GSfloor / GScolsys */
-extern void* fn_800FF56C(void);                             /* GSfloor get active */
+extern void* std092_getCurrentRoomID(void);                             /* GSfloor get active */
 extern void  GScolsys2GetObjEnable(u32 triIdx, void* outFlag);        /* GScolsys query */
 /* ===== Index lookup globals ===== */
 extern u8 lbl_8035BBA8[];  /* NPC table (BSS) */
@@ -64,7 +64,7 @@ extern u32 lbl_80478F94;  /* obj data base (SDA) */
 /* Field subsystems -- forward declarations (defined below) */
 u32  _unloadFlare__FPvUlUl(void);
 u32 floorDataBiosGetFileGroupID(u8* entry);
-void fn_80117C84(void);
+void tvRelease(void);
 void pokemonResetBasisStatus(void* ptr);
 /* ===== String constants (rodata) ===== */
 extern const char lbl_80272770[]; /* "floorUpdateFieldCamera: error updating..." */
@@ -90,7 +90,7 @@ extern u32 lbl_8047ADB8;
 extern u8 lbl_804083D0[0x30];
 extern u32 lbl_8047AD68;
 extern u32 lbl_8047AD6C;
-extern void fn_801ED674(void);
+extern void flareRelease(void);
 void fn_801193BC(void);
 extern s32 pokemonWazaGetMaxPP(u8* ptr, u16 idx);
 extern void wazaGetStatus(void);
@@ -124,8 +124,8 @@ extern void* floorDataBiosGetFieldCameraListPtr();
 extern u32 floorDataBiosGetGroupID();
 extern void* floorDataBiosGetPtr(u32 key);
 extern void fn_8011791C(void);
-extern void fn_80119930(void);
-extern void fn_80119BD0();
+extern void gsParticleKillOldest(void);
+extern void gsParticlePtclHook();
 extern u8 fn_80119D90(u16 idx);
 extern u8 fn_80119DD0(u16 idx);
 extern u16 fn_80119E10(u16 idx);
@@ -167,7 +167,7 @@ extern void heroBiosSetHizukiNamePtr(); /* K&R: typed impl or conflict */
 extern void heroBiosSetNamePtr(); /* K&R: typed impl or conflict */
 extern void heroMoveTermEvent(void);
 extern void heroMoveInitEvent(void);
-extern void fn_8012CA84();
+extern void partnerApplyMove();
 extern void heroPokemonGetEifie(u32 arg1);
 extern void heroPokemonGetBlacky(u32 arg1);
 extern s32 psGetGeneratorChildMaxLife(u32);
@@ -191,21 +191,21 @@ extern void* heroBiosGetItemNormalPtr(u8* ptr, u16 idx);
 extern u32 heroBiosGetNamePtr(void* ptr);
 extern u32 lbl_80478EBC;
 extern u32 lbl_80478EB8;
-extern void fn_80113F48(void);
+extern void std093_getCurrentGroupID(void);
 extern void peopleSetVisible(void);
-extern void fn_801653CC(void);
+extern void soundPlayFanfare(void);
 extern void msgctrlSetValue(void);
 extern void winMsgOpen(void);
 extern void winMsgClose(void);
 extern void pcboxDelItem(void);
-extern void fn_8001E184(void);
+extern void std011_dialogDisplayYesNoMenu(void);
 void floorEventGetTresure(void);
-extern void fn_8018B76C(void);
+extern void std051_characterSetAnimation(void);
 extern void peopleSetFlagsByIndex(void);
-extern void fn_801902E0(void);
-extern void fn_80166A28(void);
+extern void std081_flagCheckTrue(void);
+extern void soundStartSE(void);
 extern void peopleWaitSyncMotion(void);
-extern void fn_80190528(void);
+extern void std078_flagSetFalse(void);
 void floorEventCtrlTresure(void);
 extern void floorGetResource(void);
 extern void GSmodelSetAnimIndex(void);
@@ -220,13 +220,13 @@ extern void GSpartGetTransform(void);
 extern void GSpartFree();
 extern void fn_8018AACC(void);
 extern void peopleMoveCheck(u32 groupId, u32 index, u8 waitFlag);
-extern void fn_8018805C(void);
-extern void fn_80184470(void);
+extern void peopleStartTurn(void);
+extern void std168_characterDetachFromCharacter(void);
 extern void peopleSetPositionByIndex(void);
-extern void fn_801669BC(void);
+extern void soundStopSE(void);
 extern void GSmodelCanAnimate(void);
-extern void fn_801845E4(void);
-extern void fn_801860F8(void);
+extern void std070_characterAttachToCharacter(void);
+extern void std059_characterSetPosition(void);
 extern void GSmodelGetFrameCount(void);
 extern void fn_800D37CC(void);
 extern f32 lbl_8047CFA0;
@@ -240,13 +240,13 @@ extern f32 lbl_8047CFB4;
 extern f32 lbl_8047CFB0;
 void floorEventCtrlElevator(void);
 extern void scriptSetCol(void);
-extern void fn_801903B0(void);
+extern void std079_flagSetTrue(void);
 extern void fn_8018C558(void);
 extern void fn_8018C8F4(void);
 void floorEventCtrlDoor(void);
 extern void EvlogSet__FScUl();
 extern void scriptSetEventColID();
-extern void fn_800F7434();
+extern void cmsRunSync();
 extern u8 lbl_80272708[];
 extern u32 lbl_80478EC4;
 extern u32 lbl_80478EC0;
@@ -313,7 +313,7 @@ extern void fn_800D3190(void);
 extern void fn_800FF4D4(void);
 extern u32 lbl_802727C8[];
 extern void psSetBillboardCamera();
-extern void fn_8016AB94();
+extern void psDispMain();
 extern void psGetParticleChildCount(void* ptr);
 extern void psKillFamily();
 extern void GSmodelSet60fpsAnimFlag();
@@ -330,7 +330,7 @@ extern void psExecGenerator(void);
 extern void fn_800057A0(void);
 extern void jumptable_8035BB88();
 extern u8 lbl_8047ADB0;
-void fn_801183EC(void);
+void gsParticleUpdate(void);
 void fn_80118874(void);
 extern void psSetParticleVisibility(); /* K&R: called with 0 or 1 args */
 extern void psSetGeneratorAngleRadiusScale(void);
@@ -341,16 +341,16 @@ extern void psCreateGeneratorID(void);
 extern void fn_800D3094(void);
 extern u32 lbl_8047ADAC;
 extern u32 lbl_8047ADA8;
-void fn_801190DC(void);
+void gsParticleCreate(void);
 extern void psInitDataBank(void);
 extern void DCFlushRange();
 extern u8 lbl_802727D8[];
-void fn_801195AC(void);
+void gsParticleBankLoad(void);
 extern void fn_8016A01C(void);
 extern void psInitGenerator(void);
 extern void fn_8016AAF4(void);
-extern void fn_8019733C(void);
-extern void fn_8019D618(void);
+extern void HSD_JObjSetSPtclCallback(void);
+extern void HSD_JObjSetPtclCallback(void);
 extern void psSetPointJObjNodup(void);
 extern void fn_8019D610(void);
 extern u16 lbl_8047AD98;
@@ -411,7 +411,7 @@ extern u32 lbl_80478E64;
 extern u32 lbl_80478B60;
 extern u8 lbl_8035E940[];
 extern void _flagSet(u32);
-extern void* fn_801906A0(u32);
+extern void* std082_flagGetValue(u32);
 extern u32 lbl_80478F90;
 extern u32 lbl_80478F94;
 extern u8 lbl_80478B58[4];
@@ -501,7 +501,7 @@ extern void jumptable_80363558();
 extern u8 lbl_80426BD0[];
 extern void fadeEffectDokuStart(void);
 extern void peopleClearFlagsByIndex(void);
-extern void fn_8018CA20(void);
+extern void std151_characterFaceDirection(void);
 extern void winMsgOpenField(void);
 extern void winMsgCloseField(void);
 extern void fn_801D0AFC(void);
@@ -510,11 +510,11 @@ extern f32 lbl_8047D030;
 extern f32 lbl_8047D034;
 extern f32 lbl_8047D038;
 void cbPoison__Fl15FootStepCounterl(void);
-extern void fn_8018D998(void);
+extern void peopleIsInGroup(void);
 extern void peopleSearchID(void);
 extern void peopleInfoBiosGetPtr(void);
 extern void fn_8018F5E4(void);
-extern void fn_8010F320(void);
+extern void colsysWallSweep(void);
 extern void PSVECScale(void);
 extern void PSVECAdd(void);
 extern void GScolsys2HumanCollision(void);
@@ -527,16 +527,16 @@ extern u8 lbl_80478AC0[4];
 extern f32 lbl_8047D060;
 void fn_8012B19C(void);
 void heroMoveChkHinderClear(void);
-extern void fn_800D3088(void);
+extern void msgGetCharsPerFrame(void);
 extern f64 lbl_8047D068;
 void getStep__FP8FOOTSTEPP8_GSmodelPiP8FOOTWORK(void);
-extern void fn_8018CD08(void);
-extern void fn_8018FCBC(void);
+extern void peopleFindTalkTarget(void);
+extern void peopleGetPositionPtr(void);
 extern void fn_8018FC50(void);
 extern void fn_800CE148(void);
 extern void fn_800CDBE0(void);
 extern void GScolsys2CheckGetEventID(void);
-extern void fn_8018790C(void);
+extern void peopleStopTurn(void);
 extern void fn_800F7D38(void);
 extern void fn_800F7C8C(void);
 extern void fn_8018BA04(void);
@@ -544,8 +544,8 @@ extern void peopleTurnToPoint(void);
 extern void fn_8018D7D0(void);
 extern void fn_80183730(void);
 extern void fn_8018397C(void);
-extern void fn_801812E8(void);
-extern void fn_80189490(void);
+extern void peopleTalkPause(void);
+extern void std055_characterEndSpeech(void);
 extern void fn_80183688(void);
 extern f32 lbl_8047D070;
 extern f32 lbl_8047D074;
@@ -564,16 +564,16 @@ extern f32 lbl_8047D088;
 extern f32 lbl_8047D08C;
 extern f32 lbl_8047D090;
 extern f32 lbl_8047D0A8;
-void fn_8012D39C(void);
+void circleLineIntersect(void);
 extern f32 lbl_8047D0AC;
-void fn_8012D7F0(void);
+void partnerGetTarget(void);
 extern void fn_800E3C64(void);
 extern f32 lbl_8047D0B0;
-void fn_8012DE94(void);
+void partnerMove(void);
 extern void fn_800F7A7C(void);
 extern void fn_800F7A08(void);
 extern void fn_800F7BC4(void);
-extern void fn_80188214(void);
+extern void peopleSetSpeedFromAmount(void);
 extern void fn_80166458(void);
 extern f64 lbl_8047D0C8;
 extern f32 lbl_8047D0B4;
@@ -581,9 +581,9 @@ extern f32 lbl_8047D0B8;
 extern f32 lbl_8047D0BC;
 extern f32 lbl_8047D0C0;
 extern f32 lbl_8047D0C4;
-void fn_8012E388(void);
+void heroReadStick(void);
 extern void fn_800F7AF0(void);
-extern void fn_801887D8(void);
+extern void peopleAmountFromMove(void);
 extern void PSVECDistance(void);
 extern f32 lbl_8047D0D0;
 extern f32 lbl_8047D0D4;
@@ -595,8 +595,8 @@ extern void fn_8000D710(void);
 extern u8 lbl_80272A38[];
 extern f32 lbl_8047D064;
 void heroMoveMain(void);
-extern void fn_80188AF4(u32, u32);
-extern void fn_80188F78(u32, u32);
+extern void std067_characterStopLookAt(u32, u32);
+extern void std065_characterLookAtPlayer(u32, u32);
 void fn_8012F1FC(void);
 void fn_8012F40C(void);
 extern void GSmodelGetRotation(void);
@@ -811,10 +811,10 @@ extern void fightOutPokemonBiosGetIrekaeTargetEntryId(void);
 extern void fightOutPokemonBiosGetFightOutPokemonEnemyPtr(void);
 extern void fightOutPokemonCheckFightOut(void);
 extern void jumptable_8035E4B0();
-extern void fn_801885C4(void);
+extern void peopleMoveByVector(void);
 extern void PSVECDotProduct(void);
-extern void fn_8018F678(void);
-extern void fn_8018F658(void);
+extern void charModelGetHeadYawMin(void);
+extern void charModelGetHeadYawMax(void);
 extern f32 lbl_8047D094;
 extern f32 lbl_8047D098;
 extern f32 lbl_8047D09C;
@@ -1053,7 +1053,7 @@ extern u32 floorDataBiosGetFileGroupID(u8* entry);
 extern void* floorDataBiosGetCurrentPtr(void);
 extern void* fn_80115CB4(u32 param);
 extern void fn_80115D64(u32 r25, u32 r26);
-extern void fn_80116D30(u32 kind, u32 arg);
+extern void heroDispatchEvent(u32 kind, u32 arg);
 extern void floorCharacterBiosSetVisibility(u8* ptr, u8 val);
 extern void floorCharacterBiosSetPos(u8* dst, f32* src);
 extern u32 floorCharacterBiosGetTalkSctID(void* ptr);
@@ -1066,23 +1066,23 @@ extern u32 floorCharacterBiosGetMoveType(u8* ptr);
 extern u32 floorCharacterBiosGetLoadInit(u8* ptr);
 extern u32 floorCharacterBiosGetVisibility(u8* ptr);
 extern void* floorCharacterBiosGetPeopleInfoPtr(u8* ptr);
-extern void fn_8011711C(u32 arg);
+extern void floorCharacterBiosGetByIndex(u32 arg);
 extern void fn_80117154(void);
 extern void fn_80117164(void);
 extern void fn_801171C8(void);
 extern void fn_80117330(f32 arg);
 extern u32 fn_801174C4(void);
-extern void fn_801174F4(void);
+extern void std136_fieldClearFlag_8047ad71(void);
 extern void fn_80117500(void);
 extern u32 fn_80117AD4(void);
-extern u8 fn_80117AE4(u32 arg1);
-extern void fn_80117C84(void);
-extern void fn_80117D14(void);
-extern void fn_80117E58(void* arg);
+extern u8 std171_mapSetTextureChange(u32 arg1);
+extern void tvRelease(void);
+extern void tvRender(void);
+extern void tvInitFloor(void* arg);
 extern void fn_80118020(void);
-extern void fn_80118070(void);
+extern void tvRelease2(void);
 extern void fn_80118100(void);
-extern void fn_80118104(u32 a, u8 b);
+extern void gsParticleDraw(u32 a, u8 b);
 extern void fn_80118A68(u8* obj, u32 notify);
 extern void fn_80118C20(u8* arg1, void* arg2, u32 arg3, u32 arg4, u32 arg5);
 extern void fn_80118C88(void* obj);
@@ -1099,7 +1099,7 @@ extern void fn_80118E8C(u8* arg1, f32* arg2, u32 arg3, u32 arg4, u32 arg5);
 extern void fn_80118F04(u8* arg1, f32* arg2, u32 arg3, u32 arg4, u32 arg5);
 extern void fn_80118F7C(u8* obj, void* arg);
 extern void fn_80118FB0(u8* obj, u8* desc, u32 state, u32 byte5, u32 init_from_zero, u32 attach_model);
-extern void fn_80119824(u32 count1, u32 count2);
+extern void gsParticleInit(u32 count1, u32 count2);
 extern void fn_8011A280(u8* arg1, u16 arg2, u32 arg3);
 extern s32 fn_8011A3E4(void* obj, u16 val);
 extern void fn_8011A570(u8* arg1, u16 arg2, u32 arg3);
@@ -1498,11 +1498,11 @@ u8 floorUpdateFieldCamera(u8* pos, f32* out_x, f32* out_y, f32* out_z)
     return 1;
 }
 /* 0x8011711C | 0x38 */
-void fn_8011711C(u32 arg) {
-    extern void* fn_800FF56C(void);
+void floorCharacterBiosGetByIndex(u32 arg) {
+    extern void* std092_getCurrentRoomID(void);
     extern void* floorDataBiosGetPtr(u32 key);
     extern void* floorDataBiosGetCharInfo(void* a, u32 b);
-    floorDataBiosGetCharInfo(floorDataBiosGetPtr((u32)fn_800FF56C()), arg);
+    floorDataBiosGetCharInfo(floorDataBiosGetPtr((u32)std092_getCurrentRoomID()), arg);
 }
 /* 0x80117154 | 16 bytes | multi_sda_store */
 extern u32 lbl_8047AD68;
@@ -1711,7 +1711,7 @@ asm void fn_801174F4(void) {
 #include "src/game/gs_field_world_fn_801174F4.inc"
 }
 #else
-void fn_801174F4(void) {
+void std136_fieldClearFlag_8047ad71(void) {
     lbl_8047AD71 = 0;
 }
 #endif
@@ -1841,7 +1841,7 @@ void fn_8011791C(void)
 {
     GSFieldWorldResourceState* state =
         (GSFieldWorldResourceState*)lbl_804083D0;
-    void* activeFloor = floorDataBiosGetPtr((u32)fn_800FF56C());
+    void* activeFloor = floorDataBiosGetPtr((u32)std092_getCurrentRoomID());
     u8* loadedFloor = floorDataBiosGetPtr(state->floorId);
 
     if (activeFloor == NULL || activeFloor != loadedFloor) {
@@ -1884,8 +1884,8 @@ asm void fn_80117AE4(void) {
 #include "src/game/gs_field_world_fn_80117AE4.inc"
 }
 #else
-u8 fn_80117AE4(u32 arg1) {
-    extern u32 fn_80113F48(void);
+u8 std171_mapSetTextureChange(u32 arg1) {
+    extern u32 std093_getCurrentGroupID(void);
     extern void* GSresGetResource(u32 a, u32 b);
     extern void GSmodelResetTextureChange(void* a);
     extern void GStextureFree(void* a);
@@ -1903,7 +1903,7 @@ u8 fn_80117AE4(u32 arg1) {
     if ((s32)lbl_80478B40 == (s32)arg1) { return; }
 
     if (lbl_8047AD88 != 0) {
-        GSmodelResetTextureChange(GSresGetResource(fn_80113F48(), *(u32*)((u8*)lbl_8047AD88 + 8)));
+        GSmodelResetTextureChange(GSresGetResource(std093_getCurrentGroupID(), *(u32*)((u8*)lbl_8047AD88 + 8)));
         if (lbl_8047AD8C != 0) {
             GStextureFree((void*)lbl_8047AD8C);
             lbl_8047AD8C = 0;
@@ -1938,13 +1938,13 @@ u8 fn_80117AE4(u32 arg1) {
         lbl_8047AD88 = 0;
         return 0;
     }
-    lbl_8047AD90 = (u32)floorOpenModel(fn_80113F48(), *(u32*)((u8*)lbl_8047AD88 + 0xc));
+    lbl_8047AD90 = (u32)floorOpenModel(std093_getCurrentGroupID(), *(u32*)((u8*)lbl_8047AD88 + 0xc));
     GSmodelSetVisibility((void*)lbl_8047AD90, 0);
     GSmodelLinkTexAnimToAnim((void*)lbl_8047AD90, 1);
     GSmodelSetAnimIndex((void*)lbl_8047AD90, *(u32*)((u8*)lbl_8047AD88 + 0x10));
     GSmodelStartAnimation((void*)lbl_8047AD90);
-    lbl_8047AD94 = (u32)GSresGetResource(fn_80113F48(), *(u32*)((u8*)lbl_8047AD88 + 0x14));
-    GSmodelSetTextureChange(GSresGetResource(fn_80113F48(), *(u32*)((u8*)lbl_8047AD88 + 8)), (void*)lbl_8047AD8C);
+    lbl_8047AD94 = (u32)GSresGetResource(std093_getCurrentGroupID(), *(u32*)((u8*)lbl_8047AD88 + 0x14));
+    GSmodelSetTextureChange(GSresGetResource(std093_getCurrentGroupID(), *(u32*)((u8*)lbl_8047AD88 + 8)), (void*)lbl_8047AD8C);
     lbl_80478B40 = arg1;
     return 1;
 }
@@ -1964,15 +1964,15 @@ asm void fn_80117C84(void) {
 }
 #else
 #pragma peephole off
-void fn_80117C84(void) {
-    extern u32 fn_80113F48(void);
+void tvRelease(void) {
+    extern u32 std093_getCurrentGroupID(void);
     extern void* GSresGetResource(u32 a, u32 b);
     extern void GSmodelResetTextureChange(void* a);
     extern void GStextureFree(void* a);
     extern void GSmodelFree(void* a);
     u8* ptr = (u8*)lbl_8047AD88;
     if (ptr != NULL) {
-        GSmodelResetTextureChange(GSresGetResource(fn_80113F48(), *(u32*)(ptr + 8)));
+        GSmodelResetTextureChange(GSresGetResource(std093_getCurrentGroupID(), *(u32*)(ptr + 8)));
         if (lbl_8047AD8C != 0) {
             GStextureFree((void*)lbl_8047AD8C);
             lbl_8047AD8C = 0;
@@ -2002,7 +2002,7 @@ asm void fn_80117D14(void) {
 #else
 #pragma push
 #pragma peephole off
-void fn_80117D14(void)
+void tvRender(void)
 {
     u16 a0;
     u16 a1;

@@ -15,7 +15,7 @@ extern void fn_801EF080(void);
 extern void fn_801EF0D4(void);
 extern void memoDataSetMemoFlag(u32);
 extern void memoInitDebug(u32);
-extern void fn_80190528(u32);
+extern void std078_flagSetFalse(u32);
 extern void fn_800884BC(u32, u32, u32);
 extern void fn_800FF660(void);
 extern u32 floorGetCurrentContext(void);
@@ -24,7 +24,7 @@ extern u32 savedataGetStatus(s32, s32);
 extern u32 heroBiosGetPokemonPtr(u32, s32);
 extern u32 pokemonCheckValid(u32);
 extern void fn_80097A38(u32, s32);
-extern void fn_800FF730(u32);
+extern void std098_mapWarpToMenuRoom(u32);
 extern void menuPokemonOpen(s32, s32, s32);
 extern void GSthreadSetArgs(u32, s32, ...);
 extern u32 evolutionOpen(u32, u32, u32, u16*, u32, u8*);
@@ -186,7 +186,7 @@ s32 fn_8000CCD0(void) {
 
 /* 0x8000CCF8 */
 s32 fn_8000CCF8(void) {
-    fn_80190528(0x3F0);
+    std078_flagSetFalse(0x3F0);
     return 1;
 }
 
@@ -256,7 +256,7 @@ u32 dbgMenuMenuTestWazaMenu(void) {
 #pragma peephole off
 #pragma peephole off
 s32 fn_8000CED0(void) {
-    fn_800FF730(0x391);
+    std098_mapWarpToMenuRoom(0x391);
     return 0;
 }
 #pragma peephole on
@@ -545,7 +545,7 @@ s32 dbgMenuWazaDebugStart(void) {
         menuClose(0x13);
     }
     if (((BattleAnimState*)lbl_804673F8)->activeFlag == 0) {
-        fn_800FF730(0x3E7);
+        std098_mapWarpToMenuRoom(0x3E7);
         _threadSwitch();
     }
     return 0;

@@ -33,7 +33,7 @@ extern void fn_801081F8();
 extern void winSpriteGetDisp();
 extern void winSpriteSetDisp();
 extern void msgctrlSetValue();
-extern void fn_80166A28();
+extern void soundStartSE();
 extern void __assert();
 extern void* memset(void* dst, int val, u32 size);
 
@@ -1764,7 +1764,7 @@ do {
         tmp = *(u8*)((u8*)r18 + 0xCA);
         if (tmp == 0) {
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
         }
         tmp = 0x1;
         *(u8*)((u8*)r18 + 0xCA) = tmp;
@@ -1808,14 +1808,14 @@ do {
                 tmp = *(u8*)((u8*)r18 + 0xCA);
                 if (tmp == 0) {
                     r3 = 0x26;
-                    fn_80166A28();
+                    soundStartSE();
                 }
                 tmp = 0x1;
                 *(u8*)((u8*)r18 + 0xCA) = tmp;
                 break;
             }
             r3 = 0x3c5;
-            fn_80166A28();
+            soundStartSE();
             r3 = *(u32*)((u8*)r18 + 0xA4);
             tmp = 0x1;
             *(u32*)((u8*)r18 + 0xA4) = r3;
@@ -1832,14 +1832,14 @@ do {
                 tmp = *(u8*)((u8*)r18 + 0xCA);
                 if (tmp == 0) {
                     r3 = 0x26;
-                    fn_80166A28();
+                    soundStartSE();
                 }
                 tmp = 0x1;
                 *(u8*)((u8*)r18 + 0xCA) = tmp;
                 break;
             }
             r3 = 0x3c5;
-            fn_80166A28();
+            soundStartSE();
             r3 = *(u32*)((u8*)r18 + 0xA4);
             tmp = 0x1;
             r3 = r3 + 0x1;
@@ -1857,14 +1857,14 @@ do {
                 tmp = *(u8*)((u8*)r18 + 0xCA);
                 if (tmp == 0) {
                     r3 = 0x26;
-                    fn_80166A28();
+                    soundStartSE();
                 }
                 tmp = 0x1;
                 *(u8*)((u8*)r18 + 0xCA) = tmp;
                 break;
             }
             r3 = 0x3c5;
-            fn_80166A28();
+            soundStartSE();
             r3 = *(u8*)((u8*)r18 + 0xB5);
             tmp = 0x1;
             *(u8*)((u8*)r18 + 0xB5) = r3;
@@ -1897,14 +1897,14 @@ do {
             tmp = *(u8*)((u8*)r18 + 0xCA);
             if (tmp == 0) {
                 r3 = 0x26;
-                fn_80166A28();
+                soundStartSE();
             }
             tmp = 0x1;
             *(u8*)((u8*)r18 + 0xCA) = tmp;
             break;
             }
         r3 = 0x3c5;
-        fn_80166A28();
+        soundStartSE();
         r3 = *(u8*)((u8*)r18 + 0xB5);
         tmp = 0x1;
         r3 = r3 + 0x1;

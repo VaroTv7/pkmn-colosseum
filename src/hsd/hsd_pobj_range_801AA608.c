@@ -1715,7 +1715,7 @@ s32 fn_801ADC3C(s32 max)
 /* Address: 0x801ADC7C | Size: 0x5C  -- LCG next, normalized float return */
 #pragma push
 #pragma peephole off
-f32 fn_801ADC7C(void)
+f32 HSD_Randf(void)
 {
     extern const f32 lbl_8047DD40;
     u32* state;

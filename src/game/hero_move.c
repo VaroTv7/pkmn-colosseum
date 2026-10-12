@@ -52,7 +52,7 @@ extern void psSetParticleVisibility();
 extern void sin();
 extern void statusGetStatus();
 /* GSfloor / GScolsys */
-extern void* fn_800FF56C(void);                             /* GSfloor get active */
+extern void* std092_getCurrentRoomID(void);                             /* GSfloor get active */
 extern void  GScolsys2GetObjEnable(u32 triIdx, void* outFlag);        /* GScolsys query */
 /* ===== Index lookup globals ===== */
 extern u8 lbl_8035BBA8[];  /* NPC table (BSS) */
@@ -64,7 +64,7 @@ extern u32 lbl_80478F94;  /* obj data base (SDA) */
 /* Field subsystems -- forward declarations (defined below) */
 u32  _unloadFlare__FPvUlUl(void);
 u32 floorDataBiosGetFileGroupID(u8* entry);
-void fn_80117C84(void);
+void tvRelease(void);
 void pokemonResetBasisStatus(void* ptr);
 /* ===== String constants (rodata) ===== */
 extern const char lbl_80272770[]; /* "floorUpdateFieldCamera: error updating..." */
@@ -90,7 +90,7 @@ extern u32 lbl_8047ADB8;
 extern u8 lbl_804083D0[0x30];
 extern u32 lbl_8047AD68;
 extern u32 lbl_8047AD6C;
-extern void fn_801ED674(void);
+extern void flareRelease(void);
 void fn_801193BC(void);
 extern s32 pokemonWazaGetMaxPP(u8* ptr, u16 idx);
 extern void wazaGetStatus(void);
@@ -124,8 +124,8 @@ extern void* floorDataBiosGetFieldCameraListPtr();
 extern u32 floorDataBiosGetGroupID();
 extern void* floorDataBiosGetPtr(u32 key);
 extern void fn_8011791C(void);
-extern void fn_80119930(void);
-extern void fn_80119BD0();
+extern void gsParticleKillOldest(void);
+extern void gsParticlePtclHook();
 extern u8 fn_80119D90(u16 idx);
 extern u8 fn_80119DD0(u16 idx);
 extern u16 fn_80119E10(u16 idx);
@@ -167,7 +167,7 @@ extern void heroBiosSetHizukiNamePtr(); /* K&R: typed impl or conflict */
 extern void heroBiosSetNamePtr(); /* K&R: typed impl or conflict */
 extern void heroMoveTermEvent(void);
 extern void heroMoveInitEvent(void);
-extern void fn_8012CA84();
+extern void partnerApplyMove();
 extern void heroPokemonGetEifie(u32 arg1);
 extern void heroPokemonGetBlacky(u32 arg1);
 extern s32 psGetGeneratorChildMaxLife(u32);
@@ -191,21 +191,21 @@ extern void* heroBiosGetItemNormalPtr(u8* ptr, u16 idx);
 extern u32 heroBiosGetNamePtr(void* ptr);
 extern u32 lbl_80478EBC;
 extern u32 lbl_80478EB8;
-extern void fn_80113F48(void);
+extern void std093_getCurrentGroupID(void);
 extern void peopleSetVisible(u32, u32, u32);
-extern void fn_801653CC(void);
+extern void soundPlayFanfare(void);
 extern void msgctrlSetValue(void);
 extern void winMsgOpen(void);
 extern void winMsgClose(void);
 extern void pcboxDelItem(void);
-extern void fn_8001E184(void);
+extern void std011_dialogDisplayYesNoMenu(void);
 void floorEventGetTresure(void);
-extern void fn_8018B76C(void);
+extern void std051_characterSetAnimation(void);
 extern void peopleSetFlagsByIndex(void);
-extern void fn_801902E0(void);
-extern void fn_80166A28(void);
+extern void std081_flagCheckTrue(void);
+extern void soundStartSE(void);
 extern void peopleWaitSyncMotion(void);
-extern void fn_80190528(void);
+extern void std078_flagSetFalse(void);
 void floorEventCtrlTresure(void);
 extern void floorGetResource(void);
 extern void GSmodelSetAnimIndex(void);
@@ -220,13 +220,13 @@ extern void GSpartGetTransform(void* part, void* transform, void* arg2, void* ar
 extern void GSpartFree();
 extern void fn_8018AACC(void);
 extern void peopleMoveCheck(u32 groupId, u32 index, u8 waitFlag);
-extern void fn_8018805C(void);
-extern void fn_80184470(void);
+extern void peopleStartTurn(void);
+extern void std168_characterDetachFromCharacter(void);
 extern void peopleSetPositionByIndex(void);
-extern void fn_801669BC(void);
+extern void soundStopSE(void);
 extern void GSmodelCanAnimate(void);
-extern void fn_801845E4(void);
-extern void fn_801860F8(void);
+extern void std070_characterAttachToCharacter(void);
+extern void std059_characterSetPosition(void);
 extern void GSmodelGetFrameCount(void);
 extern void fn_800D37CC(void);
 extern f32 lbl_8047CFA0;
@@ -240,13 +240,13 @@ extern f32 lbl_8047CFB4;
 extern f32 lbl_8047CFB0;
 void floorEventCtrlElevator(void);
 extern void scriptSetCol(void);
-extern void fn_801903B0(void);
+extern void std079_flagSetTrue(void);
 extern void fn_8018C558(void);
 extern void fn_8018C8F4(void);
 void floorEventCtrlDoor(void);
 extern void EvlogSet__FScUl();
 extern void scriptSetEventColID();
-extern void fn_800F7434();
+extern void cmsRunSync();
 extern u8 lbl_80272708[];
 extern u32 lbl_80478EC4;
 extern u32 lbl_80478EC0;
@@ -313,7 +313,7 @@ extern void fn_800D3190(void);
 extern void fn_800FF4D4(void);
 extern u32 lbl_802727C8[];
 extern void psSetBillboardCamera();
-extern void fn_8016AB94();
+extern void psDispMain();
 extern void psGetParticleChildCount(void* ptr);
 extern void psKillFamily();
 extern void GSmodelSet60fpsAnimFlag();
@@ -330,7 +330,7 @@ extern void psExecGenerator(void);
 extern void fn_800057A0(void);
 extern void jumptable_8035BB88();
 extern u8 lbl_8047ADB0;
-void fn_801183EC(void);
+void gsParticleUpdate(void);
 void fn_80118874(void);
 extern void psSetParticleVisibility(); /* K&R: called with 0 or 1 args */
 extern void psSetGeneratorAngleRadiusScale(void);
@@ -341,16 +341,16 @@ extern void psCreateGeneratorID(void);
 extern void fn_800D3094(void);
 extern u32 lbl_8047ADAC;
 extern u32 lbl_8047ADA8;
-void fn_801190DC(void);
+void gsParticleCreate(void);
 extern void psInitDataBank(void);
 extern void DCFlushRange();
 extern u8 lbl_802727D8[];
-void fn_801195AC(void);
+void gsParticleBankLoad(void);
 extern void fn_8016A01C(void);
 extern void psInitGenerator(void);
 extern void fn_8016AAF4(void);
-extern void fn_8019733C(void);
-extern void fn_8019D618(void);
+extern void HSD_JObjSetSPtclCallback(void);
+extern void HSD_JObjSetPtclCallback(void);
 extern void psSetPointJObjNodup(void);
 extern void fn_8019D610(void);
 extern u16 lbl_8047AD98;
@@ -411,7 +411,7 @@ extern u32 lbl_80478E64;
 extern u32 lbl_80478B60;
 extern u8 lbl_8035E940[];
 extern void _flagSet(u32);
-extern u32 fn_801906A0(u32);
+extern u32 std082_flagGetValue(u32);
 extern u32 lbl_80478F90;
 extern u32 lbl_80478F94;
 extern u8 lbl_80478B58[4];
@@ -501,7 +501,7 @@ extern void jumptable_80363558();
 extern u8 lbl_80426BD0[];
 extern void fadeEffectDokuStart(void);
 extern void peopleClearFlagsByIndex(void);
-extern void fn_8018CA20(void);
+extern void std151_characterFaceDirection(void);
 extern void winMsgOpenField(void);
 extern void winMsgCloseField(void);
 extern void fn_801D0AFC(void);
@@ -510,11 +510,11 @@ extern f32 lbl_8047D030;
 extern f32 lbl_8047D034;
 extern f32 lbl_8047D038;
 void cbPoison__Fl15FootStepCounterl(void);
-extern u32 fn_8018D998();
+extern u32 peopleIsInGroup();
 extern u32 peopleSearchID();
 extern void peopleInfoBiosGetPtr(void);
 extern void fn_8018F5E4(void);
-extern void fn_8010F320(void);
+extern void colsysWallSweep(void);
 extern void PSVECScale(void);
 extern void PSVECAdd(void);
 extern void GScolsys2HumanCollision(void);
@@ -527,16 +527,16 @@ extern u8 lbl_80478AC0[4];
 extern f32 lbl_8047D060;
 u32 fn_8012B19C(s32 member, f32* start, f32* target, f32 extraRadius);
 u32 heroMoveChkHinderClear(s32 member);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern f64 lbl_8047D068;
 void getStep__FP8FOOTSTEPP8_GSmodelPiP8FOOTWORK(f32*, void*, s32*, f32*);
-extern u32 fn_8018CD08();
-extern u32 fn_8018FCBC();
+extern u32 peopleFindTalkTarget();
+extern u32 peopleGetPositionPtr();
 extern void fn_8018FC50(void);
 extern void fn_800CE148(void);
 extern void fn_800CDBE0(void);
 extern s32 GScolsys2CheckGetEventID();
-extern void fn_8018790C(void);
+extern void peopleStopTurn(void);
 extern void fn_800F7D38(void);
 extern void fn_800F7C8C(void);
 extern void fn_8018BA04(void);
@@ -544,8 +544,8 @@ extern void peopleTurnToPoint(void);
 extern u8 fn_8018D7D0();
 extern void fn_80183730(void);
 extern u32 fn_8018397C();
-extern void fn_801812E8(void);
-extern void fn_80189490(void);
+extern void peopleTalkPause(void);
+extern void std055_characterEndSpeech(void);
 extern void fn_80183688(void);
 extern f32 lbl_8047D070;
 extern f32 lbl_8047D074;
@@ -564,16 +564,16 @@ extern f32 lbl_8047D088;
 extern f32 lbl_8047D08C;
 extern f32 lbl_8047D090;
 extern f32 lbl_8047D0A8;
-extern s32 fn_8012D39C(void*, void*, void*, void*, void*, f32);
+extern s32 circleLineIntersect(void*, void*, void*, void*, void*, f32);
 extern f32 lbl_8047D0AC;
-void fn_8012D7F0(s32, void*, void*);
+void partnerGetTarget(s32, void*, void*);
 extern void fn_800E3C64(void);
 extern f32 lbl_8047D0B0;
-void fn_8012DE94(u32 playerIndex);
+void partnerMove(u32 playerIndex);
 extern void fn_800F7A7C(void);
 extern void fn_800F7A08(void);
 extern void fn_800F7BC4(void);
-extern void fn_80188214(void);
+extern void peopleSetSpeedFromAmount(void);
 extern void fn_80166458(void);
 extern f64 lbl_8047D0C8;
 extern f32 lbl_8047D0B4;
@@ -581,9 +581,9 @@ extern f32 lbl_8047D0B8;
 extern f32 lbl_8047D0BC;
 extern f32 lbl_8047D0C0;
 extern f32 lbl_8047D0C4;
-void fn_8012E388(s32, f32*);
+void heroReadStick(s32, f32*);
 extern void fn_800F7AF0(void);
-extern void fn_801887D8(void);
+extern void peopleAmountFromMove(void);
 extern void PSVECDistance(void);
 extern f32 lbl_8047D0D0;
 extern f32 lbl_8047D0D4;
@@ -595,8 +595,8 @@ extern void fn_8000D710(u32);
 extern u8 lbl_80272A38[];
 extern f32 lbl_8047D064;
 u32 heroMoveMain(void);
-extern void fn_80188AF4(u32, u32);
-extern void fn_80188F78(u32, u32);
+extern void std067_characterStopLookAt(u32, u32);
+extern void std065_characterLookAtPlayer(u32, u32);
 s32 fn_8012F1FC(s32);
 s32 fn_8012F40C(s32);
 extern void GSmodelGetRotation(void);
@@ -811,10 +811,10 @@ extern void fightOutPokemonBiosGetIrekaeTargetEntryId(void);
 extern void fightOutPokemonBiosGetFightOutPokemonEnemyPtr(void);
 extern void fightOutPokemonCheckFightOut(void);
 extern void jumptable_8035E4B0();
-extern void fn_801885C4(void);
+extern void peopleMoveByVector(void);
 extern void PSVECDotProduct(void);
-extern void fn_8018F678(void);
-extern void fn_8018F658(void);
+extern void charModelGetHeadYawMin(void);
+extern void charModelGetHeadYawMax(void);
 extern f32 lbl_8047D094;
 extern f32 lbl_8047D098;
 extern f32 lbl_8047D09C;
@@ -1053,7 +1053,7 @@ extern u32 floorDataBiosGetFileGroupID(u8* entry);
 extern void* floorDataBiosGetCurrentPtr(void);
 extern void* fn_80115CB4(u32 param);
 extern void fn_80115D64(u32 r25, u32 r26);
-extern void fn_80116D30(u32 kind, u32 arg);
+extern void heroDispatchEvent(u32 kind, u32 arg);
 extern void floorCharacterBiosSetVisibility(u8* ptr, u8 val);
 extern void floorCharacterBiosSetPos(u8* dst, f32* src);
 extern u32 floorCharacterBiosGetTalkSctID(void* ptr);
@@ -1066,23 +1066,23 @@ extern u32 floorCharacterBiosGetMoveType(u8* ptr);
 extern u32 floorCharacterBiosGetLoadInit(u8* ptr);
 extern u32 floorCharacterBiosGetVisibility(u8* ptr);
 extern void* floorCharacterBiosGetPeopleInfoPtr(u8* ptr);
-extern void fn_8011711C(u32 arg);
+extern void floorCharacterBiosGetByIndex(u32 arg);
 extern void fn_80117154(void);
 extern void fn_80117164(void);
 extern void fn_801171C8(void);
 extern void fn_80117330(f32 arg);
 extern u32 fn_801174C4(void);
-extern void fn_801174F4(void);
+extern void std136_fieldClearFlag_8047ad71(void);
 extern void fn_80117500(void);
 extern u32 fn_80117AD4(void);
-extern u8 fn_80117AE4(u32 arg1);
-extern void fn_80117C84(void);
-extern void fn_80117D14(void);
-extern void fn_80117E58(void* arg);
+extern u8 std171_mapSetTextureChange(u32 arg1);
+extern void tvRelease(void);
+extern void tvRender(void);
+extern void tvInitFloor(void* arg);
 extern void fn_80118020(void);
-extern void fn_80118070(void);
+extern void tvRelease2(void);
 extern void fn_80118100(void);
-extern void fn_80118104(u32 a, u8 b);
+extern void gsParticleDraw(u32 a, u8 b);
 extern void fn_80118A68(u8* obj, u32 notify);
 extern void fn_80118C20(u8* arg1, void* arg2, u32 arg3, u32 arg4, u32 arg5);
 extern void fn_80118C88(void* obj);
@@ -1099,7 +1099,7 @@ extern void fn_80118E8C(u8* arg1, f32* arg2, u32 arg3, u32 arg4, u32 arg5);
 extern void fn_80118F04(u8* arg1, f32* arg2, u32 arg3, u32 arg4, u32 arg5);
 extern void fn_80118F7C(u8* obj, void* arg);
 extern void fn_80118FB0(u8* obj, u8* desc, u32 state, u32 byte5, u32 init_from_zero, u32 attach_model);
-extern void fn_80119824(u32 count1, u32 count2);
+extern void gsParticleInit(u32 count1, u32 count2);
 extern void fn_8011A280(u8* arg1, u16 arg2, u32 arg3);
 extern s32 fn_8011A3E4(void* obj, u16 val);
 extern void fn_8011A570(u8* arg1, u16 arg2, u32 arg3);
@@ -1451,9 +1451,9 @@ void fn_8013024C(void)
     resources[0] = *(u32*)&lbl_8047D030;
     resources[1] = *(u32*)&lbl_8047D034;
     if (*(s32*)(lbl_80426BD0 + 0x0C) == 1) {
-        fn_80188AF4(0, resources[0]);
+        std067_characterStopLookAt(0, resources[0]);
     }
-    fn_80188F78(0, resources[0]);
+    std065_characterLookAtPlayer(0, resources[0]);
     *(u32*)(lbl_80426BD0 + 0x0C) = 1;
 
     active = *(u32*)lbl_80426BD0;
@@ -1471,7 +1471,7 @@ void fn_8013024C(void)
     if ((*(u16*)(lbl_80426BD0 + 4) & 1) != 0) {
         *(u32*)lbl_80426BD0 = 0;
         if (*(u32*)(lbl_80426BD0 + 0x0C) == 1) {
-            fn_80188AF4(0, resources[0]);
+            std067_characterStopLookAt(0, resources[0]);
         }
         *(u32*)(lbl_80426BD0 + 0x0C) = 0;
 
@@ -1583,7 +1583,7 @@ void cbPoison__Fl15FootStepCounterl(void) {
     extern void updateAnimation__Ff15HEROMOVE_MEMBER(void* model, s32 member, f32 frame);
     extern void peopleSetFlagsByIndex(u32 a, u32 handle, u32 flags);
     extern void peopleClearFlagsByIndex(u32 a, u32 handle, u32 flags);
-    extern void fn_8018CA20(u32 a, u32 handle, u32 flags);
+    extern void std151_characterFaceDirection(u32 a, u32 handle, u32 flags);
     extern void* pokemonBiosGetNicknamePtr(u32 mon);
     extern void msgctrlSetValue(u32 id, void* value);
     extern void winMsgOpenField(u32 msg, u32 a, u32 b);
@@ -1658,7 +1658,7 @@ void cbPoison__Fl15FootStepCounterl(void) {
             peopleSetFlagsByIndex(0, handle, 0x80000008);
             peopleClearFlagsByIndex(0, handle, 0x100);
             peopleClearFlagsByIndex(0, handle, 0x400);
-            fn_8018CA20(0, handle, 0);
+            std151_characterFaceDirection(0, handle, 0);
         }
     }
 
@@ -1706,7 +1706,7 @@ void cbPoison__Fl15FootStepCounterl(void) {
             handles[0] = *(u32*)&lbl_8047D030;
             handles[1] = *(u32*)&lbl_8047D034;
             handle = handles[member];
-            fn_8018CA20(0, handle, 1);
+            std151_characterFaceDirection(0, handle, 1);
             peopleSetFlagsByIndex(0, handle, 0x700);
             peopleClearFlagsByIndex(0, handle, 0x80000008);
         }
@@ -1744,11 +1744,11 @@ extern f32 lbl_8047D060;
 u32 fn_8012B19C(s32 member, f32* start, f32* target, f32 extraRadius) {
     extern void* GSresGetResource(u32 group, u32 handle);
     extern void GSmodelGetPosition(void* model, void* out);
-    extern void fn_8018D998(u32 group, u32 handle);
+    extern void peopleIsInGroup(u32 group, u32 handle);
     extern u8* peopleSearchID(void);
     extern void* peopleInfoBiosGetPtr(s32 id);
     extern f32 fn_8018F5E4(void* info);
-    extern s32 fn_8010F320(void* a, void* b, u32 flags);
+    extern s32 colsysWallSweep(void* a, void* b, u32 flags);
     extern void PSVECSubtract(void* a, void* b, void* out);
     extern void PSVECScale(void* src, void* dst, f32 scale);
     extern void PSVECAdd(void* a, void* b, void* out);
@@ -1800,7 +1800,7 @@ u32 fn_8012B19C(s32 member, f32* start, f32* target, f32 extraRadius) {
     handles[0] = *(u32*)&lbl_8047D030;
     handles[1] = *(u32*)&lbl_8047D034;
     handle2 = handles[member];
-    fn_8018D998(0, handle2);
+    peopleIsInGroup(0, handle2);
     people = peopleSearchID();
     if (people == NULL) {
         return 0;
@@ -1815,14 +1815,14 @@ u32 fn_8012B19C(s32 member, f32* start, f32* target, f32 extraRadius) {
     }
 
     baseRadius = lbl_8047D040 * fn_8018F5E4(info);
-    if (fn_8010F320(from, to, 0) != 0) {
+    if (colsysWallSweep(from, to, 0) != 0) {
         return 0;
     }
 
     handles[0] = *(u32*)&lbl_8047D030;
     handles[1] = *(u32*)&lbl_8047D034;
     handle3 = handles[member];
-    fn_8018D998(0, handle3);
+    peopleIsInGroup(0, handle3);
     people = peopleSearchID();
     if (people == NULL) {
         return 0;
@@ -1883,11 +1883,11 @@ u32 heroMoveChkHinderClear(s32 member) {
     extern u8 lbl_80478AC0[4];
     extern void* GSresGetResource(u32 group, u32 handle);
     extern void GSmodelGetPosition(void* model, void* out);
-    extern void fn_8018D998(u32 group, u32 handle);
+    extern void peopleIsInGroup(u32 group, u32 handle);
     extern u8* peopleSearchID(void);
     extern void* peopleInfoBiosGetPtr(s32 id);
     extern f32 fn_8018F5E4(void* info);
-    extern s32 fn_8010F320(void* a, void* b, u32 flags);
+    extern s32 colsysWallSweep(void* a, void* b, u32 flags);
     extern void PSVECSubtract(void* a, void* b, void* out);
     extern void PSVECScale(void* src, void* dst, f32 scale);
     extern void PSVECAdd(void* a, void* b, void* out);
@@ -1938,7 +1938,7 @@ u32 heroMoveChkHinderClear(s32 member) {
     GSmodelGetPosition(model, activePos);
     activePos[1] += lbl_8047D03C;
 
-    fn_8018D998(0, memberHandle);
+    peopleIsInGroup(0, memberHandle);
     people = peopleSearchID();
     if (people == NULL) {
         return 0;
@@ -1953,11 +1953,11 @@ u32 heroMoveChkHinderClear(s32 member) {
     }
     memberRadius = fn_8018F5E4(info);
 
-    if (fn_8010F320(memberPos, activePos, 0) != 0) {
+    if (colsysWallSweep(memberPos, activePos, 0) != 0) {
         return 0;
     }
 
-    fn_8018D998(0, activeHandle);
+    peopleIsInGroup(0, activeHandle);
     people = peopleSearchID();
     if (people == NULL) {
         return 0;
@@ -1972,7 +1972,7 @@ u32 heroMoveChkHinderClear(s32 member) {
     }
     activeRadius = fn_8018F5E4(info);
 
-    fn_8018D998(0, memberHandle);
+    peopleIsInGroup(0, memberHandle);
     people = peopleSearchID();
     if (people == NULL) {
         return 0;
@@ -2059,7 +2059,7 @@ asm void heroMoveTermEvent(void) {
 #else
 void heroMoveTermEvent(void) {
     extern u8 lbl_80426BD0[];
-    extern void fn_8018CA20(u32 a, u32 b, u32 c);
+    extern void std151_characterFaceDirection(u32 a, u32 b, u32 c);
     extern void peopleSetFlagsByIndex(u32 a, u32 b, u32 c);
     extern void peopleClearFlagsByIndex(u32 a, u32 b, u32 c);
     s32 i;
@@ -2087,7 +2087,7 @@ void heroMoveTermEvent(void) {
             if (i >= 0 && i < 2) {
                 val = table[idx / 4];
             }
-            fn_8018CA20(0, val, 1);
+            std151_characterFaceDirection(0, val, 1);
             peopleSetFlagsByIndex(0, val, 0x700);
             peopleClearFlagsByIndex(0, val, 0x80000008);
         }
@@ -2108,7 +2108,7 @@ void heroMoveInitEvent(void)
                                                      f32 frame);
     extern void peopleSetFlagsByIndex(u32 group, u32 handle, u32 flags);
     extern void peopleClearFlagsByIndex(u32 group, u32 handle, u32 flags);
-    extern void fn_8018CA20(u32 group, u32 handle, u32 flags);
+    extern void std151_characterFaceDirection(u32 group, u32 handle, u32 flags);
     u32 handles[2];
     s32 member;
 
@@ -2121,7 +2121,7 @@ void heroMoveInitEvent(void)
             peopleSetFlagsByIndex(0, handles[member], 0x80000008);
             peopleClearFlagsByIndex(0, handles[member], 0x100);
             peopleClearFlagsByIndex(0, handles[member], 0x400);
-            fn_8018CA20(0, handles[member], 0);
+            std151_characterFaceDirection(0, handles[member], 0);
         }
     }
 }
@@ -2195,7 +2195,7 @@ void getStep__FP8FOOTSTEPP8_GSmodelPiP8FOOTWORK(
     HeroMoveVec3 transform;
     f32 heights[4];
     f32 zero = lbl_8047D038;
-    f32 delta = (f32)fn_800D3088();
+    f32 delta = (f32)msgGetCharsPerFrame();
     void* part;
     s32 i;
 
@@ -2270,9 +2270,9 @@ s32 heroMoveCheckEvent(void* event)
         f32 y;
         f32 z;
     } HeroMoveEventVec;
-    extern u32 fn_8018D998(u32 group, u32 handle);
+    extern u32 peopleIsInGroup(u32 group, u32 handle);
     extern void* peopleSearchID(u32 id);
-    extern HeroMoveEventVec* fn_8018FCBC(void* person);
+    extern HeroMoveEventVec* peopleGetPositionPtr(void* person);
     extern HeroMoveEventVec* peopleGetPosition(void* person);
     extern f64 sin(f64 angle);
     extern f64 cos(f64 angle);
@@ -2297,9 +2297,9 @@ s32 heroMoveCheckEvent(void* event)
         handle = handles[member];
     }
 
-    person = peopleSearchID(fn_8018D998(0, handle));
+    person = peopleSearchID(peopleIsInGroup(0, handle));
     if (person != NULL) {
-        position = fn_8018FCBC(person);
+        position = peopleGetPositionPtr(person);
         rotation = peopleGetPosition(person);
         origin = *position;
         origin.y += lbl_8047D078;
@@ -2399,8 +2399,8 @@ u32 heroMoveMain(void)
     } HeroMoveFootworkPair;
     extern u32 fn_800F7AF0(s32);
     extern u32 fn_800F7BC4(s32);
-    extern u32 fn_801906A0(u32);
-    extern void fn_800F7434(void*, u32, ...);
+    extern u32 std082_flagGetValue(u32);
+    extern void cmsRunSync(void*, u32, ...);
     extern void getStep__FP8FOOTSTEPP8_GSmodelPiP8FOOTWORK();
 
     u32 resources[2];
@@ -2453,7 +2453,7 @@ u32 heroMoveMain(void)
     queued_event = *(u32*)(state + 0x18c);
     if (queued_event != 0) {
         *(u32*)(state + 0x18c) = 0;
-        fn_800F7434((void*)queued_event, 4, *(u32*)(state + 0x190),
+        cmsRunSync((void*)queued_event, 4, *(u32*)(state + 0x190),
                     *(u32*)(state + 0x194), *(u32*)(state + 0x198),
                     *(u32*)(state + 0x19c));
         return 0;
@@ -2461,19 +2461,19 @@ u32 heroMoveMain(void)
 
     ptr_a = state;
     for (i = 0; i < *(s32*)(state + 0x410); i++) {
-        fn_80116D30(3, *(u16*)(ptr_a + 0x1d0));
+        heroDispatchEvent(3, *(u16*)(ptr_a + 0x1d0));
         ptr_a += 0x34;
     }
     ptr_b = state;
     ptr_a = lbl_80426BD0;
     for (i = 0; i < *(s32*)(ptr_a + 0x418); i++) {
-        fn_80116D30(2, *(u16*)(ptr_b + 0x370));
+        heroDispatchEvent(2, *(u16*)(ptr_b + 0x370));
         ptr_b += 0x34;
     }
     ptr_c = state;
     ptr_b = lbl_80426BD0;
     for (i = 0; i < *(s32*)(ptr_b + 0x414); i++) {
-        fn_80116D30(1, *(u16*)(ptr_c + 0x2a0));
+        heroDispatchEvent(1, *(u16*)(ptr_c + 0x2a0));
         ptr_c += 0x34;
     }
 
@@ -2510,7 +2510,7 @@ member_valid:
         valid = 1;
 member_done:
         if (valid != 0 && i != *(s32*)lbl_80426BD0) {
-            fn_8012DE94(i);
+            partnerMove(i);
         }
         ptr_c += 0x20;
     }
@@ -2519,7 +2519,7 @@ member_done:
     footwork = *(HeroMoveFootworkPair*)lbl_80272A38;
     active_state = lbl_80426BD0;
     active = *(s32*)active_state;
-    fn_800D3088();
+    msgGetCharsPerFrame();
 
     active_resources[0] = *(u32*)&lbl_8047D030;
     active_resources[1] = *(u32*)&lbl_8047D034;
@@ -2531,7 +2531,7 @@ member_done:
         getStep__FP8FOOTSTEPP8_GSmodelPiP8FOOTWORK(
             footstep, model, &footwork.entries[active],
             lbl_80426BD0 + active * 0x20 + 0x14);
-        valid = fn_801906A0(0x8ae) == 0;
+        valid = std082_flagGetValue(0x8ae) == 0;
         if (valid != 0) {
             cadence = lbl_8047D064;
             accumulator_state = lbl_80426BD0;
@@ -2560,7 +2560,7 @@ void* model;
 s32 member;
 f32 amount;
 {
-    extern void fn_8018D998(u32, u32);
+    extern void peopleIsInGroup(u32, u32);
     extern void* peopleSearchID(void);
     extern void* peopleInfoBiosGetPtr(s32);
     extern void fn_8018F4C8(void*, s32, s32*, void*);
@@ -2591,7 +2591,7 @@ f32 amount;
     if (member < 0 || member >= 2) {
         return -1;
     }
-    fn_8018D998(0, resources[member]);
+    peopleIsInGroup(0, resources[member]);
     person = peopleSearchID();
     if (person == NULL) {
         return -1;
@@ -2753,7 +2753,7 @@ static inline f32 heroMoveSqrt(f32 value)
     return value;
 }
 
-s32 fn_8012D39C(void* start_, void* end_, void* center_, void* reference_,
+s32 circleLineIntersect(void* start_, void* end_, void* center_, void* reference_,
                 void* result_, f32 radius)
 {
     HeroMoveVec3* start = start_;
@@ -2857,9 +2857,9 @@ s32 fn_8012D39C(void* start_, void* end_, void* center_, void* reference_,
     return 2;
 }
 
-void fn_8012D7F0(s32 playerIndex, void* velocityOut_, void* resultOut_)
+void partnerGetTarget(s32 playerIndex, void* velocityOut_, void* resultOut_)
 {
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern void* GSresGetResource(u32, u32);
     extern void GSmodelGetPosition(void*, HeroMoveVec3*);
     extern void PSVECScale(HeroMoveVec3*, HeroMoveVec3*, f32);
@@ -2890,7 +2890,7 @@ void fn_8012D7F0(s32 playerIndex, void* velocityOut_, void* resultOut_)
     f32 scale;
 
     radius = *(f32*)(lbl_80426BD0 + playerIndex * 0x20 + 8);
-    frameDistance = (f32)fn_800D3088();
+    frameDistance = (f32)msgGetCharsPerFrame();
 
     resourceHandles[0] = *(u32*)&lbl_8047D030;
     resourceHandles[1] = *(u32*)&lbl_8047D034;
@@ -2968,7 +2968,7 @@ void fn_8012D7F0(s32 playerIndex, void* velocityOut_, void* resultOut_)
     }
 
     PSVECAdd(&currentPosition, &step, &candidatePosition);
-    if (fn_8012D39C(&currentPosition, &candidatePosition, &targetPosition,
+    if (circleLineIntersect(&currentPosition, &candidatePosition, &targetPosition,
                     &currentPosition, &collisionPosition, radius) > 0) {
         f32 magnitudeSquared;
 
@@ -3004,9 +3004,9 @@ extern f64 lbl_8047D058;
 extern f64 lbl_8047D048;
 extern f64 lbl_8047D050;
 extern f32 lbl_8047D0B0;
-void fn_8012DE94(u32 playerIndex)
+void partnerMove(u32 playerIndex)
 {
-    extern u32 fn_800D3088();
+    extern u32 msgGetCharsPerFrame();
     extern u8 fn_800E3C64();
     extern void peopleSetPositionByIndex();
     extern void PSVECSubtract(HeroMoveVec3*, HeroMoveVec3*, HeroMoveVec3*);
@@ -3055,8 +3055,8 @@ void fn_8012DE94(u32 playerIndex)
         separation.x * separation.x + separation.z * separation.z;
     heroMoveSqrt(distanceSquared);
 
-    fn_8012D7F0(playerIndex, &velocity, &movement);
-    fn_8012CA84(playerIndex, &velocity, &movement);
+    partnerGetTarget(playerIndex, &velocity, &movement);
+    partnerApplyMove(playerIndex, &velocity, &movement);
 
     resourceHandles[0] = *(u32*)&lbl_8047D030;
     resourceHandles[1] = *(u32*)&lbl_8047D034;
@@ -3079,7 +3079,7 @@ void fn_8012DE94(u32 playerIndex)
     }
 
     *(s32*)(lbl_80426BD0 + playerIndex * 0x20 + 0x10) -=
-        (s32)fn_800D3088();
+        (s32)msgGetCharsPerFrame();
     if (*(s32*)(lbl_80426BD0 + playerIndex * 0x20 + 0x10) > 0) {
         return;
     }
@@ -3152,7 +3152,7 @@ extern f32 lbl_8047D0BC;
 extern f32 lbl_8047D078;
 extern f32 lbl_8047D0C0;
 extern f32 lbl_8047D0C4;
-void fn_8012E388(s32 playerIndex, f32* magnitudeOut)
+void heroReadStick(s32 playerIndex, f32* magnitudeOut)
 {
     extern void* GSresGetResource(u32, u32);
     extern s32 fn_800F7A7C(u32, u32);
@@ -3161,9 +3161,9 @@ void fn_8012E388(s32 playerIndex, f32* magnitudeOut)
     extern u32 GSscene_GetMode(void);
     extern f64 sin(f32);
     extern f32 cameraGetRotY(void);
-    extern void fn_8018805C(u32, u32, f32, f32);
-    extern void fn_80188214(u32, u32, f32);
-    extern void fn_8018790C(u32, u32);
+    extern void peopleStartTurn(u32, u32, f32, f32);
+    extern void peopleSetSpeedFromAmount(u32, u32, f32);
+    extern void peopleStopTurn(u32, u32);
     extern void fn_80166458(void*, void*);
 
     u32 resources[2];
@@ -3208,7 +3208,7 @@ void fn_8012E388(s32 playerIndex, f32* magnitudeOut)
 
     if ((s8)stickX == 0 && (s8)stickY == 0) {
         *magnitudeOut = lbl_8047D038;
-        fn_8018790C(0, modelHandle);
+        peopleStopTurn(0, modelHandle);
         return;
     }
 
@@ -3246,10 +3246,10 @@ void fn_8012E388(s32 playerIndex, f32* magnitudeOut)
                 angle = lbl_8047D0C4 + anglePart;
             }
         }
-        fn_8018805C(0, modelHandle, cameraGetRotY() + angle,
+        peopleStartTurn(0, modelHandle, cameraGetRotY() + angle,
                     *magnitudeOut);
     }
-    fn_80188214(0, modelHandle, *magnitudeOut);
+    peopleSetSpeedFromAmount(0, modelHandle, *magnitudeOut);
     fn_80166458(GSresGetResource(0, 0x7D0), scratch);
 }
 /* 0x8012E7B8 | 0x41C */
@@ -3273,8 +3273,8 @@ s32 member;
     extern void PSVECSubtract(HeroMoveVec3*, HeroMoveVec3*, HeroMoveVec3*);
     extern void PSVECScale(HeroMoveVec3*, HeroMoveVec3*, f32);
     extern f32 PSVECDistance(HeroMoveVec3*, HeroMoveVec3*);
-    extern f32 fn_801887D8(u32, u32, HeroMoveVec3*);
-    extern u32 fn_800D3088(void);
+    extern f32 peopleAmountFromMove(u32, u32, HeroMoveVec3*);
+    extern u32 msgGetCharsPerFrame(void);
     u32 resources[2];
     HeroMoveVec3 before;
     HeroMoveVec3 after;
@@ -3303,7 +3303,7 @@ s32 member;
         handle = resources[member];
     }
     GSmodelGetPosition((void*)GSresGetResource(0, handle), &before);
-    fn_8012E388(member, input);
+    heroReadStick(member, input);
 
     resources[0] = *(u32*)&lbl_8047D030;
     resources[1] = *(u32*)&lbl_8047D034;
@@ -3313,14 +3313,14 @@ s32 member;
     GSmodelGetPosition((void*)GSresGetResource(0, handle), &after);
     PSVECSubtract(&after, &before, &direction);
     PSVECScale(&direction, &direction,
-               lbl_8047D080 / (f32)fn_800D3088());
+               lbl_8047D080 / (f32)msgGetCharsPerFrame());
 
     resources[0] = *(u32*)&lbl_8047D030;
     resources[1] = *(u32*)&lbl_8047D034;
     if (member >= 0 && member < 2) {
         handle = resources[member];
     }
-    turn = fn_801887D8(0, handle, &direction);
+    turn = peopleAmountFromMove(0, handle, &direction);
     if (turn < lbl_8047D0D0) {
         if (input[1] >= lbl_8047D0D0) {
             turn = lbl_8047D0D0;
@@ -3424,14 +3424,14 @@ u32 heroMoveSetNeckMode(s32 idx, s32 state)
     entry += idx * 0x20;
     switch (*(s32*)(entry += 0xC)) {
     case 1:
-        fn_80188AF4(0, value);
+        std067_characterStopLookAt(0, value);
         break;
     default:
         break;
     }
     switch (state) {
     case 1:
-        fn_80188F78(0, value);
+        std065_characterLookAtPlayer(0, value);
         break;
     default:
         break;
@@ -3500,7 +3500,7 @@ asm void fn_8012CA84(void) {
 #else
 /* FUNCTIONAL decomp of fn_8012CA84
  * Field movement/heading processor - computes turn amount from direction input. */
-void fn_8012CA84(s32 playerIdx, f32* dirVec, f32* fwdVec) {
+void partnerApplyMove(s32 playerIdx, f32* dirVec, f32* fwdVec) {
     extern u8 lbl_80478AC0[4];       /* sdata constant 0.0f */
     extern f32 lbl_8047D030;        /* handle pair [0] (read as u32 bits) */
     extern f32 lbl_8047D034;        /* handle pair [1] (read as u32 bits) */
@@ -3512,7 +3512,7 @@ void fn_8012CA84(s32 playerIdx, f32* dirVec, f32* fwdVec) {
     extern f32 lbl_8047D09C;        /* -PI */
     extern f32 lbl_8047D0A0;        /* PI */
     extern f32 lbl_8047D0A4;        /* minimum turn threshold */
-    extern u32  fn_800D3088(void);                        /* frame count */
+    extern u32  msgGetCharsPerFrame(void);                        /* frame count */
     extern void PSVECSubtract(void*, void*, void*);         /* VECSubtract(a, b, out) */
     extern void PSVECScale(void*, void*, f32);           /* VECScale(in, out, s) */
     extern f32  PSVECDotProduct(void*, void*);                /* VECDotProduct */
@@ -3521,15 +3521,15 @@ void fn_8012CA84(s32 playerIdx, f32* dirVec, f32* fwdVec) {
     extern void GSmodelGetPosition(void*, void*);                /* getPosition(obj, out) */
     extern void* GSresGetResource(u32, u32);                   /* resolveHandle(group, id) */
     extern void updateAnimation__Ff15HEROMOVE_MEMBER(void*, s32, f32);             /* applyTurnResult(obj, idx, amt) */
-    extern void fn_8018790C(u32, u32);                    /* stopMovement(group, handle) */
-    extern void fn_8018805C(u32, u32, f32, f32);          /* setHeading(grp, hdl, angle, spd) */
-    extern void fn_801885C4(u32, u32, f32*, u32);         /* setMoveDirection(grp, hdl, dir, flags) */
-    extern f32  fn_801887D8(u32, u32, f32*);              /* computeTurnAmount(grp, hdl, dir) */
-    extern void fn_8018D998(u32, u32);                    /* selectEntity(grp, hdl) */
+    extern void peopleStopTurn(u32, u32);                    /* stopMovement(group, handle) */
+    extern void peopleStartTurn(u32, u32, f32, f32);          /* setHeading(grp, hdl, angle, spd) */
+    extern void peopleMoveByVector(u32, u32, f32*, u32);         /* setMoveDirection(grp, hdl, dir, flags) */
+    extern f32  peopleAmountFromMove(u32, u32, f32*);              /* computeTurnAmount(grp, hdl, dir) */
+    extern void peopleIsInGroup(u32, u32);                    /* selectEntity(grp, hdl) */
     extern void* peopleSearchID(void);                       /* getEntityData() */
     extern void* peopleInfoBiosGetPtr(s32);                        /* getAngleConfig(param) */
-    extern f32  fn_8018F678(void*);                       /* getMaxTurnRatePos(obj) */
-    extern f32  fn_8018F658(void*);                       /* getMaxTurnRateNeg(obj) */
+    extern f32  charModelGetHeadYawMin(void*);                       /* getMaxTurnRatePos(obj) */
+    extern f32  charModelGetHeadYawMax(void*);                       /* getMaxTurnRateNeg(obj) */
     extern u8   lbl_80426BD0[];                           /* player state array (stride 0x20) */
 
     u32 htbl[2];
@@ -3547,7 +3547,7 @@ void fn_8012CA84(s32 playerIdx, f32* dirVec, f32* fwdVec) {
     f32 playerPos[3];
     f32 rotation[3];
 
-    frameTime = (f32)(u32)fn_800D3088();
+    frameTime = (f32)(u32)msgGetCharsPerFrame();
 
     htbl[0] = *(u32*)&lbl_8047D030;
     htbl[1] = *(u32*)&lbl_8047D034;
@@ -3574,7 +3574,7 @@ void fn_8012CA84(s32 playerIdx, f32* dirVec, f32* fwdVec) {
         GSmodelGetPosition(obj, posA);
         posA[1] = lbl_8047D038;
 
-        fn_801885C4(0, entityHandle, dirVec, 0);
+        peopleMoveByVector(0, entityHandle, dirVec, 0);
 
         h = 0;
         htbl[0] = *(u32*)&lbl_8047D030;
@@ -3601,11 +3601,11 @@ void fn_8012CA84(s32 playerIdx, f32* dirVec, f32* fwdVec) {
 
             if (fwdMag > lbl_8047D060) {
                 f32 angle = (f32)atan2(fwdVec[0], fwdVec[2]);
-                fn_8018805C(0, entityHandle, angle, clampedSpeed);
+                peopleStartTurn(0, entityHandle, angle, clampedSpeed);
             }
         }
 
-        turnAmount = fn_801887D8(0, entityHandle, scaledDir);
+        turnAmount = peopleAmountFromMove(0, entityHandle, scaledDir);
 
         if (PSVECDotProduct(diffVec, fwdVec) < lbl_8047D038) {
             turnAmount = -turnAmount;
@@ -3626,7 +3626,7 @@ void fn_8012CA84(s32 playerIdx, f32* dirVec, f32* fwdVec) {
              : 2u;
 
         if (mode != 1) {
-            fn_8018790C(0, entityHandle);
+            peopleStopTurn(0, entityHandle);
             turnAmount = lbl_8047D038;
         } else {
             /* ---- FACE-TARGET: rotate toward another entity ---- */
@@ -3693,7 +3693,7 @@ void fn_8012CA84(s32 playerIdx, f32* dirVec, f32* fwdVec) {
             if (!turnValid) {
                 turnParam = -1;
             } else {
-                fn_8018D998(0, turnH);
+                peopleIsInGroup(0, turnH);
                 tPtr = peopleSearchID();
                 if (tPtr != NULL) {
                     turnParam = *(s32*)((u8*)tPtr + 0x30);
@@ -3705,17 +3705,17 @@ void fn_8012CA84(s32 playerIdx, f32* dirVec, f32* fwdVec) {
             angleObj = peopleInfoBiosGetPtr(turnParam);
 
             {
-                f32 r = fn_8018F678(angleObj);
+                f32 r = charModelGetHeadYawMin(angleObj);
                 maxPos = (r > lbl_8047D038)
-                       ? fn_8018F678(angleObj)
-                       : -fn_8018F678(angleObj);
+                       ? charModelGetHeadYawMin(angleObj)
+                       : -charModelGetHeadYawMin(angleObj);
             }
 
             {
-                f32 r = fn_8018F658(angleObj);
+                f32 r = charModelGetHeadYawMax(angleObj);
                 maxNeg = (r > lbl_8047D038)
-                       ? fn_8018F658(angleObj)
-                       : -fn_8018F658(angleObj);
+                       ? charModelGetHeadYawMax(angleObj)
+                       : -charModelGetHeadYawMax(angleObj);
             }
 
             if (angleDiff < lbl_8047D038) {
@@ -3775,10 +3775,10 @@ void fn_8012CA84(s32 playerIdx, f32* dirVec, f32* fwdVec) {
             }
 
             if (shouldTurn) {
-                fn_8018805C(0, entityHandle, newAngle, lbl_8047D080);
+                peopleStartTurn(0, entityHandle, newAngle, lbl_8047D080);
                 turnAmount = lbl_8047D080;
             } else {
-                fn_8018790C(0, entityHandle);
+                peopleStopTurn(0, entityHandle);
                 turnAmount = lbl_8047D038;
             }
         }
@@ -3894,9 +3894,9 @@ s32 fn_8012F1FC(s32 member)
     handles[1] = *(u32*)&lbl_8047D034;
     handle = handles[member];
     if (state->neckMode == 1) {
-        fn_80188AF4(0, handle);
+        std067_characterStopLookAt(0, handle);
     }
-    fn_80188F78(0, handle);
+    std065_characterLookAtPlayer(0, handle);
     state->neckMode = 1;
 
     active = members[0].field_00;
@@ -3938,7 +3938,7 @@ s32 fn_8012F40C(s32 member)
         handles[0] = *(u32*)&lbl_8047D030;
         handles[1] = *(u32*)&lbl_8047D034;
         handle = handles[member];
-        fn_80188AF4(0, handle);
+        std067_characterStopLookAt(0, handle);
         (members + member)->neckMode = 0;
     }
 
@@ -3966,7 +3966,7 @@ u32 heroMoveGetKenObjID(void)
     s32 variant;
     s32 i;
 
-    if (fn_801906A0(0x8AE) == 0) {
+    if (std082_flagGetValue(0x8AE) == 0) {
         return 0x00F70400;
     }
 
@@ -3996,7 +3996,7 @@ void heroMoveSyncWithHero(void)
     s32 shouldFollow = 0;
     f32 spacing;
 
-    if (fn_801906A0(0x8AE) == 0 && heroGetStatus(0, 0x18, 0) != 0) {
+    if (std082_flagGetValue(0x8AE) == 0 && heroGetStatus(0, 0x18, 0) != 0) {
         shouldFollow = 1;
     }
 
@@ -4007,9 +4007,9 @@ void heroMoveSyncWithHero(void)
         }
         follower->flags |= 1;
         if (follower->neckMode == 1) {
-            fn_80188AF4(0, handle);
+            std067_characterStopLookAt(0, handle);
         }
-        fn_80188F78(0, handle);
+        std065_characterLookAtPlayer(0, handle);
         follower->neckMode = 1;
         members[members[0].field_00].spacing = lbl_8047D038;
         spacing = lbl_8047D0D4;
@@ -4048,8 +4048,8 @@ void initFloor__Fv(void) {
     extern s32 fn_8010E138(void* pos, void* out);
     extern void peopleSetPositionByIndex(u32 group, u32 handle, void* pos);
     extern void peopleSetVisible(u32 group, u32 handle);
-    extern void fn_80188AF4(u32 group, u32 handle);
-    extern void fn_80188F78(u32 group, u32 handle);
+    extern void std067_characterStopLookAt(u32 group, u32 handle);
+    extern void std065_characterLookAtPlayer(u32 group, u32 handle);
     extern f32 lbl_8047D07C;
     extern f32 lbl_8047D0AC;
     extern f32 lbl_8047D0D8;
@@ -4199,10 +4199,10 @@ void initFloor__Fv(void) {
                     handle = handles[i];
                 }
                 if (*(s32*)(member + 0xc) == 1) {
-                    fn_80188AF4(0, handle);
+                    std067_characterStopLookAt(0, handle);
                 }
                 if (state == 1) {
-                    fn_80188F78(0, handle);
+                    std065_characterLookAtPlayer(0, handle);
                 }
                 *(s32*)(member + 0xc) = state;
             }
@@ -4225,7 +4225,7 @@ typedef struct HeroMoveFloorTable {
 /* Initialize the two field hero models and select the area's model theme. */
 s32 heroMoveInit(void* position, void* rotation)
 {
-    extern void fn_8018D998(u32 group, u32 object);
+    extern void peopleIsInGroup(u32 group, u32 object);
     extern void fn_8018C8F4(u32 group, u32 object, u32 flags);
     extern void peopleSetPositionByIndex(u32 group, u32 object, void* position);
     extern void* GSresGetResource(u32 group, u32 handle);
@@ -4247,7 +4247,7 @@ s32 heroMoveInit(void* position, void* rotation)
         floors = *(HeroMoveFloorTable*)lbl_802729C0;
         themes = *(HeroMoveThemeTable*)lbl_80272A10;
 
-        unavailable = fn_801906A0(0x8AE) == 0;
+        unavailable = std082_flagGetValue(0x8AE) == 0;
         if (unavailable != 0) {
             theme = 0x00F70400;
         } else {
@@ -4278,8 +4278,8 @@ s32 heroMoveInit(void* position, void* rotation)
         fn_8018E050(0, 100, theme);
         fn_8018E050(0, 101, 0x00F30400);
     } else {
-        fn_8018D998(0, 100);
-        fn_8018D998(0, 101);
+        peopleIsInGroup(0, 100);
+        peopleIsInGroup(0, 101);
     }
 
     for (i = 0; i < 2; i++) {
@@ -4337,17 +4337,17 @@ u32 updateChat__F15HEROMOVE_MEMBER(s32 player)
     extern void PSVECAdd(HeroChatVec3*, HeroChatVec3*, HeroChatVec3*);
     extern void peopleSetFlagsByIndex(u32, u32, u32);
     extern void peopleClearFlagsByIndex(u32, u32, u32);
-    extern void fn_8018CA20(u32, u32, u32);
-    extern void fn_800F7434(void*, u32, ...);
-    extern void fn_8018790C(u32, u32);
+    extern void std151_characterFaceDirection(u32, u32, u32);
+    extern void cmsRunSync(void*, u32, ...);
+    extern void peopleStopTurn(u32, u32);
     extern void fn_800F7D38(u32, u32, u32);
     extern void fn_800F7C8C(u32, u32, u32);
     extern void fn_8018BA04(u32, u32, HeroChatVec3*);
     extern void peopleTurnToPoint(u32, u32, f32, f32, f32, f32);
     extern void floorEventCtrlTresure(u32, u32, u32);
     extern void fn_80183730(u32);
-    extern void fn_801812E8(u32, u32, u32);
-    extern void fn_80189490(u32, u32);
+    extern void peopleTalkPause(u32, u32, u32);
+    extern void std055_characterEndSpeech(u32, u32);
     extern void fn_80183688(u32);
     u32 handles[2];
     u32 eventObject;
@@ -4369,7 +4369,7 @@ u32 updateChat__F15HEROMOVE_MEMBER(s32 player)
         handle = handles[player];
     }
 
-    eventObject = fn_8018CD08(0, handle, lbl_8047D070, lbl_8047D074);
+    eventObject = peopleFindTalkTarget(0, handle, lbl_8047D070, lbl_8047D074);
     if (eventObject == 0) {
         handles[0] = *(u32*)&lbl_8047D030;
         handles[1] = *(u32*)&lbl_8047D034;
@@ -4378,10 +4378,10 @@ u32 updateChat__F15HEROMOVE_MEMBER(s32 player)
             resource = handles[i];
         }
 
-        person = peopleSearchID(fn_8018D998(0, resource));
+        person = peopleSearchID(peopleIsInGroup(0, resource));
         interaction = 0;
         if (person != 0) {
-            rotationPtr = fn_8018FCBC();
+            rotationPtr = peopleGetPositionPtr();
             positionPtr = peopleGetPosition(person);
             position = *(HeroChatVec3*)rotationPtr;
             position.y += lbl_8047D078;
@@ -4395,7 +4395,7 @@ u32 updateChat__F15HEROMOVE_MEMBER(s32 player)
         memcpy(lbl_80426BD0 + 0x1A0, collision, 0xD0);
         *(u32*)(lbl_80426BD0 + 0x410) = interaction;
         if (interaction != 0) {
-            fn_8018790C(0, 100);
+            peopleStopTurn(0, 100);
             return 1;
         }
         return 0;
@@ -4416,7 +4416,7 @@ u32 updateChat__F15HEROMOVE_MEMBER(s32 player)
             peopleSetFlagsByIndex(0, handle, 0x80000008);
             peopleClearFlagsByIndex(0, handle, 0x100);
             peopleClearFlagsByIndex(0, handle, 0x400);
-            fn_8018CA20(0, handle, 0);
+            std151_characterFaceDirection(0, handle, 0);
         }
     }
 
@@ -4429,21 +4429,21 @@ u32 updateChat__F15HEROMOVE_MEMBER(s32 player)
         floorEventCtrlTresure(*(u32*)(eventObject + 0x28),
                               *(u32*)(eventObject + 0x2C), 2);
     } else {
-        fn_80183730(fn_8018D998(*(u32*)(eventObject + 0x28),
+        fn_80183730(peopleIsInGroup(*(u32*)(eventObject + 0x28),
                                 *(u32*)(eventObject + 0x2C)));
         person = fn_8018397C(*(u32*)(eventObject + 0x28),
                              *(u32*)(eventObject + 0x2C));
         if (person != 0) {
-            fn_801812E8(*(u32*)(eventObject + 0x28),
+            peopleTalkPause(*(u32*)(eventObject + 0x28),
                         *(u32*)(eventObject + 0x2C), 1);
-            fn_800F7434((void*)person, 4, *(u32*)(eventObject + 0x28),
+            cmsRunSync((void*)person, 4, *(u32*)(eventObject + 0x28),
                         *(u32*)(eventObject + 0x2C), 0, 0);
-            fn_801812E8(*(u32*)(eventObject + 0x28),
+            peopleTalkPause(*(u32*)(eventObject + 0x28),
                         *(u32*)(eventObject + 0x2C), 0);
-            fn_80189490(*(u32*)(eventObject + 0x28),
+            std055_characterEndSpeech(*(u32*)(eventObject + 0x28),
                         *(u32*)(eventObject + 0x2C));
         }
-        fn_80183688(fn_8018D998(*(u32*)(eventObject + 0x28),
+        fn_80183688(peopleIsInGroup(*(u32*)(eventObject + 0x28),
                                 *(u32*)(eventObject + 0x2C)));
     }
 
@@ -4455,7 +4455,7 @@ u32 updateChat__F15HEROMOVE_MEMBER(s32 player)
             if (i >= 0 && i < 2) {
                 handle = handles[i];
             }
-            fn_8018CA20(0, handle, 1);
+            std151_characterFaceDirection(0, handle, 1);
             peopleSetFlagsByIndex(0, handle, 0x700);
             peopleClearFlagsByIndex(0, handle, 0x80000008);
         }

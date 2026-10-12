@@ -211,12 +211,12 @@ L_delay:
 
 /* stateFunctionEvolution - 0x8002DF10 | size: 0x35c */
 extern void pokemonEvolutionCheck(void);
-extern void fn_801CB9D8(void);
-extern void fn_80112260(void);
+extern void std113_mapObjectUnk_8018db68(void);
+extern void floorSetMapVisibility(void);
 extern void pokemonEvolutionAll(void);
 extern void cameraPlayAnime(void);
-extern void fn_80113F48(void);
-extern void fn_801CBA0C(void);
+extern void std093_getCurrentGroupID(void);
+extern void std112_modelGetResourceID(void);
 extern void GSresGetResource(void);
 extern void GSscene_SetMode(void);
 extern void GSmodelSetVisibility(void);
@@ -428,9 +428,9 @@ void stateFunctionEvolution(void)
     /* fn_8010A420 - model marker hide  (u8* obj) */
     extern void fn_8010A420(u8 *obj);
     /* fn_801CB9D8 - scene trainer anim state  (u32 handle) */
-    extern void fn_801CB9D8(u32 handle);
+    extern void std113_mapObjectUnk_8018db68(u32 handle);
     /* fn_80112260 - field collision query reset  (s32 flag) */
-    extern void fn_80112260(s32 flag);
+    extern void floorSetMapVisibility(s32 flag);
     /* _threadSwitch - GS vsync yield */
     extern void _threadSwitch(void);
     /* pokemonEvolutionAll - encounter trigger dispatcher */
@@ -442,9 +442,9 @@ void stateFunctionEvolution(void)
     /* cameraPlayAnime - scene render/BGM start (s32 scene_id, u32 color_key, s32 a, s32 b) */
     extern void cameraPlayAnime(s32 scene_id, u32 color_key, s32 a, s32 b);
     /* fn_80113F48 - get current scene/resource handle */
-    extern u32  fn_80113F48(void);
+    extern u32  std093_getCurrentGroupID(void);
     /* fn_801CBA0C - scene transition fade-out: (u32 color_key) -> u32 fade_handle */
-    extern u32  fn_801CBA0C(u32 color_key);
+    extern u32  std112_modelGetResourceID(u32 color_key);
     /* GSresGetResource - resolve resource pointer from handle (u32 handle) -> void* */
     extern void* GSresGetResource(u32 handle);
     /* GSscene_SetMode - restore people state (s32 mode) */
@@ -513,9 +513,9 @@ void stateFunctionEvolution(void)
     fn_8010A420(base + 0xd18);
     fn_8010A420(base + 0xcd0);
 
-    fn_801CB9D8(lbl_8047A418);
+    std113_mapObjectUnk_8018db68(lbl_8047A418);
 
-    fn_80112260(0);
+    floorSetMapVisibility(0);
     _threadSwitch();
 
     fadeSet(lbl_8047B9D4, 2);
@@ -567,8 +567,8 @@ void stateFunctionEvolution(void)
 
     cameraPlayAnime(0x37c, 0x0fff1800, 0, 1);
 
-    scene_handle = fn_80113F48();
-    lbl_8047A418 = fn_801CBA0C(0x0ffe1000);
+    scene_handle = std093_getCurrentGroupID();
+    lbl_8047A418 = std112_modelGetResourceID(0x0ffe1000);
     lbl_8047A414 = (u32)GSresGetResource(scene_handle);
 
     cameraPlayAnime(0x37c, 0x0fff1800, 0, 1);
@@ -577,7 +577,7 @@ void stateFunctionEvolution(void)
 
     GSmodelSetVisibility((void*)lbl_8047A414, 1);
 
-    fn_80112260(0);
+    floorSetMapVisibility(0);
 
     menuOpen(0xde, 1);
 
@@ -595,7 +595,7 @@ void stateFunctionEvolution(void)
 extern void pokemonInit(void);
 extern void pokemonBiosCopy(void);
 extern void fn_801024E8(void);
-extern void fn_801CB834(void);
+extern void std115_mapObjectPlayAnimation(void);
 extern void fn_80176B48(void);
 extern u32 lbl_8047A424;
 extern u32 lbl_8047A420;
@@ -640,12 +640,12 @@ void stateFunctionExChangeMain(void)
     extern void fadeSet(f32 duration, s32 mode);
     extern void fadeCheck(s32 flag);
     extern void fn_801024E8(s32 arg);
-    extern u32  fn_80113F48(void);
+    extern u32  std093_getCurrentGroupID(void);
     extern void cameraPlayAnime(s32 handle, u32 flags, s32 a3, s32 a4);
     extern void _threadSwitch(void);
-    extern void fn_80166AB8(s32 a1, s32 a2, s32 a3);
-    extern void fn_80112260(s32 flag);
-    extern void fn_801CB834(u32 a1, s32 a2, s32 a3, s32 a4);
+    extern void soundStartRaw(s32 a1, s32 a2, s32 a3);
+    extern void floorSetMapVisibility(s32 flag);
+    extern void std115_mapObjectPlayAnimation(u32 a1, s32 a2, s32 a3, s32 a4);
     extern void cameraWaitSyncAnime(s32 arg);
     extern void menuModelInit(void *widget, s32 x, s32 y);
     extern void fn_80109C88(void *widget, void *obj);
@@ -682,16 +682,16 @@ void stateFunctionExChangeMain(void)
     fn_801024E8(1);
 
     /* --- Set up field model and audio, yield one VBlank --- */
-    handle = fn_80113F48();
+    handle = std093_getCurrentGroupID();
     cameraPlayAnime((s32)handle, 0x10b61800, 0, 0);
 
     _threadSwitch();   /* vsync yield */
 
-    fn_80166AB8(0x4c8, 0, 0);
+    soundStartRaw(0x4c8, 0, 0);
 
     /* --- Show UI layer, load trainer model --- */
-    fn_80112260(1);
-    fn_801CB834(0x10b11000, 0, 0, 0);
+    floorSetMapVisibility(1);
+    std115_mapObjectPlayAnimation(0x10b11000, 0, 0, 0);
 
     /* --- Second camera fade, wait for sync, third camera fade --- */
     fadeSet(lbl_8047B9D0, 2);
@@ -700,7 +700,7 @@ void stateFunctionExChangeMain(void)
 
     fadeSet(lbl_8047B9D8, 3);
     fadeCheck(1);
-    fn_80112260(0);
+    floorSetMapVisibility(0);
 
     /* --- Position and bind the UI widget slots --- */
     menuModelInit(base + 0xd18, 0xe8, 0x11c);
@@ -787,7 +787,7 @@ void fn_8002E460(void* mapCtx)
     extern u8*  windowGetKeyInfo(void);                              /* current input/state base */
     extern s32  fn_80073A44(s32 mode, u16* outFlags);          /* poll input -> status, writes flags */
     extern s32  fn_8017B1AC(void);                              /* input-mode status query */
-    extern void fn_80166AB8(s32 soundId, s32 p2, s32 p3);       /* play SE */
+    extern void soundStartRaw(s32 soundId, s32 p2, s32 p3);       /* play SE */
     extern void winMsgOpen(s32 a, s32 b, s32 c, s32 d);        /* dialog/sound event */
     extern void _threadSwitch(void);                             /* vsync / scheduler yield */
     extern void* savedataGetStatus(s32 a, s32 sel);                  /* staged-record getter */
@@ -865,12 +865,12 @@ void fn_8002E460(void* mapCtx)
             if ((rawFlags & 0x10) != 0) {
                 /* select bit for slot A */
                 if ((doneA & 0xFF) == 0) {
-                    fn_80166AB8(0x24, 0, 0);
+                    soundStartRaw(0x24, 0, 0);
                 }
                 doneA = 1;
             } else if ((rawFlags & 0x20) != 0) {
                 /* cancel bit for slot A */
-                fn_80166AB8(0x25, 0, 0);
+                soundStartRaw(0x25, 0, 0);
                 if ((doneA & 0xFF) == 0) {
                     doneA = 0;
                     abortLoop = 1;   /* L_8002E6D4 -> finalize */
@@ -883,11 +883,11 @@ void fn_8002E460(void* mapCtx)
                 /* L_8002E6EC: react to newly pressed bits for slot B */
                 if ((newPress & 0x1) != 0) {
                     if ((doneB & 0xFF) == 0) {
-                        fn_80166AB8(0x24, 0, 0);
+                        soundStartRaw(0x24, 0, 0);
                     }
                     doneB = 1;
                 } else if ((newPress & 0x2) != 0) {
-                    fn_80166AB8(0x25, 0, 0);
+                    soundStartRaw(0x25, 0, 0);
                     if ((doneB & 0xFF) == 0) {
                         doneB = 0;
                         abortLoop = 1;   /* L_8002E74C -> finalize */
@@ -1051,9 +1051,9 @@ void fn_8002EA5C(void)
     extern u8*  windowSearchID(s32 key);                          /* find list/window     */
     extern u8*  windowSearchItemID(u8* head, s32 key);                /* find child element   */
     extern void winSpriteSetDisp(u8* elem, u32 flag);              /* set element flag      */
-    extern void fn_80166AB8(s32 soundId, s32 p2, s32 p3);     /* play SE              */
+    extern void soundStartRaw(s32 soundId, s32 p2, s32 p3);     /* play SE              */
     extern void _threadSwitch(void);                             /* vsync yield          */
-    extern u32  fn_800D3088(void);                             /* elapsed frame ticks  */
+    extern u32  msgGetCharsPerFrame(void);                             /* elapsed frame ticks  */
     extern s32  fn_800D37CC(void);                             /* ticks per unit       */
     extern u8*  heroBiosGetPokemonPtr(u8* base, u32 idx);                /* party slot getter    */
     extern u8   pokemonBiosGetFuseiFlag(u8* obj);                          /* slot predicate A     */
@@ -1098,13 +1098,13 @@ void fn_8002EA5C(void)
             *(u32*)(element + 0x4C) = 0x43DD;
         }
 
-        fn_80166AB8(0x26, 0, 0);
+        soundStartRaw(0x26, 0, 0);
 
         accum = lbl_8047B9D4;
         while (accum < lbl_8047B9DC) {
             _threadSwitch();
             den = (f32)(s32)fn_800D37CC();
-            num = (f32)(u32)fn_800D3088();
+            num = (f32)(u32)msgGetCharsPerFrame();
             accum = accum + num / den;
         }
 
@@ -1159,13 +1159,13 @@ void fn_8002EA5C(void)
             *(u32*)(element + 0x4C) = 0x44E8;
         }
 
-        fn_80166AB8(0x26, 0, 0);
+        soundStartRaw(0x26, 0, 0);
 
         accum = lbl_8047B9D4;
         while (accum < lbl_8047B9DC) {
             _threadSwitch();
             den = (f32)(s32)fn_800D37CC();
-            num = (f32)(u32)fn_800D3088();
+            num = (f32)(u32)msgGetCharsPerFrame();
             accum = accum + num / den;
         }
 
@@ -1188,7 +1188,7 @@ void fn_8002EA5C(void)
     while (accum < lbl_8047B9D0) {
         _threadSwitch();
         den = (f32)(s32)fn_800D37CC();
-        num = (f32)(u32)fn_800D3088();
+        num = (f32)(u32)msgGetCharsPerFrame();
         accum = accum + num / den;
     }
 
@@ -1245,10 +1245,10 @@ void fn_8002EE74(void)
     extern void* windowSearchID(s32 key);                          /* scene node by slot id */
     extern void* windowSearchItemID(void* head, s32 subkey);           /* child node by sub-key */
     extern void  winSpriteSetDisp(void* node, u32 enable);           /* enable/disable a node */
-    extern void  fn_80166AB8(s32 soundId, s32 p2, s32 p3);      /* play SE */
+    extern void  soundStartRaw(s32 soundId, s32 p2, s32 p3);      /* play SE */
     extern void  _threadSwitch(void);                             /* host vsync yield (GSthreadYield) */
     extern s32   fn_800D37CC(void);                             /* timer read A */
-    extern u32   fn_800D3088(void);                             /* timer read B (tick) */
+    extern u32   msgGetCharsPerFrame(void);                             /* timer read B (tick) */
     extern void  menuSetEnablePort(s32 mode);
     extern void  menuOpenCustom(void* p, u32 r4, s32 r5, s32 r6, void* r7, s32 r8, ...);
     extern u32   windowGetActiveID(void);
@@ -1294,14 +1294,14 @@ void fn_8002EE74(void)
             winSpriteSetDisp(child, 1);
             *(u32*)((u8*)child + 0x4c) = 0x43e1;
         }
-        fn_80166AB8(0x26, 0, 0);
+        soundStartRaw(0x26, 0, 0);
 
         acc = waitStart;
         while (acc < waitLimit) {
             f64 dtA, dtB;
             _threadSwitch();
             dtA = (f64)(s32)fn_800D37CC() - baseA;   /* ENDIAN-QA */
-            dtB = (f64)(s32)fn_800D3088() - baseB;   /* ENDIAN-QA */
+            dtB = (f64)(s32)msgGetCharsPerFrame() - baseB;   /* ENDIAN-QA */
             acc = acc + (f32)(dtB / dtA);
         }
 
@@ -1323,14 +1323,14 @@ void fn_8002EE74(void)
             winSpriteSetDisp(child, 1);
             *(u32*)((u8*)child + 0x4c) = 0x44be;
         }
-        fn_80166AB8(0x26, 0, 0);
+        soundStartRaw(0x26, 0, 0);
 
         acc = waitStart;
         while (acc < waitLimit) {
             f64 dtA, dtB;
             _threadSwitch();
             dtA = (f64)(s32)fn_800D37CC() - baseA;   /* ENDIAN-QA */
-            dtB = (f64)(s32)fn_800D3088() - baseB;   /* ENDIAN-QA */
+            dtB = (f64)(s32)msgGetCharsPerFrame() - baseB;   /* ENDIAN-QA */
             acc = acc + (f32)(dtB / dtA);
         }
 
@@ -1929,7 +1929,7 @@ void fn_8002F79C(void) {
     extern void* windowSearchID(s32 key);                    /* lookup effect object */
     extern void* windowSearchItemID(void* obj, s32 sub);         /* sub-object lookup */
     extern void winSpriteSetDisp(void* elem, u32 flag);        /* activate effect element */
-    extern void fn_80166AB8(u32 a, u32 b, u32 c);         /* play sound/cue */
+    extern void soundStartRaw(u32 a, u32 b, u32 c);         /* play sound/cue */
     extern void fn_801021F8(s32 id, s32 flag);            /* set UI visibility */
     extern u32  pokemonBiosGetDarkFlag(u8* obj);                     /* interaction busy query */
     extern u8*  heroBiosGetPokemonPtr(u8* party, u32 slot);         /* get party member at slot */
@@ -1940,7 +1940,7 @@ void fn_8002F79C(void) {
     extern u32  pokemonGetStatus(u8* obj, u32 id, u32 selector, u32 d); /* mon prop getter */
     extern void _threadSwitch(void);                        /* vsync / scheduler yield */
     extern u32  fn_800D37CC(void);                        /* GSrandom_Get */
-    extern s32  fn_800D3088(void);                        /* GSgfx tick */
+    extern s32  msgGetCharsPerFrame(void);                        /* GSgfx tick */
 
     /* ---- SDA state globals (block-scope typed externs) ---- */
     extern u32 lbl_8047A428;   /* current map/area index */
@@ -1990,14 +1990,14 @@ void fn_8002F79C(void) {
             *(u32*)((u8*)effElem + 0x4C) = 0x43DD;
         }
 
-        fn_80166AB8(0x26, 0, 0);
+        soundStartRaw(0x26, 0, 0);
 
         acc = waitStart;
         while (acc < waitLimit) {
             f64 r;
             _threadSwitch();
             r = (f64)(u32)fn_800D37CC();          /* ENDIAN-QA: unsigned int->double */
-            acc += (f32)((f64)(s32)fn_800D3088() / r); /* ENDIAN-QA: signed int->double */
+            acc += (f32)((f64)(s32)msgGetCharsPerFrame() / r); /* ENDIAN-QA: signed int->double */
         }
 
         effRoot = windowSearchID(0xD9);
@@ -2026,14 +2026,14 @@ void fn_8002F79C(void) {
             *(u32*)((u8*)effElem + 0x4C) = 0x43DF;
         }
 
-        fn_80166AB8(0x26, 0, 0);
+        soundStartRaw(0x26, 0, 0);
 
         acc = waitStart;
         while (acc < waitLimit) {
             f64 r;
             _threadSwitch();
             r = (f64)(u32)fn_800D37CC();
-            acc += (f32)((f64)(s32)fn_800D3088() / r);
+            acc += (f32)((f64)(s32)msgGetCharsPerFrame() / r);
         }
 
         effRoot = windowSearchID(0xD9);
@@ -2088,14 +2088,14 @@ void fn_8002F79C(void) {
             *(u32*)((u8*)effElem + 0x4C) = 0x44E8;
         }
 
-        fn_80166AB8(0x26, 0, 0);
+        soundStartRaw(0x26, 0, 0);
 
         acc = waitStart;
         while (acc < waitLimit) {
             f64 r;
             _threadSwitch();
             r = (f64)(u32)fn_800D37CC();
-            acc += (f32)((f64)(s32)fn_800D3088() / r);
+            acc += (f32)((f64)(s32)msgGetCharsPerFrame() / r);
         }
 
         effRoot = windowSearchID(0xD9);

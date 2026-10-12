@@ -32,8 +32,8 @@ extern u8 floorReadScriptPreFunc[];
 extern u8 floorReadTexPostFunc[];
 extern u8 floorReadTexPreFunc[];
 extern u8 floorReadWZXPreFunc[];
-extern u8 fn_80114254[];
-extern u8 fn_801142B4[];
+extern u8 floorReadRelModulePostFunc[];
+extern u8 floorReadRelModulePreFunc[];
 extern u8 fn_8017BFE8[];
 extern u8 fn_8017BFF0[];
 extern u8 fn_8017BFF8[];
@@ -150,8 +150,8 @@ void* lbl_8036C2A0[80] = {
     (void*)((u8*)floorReadNotLinkedParticlePostFunc),
     (void*)0x00000064,
     (void*)0x00000013,
-    (void*)((u8*)fn_801142B4),
-    (void*)((u8*)fn_80114254),
+    (void*)((u8*)floorReadRelModulePreFunc),
+    (void*)((u8*)floorReadRelModulePostFunc),
 };
 
 void* lbl_8036C3E0[66] = {

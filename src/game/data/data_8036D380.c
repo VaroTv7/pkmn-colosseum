@@ -63,7 +63,7 @@ extern u8 LObjForeachAnim[];
 extern u8 MakeColorGenTExp[];
 extern u8 TObjInfoInit[];
 extern u8 fn_801BAC8C[];
-extern u8 fn_801BDA58[];
+extern u8 HSD_TObjSetupTextureCoordGen[];
 extern u8 fn_801BE85C[];
 
 /* Auto-carved .data unit 0x8036D380..0x8036DCA4 (48 objects). Non-relocated data as byte-exact u8[]; pointer/jump tables as void*[] for R_PPC_ADDR32 relocations. */
@@ -288,14 +288,14 @@ void* jumptable_8036D6F0[9] = {
 };
 
 void* jumptable_8036D714[8] = {
-    (void*)((u8*)fn_801BDA58 + 0x16C),
-    (void*)((u8*)fn_801BDA58 + 0x174),
-    (void*)((u8*)fn_801BDA58 + 0x17C),
-    (void*)((u8*)fn_801BDA58 + 0x184),
-    (void*)((u8*)fn_801BDA58 + 0x18C),
-    (void*)((u8*)fn_801BDA58 + 0x194),
-    (void*)((u8*)fn_801BDA58 + 0x19C),
-    (void*)((u8*)fn_801BDA58 + 0x1A4),
+    (void*)((u8*)HSD_TObjSetupTextureCoordGen + 0x16C),
+    (void*)((u8*)HSD_TObjSetupTextureCoordGen + 0x174),
+    (void*)((u8*)HSD_TObjSetupTextureCoordGen + 0x17C),
+    (void*)((u8*)HSD_TObjSetupTextureCoordGen + 0x184),
+    (void*)((u8*)HSD_TObjSetupTextureCoordGen + 0x18C),
+    (void*)((u8*)HSD_TObjSetupTextureCoordGen + 0x194),
+    (void*)((u8*)HSD_TObjSetupTextureCoordGen + 0x19C),
+    (void*)((u8*)HSD_TObjSetupTextureCoordGen + 0x1A4),
 };
 
 void* jumptable_8036D734[25] = {

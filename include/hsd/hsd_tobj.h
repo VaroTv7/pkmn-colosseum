@@ -423,14 +423,12 @@ typedef struct _HSD_TexAnim {
 void fn_801BE800(HSD_TObj* tobj);
 void fn_801BEE68(HSD_TObj* tobj, f32 startframe, u32 flags);
 void fn_801BEEDC(HSD_TObj* tobj, HSD_TexAnim* texanim);
-void fn_801BD8D0(HSD_TObj* tobj, u32 rendermode);
-void fn_801BDA58(HSD_TObj* tobj);
+void HSD_TObjSetupVolatileTev(HSD_TObj* tobj, u32 rendermode);
+void HSD_TObjSetupTextureCoordGen(HSD_TObj* tobj);
 
 #define HSD_TObjAnimAll fn_801BE800
 #define HSD_TObjReqAnimAllByFlags fn_801BEE68
 #define HSD_TObjAddAnimAll fn_801BEEDC
-#define HSD_TObjSetupVolatileTev fn_801BD8D0
-#define HSD_TObjSetupTextureCoordGen fn_801BDA58
 
 HSD_TObj* HSD_TObjLoadDesc(HSD_TObjDesc* td);
 HSD_TObj* _HSD_TObjGetCurrentByType(HSD_TObj* from, u32 mapping);

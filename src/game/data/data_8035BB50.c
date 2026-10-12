@@ -965,7 +965,7 @@ extern u8 fightWazaWzxVariationFuncTripleKick[];
 extern u8 fightWazaWzxVariationFuncWeatherBall[];
 extern u8 fightWazaWzxVariationFuncWeatherHP[];
 extern u8 fightWazaWzxVariationFuncYatuatari[];
-extern u8 fn_801183EC[];
+extern u8 gsParticleUpdate[];
 extern u8 wazaSetStatus[];
 extern u8 wazaGetStatus[];
 extern u8 pokemonSetStatus[];

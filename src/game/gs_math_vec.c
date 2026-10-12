@@ -30,9 +30,9 @@ extern void* memset(void* dst, int val, u32 size);
 extern void DCFlushRange(void* addr, u32 size);
 extern u64 OSGetTime(void);
 extern void fn_800D3EC4(s32, f32, f32, f32, f32, f32, f32);
-extern void fn_800D4F98(u32, ...);
-extern void fn_800D67BC(u16);
-extern void fn_800D892C(u32);
+extern void gfxRecordCommand(u32, ...);
+extern void gfxBegin(u16);
+extern void gfxSetupChannelsTev(u32);
 
 /* GSmem */
 extern u16   _toolentryAlloc__FUl(u32 size);                    /* GSmemAllocRaw */
@@ -97,7 +97,7 @@ extern void fn_800D75AC(void);
 extern void fn_800D7650(u8*);
 extern void fn_800D7868(u8*, u32, u32, u32, u32, u8, u32, u8);
 extern void fn_800D7940(u32, u16);
-extern void fn_800D7A70(u32);
+extern void gfxLoadVtxDesc(u32);
 extern void fn_800DB098(void);
 extern void fn_800DB758(u16);
 extern void lightGetFrameCount__FP9_HSD_AObj(u8*);
@@ -167,7 +167,7 @@ extern u8 lbl_80400948[];
 extern u32 lbl_8047AAC4;
 extern u32 lbl_8047AABC;
 extern u16 lbl_8047AAB8;
-extern void fn_800B857C(u32, u32, u32, u32, u32, u32);
+extern void GXSetTexCoordGen2(u32, u32, u32, u32, u32, u32);
 extern void GXLoadTexMtxImm(void*, u32, u32);
 extern u8 lbl_80314404[];
 extern u8 lbl_80314454[];
@@ -184,20 +184,20 @@ extern u8 lbl_80314510[];
 extern u8 lbl_803144F0[];
 extern void fn_800BBC34(u32);
 extern void fn_800BBC0C(u32);
-extern void fn_800BA6B0();
-extern void fn_800BA6F4();
+extern void GXSetNumChans();
+extern void GXSetChanCtrl();
 extern void fn_800B884C();
 extern void fn_800BC8C8();
 extern void fn_800BBAF8();
 extern void fn_800BB97C();
 extern void fn_800BB81C();
-extern void fn_800BC6F0();
-extern void fn_800BC228();
-extern void fn_800BC290();
-extern void fn_800BC1A0();
-extern void fn_800BC1E4();
-extern void fn_800BC454();
-extern void fn_800BC4C0();
+extern void GXSetTevOrder();
+extern void GXSetTevColorOp();
+extern void GXSetTevAlphaOp();
+extern void GXSetTevColorIn();
+extern void GXSetTevAlphaIn();
+extern void GXSetTevKColorSel();
+extern void GXSetTevKAlphaSel();
 extern void fn_800BB780();
 extern void fn_800BBC7C();
 extern void fn_800BBCE0();
@@ -205,7 +205,7 @@ extern void fn_800BBE8C();
 extern void fn_800BBF98();
 extern void fn_800BBFDC();
 extern void fn_800BC3E0();
-extern void fn_800BC580();
+extern void GXSetTevSwapModeTable();
 extern void fn_800BD2E0(void*, u32);
 extern f32 lbl_8047CA50;
 extern f32 lbl_8047CA54;
@@ -333,11 +333,11 @@ extern u8 lbl_8036CB30[];
 extern void HSD_TExpGetType();
 extern void fn_801B6DC0();
 extern void HSD_TExpCnst();
-extern void fn_801B707C();
-extern void fn_801B6E74();
-extern void fn_801B64EC();
-extern void fn_801B6CD8();
-extern void fn_801B5F08();
+extern void HSD_TExpTev();
+extern void HSD_TExpColorOp();
+extern void HSD_TExpColorIn();
+extern void HSD_TExpAlphaOp();
+extern void HSD_TExpAlphaIn();
 extern void HSD_ImageDescRemove(void);
 extern void HSD_TObjLoadDesc(void);
 extern void HSD_MObjGetTObj(void);
@@ -380,7 +380,7 @@ extern u32 lbl_8047CB00;
 extern u32 lbl_8047CAF8;
 extern u32 lbl_8047CB08;
 extern u32 lbl_8047CAFC;
-extern f32 fn_801ADC7C(void);
+extern f32 HSD_Randf(void);
 extern f32 lbl_8047CB10;
 extern u32 fn_801ADCD8(void);
 extern u32 lbl_80478C94;
@@ -524,7 +524,7 @@ asm void fn_800E008C(void) {
 #include "src/game/gs_render_fn_800E008C.inc"
 }
 #else
-void fn_800E008C(void) { PSVECMag(); }
+void vecMag(void) { PSVECMag(); }
 #endif
 
 extern const f32 lbl_8047CAD8;
@@ -533,7 +533,7 @@ asm void fn_800E00AC(void) {
 #include "src/game/gs_render_fn_800E00AC.inc"
 }
 #else
-void fn_800E00AC(void* a, void* b, f32 scale) {
+void vecNormalize(void* a, void* b, f32 scale) {
     PSVECScale(b, a, lbl_8047CAD8 / scale);
 }
 #endif
@@ -563,7 +563,7 @@ asm void fn_800E013C(void* a, void* b, f32 c) {
 #include "src/game/gs_render_fn_800E013C.inc"
 }
 #else
-void fn_800E013C(void* a, void* b, f32 c) { PSVECScale(b, a, c); }
+void vecScale(void* a, void* b, f32 c) { PSVECScale(b, a, c); }
 #endif
 
 #if 0
@@ -571,7 +571,7 @@ asm void fn_800E0168(void) {
 #include "src/game/gs_render_fn_800E0168.inc"
 }
 #else
-void fn_800E0168(void* a, void* b, void* c) { PSVECSubtract(b, c, a); }
+void GSvecSub(void* a, void* b, void* c) { PSVECSubtract(b, c, a); }
 #endif
 
 #if 0

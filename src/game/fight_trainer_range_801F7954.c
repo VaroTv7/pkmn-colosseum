@@ -12,7 +12,7 @@
 #include "game/pokemon_fight_types.h"
 
 static inline u32 fightTrainerCheckValidInline(u8* context) {
-    extern u16 fn_801EF634(void* context);
+    extern u16 std103_battleGetResult(void* context);
     extern u8 heroCheckValid(void* hero);
     extern u8* fightTrainerGetStatus(u8*, u32, u16, u32);
     u8* hero;
@@ -20,7 +20,7 @@ static inline u32 fightTrainerCheckValidInline(u8* context) {
     if (context == NULL) {
         return 0;
     }
-    if ((u16)fn_801EF634(context) == 1) {
+    if ((u16)std103_battleGetResult(context) == 1) {
         return 0;
     }
     if ((s32)fightTrainerGetStatus(context, 0, 0x43, 0) == 0) {

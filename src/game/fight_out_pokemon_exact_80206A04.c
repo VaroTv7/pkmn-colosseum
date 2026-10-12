@@ -69,13 +69,13 @@ extern ColosseumEventPairRow lbl_80375A08[]; /* 0x18-byte pair rows */
 #pragma peephole on
 u32 fightPokemonCheckValid(void* ctx) {
     extern u8 pokemonCheckValid();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     u32 uVar1;
     u16 sVar3;
     void* iVar2;
     u8 cVar4;
     if (ctx == 0) { return 0; }
-    sVar3 = fn_801EF634();
+    sVar3 = std103_battleGetResult();
     if (sVar3 == 1) { return 0; }
     iVar2 = pokemonGetStatus(ctx, 0, 0xcb, 0);
     if (iVar2 == 0) { return 0; }

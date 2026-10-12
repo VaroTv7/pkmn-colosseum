@@ -5,6 +5,6 @@ typedef struct GXLightObj_800BA440 {
     GXColor color;
 } GXLightObj_800BA440;
 
-void fn_800BA440(GXLightObj* light, GXColor color) {
+void GXInitLightColor(GXLightObj* light, GXColor color) {
     ((GXLightObj_800BA440*) light)->color = color;
 }

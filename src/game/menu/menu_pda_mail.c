@@ -79,12 +79,12 @@ extern void GSlightSetAnimFrame(void* light, f32 frame);
 extern void GSlightSetAnimType(void* light, s32 type);
 extern void GSlightStartAnimation(void* light);
 extern void GSlightSetActive(void* light, s32 active);
-extern void fn_80166AB8(s32 soundId, s32 arg1, s32 arg2);
+extern void soundStartRaw(s32 soundId, s32 arg1, s32 arg2);
 extern void cameraWaitSyncAnime(s32 camera);
 extern void fn_8004A47C(void);
 extern void fn_8003C7C0(void);
 extern void fn_80044630(void);
-extern u8 fn_801902E0(s32 id);
+extern u8 std081_flagCheckTrue(s32 id);
 extern void fn_8004C120(void);
 extern void fadeSet(s32 type, f32 speed);
 extern s8 fadeCheck(s32 type);
@@ -101,7 +101,7 @@ typedef struct PdaMailAttachmentConfig {
 } PdaMailAttachmentConfig;
 
 #pragma peephole off
-void fn_8004B7EC(void)
+void std027_unkMenuSequence27(void)
 {
     PdaMailOpenConfig config;
     s32 menuSelection;
@@ -147,7 +147,7 @@ void fn_8004B7EC(void)
     GSlightSetAnimType(light, 0);
     GSlightStartAnimation(light);
     GSmodelStartAnimation(model);
-    fn_80166AB8(0x448, 0, 0);
+    soundStartRaw(0x448, 0, 0);
     if (model != 0) {
         while (GSmodelIsAnimating(model)) {
             _threadSwitch();
@@ -235,7 +235,7 @@ void fn_8004B7EC(void)
             }
             menuClose(0x97);
             menuCloseSync(0x97, 1);
-            if (!fn_801902E0(0x3F0)) {
+            if (!std081_flagCheckTrue(0x3F0)) {
                 phase = 1;
             }
             *config.message = 0x36B3;
@@ -811,7 +811,7 @@ void fn_8004D8BC(PdaMailWindowA* window)
 /* fn_800FF730 (gs_floor_data.c): floor-transition trigger; floorSetFadeScript
  * (gs_field_colquery.c, GSfield_IsTransitioning): floor resource-alloc
  * helper; _threadSwitch: cooperative thread yield. */
-extern void fn_800FF730(s32 floorId);
+extern void std098_mapWarpToMenuRoom(s32 floorId);
 
 #if 0
 asm void menuPdaOpen(void) {
@@ -821,7 +821,7 @@ asm void menuPdaOpen(void) {
 #pragma scheduling off
 void menuPdaOpen(void)
 {
-    fn_800FF730(0x392);
+    std098_mapWarpToMenuRoom(0x392);
     floorSetFadeScript(0, 0);
     _threadSwitch();
 }
@@ -1589,7 +1589,7 @@ s32 fn_8004DCC0(void* unused, PdaMailOutC* window)
  * despite their current unverified shapes there (2.4%/2.4%/1.3% match
  * -- those bodies are still stubs), this call site's actual arg count
  * (1 each) is what matters for our own byte match. */
-extern void fn_80166A50(s32 id, s32 a, s32 b, s32 c);
+extern void soundStart(s32 id, s32 a, s32 b, s32 c);
 extern s32 fn_801D1B78(s32 mailId);
 extern void fn_801D1C20(s32 mailId);
 extern void fn_801D228C(u16 mailId);
@@ -1626,7 +1626,7 @@ s32 fn_8004D7D0(PdaMailWindowA* window)
         }
     }
     if (index != cur) {
-        fn_80166A50(0x23, 0, 0xFF, 0);
+        soundStart(0x23, 0, 0xFF, 0);
         **field = index;
     }
     mailId = pdaMailGetMailID(index);
@@ -1957,12 +1957,12 @@ u32 fn_8004CDD8(u8* context, u8* object)
 
 extern u8* fn_80105624(void);
 extern u32 fn_801D1650(u32 index);
-extern void fn_801666BC(u32 id);
-extern void fn_80166B18(u32 id);
+extern void soundGetStatus(u32 id);
+extern void soundKill(u32 id);
 extern void fn_801654E0(u32 id, u32 buffer, u32 size);
-extern void fn_80166B3C(u32 id, u32 arg1, u32 arg2);
+extern void soundAttachWork(u32 id, u32 arg1, u32 arg2);
 extern s32 fn_801D1618(void);
-extern void fn_801669E4(u32 id, u32 arg1, u32 arg2);
+extern void soundStopRaw(u32 id, u32 arg1, u32 arg2);
 extern s32 lbl_8047A520;
 extern u8 lbl_8047A524;
 extern u32 lbl_8047A528;
@@ -1980,18 +1980,18 @@ u32 fn_8004DDC0(u8* context)
     if (lbl_8047A520 != 0) {
         soundId = fn_801D1650(lbl_8047A524);
         if (soundId != 0) {
-            fn_801666BC(soundId);
+            soundGetStatus(soundId);
         }
         soundId = fn_801D1650(lbl_8047A524);
         if (soundId != 0) {
-            fn_80166B18(soundId);
+            soundKill(soundId);
         }
         lbl_8047A524 = context[0x95];
         soundId = fn_801D1650(context[0x95]);
         if (soundId != 0) {
             fn_801654E0(soundId, lbl_8047A52C, 0x10000);
-            fn_80166B3C(soundId, 0, 0x408);
-            fn_80166A50(soundId, 0, 0xFF, 0);
+            soundAttachWork(soundId, 0, 0x408);
+            soundStart(soundId, 0, 0xFF, 0);
             lbl_8047A528 = 0;
         }
         lbl_8047A520 = 0;
@@ -2015,7 +2015,7 @@ u32 fn_8004DDC0(u8* context)
     if (lbl_8047A524 != (s8)context[0x95]) {
         soundId = fn_801D1650(lbl_8047A524);
         if (soundId != 0) {
-            fn_801669E4(soundId, 0, 0);
+            soundStopRaw(soundId, 0, 0);
         }
         lbl_8047A520 = 1;
     }
@@ -2023,11 +2023,11 @@ u32 fn_8004DDC0(u8* context)
 }
 #pragma peephole reset
 
-extern u32 fn_8016557C(void);
+extern u32 soundPauseMusic(void);
 extern u32 GSresAllocResourceAlign(u32 size, u32 align, u32 arg2, u32 group, u32 arg4);
 extern void GSresRegisterResource(u32 buffer, u32 arg1, u32 group, u32 arg3);
 extern void fn_800F9210(u32 arg0, u32 group);
-extern void fn_80165548(u32 state);
+extern void soundResumeMusic(u32 state);
 extern s32 fn_801026A4(u32 menuId, ...);
 extern void fn_80102510(u32 menuId);
 
@@ -2040,15 +2040,15 @@ s32 fn_8004DFCC(u8 initialSelection)
     s32 result;
 
     selection = initialSelection;
-    state = fn_8016557C();
+    state = soundPauseMusic();
     lbl_8047A52C = GSresAllocResourceAlign(0x10000, 0x20, 0, 0x408, 0);
     GSresRegisterResource(lbl_8047A52C, 0, 0x408, 0);
     lbl_8047A524 = initialSelection;
     soundId = fn_801D1650(initialSelection);
     if (soundId != 0) {
         fn_801654E0(soundId, lbl_8047A52C, 0x10000);
-        fn_80166B3C(soundId, 0, 0x408);
-        fn_80166A50(soundId, 0, 0xFF, 0);
+        soundAttachWork(soundId, 0, 0x408);
+        soundStart(soundId, 0, 0xFF, 0);
         lbl_8047A528 = 0;
     }
 
@@ -2061,18 +2061,18 @@ s32 fn_8004DFCC(u8 initialSelection)
 
     soundId = fn_801D1650(lbl_8047A524);
     if (soundId != 0) {
-        fn_801669E4(soundId, 0, 0);
+        soundStopRaw(soundId, 0, 0);
     }
     soundId = fn_801D1650(lbl_8047A524);
     if (soundId != 0) {
-        fn_801666BC(soundId);
+        soundGetStatus(soundId);
     }
     soundId = fn_801D1650(lbl_8047A524);
     if (soundId != 0) {
-        fn_80166B18(soundId);
+        soundKill(soundId);
     }
     fn_800F9210(0, 0x408);
-    fn_80165548(state);
+    soundResumeMusic(state);
     return result;
 }
 #pragma peephole reset
@@ -2171,15 +2171,15 @@ s32 fn_8004E2E0(u8* context, u8* object)
 #pragma peephole reset
 
 extern u8 fn_8017B07C(u32 fileHandle, u32 entry);
-extern void fn_800D88DC(u32 mask);
-extern void fn_800D888C(u32 value);
-extern void fn_800D85D4(u32 slot, void* texture);
-extern void fn_800D6A00(u32 mode);
-extern void fn_800D67BC(u32 count);
+extern void gfxSetFlags(u32 mask);
+extern void gfxClearFlags(u32 value);
+extern void gfxLoadTexture(u32 slot, void* texture);
+extern void gfxSetPrimitive(u32 mode);
+extern void gfxBegin(u32 count);
 extern void fn_800D61E4(s16 x, s16 y);
 extern void fn_800D5BA0(u32 slot, s32 value);
-extern void fn_800D59B8(u32 slot, f32 x, f32 y);
-extern void fn_800D6728(void);
+extern void gfxVtxTexCoord(u32 slot, f32 x, f32 y);
+extern void gfxEnd(void);
 extern f32 lbl_8047BE48;
 extern f32 lbl_8047BE4C;
 
@@ -2252,18 +2252,18 @@ s32 fn_8004E510(u8* context, u8* object)
     if (texture == 0) {
         return 0;
     }
-    fn_800D88DC(3);
-    fn_800D888C(4);
-    fn_800D85D4(0, (void*)texture);
-    fn_800D6A00(7);
-    fn_800D67BC(2);
+    gfxSetFlags(3);
+    gfxClearFlags(4);
+    gfxLoadTexture(0, (void*)texture);
+    gfxSetPrimitive(7);
+    gfxBegin(2);
     fn_800D61E4(0, 0);
     fn_800D5BA0(0, -1);
-    fn_800D59B8(0, lbl_8047BE48, lbl_8047BE48);
+    gfxVtxTexCoord(0, lbl_8047BE48, lbl_8047BE48);
     fn_800D61E4(*(s16*)(object + 0x54), *(s16*)(object + 0x56));
     fn_800D5BA0(0, -1);
-    fn_800D59B8(0, lbl_8047BE4C, lbl_8047BE4C);
-    fn_800D6728();
+    gfxVtxTexCoord(0, lbl_8047BE4C, lbl_8047BE4C);
+    gfxEnd();
     return 0;
 }
 #pragma peephole reset

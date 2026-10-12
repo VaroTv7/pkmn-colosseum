@@ -1,6 +1,6 @@
 #include "game/camera_types.h"
 
-void fn_80176948(f32 x, f32 y, f32 z)
+void std040_cameraSetPosition(f32 x, f32 y, f32 z)
 {
     GSSceneVec3 direction;
 

@@ -324,16 +324,16 @@ void* peopleGetTransform(PeopleEntry* entry);
 
 u32 fn_8018F470(u32 index);
 u32 fn_8018F490(const PeopleInfoBiosEntry* info);
-u32 fn_8018F4AC(const PeopleInfoBiosEntry* info);
+u32 characterModelGetTalkSE(const PeopleInfoBiosEntry* info);
 f32 fn_8018F5B4(const PeopleInfoBiosEntry* info);
 f32 fn_8018F5CC(const PeopleInfoBiosEntry* info);
 f32 fn_8018F5E4(const PeopleInfoBiosEntry* info);
 u32 fn_8018F5FC(const PeopleInfoBiosEntry* info);
-f32 fn_8018F618(const PeopleInfoBiosEntry* info);
-f32 fn_8018F638(const PeopleInfoBiosEntry* info);
-f32 fn_8018F658(const PeopleInfoBiosEntry* info);
-f32 fn_8018F678(const PeopleInfoBiosEntry* info);
-s32 fn_8018F698(const PeopleInfoBiosEntry* info);
+f32 charModelGetHeadPitchMax(const PeopleInfoBiosEntry* info);
+f32 charModelGetHeadPitchMin(const PeopleInfoBiosEntry* info);
+f32 charModelGetHeadYawMax(const PeopleInfoBiosEntry* info);
+f32 charModelGetHeadYawMin(const PeopleInfoBiosEntry* info);
+s32 charModelGetHeadPart(const PeopleInfoBiosEntry* info);
 void* fn_8018F6B4(const PeopleInfoBiosEntry* info);
 PeopleInfoBiosEntry* peopleInfoBiosGetPtrFromIndex(u32 index);
 
@@ -393,8 +393,6 @@ void peopleSetAnim(PeopleEntry* entry, u8 animId);
 /** Set the NPC's shadow animation. fn_8018FB2C */
 void peopleSetShadowAnim(PeopleEntry* entry, u8 animId);
 
-/** Get rotation data from model. fn_8018FC2C */
-void peopleGetRotation(PeopleEntry* entry);
 
 /** Historical name; returns the model rotation-vector pointer. fn_8018FC50 */
 struct GSvec* peopleGetPosition(PeopleEntry* entry);

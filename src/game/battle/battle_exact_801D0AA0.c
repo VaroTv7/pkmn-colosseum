@@ -53,7 +53,7 @@ u16 fn_801D0AFC(s32 mode)
     return lbl_8047B3D8;
 }
 
-void fn_801D0BD0(s32 arg0, s32 arg1, s32 mode)
+void std083_unk_801d0bd0(s32 arg0, s32 arg1, s32 mode)
 {
     extern void fn_801D0C30(void);
     extern void fn_801D0DB0(s32 arg0, s32 arg1);

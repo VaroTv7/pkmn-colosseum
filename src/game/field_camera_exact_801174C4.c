@@ -20,7 +20,7 @@ u8 fn_801174EC(void)
     return lbl_8047AD71;
 }
 
-void fn_801174F4(void)
+void std136_fieldClearFlag_8047ad71(void)
 {
     lbl_8047AD71 = 0;
 }

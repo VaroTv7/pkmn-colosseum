@@ -102,7 +102,7 @@ extern void fn_800B96BC(u16 width, u16 height);
 extern void fn_800B9874(u32 clamp);
 extern f32 GXGetYScaleFactor(u16 efbHeight, u16 xfbHeight);
 extern u32 fn_800B9B14(f32 scale);
-extern void fn_800B9BDC(GXColor color, u32 clear_z);
+extern void GXSetCopyClear(GXColor color, u32 clear_z);
 extern void fn_800B9C44(BOOL aa, u8 sample_pattern[12][2], BOOL vf,
                         u8 vfilter[7]);
 extern void fn_800B9E6C(u32 gamma);
@@ -207,7 +207,7 @@ void fn_801BF6AC(void)
     OSRestoreInterrupts(intr);
 }
 
-void fn_801BFA1C(HSD_VIStatus* vi, void* buffer, HSD_RenderPass rpass);
+void HSD_VICopyEFB2XFB(HSD_VIStatus* vi, void* buffer, HSD_RenderPass rpass);
 
 /* HSD_VICopyXFBAsync */
 void fn_801BF8A0(HSD_RenderPass rpass)
@@ -218,7 +218,7 @@ void fn_801BF8A0(HSD_RenderPass rpass)
         return;
     }
     idx = HSD_VIWaitXFBDrawEnable();
-    fn_801BFA1C(&_p->current.vi, _p->xfb[idx].buffer, rpass);
+    HSD_VICopyEFB2XFB(&_p->current.vi, _p->xfb[idx].buffer, rpass);
 
     while (fn_801BFCA0()) {
         fn_800B8DA8();
@@ -229,7 +229,7 @@ void fn_801BF8A0(HSD_RenderPass rpass)
 }
 
 /* HSD_VICopyEFB2XFBPtr */
-void fn_801BFA1C(HSD_VIStatus* vi, void* buffer, HSD_RenderPass rpass)
+void HSD_VICopyEFB2XFB(HSD_VIStatus* vi, void* buffer, HSD_RenderPass rpass)
 {
     GXRenderModeObj* rmode = &vi->rmode;
     int n_xfb_lines;
@@ -243,7 +243,7 @@ void fn_801BFA1C(HSD_VIStatus* vi, void* buffer, HSD_RenderPass rpass)
     fn_801B278C(vi->update_clr);
     fn_801B273C(vi->update_alpha);
     fn_801B27DC(vi->update_z, 3, TRUE);
-    fn_800B9BDC(vi->clear_clr, vi->clear_z);
+    GXSetCopyClear(vi->clear_clr, vi->clear_z);
 
     switch (rpass) {
     case HSD_RP_SCREEN:
@@ -334,7 +334,7 @@ void fn_801BFD10(u32 retraceCount)
             _p->xfb[idx].status = HSD_VI_XFB_NEXT;
         }
     } else if ((idx = HSD_VISearchXFBByStatus(HSD_VI_XFB_COPYEFB)) != -1) {
-        fn_801BFA1C(&_p->efb.vi_all.vi, _p->xfb[idx].buffer, HSD_RP_SCREEN);
+        HSD_VICopyEFB2XFB(&_p->efb.vi_all.vi, _p->xfb[idx].buffer, HSD_RP_SCREEN);
         _p->xfb[idx].status = HSD_VI_XFB_DISPLAY;
         _p->efb.status = HSD_VI_EFB_FREE;
     }

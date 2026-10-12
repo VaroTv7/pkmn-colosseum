@@ -74,9 +74,9 @@ s32 fn_8010FAF4(
     GScolsys2Vec3* segmentEnd, GScolsys2Vec3* result)
 {
     extern u8* GScolsys2GetCurFloor(void);
-    extern void* fn_8018D998(s32, s32);
+    extern void* peopleIsInGroup(s32, s32);
     extern void* peopleSearchID(void*);
-    extern GScolsys2Vec3* fn_8018FCBC(void*);
+    extern GScolsys2Vec3* peopleGetPositionPtr(void*);
     extern f32 lbl_8047CF20;
     extern f32 lbl_8047CF40;
     extern f32 lbl_8047CF44;
@@ -113,11 +113,11 @@ s32 fn_8010FAF4(
                 continue;
             }
             person = peopleSearchID(
-                fn_8018D998(*(s32*)(entry + 0), *(s32*)(entry + 4)));
+                peopleIsInGroup(*(s32*)(entry + 0), *(s32*)(entry + 4)));
             if (person == NULL) {
                 continue;
             }
-            other = fn_8018FCBC(person);
+            other = peopleGetPositionPtr(person);
             if (other == NULL) {
                 continue;
             }

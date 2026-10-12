@@ -54,7 +54,7 @@ extern void  winMsgClose(s32 slot);                   /* Close message box */
 extern u8    fn_801F18DC(s32 controller);             /* Check input ready */
 extern u8    fightFloorIsUseFightTimerCommand(s32 controller);             /* Check button pressed */
 extern u8    fightTimerCommandIsOver(void);                       /* Check A button */
-extern u16   fn_801EF634(void);                       /* Get input state */
+extern u16   std103_battleGetResult(void);                       /* Get input state */
 extern void  _threadSwitch(void);                       /* Frame advance */
 extern u32   fn_800F7AF0(s32 slot);                   /* Get render flags */
 extern u32   fn_800F7BC4(s32 slot);                   /* Get VSync flags */
@@ -622,7 +622,7 @@ L_800117F0:
                     break;
                 } while (0);
 
-                ((void(*)(void))fn_801EF634)();
+                ((void(*)(void))std103_battleGetResult)();
                 tmp = r3 & 0xFFFF;
                 if (tmp != 1) break;
                 tmp = 0x1;
@@ -704,16 +704,16 @@ s32 fn_80011A1C(u8* obj, s32 a1, s32 a2) {
 
 /* fn_8000D710 - 0x8000D710 | size: 0x398 */
 extern s32 heroMoveCheckEvent();
-extern void fn_80116D30(void);
+extern void heroDispatchEvent(void);
 extern void heroMoveInitEvent(void);
 extern void mailMainReceiveTerminate(void);
 extern void GSmodelAllPauseAnimation(void);
 extern s32 fn_800D37CC();
 extern void menuCreateOffScreen(void);
 extern u8 menuGetOffScreenFlag();
-extern void fn_801661D0(void);
+extern void soundDuck(void);
 extern void fn_800D3074(void);
-extern void* fn_801906A0();
+extern void* std082_flagGetValue();
 extern u32 floorGetCurrentContext();
 extern void fn_80130CD8(void);
 extern void GSgappBlock(void);
@@ -727,9 +727,9 @@ extern void menuPdaOpen(void);
 extern u32 fn_80018F88();
 extern u32 fn_80019070();
 extern void heroMoveAddAutoEvent(void);
-extern s32 fn_801CBAB8();
+extern s32 std223_askYesNoThenWarp395();
 extern void menuOffScreenRelease(void);
-extern void fn_801660D8(void);
+extern void soundUnduck(void);
 extern void menuReleaseOffScreen(void);
 extern void menuCloseSync(void);
 extern void heroMoveTermEvent(void);
@@ -750,16 +750,16 @@ asm void fn_8000D710(void) {
 #pragma peephole off
 u32 fn_8000D710(u32 mode) {
     extern s32 heroMoveCheckEvent(void* out);
-    extern void fn_80116D30(s32 kind, u16 value);
+    extern void heroDispatchEvent(s32 kind, u16 value);
     extern void heroMoveInitEvent(void);
     extern void mailMainReceiveTerminate(void);
     extern void GSmodelAllPauseAnimation(void);
     extern s32 fn_800D37CC(void);
     extern void menuCreateOffScreen(f32 value);
     extern u8 menuGetOffScreenFlag(void);
-    extern void fn_801661D0(s32, s32, s32, s32);
+    extern void soundDuck(s32, s32, s32, s32);
     extern void fn_800D3074(s32);
-    extern void* fn_801906A0(s32);
+    extern void* std082_flagGetValue(s32);
     extern u32 floorGetCurrentContext(void);
     extern void fn_80130CD8(void);
     extern void GSgappBlock(void);
@@ -773,9 +773,9 @@ u32 fn_8000D710(u32 mode) {
     extern u32 fn_80018F88(s32, void*, s32);
     extern u32 fn_80019070(u32);
     extern void heroMoveAddAutoEvent(u32, u32, u32, s32, s32);
-    extern s32 fn_801CBAB8(void);
+    extern s32 std223_askYesNoThenWarp395(void);
     extern void menuOffScreenRelease(void);
-    extern void fn_801660D8(s32, s32, s32);
+    extern void soundUnduck(s32, s32, s32);
     extern void menuReleaseOffScreen(f32 value);
     extern void menuCloseSync(s32, s32);
     extern void heroMoveTermEvent(void);
@@ -791,7 +791,7 @@ u32 fn_8000D710(u32 mode) {
 
     count = heroMoveCheckEvent(stackData);
     for (i = 0; i < count; i++) {
-        fn_80116D30(4, *(u16*)(stackData + 0x30 + (i * 0x34)));
+        heroDispatchEvent(4, *(u16*)(stackData + 0x30 + (i * 0x34)));
     }
 
     heroMoveInitEvent();
@@ -806,9 +806,9 @@ u32 fn_8000D710(u32 mode) {
     while ((u8)menuGetOffScreenFlag() == 0) {
         _threadSwitch();
     }
-    fn_801661D0(0x55, 0x1F4, 1, 1);
+    soundDuck(0x55, 0x1F4, 1, 1);
     fn_800D3074(1);
-    dialogId = (fn_801906A0(0x8AE) == NULL) ? 0x41 : 0x109;
+    dialogId = (std082_flagGetValue(0x8AE) == NULL) ? 0x41 : 0x109;
     result = 0;
 
     switch ((u8)mode) {
@@ -862,7 +862,7 @@ u32 fn_8000D710(u32 mode) {
     }
 
     fn_80019070(result);
-    fn_801660D8(0x1F4, 1, 1);
+    soundUnduck(0x1F4, 1, 1);
     menuClose(dialogId);
     tmp = fn_800D37CC();
     if (tmp != 0) {
@@ -1058,12 +1058,12 @@ void menuFightButtonSecretKousan(u8* ptr) {
     extern u8 fn_801F18DC(s32 a);
     extern u8 fightFloorIsUseFightTimerCommand(s32 a);
     extern u8 fightTimerCommandIsOver(void);
-    extern u16 fn_801EF634(void);
+    extern u16 std103_battleGetResult(void);
     u8 flag;
     menuButtonNormal(ptr);
     if (!(u8)fn_801F18DC(0)) goto _zero;
     if ((u8)fightFloorIsUseFightTimerCommand(0) == 1 && (u8)fightTimerCommandIsOver() == 1) { flag = 1; goto _check; }
-    if ((u16)fn_801EF634() == 1) { flag = 1; goto _check; }
+    if ((u16)std103_battleGetResult() == 1) { flag = 1; goto _check; }
     _zero:
     flag = 0;
     _check:
@@ -1201,7 +1201,7 @@ void menuFightButtonTargetSecret(u8* ctx) {
     if ((u8)fn_801F18DC(0) != 0) {
         if (((u8)fightFloorIsUseFightTimerCommand(0) == 1) && ((u8)fightTimerCommandIsOver() == 1)) {
             pressed = 1;
-        } else if ((u16)fn_801EF634() == 1) {
+        } else if ((u16)std103_battleGetResult() == 1) {
             pressed = 1;
         }
     }
@@ -1758,7 +1758,7 @@ void menuFightButtonSecretPokemonTop(u8* ctx) {
     if ((u8)fn_801F18DC(0) != 0) {
         if (((u8)fightFloorIsUseFightTimerCommand(0) == 1) && ((u8)fightTimerCommandIsOver() == 1)) {
             pressed = 1;
-        } else if ((u16)fn_801EF634() == 1) {
+        } else if ((u16)std103_battleGetResult() == 1) {
             pressed = 1;
         }
     }
@@ -2159,7 +2159,7 @@ void menuFightButtonSecretWazaTop(u8* ctx) {
     if ((u8)fn_801F18DC(0) != 0) {
         if (((u8)fightFloorIsUseFightTimerCommand(0) == 1) && ((u8)fightTimerCommandIsOver() == 1)) {
             pressed = 1;
-        } else if ((u16)fn_801EF634() == 1) {
+        } else if ((u16)std103_battleGetResult() == 1) {
             pressed = 1;
         }
     }
@@ -2225,7 +2225,7 @@ void menuFightButtonSecretMain(u8* arg1) {
     extern u8 fn_801F18DC(s32 a);
     extern u8 fightFloorIsUseFightTimerCommand(s32 a);
     extern u8 fightTimerCommandIsOver(void);
-    extern u16 fn_801EF634(void);
+    extern u16 std103_battleGetResult(void);
     void* data;
     u16 flags;
     s32 flag_val;
@@ -2255,7 +2255,7 @@ void menuFightButtonSecretMain(u8* arg1) {
                 goto got_flag;
             }
         }
-        if ((u16)fn_801EF634() == 1) {
+        if ((u16)std103_battleGetResult() == 1) {
             flag = 1;
             goto got_flag;
         }
@@ -2918,7 +2918,7 @@ waitLabel: \
         if ((fightFloorIsUseFightTimerCommand(0) == 1) && (fightTimerCommandIsOver() == 1)) { \
             advance = 1; \
             goto haveLabel; \
-        } else if (fn_801EF634() == 1) { \
+        } else if (std103_battleGetResult() == 1) { \
             advance = 1; \
             goto haveLabel; \
         } \

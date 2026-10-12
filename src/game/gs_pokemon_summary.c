@@ -203,7 +203,7 @@ extern void fn_800FE6D0(s32, s32);
 extern void spriteSetEnv(void);
 extern void windowDrawSprite2(s32, s32, s32, s32, u32, s32, s32, s32);
 extern void winSeqSetMenu(s32, s32);
-extern void fn_80166A50(s32, s32, s32, s32);
+extern void soundStart(s32, s32, s32, s32);
 extern void winMsgOpen(s32, s32, s32, s32);
 extern void* windowGetActiveID(void);
 extern s32 menuOpenCustom(s32, void*, ...);
@@ -1628,7 +1628,7 @@ s32 fn_80017028(u8* ctx) {
     }
 
     if (soundId != 0) {
-        fn_80166A50(soundId, 0, 0xFF, 0);
+        soundStart(soundId, 0, 0xFF, 0);
     }
 
     if ((s32)lbl_8047A2E8 >= 0) {

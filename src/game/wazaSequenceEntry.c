@@ -72,7 +72,7 @@ u8 wazaSequenceEntryStop(void* entry, BOOL immediate) {
                 GSmodelGetRotation(model, rotation);
                 GSmodelGetScale(model, scale);
                 GSmodelGetPosition(ownerModel, ownerPosition);
-                fn_800E0168(ownerPosition, ownerPosition, position);
+                GSvecSub(ownerPosition, ownerPosition, position);
                 if (*(s32*)(node + 0xA0) != 0) {
                     GSmodelDetachFromGSpart(ownerModel, 0);
                 }
@@ -85,7 +85,7 @@ u8 wazaSequenceEntryStop(void* entry, BOOL immediate) {
                     GSlerpGetLinearInterpolationVector(
                         boundCenter, (u8*)bound + 0x10, (u8*)bound + 0x1C,
                         lbl_8047E348);
-                    fn_800E0168(position, position, boundCenter);
+                    GSvecSub(position, position, boundCenter);
                     GSmodelSetPosition(ownerModel, position);
                     GSmodelRemoveNull(ownerModel);
                 }
@@ -127,7 +127,7 @@ u8 wazaSequenceEntryStop(void* entry, BOOL immediate) {
                     f32 position[3];
 
                     GSmodelGetPosition(ownerModel, position);
-                    fn_800E0168(position, position, effect + 0x48);
+                    GSvecSub(position, position, effect + 0x48);
                     GSmodelSetPosition(ownerModel, position);
                 }
             } else if (*(s32*)(node + 0x88) == 0) {
@@ -145,7 +145,7 @@ u8 wazaSequenceEntryStop(void* entry, BOOL immediate) {
         if ((*(u32*)(node + 0x7C) & 1) != 0) {
             lbl_8047B408 = 0;
         }
-        fn_80166B18(*(u32*)(node + 0x78));
+        soundKill(*(u32*)(node + 0x78));
         break;
 
     default:
@@ -241,7 +241,7 @@ u8 wazaSequenceEntryUpdate(void* entry, s32 elapsed) {
             }
             return FALSE;
         } else {
-            u32 status = fn_801666BC(*(u32*)(node + 0x78));
+            u32 status = soundGetStatus(*(u32*)(node + 0x78));
             return status == 2 || status == 3;
         }
 
@@ -313,7 +313,7 @@ u8 wazaSequenceEntryUpdate(void* entry, s32 elapsed) {
  */
 u8 wazaSequenceEntryStart(void* entry) {
     extern void GSthreadSetArgs(void* thread, s32 priority, ...);
-    extern void fn_80165668(u32 id, void* buffer, u32 size);
+    extern void std130_soundUnk_801653cc(u32 id, void* buffer, u32 size);
     extern s32 lbl_8047B408;
     extern const char lbl_80279610[];
     WazaSequenceNode* node = entry;
@@ -356,7 +356,7 @@ u8 wazaSequenceEntryStart(void* entry) {
         if ((node->runtimeFlags & 1) != 0) {
             if (lbl_8047B408 == 0) {
                 lbl_8047B408 = (s32)GSthreadCreate(0x15, 0x4E20, 0x2000,
-                                                    1, 1, fn_80165668);
+                                                    1, 1, std130_soundUnk_801653cc);
                 if (lbl_8047B408 != 0) {
                     GSthreadSetArgs((void*)lbl_8047B408, 3,
                                     node->resourceId, 0, 0xFF);
@@ -364,7 +364,7 @@ u8 wazaSequenceEntryStart(void* entry) {
                 }
             }
         } else {
-            started = fn_80166AB8(node->resourceId, 0, 0);
+            started = soundStartRaw(node->resourceId, 0, 0);
         }
         if (started) {
             goto started_entry;
@@ -436,7 +436,7 @@ u8 _wazaSequenceEffectEntryStart(void* entry) {
     extern BOOL GSeffect(u32 effectId);
     extern void* fn_8013151C(u32 arg);
     extern void* GSresGetResource(u32 group, u32 resource);
-    extern u32 fn_80113F48(void);
+    extern u32 std093_getCurrentGroupID(void);
     extern void* floorDataBiosGetCurrentPtr(void);
     extern u32 floorReadMakeModelResID(u32 value);
     extern void* HSD_ArchiveGetPublicAddress(void* archive, const char* symbols);
@@ -477,7 +477,7 @@ u8 _wazaSequenceEffectEntryStart(void* entry) {
         switch (*(u8*)(effect + 0x4C)) {
         case 1: {
             void* floor = floorDataBiosGetCurrentPtr();
-            u32 group = fn_80113F48();
+            u32 group = std093_getCurrentGroupID();
             void* archive = GSresGetResource(group, *(u32*)((u8*)floor + 0x08));
             void* list = NULL;
             u32 baseId;
@@ -667,7 +667,7 @@ u8 _wazaSequenceParticleEntryStart(void* entry) {
     }
 
     *(void**)((u8*) node + 0x8C) =
-        fn_801190DC(resource, node->field_80,
+        gsParticleCreate(resource, node->field_80,
                     (u32) node->animationMode & 1);
     *(u32*)((u8*) node + 0x90) = 0;
 

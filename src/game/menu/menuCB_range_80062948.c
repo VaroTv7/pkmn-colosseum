@@ -678,7 +678,7 @@ extern s32 toolentryTaisenGetPokemonNum(s32);
 extern s32 toolentryTaisengetEtnryPokemonOrderNum(s32);
 extern s32 fn_8025D9CC(void);
 extern s32 fn_800D37CC(void);
-extern s32 fn_800D3088(void);
+extern s32 msgGetCharsPerFrame(void);
 extern f32 lbl_8047BFE8;
 extern f32 lbl_8047BFF8;
 extern f32 lbl_8047BFFC;
@@ -698,15 +698,15 @@ extern void fn_8006B354(s32);
 extern s32 fn_8025DAAC(void);
 extern void fn_800FB680(s32, s32, s32, u32);
 extern void fn_80063AD4(u8*, UICmdMsg*);
-extern void fn_800D88DC(s32);
-extern void fn_800D888C(s32);
+extern void gfxSetFlags(s32);
+extern void gfxClearFlags(s32);
 extern void fn_800D5648(f32);
-extern void fn_800D6A00(s32);
-extern void fn_800D7820(void*);
-extern void fn_800D67BC(s32);
+extern void gfxSetPrimitive(s32);
+extern void gfxSetVtxDesc(void*);
+extern void gfxBegin(s32);
 extern void fn_800D61E4(s32, s32);
 extern void fn_800D5BA0(s32, u32);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 extern void fn_800FE38C(s32, s32, s32, s32);
 extern void fn_800FE35C(void);
 extern u8 lbl_80314E08[];
@@ -814,10 +814,10 @@ s32 fn_80063060(MenuCBBattleEntryContext* context)
     extern s32 heroBiosGetPokecoupon(void);
     extern void fn_8012A824(s32, s32);
     extern void fn_80132A38(s32, s32);
-    extern void fn_80166AB8(s32, s32, s32);
-    extern s32 fn_801906A0(s32);
+    extern void soundStartRaw(s32, s32, s32);
+    extern s32 std082_flagGetValue(s32);
     extern s32 fn_801EE398(void);
-    extern u16 fn_801EF634(void);
+    extern u16 std103_battleGetResult(void);
     extern void fn_8025D06C(void);
     extern s32 fn_8025D164(void);
     extern s32 fn_8025D9A8(void);
@@ -854,7 +854,7 @@ s32 fn_80063060(MenuCBBattleEntryContext* context)
     allowDbCleanup = TRUE;
     pendingPostCopy = FALSE;
 
-    battleType = (u16)fn_801EF634();
+    battleType = (u16)std103_battleGetResult();
     battleMode = fn_8025D9A8();
     battleCount = fn_8025DBB0();
     savedPortState = savedataGetStatus(0, 2);
@@ -897,7 +897,7 @@ s32 fn_80063060(MenuCBBattleEntryContext* context)
             }
 
             if (pendingSetup) {
-                if (battleMode == 1 && fn_801906A0(0xAFD) == 0) {
+                if (battleMode == 1 && std082_flagGetValue(0xAFD) == 0) {
                     pendingPostCopy = fn_801EE398() != 0;
                 }
                 state = 5;
@@ -984,7 +984,7 @@ s32 fn_80063060(MenuCBBattleEntryContext* context)
             s32 entryResult;
 
             fn_80132A38(0x30, fn_8006ADEC());
-            fn_80166AB8(0x3CC, 0, 0);
+            soundStartRaw(0x3CC, 0, 0);
             fn_80106D3C(2, 0x3C11, 1, 1);
             fn_8006B09C(0);
             fn_8006A7D0();
@@ -1110,7 +1110,7 @@ s32 fn_80063060(MenuCBBattleEntryContext* context)
 
 s32 fn_80062AB4(void* arg)
 {
-    extern u16 fn_801EF634(void);
+    extern u16 std103_battleGetResult(void);
     extern void menuSetEnablePort(s32 port);
     extern s32 toolentryTaisenGetEntryPlayerNum(void);
     extern s32 toolentryTaisenGetControlerType(s32 player);
@@ -1143,7 +1143,7 @@ s32 fn_80062AB4(void* arg)
     menuOpen(0xDF, 0);
     menuOpen(0xBA, 1);
 
-    if (fn_801EF634() == 1) {
+    if (std103_battleGetResult() == 1) {
         menuSetEnablePort(1);
         specialMode =
             (toolentryTaisenGetBattleType() == 2 &&
@@ -1404,11 +1404,11 @@ void fn_80063AD4(u8* context, UICmdMsg* msg)
     bottom.channel.alpha =
         (u8)(s32)((f32)bottom.channel.alpha * opacity);
 
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D6A00(6);
-    fn_800D7820(lbl_80314E08);
-    fn_800D67BC(4);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetPrimitive(6);
+    gfxSetVtxDesc(lbl_80314E08);
+    gfxBegin(4);
     fn_800D61E4(0, 0);
     fn_800D5BA0(0, top.value);
     fn_800D61E4(msg->s54, 0);
@@ -1417,26 +1417,26 @@ void fn_80063AD4(u8* context, UICmdMsg* msg)
     fn_800D5BA0(0, bottom.value);
     fn_800D61E4(0, msg->s56);
     fn_800D5BA0(0, bottom.value);
-    fn_800D6728();
+    gfxEnd();
     fn_800FE38C(0, 0, msg->s54, msg->s56);
 
-    fn_800D88DC(1);
-    fn_800D888C(6);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
     fn_800D5648(lbl_8047BFD0);
-    fn_800D6A00(1);
-    fn_800D7820(lbl_80314E08);
+    gfxSetPrimitive(1);
+    gfxSetVtxDesc(lbl_80314E08);
     white.channel.red = 0xFF;
     white.channel.green = 0xFF;
     white.channel.blue = 0xFF;
     white.channel.alpha =
         (u8)(s32)(lbl_8047BFD4 * opacity);
     for (y = 0; y < msg->s56; y += 4) {
-        fn_800D67BC(2);
+        gfxBegin(2);
         fn_800D61E4(0, y);
         fn_800D5BA0(0, white.value);
         fn_800D61E4(msg->s54, y);
         fn_800D5BA0(0, white.value);
-        fn_800D6728();
+        gfxEnd();
     }
     fn_800FE35C();
 }
@@ -1557,7 +1557,7 @@ void _menuCBPokemonEntryEntCheckGBA__F13GSinputDevicel(
     extern void gbaCommandEntryPokemon(u32, u8*);
     extern void toolentryTaisenSetEtnryPokemonOrderGBA(
         s32, s32, u32*);
-    extern void fn_80166AB8(s32, s32, s32);
+    extern void soundStartRaw(s32, s32, s32);
     u32 order[8];
     u32 linkStatus;
     u32 command;
@@ -1575,7 +1575,7 @@ void _menuCBPokemonEntryEntCheckGBA__F13GSinputDevicel(
         count = toolentryTaisengetEtnryPokemonOrderNum(player);
         result = toolentryTaisenSetEtnryPokemonOrder(player, count);
         if (result >= 0) {
-            fn_80166AB8(0x3C3, 0, 0);
+            soundStartRaw(0x3C3, 0, 0);
             *(f32*)&lbl_803A9F08[
                 0xCD8C + player * 0x30 + result * 4] =
                 (f32)((5 - result) * 0x18);
@@ -1587,7 +1587,7 @@ void _menuCBPokemonEntryEntCheckGBA__F13GSinputDevicel(
     case 0xFF000000:
         oldCount = toolentryTaisengetEtnryPokemonOrderNum(player);
         if (oldCount != toolentryTaisenDeleteEtnryPokemonOrder(player)) {
-            fn_80166AB8(0x25, 0, 0);
+            soundStartRaw(0x25, 0, 0);
         }
         break;
     case 0:
@@ -1620,7 +1620,7 @@ static inline void menuCBPokemonEntryAdvancePositions(void)
     u32 numerator;
 
     denominator = (f32)fn_800D37CC();
-    numerator = fn_800D3088();
+    numerator = msgGetCharsPerFrame();
     *(f32*)&lbl_803A9F08[0xCD88] = (f32)numerator / denominator;
     for (player = 0; player < 4; player++) {
         current = (f32*)&lbl_803A9F08[0xCD8C + player * 0x30];
@@ -1724,7 +1724,7 @@ void fn_80068418(PokemonEntryInputRepeat* input, s32 device)
             input->timer[bit] = 15;
             repeated |= mask;
         } else if ((current & mask) != 0) {
-            input->timer[bit] -= fn_800D3088();
+            input->timer[bit] -= msgGetCharsPerFrame();
             if (input->timer[bit] <= 0) {
                 input->timer[bit] = 5;
                 repeated |= mask;

@@ -17,7 +17,7 @@ extern f32 lbl_8047C998;
 extern f32 lbl_80478ACC;
 extern double lbl_8047C9A0;
 extern void fn_800E01D0(void*, void*);
-extern void fn_800E0168(void*, void*, void*);
+extern void GSvecSub(void*, void*, void*);
 extern void fn_800E0628(void*, void*);
 extern void fn_800E0218(void*, void*, void*, void*);
 extern void fn_800E053C(void*, f32);
@@ -104,7 +104,7 @@ void fn_800D1070(u32 ticks)
             } else if (object[1] == 1) {
                 f32 delta[3];
                 f32 value;
-                fn_800E0168(delta, object + 0x70, object + 0x100);
+                GSvecSub(delta, object + 0x70, object + 0x100);
                 if ((delta[0] < 0 ? -delta[0] : delta[0]) < lbl_80478ACC
                  && (delta[1] < 0 ? -delta[1] : delta[1]) < lbl_80478ACC
                  && (delta[2] < 0 ? -delta[2] : delta[2]) < lbl_80478ACC) {

@@ -192,22 +192,22 @@ extern void* heroGetStatus(void* hero, s32 selector, u16 index);
 extern u8 pokemonCheckValid(void* pokemon);
 extern s32 fn_80057DE8(void* pokemon);
 extern void* fn_80057F94(void* pokemon);
-extern void fn_800D88DC(u32 flags);
+extern void gfxSetFlags(u32 flags);
 extern void fn_800DC0D4(s32, s32, s32, s32, s32);
 extern void fn_800DC14C(s32, s32, s32, s32, s32, s32);
 extern void fn_800DBFD4(s32, s32, s32, s32, s32);
 extern void fn_800DC04C(s32, s32, s32, s32, s32, s32);
 extern u16 GStextureGetXsize(void* texture);
 extern u16 GStextureGetYsize(void* texture);
-extern void fn_800D7820(void* resource);
-extern void fn_800D85D4(s32 slot, void* texture);
-extern void fn_800D6A00(s32 mode);
-extern void fn_800D67BC(s32 mode);
+extern void gfxSetVtxDesc(void* resource);
+extern void gfxLoadTexture(s32 slot, void* texture);
+extern void gfxSetPrimitive(s32 mode);
+extern void gfxBegin(s32 mode);
 extern void fn_800D61E4(s16 x, s16 y);
 extern void fn_800D5CB8(s32, s32, s32, s32, s32);
-extern void fn_800D59B8(s32 slot, f32 xScale, f32 yScale);
-extern void fn_800D6728(void);
-extern void fn_800D888C(u32 flags);
+extern void gfxVtxTexCoord(s32 slot, f32 xScale, f32 yScale);
+extern void gfxEnd(void);
+extern void gfxClearFlags(u32 flags);
 extern void* menuSpriteBiosGetPtr(s32 id);
 extern void windowDrawSprite2(s32, s32, s16, s16, s32, void*, s32, s32);
 s32 fn_800576B4(void);
@@ -318,10 +318,10 @@ u32 fn_80053778(u32 unused, u8* pane) {
     texture = 0;
 
     if (fn_80057E40() != 2) {
-        fn_800D88DC(1);
-        fn_800D888C(6);
-        fn_800D6A00(6);
-        fn_800D7820(lbl_80314E08);
+        gfxSetFlags(1);
+        gfxClearFlags(6);
+        gfxSetPrimitive(6);
+        gfxSetVtxDesc(lbl_80314E08);
 
         heightScale = lbl_8047BE64 * lbl_8047A540;
         if (heightScale > lbl_8047BE60) {
@@ -335,7 +335,7 @@ u32 fn_80053778(u32 unused, u8* pane) {
         }
         alpha = (s32)(lbl_8047BE70 * (lbl_8047BE60 - fade));
 
-        fn_800D67BC(4);
+        gfxBegin(4);
         fn_800D61E4(0, 0);
         fn_800D5CB8(0, 0xff, 0xff, 0xff, 0);
         fn_800D61E4(*(s16*)(pane + 0x54), 0);
@@ -344,7 +344,7 @@ u32 fn_80053778(u32 unused, u8* pane) {
         fn_800D5CB8(0, 0xff, 0xff, 0xff, alpha);
         fn_800D61E4(0, height);
         fn_800D5CB8(0, 0xff, 0xff, 0xff, alpha);
-        fn_800D6728();
+        gfxEnd();
         return 0;
     }
 
@@ -363,19 +363,19 @@ u32 fn_80053778(u32 unused, u8* pane) {
     }
 
     if (texture != 0) {
-        fn_800D88DC(3);
-        fn_800D888C(4);
-        fn_800D6A00(7);
-        fn_800D7820(lbl_80314F98);
-        fn_800D85D4(0, (void*)texture);
-        fn_800D67BC(2);
+        gfxSetFlags(3);
+        gfxClearFlags(4);
+        gfxSetPrimitive(7);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxLoadTexture(0, (void*)texture);
+        gfxBegin(2);
         fn_800D61E4(0, 0);
         fn_800D5CB8(0, 0xff, 0xff, 0xff, 0xff);
-        fn_800D59B8(0, lbl_8047BE68, lbl_8047BE68);
+        gfxVtxTexCoord(0, lbl_8047BE68, lbl_8047BE68);
         fn_800D61E4(*(s16*)(pane + 0x54), *(s16*)(pane + 0x56));
         fn_800D5CB8(0, 0xff, 0xff, 0xff, 0xff);
-        fn_800D59B8(0, lbl_8047BE60, lbl_8047BE60);
-        fn_800D6728();
+        gfxVtxTexCoord(0, lbl_8047BE60, lbl_8047BE60);
+        gfxEnd();
     }
 
     return 0;
@@ -719,7 +719,7 @@ s32 fn_80053ED8(MenuCBPane* pane, MenuCBPane* sprite) {
 
         x = sprite->width;
         y = sprite->height;
-        fn_800D88DC(-0x7ffffffe);
+        gfxSetFlags(-0x7ffffffe);
         fn_800DC0D4(0, 0xf, 0xb, 0xa, 8);
         fn_800DC14C(0, 0, 0, 0, 1, 0);
         fn_800DBFD4(0, 7, 7, 7, 4);
@@ -730,18 +730,18 @@ s32 fn_80053ED8(MenuCBPane* pane, MenuCBPane* sprite) {
         scaleT0 = lbl_8047BE68 / (f32)GStextureGetYsize(texture);
         scaleT1 = (f32)y / (f32)GStextureGetYsize(texture);
 
-        fn_800D7820(lbl_80314F98);
-        fn_800D85D4(0, texture);
-        fn_800D6A00(7);
-        fn_800D67BC(2);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxLoadTexture(0, texture);
+        gfxSetPrimitive(7);
+        gfxBegin(2);
         fn_800D61E4(insetX, insetY);
         fn_800D5CB8(0, 0x3c, 0xc, 0xff, alpha);
-        fn_800D59B8(0, scaleS0, scaleT0);
+        gfxVtxTexCoord(0, scaleS0, scaleT0);
         fn_800D61E4((s16)(insetX + width), (s16)(insetY + height));
         fn_800D5CB8(0, 0x3c, 0xc, 0xff, alpha);
-        fn_800D59B8(0, scaleS1, scaleT1);
-        fn_800D6728();
-        fn_800D888C(0x80000000);
+        gfxVtxTexCoord(0, scaleS1, scaleT1);
+        gfxEnd();
+        gfxClearFlags(0x80000000);
     } else if (drawFallback != FALSE) {
         void* bios = menuSpriteBiosGetPtr(0x232);
         s16 drawW = *(s16*)((u8*)bios + 0xc);

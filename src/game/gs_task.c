@@ -454,7 +454,7 @@ extern void fn_8001EA98(s32, s32, s32, s32);
 extern void fn_8001E4B4(s32, s32, s32, s32, s32, s32);
 extern s32 sprintf(char*, const char*, ...);
 extern s32 fn_800FAEF8(s32, s32, s32, ...);
-extern u32 fn_801906A0(u32);
+extern u32 std082_flagGetValue(u32);
 extern u32 lbl_80478F98;
 extern u8 lbl_80478838[8];
 extern u8 lbl_803A19C8[];
@@ -564,7 +564,7 @@ void fn_80008868(u8* window)
         }
 
         fn_800FAEF8(right + 30, rowY, color, lbl_8047B6C8,
-                    fn_801906A0((u16)flagId));
+                    std082_flagGetValue((u16)flagId));
         rowY += 13;
         row++;
     }
@@ -572,8 +572,8 @@ void fn_80008868(u8* window)
 
 /* 0x80008C40 | 0x538 */
 extern u8* windowGetKeyInfo(void);
-extern void fn_80190528(u32);
-extern void fn_801903B0(u32);
+extern void std078_flagSetFalse(u32);
+extern void std079_flagSetTrue(u32);
 extern u32 lbl_80478F98;
 extern u32 lbl_80478F9C;
 static u16 GStaskGetLinkedEntryId(s32 index) {
@@ -652,9 +652,9 @@ void fn_80008C40(u8* window) {
 
     value = top + cursor;
     if (trigger & 0x80) {
-        fn_80190528(GStaskGetLinkedEntryId(value));
+        std078_flagSetFalse(GStaskGetLinkedEntryId(value));
     } else if (trigger & 0x40) {
-        fn_801903B0(GStaskGetLinkedEntryId(value));
+        std079_flagSetTrue(GStaskGetLinkedEntryId(value));
     }
 
     *(u32*)lbl_80478838 = ((u16)top << 16) | (u16)cursor;

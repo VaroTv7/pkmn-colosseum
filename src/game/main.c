@@ -95,7 +95,7 @@ extern void GSpartInit(u32 param);                     /* VI callback setup */
 extern void GSmaterialInit(u32 bufSize);                   /* Display list buffer init */
 extern void fn_800D2AD4(u32 count);                     /* GSgfx light init */
 extern void GSlightInit(u32 count);                     /* GSgfx texture init */
-extern void fn_80119824(u32 a, u32 b);                  /* GSmaterial init */
+extern void gsParticleInit(u32 a, u32 b);                  /* GSmaterial init */
 extern void fn_80132C6C(u32 a, u32 b, u32 c, u32 d);  /* GStexture cache init */
 extern void fn_800F8138(void);                           /* GSgfx camera/viewport init */
 
@@ -117,7 +117,7 @@ extern void GSmsgOpen(void* relData);                  /* GSfloor register REL d
 extern void fn_800F76E4(void* relData);                  /* GSfloor register REL data (floor) */
 extern void fn_80167DC0(u32 a, u32 b, u32 c, u32 d, u32 e); /* Script/event system init */
 extern void fn_801E1300(void);                           /* Save/card system init */
-extern void fn_801ED740(void);                           /* GBA communication init */
+extern void flareCreateTask(void);                           /* GBA communication init */
 extern void fn_801E1B2C(void);                           /* Save data init */
 extern void menuInit(u32 param);                      /* Effect system init */
 extern void fn_80101FB8(u32 param);                      /* Particle system init */
@@ -216,7 +216,7 @@ extern void VIWaitForRetrace(void);    /* AIReset */
 
 extern void GSthreadExecuteAll(void);    /* GSthread begin frame */
 extern u8   fn_8000DAA8(void);    /* IsLanguageJapanese or locale check */
-extern void fn_80181850(u32 a, u32 b); /* Retry/reconnect handler */
+extern void peopleMain(u32 a, u32 b); /* Retry/reconnect handler */
 
 extern u8   fn_8008ABA0(u32 padIdx); /* PAD is connected check */
 extern void fn_800F7F64(u32 padIdx); /* PAD disconnect handler */
@@ -241,9 +241,9 @@ extern void fn_801E118C(void);   /* Card system finalize */
 extern void menuDaemon(void);   /* Particle system update */
 extern void GSmsgDaemon(void);   /* GSthread sync / process tasks */
 
-extern u32  fn_801906A0(u32 evtId);  /* Event system check state */
+extern u32  std082_flagGetValue(u32 evtId);  /* Event system check state */
 extern s32  fn_800D37CC(void);       /* GSgfx get frame counter */
-extern u32  fn_800D3088(void);       /* GSgfx get tick counter */
+extern u32  msgGetCharsPerFrame(void);       /* GSgfx get tick counter */
 
 extern u32  fn_800F7AF0(u32 padIdx); /* PAD get buttons pressed */
 extern u32  fn_800F7BC4(u32 padIdx); /* PAD get buttons held */
@@ -599,7 +599,7 @@ void fn_800057B0(void) {
     GSlightInit(0x20);
 
     /* Initialize material system: 32 materials, 128 max textures */
-    fn_80119824(0x20, 0x80);
+    gsParticleInit(0x20, 0x80);
 
     /* Initialize texture cache: 16 slots, 64 entries, 1 bank, 8192 byte cache */
     fn_80132C6C(0x10, 0x40, 0x1, 0x2000);
@@ -652,7 +652,7 @@ void fn_800057B0(void) {
     fn_801E1300();
 
     /* Initialize GBA communication system */
-    fn_801ED740();
+    flareCreateTask();
 
     /* Initialize save data structures */
     fn_801E1B2C();

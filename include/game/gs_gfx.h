@@ -60,7 +60,7 @@ typedef struct GSgfxState {
 
 extern GSgfxState* lbl_8047AA80;
 
-u32 fn_800D3088(void);
+u32 msgGetCharsPerFrame(void);
 
 /* -----------------------------------------------------------------------
  * Video mode constants (for GSgfxSetVideoMode)

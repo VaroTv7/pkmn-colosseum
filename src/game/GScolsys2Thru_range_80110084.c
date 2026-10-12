@@ -87,7 +87,7 @@ typedef struct GSFieldWzxRegionLocal {
     u8 pad_3E[2];
 } GSFieldWzxRegionLocal;
 
-s32 fn_801101B4(GScolsys2Vec3* start, GScolsys2Vec3* end,
+s32 colsysPassGetEventID(GScolsys2Vec3* start, GScolsys2Vec3* end,
                 GSfieldQueryTriangle* out)
 {
 #pragma optimization_level 4

@@ -309,7 +309,7 @@ void fn_8011207C(u8* state, u32 stateSize) {
 }
 
 /* 0x80112260 | 0x120 */
-void fn_80112260(s32 visible) {
+void floorSetMapVisibility(s32 visible) {
     FloorArchiveResourceLists* lists;
     void* floor;
     void* resource;

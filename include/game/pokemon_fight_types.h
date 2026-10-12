@@ -27,7 +27,7 @@ extern u32 dbgMenuFightGetMsgSpeedToFrame(void);
 extern void _threadSwitch(void);
 
 /* fn_800D3088: Returns frame delta or similar timing value */
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 
 /**
  * FightFloorData: static floor-definition record used by the
@@ -73,7 +73,7 @@ extern void fn_80119ED0(void);
 extern void fn_8011B444(void);
 extern void fn_8011B67C(void);
 extern void pokemonGetStatus(void);
-extern void fn_801EF634(void);
+extern void std103_battleGetResult(void);
 extern void fightTrainerGetValidFightOutPokemonPtr(void);
 extern u32 fightEncountGetEnvSndDataId(u16 encountDataIndex);
 extern u32 fightEncountGetBgmSndDataId(u16 encountDataIndex);

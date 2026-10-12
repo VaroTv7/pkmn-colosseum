@@ -235,7 +235,7 @@ static inline void battleGridApplyFloorScale(void) {
     extern const f32 lbl_8047DF68;
     extern char lbl_802757FC[];
     extern FloorData* floorDataBiosGetCurrentPtr(void);
-    extern void* fn_80113F48(void);
+    extern void* std093_getCurrentGroupID(void);
     extern void set__5GSvecFfff(f32*, f32, f32, f32);
     extern void* GSresGetResource(void*, u32);
     extern ModelList* HSD_ArchiveGetPublicAddress(void*, const char*);
@@ -255,7 +255,7 @@ static inline void battleGridApplyFloorScale(void) {
     maxField = battleGridGetMaxPokemonField();
 
     floor = floorDataBiosGetCurrentPtr();
-    resourceBase = fn_80113F48();
+    resourceBase = std093_getCurrentGroupID();
     modelIndex = 0;
     switch (maxField) {
     case 1:
@@ -273,7 +273,7 @@ static inline void battleGridApplyFloorScale(void) {
     }
     set__5GSvecFfff(scale, scaleValue, scaleValue, scaleValue);
 
-    resource = GSresGetResource(fn_80113F48(), floor->resourceId);
+    resource = GSresGetResource(std093_getCurrentGroupID(), floor->resourceId);
     if (resource != NULL) {
         modelList = HSD_ArchiveGetPublicAddress(resource, lbl_802757FC);
         if (modelList != NULL && modelList->models != NULL) {

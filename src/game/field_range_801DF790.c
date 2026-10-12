@@ -14,7 +14,7 @@
 #include "dolphin/types.h"
 
 extern void winMsgOpenFieldWithSE(s32 messageID, s32 windowID, s32 arg2, s32 arg3);
-extern s32 fn_8001E184(void);
+extern s32 std011_dialogDisplayYesNoMenu(void);
 extern s32 menuPokemonOpen(s32 mode, s32 arg1, s32 arg2);
 extern void* savedataGetStatus(s32 side, s32 slotType);
 extern void* heroBiosGetPokemonPtr(void* status, u16 slot);
@@ -26,7 +26,7 @@ extern void* pokemonBiosGetNicknamePtr(void* pokemon);
 extern u8 pokemonWazaCheckValid(void* pokemon, u16 slot);
 extern s32 fn_80097BBC(u8 chan);
 extern u16 pokemonBiosGetPokemonWazaDataId(void* pokemon, u16 slot);
-extern void fn_80166AB8(u32 sndId, u32 fadeTime, u32 volume);
+extern void soundStartRaw(u32 sndId, u32 fadeTime, u32 volume);
 extern void pokemonWazaInit(void* pokemon, u32 slot);
 extern u32* pokemonBiosGetPokemonWazaPtr(void* pokemon, u16 slot, u8 mode);
 extern void pokemonWazaBiosCopy(u32* dst, u32* src);
@@ -38,7 +38,7 @@ extern void winMsgClose(s32 windowID);
  * fn_801DF790 - Waza item effect handler.
  * Address: 0x801DF790 | Size: 0x4A0
  */
-void fn_801DF790(s32 slot, s32 itemID) {
+void std086_sequenceJump86(s32 slot, s32 itemID) {
     s32 running = 1;
     s32 selection = 0;
     s32 moveSlot = 0;
@@ -54,7 +54,7 @@ void fn_801DF790(s32 slot, s32 itemID) {
             state = 1;
             break;
         case 1:
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 2;
             } else {
                 state = 12;
@@ -154,14 +154,14 @@ void fn_801DF790(s32 slot, s32 itemID) {
             break;
         }
         case 9:
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 10;
             } else {
                 state = 6;
             }
             break;
         case 10:
-            fn_80166AB8(0x48, 0, 0);
+            soundStartRaw(0x48, 0, 0);
             state = 11;
             break;
         case 11: {
@@ -185,7 +185,7 @@ void fn_801DF790(s32 slot, s32 itemID) {
             msgctrlSetValue(0x32, pokemonBiosGetNicknamePtr(pokemon));
             msgctrlSetValue(0x39, (void*)(u32)pokemonBiosGetPokemonWazaDataId(pokemon, (u16)moveSlot));
             winMsgOpenFieldWithSE(0x3B2C, 1, 0, 1);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 7;
             } else {
                 state = 12;
@@ -202,7 +202,7 @@ void fn_801DF790(s32 slot, s32 itemID) {
                 pokemonBiosGetNicknamePtr(
                     heroBiosGetPokemonPtr(savedataGetStatus(0, 2), (u16)selection)));
             winMsgOpenFieldWithSE(0x44AA, 1, 0, 1);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 2;
             } else {
                 state = 12;
@@ -210,7 +210,7 @@ void fn_801DF790(s32 slot, s32 itemID) {
             break;
         case 14:
             winMsgOpenFieldWithSE(0x3B2E, 1, 0, 1);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 2;
             } else {
                 state = 12;
@@ -231,7 +231,7 @@ void fn_801DF790(s32 slot, s32 itemID) {
  * This is likely the top-level function called from the battle state machine
  * to drive a complete move execution's visual presentation.
  */
-void fn_801DFC30(void) {
+void std085_sequenceJump85(void) {
     extern u8 fn_801ED218(s32);
     extern u16 pokemonGetStatus(void*, u16, s32, s32);
     extern u8 fn_801ED0CC(s32, void*);
@@ -243,14 +243,14 @@ void fn_801DFC30(void) {
     extern u32 heroGetStatus(s32, s32, s32);
     extern void heroDecPokedoru(void*, u32);
     extern void winMsgOpenField(u32, s32, s32, s32);
-    extern void fn_80183350(u32, u32);
+    extern void std076_characterEventFlagsClear(u32, u32);
     extern void peopleClearFlagsByIndex(u32, u32, u32);
-    extern void fn_8018B76C(u32, u32, u32, u32, u32);
-    extern void fn_80183018(u32, u32);
+    extern void std051_characterSetAnimation(u32, u32, u32, u32, u32);
+    extern void std077_characterEventFlagsSet(u32, u32);
     extern void fn_801ECFE0(s32, void*);
     extern void fn_801E09E0(s32);
     extern s32 fn_800D37CC(void);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern void _threadSwitch(void);
     extern f32 lbl_8047E3F4;
     extern f32 lbl_8047E3F8;
@@ -276,7 +276,7 @@ void fn_801DFC30(void) {
             break;
         case 1:
             winMsgOpenFieldWithSE(0x3B11, 1, 0, 2);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 2;
             } else {
                 state = 8;
@@ -366,7 +366,7 @@ void fn_801DFC30(void) {
         }
         case 11:
             winMsgOpenFieldWithSE(0x3B1E, 1, 0, 2);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 13;
             } else {
                 state = 4;
@@ -400,7 +400,7 @@ void fn_801DFC30(void) {
             }
             msgctrlSetValue(0x4B, (void*)(u32)(((s32)selection * 0x64) + price + 0x64));
             winMsgOpenFieldWithSE(0x3B14, 1, 0, 2);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 16;
             } else {
                 state = 4;
@@ -417,10 +417,10 @@ void fn_801DFC30(void) {
             price += ((s32)selection * 0x64) + 0x64;
             if ((s32)heroGetStatus(0, 0xC, 0) >= price) {
                 heroDecPokedoru(savedataGetStatus(0, 2), price);
-                fn_80166AB8(0x3CB, 0, 0);
+                soundStartRaw(0x3CB, 0, 0);
                 timer = lbl_8047E3F4;
                 while (timer < lbl_8047E3F8) {
-                    f32 frame = (f32)fn_800D3088() / (f32)fn_800D37CC();
+                    f32 frame = (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                     timer += frame;
                     _threadSwitch();
                 }
@@ -459,10 +459,10 @@ void fn_801DFC30(void) {
                 }
             }
             fn_801ECFE0(0, firstOpen);
-            fn_80183350(0x4D, 1);
+            std076_characterEventFlagsClear(0x4D, 1);
             peopleClearFlagsByIndex(0x4D, 1, 8);
-            fn_8018B76C(0x4D, 1, 5, 0, 1);
-            fn_80183018(0x4D, 1);
+            std051_characterSetAnimation(0x4D, 1, 5, 0, 1);
+            std077_characterEventFlagsSet(0x4D, 1);
             break;
         }
         case 20:
@@ -481,7 +481,7 @@ void fn_801DFC30(void) {
  * fn_801E03D4 - Party Pokemon nickname flow.
  * Address: 0x801E03D4 | Size: 0x388
  */
-void fn_801E03D4(void) {
+void std084_sequenceJump84(void) {
     s32 running = 1;
     s32 selection;
     s32 state = 0;
@@ -490,7 +490,7 @@ void fn_801E03D4(void) {
         switch (state) {
         case 0:
             winMsgOpenFieldWithSE(0x3B21, 1, 0, 1);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 2;
             } else {
                 state = 1;
@@ -558,7 +558,7 @@ void fn_801E03D4(void) {
                 0x32, pokemonBiosGetNicknamePtr(
                           heroBiosGetPokemonPtr(savedataGetStatus(0, 2), (u16)selection)));
             winMsgOpenFieldWithSE(0x3B25, 1, 0, 1);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 7;
             } else {
                 state = 1;
@@ -584,7 +584,7 @@ void fn_801E03D4(void) {
                 0x32, pokemonBiosGetNicknamePtr(
                           heroBiosGetPokemonPtr(savedataGetStatus(0, 2), (u16)selection)));
             winMsgOpenFieldWithSE(0x3B1F, 1, 0, 1);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 10;
             } else {
                 state = 7;
@@ -636,7 +636,7 @@ void fn_801E075C(s32 partyIndex)
     extern void GSmodelSetVisibility(void* model, s32 visible);
     extern void GSmodelFree(void* model);
     extern s32 fn_800D37CC(void);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern void _threadSwitch(void);
     extern const f32 lbl_8047E3F4;
     extern const f32 lbl_8047E414;
@@ -661,7 +661,7 @@ void fn_801E075C(s32 partyIndex)
             if (pokemonCheckValid(pokemon) != 0) {
                 void* data = pokemonDataBiosGetPtr(species);
                 if (data != NULL) {
-                    fn_80166AB8(pokemonDataBiosGetVoice(data), 0, 0);
+                    soundStartRaw(pokemonDataBiosGetVoice(data), 0, 0);
                 }
             }
             GSmodelSetPosition(model, position);
@@ -677,7 +677,7 @@ void fn_801E075C(s32 partyIndex)
             endTime = lbl_8047E414;
 
             while (timer < endTime) {
-                timer += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                timer += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                 _threadSwitch();
             }
             state = 100;

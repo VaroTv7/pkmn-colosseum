@@ -117,7 +117,7 @@ extern void* GSresGetResource();        /* GSres simple alloc */
 extern void* GSresRegisterResource();        /* GSres install loader */
 extern void  fn_8010CFE4();        /* PKX overlap setup */
 extern u32   GStextureLoad();        /* WZX overlap check */
-extern void* fn_801195AC();        /* node lookup */
+extern void* gsParticleBankLoad();        /* node lookup */
 
 typedef struct HSDArchiveBuffer {
     u8 header[0x60];
@@ -169,7 +169,7 @@ void* floorReadBGMPreFunc(u32 unused, u32 sndResId, u32 dataSize) {
 #pragma peephole off
 void* floorReadNotLinkedParticlePostFunc(u32 resId, u32 param) {
     void* result = GSresGetResource(resId, (param & 0x7FFF0000) | 0x400);
-    void* node = fn_801195AC(result);
+    void* node = gsParticleBankLoad(result);
     if (node != (void*)0) {
         GSresRegisterResource(node, resId, param, (void*)_unloadParticles__FPvUlUl);
     }
@@ -208,7 +208,7 @@ void* floorReadParticlePostFunc(u32 resId, u32 param) {
         void** models;
     } SceneData;
     extern FloorData* floorDataBiosGetCurrentPtr(void);
-    extern u32 fn_80113F48(void);
+    extern u32 std093_getCurrentGroupID(void);
     extern void* HSD_ArchiveGetPublicAddress(void* archive, const char* symbol);
     extern void GSmodelLinkToGSparticleBank(void* model, void* bank);
     u32 resourceFlags;
@@ -220,14 +220,14 @@ void* floorReadParticlePostFunc(u32 resId, u32 param) {
     u32 i = 0;
 
     result = GSresGetResource(resId, (param & 0x7FFF0000) | 0x400);
-    particleBank = fn_801195AC(result);
+    particleBank = gsParticleBankLoad(result);
     if (particleBank != (void*)0) {
         GSresRegisterResource(particleBank, resId, param,
                               (void*)_unloadParticles__FPvUlUl);
         nullValue = (void*)0;
         floorData = floorDataBiosGetCurrentPtr();
         sceneData = HSD_ArchiveGetPublicAddress(
-            GSresGetResource(fn_80113F48(), floorData->resourceFlags),
+            GSresGetResource(std093_getCurrentGroupID(), floorData->resourceFlags),
             lbl_802722AC);
         if (sceneData == nullValue) {
             return nullValue;
@@ -237,7 +237,7 @@ void* floorReadParticlePostFunc(u32 resId, u32 param) {
             resourceFlags = (floorData->resourceFlags & 0x7FFF0000) | 0x1000;
             for (; *(void**)((u8*)sceneData->models + modelOffset) != nullValue;
                  modelOffset += sizeof(void*), i++) {
-                void* model = GSresGetResource(fn_80113F48(),
+                void* model = GSresGetResource(std093_getCurrentGroupID(),
                                                 resourceFlags | i);
                 if (model != nullValue) {
                     GSmodelLinkToGSparticleBank(model, particleBank);

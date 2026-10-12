@@ -42,7 +42,7 @@ extern void  menuDataBiosSetXY(s16 x, s16 y, s16 z);
 extern void* menuDataBiosGetPtr(void* data);
 
 /* 0x8001C064 | 0x754 */
-extern u32 fn_801906A0();
+extern u32 std082_flagGetValue();
 extern void savedataGetStatus();
 extern u32 fn_8006AEEC();
 extern u32 fightFloorGetGcHeroFightTrainerPtr();
@@ -89,7 +89,7 @@ void fn_8001C064(void) {
     extern void heroItemAddItemDataId();
     extern void heroBiosGetPokemonPtr();
     extern void msgctrlSetValue();
-    extern void fn_801906A0();
+    extern void std082_flagGetValue();
     extern void fightFloorGetGcHeroFightTrainerPtr();
     extern void fightTrainerGetValidFightPokemonPtr();
     extern void fightTrainerGetStatus();
@@ -135,7 +135,7 @@ void fn_8001C064(void) {
                 goto L_8001C148;
             }
             r3 = 0x8ae;
-            fn_801906A0();
+            std082_flagGetValue();
             if (r3 == 0) {
                 r3 = 0x0;
                 r4 = 0x2;
@@ -234,7 +234,7 @@ L_8001C204:
             goto L_8001C2BC;
         }
         r3 = 0x8ae;
-        fn_801906A0();
+        std082_flagGetValue();
         if (r3 == 0) {
             r3 = 0x0;
             r4 = 0x2;
@@ -452,7 +452,7 @@ do {
                     goto L_8001C600;
                 }
                 r3 = 0x8ae;
-                fn_801906A0();
+                std082_flagGetValue();
                 if (r3 == 0) {
                     r3 = 0x0;
                     r4 = 0x2;
@@ -646,7 +646,7 @@ void fn_8001C7B8(void) {
     extern void pokemonGetStatus();
     extern void savedataGetStatus();
     extern void heroBiosGetPokemonPtr();
-    extern void fn_801906A0();
+    extern void std082_flagGetValue();
     extern void fadeCheck();
     extern void fadeSet();
     extern void fightFloorGetGcHeroFightTrainerPtr();
@@ -681,7 +681,7 @@ void fn_8001C7B8(void) {
         tmp = 0x1;
         r3 = 0x8ae;
         *(u8*)((u8*)r31 + 0x14) = tmp;
-        fn_801906A0();
+        std082_flagGetValue();
         if (r3 == 0) {
             r3 = 0x6b;
             r4 = 0x1;
@@ -746,7 +746,7 @@ void fn_8001C7B8(void) {
                             goto L_8001C93C;
                         }
                         r3 = 0x8ae;
-                        fn_801906A0();
+                        std082_flagGetValue();
                         if (r3 == 0) {
                             r3 = 0x0;
                             r4 = 0x2;
@@ -909,7 +909,7 @@ void fn_8001C7B8(void) {
                                 goto L_8001CBB4;
                             }
                             r3 = 0x8ae;
-                            fn_801906A0();
+                            std082_flagGetValue();
                             if (r3 == 0) {
                                 r3 = 0x0;
                                 r4 = 0x2;
@@ -1006,7 +1006,7 @@ void fn_8001C7B8(void) {
                                 goto L_8001CD1C;
                             }
                             r3 = 0x8ae;
-                            fn_801906A0();
+                            std082_flagGetValue();
                             if (r3 == 0) {
                                 r3 = 0x0;
                                 r4 = 0x2;
@@ -1182,7 +1182,7 @@ void fn_8001C7B8(void) {
                                     goto L_8001CFB0;
                                 }
                                 r3 = 0x8ae;
-                                fn_801906A0();
+                                std082_flagGetValue();
                                 if (r3 == 0) {
                                     r3 = 0x0;
                                     r4 = 0x2;
@@ -1484,7 +1484,7 @@ void fn_8001D378(void) {
     extern void pokemonGetStatus();
     extern void savedataGetStatus();
     extern void heroBiosGetPokemonPtr();
-    extern void fn_801906A0();
+    extern void std082_flagGetValue();
     extern void fightFloorGetGcHeroFightTrainerPtr();
     extern void fightTrainerGetValidFightPokemonPtr();
     extern void fightTrainerGetStatus();
@@ -1538,7 +1538,7 @@ void fn_8001D378(void) {
                     goto L_8001D470;
                 }
                 r3 = 0x8ae;
-                fn_801906A0();
+                std082_flagGetValue();
                 if (r3 == 0) {
                     r3 = 0x0;
                     r4 = 0x2;
@@ -1683,7 +1683,7 @@ void fn_8001D378(void) {
 
 /* 0x8001D718 | 0xCC */
 extern s32 fn_800D37CC(void);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern f32 lbl_8047B7C8;
 extern f64 lbl_8047B7D0;
 extern f64 lbl_8047B7D8;
@@ -1698,7 +1698,7 @@ void fn_8001D718(f32 target) {
 
     while (progress < target) {
         _threadSwitch();
-        progress += (f32)fn_800D3088() / (f32)fn_800D37CC();
+        progress += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
 }
 #endif
@@ -1739,7 +1739,7 @@ s32 fn_800181C4(page, itemId, itemSlot)
     extern void fn_8012959C(void* hero, u16 item, u16 count, s16 slot);
     extern void heroItemDecItemDataId(void* hero, u16 item, u16 count,
                                       s16 slot);
-    extern void fn_80166AB8(s32 sound, s32, s32);
+    extern void soundStartRaw(s32 sound, s32, s32);
     extern void heroAddPokedoru(void* hero, u32 amount);
     extern u8 lbl_80266918[];
     extern u32 lbl_8047A2BC;
@@ -1845,7 +1845,7 @@ s32 fn_800181C4(page, itemId, itemSlot)
         heroItemDecItemDataId(lbl_8047A2F8, itemId,
                               (u16)selectedQuantity, itemSlot);
     }
-    fn_80166AB8(0x3CB, 0, 0);
+    soundStartRaw(0x3CB, 0, 0);
     heroAddPokedoru(lbl_8047A2F8, saleValue);
     message = fn_8002A0B8(&messageColor, lbl_8047A2BC, 0xA, 0x2D,
                           itemId, 0x4B, saleValue, -1);
@@ -2257,7 +2257,7 @@ asm void fn_80018F30(void) {
 #include "src/game/gs_pcbox_fn_80018F30.inc"
 }
 #else
-void fn_80018F30(void) {
+void std016_menuUnk_80018a68(void) {
     *(u16*)&lbl_8047A2F0 = fn_80018A68();
 }
 #endif
@@ -2284,7 +2284,7 @@ void fn_80018F54(u32 a, u32 b, u32 c) {
 /* fn_80018F88 - 0x80018F88 | size: 0xdc */
 extern u32 fightTrainer_GetHeroPtr();
 extern void _flagSet();
-extern void fn_800FF730();
+extern void std098_mapWarpToMenuRoom();
 extern u32 lbl_8047A2F4;
 extern u32 lbl_8047A2F8;
 extern u32 lbl_8047A2EC;
@@ -2316,7 +2316,7 @@ u32 fn_80018F88(s32 mode, s32* ptr, u32 val) {
     lbl_8047A2E0 = mode;
     lbl_8047A2E4 = 1;
     _flagSet(1, 0);
-    fn_800FF730(0x38f);
+    std098_mapWarpToMenuRoom(0x38f);
     floorSetFadeScript(0, 0);
     _threadSwitch();
     if (*(u16*)&lbl_8047A2F0 == 0) {
@@ -2397,7 +2397,7 @@ asm void fn_800190D8(void) {
 #pragma push
 #pragma optimization_level 4
 #pragma peephole off
-void fn_800190D8(u32 species, u32 data) {
+void std017_menuQueueAdd(u32 species, u32 data) {
     MenuPokemonSpeciesCache* cache;
     s32 count;
 
@@ -2949,7 +2949,7 @@ s32 fn_80019B48(s32 a) {
         if ((u32)(s16)r30 >= 0x6) goto L_80019CE0;
         if (r5 == 0x0) {
             r3 = 0x8ae;
-            fn_801906A0();
+            std082_flagGetValue();
             if (r3 == 0) {
                 r3 = 0x0; r4 = 0x2;
                 savedataGetStatus();
@@ -3022,7 +3022,7 @@ asm void fn_80019D5C(void) {
 #pragma optimization_level 4
 u32 fn_80019D5C(u32 a, u32 b) {
     extern u8 lbl_803A1D40[];
-    extern void fn_801906A0();
+    extern void std082_flagGetValue();
     extern void savedataGetStatus();
     extern void fn_8006AEEC();
     extern void fightFloorGetGcHeroFightTrainerPtr();
@@ -3062,7 +3062,7 @@ u32 fn_80019D5C(u32 a, u32 b) {
         if ((s32)r4 >= 0x2) goto L_80019E98;
         /* r4==0 */
         r3 = 0x8ae;
-        fn_801906A0();
+        std082_flagGetValue();
         if (r3 == 0) {
             r3 = 0x0; r4 = 0x2;
             savedataGetStatus();
@@ -3204,7 +3204,7 @@ void menuPokemonDrawItem(u8* ctx, u8* pane) {
                 switch (*(s32*)(lbl_803A1D40 + 8)) {
                 case 0:
                     if ((u32)count < 6) {
-                        tmp = fn_801906A0(0x8AE);
+                        tmp = std082_flagGetValue(0x8AE);
                         if (tmp == 0) {
                             savedataGetStatus(0, 2);
                         } else {
@@ -3440,7 +3440,7 @@ void menuPokemonDrawHelp(u8* a) {
 #endif
 
 /* menuPokemonButton - 0x8001AA98 | size: 0xd8 */
-extern void fn_80166A28(void);
+extern void soundStartSE(void);
 extern void menuButtonNormal(void);
 #if 0
 asm void menuPokemonButton(void) {
@@ -3454,7 +3454,7 @@ void menuPokemonButton(u8* a) {
     extern u8 lbl_803A1D40[];
     extern u32 windowGetKeyInfo();
     extern u32 menuGetCursorItemID();
-    extern void fn_80166A28(u32);
+    extern void soundStartSE(u32);
     extern void menuButtonNormal(u8*);
     s32 r3;
     u32 r31;
@@ -3474,7 +3474,7 @@ void menuPokemonButton(u8* a) {
     }
     if ((u8)r31 != 0) {
         if (*(u8*)(lbl_803A1D40 + 0x15) == 0) {
-            fn_80166A28(0x26);
+            soundStartSE(0x26);
             return;
         }
         *(u8*)(a + 0x98) = 0x1;
@@ -3516,7 +3516,7 @@ void fn_8001AB70(u8* ctx) {
         switch (mode) {
         case 0:
             if ((u32)(u16)index < 6) {
-                mon = (u8*)fn_801906A0(0x8AE);
+                mon = (u8*)std082_flagGetValue(0x8AE);
                 if (mon == NULL) {
                     savedataGetStatus(0, 2);
                 } else {
@@ -3789,7 +3789,7 @@ s32 menuPokemonSub() {
         switch (mode) {
         case 0:
             if ((u32)(u16)i < 6) {
-                mon = (u8*)fn_801906A0(0x8AE);
+                mon = (u8*)std082_flagGetValue(0x8AE);
                 if (mon == NULL) {
                     savedataGetStatus(0, 2);
                 } else {
@@ -3917,7 +3917,7 @@ s32 menuPokemonSub() {
                     switch (mode) {
                     case 0:
                         if ((u32)(u16)(s8)selection < 6) {
-                            mon = (u8*)fn_801906A0(0x8AE);
+                            mon = (u8*)std082_flagGetValue(0x8AE);
                             if (mon == NULL) {
                                 savedataGetStatus(0, 2);
                             } else {
@@ -3985,7 +3985,7 @@ s32 menuPokemonSub() {
             switch (mode) {
             case 0:
                 if ((u32)(u16)(s8)selection < 6) {
-                    mon = (u8*)fn_801906A0(0x8AE);
+                    mon = (u8*)std082_flagGetValue(0x8AE);
                     if (mon == NULL) {
                         savedataGetStatus(0, 2);
                     } else {
@@ -4065,7 +4065,7 @@ u32 menuPokemonOpenSub(u32 a0, u8 a1, u8 a2, u16 a3, u32 a4, u8 a5) {
     extern u8 lbl_803A1D40[];
     extern s32 fn_800D37CC(void);
     extern void _flagSet();
-    extern void fn_800FF730();
+    extern void std098_mapWarpToMenuRoom();
     extern void floorSetFadeScript();
     extern void _threadSwitch();
     extern void menuPokemonSub();
@@ -4123,7 +4123,7 @@ BBDC:
 BC20:
     if (*(u8*)(lbl_803A1D40 + 0x2) == 1) {
         _flagSet(1, 1);
-        fn_800FF730(0x38f);
+        std098_mapWarpToMenuRoom(0x38f);
         if (*(u8*)(lbl_803A1D40 + 0x3) != 1) {
             floorSetFadeScript(0, 0);
         }
@@ -4260,7 +4260,7 @@ asm void fn_8001BEBC(void) {
 #pragma optimization_level 4
 void fn_8001BEBC(void* a) {
     extern u8 lbl_803A1D40[];
-    extern void fn_801906A0();
+    extern void std082_flagGetValue();
     extern void savedataGetStatus();
     extern void fn_8006AEEC();
     extern void fightFloorGetGcHeroFightTrainerPtr();
@@ -4295,7 +4295,7 @@ void fn_8001BEBC(void* a) {
     if ((s32)tmp < 0x0) goto L_8001BF94;
     /* tmp == 0, r29 < 6 */
     r3 = 0x8ae;
-    fn_801906A0();
+    std082_flagGetValue();
     if (r3 == 0) {
         r3 = 0x0;
         r4 = 0x2;

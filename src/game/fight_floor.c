@@ -41,7 +41,7 @@ s32 _fightFloorSetTuusinErrorFightResultSub__FPvUsPv(void* context) {
 
 /* 0x801F1588 | size: 0x178 | medium */
 void fightFloorSetTimeOutAllFightResult(void* param) {
-    extern u16 fn_801EF634(void*);
+    extern u16 std103_battleGetResult(void*);
     extern u32 fightTargetGetPtrAsNowFightType(u32, u32);
     extern void fightFloorSetFightResultId(void*, u32);
     extern u32 fightFloorGetStatus(void*, u32, u32, u32);
@@ -58,7 +58,7 @@ void fightFloorSetTimeOutAllFightResult(void* param) {
     u32 pct2;
 
     obj = param;
-    if ((u16)fn_801EF634(obj) == 1) {
+    if ((u16)std103_battleGetResult(obj) == 1) {
         return;
     }
     slot1 = fightFloorGetStatus(obj, 0, 0x16, 0) & 0xFFFF;
@@ -81,7 +81,7 @@ void fightFloorSetTimeOutAllFightResult(void* param) {
     if ((base1 & 0xFFFF) < (base2 & 0xFFFF)) {
         fightFloorSetFightResultId(obj, 3);
     }
-    if ((u16)fn_801EF634(obj) == 0) {
+    if ((u16)std103_battleGetResult(obj) == 0) {
         if (pct1 >= pct2) {
             fightFloorSetFightResultId(obj, 2);
         }
@@ -1499,7 +1499,7 @@ u8 fightFloorLoopValidFightOutPokemon(void *param_1, void *callback, void *buf, 
 
 /* 0x801F3984 | size: 0x1A0 | medium */
 u8 fightFloorSetFightResultId(void *param_1, u32 param_2) {
-    extern u32 fn_801EF634(void*);
+    extern u32 std103_battleGetResult(void*);
     extern void fn_801EF62C(u32);
     extern u32 fightFloorGetStatus(void*, u32, u32, u32);
     void *pkmn;
@@ -1509,7 +1509,7 @@ u8 fightFloorSetFightResultId(void *param_1, u32 param_2) {
 
     pkmn = param_1;
     curval = param_2;
-    newval = fn_801EF634(pkmn);
+    newval = std103_battleGetResult(pkmn);
     battletype = fightFloorGetStatus(pkmn, 0, 0x23, 0) & 0xFF;
     if ((newval & 0xFFFF) == (curval & 0xFFFF))
         return 0;
@@ -2467,7 +2467,7 @@ s32 fightFloorGetStatus(u8* pkm, u32 slot, u32 field, u32 arg) {
     extern void fightFloorLoopValidFightOutPokemon(u8*, u32 (*)(u8*, u32*), u32*, u32);
     extern u32 _fightFloorCheckFightOutPokemonPtrAryPokemonTokuseiDataIdSub__FPvUsPv(u8*, u32*);
     extern u32 pokemonGetStatus(u32, u32, u32, u32);
-    extern u32 fn_801EF634(void);
+    extern u32 std103_battleGetResult(void);
     extern u8 fightFloorDataBiosGetTikeiDataId(u8*);
     extern u32 fightFloorDataBiosGetSyoukaiWzxDataId(u8*);
     extern u32 fightFloorDataBiosGetBgmSndId(u8*);
@@ -2807,7 +2807,7 @@ s32 fightFloorGetStatus(u8* pkm, u32 slot, u32 field, u32 arg) {
     case 0x5B:
         return (u16)fightFloorBiosGetFirstAttackRnd(pkm);
     case 0x5C:
-        return (u16)fn_801EF634();
+        return (u16)std103_battleGetResult();
     case 0x5D: {
         u32 c16, n, c18, k, i, j, m;
         fightFloorGetStatus(pkm, 0, 0x14, 0);

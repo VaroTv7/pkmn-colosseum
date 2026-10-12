@@ -152,24 +152,24 @@ u8 menuSubGetPokemonSexForFightDisp(void* pokemon)
 extern void fn_800F92D4(void);
 extern void GStextureGetXsize(void);
 extern void GStextureGetYsize(void);
-extern void fn_800D88DC(void);
-extern void fn_800D888C(void);
+extern void gfxSetFlags(void);
+extern void gfxClearFlags(void);
 extern void GStextureSetWrap(void);
 extern void fn_800D848C(void);
 extern void fn_800DC1D4(void);
-extern void fn_800D85D4(void);
-extern void fn_800DC224(void);
+extern void gfxLoadTexture(void);
+extern void gfxSetTevStage(void);
 extern void fn_800DC14C(void);
 extern void fn_800DC0D4(void);
 extern void fn_800DC04C(void);
 extern void fn_800DBFD4(void);
-extern void fn_800D7820(void);
-extern void fn_800D6A00(void);
-extern void fn_800D67BC(void);
+extern void gfxSetVtxDesc(void);
+extern void gfxSetPrimitive(void);
+extern void gfxBegin(void);
 extern void fn_800D61E4(void);
 extern void fn_800D5CB8(void);
-extern void fn_800D59B8(void);
-extern void fn_800D6728(void);
+extern void gfxVtxTexCoord(void);
+extern void gfxEnd(void);
 extern f64 lbl_8047B7D8;
 extern f64 lbl_8047B7D0;
 extern u32 lbl_8047AD00;
@@ -184,23 +184,23 @@ void fn_8001DACC(void) {
     extern f64 lbl_8047B7D0;
     extern f64 lbl_8047B7D8;
     extern f32 lbl_8047B7E0;
-    extern void fn_800D59B8();
+    extern void gfxVtxTexCoord();
     extern void fn_800D5CB8();
     extern void fn_800D61E4();
-    extern void fn_800D6728();
-    extern void fn_800D67BC();
-    extern void fn_800D6A00();
-    extern void fn_800D7820();
+    extern void gfxEnd();
+    extern void gfxBegin();
+    extern void gfxSetPrimitive();
+    extern void gfxSetVtxDesc();
     extern void fn_800D848C();
-    extern void fn_800D85D4();
-    extern void fn_800D888C();
-    extern void fn_800D88DC();
+    extern void gfxLoadTexture();
+    extern void gfxClearFlags();
+    extern void gfxSetFlags();
     extern void fn_800DBFD4();
     extern void fn_800DC04C();
     extern void fn_800DC0D4();
     extern void fn_800DC14C();
     extern void fn_800DC1D4();
-    extern void fn_800DC224();
+    extern void gfxSetTevStage();
     extern void GStextureGetYsize();
     extern void GStextureGetXsize();
     extern void GStextureSetWrap();
@@ -288,9 +288,9 @@ void fn_8001DACC(void) {
         f2 = f0 - f2;
         f0 = f0 - f1;
         f26 = f0 / f2;
-        fn_800D88DC();
+        gfxSetFlags();
         r3 = 0x4;
-        fn_800D888C();
+        gfxClearFlags();
         r3 = r30;
         r4 = 0x1;
         r5 = 0x1;
@@ -314,13 +314,13 @@ void fn_8001DACC(void) {
         fn_800DC1D4();
         r4 = r31;
         r3 = 0x0;
-        fn_800D85D4();
+        gfxLoadTexture();
         r3 = 0x0;
         r4 = 0x0;
         r5 = 0x0;
         r6 = 0x0;
         r7 = 0x0;
-        fn_800DC224();
+        gfxSetTevStage();
         r3 = 0x0;
         r4 = 0x0;
         r5 = 0x0;
@@ -349,13 +349,13 @@ void fn_8001DACC(void) {
         fn_800DBFD4();
         r4 = r30;
         r3 = 0x1;
-        fn_800D85D4();
+        gfxLoadTexture();
         r3 = 0x1;
         r4 = 0x0;
         r5 = 0x1;
         r6 = 0x1;
         r7 = 0x0;
-        fn_800DC224();
+        gfxSetTevStage();
         r3 = 0x1;
         r4 = 0x1;
         r5 = 0x0;
@@ -384,13 +384,13 @@ void fn_8001DACC(void) {
         fn_800DBFD4();
         r4 = r30;
         r3 = 0x2;
-        fn_800D85D4();
+        gfxLoadTexture();
         r3 = 0x2;
         r4 = 0x0;
         r5 = 0x2;
         r6 = 0x2;
         r7 = 0x0;
-        fn_800DC224();
+        gfxSetTevStage();
         r3 = 0x2;
         r4 = 0x1;
         r5 = 0x0;
@@ -418,11 +418,11 @@ void fn_8001DACC(void) {
         r7 = 0x1;
         fn_800DBFD4();
         r3 = lbl_8047AD00;
-        fn_800D7820();
+        gfxSetVtxDesc();
         r3 = 0x7;
-        fn_800D6A00();
+        gfxSetPrimitive();
         r3 = 0x2;
-        fn_800D67BC();
+        gfxBegin();
         r3 = 0x0;
         r4 = 0x0;
         fn_800D61E4();
@@ -435,18 +435,18 @@ void fn_8001DACC(void) {
         f1 = f31;
         r3 = 0x0;
         f2 = f27;
-        fn_800D59B8();
+        gfxVtxTexCoord();
         f28 = f29 + f27;
         r3 = 0x1;
         f1 = f29 + f31;
         f2 = f28;
-        fn_800D59B8();
+        gfxVtxTexCoord();
         f0 = lbl_8047B7E0;
         f2 = f28;
         r3 = 0x2;
         f27 = f0 - f29;
         f1 = f27 + f31;
-        fn_800D59B8();
+        gfxVtxTexCoord();
         r3 = *(s16*)((u8*)r29 + 0x54);
         r4 = *(s16*)((u8*)r29 + 0x56);
         fn_800D61E4();
@@ -459,21 +459,21 @@ void fn_8001DACC(void) {
         f1 = f30;
         r3 = 0x0;
         f2 = f26;
-        fn_800D59B8();
+        gfxVtxTexCoord();
         f28 = f29 + f26;
         r3 = 0x1;
         f1 = f29 + f30;
         f2 = f28;
-        fn_800D59B8();
+        gfxVtxTexCoord();
         f2 = f28;
         r3 = 0x2;
         f1 = f27 + f30;
-        fn_800D59B8();
-        fn_800D6728();
+        gfxVtxTexCoord();
+        gfxEnd();
         r3 = 0x1;
         fn_800DC1D4();
         r3 = 0x80000000;
-        fn_800D888C();
+        gfxClearFlags();
     }
     r3 = 0x0;
     return;
@@ -508,7 +508,7 @@ asm void fn_8001E00C(void) {
 #else
 #pragma push
 #pragma peephole off
-s32 fn_8001E00C(u32 sp8) {
+s32 std158_menuOpenCustom43(u32 sp8) {
     extern void* windowGetActiveID();
     extern s32 menuOpenCustom(s32, ...);
     extern void menuCloseCustom(s32, s32, s32);
@@ -595,7 +595,7 @@ asm void fn_8001E184(void) {
 #pragma optimization_level 4
 #pragma push
 #pragma peephole off
-s32 fn_8001E184(void) {
+s32 std011_dialogDisplayYesNoMenu(void) {
     extern void* windowGetActiveID();
     extern void menuOpenCustom(s32, ...);
     extern void windowCheckCursor();

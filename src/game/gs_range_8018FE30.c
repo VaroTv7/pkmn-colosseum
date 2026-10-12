@@ -54,9 +54,9 @@ typedef struct FlagInitState {
     u32* buffer3;
 } FlagInitState;
 
-void fn_801903B0(s32 flagId);
+void std079_flagSetTrue(s32 flagId);
 void _flagSet(s32 flagId, u32 value);
-extern void* fn_800FF56C(void);
+extern void* std092_getCurrentRoomID(void);
 extern void* savedataGetStatus(u8* data, u16 index);
 extern s32 heroItemDecItemDataId(u8* ptr, u32 itemId, u32 count, s32 arg4);
 extern s32 heroItemAddItemDataId(u8* ptr, u32 itemId, u32 count, s32 arg4);
@@ -216,7 +216,7 @@ void fn_8018FE30(s32 flagId)
         savedataGetStatus(0, 2);
         heroBiosSetPokedoru(*(u16*)(scene + 4));
         if (*(u16*)(scene + 2) == 0) {
-            fn_800FF56C();
+            std092_getCurrentRoomID();
         }
         floorChangePos(0, scene, *(f32*)(scene + 8), *(f32*)(scene + 0xC),
                        *(f32*)(scene + 0x10));
@@ -325,7 +325,7 @@ void GSflagInitBitPos(FlagDefinition* definitions, u32 count, u32 capacity1,
     }
 }
 
-u8 fn_801902E0(s32 flagId)
+u8 std081_flagCheckTrue(s32 flagId)
 {
     extern u8* lbl_80478F9C;
     extern FlagStateEntry* lbl_80478EEC;
@@ -432,13 +432,13 @@ u8 fn_801902E0(s32 flagId)
         }                                                                      \
     }
 
-DEFINE_FLAG_SET(fn_801903B0, (s32 flagId), 0)
-DEFINE_FLAG_SET(fn_80190528, (s32 flagId), 1)
+DEFINE_FLAG_SET(std079_flagSetTrue, (s32 flagId), 0)
+DEFINE_FLAG_SET(std078_flagSetFalse, (s32 flagId), 1)
 DEFINE_FLAG_SET(_flagSet, (s32 flagId, u32 valueArg), valueArg)
 
 #undef DEFINE_FLAG_SET
 
-u32 fn_801906A0(s32 flagId)
+u32 std082_flagGetValue(s32 flagId)
 {
     extern u8* lbl_80478F9C;
     extern FlagStateEntry* lbl_80478EEC;

@@ -164,7 +164,7 @@ extern void* memcpy(void* dst, const void* src, u32 size);
 /* Engine core */
 extern void  GSlogWrite(const char* fmt, ...);           /* GSlog_Print */
 extern s32   fn_800D37CC(void);                            /* GSrandom_Get */
-extern s32   fn_800D3088(void);                            /* GSgfx tick */
+extern s32   msgGetCharsPerFrame(void);                            /* GSgfx tick */
 extern void* fn_800DB940(u32 size);                        /* GSmem_Alloc */
 extern void  fn_800DB9A4(void* ptr);                       /* GSmem_Free */
 
@@ -181,9 +181,9 @@ extern void  fn_80363CF4(void* jobj);                      /* HSD_JObjRemoveAll 
 extern void  fn_8036A384(void* jobj, f32 x, f32 y, f32 z); /* HSD_JObjSetTranslate */
 
 /* Sound */
-extern void  fn_801659FC(s32 sndID, s32 fadeTime, s32 volume); /* sndPlay */
+extern void  std105_soundPlayEffect(s32 sndID, s32 fadeTime, s32 volume); /* sndPlay */
 extern void  soundStop(s32 sndID, s32 volume);              /* soundStop */
-extern void  fn_801669E4(s32 handle, s32 fadeTime, s32 volume);
+extern void  soundStopRaw(s32 handle, s32 fadeTime, s32 volume);
 extern void  heroMoveAddStepCallback(void* callback, s32 arg);
 
 /* Particle system */
@@ -200,7 +200,7 @@ extern f32   fadeEffectHookFunction_fadein_Init(s32 slot);                      
 extern f32   fadeEffectHookFunction_trainer_Init(s32 slot);                        /* get slot Z */
 
 /* Waza effect functions (engine callbacks) */
-extern u8*   fn_801190DC(u8* texture, u32 selector, u32 subid);
+extern u8*   gsParticleCreate(u8* texture, u32 selector, u32 subid);
 extern void  fn_80118C88(void* particleNode, u32 visible);
 extern GSpart* GSmodelGetPart(struct GSmodel* model, s32 partIndex);
 void  set__5GSvecFfff(f32* vec, f32 x, f32 y, f32 z);
@@ -453,8 +453,8 @@ extern s32 fn_801DF160(u8* obj);
 extern void fn_801DF1D0(void* obj);
 extern void fn_801DF33C(void* obj);
 extern void fn_801DF3D4(void* obj);
-extern void fn_801DF474(s32 slot, s32 abilityID);
-extern void fn_801DF790(s32 slot, s32 itemID);
-extern void fn_801DFC30(void);
+extern void std087_sequenceUnk87(s32 slot, s32 abilityID);
+extern void std086_sequenceJump86(s32 slot, s32 itemID);
+extern void std085_sequenceJump85(void);
 
 #endif /* GAME_BATTLE_BATTLE_WAZA_TYPES_H */

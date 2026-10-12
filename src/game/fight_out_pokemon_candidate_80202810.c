@@ -194,7 +194,7 @@ void fn_80202C1C(u32 r3,u32 r4)
 {
     extern s8 pokemonCheckFightOut();
     extern s8 pokemonCheckValid();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern u32 fightFloorGetStatus();
     extern u32 fightSideGetStatus();
     extern s8 fightTrainerCheckValid();
@@ -232,7 +232,7 @@ void fn_80202C1C(u32 r3,u32 r4)
             bVar1 = 0;
             goto initial_valid_done;
           }
-          sVar8 = fn_801EF634();
+          sVar8 = std103_battleGetResult();
           if (sVar8 == 1) {
             bVar1 = 0;
           }
@@ -246,7 +246,7 @@ void fn_80202C1C(u32 r3,u32 r4)
                 bVar1 = 0;
                 goto initial_valid_done;
               }
-              sVar8 = fn_801EF634();
+              sVar8 = std103_battleGetResult();
               if (sVar8 == 1) {
                 bVar1 = 0;
               }
@@ -316,7 +316,7 @@ void fn_80202C1C(u32 r3,u32 r4)
                   bVar1 = 0;
                   goto second_valid_done;
                 }
-                sVar8 = fn_801EF634();
+                sVar8 = std103_battleGetResult();
                 if (sVar8 == 1) {
                   bVar1 = 0;
                 }
@@ -408,7 +408,7 @@ void fn_80202C1C(u32 r3,u32 r4)
             bVar1 = 0;
           }
           else {
-            sVar8 = fn_801EF634();
+            sVar8 = std103_battleGetResult();
             if (sVar8 == 1) {
               bVar1 = 0;
             }
@@ -422,7 +422,7 @@ void fn_80202C1C(u32 r3,u32 r4)
                   bVar1 = 0;
                   goto third_valid_done;
                 }
-                sVar8 = fn_801EF634();
+                sVar8 = std103_battleGetResult();
                 if (sVar8 == 1) {
                   bVar1 = 0;
                 }

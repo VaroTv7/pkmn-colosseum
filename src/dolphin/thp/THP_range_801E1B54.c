@@ -1240,11 +1240,11 @@ BOOL fn_801E40F8(s32 frame, u8 flag, s32 audioTrack)
 void fn_801E24B0(void)
 {
     extern void fn_800B884C(u32);
-    extern void fn_800BA6B0(u32);
+    extern void GXSetNumChans(u32);
     extern void fn_800BC114(u32, u32);
-    extern void fn_800BC52C(u32, u32, u32);
-    extern void fn_800BC580(u32, u32, u32, u32, u32);
-    extern void fn_800BC6F0(u32, u32, u32, u32);
+    extern void GXSetTevSwapMode(u32, u32, u32);
+    extern void GXSetTevSwapModeTable(u32, u32, u32, u32, u32);
+    extern void GXSetTevOrder(u32, u32, u32, u32);
     extern void fn_800BC8C8(u32);
     extern void fn_800BCDDC(u32, u32, u32, u32);
     extern void fn_800BCE88(u32, u32, u32);
@@ -1252,18 +1252,18 @@ void fn_801E24B0(void)
     fn_800BCE88(1, 7, 0);
     fn_800BCDDC(0, 1, 0, 0xF);
     fn_800B884C(1);
-    fn_800BA6B0(0);
+    GXSetNumChans(0);
     fn_800BC8C8(1);
-    fn_800BC6F0(0, 0, 0, 0xFF);
+    GXSetTevOrder(0, 0, 0, 0xFF);
     fn_800BC114(0, 3);
-    fn_800BC52C(0, 0, 0);
-    fn_800BC52C(1, 0, 0);
-    fn_800BC52C(2, 0, 0);
-    fn_800BC52C(3, 0, 0);
-    fn_800BC580(0, 0, 1, 2, 3);
-    fn_800BC580(1, 0, 0, 0, 3);
-    fn_800BC580(2, 1, 1, 1, 3);
-    fn_800BC580(3, 2, 2, 2, 3);
+    GXSetTevSwapMode(0, 0, 0);
+    GXSetTevSwapMode(1, 0, 0);
+    GXSetTevSwapMode(2, 0, 0);
+    GXSetTevSwapMode(3, 0, 0);
+    GXSetTevSwapModeTable(0, 0, 1, 2, 3);
+    GXSetTevSwapModeTable(1, 0, 0, 0, 3);
+    GXSetTevSwapModeTable(2, 1, 1, 1, 3);
+    GXSetTevSwapModeTable(3, 2, 2, 2, 3);
 }
 
 s32 fn_801E25C8(void)
@@ -1317,23 +1317,23 @@ void fn_801E1FF8(const THPVideoInfo* info)
     extern void fn_800BCE30(u32);
     extern void fn_800BCE5C(u32);
     extern void fn_800B9E6C(u32);
-    extern void fn_800BA6B0(u32);
+    extern void GXSetNumChans(u32);
     extern void fn_800B884C(u32);
-    extern void fn_800B857C(u32, u32, u32, u32, u32, u32);
+    extern void GXSetTexCoordGen2(u32, u32, u32, u32, u32, u32);
     extern void GXInvalidateTexAll(void);
     extern void fn_800B7D3C(void);
     extern void fn_800B7874(u32, u32);
     extern void fn_800B7D74(u32, u32, u32, u32, u32);
     extern void fn_800BC8C8(u32);
-    extern void fn_800BC6F0(u32, u32, u32, u32);
-    extern void fn_800BC1A0(u32, u32, u32, u32, u32);
-    extern void fn_800BC228(u32, u32, u32, u32, u32, u32);
-    extern void fn_800BC1E4(u32, u32, u32, u32, u32);
-    extern void fn_800BC290(u32, u32, u32, u32, u32, u32);
-    extern void fn_800BC454(u32, u32);
-    extern void fn_800BC4C0(u32, u32);
-    extern void fn_800BC52C(u32, u32, u32);
-    extern void fn_800BC580(u32, u32, u32, u32, u32);
+    extern void GXSetTevOrder(u32, u32, u32, u32);
+    extern void GXSetTevColorIn(u32, u32, u32, u32, u32);
+    extern void GXSetTevColorOp(u32, u32, u32, u32, u32, u32);
+    extern void GXSetTevAlphaIn(u32, u32, u32, u32, u32);
+    extern void GXSetTevAlphaOp(u32, u32, u32, u32, u32, u32);
+    extern void GXSetTevKColorSel(u32, u32);
+    extern void GXSetTevKAlphaSel(u32, u32);
+    extern void GXSetTevSwapMode(u32, u32, u32);
+    extern void GXSetTevSwapModeTable(u32, u32, u32, u32, u32);
     extern void fn_800BC36C(u32, void*);
     extern void fn_800BC3E0(u32, void*);
 
@@ -1361,11 +1361,11 @@ void fn_801E1FF8(const THPVideoInfo* info)
     fn_800BCE30(1);
     fn_800BCE5C(0);
     fn_800B9E6C(0);
-    fn_800BA6B0(0);
+    GXSetNumChans(0);
 
     fn_800B884C(2);
-    fn_800B857C(0, 1, 4, 0x3C, 0, 0x7D);
-    fn_800B857C(1, 1, 4, 0x3C, 0, 0x7D);
+    GXSetTexCoordGen2(0, 1, 4, 0x3C, 0, 0x7D);
+    GXSetTexCoordGen2(1, 1, 4, 0x3C, 0, 0x7D);
     GXInvalidateTexAll();
     fn_800B7D3C();
     fn_800B7874(9, 1);
@@ -1375,38 +1375,38 @@ void fn_801E1FF8(const THPVideoInfo* info)
 
     fn_800BC8C8(4);
 
-    fn_800BC6F0(0, 1, 1, 0xFF);
-    fn_800BC1A0(0, 0xF, 8, 0xE, 2);
-    fn_800BC228(0, 0, 0, 0, 0, 0);
-    fn_800BC1E4(0, 7, 4, 6, 1);
-    fn_800BC290(0, 1, 0, 0, 0, 0);
-    fn_800BC454(0, 0xC);
-    fn_800BC4C0(0, 0x1C);
-    fn_800BC52C(0, 0, 0);
+    GXSetTevOrder(0, 1, 1, 0xFF);
+    GXSetTevColorIn(0, 0xF, 8, 0xE, 2);
+    GXSetTevColorOp(0, 0, 0, 0, 0, 0);
+    GXSetTevAlphaIn(0, 7, 4, 6, 1);
+    GXSetTevAlphaOp(0, 1, 0, 0, 0, 0);
+    GXSetTevKColorSel(0, 0xC);
+    GXSetTevKAlphaSel(0, 0x1C);
+    GXSetTevSwapMode(0, 0, 0);
 
-    fn_800BC6F0(1, 1, 2, 0xFF);
-    fn_800BC1A0(1, 0xF, 8, 0xE, 0);
-    fn_800BC228(1, 0, 0, 1, 0, 0);
-    fn_800BC1E4(1, 7, 4, 6, 0);
-    fn_800BC290(1, 1, 0, 0, 0, 0);
-    fn_800BC454(1, 0xD);
-    fn_800BC4C0(1, 0x1D);
-    fn_800BC52C(1, 0, 0);
+    GXSetTevOrder(1, 1, 2, 0xFF);
+    GXSetTevColorIn(1, 0xF, 8, 0xE, 0);
+    GXSetTevColorOp(1, 0, 0, 1, 0, 0);
+    GXSetTevAlphaIn(1, 7, 4, 6, 0);
+    GXSetTevAlphaOp(1, 1, 0, 0, 0, 0);
+    GXSetTevKColorSel(1, 0xD);
+    GXSetTevKAlphaSel(1, 0x1D);
+    GXSetTevSwapMode(1, 0, 0);
 
-    fn_800BC6F0(2, 0, 0, 0xFF);
-    fn_800BC1A0(2, 0xF, 8, 0xC, 0);
-    fn_800BC228(2, 0, 0, 0, 1, 0);
-    fn_800BC1E4(2, 4, 7, 7, 0);
-    fn_800BC290(2, 0, 0, 0, 1, 0);
-    fn_800BC52C(2, 0, 0);
+    GXSetTevOrder(2, 0, 0, 0xFF);
+    GXSetTevColorIn(2, 0xF, 8, 0xC, 0);
+    GXSetTevColorOp(2, 0, 0, 0, 1, 0);
+    GXSetTevAlphaIn(2, 4, 7, 7, 0);
+    GXSetTevAlphaOp(2, 0, 0, 0, 1, 0);
+    GXSetTevSwapMode(2, 0, 0);
 
-    fn_800BC6F0(3, 0xFF, 0xFF, 0xFF);
-    fn_800BC1A0(3, 1, 0, 0xE, 0xF);
-    fn_800BC228(3, 0, 0, 0, 1, 0);
-    fn_800BC1E4(3, 7, 7, 7, 7);
-    fn_800BC290(3, 0, 0, 0, 1, 0);
-    fn_800BC52C(3, 0, 0);
-    fn_800BC454(3, 0xE);
+    GXSetTevOrder(3, 0xFF, 0xFF, 0xFF);
+    GXSetTevColorIn(3, 1, 0, 0xE, 0xF);
+    GXSetTevColorOp(3, 0, 0, 0, 1, 0);
+    GXSetTevAlphaIn(3, 7, 7, 7, 7);
+    GXSetTevAlphaOp(3, 0, 0, 0, 1, 0);
+    GXSetTevSwapMode(3, 0, 0);
+    GXSetTevKColorSel(3, 0xE);
 
     tevColor1[0] = lbl_8047E480;
     tevColor1[1] = lbl_8047E484;
@@ -1417,7 +1417,7 @@ void fn_801E1FF8(const THPVideoInfo* info)
     fn_800BC3E0(1, &tevColor2);
     tevColor3 = lbl_8047E490;
     fn_800BC3E0(2, &tevColor3);
-    fn_800BC580(0, 0, 1, 2, 3);
+    GXSetTevSwapModeTable(0, 0, 1, 2, 3);
 }
 #pragma pop
 

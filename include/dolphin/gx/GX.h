@@ -84,6 +84,6 @@ typedef struct GXLightObj {
     u8 dummy[0x40];
 } GXLightObj;
 
-void fn_800BA440(GXLightObj* light, GXColor color);
+void GXInitLightColor(GXLightObj* light, GXColor color);
 
 #endif /* DOLPHIN_GX_GX_H */

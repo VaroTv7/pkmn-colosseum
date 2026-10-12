@@ -24,7 +24,7 @@ typedef struct BattleRangeDef {
 } BattleRangeDef;
 
 extern BattleRangeDef* lbl_80478F6C;
-extern u8 fn_801902E0(u16 flag);
+extern u8 std081_flagCheckTrue(u16 flag);
 
 u8 fn_801EEAD0(u16 id)
 {
@@ -35,7 +35,7 @@ u8 fn_801EEAD0(u16 id)
     }
     if (def != NULL) {
         if (def->flag12 != 0) {
-            return fn_801902E0(def->flag12);
+            return std081_flagCheckTrue(def->flag12);
         }
         return 0;
     }

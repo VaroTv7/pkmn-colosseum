@@ -3,9 +3,9 @@
 
 extern void heroMoveGetHeroRot(f32* rotation);
 extern void heroMoveGetHeroPos(f32* position);
-extern u32 fn_800FF56C(void);
+extern u32 std092_getCurrentRoomID(void);
 extern u32 floorGetPrevFloorID(void);
-extern u32 fn_801906A0(s32 flag);
+extern u32 std082_flagGetValue(s32 flag);
 
 void fn_80088EA8(u8* output)
 {
@@ -21,11 +21,11 @@ void fn_80088EA8(u8* output)
     memo->rotX = rotation[0];
     memo->rotY = rotation[1];
     memo->rotZ = rotation[2];
-    memo->unk04 = fn_800FF56C();
+    memo->unk04 = std092_getCurrentRoomID();
     memo->prevFloorId = floorGetPrevFloorID();
     memo->valid = 1;
-    memo->flagAfc = fn_801906A0(0xafc);
-    memo->flagAfd = fn_801906A0(0xafd);
-    memo->flagB11 = fn_801906A0(0xb11);
-    memo->flagDe1 = fn_801906A0(0xde1);
+    memo->flagAfc = std082_flagGetValue(0xafc);
+    memo->flagAfd = std082_flagGetValue(0xafd);
+    memo->flagB11 = std082_flagGetValue(0xb11);
+    memo->flagDe1 = std082_flagGetValue(0xde1);
 }

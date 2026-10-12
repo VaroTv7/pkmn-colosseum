@@ -411,10 +411,10 @@ typedef struct HSD_VIStatus {
 extern void DVDInit(void);
 extern void* OSAllocFromArenaLo(u32 size, u32 align);
 extern void HSD_Panic(const char* file, u32 line, const char* message);
-extern void fn_801BF1F0(HSD_VIStatus* vi, void* xfb0, void* xfb1, void* xfb2);
-extern void fn_800BA414(GXLightObj* light, f32 x, f32 y, f32 z);
-extern void fn_800BA424(GXLightObj* light, f32 x, f32 y, f32 z);
-extern void fn_800BA198(GXLightObj* light, f32 a0, f32 a1, f32 a2, f32 k0,
+extern void HSD_VIInit(HSD_VIStatus* vi, void* xfb0, void* xfb1, void* xfb2);
+extern void GXInitLightPos(GXLightObj* light, f32 x, f32 y, f32 z);
+extern void GXInitLightDir(GXLightObj* light, f32 x, f32 y, f32 z);
+extern void GXInitLightAttn(GXLightObj* light, f32 a0, f32 a1, f32 a2, f32 k0,
                         f32 k1, f32 k2);
 extern void GXLoadLightObjImm(GXLightObj* light, u32 light_id);
 extern u32 HSD_Index2LightID(u32 index);
@@ -444,7 +444,7 @@ extern const f32 lbl_8047DB14;
 extern const f32 lbl_8047DB18;
 extern u8 lbl_80274818[];
 
-void fn_8019CB70(void)
+void HSD_GXInit(void)
 {
     HSD_VIStatus vi;
     GXLightObj light;
@@ -498,13 +498,13 @@ void fn_8019CB70(void)
     vi.update_clr = 1;
     vi.update_alpha = 1;
     vi.update_z = 1;
-    fn_801BF1F0(&vi, lbl_8046557C[0], lbl_8046557C[1], lbl_8046557C[2]);
+    HSD_VIInit(&vi, lbl_8046557C[0], lbl_8046557C[1], lbl_8046557C[2]);
 
-    fn_800BA414(&light, lbl_8047DB14, lbl_8047DB18, lbl_8047DB18);
-    fn_800BA424(&light, lbl_8047DB14, lbl_8047DB18, lbl_8047DB18);
-    fn_800BA198(&light, lbl_8047DB14, lbl_8047DB18, lbl_8047DB18,
+    GXInitLightPos(&light, lbl_8047DB14, lbl_8047DB18, lbl_8047DB18);
+    GXInitLightDir(&light, lbl_8047DB14, lbl_8047DB18, lbl_8047DB18);
+    GXInitLightAttn(&light, lbl_8047DB14, lbl_8047DB18, lbl_8047DB18,
                 lbl_8047DB14, lbl_8047DB18, lbl_8047DB18);
-    fn_800BA440(&light, lbl_80478C84);
+    GXInitLightColor(&light, lbl_80478C84);
 
     for (i = 0; i < 8; i++) {
         GXLoadLightObjImm(&light, HSD_Index2LightID(i));

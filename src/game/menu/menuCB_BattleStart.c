@@ -103,9 +103,9 @@ extern u8 lbl_803A9E40[];
 void fn_8005DFC8(void* arg)
 {
     extern u8 fn_80069048(void);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern s32 fn_800D37CC(void);
-    extern s32 fn_801666BC(u32);
+    extern s32 soundGetStatus(u32);
     extern s32 toolentryTaisenGetBattleType(void);
     extern s32 menuCBPokemonEntryGetReadFlag(void);
     extern void fn_80060A28(void);
@@ -138,7 +138,7 @@ void fn_8005DFC8(void* arg)
 #define STATE_U32(off) (*(u32*) (state_bytes + (off)))
 #define STATE_F32(off) (*(f32*) (state_bytes + (off)))
 
-    delta_time = (f32) ((f64) fn_800D3088() / (f64) fn_800D37CC());
+    delta_time = (f32) ((f64) msgGetCharsPerFrame() / (f64) fn_800D37CC());
     state->deltaTime = delta_time;
 
     switch (STATE_U32(0x38)) {
@@ -304,7 +304,7 @@ void fn_8005DFC8(void* arg)
         break;
 
     case 0xA:
-        if (fn_801666BC(STATE_U32(0x3BC)) == 0) {
+        if (soundGetStatus(STATE_U32(0x3BC)) == 0) {
             STATE_U32(0x38) = 0xB;
         }
         break;
@@ -535,16 +535,16 @@ typedef struct MenuCBBattleStartDrawParams {
 #pragma peephole off
 void fn_800608C4(void* context, MenuCBBattleStartDrawParams* params) {
     extern void* menuModelRender(void* model);
-    extern void fn_800D88DC(s32 mode);
-    extern void fn_800D888C(s32 mode);
-    extern void fn_800D6A00(s32 primitive);
-    extern void fn_800D7820(void* format);
-    extern void fn_800D85D4(s32 index, void* model);
-    extern void fn_800D67BC(s32 count);
+    extern void gfxSetFlags(s32 mode);
+    extern void gfxClearFlags(s32 mode);
+    extern void gfxSetPrimitive(s32 primitive);
+    extern void gfxSetVtxDesc(void* format);
+    extern void gfxLoadTexture(s32 index, void* model);
+    extern void gfxBegin(s32 count);
     extern void fn_800D61E4(s32 x, s32 y);
     extern void fn_800D5CB8(s32 index, s32 red, s32 green, s32 blue, s32 alpha);
-    extern void fn_800D59B8(s32 index, f32 x, f32 y);
-    extern void fn_800D6728(void);
+    extern void gfxVtxTexCoord(s32 index, f32 x, f32 y);
+    extern void gfxEnd(void);
     extern u8 lbl_80314F98[];
     extern f32 lbl_8047BF60;
     extern f32 lbl_8047BF90;
@@ -553,19 +553,19 @@ void fn_800608C4(void* context, MenuCBBattleStartDrawParams* params) {
     model = menuModelRender(&lbl_803A9A60.model);
     if (model != 0) {
 #pragma scheduling on
-        fn_800D88DC(3);
-        fn_800D888C(4);
-        fn_800D6A00(7);
-        fn_800D7820(lbl_80314F98);
-        fn_800D85D4(0, model);
-        fn_800D67BC(2);
+        gfxSetFlags(3);
+        gfxClearFlags(4);
+        gfxSetPrimitive(7);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxLoadTexture(0, model);
+        gfxBegin(2);
         fn_800D61E4(0, 0);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D59B8(0, lbl_8047BF60, lbl_8047BF60);
+        gfxVtxTexCoord(0, lbl_8047BF60, lbl_8047BF60);
         fn_800D61E4(params->x, params->y);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D59B8(0, lbl_8047BF90, lbl_8047BF90);
-        fn_800D6728();
+        gfxVtxTexCoord(0, lbl_8047BF90, lbl_8047BF90);
+        gfxEnd();
     }
 }
 #pragma pop
@@ -709,7 +709,7 @@ void menuCBBattleStartInit(void* menu, s32 mode)
     extern void fn_80068F84(void);
     extern void menuCBPokemonEntryLoadTex(void);
     extern s32 fn_8025D9A8(void);
-    extern void fn_80165A20(u32, s32, s32);
+    extern void std104_soundSetBackgroundMusic(u32, s32, s32);
     extern void* toolentryTaisenGetEntryPokemonPtr(s32, s32);
     extern u16 pokemonBiosGetMaxHp(void*);
     extern u16 pokemonBiosGetHp(void*);
@@ -776,7 +776,7 @@ void menuCBBattleStartInit(void* menu, s32 mode)
             lbl_803A9A60.model.soundId = 0x3CD;
             break;
         }
-        fn_80165A20(lbl_803A9A60.model.soundId, 0, 0xFF);
+        std104_soundSetBackgroundMusic(lbl_803A9A60.model.soundId, 0, 0xFF);
     } else if (mode == 1) {
         fn_80068F84();
         menuCBPokemonEntryLoadTex();
@@ -802,7 +802,7 @@ void menuCBBattleStartInit(void* menu, s32 mode)
             }
         }
         lbl_803A9A60.model.soundId = 0x1E;
-        fn_80165A20(0x1E, 0, 0xFF);
+        std104_soundSetBackgroundMusic(0x1E, 0, 0xFF);
     }
 }
 
@@ -1791,7 +1791,7 @@ extern s32 fn_8025DA88(void);
 extern u16 fn_8025D28C(s32);
 extern u16 fn_8025D914(s32);
 extern u16 fn_8025DA18(s32);
-extern u16 fn_801EF634(void);
+extern u16 std103_battleGetResult(void);
 extern void* fn_8012AC54(u16);
 extern void* fn_800FA280(s32);
 extern void fn_80132A38();
@@ -1800,17 +1800,17 @@ extern void fn_800FBB34();
 extern void fn_800FE6D0(s32, s32);
 extern void fn_800FE4D4(void);
 extern void fn_801040F0();
-extern void fn_800D88DC(s32);
-extern void fn_800D888C(s32);
-extern void fn_800D6A00(s32);
-extern void fn_800D7820(void*);
-extern void fn_800D85D4(s32, void*);
-extern void fn_800D67BC(s32);
+extern void gfxSetFlags(s32);
+extern void gfxClearFlags(s32);
+extern void gfxSetPrimitive(s32);
+extern void gfxSetVtxDesc(void*);
+extern void gfxLoadTexture(s32, void*);
+extern void gfxBegin(s32);
 extern void fn_800D61E4(s32, s32);
 extern void fn_800D5CB8(s32, s32, s32, s32, s32);
 extern void fn_800D5BA0(s32, u32);
-extern void fn_800D59B8(s32, f32, f32);
-extern void fn_800D6728(void);
+extern void gfxVtxTexCoord(s32, f32, f32);
+extern void gfxEnd(void);
 extern void fn_801FCCC4(u16);
 extern void fn_801FCC64(void);
 extern void fn_801FBD58(void);
@@ -1854,7 +1854,7 @@ void fn_80060D70(void* context, UICmdMsg* msg, s32 player, s32 kind)
     if (lbl_803A9A60.status != 1)
         goto hide;
 
-    battle_kind = fn_801EF634();
+    battle_kind = std103_battleGetResult();
     if (battle_kind == 2 || battle_kind == 5) {
         expected[0] = 0;
         expected[1] = 1;
@@ -1962,11 +1962,11 @@ void fn_80061240(void* context, UICmdMsg* msg, s32 player, s32 slot)
     if (ratio != 0.0f) {
         color = ((red - 2) << 24) | ((green - 2) << 16) |
                 ((blue - 2) << 8) | alpha;
-        fn_800D88DC(1);
-        fn_800D888C(6);
-        fn_800D7820(lbl_80314E08);
-        fn_800D6A00(4);
-        fn_800D67BC(4);
+        gfxSetFlags(1);
+        gfxClearFlags(6);
+        gfxSetVtxDesc(lbl_80314E08);
+        gfxSetPrimitive(4);
+        gfxBegin(4);
         fn_800D61E4(lbl_80478918, lbl_8047891A);
         fn_800D5BA0(0, color);
         end = (s32)(ratio *
@@ -1978,7 +1978,7 @@ void fn_80061240(void* context, UICmdMsg* msg, s32 player, s32 slot)
         fn_800D5BA0(0, color);
         fn_800D61E4(end, msg->field56);
         fn_800D5BA0(0, color);
-        fn_800D6728();
+        gfxEnd();
     }
 }
 
@@ -1996,21 +1996,21 @@ void fn_80061454(void* context, UICmdMsg* msg, s32 player, s32 kind)
             *(f32*)((u8*)&lbl_803A9A60 + 0x32C + player * 0xC));
         image = *(void**)((u8*)&lbl_803A9A60 + 0x0C + player * 8);
         if (image != NULL) {
-            fn_800D88DC(3);
-            fn_800D888C(4);
-            fn_800D6A00(7);
-            fn_800D7820(lbl_80314F98);
-            fn_800D85D4(0, image);
-            fn_800D67BC(2);
+            gfxSetFlags(3);
+            gfxClearFlags(4);
+            gfxSetPrimitive(7);
+            gfxSetVtxDesc(lbl_80314F98);
+            gfxLoadTexture(0, image);
+            gfxBegin(2);
             fn_800D61E4(0, 0);
             fn_800D5CB8(
                 0, 0xFF, 0xFF, 0xFF, *((u8*)context + 0x8B));
-            fn_800D59B8(0, 0.0f, 0.0f);
+            gfxVtxTexCoord(0, 0.0f, 0.0f);
             fn_800D61E4(msg->field54, msg->field56);
             fn_800D5CB8(
                 0, 0xFF, 0xFF, 0xFF, *((u8*)context + 0x8B));
-            fn_800D59B8(0, 1.0f, 1.0f);
-            fn_800D6728();
+            gfxVtxTexCoord(0, 1.0f, 1.0f);
+            gfxEnd();
         }
     }
 }

@@ -35,7 +35,7 @@ u32 fn_8018F5FC(const PeopleInfoBiosEntry* info)
     return 0;
 }
 
-f32 fn_8018F618(const PeopleInfoBiosEntry* info)
+f32 charModelGetHeadPitchMax(const PeopleInfoBiosEntry* info)
 {
     if (info != NULL) {
         return lbl_8047D8AC * info->field_20;
@@ -43,7 +43,7 @@ f32 fn_8018F618(const PeopleInfoBiosEntry* info)
     return lbl_8047D8A8;
 }
 
-f32 fn_8018F638(const PeopleInfoBiosEntry* info)
+f32 charModelGetHeadPitchMin(const PeopleInfoBiosEntry* info)
 {
     if (info != NULL) {
         return lbl_8047D8AC * info->field_1C;
@@ -51,7 +51,7 @@ f32 fn_8018F638(const PeopleInfoBiosEntry* info)
     return lbl_8047D8A8;
 }
 
-f32 fn_8018F658(const PeopleInfoBiosEntry* info)
+f32 charModelGetHeadYawMax(const PeopleInfoBiosEntry* info)
 {
     if (info != NULL) {
         return lbl_8047D8AC * info->field_20;
@@ -59,7 +59,7 @@ f32 fn_8018F658(const PeopleInfoBiosEntry* info)
     return lbl_8047D8A8;
 }
 
-f32 fn_8018F678(const PeopleInfoBiosEntry* info)
+f32 charModelGetHeadYawMin(const PeopleInfoBiosEntry* info)
 {
     if (info != NULL) {
         return lbl_8047D8AC * info->field_1C;
@@ -67,7 +67,7 @@ f32 fn_8018F678(const PeopleInfoBiosEntry* info)
     return lbl_8047D8A8;
 }
 
-s32 fn_8018F698(const PeopleInfoBiosEntry* info)
+s32 charModelGetHeadPart(const PeopleInfoBiosEntry* info)
 {
     return (info != NULL) ? (s32)(s8)info->raw_09 : -1;
 }

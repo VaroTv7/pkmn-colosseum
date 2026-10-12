@@ -28,12 +28,12 @@ extern u32 VIGetDTVStatus(void);
 extern void _threadSwitch(void);
 extern void fadeCheck(u32 arg);
 extern void fn_800A0FC8(u32 arg);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern s32 fn_800D37CC(void);
 extern s32 fn_800F7BC4(u32 arg);
 extern void fn_800F7F64(u32 arg);
 extern void fn_80165F84(void);
-extern void fn_80166E88(u32 a, u32 b, u32 c, u32 d, u32 e);
+extern void soundInit(u32 a, u32 b, u32 c, u32 d, u32 e);
 extern s32 fn_8017B2CC(u32 arg);
 extern s32 menuOpenCustom(u32 id, s32 active, s32* out, u32 a, u32 b, u32 c);
 extern void menuCloseCustom(u32 id, u32 a, u32 b);
@@ -68,7 +68,7 @@ void bootWaitLogo(void) {
         limit = lbl_8047BA34;
         while (timer < limit) {
             _threadSwitch();
-            timer += (f32)fn_800D3088() / (f32)fn_800D37CC();
+            timer += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         }
         goto boot_done;
     }
@@ -94,7 +94,7 @@ void bootWaitLogo(void) {
                     lastCursor = (s8)windowSearchID(0x11)->cursor;
                 }
                 _threadSwitch();
-                timer += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                timer += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
             }
             if (!(timer < limit)) {
                 chosen = (s8)windowSearchID(0x11)->cursor;
@@ -111,7 +111,7 @@ void bootWaitLogo(void) {
                 limit = lbl_8047BA34;
                 while (timer < limit) {
                     _threadSwitch();
-                    timer += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                    timer += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                 }
             } else {
                 if (((OSGetResetCode() + 0x80000000U) == 0U && OSGetProgressiveMode() == 1U) ||
@@ -123,7 +123,7 @@ void bootWaitLogo(void) {
                 limit = lbl_8047BA34;
                 while (timer < limit) {
                     _threadSwitch();
-                    timer += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                    timer += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                 }
             }
             winMsgClose(1);
@@ -149,7 +149,7 @@ void bootWaitLogo(void) {
                     lastCursor = (s8)windowSearchID(0x11)->cursor;
                 }
                 _threadSwitch();
-                timer += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                timer += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
             }
             if (!(timer < limit)) {
                 chosen = (s8)windowSearchID(0x11)->cursor;
@@ -166,7 +166,7 @@ void bootWaitLogo(void) {
                 limit = lbl_8047BA34;
                 while (timer < limit) {
                     _threadSwitch();
-                    timer += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                    timer += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                 }
             } else {
                 if (((OSGetResetCode() + 0x80000000U) == 0U && OSGetProgressiveMode() == 1U) ||
@@ -178,7 +178,7 @@ void bootWaitLogo(void) {
                 limit = lbl_8047BA34;
                 while (timer < limit) {
                     _threadSwitch();
-                    timer += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                    timer += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                 }
             }
             winMsgClose(1);
@@ -190,7 +190,7 @@ void bootWaitLogo(void) {
         limit = lbl_8047BA34;
         while (timer < limit) {
             _threadSwitch();
-            timer += (f32)fn_800D3088() / (f32)fn_800D37CC();
+            timer += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         }
         goto boot_done;
     }
@@ -200,7 +200,7 @@ void bootWaitLogo(void) {
     limit = lbl_8047BA34;
     while (timer < limit) {
         _threadSwitch();
-        timer += (f32)fn_800D3088() / (f32)fn_800D37CC();
+        timer += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
     fn_800A0FC8(0);
 
@@ -216,7 +216,7 @@ boot_done:
         _threadSwitch();
     }
 
-    fn_80166E88(2, 1, 0x20, 1, 0x10);
+    soundInit(2, 1, 0x20, 1, 0x10);
     fn_80165F84();
 
     base = lbl_803A3E58;

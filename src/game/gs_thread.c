@@ -180,42 +180,42 @@ extern void fn_80080ED8(void);
 extern void fn_800DBEB4(u32 a, void* b);
 extern void fn_800D5CB8(s32 a, s32 b, s32 c, s32 d, s32 e);
 extern void fn_800D61E4(s16 x, s16 y);
-extern void fn_800D6728(void);
-extern void fn_800D67BC(s32 a);
-extern void fn_800D6A00(s32 a);
-extern void fn_800D7820(void* ptr);
-extern void fn_800D85D4(void);
-extern void fn_800D888C(u32 mask, ...);
-extern void fn_800D88DC(u32 mask);
+extern void gfxEnd(void);
+extern void gfxBegin(s32 a);
+extern void gfxSetPrimitive(s32 a);
+extern void gfxSetVtxDesc(void* ptr);
+extern void gfxLoadTexture(void);
+extern void gfxClearFlags(u32 mask, ...);
+extern void gfxSetFlags(u32 mask);
 extern void fn_800D9ED8(void);
 extern void fn_800DC1D4(s32 a);
 extern void logVsnprintf_float(void);
 extern void GStextureUnlockImage(void* ctx);
 extern void GStextureLockImage(void);
-extern void fn_801669BC(u32 type);
+extern void soundStopSE(u32 type);
 extern void* GStextureCreate(u16 width, u16 height, u32 format, u32 tlutFormat, u8 mipLevels);
 extern void fn_800CDBE0(void);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern void fn_800DBF78(void);
 extern void fn_800DBFD4(void);
 extern void fn_800DC04C(void);
 extern void fn_800DC0D4(void);
 extern void fn_800DC14C(void);
-extern void fn_800DC224(void);
+extern void gfxSetTevStage(void);
 extern void windowDrawSprite(void);
-extern void fn_80166A28(void);
-extern void fn_800D59B8(void);
+extern void soundStartSE(void);
+extern void gfxVtxTexCoord(void);
 extern void fn_800D5BA0(void);
 extern void fn_800D9D68(u16 a, u16 b, u16 c, u16 d);
 extern f64 tan(void);
 extern void fn_800D7FE4(void* mtx);
 extern void fn_800D834C(void);
 extern void fn_800D9BD0(f32 a, f32 b, f32 c, f32 d);
-extern void fn_800DA028(s32 a);
+extern void gfxSetCullMode(s32 a);
 extern void fn_800DA100(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f);
-extern void fn_800DA1E8(s32 a, s32 b, s32 c);
-extern void fn_800DA2BC(s32 a, s32 b, s32 c);
-extern void fn_800DA4C4(s32 a, s32 b, s32 c);
+extern void gfxSetZMode(s32 a, s32 b, s32 c);
+extern void gfxSetUpdates(s32 a, s32 b, s32 c);
+extern void gfxSetBlendMode(s32 a, s32 b, s32 c);
 extern void set__5GSvecFfff(void* dst, f32 x, f32 y, f32 z);
 extern void fn_800E0218(void* dst, void* a, void* b, void* c);
 extern void* memset(void* dest, int val, u32 n);
@@ -1240,7 +1240,7 @@ extern void GSmsgSetColor(void* obj);
 extern s32 GSmsgGetRect();
 extern void GSmsgInitRuby();
 extern s32 fn_800FAEF8();
-extern s32 fn_800FB43C();
+extern s32 std001_messageFormatLookup();
 extern s32 fn_800FB680();
 extern s32 fn_800FB8C8();
 extern s32 fn_800FBB34();
@@ -1251,7 +1251,7 @@ extern u32 fn_800FC2A8(void* ptr);
 extern void* GSmsgFontOpen();
 extern s32 GSmsgSetCtrlFunc(u32 val);
 extern s32 GSmsgInit();
-extern s32 fn_800FC7E0();
+extern s32 msgTaskDraw();
 extern void fn_800FD348();
 extern void fn_800FD69C();
 extern u16 * _msgGetCodeInfo__FP13MSG_TASK_WORKUsPP12tagFONT_INFO();
@@ -3255,7 +3255,7 @@ asm void fn_800FB43C(void) {
 #include "src/game/gs_thread_fn_800FB43C.inc"
 }
 #else
-s32 fn_800FB43C(arg0, arg1, arg2)
+s32 std001_messageFormatLookup(arg0, arg1, arg2)
     s32 arg0;
     s32 arg1;
     u32 arg2;
@@ -3368,7 +3368,7 @@ loop_19:
             }
         }
     }
-    return fn_800FC7E0((u8 *)&lbl_80402418, M2C_FIELD((u8 *)&lbl_80402418, u8 *, 0x44), 0, 0, var_f2);
+    return msgTaskDraw((u8 *)&lbl_80402418, M2C_FIELD((u8 *)&lbl_80402418, u8 *, 0x44), 0, 0, var_f2);
 }
 #endif
 #pragma pop
@@ -3496,7 +3496,7 @@ loop_19:
             }
         }
     }
-    return fn_800FC7E0((u8 *)&lbl_80402418, M2C_FIELD((u8 *)&lbl_80402418, u8 *, 0x44), 0, 0, var_f2);
+    return msgTaskDraw((u8 *)&lbl_80402418, M2C_FIELD((u8 *)&lbl_80402418, u8 *, 0x44), 0, 0, var_f2);
 }
 #endif
 #pragma pop
@@ -3628,7 +3628,7 @@ loop_19:
             }
         }
     }
-    return fn_800FC7E0((u8 *)&lbl_80402418, M2C_FIELD((u8 *)&lbl_80402418, u8 *, 0x44), 0, 0, var_f2);
+    return msgTaskDraw((u8 *)&lbl_80402418, M2C_FIELD((u8 *)&lbl_80402418, u8 *, 0x44), 0, 0, var_f2);
 }
 #endif
 #pragma pop
@@ -3758,7 +3758,7 @@ loop_19:
             }
         }
     }
-    return fn_800FC7E0((u8 *)&lbl_80402418, M2C_FIELD((u8 *)&lbl_80402418, u8 *, 0x44), 0, 0, var_f2);
+    return msgTaskDraw((u8 *)&lbl_80402418, M2C_FIELD((u8 *)&lbl_80402418, u8 *, 0x44), 0, 0, var_f2);
 }
 #endif
 #pragma pop
@@ -3773,7 +3773,7 @@ asm void fn_800FBD88(void) {
 }
 #else
 #pragma optimization_level 2
-void fn_800FBD88(u32 key) {
+void GSmsgFree(u32 key) {
     u8* head;
     u32 count;
     u8* entry;
@@ -3799,7 +3799,7 @@ void fn_800FBD88(u32 key) {
     else if (type == 3) r3 = 0x59;
     else if (type == 4) r3 = 0x497;
     else if (type == 5) r3 = 0x498;
-    if (r3 != 0) fn_801669BC(r3);
+    if (r3 != 0) soundStopSE(r3);
     *(u8*)(entry + 0x0) = 0;
 }
 #endif
@@ -3832,7 +3832,7 @@ s32 winMsgDrawMessage(u32 key, u32 r4arg) {
         }
     }
     if (entry == NULL) return -1;
-    return fn_800FC7E0(entry, *(u8*)(entry + 0x44), r4arg);
+    return msgTaskDraw(entry, *(u8*)(entry + 0x44), r4arg);
 }
 #endif
 #pragma pop
@@ -4295,7 +4295,7 @@ asm s32 fn_800FC7E0(entry, type, arg)
 #include "src/game/gs_thread_fn_800FC7E0.inc"
 }
 #else
-s32 fn_800FC7E0(arg0, arg1, arg2, arg3)
+s32 msgTaskDraw(arg0, arg1, arg2, arg3)
     u8 *arg0;
     u8 arg1;
     s32 arg2;
@@ -4376,17 +4376,17 @@ void fn_800FD348(arg0, farg1)
                 x1 = (s16)((arg0[0x22] * scaleX) + (f32)x0);
                 y1 = (s16)(((f32)glyphHeight * scaleY) + (f32)y0);
 
-                fn_800D888C(0x80000002, glyphHeight, scaleY, (f32)glyphHeight, (f32)arg0[0x22]);
-                fn_800D6A00(7);
-                fn_800D7820(lbl_80314E08);
-                fn_800D67BC(2);
+                gfxClearFlags(0x80000002, glyphHeight, scaleY, (f32)glyphHeight, (f32)arg0[0x22]);
+                gfxSetPrimitive(7);
+                gfxSetVtxDesc(lbl_80314E08);
+                gfxBegin(2);
                 fn_800D61E4(x0, y0);
                 fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
                 fn_800D61E4(x1, y1);
                 fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-                fn_800D6728();
-                fn_800D88DC(0x80000002);
-                fn_800D7820(lbl_80314F98);
+                gfxEnd();
+                gfxSetFlags(0x80000002);
+                gfxSetVtxDesc(lbl_80314F98);
                 fn_800DC1D4(1);
 
                 spaceBias = lbl_8047CD28;
@@ -4804,12 +4804,12 @@ void spriteSetEnv(void) {
     fn_800D9BD0(lbl_8047CD70, -(sx / sy), lbl_8047CD74, lbl_8047CD78);
     fn_800D834C();
     fn_800D7FE4(mtx);
-    fn_800DA4C4(1, 6, 7);
-    fn_800D888C(0x80000000);
-    fn_800DA2BC(2, 2, 1);
+    gfxSetBlendMode(1, 6, 7);
+    gfxClearFlags(0x80000000);
+    gfxSetUpdates(2, 2, 1);
     fn_800DA100(0, 7, 0, 1, 7, 0);
-    fn_800DA1E8(0, 2, 0);
-    fn_800DA028(0);
+    gfxSetZMode(0, 2, 0);
+    gfxSetCullMode(0);
 }
 #endif
 #pragma pop
@@ -5307,7 +5307,7 @@ asm void fn_800F106C(void) {
 }
 #else
 #pragma optimization_level 2
-u32 fn_800F106C(void) {
+u32 cms_CallStdTrampoline(void) {
     u32 (*f)(u32,u32,u32,u32,u32,u32,u32,u32,f32,f32,f32,f32,f32,f32,f32,f32);
     f32* fa;
     u32* ia;
@@ -5334,7 +5334,7 @@ asm void fn_800F10E8(void) {
 #include "src/game/gs_thread_fn_800F10E8.inc"
 }
 #else
-s32 fn_800F10E8(arg0)
+s32 cms_op37_callStandard(arg0)
     u8 *arg0;
 {
     u16 argCount;
@@ -5378,7 +5378,7 @@ s32 fn_800F10E8(arg0)
         }
         lbl_8047AC3C = (u32)lbl_80401BB8;
         lbl_8047AC40 = (u32)lbl_80401BD8;
-        result = fn_800F106C();
+        result = cms_CallStdTrampoline();
     }
 
     GS_VM_STACK(arg0)[GS_VM_FRAME(arg0) - 1] = result;
@@ -5405,7 +5405,7 @@ asm void fn_800F13D0(void) {
 }
 #else
 #pragma optimization_level 2
-s32 fn_800F13D0(void* obj) {
+s32 cms_op36_yield(void* obj) {
     u8* p;
     u32 r29;
     u32 r30;
@@ -5476,7 +5476,7 @@ s32 fn_800F13D0(void* obj) {
             return 0;
         }
         _threadSwitch();
-        r30 += fn_800D3088();
+        r30 += msgGetCharsPerFrame();
     }
 
     /* exit loop: state=1, pop twice, drain */
@@ -5521,7 +5521,7 @@ asm void fn_800F16C0(void) {
 }
 #else
 #pragma optimization_level 2
-s32 fn_800F16C0(void* obj) {
+s32 cms_op35_printf(void* obj) {
     u8* p;
     u32 r30;
     u8* r26;
@@ -5660,7 +5660,7 @@ asm void fn_800F1A0C(void) {
 #include "src/game/gs_thread_fn_800F1A0C.inc"
 }
 #else
-s32 fn_800F1A0C(void* obj) {
+s32 cms_op34_orl(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -5748,7 +5748,7 @@ asm void fn_800F1E38(void) {
 #include "src/game/gs_thread_fn_800F1E38.inc"
 }
 #else
-s32 fn_800F1E38(void* obj) {
+s32 cms_op33_andl(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -5834,7 +5834,7 @@ asm void fn_800F2264(void) {
 #include "src/game/gs_thread_fn_800F2264.inc"
 }
 #else
-s32 fn_800F2264(void* obj) {
+s32 cms_op32_copyStruct(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 srcDesc;
@@ -5902,7 +5902,7 @@ asm void fn_800F24F4(void) {
 #include "src/game/gs_thread_fn_800F24F4.inc"
 }
 #else
-s32 fn_800F24F4(void* obj) {
+s32 cms_op31_setVar(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 srcDesc;
@@ -5982,7 +5982,7 @@ asm void fn_800F27D4(void) {
 #include "src/game/gs_thread_fn_800F27D4.inc"
 }
 #else
-s32 fn_800F27D4(void* obj) {
+s32 cms_op30_notEqual(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -6081,7 +6081,7 @@ asm void fn_800F2BE8(void) {
 #include "src/game/gs_thread_fn_800F2BE8.inc"
 }
 #else
-s32 fn_800F2BE8(void* obj) {
+s32 cms_op29_equal(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -6181,7 +6181,7 @@ asm void fn_800F2FF8(void) {
 }
 #else
 #pragma optimization_level 2
-s32 fn_800F2FF8(void* obj) {
+s32 cms_op28_greaterThanEqual(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -6280,7 +6280,7 @@ asm void fn_800F3418(void) {
 #include "src/game/gs_thread_fn_800F3418.inc"
 }
 #else
-s32 fn_800F3418(void* obj) {
+s32 cms_op27_greaterThan(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -6379,7 +6379,7 @@ asm void fn_800F3830(void) {
 #include "src/game/gs_thread_fn_800F3830.inc"
 }
 #else
-s32 fn_800F3830(void* obj) {
+s32 cms_op26_lessThanEqual(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -6478,7 +6478,7 @@ asm void fn_800F3C50(void) {
 #include "src/game/gs_thread_fn_800F3C50.inc"
 }
 #else
-s32 fn_800F3C50(void* obj) {
+s32 cms_op25_lessThan(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -6577,7 +6577,7 @@ asm void fn_800F4068(void) {
 #include "src/game/gs_thread_fn_800F4068.inc"
 }
 #else
-s32 fn_800F4068(void* obj) {
+s32 cms_op24_subtract(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -6677,7 +6677,7 @@ asm void fn_800F4440(void) {
 #include "src/game/gs_thread_fn_800F4440.inc"
 }
 #else
-s32 fn_800F4440(void* obj) {
+s32 cms_op23_add(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -6778,7 +6778,7 @@ asm void fn_800F4818(void) {
 #include "src/game/gs_thread_fn_800F4818.inc"
 }
 #else
-s32 fn_800F4818(void* obj) {
+s32 cms_op22_mod(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -6885,7 +6885,7 @@ asm void fn_800F4C38(void) {
 #include "src/game/gs_thread_fn_800F4C38.inc"
 }
 #else
-s32 fn_800F4C38(void* obj) {
+s32 cms_op21_divide(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -6988,7 +6988,7 @@ asm void fn_800F502C(void) {
 #include "src/game/gs_thread_fn_800F502C.inc"
 }
 #else
-s32 fn_800F502C(void* obj) {
+s32 cms_op20_multiply(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -7090,7 +7090,7 @@ asm void fn_800F5404(void) {
 }
 #else
 #pragma optimization_level 2
-s32 fn_800F5404(void* obj) {
+s32 cms_op19_pushVar2(void* obj) {
     u8* p;
     u8* r31;
     u32 r30;
@@ -7180,7 +7180,7 @@ asm void fn_800F55DC(void) {
 }
 #else
 #pragma optimization_level 2
-s32 fn_800F55DC(void* obj) {
+s32 cms_op18_negate(void* obj) {
     u8* p;
     u8* r31;
     u32 r30;
@@ -7281,7 +7281,7 @@ asm void fn_800F57F0(void) {
 #else
 #pragma push
 #pragma optimization_level 1
-s32 fn_800F57F0(GSVMCtx* context)
+s32 cms_op17_not(GSVMCtx* context)
 {
     union {
         u32 word;
@@ -7361,7 +7361,7 @@ asm void fn_800F5A3C(void) {
 #else
 #pragma push
 #pragma optimization_level 0
-s32 fn_800F5A3C(arg0)
+s32 cms_op16_pushMultiVar(arg0)
     u8 *arg0;
 {
     u8 desc;
@@ -7393,7 +7393,7 @@ asm void fn_800F5CA0(void) {
 #else
 #pragma push
 #pragma optimization_level 0
-s32 fn_800F5CA0(arg0)
+s32 cms_op15_pushVarRef(arg0)
     u8 *arg0;
 {
     u8 desc;
@@ -7417,7 +7417,7 @@ asm void fn_800F5EEC(void) {
 #include "src/game/gs_thread_fn_800F5EEC.inc"
 }
 #else
-s32 fn_800F5EEC(void* obj) {
+s32 cms_op14_or(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -7514,7 +7514,7 @@ asm void fn_800F62BC(void) {
 #include "src/game/gs_thread_fn_800F62BC.inc"
 }
 #else
-s32 fn_800F62BC(void* obj) {
+s32 cms_op13_and(void* obj) {
     GSVMCtx* ctx;
     u8* errBase;
     u32 leftDesc;
@@ -7612,7 +7612,7 @@ asm s32 fn_800F668C(void* obj) {
 }
 #else
 #pragma optimization_level 2
-s32 fn_800F668C(void* obj) {
+s32 cms_op08_pushImmediate(void* obj) {
     u8* p = (u8*)obj;
     s32 count;
     u32 val;
@@ -7638,7 +7638,7 @@ asm s32 fn_800F670C(void* obj) {
 }
 #else
 #pragma optimization_level 4
-s32 fn_800F670C(u8* ptr) {
+s32 cms_op07_jumpFalse(u8* ptr) {
     volatile u32 cond;
     volatile u32 val;
     s32 count = *(s32*)(ptr + 0x28);
@@ -7668,7 +7668,7 @@ asm void fn_800F67AC(void) {
 #pragma optimization_level 2
 #pragma push
 #pragma optimization_level 3
-s32 fn_800F67AC(u32* ptr) {
+s32 cms_op06_jump(u32* ptr) {
     u32* p = (u32*)ptr[5];
     ptr[5] = ptr[0] + *p;
     return 1;
@@ -7683,7 +7683,7 @@ asm s32 fn_800F67C8(void* obj) {
 }
 #else
 #pragma optimization_level 2
-s32 fn_800F67C8(void* obj) {
+s32 cms_op05_return(void* obj) {
     u8* p;
     s32 count;
     volatile u32 val1;
@@ -7758,7 +7758,7 @@ asm s32 fn_800F694C(void* obj) {
 }
 #else
 #pragma optimization_level 2
-s32 fn_800F694C(void* obj) {
+s32 cms_op04_call(void* obj) {
     u8* p;
     u8* ptr;
     u32 funcIdx;
@@ -7831,7 +7831,7 @@ asm s32 fn_800F6AB4(obj)
 }
 #else
 #pragma optimization_level 2
-s32 fn_800F6AB4(obj)
+s32 cms_op03_pop(obj)
     void* obj;
 {
     u8* p;
@@ -7865,7 +7865,7 @@ asm s32 fn_800F6B54(void* obj) {
 }
 #else
 #pragma optimization_level 2
-u32 fn_800F6B54(u8* ptr) {
+u32 cms_op02_pushMinus1(u8* ptr) {
     s32 count = *(s32*)(ptr + 0x28);
     if (count > 0x40) {
         GSlogWritef((const char*)lbl_80271068);
@@ -7885,7 +7885,7 @@ asm void fn_800F6BAC(void) {
 }
 #else
 #pragma optimization_level 2
-s32 fn_800F6BAC(u8* ptr) {
+s32 cms_op01_exit(u8* ptr) {
     ptr[4] = 3;
     return 0;
 }
@@ -7898,7 +7898,7 @@ asm void fn_800F6BBC(void) {
 }
 #else
 #pragma optimization_level 2
-s32 fn_800F6BBC(void) {
+s32 cms_op00_nop(void) {
     return 1;
 }
 #endif
@@ -7911,7 +7911,7 @@ asm u32 fn_800F6BC4(void* obj) {
 }
 #else
 #pragma optimization_level 2
-u32 fn_800F6BC4(void* obj) {
+u32 cms_ScriptExecute(void* obj) {
     u8* p;
     u8* strBase;
     u8* ip;
@@ -7989,7 +7989,7 @@ asm void* fn_800F6D18(callback, arg, list)
 #pragma push
 #pragma optimization_level 3
 #pragma peephole off
-u8 *fn_800F6D18(arg0, arg1, arg2)
+u8 *cms_ScriptCreateThread(arg0, arg1, arg2)
     u32 arg0;
     u32 arg1;
     void *arg2;
@@ -8356,12 +8356,12 @@ u32 fn_800F7318(u32 r27, void* callback, u32 r28, u32 r29, u32 r30, u32 r8, ...)
     list[0].overflow_arg_area = (u32*)((u8*)list + 0x30);
     list[0].reg_save_area = (u32*)((u8*)list - 0x60);
     listPtr = list;
-    entry = fn_800F6D18(callback, r8, listPtr);
+    entry = cms_ScriptCreateThread(callback, r8, listPtr);
     current = floorGetCurrentContext();
     if (entry == NULL) {
         return 0;
     }
-    thread = GSthreadCreate(r27, current, r28, 1, r29, fn_800F6BC4);
+    thread = GSthreadCreate(r27, current, r28, 1, r29, cms_ScriptExecute);
     if (thread != NULL) {
         *(void**)(entry + 0xC) = thread;
         *(u32*)(entry + 0x10) = r30;
@@ -8380,7 +8380,7 @@ asm u32 fn_800F7434(void* callback, u32 arg, ...) {
 #else
 #pragma optimization_level 4
 #pragma scheduling on
-u32 fn_800F7434(void* callback, u32 arg, ...) {
+u32 cmsRunSync(void* callback, u32 arg, ...) {
     ThreadVaListArray list;
     register void* listPtr;
     u8* entry;
@@ -8399,7 +8399,7 @@ u32 fn_800F7434(void* callback, u32 arg, ...) {
     list[0].overflow_arg_area = (u32*)((u8*)list + 0x28);
     list[0].reg_save_area = (u32*)((u8*)list - 0x68);
     listPtr = list;
-    entry = fn_800F6D18(callback, arg, listPtr);
+    entry = cms_ScriptCreateThread(callback, arg, listPtr);
     if (entry == NULL) {
         return 0;
     }
