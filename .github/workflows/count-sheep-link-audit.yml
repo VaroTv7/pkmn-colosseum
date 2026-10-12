@@ -1,0 +1,85 @@
+name: Count-Sheep link audit
+on:
+  push:
+    branches: [integrate/count-sheep-full-20261011]
+    paths: [.github/workflows/count-sheep-link-audit.yml]
+permissions:
+  contents: read
+  packages: read
+jobs:
+  link-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container: ghcr.io/dougchansan/pkmn-colosseum-build:main
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 596e8e7779fe688c2249fdc0d61e0d40962cdcc4
+          persist-credentials: false
+      - name: Prepare disposable DOL-only profile
+        shell: sh
+        run: |
+          set -eu
+          cp -a /orig .
+          mkdir -p /tmp/link-audit
+          cp configure.py /tmp/canonical-configure.py
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('config/GC6E01')
+          (root/'config.dol-diagnostic.yml').write_text((root/'config.yml').read_text().split('\nmodules:',1)[0]+'\n')
+          lines=[s for s in (root/'build.sha1').read_text().splitlines() if s.rstrip().endswith('/main.dol')]
+          assert len(lines)==1
+          (root/'build.dol-diagnostic.sha1').write_text(lines[0]+'\n')
+          override='''# Temporary diagnostic, never committed as canonical configuration.
+          excluded=set(config.gnu_ld_modules)
+          config.libs=[lib for lib in config.libs if lib["lib"] not in excluded]
+          config.gnu_ld_modules=[]
+          config.custom_build_steps={}
+          config.config_path=Path("config/GC6E01/config.dol-diagnostic.yml")
+          config.check_sha_path=Path("config/GC6E01/build.dol-diagnostic.sha1")
+          '''
+          Path('/tmp/dol-override.txt').write_text(override)
+          p=Path('configure.py');s=p.read_text();p.write_text(s.replace('if args.mode == "configure":',override+'\nif args.mode == "configure":'))
+          PY
+          python configure.py --map --version GC6E01 --binutils /binutils --compilers /compilers
+          if ! ninja -j2 all_source build/GC6E01/report.json >/tmp/source.log 2>&1; then tail -100 /tmp/source.log; exit 1; fi
+      - name: Compare baseline and deadstrip-off links using identical objects
+        shell: sh
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,json,re,shutil,struct,subprocess as sp
+          out=Path('/tmp/link-audit')
+          original=Path('orig/GC6E01/sys/main.dol').read_bytes()
+          expected=hashlib.sha1(original).hexdigest()
+          results=[]
+          for label,extra in [('baseline',''),('deadstrip-off','config.ldflags.extend(["-deadstrip", "off"])\n')]:
+              if extra:
+                  s=Path('/tmp/canonical-configure.py').read_text()
+                  override=Path('/tmp/dol-override.txt').read_text()+extra
+                  Path('configure.py').write_text(s.replace('if args.mode == "configure":',override+'\nif args.mode == "configure":'))
+                  sp.run(['python','configure.py','--map','--version','GC6E01','--binutils','/binutils','--compilers','/compilers'],check=True)
+              with open(f'/tmp/{label}-link.log','w') as log:
+                  rc=sp.run(['ninja','-j2','build/GC6E01/main.dol'],stdout=log,stderr=sp.STDOUT).returncode
+              log=Path(f'/tmp/{label}-link.log').read_text(errors='replace')
+              errors='\n'.join(line for line in log.splitlines() if re.search('error|Error|FAILED|failed|undefined|Undefined|unresolved',line))
+              (out/f'{label}-errors.txt').write_text(errors+'\n')
+              result={'label':label,'link_exit_code':rc,'expected_sha1':expected,'scope':'DOL-only; RELs not validated'}
+              p=Path('build/GC6E01/main.dol')
+              if rc==0 and p.exists():
+                  b=p.read_bytes()
+                  result.update(rebuilt_sha1=hashlib.sha1(b).hexdigest(),size=len(b),byte_identical=(b==original),text_sizes=list(struct.unpack_from('>7I',b,0x90)))
+              for pattern in ['build/GC6E01/*.lcf','build/GC6E01/*.MAP','build/*.lcf']:
+                  for p in Path('.').glob(pattern):shutil.copyfile(p,out/f'{label}-{p.name}')
+              if Path('build/GC6E01/main.elf').exists():
+                  with open(out/f'{label}-symbols.txt','w') as f:sp.run(['/binutils/powerpc-eabi-nm','-S','-n','build/GC6E01/main.elf'],stdout=f,stderr=sp.DEVNULL)
+              results.append(result);print(json.dumps(result,indent=2));print(errors[-3000:])
+          (out/'results.json').write_text(json.dumps(results,indent=2)+'\n')
+          shutil.copyfile('build/GC6E01/report.json',out/'report.json')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: count-sheep-link-audit
+          path: /tmp/link-audit/
+          retention-days: 7
