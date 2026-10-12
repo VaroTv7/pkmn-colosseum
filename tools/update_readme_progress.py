@@ -73,7 +73,7 @@ def progress_table(report: dict[str, Any]) -> str:
                 f"{count(measures.get('total_data'), 'total_data')} matched data bytes) |"
             ),
             (
-                "| Linked into DOL | "
+                "| Source-linked | "
                 f"{count(measures.get('complete_units'), 'complete_units')} / "
                 f"{count(measures.get('total_units'), 'total_units')} scoring units "
                 f"({pct(measures.get('complete_code_percent'), 'complete_code_percent')} of code) |"
