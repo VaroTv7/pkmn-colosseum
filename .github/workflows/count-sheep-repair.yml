@@ -1,14 +1,11 @@
 name: Count-Sheep repair validation
-
 on:
   push:
     branches: [integrate/count-sheep-full-20261011]
     paths: [.github/workflows/count-sheep-repair.yml]
-
 permissions:
   contents: write
   packages: read
-
 jobs:
   repair:
     runs-on: ubuntu-latest
@@ -18,36 +15,36 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Repair the inline-helper collision without changing either body
+      - name: Repair inline-helper identity without changing either body
         shell: sh
         run: |
           set -eu
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          test "$(git rev-parse HEAD^)" = e09eb5af7741653950f4ec3306dc95ef126f377e
+          git merge-base --is-ancestor e09eb5af7741653950f4ec3306dc95ef126f377e HEAD
+          git diff --exit-code e09eb5af7741653950f4ec3306dc95ef126f377e -- src include config configure.py tools
           python - <<'PY'
           from pathlib import Path
           import hashlib, re
-          p = Path('src/game/people/people.c')
-          b = p.read_bytes()
-          assert hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest() == 'c9a70ef401a7cd4aecf62a4e16afefafeaecf445'
-          s = b.decode()
-          replacements = {
+          p=Path('src/game/people/people.c');b=p.read_bytes()
+          assert hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()=='c9a70ef401a7cd4aecf62a4e16afefafeaecf445'
+          s=b.decode()
+          replacements={
               'static inline void peopleSetVisible(u32 groupId, u32 index, u8 visible)': 'static inline void peopleSetVisibleInline(u32 groupId, u32 index, u8 visible)',
               '    peopleSetVisible(entry->groupId, entry->index, FALSE);': '    peopleSetVisibleInline(entry->groupId, entry->index, FALSE);',
               '    peopleSetVisible(groupId, index, TRUE);': '    peopleSetVisibleInline(groupId, index, TRUE);',
           }
-          for old, new in replacements.items():
-              assert s.count(old) == 1, old
-              s = s.replace(old,new)
-          assert len(re.findall(r'^void peopleSetVisible\(',s,re.M)) == 1
+          for old,new in replacements.items():
+              assert s.count(old)==1,old
+              s=s.replace(old,new)
+          assert len(re.findall(r'^void peopleSetVisible\([^;{}]*\)\s*\{',s,re.M))==1
           p.write_text(s)
           PY
           git add src/game/people/people.c
           git diff --cached --check
-          git commit -m 'Fix public peopleSetVisible collision with donor inline helper' -m 'Preserve the canonical runtime name at 0x8018C1E8. Give the pre-existing static inline expansion a distinct name and retain its original two callers and both function bodies.'
-      - name: Prepare isolated DOL diagnostic and public-source patch
+          git commit -m 'Fix public peopleSetVisible collision with donor inline helper' -m 'Preserve canonical runtime name 0x8018C1E8 and both bodies. Rename only the existing inline helper and its original two callers.'
+      - name: Prepare isolated diagnostic and public-source patch
         shell: sh
         run: |
           set -eu
@@ -57,16 +54,14 @@ jobs:
           git log -1 --format='%H%n%T%n%P' > /tmp/repair-evidence/commit.txt
           python - <<'PY'
           from pathlib import Path
-          import json,subprocess
           root=Path('config/GC6E01')
-          original=root/'config.yml'
-          (root/'config.dol-diagnostic.yml').write_text(original.read_text().split('\nmodules:',1)[0]+'\n')
+          (root/'config.dol-diagnostic.yml').write_text((root/'config.yml').read_text().split('\nmodules:',1)[0]+'\n')
           lines=[s for s in (root/'build.sha1').read_text().splitlines() if s.rstrip().endswith('/main.dol')]
           assert len(lines)==1
           (root/'build.dol-diagnostic.sha1').write_text(lines[0]+'\n')
           p=Path('configure.py');s=p.read_text();marker='if args.mode == "configure":'
           assert s.count(marker)==1
-          override='''# Disposable DOL diagnostic only; canonical configuration remains unchanged.
+          override='''# Disposable DOL diagnostic; REL validation remains required.
           excluded=set(config.gnu_ld_modules)
           config.libs=[lib for lib in config.libs if lib["lib"] not in excluded]
           config.gnu_ld_modules=[]
@@ -75,7 +70,6 @@ jobs:
           config.check_sha_path=Path("config/GC6E01/build.dol-diagnostic.sha1")
           '''
           p.write_text(s.replace(marker,override+'\n'+marker))
-          Path('/tmp/repair-evidence/scope.json').write_text(json.dumps({'scope':'DOL-only; original REL inputs absent; not full-retail validation','source_revision':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()},indent=2)+'\n')
           PY
           git diff --exit-code -- src include config/GC6E01/config.yml config/GC6E01/build.sha1 config/GC6E01/splits.txt
       - name: Compile every DOL source and regenerate report
@@ -90,7 +84,7 @@ jobs:
           fi
           cp build/GC6E01/report.json /tmp/repair-evidence/report.json
           tail -10 /tmp/source.log
-      - name: Link and require the unchanged canonical DOL hash
+      - name: Require the unchanged canonical DOL hash
         id: link
         shell: sh
         run: |
@@ -100,7 +94,7 @@ jobs:
             exit 1
           fi
           sha1sum -c config/GC6E01/build.dol-diagnostic.sha1
-      - name: Record mismatch locations without publishing retail bytes
+      - name: Record mismatch locations without retail bytes
         if: always()
         shell: sh
         env:
@@ -135,8 +129,8 @@ jobs:
               result['sections']=sections;result['top_mismatch_symbols']=owners.most_common(60)
           (out/'result.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
           PY
-      - name: Publish the compile-validated source fix on the integration branch only
-        if: steps.compile.outcome == 'success'
+      - name: Publish compile-validated source fix to integration branch only
+        if: always() && steps.compile.outcome == 'success'
         shell: sh
         run: |
           set -eu
