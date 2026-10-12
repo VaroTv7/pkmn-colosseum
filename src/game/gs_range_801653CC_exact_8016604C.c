@@ -33,7 +33,7 @@ u32 fn_80166098(u32 id)
     return 0;
 }
 
-void fn_801660D8(u32 volume, u32 includeBgm, u32 includeSe)
+void soundUnduck(u32 volume, u32 includeBgm, u32 includeSe)
 {
     u32 offset;
     int i;
@@ -71,10 +71,10 @@ u32 fn_80166168(u32 id, u32 volume)
   }
   new_var = depth - 1;
   work->stackDepth = new_var;
-  return fn_80166670(id, volume, work->volumeStack[work->stackDepth]);
+  return soundSetVolume(id, volume, work->volumeStack[work->stackDepth]);
 }
 
-void fn_801661D0(u32 limit, u32 volume, u32 includeBgm, u32 includeSe)
+void soundDuck(u32 limit, u32 volume, u32 includeBgm, u32 includeSe)
 {
     u32 offset;
     s32 i;
@@ -122,12 +122,12 @@ u32 fn_80166268(u32 id, u32 volume, u32 limit)
         work->stackDepth = depth + 1;
     }
 
-    return fn_80166670(id, volume, limit);
+    return soundSetVolume(id, volume, limit);
 }
 
 u32 fn_801662E8(u32 arg0, u32 arg1)
 {
-    return fn_80167768(arg0, arg1);
+    return soundFindOwner(arg0, arg1);
 }
 
 u32 fn_80166308(u32 id, const GSvec* position)
@@ -166,7 +166,7 @@ u32 fn_80166458(GSsndEmitter* emitter, const GSvec* position)
     GSvec velocity;
 
     if (emitter != 0) {
-        fn_800E0168(&velocity, &emitter->position, position);
+        GSvecSub(&velocity, &emitter->position, position);
         if ((u8)fn_8015ED00(&emitter->unk40, position, &velocity, &emitter->unk28, &emitter->unk34, emitter->unk1, 0)
             == 1) {
             GSvecCopy(&emitter->position, position);
@@ -212,7 +212,7 @@ u32 fn_80166578(const GSvec* position, const GSvec* arg1, const GSvec* arg2, con
     return 0;
 }
 
-u32 fn_80166670(u32 id, u32 volume, u32 arg2)
+u32 soundSetVolume(u32 id, u32 volume, u32 arg2)
 {
     GSsndEntry* entry = &lbl_80478FAC[id];
     u32 flags = entry->flags;
@@ -223,7 +223,7 @@ u32 fn_80166670(u32 id, u32 volume, u32 arg2)
     return fn_8016737C(entry, volume, arg2);
 }
 
-s32 fn_801666BC(u32 id)
+s32 soundGetStatus(u32 id)
 {
   u32 offset = id * (sizeof(GSsndEntry));
   u8 *entry = ((u8 *) lbl_80478FAC) + offset;
@@ -264,7 +264,7 @@ s32 fn_801666BC(u32 id)
   return 0;
 }
 
-u32 fn_801667D8(u32 id, u32 volume, u32 arg2)
+u32 soundResumeSong(u32 id, u32 volume, u32 arg2)
 {
     GSsndEntry* entry = &lbl_80478FAC[id];
     u32 flags = entry->flags;
@@ -291,7 +291,7 @@ u32 fn_801667D8(u32 id, u32 volume, u32 arg2)
         return 0;
     }
 
-    fn_80166C34(entry->reverb);
+    soundApplyReverb(entry->reverb);
     if (id == 1) {
         return 1;
     }
@@ -303,7 +303,7 @@ u32 fn_801667D8(u32 id, u32 volume, u32 arg2)
     return 1;
 }
 
-u32 fn_801668DC(u32 id, u32 volume, u32 arg2)
+u32 soundPauseSong(u32 id, u32 volume, u32 arg2)
 {
     GSsndEntry* entry = &lbl_80478FAC[id];
     u32 flags = entry->flags;
@@ -340,12 +340,12 @@ u32 fn_801668DC(u32 id, u32 volume, u32 arg2)
     return 1;
 }
 
-void fn_801669BC(u32 id)
+void soundStopSE(u32 id)
 {
-    fn_801669E4(id, 0, 0);
+    soundStopRaw(id, 0, 0);
 }
 
-void fn_801669E4(u32 id, u32 arg1, u32 arg2)
+void soundStopRaw(u32 id, u32 arg1, u32 arg2)
 {
     GSsndEntry* entry = &lbl_80478FAC[id];
     u32 flags = entry->flags;
@@ -357,28 +357,28 @@ void fn_801669E4(u32 id, u32 arg1, u32 arg2)
     }
 }
 
-void fn_80166A28(u32 id)
+void soundStartSE(u32 id)
 {
-    fn_80166AB8(id, 0, 0);
+    soundStartRaw(id, 0, 0);
 }
 
-u32 fn_80166A50(u32 id, u32 arg1, u32 volume, u32 arg3)
+u32 soundStart(u32 id, u32 arg1, u32 volume, u32 arg3)
 {
     extern u8 _sndSetVolumeWork(u32, u32);
 
     if ((u8)_sndSetVolumeWork(id, volume) == 0) {
         return 0;
     }
-    return fn_80166AB8(id, arg1, arg3);
+    return soundStartRaw(id, arg1, arg3);
 }
 
-u32 fn_80166AB8(u32 id, u32 arg1, u32 arg2)
+u32 soundStartRaw(u32 id, u32 arg1, u32 arg2)
 {
     GSsndEntry* entry = &lbl_80478FAC[id];
     u32 flags = entry->flags;
 
     if (((flags >> 7) & 1U) == 1U) {
-        return fn_8016758C(entry, id, arg2);
+        return soundStartFX(entry, id, arg2);
     }
     if (((flags >> 5) & 1U) != 1U) {
         return 0;
@@ -386,12 +386,12 @@ u32 fn_80166AB8(u32 id, u32 arg1, u32 arg2)
     return fn_8016761C(entry, arg1, arg2);
 }
 
-void fn_80166B18(u32 id)
+void soundKill(u32 id)
 {
     fn_80167070(id, 1);
 }
 
-u32 fn_80166B3C(u32 id, u32 arg1, u32 arg2)
+u32 soundAttachWork(u32 id, u32 arg1, u32 arg2)
 {
     GSsndEntry* entry = &lbl_80478FAC[id];
     GSsndWork* work;
@@ -418,10 +418,10 @@ u32 fn_80166B3C(u32 id, u32 arg1, u32 arg2)
 
 u8 GSsndOpenWaveDVD(u32 wave, u32 fileId, u32 heap, u32 unk0, u32 unk1, u32 unk2, u32 unk3)
 {
-    return fn_80167118(wave, 1, fileId, heap, unk0, unk1, unk2, unk3);
+    return soundPushWave(wave, 1, fileId, heap, unk0, unk1, unk2, unk3);
 }
 
-void fn_80166C34(u32 reverb)
+void soundApplyReverb(u32 reverb)
 {
     if (reverb != 0 && lbl_8047B0E4 != reverb) {
         _sndSetReverbParm(reverb);

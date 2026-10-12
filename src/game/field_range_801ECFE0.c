@@ -211,7 +211,7 @@ void fn_801ED3B8(void)
     extern u32 pokemonBiosGetDp(u8* pokemon);
     extern u16 fn_801EE470(u16 darkPokemonId);
     extern void fn_801EE4DC(u16 darkPokemonId, u16 value);
-    extern u16 fn_801906A0(u16 flag);
+    extern u16 std082_flagGetValue(u16 flag);
     extern void _flagSet(u16 flag, u16 value);
     extern void pokemonAddDpFormPokemonDpFilterId(u8* pokemon, u32 filter, u32 form);
     extern u8 pokemonBiosGetLevel(u8* pokemon);
@@ -250,8 +250,8 @@ void fn_801ED3B8(void)
         }
     }
 
-    if (fn_801906A0(0xD0) != 0) {
-        progress = fn_801906A0(0xD1);
+    if (std082_flagGetValue(0xD0) != 0) {
+        progress = std082_flagGetValue(0xD1);
 
         if (progress < 10000) {
             progress++;

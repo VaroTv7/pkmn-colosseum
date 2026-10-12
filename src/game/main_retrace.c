@@ -22,8 +22,8 @@ extern u32 fn_80128E24(void);
 extern void* fn_80128E04(void);
 extern void* gamedatasaveBiosGetPtr(void);
 extern f32 gamedatasaveBiosGetPlaytime(void* mixer);
-extern u32 fn_801906A0(u32 evtId);
-extern u32 fn_800D3088(void);
+extern u32 std082_flagGetValue(u32 evtId);
+extern u32 msgGetCharsPerFrame(void);
 extern s32 fn_800D37CC(void);
 extern void gamedatasaveBiosSetPlaytime(void* mixer, f64 volume);
 
@@ -85,9 +85,9 @@ void fn_80005E00(void) {
         mixer = NULL;
     }
 
-    if (mixer != NULL && lbl_80478DC8 == 1 && fn_801906A0(0x8AE) == 0) {
+    if (mixer != NULL && lbl_80478DC8 == 1 && std082_flagGetValue(0x8AE) == 0) {
         vol = gamedatasaveBiosGetPlaytime(mixer);
-        v = vol + (f32)fn_800D3088() / (f32)fn_800D37CC();
+        v = vol + (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         if (v >= lbl_8047B6A4) {
             v = lbl_8047B6A4;
         }

@@ -27,7 +27,7 @@ extern s32 fn_8006B1D4(void);
 extern u8 fn_8008ABA0(void);
 extern s32 fn_800F7AF0(void);
 extern s32 fn_800F7BC4(s32);
-extern void fn_80166AB8(u32, u32, u32);
+extern void soundStartRaw(u32, u32, u32);
 extern s32 fn_8025D9CC(void);
 extern s32 toolentryTaisenDeleteEtnryPokemonOrder(s32);
 extern u16 toolentryTaisenGetBattlePlayerID(s32);
@@ -88,7 +88,7 @@ void fn_800679C0(MenuCBContext676EC* context, s32 startPlayer) {
                     if ((buttons & 0x40) != 0) {
                         s32 count = toolentryTaisengetEtnryPokemonOrderNum(player);
                         if (count != toolentryTaisenDeleteEtnryPokemonOrder(player)) {
-                            fn_80166AB8(0x25, 0, 0);
+                            soundStartRaw(0x25, 0, 0);
                         }
                     } else if ((buttons & 0xC0F) != 0) {
                         s32 selection = -1;
@@ -119,7 +119,7 @@ void fn_800679C0(MenuCBContext676EC* context, s32 startPlayer) {
                         if (selection >= 0) {
                             slot = toolentryTaisenSetEtnryPokemonOrder(player, selection);
                             if (slot >= 0) {
-                                fn_80166AB8(0x3C3, 0, 0);
+                                soundStartRaw(0x3C3, 0, 0);
                                 menuCBSetAnimTrack(player, slot);
                             }
                         }
@@ -168,7 +168,7 @@ void fn_800679C0(MenuCBContext676EC* context, s32 startPlayer) {
                     }
                     slot = toolentryTaisenSetEtnryPokemonOrder(player, selection);
                     if (slot >= 0) {
-                        fn_80166AB8(0x3C3, 0, 0);
+                        soundStartRaw(0x3C3, 0, 0);
                         menuCBSetAnimTrack(player, slot);
                     }
                 }
@@ -186,7 +186,7 @@ void fn_800679C0(MenuCBContext676EC* context, s32 startPlayer) {
                         if ((buttons & 0x40) != 0) {
                             s32 count = toolentryTaisengetEtnryPokemonOrderNum(player);
                             if (count != toolentryTaisenDeleteEtnryPokemonOrder(player)) {
-                                fn_80166AB8(0x25, 0, 0);
+                                soundStartRaw(0x25, 0, 0);
                             }
                         } else if ((buttons & 0xC0F) != 0) {
                             s32 selection = -1;
@@ -217,7 +217,7 @@ void fn_800679C0(MenuCBContext676EC* context, s32 startPlayer) {
                             if (selection >= 0) {
                                 slot = toolentryTaisenSetEtnryPokemonOrder(player, selection);
                                 if (slot >= 0) {
-                                    fn_80166AB8(0x3C3, 0, 0);
+                                    soundStartRaw(0x3C3, 0, 0);
                                     menuCBSetAnimTrack(player, slot);
                                 }
                             }
@@ -231,7 +231,7 @@ void fn_800679C0(MenuCBContext676EC* context, s32 startPlayer) {
                     if ((buttons & 0x40) != 0) {
                         s32 count = toolentryTaisengetEtnryPokemonOrderNum(player);
                         if (count != toolentryTaisenDeleteEtnryPokemonOrder(player)) {
-                            fn_80166AB8(0x25, 0, 0);
+                            soundStartRaw(0x25, 0, 0);
                         }
                     } else if ((buttons & 0xC0F) != 0) {
                         s32 selection = -1;
@@ -262,7 +262,7 @@ void fn_800679C0(MenuCBContext676EC* context, s32 startPlayer) {
                         if (selection >= 0) {
                             slot = toolentryTaisenSetEtnryPokemonOrder(player, selection);
                             if (slot >= 0) {
-                                fn_80166AB8(0x3C3, 0, 0);
+                                soundStartRaw(0x3C3, 0, 0);
                                 menuCBSetAnimTrack(player, slot);
                             }
                         }

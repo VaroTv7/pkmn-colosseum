@@ -39,21 +39,21 @@
 #define GX_COLOR1A1 5
 
 /* HSD_TExpTev */
-extern HSD_TExp* fn_801B707C(HSD_TExp** list);
+extern HSD_TExp* HSD_TExpTev(HSD_TExp** list);
 /* HSD_TExpOrder */
-extern void fn_801B5E40(HSD_TExp* exp, HSD_TObj* tobj, u32 chan);
+extern void HSD_TExpOrder(HSD_TExp* exp, HSD_TObj* tobj, u32 chan);
 /* HSD_TExpColorOp */
-extern void fn_801B6E74(HSD_TExp* exp, u32 op, u32 bias, u32 scale,
+extern void HSD_TExpColorOp(HSD_TExp* exp, u32 op, u32 bias, u32 scale,
                         u32 clamp);
 /* HSD_TExpAlphaOp */
-extern void fn_801B6CD8(HSD_TExp* exp, u32 op, u32 bias, u32 scale,
+extern void HSD_TExpAlphaOp(HSD_TExp* exp, u32 op, u32 bias, u32 scale,
                         u32 clamp);
 /* HSD_TExpColorIn */
-extern void fn_801B64EC(HSD_TExp* exp, u32 sel_a, HSD_TExp* a, u32 sel_b,
+extern void HSD_TExpColorIn(HSD_TExp* exp, u32 sel_a, HSD_TExp* a, u32 sel_b,
                         HSD_TExp* b, u32 sel_c, HSD_TExp* c, u32 sel_d,
                         HSD_TExp* d);
 /* HSD_TExpAlphaIn */
-extern void fn_801B5F08(HSD_TExp* exp, u32 sel_a, HSD_TExp* a, u32 sel_b,
+extern void HSD_TExpAlphaIn(HSD_TExp* exp, u32 sel_a, HSD_TExp* a, u32 sel_b,
                         HSD_TExp* b, u32 sel_c, HSD_TExp* c, u32 sel_d,
                         HSD_TExp* d);
 /* HSD_TExpFreeList */
@@ -66,18 +66,18 @@ extern void HSD_TExpCompile(HSD_TExp* texp, HSD_TExpTevDesc** tevdesc,
                             HSD_TExp** list);
 extern void HSD_TExpFreeTevDesc(HSD_TExpTevDesc* tevdesc);
 
-#define HSD_TExpTev(list) fn_801B707C(list)
-#define HSD_TExpOrder(exp, tobj, chan) fn_801B5E40(exp, tobj, chan)
+#define HSD_TExpTev(list) HSD_TExpTev(list)
+#define HSD_TExpOrder(exp, tobj, chan) HSD_TExpOrder(exp, tobj, chan)
 #define HSD_TExpColorOp(exp, op, bias, scale, clamp) \
-    fn_801B6E74(exp, op, bias, scale, clamp)
+    HSD_TExpColorOp(exp, op, bias, scale, clamp)
 #define HSD_TExpAlphaOp(exp, op, bias, scale, clamp) \
-    fn_801B6CD8(exp, op, bias, scale, clamp)
+    HSD_TExpAlphaOp(exp, op, bias, scale, clamp)
 #define HSD_TExpColorIn(exp, sa, a, sb, b, sc, c, sd, d) \
-    fn_801B64EC(exp, sa, a, sb, b, sc, c, sd, d)
+    HSD_TExpColorIn(exp, sa, a, sb, b, sc, c, sd, d)
 #define HSD_TExpAlphaIn(exp, sa, a, sb, b, sc, c, sd, d) \
-    fn_801B5F08(exp, sa, a, sb, b, sc, c, sd, d)
+    HSD_TExpAlphaIn(exp, sa, a, sb, b, sc, c, sd, d)
 #define HSD_TExpFreeList(texp, type, flag) fn_801B7178(texp, type, flag)
-#define HSD_TExpSetupTev(tevdesc, texp) fn_801B45A4(tevdesc, texp)
+#define HSD_TExpSetupTev(tevdesc, texp) HSD_TExpSetupTev(tevdesc, texp)
 
 /* ========================================================================= */
 /*  Render state (hsd_state.c) and TObj helpers (hsd_tobj.c)                 */
@@ -88,18 +88,18 @@ extern void fn_801B3884(void);
 /* HSD_SetMaterialShininess */
 extern void fn_801B28B8(f32 shininess);
 /* HSD_SetMaterialColor */
-extern void fn_801B28C8(GXColor ambient, GXColor diffuse, GXColor specular,
+extern void HSD_SetMaterialColor(GXColor ambient, GXColor diffuse, GXColor specular,
                         f32 alpha);
 /* HSD_SetupRenderModeWithCustomPE */
-extern void fn_801B294C(u32 rendermode, HSD_PEDesc* pe);
+extern void HSD_SetupRenderModeWithCustomPE(u32 rendermode, HSD_PEDesc* pe);
 /* HSD_TObjAddNext */
 extern void fn_801BBE3C(HSD_TObj* tobj, HSD_TObj* next);
 
 
 #define HSD_StateInitTev() fn_801B3884()
 #define HSD_SetMaterialShininess(s) fn_801B28B8(s)
-#define HSD_SetMaterialColor(a, d, s, al) fn_801B28C8(a, d, s, al)
-#define HSD_SetupRenderModeWithCustomPE(r, pe) fn_801B294C(r, pe)
+#define HSD_SetMaterialColor(a, d, s, al) HSD_SetMaterialColor(a, d, s, al)
+#define HSD_SetupRenderModeWithCustomPE(r, pe) HSD_SetupRenderModeWithCustomPE(r, pe)
 #define HSD_TObjAddNext(t, n) fn_801BBE3C(t, n)
 
 /* ========================================================================= */

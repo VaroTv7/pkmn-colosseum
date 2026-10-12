@@ -3,7 +3,7 @@
 #define GS_MODEL_ANIM_SUFFIX_MIDDLE
 #include "src/game/gs_model_anim_suffix_800ED4D4.c"
 
-extern s32 fn_800D3088(void);
+extern s32 msgGetCharsPerFrame(void);
 extern f32 fn_800CE318(f64);
 extern u8 lbl_80478AF8;
 extern const f64 lbl_8047CC80;
@@ -21,7 +21,7 @@ f32 fn_800ED8C4(u32 type, u32 fractional_frames, f32 frame,
             f32 fraction =
                 frame - (f32)(integral - lbl_8047CC80);
             if (fraction > lbl_8047CC78) {
-                f64 frames = (f64)(fn_800D3088() - 1);
+                f64 frames = (f64)(msgGetCharsPerFrame() - 1);
                 f32 advance =
                     (f32)((frames - lbl_8047CC88) * rate);
                 if (advance < lbl_8047CC60) {

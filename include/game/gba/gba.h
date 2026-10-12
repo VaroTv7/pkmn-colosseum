@@ -279,7 +279,7 @@ void gbaCommunication_ThreadEntry(void);
  * ========================================================================= */
 
 /**
- * fn_801ED740: Initialize GBA communication system.
+ * flareCreateTask: Initialize GBA communication system.
  * Called from GameInit(). Sets up the global GBA comm state.
  */
 void gba_SystemInit(void);

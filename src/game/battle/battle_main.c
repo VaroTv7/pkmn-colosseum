@@ -55,9 +55,9 @@ extern void* memcpy(void* dst, const void* src, u32 size);
 
 /* OS / Engine */
 extern u8   fn_800FF548(void);                      /* check if floor is loaded */
-extern void fn_800FF56C(void);                      /* tick floor */
+extern void std092_getCurrentRoomID(void);                      /* tick floor */
 extern void _threadSwitch(void);                      /* tick render */
-extern void fn_800D3088(void);                      /* GSgfx tick */
+extern void msgGetCharsPerFrame(void);                      /* GSgfx tick */
 extern void GSlogWrite(const char* fmt, ...);      /* GSlog_Print */
 
 /* Scene management */
@@ -68,8 +68,8 @@ extern void* fn_80113FB4(void);                            /* check floor loaded
 
 /* Sound */
 extern void soundStop(s32 sndID, s32 volume);    /* soundStop */
-extern void fn_801659FC(s32 sndID, s32 fadeTime, s32 volume); /* sndPlay with fade */
-extern void fn_80165A20(s32 mode, s32 sndID, s32 volume);     /* sndFade */
+extern void std105_soundPlayEffect(s32 sndID, s32 fadeTime, s32 volume); /* sndPlay with fade */
+extern void std104_soundSetBackgroundMusic(s32 mode, s32 sndID, s32 volume);     /* sndFade */
 
 /* People / NPC system */
 extern u8   GSscene_GetMode(void);                      /* save people state */
@@ -380,7 +380,7 @@ void _fightFinalize__FUi14FloorEnterMode(u32 floor, u32 enterMode) {
     if (soundID != 0) {
         soundStop(soundID, 0);
     }
-    fn_80165A20(1, 0, 0xFF);
+    std104_soundSetBackgroundMusic(1, 0, 0xFF);
     dbgMenuSetEnable(lbl_8047B5D5);
     lbl_8047B5DA = 0;
     GSlogWrite(lbl_80279BD8);
@@ -434,7 +434,7 @@ void fn_801EF62C(u16 val) {
 }
 
 /* Address: 0x801EF634 | Size: 0x8 | Pattern: sda_getter */
-u16 fn_801EF634(void) {
+u16 std103_battleGetResult(void) {
     return lbl_8047B5D8;
 }
 
@@ -478,7 +478,7 @@ void fn_801EF6FC(u8 a) {
     extern u8 lbl_8047B5E1;
     extern u16 fn_801EF624(void);
     extern u32 fightEncountGetEnvSndDataId(u16 encountDataIndex);
-    extern void fn_801659FC(u32 r3, u32 r4, u32 r5);
+    extern void std105_soundPlayEffect(u32 r3, u32 r4, u32 r5);
     u16 encountDataIndex;
     u32 r3;
 
@@ -488,7 +488,7 @@ void fn_801EF6FC(u8 a) {
     if (encountDataIndex == 0) return;
     r3 = fightEncountGetEnvSndDataId(encountDataIndex);
     if (r3 != 0) {
-        fn_801659FC(r3, 0x3e8, 0xff);
+        std105_soundPlayEffect(r3, 0x3e8, 0xff);
     }
     lbl_8047B5E1 = 1;
     return;
@@ -499,7 +499,7 @@ void fn_801EF758(u8 a) {
     extern u8 lbl_8047B5E0;
     extern u16 fn_801EF624(void);
     extern u32 fightEncountGetBgmSndDataId(u16 encountDataIndex);
-    extern void fn_80165A20(u32 r3, u32 r4, u32 r5);
+    extern void std104_soundSetBackgroundMusic(u32 r3, u32 r4, u32 r5);
     u16 encountDataIndex;
     u32 r3;
 
@@ -509,7 +509,7 @@ void fn_801EF758(u8 a) {
     if (encountDataIndex == 0) return;
     r3 = fightEncountGetBgmSndDataId(encountDataIndex);
     if (r3 != 0) {
-        fn_80165A20(r3, 0x0, 0xff);
+        std104_soundSetBackgroundMusic(r3, 0x0, 0xff);
     }
     lbl_8047B5E0 = 1;
     return;
@@ -568,7 +568,7 @@ u8 fn_801EF8F4(u8 useSimpleCamera) {
     } else {
         battleCameraDoFull();
     }
-    fn_800FF56C();
+    std092_getCurrentRoomID();
     data = fn_80113FB4();
     if (data != NULL) {
         fn_801C2F00(data, 0x7B1800);
@@ -584,7 +584,7 @@ void fn_801EF95C(void) {
     extern void dbgMenuMain(s32 mode);
     extern void menuGetKeyInfo(void* padData, s32 port);
     extern void _threadSwitch(void);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     u8 ticks;
     u8 mode;
     u8 input[0x20];
@@ -599,7 +599,7 @@ void fn_801EF95C(void) {
             menuGetKeyInfo(input, 1);
             if (!(*(u16*)input & 0x800)) {
                 _threadSwitch();
-                ticks += fn_800D3088();
+                ticks += msgGetCharsPerFrame();
             } else {
                 break;
             }
@@ -626,10 +626,10 @@ void fn_801EFA08(void) {
     extern void dbgMenuFightGetMsgSpeedToFrame();
     extern void fn_800FF660();
     extern void floorSetFadeScript();
-    extern void fn_8016597C();
+    extern void std138_soundPlayEffectEx();
     extern void battleCameraDoFull();
     extern void fn_801EF2D4();
-    extern void fn_801EF634();
+    extern void std103_battleGetResult();
     extern void fightFloorSetTimeOutAllFightResult();
     extern void fightFloorIsUseFightTimerCommand();
     extern void fightMenuCloseInfoMenu();
@@ -665,7 +665,7 @@ void fn_801EFA08(void) {
     if (r3 != 0) {
         r4 = 0x3e8;
         r5 = 0xff;
-        ((void(*)(void))fn_801659FC)();
+        ((void(*)(void))std105_soundPlayEffect)();
     }
     ((void(*)(void))fightActionFlowKaisiPreSubLoad)();
     f1 = lbl_8047E508;
@@ -682,7 +682,7 @@ void fn_801EFA08(void) {
     ((void(*)(void))fightActionCreateAndFlowFifo)();
     ((void(*)(void))battleCameraIsSimple)();
     ((void(*)(void))battleCameraDoSimple)();
-    ((void(*)(void))fn_800FF56C)();
+    ((void(*)(void))std092_getCurrentRoomID)();
     ((void(*)(void))fn_80113FB4)();
     if (r3 != 0) {
         r4 = 0x7B0000;
@@ -710,7 +710,7 @@ void fn_801EFA08(void) {
             tmp = tmp & 0x00000800;
             if (tmp != 1) break;
             ((void(*)(void))_threadSwitch)();
-            ((void(*)(void))fn_800D3088)();
+            ((void(*)(void))msgGetCharsPerFrame)();
             tmp = r29 + r3;
             r29 = tmp & 0xFF;
         }
@@ -721,12 +721,12 @@ void fn_801EFA08(void) {
     }
     r3 = r28;
     ((void(*)(void))dbgMenuSetEnable)();
-    fn_801EF634();
+    std103_battleGetResult();
     tmp = r3 & 0xFFFF;
     if (tmp == 4) {
         ((void(*)(void))battleCameraIsSimple)();
         ((void(*)(void))battleCameraDoSimple)();
-        ((void(*)(void))fn_800FF56C)();
+        ((void(*)(void))std092_getCurrentRoomID)();
         ((void(*)(void))fn_80113FB4)();
         if (r3 != 0) {
             r4 = 0x7B0000;
@@ -744,7 +744,7 @@ void fn_801EFA08(void) {
         ((void(*)(void))fightActionCreateAndFlowFifo)();
         ((void(*)(void))battleCameraIsSimple)();
         ((void(*)(void))battleCameraDoSimple)();
-        ((void(*)(void))fn_800FF56C)();
+        ((void(*)(void))std092_getCurrentRoomID)();
         ((void(*)(void))fn_80113FB4)();
         if (r3 != 0) {
             r4 = 0x7B0000;
@@ -762,7 +762,7 @@ void fn_801EFA08(void) {
         ((void(*)(void))fightActionCreateAndFlowFifo)();
         ((void(*)(void))battleCameraIsSimple)();
         ((void(*)(void))battleCameraDoSimple)();
-        ((void(*)(void))fn_800FF56C)();
+        ((void(*)(void))std092_getCurrentRoomID)();
         ((void(*)(void))fn_80113FB4)();
         if (r3 != 0) {
             r4 = 0x7B0000;
@@ -815,7 +815,7 @@ void fn_801EFA08(void) {
                     tmp = tmp & 0x00000800;
                     if (tmp != 1) break;
                     ((void(*)(void))_threadSwitch)();
-                    ((void(*)(void))fn_800D3088)();
+                    ((void(*)(void))msgGetCharsPerFrame)();
                     tmp = r26 + r3;
                     r26 = tmp & 0xFF;
                 }
@@ -826,7 +826,7 @@ void fn_801EFA08(void) {
             }
             r3 = r27;
             ((void(*)(void))dbgMenuSetEnable)();
-            fn_801EF634();
+            std103_battleGetResult();
             tmp = r3 & 0xFFFF;
             if (tmp != 4) break;
 
@@ -839,7 +839,7 @@ void fn_801EFA08(void) {
                 if (tmp == 1) {
                     ((void(*)(void))battleCameraIsSimple)();
                     ((void(*)(void))battleCameraDoSimple)();
-                    ((void(*)(void))fn_800FF56C)();
+                    ((void(*)(void))std092_getCurrentRoomID)();
                     ((void(*)(void))fn_80113FB4)();
                     if (r3 != 0) {
                         r4 = 0x7B0000;
@@ -857,7 +857,7 @@ void fn_801EFA08(void) {
                         r26 = 0x0;
                         while (r26 < r28) {
                             ((void(*)(void))_threadSwitch)();
-                            ((void(*)(void))fn_800D3088)();
+                            ((void(*)(void))msgGetCharsPerFrame)();
                             r26 = r26 + r3;
                         }
                     }
@@ -875,7 +875,7 @@ void fn_801EFA08(void) {
             }
             ((void(*)(void))battleCameraIsSimple)();
             battleCameraDoFull();
-            ((void(*)(void))fn_800FF56C)();
+            ((void(*)(void))std092_getCurrentRoomID)();
             ((void(*)(void))fn_80113FB4)();
             if (r3 != 0) {
                 r4 = 0x7B0000;
@@ -903,7 +903,7 @@ void fn_801EFA08(void) {
                 fightTimerCommandBlock();
                 fightTimerCommandTerminate();
             }
-            fn_801EF634();
+            std103_battleGetResult();
             tmp = r3 & 0xFFFF;
             if (tmp != 1) break;
             r3 = r28;
@@ -913,7 +913,7 @@ void fn_801EFA08(void) {
             r6 = 0xb;
             r7 = 0x0;
             ((void(*)(void))fightActionCreateAndFlowFifo)();
-            fn_801EF634();
+            std103_battleGetResult();
             tmp = r3 & 0xFFFF;
             if (tmp != 1) break;
             r3 = r30;
@@ -923,17 +923,17 @@ void fn_801EFA08(void) {
             r6 = 0xd;
             r7 = 0x0;
             ((void(*)(void))fightActionCreateAndFlowFifo)();
-            fn_801EF634();
+            std103_battleGetResult();
             tmp = r3 & 0xFFFF;
             if (tmp != 1) break;
-            fn_801EF634();
+            std103_battleGetResult();
             tmp = r3 & 0xFFFF;
         } while (tmp == 1);
         ((void(*)(void))fightActionDispFifoAll)();
     }
     ((void(*)(void))battleCameraIsSimple)();
     ((void(*)(void))battleCameraDoSimple)();
-    ((void(*)(void))fn_800FF56C)();
+    ((void(*)(void))std092_getCurrentRoomID)();
     ((void(*)(void))fn_80113FB4)();
     if (r3 != 0) {
         r4 = 0x7B0000;
@@ -957,7 +957,7 @@ void fn_801EFA08(void) {
     r6 = 0xe;
     r7 = 0x0;
     ((void(*)(void))fightActionCreateAndFlowFifo)();
-    fn_801EF634();
+    std103_battleGetResult();
     r5 = (u32)lbl_80375D80;
     r6 = (u32)lbl_8046D760;
     r7 = r3 & 0xFFFF;
@@ -987,7 +987,7 @@ void fn_801EFA08(void) {
         r4 = 0x3e8;
         r5 = 0x3e8;
         r6 = 0xff;
-        fn_8016597C();
+        std138_soundPlayEffectEx();
     }
     f1 = lbl_8047E508;
     r3 = 0x3;
@@ -1025,13 +1025,13 @@ void fn_801EFA08(void) {
 
 /* 0x801EFFC4 | size: 0x48 | small */
 void fn_801EFFC4(u32 count) {
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     u32 i;
     if (count != 0) {
         i = 0;
         while (i < count) {
             _threadSwitch();
-            i += fn_800D3088();
+            i += msgGetCharsPerFrame();
         }
     }
 }
@@ -1039,7 +1039,7 @@ void fn_801EFFC4(u32 count) {
 /* 0x801F000C | size: 0x4C | small */
 void fightMainWaitFrame(void) {
     extern u32 dbgMenuFightGetMsgSpeedToFrame(void);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     u32 total;
     u32 elapsed;
     total = dbgMenuFightGetMsgSpeedToFrame();
@@ -1047,7 +1047,7 @@ void fightMainWaitFrame(void) {
         elapsed = 0;
         while (elapsed < total) {
             _threadSwitch();
-            elapsed += fn_800D3088();
+            elapsed += msgGetCharsPerFrame();
         }
     }
 }

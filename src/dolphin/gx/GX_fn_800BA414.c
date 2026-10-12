@@ -7,7 +7,7 @@ typedef struct GXLightObj_800BA414 {
     f32 z;
 } GXLightObj_800BA414;
 
-void fn_800BA414(GXLightObj_800BA414* light, f32 x, f32 y, f32 z) {
+void GXInitLightPos(GXLightObj_800BA414* light, f32 x, f32 y, f32 z) {
     light->x = x;
     light->y = y;
     light->z = z;

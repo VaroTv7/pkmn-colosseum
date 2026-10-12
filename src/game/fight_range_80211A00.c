@@ -2810,8 +2810,8 @@ void fn_80213158(u32 param1) {
 
 #if !defined(FIGHT_RANGE_EXACT_80213158_ONLY)
 /* ===== 0x8021D688-0x80223A24 sound/anim/thread ops (wave2-w2 worker) ===== */
-extern void fn_80165668(s32, s32, s32);
-extern void fn_80166A50(s32, s32, s32, s32);
+extern void std130_soundUnk_801653cc(s32, s32, s32);
+extern void soundStart(s32, s32, s32, s32);
 extern void fn_801F22D8(u32 obj);
 extern u32  fn_80262308(void);
 extern u8   lbl_8047B642;
@@ -2840,12 +2840,12 @@ void fn_8021EE38(void) { lbl_8047B610 = lbl_8047B610 + 1; }
 
 /* Sound-id opcode handlers: id read at pc+1 (u16), advance pc by 3. */
 void fn_8021EE98(void) {
-    fn_80165668(*(u16*)(lbl_8047B610 + 1), 0, 0xff);
+    std130_soundUnk_801653cc(*(u16*)(lbl_8047B610 + 1), 0, 0xff);
     lbl_8047B610 = lbl_8047B610 + 3;
 }
 
 void fn_8021EED4(void) {
-    fn_80166A50(*(u16*)(lbl_8047B610 + 1), 0, 0xff, 0);
+    soundStart(*(u16*)(lbl_8047B610 + 1), 0, 0xff, 0);
     lbl_8047B610 = lbl_8047B610 + 3;
 }
 
@@ -2881,14 +2881,14 @@ void fn_8021EA94(void) {
 }
 #undef fn_80262308
 
-/* ctx = fn_801F025C(byte@pc+1, 0); play sound via fn_80166A50; pc += 2. */
+/* ctx = fn_801F025C(byte@pc+1, 0); play sound via soundStart; pc += 2. */
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_802036D4 fightOutPokemonGetVoiceSndId
 void fn_8021EE48(void) {
     extern u32 fn_801F025C();
     extern int fn_802036D4();
     u32 ctx = fn_801F025C(*(u8*)(lbl_8047B610 + 1), 0);
-    fn_80166A50((u16)fn_802036D4(ctx), 0, 0xff, 0);
+    soundStart((u16)fn_802036D4(ctx), 0, 0xff, 0);
     lbl_8047B610 = lbl_8047B610 + 2;
 }
 #undef fn_801F025C
@@ -7090,7 +7090,7 @@ u32 fn_8022BE2C(u32 ctx, u8 mode) {
 #define fn_80206608 fightPokemonCheckFightOut
 #define fn_80202ADC fightPokemonCheckWriteJoutaiDataId
 u8 fn_80230568(void* ctx, u32 side) {
-    extern u16  fn_801EF634();
+    extern u16  std103_battleGetResult();
     extern u8   fn_802062FC();
     extern void fn_801DA7AC();
     extern u8   fn_80201704();
@@ -7148,7 +7148,7 @@ u8 fn_80230568(void* ctx, u32 side) {
     register u32 tmp2;
     register u32 tmp;
 
-  if ((u16)fn_801EF634(ctx) != 0) {
+  if ((u16)std103_battleGetResult(ctx) != 0) {
         return 0;
     }
     if ((u8)fn_802062FC(ctx) == 0) {
@@ -9178,7 +9178,7 @@ void fn_802232F4(void) {
 
 #pragma opt_propagation off
 void fn_802317E4(void) {
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern u8 fightOutPokemonCheckFightOut();
     extern u8 fightSideIsJoutaiDataId();
     extern u8 fightFloorIsJoutaiDataId();
@@ -9194,7 +9194,7 @@ void fn_802317E4(void) {
     u8* msg;
     u8 i;
 
-    if (fn_801EF634() != 0) {
+    if (std103_battleGetResult() != 0) {
         return;
     }
 
@@ -9318,7 +9318,7 @@ void fn_802317E4(void) {
     }
 
     fn_801DA7AC();
-    if (fn_801EF634() != 0) {
+    if (std103_battleGetResult() != 0) {
         return;
     }
 
@@ -9345,7 +9345,7 @@ void fn_802317E4(void) {
     }
 
     fn_801DA7AC();
-    if (fn_801EF634() != 0) {
+    if (std103_battleGetResult() != 0) {
         return;
     }
 
@@ -9368,7 +9368,7 @@ void fn_802317E4(void) {
     }
 
     fn_801DA7AC();
-    if (fn_801EF634() != 0) {
+    if (std103_battleGetResult() != 0) {
         return;
     }
 
@@ -9391,7 +9391,7 @@ void fn_802317E4(void) {
     }
 
     fn_801DA7AC();
-    if (fn_801EF634() != 0) {
+    if (std103_battleGetResult() != 0) {
         return;
     }
 }
@@ -10761,7 +10761,7 @@ void fn_80213270(void)
 {
     extern u32 GSrand();
     extern void fn_801DA7AC();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern void fightFloorInitFightOutPokemonPtrAryFightWazaJoutai();
     extern void fightFloorLoopValidFightOutPokemon();
     extern u32 fightFloorGetValidFightSidePtr();
@@ -10834,7 +10834,7 @@ void fn_80213270(void)
   for (bVar5 = 0; (bVar5 & 0xff) < 5; bVar5 = bVar5 + 1) {
     lbl_80478D78[(u8)bVar5] = 0;
   }
-  sVar2 = fn_801EF634();
+  sVar2 = std103_battleGetResult();
   if (sVar2 == 0) {
     sVar2 = fightFloorGetStatus(0,0,0xc,0);
     ++sVar2;
@@ -11307,7 +11307,7 @@ void fn_80213E94(void)
     extern u32 GSrand();
     extern u8 pokemonIsDarkPokemon();
     extern void msgctrlSetValue();
-    extern void fn_80165668();
+    extern void std130_soundUnk_801653cc();
     extern u8 fn_801EEAD0();
     extern u16 fn_801EEE44();
     extern u32 fightTargetGetPtrAsNowFightType();
@@ -11478,7 +11478,7 @@ void fn_80213E94(void)
     fightTrainerHokakuThrowEffect(trainerPtr,uVar3,4);
     msgctrlSetValue(0x5d,0);
     fightMenuOpenMsg(0x771f);
-    fn_80165668(0x3f6,0,0xff);
+    std130_soundUnk_801653cc(0x3f6,0,0xff);
     fightTrainerHokakuThrowEffect(trainerPtr,uVar3,5);
     fightMenuCloseMsg();
     lbl_8047B610 = lbl_80375E51;
@@ -16006,7 +16006,7 @@ u32 fn_80222EF0(u32 r3);
 #define fn_802068C8 fightOutPokemonCreate
 u32 fn_802230BC(u32 trainer, u32 selector)
 {
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern void fn_801F150C();
     extern u32 fn_801F54A4();
     extern u32 fn_801F85B0();
@@ -16031,7 +16031,7 @@ u32 fn_802230BC(u32 trainer, u32 selector)
 
     ctx = (void*)trainer;
 
-    if (fn_801EF634() != 0) {
+    if (std103_battleGetResult() != 0) {
         return 1;
     }
     if (fn_801FA634(ctx) == 0) {
@@ -17474,7 +17474,7 @@ void WS_HITCHECK(void)
     extern void wazaSetStatus();
     extern u32 wazaGetStatus();
     extern s8 pokemonSearchWazaDataId();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern u32 fightTargetGetPtrAsNowFightType();
     extern void fightFloorLoopValidFightOutPokemon();
     extern void fightFloorSetStatus();
@@ -17539,7 +17539,7 @@ void WS_HITCHECK(void)
   iVar2 = fightTargetGetPtrAsNowFightType(0x11,0);
   uVar3 = fightOutPokemonGetPokemonPtr();
   iVar4 = fightTargetGetPtrAsNowFightType(0x12,0);
-  floorState = fn_801EF634();
+  floorState = std103_battleGetResult();
   if (floorState != 0) {
     lbl_8047B614 = 2;
   }

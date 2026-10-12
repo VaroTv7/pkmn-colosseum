@@ -4,7 +4,7 @@
 void cameraSetFloorDefault(f32 height, f32 distance, f32 rotationY) {
     CameraFloorEntry* floorEntry;
 
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry == NULL) {
         return;
     }
@@ -17,19 +17,19 @@ void cameraSetFloorDefault(f32 height, f32 distance, f32 rotationY) {
     }
 
     floorEntry->field_00 = 2;
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->height = height;
     }
     ((CameraPadState*)lbl_80478C40)->height = height;
 
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->distance = distance;
     }
     ((CameraPadState*)lbl_80478C40)->distance = distance;
 
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->rotationY = rotationY;
     }
@@ -47,27 +47,27 @@ void cameraResetFloor(void) {
         }
     }
 
-    defaults = cameraFindFloorEntry(fn_800FF56C());
+    defaults = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (defaults == NULL) {
         return;
     }
 
     value = defaults->defaultHeight;
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->height = value;
     }
     ((CameraPadState*)lbl_80478C40)->height = value;
 
     value = defaults->defaultDistance;
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->distance = value;
     }
     ((CameraPadState*)lbl_80478C40)->distance = value;
 
     value = defaults->defaultRotationY;
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->rotationY = value;
     }
@@ -80,7 +80,7 @@ void cameraResetFloor(void) {
     if (value > lbl_8047D72C.value) {
         value = lbl_8047D72C.value;
     }
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->fov = value;
     }

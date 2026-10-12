@@ -3,7 +3,7 @@
 
 extern void _threadSwitch(void);
 extern u32 fn_8010B560(void);
-extern void fn_801CB9D8(u32);
+extern void std113_mapObjectUnk_8018db68(u32);
 
 extern u32 lbl_8047A418;
 extern u32 lbl_8047A420;
@@ -97,6 +97,6 @@ void fn_80031B10(void)
     while ((u8) fn_8010B560() != 0) {
         _threadSwitch();
     }
-    fn_801CB9D8(lbl_8047A418);
+    std113_mapObjectUnk_8018db68(lbl_8047A418);
 }
 #pragma peephole on

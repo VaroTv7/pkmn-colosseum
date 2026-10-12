@@ -7,7 +7,7 @@
  * Named with a _range_ suffix per convention pending call-graph
  * confirmation of the exact XD TU boundary.
  *
- * fn_801101B4 previously carried an invented "GSfield_BuildCollisionGrid"
+ * colsysPassGetEventID previously carried an invented "GSfield_BuildCollisionGrid"
  * name/signature from an earlier bad campaign pass (same class of issue
  * documented in include/game/gs_colsys.h); reverted to the standard
  * fn_<addr> placeholder since no confirmed symbols.txt name exists yet.
@@ -87,7 +87,7 @@ typedef struct GSFieldWzxRegionLocal {
     u8 pad_3E[2];
 } GSFieldWzxRegionLocal;
 
-s32 fn_801101B4(GScolsys2Vec3* start, GScolsys2Vec3* end,
+s32 colsysPassGetEventID(GScolsys2Vec3* start, GScolsys2Vec3* end,
                 GSfieldQueryTriangle* out)
 {
 #pragma optimization_level 4

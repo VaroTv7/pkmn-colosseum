@@ -7,7 +7,7 @@
  * gs_range_801653CC.c (0x801653CC-0x80167040) per splits.txt. It contains
  * only two trivial SDA getters, both matched at 100%:
  *   - fn_801653BC: returns lbl_8047B0A8
- *   - fn_801653C4: returns lbl_8047B0AC
+ *   - std228_soundGetCurrentBackgroundMusic: returns lbl_8047B0AC
  *
  * A prior campaign-generation transplant (from
  * archive/previous_campaign/src/game/sound/{sound_bgm,sound_se}.c) had
@@ -40,6 +40,6 @@ u32 fn_801653BC(void) {
 }
 
 /* 0x801653C4 | 0x8 | sda_getter */
-u32 fn_801653C4(void) {
+u32 std228_soundGetCurrentBackgroundMusic(void) {
     return lbl_8047B0AC;
 }

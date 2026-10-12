@@ -69,7 +69,7 @@ void fn_801D9E8C(void* effect) {
     if (ctx == 0) return;
     if (fx->effect_handle != 0) return;
 
-    fx->effect_handle = fn_801190DC(ctx, 0, 0);
+    fx->effect_handle = gsParticleCreate(ctx, 0, 0);
     if (fx->effect_handle == 0) return;
 
     if ((fx->flags & 1) != 1) {
@@ -149,7 +149,7 @@ void fn_801DA070(void* effect) {
     if (ctx == 0) return;
     if (fx->field_80 != 0) return;
 
-    fx->field_80 = fn_801190DC(ctx, 0, 0);
+    fx->field_80 = gsParticleCreate(ctx, 0, 0);
     if (fx->field_80 == 0) return;
 
     if ((fx->flags & 1) != 1) {
@@ -636,7 +636,7 @@ void fn_801DA9E8(void* sequence, s32 moveID, s32 variant) {
 void fn_801DAAAC(void* effectPtr) {
     extern void* GScameraGetActiveCamera(void);
     extern s32 HSD_CObjSetCurrent(void* cobj);
-    extern void fn_80118104(u32 drawFlags, u8 modelID);
+    extern void gsParticleDraw(u32 drawFlags, u8 modelID);
     extern void fn_80195A48(void);
     WazaEffect* effect = effectPtr;
     u8* effectBytes = effectPtr;
@@ -674,7 +674,7 @@ void fn_801DAAAC(void* effectPtr) {
 
                 camera = GScameraGetActiveCamera();
                 if (camera != NULL && HSD_CObjSetCurrent(*(void**)((u8*)camera + 0xC))) {
-                    fn_80118104(flags, modelID);
+                    gsParticleDraw(flags, modelID);
                     fn_80195A48();
                 }
             }

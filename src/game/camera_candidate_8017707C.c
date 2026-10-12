@@ -77,17 +77,17 @@ void cameraReturn(u8 wait, f32 duration)
         fn_80117500();
         fn_80117330(duration);
     } else {
-        defaults = cameraFindFloorEntry(fn_800FF56C());
+        defaults = cameraFindFloorEntry(std092_getCurrentRoomID());
         if (defaults != 0) {
             value = defaults->defaultHeight;
-            floorEntry = cameraFindFloorEntry(fn_800FF56C());
+            floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
             if (floorEntry != 0) {
                 floorEntry->height = value;
             }
             ((CameraPadState*)lbl_80478C40)->height = value;
 
             value = defaults->defaultDistance;
-            floorEntry = cameraFindFloorEntry(fn_800FF56C());
+            floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
             if (floorEntry != 0) {
                 floorEntry->distance = value;
             }
@@ -100,7 +100,7 @@ void cameraReturn(u8 wait, f32 duration)
             if (value > lbl_8047D72C.value) {
                 value = lbl_8047D72C.value;
             }
-            floorEntry = cameraFindFloorEntry(fn_800FF56C());
+            floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
             if (floorEntry != 0) {
                 floorEntry->fov = value;
             }

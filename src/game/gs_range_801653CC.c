@@ -2,7 +2,7 @@
  * @file gs_range_801653CC.c
  * @brief Candidate gs-engine suffix, 0x80166E88 - 0x80167040.
  *
- * No source body is currently available for fn_80166E88.
+ * No source body is currently available for soundInit.
  */
 #include "game/gs_range_801653CC_shared.h"
 
@@ -37,7 +37,7 @@ extern void fn_80166CC0(u32 mode);
 extern void fn_80167040(void);
 extern void sndSetReceiveMessageCallback(void* callback);
 
-u32 fn_80166E88(u32 stackCount, u32 workSize, u32 extraStackCount,
+u32 soundInit(u32 stackCount, u32 workSize, u32 extraStackCount,
                 u32 emitterCount, u32 emitter3dCount)
 {
     GSsndInitSettings settings;
@@ -86,8 +86,8 @@ u32 fn_80166E88(u32 stackCount, u32 workSize, u32 extraStackCount,
     sndAuxCallbackPrepareReverbHI(lbl_80452500);
     sndSetAuxProcessingCallbacks(0, sndAuxCallbackReverbHI, lbl_80452500,
                                  0xFF, 0, 0, 0, 0xFF, 0);
-    fn_80166D48(0x7F, 0, 1, 0);
-    fn_80166D48(0x64, 0, 0, 1);
+    soundMasterVolume(0x7F, 0, 1, 0);
+    soundMasterVolume(0x64, 0, 0, 1);
     fn_80166CC0(GSsndGetOutputMode());
     sndSetReceiveMessageCallback(fn_80167040);
     return 1;

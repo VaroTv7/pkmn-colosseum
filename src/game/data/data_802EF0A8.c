@@ -74,7 +74,7 @@ extern u8 fn_8002464C[];
 extern u8 fn_80024698[];
 extern u8 fn_8002469C[];
 extern u8 fn_800246CC[];
-extern u8 fn_800246FC[];
+extern u8 wmapDrawInfo[];
 extern u8 fn_80024A2C[];
 extern u8 fn_80024BA4[];
 extern u8 fn_80024CDC[];
@@ -16653,7 +16653,7 @@ void* lbl_802EF0A8[33726] = {
     (void*)0x00720000,
     (void*)0x00000000,
     (void*)0x000000CE,
-    (void*)((u8*)fn_800246FC),
+    (void*)((u8*)wmapDrawInfo),
     (void*)0x0A840000,
     (void*)0x006600BF,
     (void*)0x0149019D,

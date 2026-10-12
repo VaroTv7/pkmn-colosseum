@@ -41,7 +41,7 @@ void fn_8018FC08(PeopleEntry* entry, struct GSvec* rotation)
     GSmodelSetRotation((struct GSmodel*)entry->modelHandle, rotation);
 }
 
-void fn_8018FC2C(PeopleEntry* entry, struct GSvec* rotation)
+void peopleGetRotation(PeopleEntry* entry, struct GSvec* rotation)
 {
     GSmodelGetRotation((struct GSmodel*)entry->modelHandle, rotation);
 }

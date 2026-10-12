@@ -17,7 +17,7 @@ void fn_8018FC98(PeopleEntry* entry, struct GSvec* position)
     GSmodelGetPosition((struct GSmodel*)entry->modelHandle, position);
 }
 
-struct GSvec* fn_8018FCBC(PeopleEntry* entry)
+struct GSvec* peopleGetPositionPtr(PeopleEntry* entry)
 {
     return GSmodelGetPositionPtr((struct GSmodel*)entry->modelHandle);
 }

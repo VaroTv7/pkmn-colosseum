@@ -35,8 +35,8 @@ extern char lbl_8047DE60;
 extern char lbl_8047DE68;
 
 extern void fn_800B884C(u32 value);
-extern void fn_800BA6B0(u8 num_chans);
-extern void fn_800BA6F4(s32 chan, u8 enable, s32 amb_src, s32 mat_src,
+extern void GXSetNumChans(u8 num_chans);
+extern void GXSetChanCtrl(s32 chan, u8 enable, s32 amb_src, s32 mat_src,
                        s32 light_mask, s32 diff_fn, s32 attn_fn);
 extern void fn_801B3D1C(HSD_Chan* chan);
 
@@ -134,7 +134,7 @@ void fn_801B3998(HSD_Chan* chan)
         chan = chan->next;
     }
     if (lbl_8047B35C != (u8) num_chans) {
-        fn_800BA6B0((u8) num_chans);
+        GXSetNumChans((u8) num_chans);
         lbl_8047B35C = (u8) num_chans;
     }
 }
@@ -143,7 +143,7 @@ void fn_801B3998(HSD_Chan* chan)
 void HSD_StateSetNumChans(s32 n)
 {
     if (lbl_8047B35C != n) {
-        fn_800BA6B0((u8) n);
+        GXSetNumChans((u8) n);
         lbl_8047B35C = n;
     }
 }
@@ -175,7 +175,7 @@ void fn_801B3AE8(s32 chan)
             lbl_8036D018[idx + 2].mat_src = mat_src;
             lbl_8036D018[idx + 2].diff_fn = diff_fn;
             lbl_8036D018[idx + 2].attn_fn = attn_fn;
-            fn_800BA6F4(chan, 0, amb_src, mat_src, 0, diff_fn, attn_fn);
+            GXSetChanCtrl(chan, 0, amb_src, mat_src, 0, diff_fn, attn_fn);
         }
         break;
     default:
@@ -186,7 +186,7 @@ void fn_801B3AE8(s32 chan)
             mat_src = lbl_8036D018[idx].mat_src;
             diff_fn = lbl_8036D018[idx].diff_fn;
             attn_fn = lbl_8036D018[idx].attn_fn;
-            fn_800BA6F4(chan, 0, amb_src, mat_src, 0, diff_fn, attn_fn);
+            GXSetChanCtrl(chan, 0, amb_src, mat_src, 0, diff_fn, attn_fn);
         }
         break;
     }

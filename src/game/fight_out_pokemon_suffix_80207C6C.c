@@ -247,7 +247,7 @@ void fn_802080A8(void* r3, u8 r4, u8 r5, u32 r6, u8 r7)
 
 {
     extern void _threadSwitch();
-    extern void fn_80166A50();
+    extern void soundStart();
     extern void fn_801DA8C4();
     extern u8 fn_801DA94C();
     extern void fn_801DA9E8();
@@ -294,7 +294,7 @@ void fn_802080A8(void* r3, u8 r4, u8 r5, u32 r6, u8 r7)
         }
         uVar5 = (int)pokemonGetStatus(uVar2,0,0x6e,0);
         uVar5 = (int)pokemonGetStatus(0,uVar5,0x61,0);
-        fn_80166A50(uVar5,0,0xff,0);
+        soundStart(uVar5,0,0xff,0);
         fightMenuOpenMsg(r6);
         if (r5 == 0) {
           fightMenuFightOutPokemonRenewStatusMenu(r3,uVar4,1);
@@ -324,7 +324,7 @@ void fn_802080A8(void* r3, u8 r4, u8 r5, u32 r6, u8 r7)
           }
           uVar5 = (int)pokemonGetStatus(uVar2,0,0x6e,0);
           uVar5 = (int)pokemonGetStatus(0,uVar5,0x61,0);
-          fn_80166A50(uVar5,0,0xff,0);
+          soundStart(uVar5,0,0xff,0);
           fightMenuOpenMsg(r6);
         }
         fightMenuFightOutPokemonRenewStatusMenu(r3,uVar4,1);
@@ -671,7 +671,7 @@ void fightOutPokemonDasuEffect(void* r3, u8 r4)
 {
     extern void _threadSwitch();
     extern u8 pokemonCheckRare();
-    extern void fn_80166A50();
+    extern void soundStart();
     extern u8 fn_801DA5C4();
     extern void fn_801DA8C4();
     extern u8 fn_801DA94C();
@@ -741,7 +741,7 @@ void fightOutPokemonDasuEffect(void* r3, u8 r4)
       }
       uVar4 = (int)pokemonGetStatus(uVar2,0,0x6e,0);
       uVar4 = (int)pokemonGetStatus(0,uVar4,0x61,0);
-      fn_80166A50(uVar4,0,0xff,0);
+      soundStart(uVar4,0,0xff,0);
       while (1) {
         cVar7 = fn_801DA94C(iVar1,uVar5,4);
         if (cVar7 == 0) break;

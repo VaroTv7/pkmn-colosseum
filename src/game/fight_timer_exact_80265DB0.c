@@ -11,7 +11,7 @@ typedef struct ColosseumBattleTimerState {
 
 extern f32 lbl_8047E6D8;
 extern const f32 lbl_8047E6DC;
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern void _threadSwitch(void);
 
 void fightTimerThreadFunc(ColosseumBattleTimerState* timer)
@@ -19,7 +19,7 @@ void fightTimerThreadFunc(ColosseumBattleTimerState* timer)
     timer->elapsed = lbl_8047E6D8;
     while (timer->elapsed < lbl_8047E6DC * timer->limit) {
         _threadSwitch();
-        timer->elapsed = (f32)fn_800D3088() + timer->elapsed;
+        timer->elapsed = (f32)msgGetCharsPerFrame() + timer->elapsed;
     }
     timer->done = 1;
     for (;;) {

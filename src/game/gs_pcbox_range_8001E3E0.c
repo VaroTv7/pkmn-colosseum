@@ -89,24 +89,24 @@ asm void fn_8001E4B4(void) {
 void fn_8001E4B4(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f) {
     extern void fn_800D5CB8(s32, s32, s32, s32, s32);
     extern void fn_800D61E4(s32, s32);
-    extern void fn_800D6728();
-    extern void fn_800D67BC(s32);
-    extern void fn_800D6A00(s32);
-    extern void fn_800D7820(u8*);
-    extern void fn_800D888C(s32);
-    extern void fn_800D88DC(s32);
-    fn_800D88DC(0x1);
-    fn_800D888C(0x6);
-    fn_800D6A00(0x3);
-    fn_800D7820(lbl_80314E08);
-    fn_800D67BC(0x3);
+    extern void gfxEnd();
+    extern void gfxBegin(s32);
+    extern void gfxSetPrimitive(s32);
+    extern void gfxSetVtxDesc(u8*);
+    extern void gfxClearFlags(s32);
+    extern void gfxSetFlags(s32);
+    gfxSetFlags(0x1);
+    gfxClearFlags(0x6);
+    gfxSetPrimitive(0x3);
+    gfxSetVtxDesc(lbl_80314E08);
+    gfxBegin(0x3);
     fn_800D61E4((s16)a, (s16)b);
     fn_800D5CB8(0x0, 0xff, 0xff, 0xff, 0xff);
     fn_800D61E4((s16)c, (s16)d);
     fn_800D5CB8(0x0, 0xff, 0xff, 0xff, 0xff);
     fn_800D61E4((s16)e, (s16)f);
     fn_800D5CB8(0x0, 0xff, 0xff, 0xff, 0xff);
-    fn_800D6728();
+    gfxEnd();
 }
 #endif
 
@@ -149,12 +149,12 @@ void fn_8001E644(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4) {
     extern void fn_800D5648(f32);
     extern void fn_800D5BA0(u32, u32);
     extern void fn_800D61E4(s16, s16);
-    extern void fn_800D6728(void);
-    extern void fn_800D67BC(s32);
-    extern void fn_800D6A00(s32);
-    extern void fn_800D7820(void*);
-    extern void fn_800D888C(s32);
-    extern void fn_800D88DC(s32);
+    extern void gfxEnd(void);
+    extern void gfxBegin(s32);
+    extern void gfxSetPrimitive(s32);
+    extern void gfxSetVtxDesc(void*);
+    extern void gfxClearFlags(s32);
+    extern void gfxSetFlags(s32);
     extern void windowDrawSprite(s32, s32, void*, u16, u32);
     extern void windowDrawSprite2(s32, s32, s16, s16, s32, s32, s32, s32);
     u32 colors[3];
@@ -186,15 +186,15 @@ void fn_8001E644(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4) {
     ((u8*)colors)[7] = (u8)((f32)((u8*)colors)[7] * alphaScale);
     ((u8*)colors)[11] = (u8)((f32)((u8*)colors)[11] * alphaScale);
 
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D6A00(6);
-    fn_800D7820(lbl_80314E08);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetPrimitive(6);
+    gfxSetVtxDesc(lbl_80314E08);
 
     left = (s16)(arg0 - 0xA);
     top = (s16)(arg1 - 0xA);
 
-    fn_800D67BC(4);
+    gfxBegin(4);
     fn_800D61E4(left, top);
     fn_800D5BA0(0, colors[0]);
     right = left + (s16)(arg2 + 0x14);
@@ -206,18 +206,18 @@ void fn_8001E644(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4) {
     fn_800D5BA0(0, colors[1]);
     fn_800D61E4(left, bottom);
     fn_800D5BA0(0, colors[1]);
-    fn_800D6728();
+    gfxEnd();
 
-    fn_800D6A00(1);
-    fn_800D7820(lbl_80314E08);
+    gfxSetPrimitive(1);
+    gfxSetVtxDesc(lbl_80314E08);
     fn_800D5648(lbl_8047B7E0);
     for (y = top; y < outerHeight + top; y += 4) {
-        fn_800D67BC(2);
+        gfxBegin(2);
         fn_800D61E4(left, (s16)y);
         fn_800D5BA0(0, colors[2]);
         fn_800D61E4(right, (s16)y);
         fn_800D5BA0(0, colors[2]);
-        fn_800D6728();
+        gfxEnd();
     }
 
     sprite = menuSpriteBiosGetPtr(0xBB);
@@ -280,28 +280,28 @@ void fn_8001EA98(s16 x, s16 y, s16 width, s16 height) {
     extern void fn_800D5648();
     extern void fn_800D5BA0();
     extern void fn_800D61E4();
-    extern void fn_800D6728();
-    extern void fn_800D67BC();
-    extern void fn_800D6A00();
-    extern void fn_800D7820();
-    extern void fn_800D888C();
-    extern void fn_800D88DC();
+    extern void gfxEnd();
+    extern void gfxBegin();
+    extern void gfxSetPrimitive();
+    extern void gfxSetVtxDesc();
+    extern void gfxClearFlags();
+    extern void gfxSetFlags();
     s16 right = x + width + 10;
     s16 bottom = y + height + 10;
 
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D6A00(7);
-    fn_800D7820(lbl_80314E08);
-    fn_800D67BC(2);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetPrimitive(7);
+    gfxSetVtxDesc(lbl_80314E08);
+    gfxBegin(2);
     fn_800D61E4(x - 10, y - 10);
     fn_800D5BA0(0, 0xC0);
     fn_800D61E4(right, bottom);
     fn_800D5BA0(0, 0xC0);
-    fn_800D6728();
+    gfxEnd();
     fn_800D5648(lbl_8047B7E0);
-    fn_800D6A00(2);
-    fn_800D67BC(5);
+    gfxSetPrimitive(2);
+    gfxBegin(5);
     fn_800D61E4(x - 10, y - 10);
     fn_800D5BA0(0, -1);
     fn_800D61E4(right, y - 10);
@@ -312,7 +312,7 @@ void fn_8001EA98(s16 x, s16 y, s16 width, s16 height) {
     fn_800D5BA0(0, -1);
     fn_800D61E4(x - 10, y - 10);
     fn_800D5BA0(0, -1);
-    fn_800D6728();
+    gfxEnd();
     return;
 }
 #endif
@@ -329,8 +329,8 @@ extern f64 lbl_8047B7F8;
 extern f64 lbl_8047B7E8;
 extern f64 lbl_8047B800;
 #if 0
-asm void fn_8001EC08(void) {
-#include "src/game/gs_pcbox_fn_8001EC08.inc"
+asm void msgWinDrawBackground(void) {
+#include "src/game/gs_pcbox_msgWinDrawBackground.inc"
 }
 #else
 typedef struct PCBoxVertex {
@@ -339,7 +339,7 @@ typedef struct PCBoxVertex {
     u32 color;
 } PCBoxVertex;
 
-void fn_8001EC08(s32 x, s32 y, s32 width, s32 height, u8 color, u8 dimColor) {
+void msgWinDrawBackground(s32 x, s32 y, s32 width, s32 height, u8 color, u8 dimColor) {
     extern u8 lbl_80314E08[];
     extern u8 lbl_803A1D60[];
     extern f64 lbl_8047B7D0;
@@ -351,12 +351,12 @@ void fn_8001EC08(s32 x, s32 y, s32 width, s32 height, u8 color, u8 dimColor) {
     extern f64 cos(f64);
     extern void fn_800D5BA0(s32, u32);
     extern void fn_800D61E4(s16, s16);
-    extern void fn_800D6728(void);
-    extern void fn_800D67BC(s32);
-    extern void fn_800D6A00(s32);
-    extern void fn_800D7820(void*);
-    extern void fn_800D888C(s32);
-    extern void fn_800D88DC(s32);
+    extern void gfxEnd(void);
+    extern void gfxBegin(s32);
+    extern void gfxSetPrimitive(s32);
+    extern void gfxSetVtxDesc(void*);
+    extern void gfxClearFlags(s32);
+    extern void gfxSetFlags(s32);
     PCBoxVertex* corners = (PCBoxVertex*)lbl_803A1D60;
     PCBoxVertex* inner = (PCBoxVertex*)(lbl_803A1D60 + 0x28);
     PCBoxVertex* outer = (PCBoxVertex*)(lbl_803A1D60 + 0x128);
@@ -394,11 +394,11 @@ void fn_8001EC08(s32 x, s32 y, s32 width, s32 height, u8 color, u8 dimColor) {
         inner[i].y += base->y;
     }
 
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D6A00(4);
-    fn_800D7820(lbl_80314E08);
-    fn_800D67BC(0x42);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetPrimitive(4);
+    gfxSetVtxDesc(lbl_80314E08);
+    gfxBegin(0x42);
     for (i = 0; i < 32; i++) {
         fn_800D61E4(outer[i].x, outer[i].y);
         fn_800D5BA0(0, outer[i].color);
@@ -409,10 +409,10 @@ void fn_8001EC08(s32 x, s32 y, s32 width, s32 height, u8 color, u8 dimColor) {
     fn_800D5BA0(0, outer[0].color);
     fn_800D61E4(inner[0].x, inner[0].y);
     fn_800D5BA0(0, inner[0].color);
-    fn_800D6728();
+    gfxEnd();
 
-    fn_800D6A00(5);
-    fn_800D67BC(0x22);
+    gfxSetPrimitive(5);
+    gfxBegin(0x22);
     fn_800D61E4(corners[4].x, corners[4].y);
     fn_800D5BA0(0, corners[4].color);
     for (i = 0; i < 32; i++) {
@@ -421,12 +421,12 @@ void fn_8001EC08(s32 x, s32 y, s32 width, s32 height, u8 color, u8 dimColor) {
     }
     fn_800D61E4(inner[0].x, inner[0].y);
     fn_800D5BA0(0, inner[0].color);
-    fn_800D6728();
+    gfxEnd();
 }
 #endif
 
 /* 0x8001EF78 | 0x270 */
-extern void fn_801666BC(void);
+extern void soundGetStatus(void);
 extern f64 lbl_8047B828;
 extern f64 lbl_8047B830;
 extern f32 lbl_8047B810;
@@ -459,9 +459,9 @@ void fn_8001EF78(void) {
     extern f32 lbl_8047B824;
     extern f64 lbl_8047B828;
     extern f64 lbl_8047B830;
-    extern void fn_800D3088();
+    extern void msgGetCharsPerFrame();
     extern void fn_800D37CC();
-    extern void fn_801666BC();
+    extern void soundGetStatus();
     u8 sp[0x30];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -479,7 +479,7 @@ void fn_8001EF78(void) {
     f1 = lbl_8047B828;
     *(u32*)(sp + 0x8) = tmp;
     f31 = f0 - f1;
-    fn_800D3088();
+    msgGetCharsPerFrame();
     tmp = 0x43300000;
     f3 = lbl_8047B830;
     *(u32*)(sp + 0x10) = tmp;
@@ -503,7 +503,7 @@ void fn_8001EF78(void) {
     r3 = 0x46a;
     f0 = f0 + f3;
     lbl_8047A334 = f0;
-    fn_801666BC();
+    soundGetStatus();
     if ((s32)r3 == 0) {
         tmp = lbl_8047A31C;
         f0 = lbl_8047B814;
@@ -626,9 +626,9 @@ void fn_8001EF78(void) {
 
 /* 0x8001F1E8 | 0x11C */
 extern void dbgMenuSetEnable(void);
-extern void fn_801669E4(void);
+extern void soundStopRaw(void);
 extern u8* windowGetKeyInfo();
-extern void fn_80166AB8(void);
+extern void soundStartRaw(void);
 extern u32 lbl_8047A31C;
 extern u32 lbl_8047A328;
 #pragma peephole off
@@ -639,8 +639,8 @@ void fn_8001F1E8(u8* arg) {
     extern u32 fn_800F7BC4(s32);
     extern u8* windowGetKeyInfo(void);
     extern void dbgMenuSetEnable(s32);
-    extern void fn_801669E4(s32, s32, s32);
-    extern void fn_80166AB8(s32, s32, s32);
+    extern void soundStopRaw(s32, s32, s32);
+    extern void soundStartRaw(s32, s32, s32);
     extern void* menuDataBiosGetPtr(u32);
     u32 a;
     u32 b;
@@ -654,14 +654,14 @@ void fn_8001F1E8(u8* arg) {
         b = fn_800F7BC4(1);
         if ((b & a) & 0x1100) {
             lbl_8047A31C = 4;
-            fn_801669E4(0x46e, 0, 0);
+            soundStopRaw(0x46e, 0, 0);
             lbl_8047A328 = 1;
         }
         a = fn_800F7AF0(1);
         b = fn_800F7BC4(1);
         if (((b & a) & 0x200) == 0) return;
         lbl_8047A31C = 4;
-        fn_801669E4(0x46e, 0, 0);
+        soundStopRaw(0x46e, 0, 0);
         lbl_8047A328 = 1;
         return;
     }
@@ -671,7 +671,7 @@ void fn_8001F1E8(u8* arg) {
     obj = windowGetKeyInfo();
     if ((*(u16*)(obj + 0x4) & 0x810) == 0) return;
     *(u8*)(arg + 0x98) = 1;
-    fn_80166AB8(0x4c2, 0, 0);
+    soundStartRaw(0x4c2, 0, 0);
 }
 #pragma peephole reset
 
@@ -1351,13 +1351,13 @@ L_8001FD18:
 
 /* 0x8001FD48 | 0x5E0 */
 extern void fn_801662E8(void);
-extern void fn_80165A20(void);
+extern void std104_soundSetBackgroundMusic(void);
 extern void fn_8017B1AC(void);
 extern void GSmodelAllPauseAnimation(void);
 extern void cameraStopAnimation(void);
-extern void fn_8016557C(void);
+extern void soundPauseMusic(void);
 extern void cameraStartAnimation(void);
-extern void fn_80165548(void);
+extern void soundResumeMusic(void);
 extern void GSmodelAllUnpauseAnimation(void);
 extern void GSmodelSetAnimIndex(void);
 extern void GSmodelSetAnimFrame(void);
@@ -1386,11 +1386,11 @@ extern f32 lbl_8047B810;
 extern f32 lbl_8047A344;
 extern f32 lbl_8047B818;
 #if 0
-asm void fn_8001FD48(void) {
-#include "src/game/gs_pcbox_fn_8001FD48.inc"
+asm void std021_newGameIntroSequence(void) {
+#include "src/game/gs_pcbox_std021_newGameIntroSequence.inc"
 }
 #else
-void fn_8001FD48(void) {
+void std021_newGameIntroSequence(void) {
     extern u32 lbl_8047A310;
     extern u32 lbl_8047A314;
     extern u32 lbl_8047A318;
@@ -1422,9 +1422,9 @@ void fn_8001FD48(void) {
     extern void fn_80113828();
     extern void savedataCreate();
     extern void gamedatasaveGetStatus();
-    extern void fn_80165548();
-    extern void fn_8016557C();
-    extern void fn_80165A20();
+    extern void soundResumeMusic();
+    extern void soundPauseMusic();
+    extern void std104_soundSetBackgroundMusic();
     extern void fn_801662E8();
     extern void cameraStartAnimation();
     extern void cameraStopAnimation();
@@ -1470,7 +1470,7 @@ void fn_8001FD48(void) {
     r3 = 0x46a;
     r4 = 0x0;
     r5 = 0xff;
-    fn_80165A20();
+    std104_soundSetBackgroundMusic();
     tmp = lbl_8047A310;
     if ((s32)tmp == 1) {
         r4 = 0x7;
@@ -1498,7 +1498,7 @@ void fn_8001FD48(void) {
             if ((s32)tmp == 0) {
                 GSmodelAllPauseAnimation();
                 cameraStopAnimation();
-                fn_8016557C();
+                soundPauseMusic();
                 tmp = 0x1;
                 lbl_8047A318 = tmp;
             }
@@ -1511,7 +1511,7 @@ void fn_8001FD48(void) {
             r3 = 0x0;
             r4 = 0x406;
             fn_801662E8();
-            fn_80165548();
+            soundResumeMusic();
             GSmodelAllUnpauseAnimation();
             tmp = 0x0;
             lbl_8047A318 = tmp;
@@ -1521,7 +1521,7 @@ void fn_8001FD48(void) {
             if ((s32)tmp == 0) {
                 GSmodelAllPauseAnimation();
                 cameraStopAnimation();
-                fn_8016557C();
+                soundPauseMusic();
                 tmp = 0x1;
                 lbl_8047A314 = tmp;
             }
@@ -1534,7 +1534,7 @@ void fn_8001FD48(void) {
             r3 = 0x0;
             r4 = 0x406;
             fn_801662E8();
-            fn_80165548();
+            soundResumeMusic();
             GSmodelAllUnpauseAnimation();
             tmp = 0x0;
             lbl_8047A314 = tmp;
@@ -1833,26 +1833,26 @@ asm void fn_8001E58C(void) {
 #else
 #pragma optimization_level 4
 void fn_8001E58C(s16 x1, s16 y1, s16 x2, s16 y2, u8* color) {
-    extern void fn_800D88DC();
-    extern void fn_800D888C();
-    extern void fn_800D6A00();
-    extern void fn_800D7820();
-    extern void fn_800D67BC();
+    extern void gfxSetFlags();
+    extern void gfxClearFlags();
+    extern void gfxSetPrimitive();
+    extern void gfxSetVtxDesc();
+    extern void gfxBegin();
     extern void fn_800D61E4();
     extern void fn_800D5CB8();
-    extern void fn_800D6728();
+    extern void gfxEnd();
     extern u8 lbl_80314E08[];
-    fn_800D88DC(0x1);
-    fn_800D888C(0x6);
-    fn_800D6A00(0x7);
-    fn_800D7820(lbl_80314E08);
+    gfxSetFlags(0x1);
+    gfxClearFlags(0x6);
+    gfxSetPrimitive(0x7);
+    gfxSetVtxDesc(lbl_80314E08);
     x2 += x1;
     y2 += y1;
-    fn_800D67BC(0x2);
+    gfxBegin(0x2);
     fn_800D61E4(x1, y1);
     fn_800D5CB8(0, color[0], color[1], color[2], color[3]);
     fn_800D61E4(x2, y2);
     fn_800D5CB8(0, color[0], color[1], color[2], color[3]);
-    fn_800D6728();
+    gfxEnd();
 }
 #endif

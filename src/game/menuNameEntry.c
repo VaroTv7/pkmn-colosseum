@@ -1942,7 +1942,7 @@ found:
 #endif
 
 /* selectLetter__FP14NAME_ENTRY_ARG - 0x80027AA4 | size: 0x2b4 */
-extern void fn_80166A28(void);
+extern void soundStartSE(void);
 #if 0
 asm void selectLetter__FP14NAME_ENTRY_ARG(void) {
 #include "src/game/gs_worldmap_selectLetter__FP14NAME_ENTRY_ARG.inc"
@@ -1954,7 +1954,7 @@ asm void selectLetter__FP14NAME_ENTRY_ARG(void) {
  * World-map travel / UI state machine tick.
  * Reads two indirect sub-state counters from the context object,
  * decides which action to perform (0-6), then optionally fires a
- * scheduler/sound event via fn_80166A28 before returning a flag.
+ * scheduler/sound event via soundStartSE before returning a flag.
  *
  * param r3  - pointer to the world-map controller object ("self")
  * return    - 1 if a "complete / next-scene" transition was triggered,
@@ -1964,12 +1964,12 @@ s32 selectLetter__FP14NAME_ENTRY_ARG(void* r3) {
     extern s32  GSmsgGetLength(void*);
     extern void* GSmsgGetGSchar(u32);
     extern u16  exchangeDakuon__FUs11DAKUON_MODE(u16, s32);
-    extern void fn_80166A28(u32);
+    extern void soundStartSE(u32);
     extern u8   lbl_80266DD8[];   /* array of 16-byte entries: [u32 id, u32 limit, ...] */
     extern u8   lbl_80266E18[];   /* 2D array: [2][0x18], each 0x18 entry has sub-arrays of void* at +8 */
 
     u8*   self;          /* r28 -- self pointer (reused as byte-offset after case 1/2) */
-    u32   r29;           /* event code sent to fn_80166A28 (0 = no call) */
+    u32   r29;           /* event code sent to soundStartSE (0 = no call) */
     s32   r30;           /* return value */
     u16   r31;           /* current travel-target ID */
     s32   r27;           /* animation sub-counter (from self+0x28 indirect) */
@@ -2171,7 +2171,7 @@ act_done:
 
     /* Fire the scheduler/sound event if a code was set. */
     if (r29 != 0)
-        fn_80166A28(r29);
+        soundStartSE(r29);
 
     return r30;
 }
@@ -2202,7 +2202,7 @@ asm void menuNameEntryCursor(void) {
  * Returns 0 in all paths. */
 s32 menuNameEntryCursor(void* actor) {
     extern u16* windowGetKeyInfo(void);
-    extern void fn_80166A28(s32 se);
+    extern void soundStartSE(s32 se);
     extern s32  selectLetter__FP14NAME_ENTRY_ARG(void* ctx);
     extern u16  exchangeDakuon__FUs11DAKUON_MODE(u16 value, s32 listIndex);
     extern s32  GSmsgGetLength(u32 list);
@@ -2224,7 +2224,7 @@ s32 menuNameEntryCursor(void* actor) {
         s32  v = *cell + 1;
         if (v >= 2) v = 0;
         *cell = v;
-        fn_80166A28(0x27);
+        soundStartSE(0x27);
         return 0;
     }
 
@@ -2261,7 +2261,7 @@ s32 menuNameEntryCursor(void* actor) {
             played = 1;
         }
         if (played) {
-            fn_80166A28(0x25);
+            soundStartSE(0x25);
         }
         return 0;
     }
@@ -2322,7 +2322,7 @@ s32 menuNameEntryCursor(void* actor) {
                 }
             }
         }
-        fn_80166A28(0x24);
+        soundStartSE(0x24);
         return 0;
     }
 
@@ -2340,7 +2340,7 @@ s32 menuNameEntryCursor(void* actor) {
         if (col >= 0x10) {
             col = 0xf;
         } else {
-            fn_80166A28(0x23);
+            soundStartSE(0x23);
         }
         *colP = col;
     }
@@ -2351,7 +2351,7 @@ s32 menuNameEntryCursor(void* actor) {
         if (col < 0) {
             col = 0;
         } else {
-            fn_80166A28(0x23);
+            soundStartSE(0x23);
         }
         *colP = col;
     }
@@ -2373,7 +2373,7 @@ s32 menuNameEntryCursor(void* actor) {
         if (row >= 4) {
             row = 3;
         } else {
-            fn_80166A28(0x23);
+            soundStartSE(0x23);
         }
         *rowP = row;
     }
@@ -2395,7 +2395,7 @@ s32 menuNameEntryCursor(void* actor) {
         if (row < 0) {
             row = 0;
         } else {
-            fn_80166A28(0x23);
+            soundStartSE(0x23);
         }
         *rowP = row;
     }
@@ -2531,7 +2531,7 @@ s32 inputName__FPUsPUsiii(u16 *existing_name, u8 *name_buf_in, void *arg2, void 
     extern void dbgMenuSetEnable(s32 mode);                 /* set VSync mode (0=off, 1=on)    */
     extern u32  windowGetActiveID(void);                     /* get current scene handle         */
     extern void menuOpenCustom(s32 sceneId, u32 handle, s32 a, s32 b, s32 c, s32 d, ...); /* open GS scene with descriptor */
-    extern void fn_80166A28(u32 arg);                  /* audio/effect trigger             */
+    extern void soundStartSE(u32 arg);                  /* audio/effect trigger             */
     extern void msgctrlSetValue(s32 effect, void *param);  /* UI effect dispatcher             */
     extern void winMsgOpen(s32 slot, s32 msgId, s32 p3, s32 p4); /* open dialog message */
     extern s8 menuSubOpenYesNo(s32 max, s32 a, s32 b, s32 initial); /* blocking yes/no picker */
@@ -2678,7 +2678,7 @@ s32 inputName__FPUsPUsiii(u16 *existing_name, u8 *name_buf_in, void *arg2, void 
         /* ---------------------------------------------------------------
          * Show the "Are you sure?" dialog (message 0x2ef6).
          * ------------------------------------------------------------- */
-        fn_80166A28(0x440);
+        soundStartSE(0x440);
         msgctrlSetValue(0x4d, name_to_use);
         winMsgOpen(2, 0x2ef6, 1, 0);
         yn_result = menuSubOpenYesNo(0, -1, -1, 0);
@@ -2853,16 +2853,16 @@ s32 menuNameEntrySelectCtrl(void* r3) {
 
 /* menuNameEntryBackDrawHumanModel - 0x80028620 | size: 0x108 */
 extern void* menuModelRender(void*);
-extern void fn_800D888C(s32);
-extern void fn_800D88DC(s32);
-extern void fn_800D7820(void*);
-extern void fn_800D85D4(s32, void*);
-extern void fn_800D6A00(s32);
-extern void fn_800D67BC(s32);
+extern void gfxClearFlags(s32);
+extern void gfxSetFlags(s32);
+extern void gfxSetVtxDesc(void*);
+extern void gfxLoadTexture(s32, void*);
+extern void gfxSetPrimitive(s32);
+extern void gfxBegin(s32);
 extern void fn_800D61E4(s32, s32);
 extern void fn_800D5CB8(s32, s32, s32, s32, s32);
-extern void fn_800D59B8(s32, f32, f32);
-extern void fn_800D6728(void);
+extern void gfxVtxTexCoord(s32, f32, f32);
+extern void gfxEnd(void);
 extern u8 lbl_803A2094[];
 extern u8 lbl_80314F98[];
 extern f32 lbl_8047B930;
@@ -2885,19 +2885,19 @@ s32 menuNameEntryBackDrawHumanModel(void* r3, u8* r4) {
     }
     r31 = menuModelRender(lbl_803A2094);
     if (r31 != (void*)0) {
-        fn_800D888C(4);
-        fn_800D88DC(3);
-        fn_800D7820(lbl_80314F98);
-        fn_800D85D4(0, r31);
-        fn_800D6A00(7);
-        fn_800D67BC(2);
+        gfxClearFlags(4);
+        gfxSetFlags(3);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxLoadTexture(0, r31);
+        gfxSetPrimitive(7);
+        gfxBegin(2);
         fn_800D61E4(0, 0);
         fn_800D5CB8(0, 0xff, 0xff, 0xff, 0xff);
-        fn_800D59B8(0, lbl_8047B930, lbl_8047B930);
+        gfxVtxTexCoord(0, lbl_8047B930, lbl_8047B930);
         fn_800D61E4((s32)*(s16*)(r30 + 0x54), (s32)*(s16*)(r30 + 0x56));
         fn_800D5CB8(0, 0xff, 0xff, 0xff, 0xff);
-        fn_800D59B8(0, lbl_8047B934, lbl_8047B934);
-        fn_800D6728();
+        gfxVtxTexCoord(0, lbl_8047B934, lbl_8047B934);
+        gfxEnd();
     }
     return 0;
 }
@@ -2924,19 +2924,19 @@ s32 menuNameEntryBackDrawPokemonModel(void* r3, u8* r4) {
     }
     r31 = menuModelRender(lbl_803A2094);
     if (r31 != (void*)0) {
-        fn_800D888C(4);
-        fn_800D88DC(3);
-        fn_800D7820(lbl_80314F98);
-        fn_800D85D4(0, r31);
-        fn_800D6A00(7);
-        fn_800D67BC(2);
+        gfxClearFlags(4);
+        gfxSetFlags(3);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxLoadTexture(0, r31);
+        gfxSetPrimitive(7);
+        gfxBegin(2);
         fn_800D61E4(0, 0);
         fn_800D5CB8(0, 0xff, 0xff, 0xff, 0xff);
-        fn_800D59B8(0, lbl_8047B930, lbl_8047B930);
+        gfxVtxTexCoord(0, lbl_8047B930, lbl_8047B930);
         fn_800D61E4((s32)*(s16*)(r30 + 0x54), (s32)*(s16*)(r30 + 0x56));
         fn_800D5CB8(0, 0xff, 0xff, 0xff, 0xff);
-        fn_800D59B8(0, lbl_8047B934, lbl_8047B934);
-        fn_800D6728();
+        gfxVtxTexCoord(0, lbl_8047B934, lbl_8047B934);
+        gfxEnd();
     }
     return 0;
 }
@@ -3258,7 +3258,7 @@ void menuNameEntry(void) {
     extern void fadeCheck(s32 v);
     extern u32  windowGetActiveID(void);                         /* returns context handle    */
     extern s32  menuOpenCustom(s32 id, u32 ctx, s32 a, s32 b, s32 c, s32 d, void* arg);
-    extern u32  fn_80166A28(s32 size);
+    extern u32  soundStartSE(s32 size);
     extern void msgctrlSetValue(s32 id, u32 name);
     extern void winMsgOpen(s32 a, s32 b, s32 c, s32 d);
     extern s32  menuSubOpenYesNo(s32 a, s32 b, s32 c, s32 d);
@@ -3412,7 +3412,7 @@ void menuNameEntry(void) {
                         nameBuf[5] = count;        /* sp+0x14 */
                         pick = menuOpenCustom(0x70, windowGetActiveID(), 0, 0, 1, 1, &nameBuf[4]);
                         if (pick == 0) {
-                            fn_80166A28(0x24);
+                            soundStartSE(0x24);
                             accepted = 0;
                             break;
                         }
@@ -3422,7 +3422,7 @@ void menuNameEntry(void) {
                         {
                             u32 choiceName = (u32)GSmsgGetGSchar((u32)listPtr[pick - 1]);
                             s32 ans;
-                            fn_80166A28(0x440);
+                            soundStartSE(0x440);
                             msgctrlSetValue(0x4d, choiceName);
                             winMsgOpen(2, 0x2ef6, 1, 0);
                             ans = (s32)(s8)menuSubOpenYesNo(0, -1, -1, 0);
@@ -3573,7 +3573,7 @@ void menuNameEntryGetLastName(void* r3) {
 #endif
 
 /* menuNameEntryOpenNoFade - 0x80029660 | size: 0x100 */
-extern void fn_800FF730(s32);
+extern void std098_mapWarpToMenuRoom(s32);
 extern void _threadSwitch(void);
 #if 0
 asm void menuNameEntryOpenNoFade(void) {
@@ -3618,7 +3618,7 @@ s32 menuNameEntryOpenNoFade(s32 r3, s32 r4) {
     *(s32*)(ctx + 0x20) = 0;
     *(s32*)(ctx + 0x24) = 0;
     *(s32*)(ctx + 0x28) = 1;
-    fn_800FF730(0x390);
+    std098_mapWarpToMenuRoom(0x390);
     floorSetFadeScript(0, 0x05960008);
     _threadSwitch();
     return *(s32*)(ctx + 0x20);
@@ -3669,7 +3669,7 @@ s32 menuNameEntryOpen(s32 r3, s32 r4) {
     *(s32*)(ctx + 0x20) = 0;
     *(s32*)(ctx + 0x24) = 1;
     *(s32*)(ctx + 0x28) = 1;
-    fn_800FF730(0x390);
+    std098_mapWarpToMenuRoom(0x390);
     _threadSwitch();
     return *(s32*)(ctx + 0x20);
 }

@@ -40,7 +40,7 @@ void cameraSetFov(f32 fov)
         fov = lbl_8047D72C;
     }
 
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->fov = fov;
     }
@@ -51,7 +51,7 @@ void cameraSetRotY(f32 angle)
 {
     CameraFloorEntry* floorEntry;
 
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->rotationY = angle;
     }
@@ -62,7 +62,7 @@ void cameraSetDistance(f32 distance)
 {
     CameraFloorEntry* floorEntry;
 
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->distance = distance;
     }
@@ -73,7 +73,7 @@ void cameraSetHeight(f32 height)
 {
     CameraFloorEntry* floorEntry;
 
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->height = height;
     }

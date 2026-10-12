@@ -28,8 +28,8 @@ extern void fn_801EF8F4();
 
 /* Sound functions */
 extern void soundStop();     /* Stop sound */
-extern void fn_80165A20();     /* Fade out music */
-extern void fn_801659FC();     /* Start BGM */
+extern void std104_soundSetBackgroundMusic();     /* Fade out music */
+extern void std105_soundPlayEffect();     /* Start BGM */
 
 /* SDA2 float constants used by asm wrappers */
 extern f32 lbl_8047E678;
@@ -102,7 +102,7 @@ u32 fightMenuFightTrainerGcHeroOpenMenu(void* ctx, u32 param1, u32 param2) {
     extern void menuCloseCustom();
     extern void menuIsCheck();
     extern void menuOpenCustom();
-    extern void fn_801EF634();
+    extern void std103_battleGetResult();
     extern void fightTargetGetTragetPtrToRelativeHostSideFightTargetId();
     extern void fightTargetDataBiosGetBuff();
     extern void fightTargetDataBiosGetPtr();
@@ -237,7 +237,7 @@ while (1) {
             r26 = r30;
             break;
         }
-        fn_801EF634();
+        std103_battleGetResult();
         r0 = r3 & 0xFFFF;
         if (r0 == (u32)0x1) {
     while (1) {
@@ -321,7 +321,7 @@ while (1) {
             r5 = 0x1;
             fn_80011A1C();
             r24 = r3;
-            fn_801EF634();
+            std103_battleGetResult();
             r0 = r3 & 0xFFFF;
             if (r0 == (u32)0x1) {
                 r3 = 0x0;
@@ -433,7 +433,7 @@ while (1) {
             r6 = r24;
             _fightMenuFightTrainerGcHeroOpenMenuSubMain__FP13FIGHT_TRAINERP15FightOutPokemonUsl();
             r24 = r3;
-            fn_801EF634();
+            std103_battleGetResult();
             r0 = r3 & 0xFFFF;
             if (r0 == (u32)0x1) {
                 r3 = 0x0;
@@ -935,7 +935,7 @@ u32 _fightMenuFightTrainerGcHeroOpenMenuSubMain__FP13FIGHT_TRAINERP15FightOutPok
 /* Address: 0x80263DE4 | Size: 0x6A4 | Ghidra import */
 s32 fightMenuFightTrainerGcHeroSelectIrekaeFightPokemon(u32 r3, u32 r4, u32 r5, u32 retry, u32 reopen)
 {
-    extern u16 fn_801EF634(void);
+    extern u16 std103_battleGetResult(void);
     extern u8 fightFloorIsUseFightTimerCommand(u32);
     extern u8 fightFloorIsUseFightTimerAll(u32);
     extern u8 fightTimerCommandIsOver(void);
@@ -972,7 +972,7 @@ s32 fightMenuFightTrainerGcHeroSelectIrekaeFightPokemon(u32 r3, u32 r4, u32 r5, 
     actor = r4;
     param = r5;
     while (1) {
-        if ((u16)fn_801EF634() == 1) {
+        if ((u16)std103_battleGetResult() == 1) {
             return -2;
         }
         if ((fightFloorIsUseFightTimerCommand(0) == 1) && (fightTimerCommandIsOver() == 1)) {
@@ -1128,7 +1128,7 @@ s32 fightMenuFightTrainerGcHeroSelectIrekaeFightPokemon(u32 r3, u32 r4, u32 r5, 
                 menuCloseCustom(msg, 0, 1);
             }
         }
-        if ((u16)fn_801EF634() == 1) {
+        if ((u16)std103_battleGetResult() == 1) {
             return -2;
         }
         if ((fightFloorIsUseFightTimerCommand(0) == 1) && (fightTimerCommandIsOver() == 1) && (choice < 0)) {
@@ -1532,9 +1532,9 @@ void fightMenuCloseLevelUpStatusMenu(void)
 /* Address: 0x80262308 | Size: 0x2C | Ghidra import */
 u32 fightMenuYesNo(void)
 {
-    extern s8 fn_8001E184(void);
+    extern s8 std011_dialogDisplayYesNoMenu(void);
 
-    return (__cntlzw((s8)fn_8001E184()) >> 5) & 0xff;
+    return (__cntlzw((s8)std011_dialogDisplayYesNoMenu()) >> 5) & 0xff;
 }
 
 /* Address: 0x80262334 | Size: 0x80 | Ghidra import */
@@ -1613,7 +1613,7 @@ u32 fightMenuFightTrainerAgbHeroOpenMenu(u32 r3, u32 r4)
     extern u32 fightTrainerGetValidFightOutPokemonPtr(u32, u32);
     extern u8 fightOutPokemonCheckFightActionSelect(u32, u32);
     extern void fightOutPokemonInitFightActionBuff(u32);
-    extern u16 fn_801EF634(void);
+    extern u16 std103_battleGetResult(void);
     extern u8 fightFloorIsUseFightTimerCommand(u32);
     extern u8 fightTimerCommandIsOver(void);
     extern u32 menuFightOpenGBAMain(u32, u32, u32, u32);
@@ -1723,7 +1723,7 @@ u32 fightMenuFightTrainerAgbHeroOpenMenu(u32 r3, u32 r4)
         }
         while (1) {
             fightOutPokemonInitFightActionBuff(slot);
-            if ((u16)fn_801EF634() == 1) {
+            if ((u16)std103_battleGetResult() == 1) {
                 fightTrainerAllInitFightActionBuff(ctx);
                 if (fn_801F18DC(0) != 0) {
                     msg = 0x100;
@@ -1769,7 +1769,7 @@ u32 fightMenuFightTrainerAgbHeroOpenMenu(u32 r3, u32 r4)
             }
             entry = menuFightOpenGBAMain(battle, ctx, (u16)i, param);
             kind = fn_80089F70(entry);
-            if ((u16)fn_801EF634() == 1) {
+            if ((u16)std103_battleGetResult() == 1) {
                 fightTrainerAllInitFightActionBuff(ctx);
                 return 0;
             }
@@ -1942,7 +1942,7 @@ s32 fightMenuFightTrainerAgbHeroSelectIrekaeFightPokemon(u32 r3, u32 r4, u32 r5,
     extern u32 fightTrainerGetStatus(u32, u32, u32, u32);
     extern void fightTypeDataBiosGetPtr(u32);
     extern u32 fightTypeDataBiosGetFightoutPokemonNum(void);
-    extern u16 fn_801EF634(void);
+    extern u16 std103_battleGetResult(void);
     extern u8 fightFloorIsUseFightTimerCommand(u32);
     extern u8 fightTimerCommandIsOver(void);
     extern u8 fn_801F18DC(u32);
@@ -1993,7 +1993,7 @@ s32 fightMenuFightTrainerAgbHeroSelectIrekaeFightPokemon(u32 r3, u32 r4, u32 r5,
         return fightTrainerAiSelectIrekaeDasuFightPokemon((void *)ctx, param1, param2, target);
     }
 
-    if ((u16)fn_801EF634() == 1) {
+    if ((u16)std103_battleGetResult() == 1) {
         goto set_cancel;
     }
     if ((fightFloorIsUseFightTimerCommand(0) == 1) && (fightTimerCommandIsOver() == 1)) {
@@ -2040,7 +2040,7 @@ s32 fightMenuFightTrainerAgbHeroSelectIrekaeFightPokemon(u32 r3, u32 r4, u32 r5,
         }
         entry = menuFightOpenGBAIrekae(battle, ctx, (u16)i, param1);
         kind = fn_80089F70(entry);
-        if ((u16)fn_801EF634() == 1) {
+        if ((u16)std103_battleGetResult() == 1) {
             goto set_cancel;
         }
         if (kind == 2) {
@@ -2147,7 +2147,7 @@ u32 _fightMenuFightTrainerGcHeroOpenMenuSubBallSelectTargetPokemon__FP15FightOut
     extern int menuFightOpenTarget();
     extern int winMsgCloseFight();
     extern int winMsgOpenFight();
-    extern int fn_801906A0();
+    extern int std082_flagGetValue();
     extern int fightMainWaitFrame();
   u16 uVar4;
   u32 uVar1;
@@ -2249,7 +2249,7 @@ LAB_00261ccc:
       fightOutPokemonGetPokemonPtr(uVar1);
       cVar6 = pokemonIsDarkPokemon();
       if (cVar6 == '\0') {
-        uVar3 = fn_801906A0(0x99f);
+        uVar3 = std082_flagGetValue(0x99f);
         if (uVar3 == 0) {
           winMsgOpenFight(0x7716,1,1);
         }

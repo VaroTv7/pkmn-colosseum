@@ -177,7 +177,7 @@ void fn_800B90A4(void (*cb)(void)); /* GXSetDrawDoneCallback */
 void fn_801BFF18(u32 retraceCount); /* HSD_VIPreRetraceCB  */
 void fn_801BFD10(u32 retraceCount); /* HSD_VIPostRetraceCB */
 void fn_801BFCB0(void);             /* HSD_VIGXDrawDoneCB  */
-void fn_801BFA1C(HSD_VIStatus* vi, void* buffer, HSD_RenderPass rpass);
+void HSD_VICopyEFB2XFB(HSD_VIStatus* vi, void* buffer, HSD_RenderPass rpass);
 
 static inline int HSD_VISearchXFBByStatus(HSD_VIXFBDrawDispStatus status)
 {
@@ -192,7 +192,7 @@ static inline int HSD_VISearchXFBByStatus(HSD_VIXFBDrawDispStatus status)
 }
 
 /* 0x801BF1F0 | 0x2D4 -- HSD_VIInit */
-void fn_801BF1F0(HSD_VIStatus* vi, void* xfb0, void* xfb1, void* xfb2)
+void HSD_VIInit(HSD_VIStatus* vi, void* xfb0, void* xfb1, void* xfb2)
 {
     int i, fbnum, idx;
 
@@ -239,7 +239,7 @@ void fn_801BF1F0(HSD_VIStatus* vi, void* xfb0, void* xfb1, void* xfb2)
     VIFlush();
 
     idx = HSD_VISearchXFBByStatus(HSD_VI_XFB_FREE);
-    fn_801BFA1C(&_p->current.vi, _p->xfb[idx].buffer, HSD_RP_SCREEN);
+    HSD_VICopyEFB2XFB(&_p->current.vi, _p->xfb[idx].buffer, HSD_RP_SCREEN);
 }
 
 /* 0x801BF4C4 | 0x20 -- HSD_VISetBlack */

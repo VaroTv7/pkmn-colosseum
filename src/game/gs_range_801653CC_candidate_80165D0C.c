@@ -4,16 +4,16 @@
  */
 #include "game/gs_range_801653CC_shared.h"
 
-void fn_80165D0C(u32 frames)
+void soundWaitMs(u32 frames)
 {
     extern s32 fn_800D37CC(void);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern const f32 lbl_8047D544;
     f32 duration = (f32)frames / lbl_8047D544;
     f32 elapsed = lbl_8047D540;
 
     while (elapsed < duration) {
         _threadSwitch();
-        elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+        elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
 }

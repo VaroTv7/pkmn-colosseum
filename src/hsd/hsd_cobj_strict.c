@@ -2122,18 +2122,18 @@ extern void _restfpr_27(void);
 extern void fn_800B7874(u32, u32);
 extern void fn_800B7D3C(void);
 extern void fn_800B7D74(u32, u32, u32, u32, u32);
-extern void fn_800B857C(u32, u32, u32, u32, u32, u32);
+extern void GXSetTexCoordGen2(u32, u32, u32, u32, u32, u32);
 extern void fn_800B884C(u32);
 extern void fn_800B928C(u32, u32, u16);
 extern void fn_800B94F0(u32);
-extern void fn_800BA6B0(u32);
-extern void fn_800BA6F4(u32, u32, u32, u32, u32, u32, u32);
+extern void GXSetNumChans(u32);
+extern void GXSetChanCtrl(u32, u32, u32, u32, u32, u32, u32);
 extern void fn_800BA9E4(void*, void*, u16, u16, u32, u32, u32, u32);
 extern void fn_800BAFFC(void*, u32);
 extern void fn_800BC114(u32, u32);
 extern void fn_800BC618(u32, u8, u32, u32, u8);
 extern void fn_800BC66C(u32, u32, u32);
-extern void fn_800BC6F0(u32, u32, u32, u32);
+extern void GXSetTevOrder(u32, u32, u32, u32);
 extern void fn_800BC8C8(u32);
 extern void fn_800BCDDC(u32, u32, u32, u32);
 extern void fn_800BCE30(u32);
@@ -2163,15 +2163,15 @@ void HSD_EraseRect(s32 arg0, s32 arg1, s32 arg2, f32 f1, f32 f2, f32 f3, f32 f4,
         fn_800BA9E4(texobj, lbl_8036C720, 4, 4, 0x11, 1, 1, 0);
         fn_800BAFFC(texobj, 0);
         fn_800B884C(1);
-        fn_800B857C(0, 1, 4, 0x3C, 0, 0x7D);
+        GXSetTexCoordGen2(0, 1, 4, 0x3C, 0, 0x7D);
         fn_800BC8C8(1);
-        fn_800BC6F0(0, 0, 0, 4);
+        GXSetTevOrder(0, 0, 0, 4);
         fn_800BC114(0, 4);
         fn_800BC66C(2, 0x11, 0);
     } else {
         fn_800B884C(0);
         fn_800BC8C8(1);
-        fn_800BC6F0(0, 0xFF, 0xFF, 4);
+        GXSetTevOrder(0, 0xFF, 0xFF, 4);
         fn_800BC114(0, 4);
     }
 
@@ -2182,8 +2182,8 @@ void HSD_EraseRect(s32 arg0, s32 arg1, s32 arg2, f32 f1, f32 f2, f32 f3, f32 f4,
     fn_800BCDDC(2, 1, 0, 3);
     fn_800BCE30(arg0 != 0);
     fn_800BCE5C(arg1 != 0);
-    fn_800BA6B0(1);
-    fn_800BA6F4(4, 0, 0, 1, 0, 0, 2);
+    GXSetNumChans(1);
+    GXSetChanCtrl(4, 0, 0, 1, 0, 0, 2);
     fn_800B7D3C();
     fn_800B7D74(0, 9, 1, 4, 0);
     fn_800B7D74(0, 0xB, 1, 5, 0);
@@ -2263,7 +2263,7 @@ void HSD_SetEraseColor(u8 a, u8 b, u8 c, u8 d) {
 #if !defined(HSD_COBJ_SPLIT) || defined(HSD_COBJ_EXACT_8019733C)
 typedef void (*HSD_DispParticleCallback)(s32, s32, s32, HSD_JObj*);
 #if 1
-void fn_8019733C(HSD_DispParticleCallback callback)
+void HSD_JObjSetSPtclCallback(HSD_DispParticleCallback callback)
 {
     extern HSD_DispParticleCallback lbl_8047B240;
     lbl_8047B240 = callback;
@@ -2369,9 +2369,9 @@ void fn_801975FC(void) {
 /* 0x80197998 | 0xCC */
 #if !defined(HSD_COBJ_SPLIT) || defined(HSD_COBJ_CANDIDATE_80197344)
 extern void fn_8019F024(HSD_JObj* jobj);
-extern void fn_801A5DCC(f32 pmtx[3][4]);
+extern void HSD_LObjSetupSpecularInit(f32 pmtx[3][4]);
 extern void fn_801AB63C(u32 first, u32 second);
-void fn_80197998(HSD_JObj* jobj, f32 vmtx[3][4], f32 pmtx[3][4],
+void HSD_JObjDispDObj(HSD_JObj* jobj, f32 vmtx[3][4], f32 pmtx[3][4],
                  u32 trsp_mask, u32 rendermode)
 {
     HSD_DObj* dobj;
@@ -2383,7 +2383,7 @@ void fn_80197998(HSD_JObj* jobj, f32 vmtx[3][4], f32 pmtx[3][4],
 
     if (!(rendermode & RENDER_SHADOW)) {
         if (jobj->flags & JOBJ_SPECULAR) {
-            fn_801A5DCC(pmtx);
+            HSD_LObjSetupSpecularInit(pmtx);
         }
     }
 

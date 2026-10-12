@@ -37,7 +37,7 @@ extern GS_SDATA2 const char lbl_8047E464[];
 extern GS_SDATA2 const char lbl_8047E46C[];
 extern GS_SDATA2 const char lbl_8047E474[];
 
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern s32 fn_800D37CC(void);
 extern void _threadSwitch(void);
 extern void GSvecCopy(void*, const void*);
@@ -49,7 +49,7 @@ extern void GSmodelSetScale(void*, const void*);
 extern void GSmodelSetVisibility(void*, u8);
 extern void GSmodelFree(void*);
 extern void* fn_800F92D4(u32);
-extern void* fn_800FF56C(void);
+extern void* std092_getCurrentRoomID(void);
 extern void floorEventCtrlDoor(void*, u32, u32);
 extern void* floorOpenObject(u32);
 extern void* sodateyaGetPokemonPtr(u32);
@@ -57,20 +57,20 @@ extern u8 pokemonBiosGetCatchBallId(void*);
 extern u32 pokemonBiosGetPokemonDataId(void*);
 extern void* pokemonDataBiosGetPtr(u32);
 extern u16 pokemonDataBiosGetVoice(void*);
-extern void fn_80166AB8(u32, u32, u32);
-extern void fn_80183018(u32, u32);
-extern void fn_80183350(u32, u32);
-extern void fn_80185EE8(u32, u32, u32, f32, f32, f32);
-extern void fn_8018805C(u32, u32, f32, f32);
+extern void soundStartRaw(u32, u32, u32);
+extern void std077_characterEventFlagsSet(u32, u32);
+extern void std076_characterEventFlagsClear(u32, u32);
+extern void std061_characterMoveToPosition(u32, u32, u32, f32, f32, f32);
+extern void peopleStartTurn(u32, u32, f32, f32);
 extern void peopleMoveCheck(u32, u32, u32);
-extern void fn_8018BDF4(u32, u32, void*);
+extern void std172_characterGetPosition(u32, u32, void*);
 
 #define ETCTOOL_WAIT(duration)                                             \
     do {                                                                   \
         f32 elapsed = lbl_8047E3F4;                                        \
         f32 limit = (duration);                                            \
         while (elapsed < limit) {                                          \
-            elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();            \
+            elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();            \
             _threadSwitch();                                               \
         }                                                                  \
     } while (0)
@@ -98,18 +98,18 @@ void fn_801E09E0(void)
     object = NULL;
     state = 0;
     running = TRUE;
-    resource = fn_800FF56C();
+    resource = std092_getCurrentRoomID();
 
     do {
         switch (state) {
         case 0:
-            fn_8018BDF4(0x4D, 1, &savedPosition);
-            fn_80183350(0x4D, 1);
+            std172_characterGetPosition(0x4D, 1, &savedPosition);
+            std076_characterEventFlagsClear(0x4D, 1);
             part = GSmodelGetPart(fn_800F92D4(0x01DA1002), 0);
             GSpartGetTransform(part, &position, 0, 0);
             GSpartFree(part);
             GSvecCopy(&position, &sequencePositions[1]);
-            fn_80185EE8(0x4D, 1, 1, position.x, position.y, position.z);
+            std061_characterMoveToPosition(0x4D, 1, 1, position.x, position.y, position.z);
             peopleMoveCheck(0x4D, 1, 1);
             floorEventCtrlDoor(resource, 0x2C, 0);
             ETCTOOL_WAIT(lbl_8047E418);
@@ -118,26 +118,26 @@ void fn_801E09E0(void)
 
         case 1:
             GSvecCopy(&position, &sequencePositions[2]);
-            fn_80185EE8(0x4D, 1, 1, position.x, position.y, position.z);
+            std061_characterMoveToPosition(0x4D, 1, 1, position.x, position.y, position.z);
             peopleMoveCheck(0x4D, 1, 1);
             floorEventCtrlDoor(resource, 0x2C, 2);
             ETCTOOL_WAIT(lbl_8047E3F0);
 
-            fn_80185EE8(0x4D, 1, 1, position.x, position.y,
+            std061_characterMoveToPosition(0x4D, 1, 1, position.x, position.y,
                         position.z + lbl_8047E410);
             peopleMoveCheck(0x4D, 1, 1);
             floorEventCtrlDoor(resource, 0x2C, 0);
 
             GSvecCopy(&position, &sequencePositions[1]);
-            fn_80185EE8(0x4D, 1, 1, position.x, position.y, position.z);
+            std061_characterMoveToPosition(0x4D, 1, 1, position.x, position.y, position.z);
             peopleMoveCheck(0x4D, 1, 1);
             floorEventCtrlDoor(resource, 0x2C, 2);
             ETCTOOL_WAIT(lbl_8047E41C);
 
-            fn_80185EE8(0x4D, 1, 1, savedPosition.x, savedPosition.y,
+            std061_characterMoveToPosition(0x4D, 1, 1, savedPosition.x, savedPosition.y,
                         savedPosition.z);
             peopleMoveCheck(0x4D, 1, 1);
-            fn_8018805C(0x4D, 1, lbl_8047E3F4, lbl_8047E410);
+            peopleStartTurn(0x4D, 1, lbl_8047E3F4, lbl_8047E410);
             state = 10;
             ETCTOOL_WAIT(lbl_8047E420);
             break;
@@ -166,7 +166,7 @@ void fn_801E09E0(void)
                 pokemonData = pokemonDataBiosGetPtr(
                     pokemonBiosGetPokemonDataId(pokemon));
                 if (pokemonData != NULL) {
-                    fn_80166AB8(pokemonDataBiosGetVoice(pokemonData), 0, 0);
+                    soundStartRaw(pokemonDataBiosGetVoice(pokemonData), 0, 0);
                 }
             }
 
@@ -182,7 +182,7 @@ void fn_801E09E0(void)
 
         case 100:
             running = FALSE;
-            fn_80183018(0x4D, 1);
+            std077_characterEventFlagsSet(0x4D, 1);
             GSmodelSetVisibility(object, 0);
             GSmodelFree(object);
             object = NULL;
@@ -198,12 +198,12 @@ void etctoolSetPokemonNakigoe(void)
 
     extern void *pokemonDataBiosGetPtr(void);
     extern u16 pokemonDataBiosGetVoice(void *);
-    extern void fn_80166AB8(u32, u32, u32);
+    extern void soundStartRaw(u32, u32, u32);
 
     pokemonData = pokemonDataBiosGetPtr();
     if (pokemonData != NULL) {
         voice = pokemonDataBiosGetVoice(pokemonData);
-        fn_80166AB8((u32)voice, 0, 0);
+        soundStartRaw((u32)voice, 0, 0);
     }
 }
 
@@ -417,22 +417,22 @@ void _vtrTexDispFunc__Fv(void)
     extern f32 lbl_8047E454;
     extern u8 lbl_80314958[];
     extern u8 lbl_80314C78[];
-    extern void fn_800D88DC(s32 mode);
-    extern void fn_800D888C(s32 mode);
-    extern void fn_800D9B58(f32, f32, f32, f32);
-    extern void fn_800DA4C4(s32, s32, s32);
-    extern void fn_800DA2BC(s32, s32, s32);
-    extern void fn_800DA1E8(s32, s32, s32);
-    extern void fn_800DA028(s32);
+    extern void gfxSetFlags(s32 mode);
+    extern void gfxClearFlags(s32 mode);
+    extern void gfxSetOrtho(f32, f32, f32, f32);
+    extern void gfxSetBlendMode(s32, s32, s32);
+    extern void gfxSetUpdates(s32, s32, s32);
+    extern void gfxSetZMode(s32, s32, s32);
+    extern void gfxSetCullMode(s32);
     extern void fn_800D9ED8(s32);
-    extern void fn_800D6A00(s32 primitive);
-    extern void fn_800D7820(void* format);
-    extern void fn_800D67BC(s32 count);
-    extern void fn_800D6680(f32 x, f32 y, f32 z);
-    extern void fn_800D5C18(s32 index, s32 red, s32 green, s32 blue);
-    extern void fn_800D85D4(s32 index, void* texture);
-    extern void fn_800D59B8(s32 index, f32 u, f32 v);
-    extern void fn_800D6728(void);
+    extern void gfxSetPrimitive(s32 primitive);
+    extern void gfxSetVtxDesc(void* format);
+    extern void gfxBegin(s32 count);
+    extern void gfxVtxPos(f32 x, f32 y, f32 z);
+    extern void gfxVtxColor(s32 index, s32 red, s32 green, s32 blue);
+    extern void gfxLoadTexture(s32 index, void* texture);
+    extern void gfxVtxTexCoord(s32 index, f32 u, f32 v);
+    extern void gfxEnd(void);
     extern void fn_800FAEF8(s32 x, s32 y, s32 color, const char* text,
                             ...);
 
@@ -446,49 +446,49 @@ void _vtrTexDispFunc__Fv(void)
         return;
     }
 
-    fn_800D88DC(1);
-    fn_800D888C(4);
-    fn_800D9B58(lbl_8047E428, lbl_8047E428, lbl_8047E42C,
+    gfxSetFlags(1);
+    gfxClearFlags(4);
+    gfxSetOrtho(lbl_8047E428, lbl_8047E428, lbl_8047E42C,
                 lbl_8047E430);
-    fn_800DA4C4(0, 1, 1);
-    fn_800DA2BC(1, 1, 0);
-    fn_800DA1E8(0, 1, 1);
-    fn_800DA028(0);
+    gfxSetBlendMode(0, 1, 1);
+    gfxSetUpdates(1, 1, 0);
+    gfxSetZMode(0, 1, 1);
+    gfxSetCullMode(0);
     fn_800D9ED8(1);
-    fn_800D6A00(4);
+    gfxSetPrimitive(4);
 
     if (lbl_8047B435) {
-        fn_800D888C(2);
-        fn_800D7820(lbl_80314958);
-        fn_800D67BC(4);
-        fn_800D6680(lbl_8047E434, lbl_8047E438, lbl_8047E428);
-        fn_800D5C18(0, 0xFF, 0, 0);
-        fn_800D6680(lbl_8047E43C, lbl_8047E438, lbl_8047E428);
-        fn_800D5C18(0, 0xFF, 0, 0);
-        fn_800D6680(lbl_8047E434, lbl_8047E440, lbl_8047E428);
-        fn_800D5C18(0, 0xFF, 0, 0);
-        fn_800D6680(lbl_8047E43C, lbl_8047E440, lbl_8047E428);
-        fn_800D5C18(0, 0xFF, 0, 0);
-        fn_800D6728();
+        gfxClearFlags(2);
+        gfxSetVtxDesc(lbl_80314958);
+        gfxBegin(4);
+        gfxVtxPos(lbl_8047E434, lbl_8047E438, lbl_8047E428);
+        gfxVtxColor(0, 0xFF, 0, 0);
+        gfxVtxPos(lbl_8047E43C, lbl_8047E438, lbl_8047E428);
+        gfxVtxColor(0, 0xFF, 0, 0);
+        gfxVtxPos(lbl_8047E434, lbl_8047E440, lbl_8047E428);
+        gfxVtxColor(0, 0xFF, 0, 0);
+        gfxVtxPos(lbl_8047E43C, lbl_8047E440, lbl_8047E428);
+        gfxVtxColor(0, 0xFF, 0, 0);
+        gfxEnd();
     }
 
-    fn_800D88DC(2);
-    fn_800D7820(lbl_80314C78);
-    fn_800D85D4(0, lbl_8047B438);
-    fn_800D67BC(4);
-    fn_800D6680(lbl_8047E444, lbl_8047E448, lbl_8047E428);
-    fn_800D5C18(0, 0xFF, 0xFF, 0xFF);
-    fn_800D59B8(0, lbl_8047E428, lbl_8047E428);
-    fn_800D6680(lbl_8047E44C, lbl_8047E448, lbl_8047E428);
-    fn_800D5C18(0, 0xFF, 0xFF, 0xFF);
-    fn_800D59B8(0, lbl_8047E450, lbl_8047E428);
-    fn_800D6680(lbl_8047E444, lbl_8047E454, lbl_8047E428);
-    fn_800D5C18(0, 0xFF, 0xFF, 0xFF);
-    fn_800D59B8(0, lbl_8047E428, lbl_8047E450);
-    fn_800D6680(lbl_8047E44C, lbl_8047E454, lbl_8047E428);
-    fn_800D5C18(0, 0xFF, 0xFF, 0xFF);
-    fn_800D59B8(0, lbl_8047E450, lbl_8047E450);
-    fn_800D6728();
+    gfxSetFlags(2);
+    gfxSetVtxDesc(lbl_80314C78);
+    gfxLoadTexture(0, lbl_8047B438);
+    gfxBegin(4);
+    gfxVtxPos(lbl_8047E444, lbl_8047E448, lbl_8047E428);
+    gfxVtxColor(0, 0xFF, 0xFF, 0xFF);
+    gfxVtxTexCoord(0, lbl_8047E428, lbl_8047E428);
+    gfxVtxPos(lbl_8047E44C, lbl_8047E448, lbl_8047E428);
+    gfxVtxColor(0, 0xFF, 0xFF, 0xFF);
+    gfxVtxTexCoord(0, lbl_8047E450, lbl_8047E428);
+    gfxVtxPos(lbl_8047E444, lbl_8047E454, lbl_8047E428);
+    gfxVtxColor(0, 0xFF, 0xFF, 0xFF);
+    gfxVtxTexCoord(0, lbl_8047E428, lbl_8047E450);
+    gfxVtxPos(lbl_8047E44C, lbl_8047E454, lbl_8047E428);
+    gfxVtxColor(0, 0xFF, 0xFF, 0xFF);
+    gfxVtxTexCoord(0, lbl_8047E450, lbl_8047E450);
+    gfxEnd();
 
     switch (lbl_8047B424) {
     case 0:

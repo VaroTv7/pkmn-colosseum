@@ -691,9 +691,9 @@ extern void GXInitLightDistAttn(GXLightObj* lo, f32 ref_dist, f32 ref_br,
                                 u32 dist_func);
 extern void GXLoadLightObjImm(GXLightObj* lo, u32 light_id);
 /* GXInitLightPos / GXInitLightDir / GXInitLightColor / GXInitLightAttn */
-extern void fn_800BA414(GXLightObj* lo, f32 x, f32 y, f32 z);
-extern void fn_800BA424(GXLightObj* lo, f32 nx, f32 ny, f32 nz);
-extern void fn_800BA198(GXLightObj* lo, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1,
+extern void GXInitLightPos(GXLightObj* lo, f32 x, f32 y, f32 z);
+extern void GXInitLightDir(GXLightObj* lo, f32 nx, f32 ny, f32 nz);
+extern void GXInitLightAttn(GXLightObj* lo, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1,
                         f32 k2);
 
 /* active_lights[MAX_GXLIGHT] */
@@ -814,7 +814,7 @@ static inline HSD_LObj* LObjGetActiveBySlot(s32 idx)
 
 static inline void LObjSetupDiffuse(HSD_LObj* lobj)
 {
-    fn_800BA440(&lobj->lightobj, lobj->color);
+    GXInitLightColor(&lobj->lightobj, lobj->color);
     lobj->hw_color = lobj->color;
     lobj->flags |= LOBJ_DIFF_DIRTY;
 
@@ -842,9 +842,9 @@ static inline void LObjSetupSpecular(HSD_LObj* lobj, MtxPtr mtx, s32 spec_id)
 {
     lobj->spec_id = spec_id;
     if (spec_id != 0) {
-        fn_800BA440(&lobj->spec_lightobj, lobj->color);
+        GXInitLightColor(&lobj->spec_lightobj, lobj->color);
         lobj->shininess = lbl_8047DBF8;
-        fn_800BA198(&lobj->spec_lightobj, lbl_8047DBE8, lbl_8047DBE8,
+        GXInitLightAttn(&lobj->spec_lightobj, lbl_8047DBE8, lbl_8047DBE8,
                     lbl_8047DBE4, lobj->shininess * lbl_8047DBFC, lbl_8047DBE8,
                     lbl_8047DBE4 - lobj->shininess * lbl_8047DBFC);
 
@@ -880,12 +880,12 @@ static inline void LObjSetupInfinite(HSD_LObj* lobj, MtxPtr vmtx)
     PSMTXMultVec(vmtx, &lpos, &lpos);
 
     if (lobj->flags & LOBJ_DIFFUSE) {
-        fn_800BA414(&lobj->lightobj, lpos.x, lpos.y, lpos.z);
-        fn_800BA198(&lobj->lightobj, lbl_8047DBE4, lbl_8047DBE8, lbl_8047DBE8,
+        GXInitLightPos(&lobj->lightobj, lpos.x, lpos.y, lpos.z);
+        GXInitLightAttn(&lobj->lightobj, lbl_8047DBE4, lbl_8047DBE8, lbl_8047DBE8,
                     lbl_8047DBE4, lbl_8047DBE8, lbl_8047DBE8);
     }
     if (lobj->flags & LOBJ_SPECULAR) {
-        fn_800BA414(&lobj->spec_lightobj, lpos.x, lpos.y, lpos.z);
+        GXInitLightPos(&lobj->spec_lightobj, lpos.x, lpos.y, lpos.z);
     }
 }
 
@@ -893,15 +893,15 @@ static inline void LObjSetupPoint(HSD_LObj* lobj, MtxPtr mtx)
 {
     Vec lpos;
 
-    fn_800BA440(&lobj->lightobj, lobj->color);
+    GXInitLightColor(&lobj->lightobj, lobj->color);
     lobj->hw_color = lobj->color;
     HSD_LObjGetPosition(lobj, &lpos);
     PSMTXMultVec(mtx, &lpos, &lpos);
-    fn_800BA414(&lobj->lightobj, lpos.x, lpos.y, lpos.z);
-    fn_800BA414(&lobj->spec_lightobj, lpos.x, lpos.y, lpos.z);
+    GXInitLightPos(&lobj->lightobj, lpos.x, lpos.y, lpos.z);
+    GXInitLightPos(&lobj->spec_lightobj, lpos.x, lpos.y, lpos.z);
 
     if (lobj->flags & LOBJ_RAW_PARAM) {
-        fn_800BA198(&lobj->lightobj, lbl_8047DBE4, lbl_8047DBE8, lbl_8047DBE8,
+        GXInitLightAttn(&lobj->lightobj, lbl_8047DBE4, lbl_8047DBE8, lbl_8047DBE8,
                     lobj->u.attn.k0, lobj->u.attn.k1, lobj->u.attn.k2);
     } else {
         f32 ref_br = lobj->u.spot.ref_br;
@@ -924,12 +924,12 @@ static inline void LObjSetupSpot(HSD_LObj* lobj, MtxPtr mtx)
     LObjGetLightVector(lobj, &ldir);
     PSMTXMultVecSR(mtx, &ldir, &ldir);
     PSVECNormalize(&ldir, &ldir);
-    fn_800BA414(&lobj->lightobj, lpos.x, lpos.y, lpos.z);
-    fn_800BA414(&lobj->spec_lightobj, lpos.x, lpos.y, lpos.z);
-    fn_800BA424(&lobj->lightobj, ldir.x, ldir.y, ldir.z);
+    GXInitLightPos(&lobj->lightobj, lpos.x, lpos.y, lpos.z);
+    GXInitLightPos(&lobj->spec_lightobj, lpos.x, lpos.y, lpos.z);
+    GXInitLightDir(&lobj->lightobj, ldir.x, ldir.y, ldir.z);
 
     if (lobj->flags & LOBJ_RAW_PARAM) {
-        fn_800BA198(&lobj->lightobj, lobj->u.attn.a0, lobj->u.attn.a1,
+        GXInitLightAttn(&lobj->lightobj, lobj->u.attn.a0, lobj->u.attn.a1,
                     lobj->u.attn.a2, lobj->u.attn.k0, lobj->u.attn.k1,
                     lobj->u.attn.k2);
     } else {
@@ -948,7 +948,7 @@ static inline void LObjSetupSpot(HSD_LObj* lobj, MtxPtr mtx)
     }
 }
 
-extern void fn_801A6098(HSD_LObj* lobj, GXColor color, f32 shininess);
+extern void HSD_LObjSetupSpecular(HSD_LObj* lobj, GXColor color, f32 shininess);
 
 /* 0x801A4F54 | 0xE78 */
 /* Really HSD_LObjSetupInit: binds every current light to a hardware slot. */
@@ -1059,13 +1059,13 @@ void HSD_LObjSetup(HSD_CObj* cobj)
         if (lobj == NULL) {
             continue;
         }
-        fn_801A6098(lobj, lobj->color, lobj->shininess);
+        HSD_LObjSetupSpecular(lobj, lobj->color, lobj->shininess);
     }
 }
 
 /* 0x801A5DCC | 0x2CC */
 /* Really HSD_LObjSetupSpecularInit: rebuilds every specular half-vector. */
-void fn_801A5DCC(MtxPtr pmtx)
+void HSD_LObjSetupSpecularInit(MtxPtr pmtx)
 {
     s32 i;
     s32 num;
@@ -1110,14 +1110,14 @@ void fn_801A5DCC(MtxPtr pmtx)
         LObjNormalizeVecOr(&half, &half, lbl_8047DBE8, lbl_8047DBE8,
                            lbl_8047DBE4);
     init_dir:
-        fn_800BA424(&lobj->spec_lightobj, half.x, half.y, half.z);
+        GXInitLightDir(&lobj->spec_lightobj, half.x, half.y, half.z);
         lobj->flags |= LOBJ_SPEC_DIRTY;
     }
 }
 
 /* 0x801A6098 | 0x174 */
 /* The public per-light HSD_LObjSetup(lobj, color, shininess). */
-void fn_801A6098(HSD_LObj* lobj, GXColor color, f32 shininess)
+void HSD_LObjSetupSpecular(HSD_LObj* lobj, GXColor color, f32 shininess)
 {
     if ((lobj->flags & LOBJ_HIDDEN) ||
         (lobj->flags & LOBJ_TYPE_MASK) == LOBJ_AMBIENT)
@@ -1129,7 +1129,7 @@ void fn_801A6098(HSD_LObj* lobj, GXColor color, f32 shininess)
         if (lobj->hw_color.r != color.r || lobj->hw_color.g != color.g ||
             lobj->hw_color.b != color.b || lobj->hw_color.a != color.a)
         {
-            fn_800BA440(&lobj->lightobj, color);
+            GXInitLightColor(&lobj->lightobj, color);
             lobj->hw_color = color;
             lobj->flags |= LOBJ_DIFF_DIRTY;
         }
@@ -1142,7 +1142,7 @@ void fn_801A6098(HSD_LObj* lobj, GXColor color, f32 shininess)
     if (lobj->spec_id != 0) {
         if (lobj->shininess != shininess) {
             lobj->shininess = shininess;
-            fn_800BA198(&lobj->spec_lightobj, lbl_8047DBE8, lbl_8047DBE8,
+            GXInitLightAttn(&lobj->spec_lightobj, lbl_8047DBE8, lbl_8047DBE8,
                         lbl_8047DBE4, shininess * lbl_8047DBFC, lbl_8047DBE8,
                         lbl_8047DBE4 - shininess * lbl_8047DBFC);
             lobj->flags |= LOBJ_SPEC_DIRTY;

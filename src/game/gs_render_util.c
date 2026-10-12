@@ -45,7 +45,7 @@ extern void fn_80363CF4(void* jobj);   /* HSD_JObjRemoveAll */
 
 /* GS render util internal functions */
 extern void GSvecCopy(void* dst, const void* src);
-extern void fn_800E0168(void* dst, void* src1, void* src2);
+extern void GSvecSub(void* dst, void* src1, void* src2);
 extern void fn_800E0628(void* dst, void* src);
 extern void fn_800E0218(void* a, void* b, void* c, void* d);
 extern void GSmtxMakeXRotation(void* a, f32 b);
@@ -99,7 +99,7 @@ extern s32  fn_800D37CC(void);
 extern void fn_800D7FE4(void* obj);
 extern void fn_800D834C(void);
 extern void fn_800D9BD0(f32 a, f32 b, f32 c, f32 d);
-extern void fn_800D9B58(f32 a, f32 b, f32 c, f32 d);
+extern void gfxSetOrtho(f32 a, f32 b, f32 c, f32 d);
 extern void* HSD_CObjLoadDesc(void* modelSub);
 extern char lbl_8047C9C4[] __attribute__((section(".sdata2")));
 extern char lbl_8047C9CC[] __attribute__((section(".sdata2")));
@@ -113,7 +113,7 @@ extern f32 lbl_8047CA04;   /* SDA2 float constant */
 extern f32 lbl_8047CA08;   /* SDA2 float constant */
 extern f32 lbl_8047CA0C;   /* SDA2 float constant */
 extern u32 lbl_80270350[4]; /* .rodata array */
-extern void* fn_800D7BF8(u32 idx);
+extern void* gfxGetCameraMatrix(u32 idx);
 extern void GSvecTransform(void* out, void* sphere, void* ray);
 extern void GXProject(void* sphere, void* center, void* radii, f32 x, f32 y, f32 z, void* outA, void* outB, void* outC);
 extern void* HSD_FogLoadDesc(void* ctx);
@@ -200,7 +200,7 @@ void fn_800D1070(u32 dtUnk) {
                 HSD_CObjGetInterest(*(void**)((u8*)obj + 0xc), (u8*)obj + 0x100);
             } else if (*(u8*)((u8*)obj + 0x1) == 1) {
                 f32 tmp[3];
-                fn_800E0168(tmp, (u8*)obj + 0x70, (u8*)obj + 0x100);
+                GSvecSub(tmp, (u8*)obj + 0x70, (u8*)obj + 0x100);
                 {
                     f32 ax = tmp[0];
                     ax = ax > lbl_8047C998 ? ax : -ax;
@@ -470,7 +470,7 @@ u8 GScameraIsAnimating(GSRenderCamera* camera) {
  * Address: 0x800D1A40, Size: 0x30
  * ================================================================== */
 void GScameraGetDistanceVector(GSRenderCamera* camera, GSRenderVec3* dest) {
-    fn_800E0168(dest, &camera->eye, &camera->interest);
+    GSvecSub(dest, &camera->eye, &camera->interest);
 }
 
 /* ==================================================================
@@ -518,7 +518,7 @@ void* fn_800D1B3C(void* obj) {
             HSD_CObjGetInterest(c->cobj, &c->interest);
         } else if (c->useLookAt == 1) {
             f32 tmp[3];
-            fn_800E0168(tmp, &c->eye, &c->interest);
+            GSvecSub(tmp, &c->eye, &c->interest);
             {
                 f32 ax = tmp[0];
                 ax = ax > lbl_8047C998 ? ax : -ax;
@@ -570,7 +570,7 @@ void fn_800D1D00(void* obj) {
         HSD_CObjGetInterest(c->cobj, &c->interest);
     } else if (c->useLookAt == 1) {
         f32 tmp[3];
-        fn_800E0168(tmp, &c->eye, &c->interest);
+        GSvecSub(tmp, &c->eye, &c->interest);
         {
             f32 ax = tmp[0];
             ax = ax > lbl_8047C998 ? ax : -ax;
@@ -757,7 +757,7 @@ void _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID(void) {
             HSD_CObjGetInterest(c->cobj, &c->interest);
         } else if (c->useLookAt == 1) {
             f32 tmp[3];
-            fn_800E0168(tmp, &c->eye, &c->interest);
+            GSvecSub(tmp, &c->eye, &c->interest);
             {
                 f32 ax = tmp[0];
                 ax = ax > lbl_8047C998 ? ax : -ax;
@@ -809,7 +809,7 @@ lab_ortho:
     {
         f32 a, b, c2, d;
         HSD_CObjGetOrtho(jobj, &b, &d, &a, &c2);
-        fn_800D9B58(b, d, a, c2);
+        gfxSetOrtho(b, d, a, c2);
         fn_800D834C();
     }
 }
@@ -837,7 +837,7 @@ void fn_800D258C(void* obj) {
         HSD_CObjGetInterest(c->cobj, &c->interest);
     } else if (c->useLookAt == 1) {
         f32 tmp[3];
-        fn_800E0168(tmp, &c->eye, &c->interest);
+        GSvecSub(tmp, &c->eye, &c->interest);
         {
             f32 ax = tmp[0];
             ax = ax > lbl_8047C998 ? ax : -ax;
@@ -1087,12 +1087,12 @@ void fn_800D2B44(void* obj) {
 }
 
 /* ==================================================================
- * fn_800D2B90 - GS render: set current lighting context
+ * gfxSetFog - GS render: set current lighting context
  * Address: 0x800D2B90, Size: 0x258
  * ================================================================== */
 #pragma push
 #pragma optimization_level 2
-void fn_800D2B90(void* arg1) {
+void gfxSetFog(void* arg1) {
     u32 savedColors[4];
     void* prevLight;
     savedColors[0] = lbl_80270350[0];
@@ -1168,8 +1168,8 @@ s32 fn_800D2DE8(void* arg1, void* arg2, u32 count) {
     void* out = arg2;
     s32 result;
     void* model;
-    sphere = fn_800D7BF8(0);
-    model = fn_800D7BF8(2);
+    sphere = gfxGetCameraMatrix(0);
+    model = gfxGetCameraMatrix(2);
     if (sphere == 0 || model == 0) {
         return 0;
     }
@@ -1220,15 +1220,15 @@ s32 fn_800D2DE8(void* arg1, void* arg2, u32 count) {
 }
 
 /* ==================================================================
- * fn_800D2F34 - GS render: single sphere/ray intersection
+ * gfxWorldToScreen - GS render: single sphere/ray intersection
  * Address: 0x800D2F34, Size: 0x128
  * ================================================================== */
-s32 fn_800D2F34(void* arg1, void* arg2) {
+s32 gfxWorldToScreen(void* arg1, void* arg2) {
     f32 center[7];
     f32 radii[6];
     f32 testOut[3];
-    void* sphere = fn_800D7BF8(0);
-    void* model = fn_800D7BF8(2);
+    void* sphere = gfxGetCameraMatrix(0);
+    void* model = gfxGetCameraMatrix(2);
     if (sphere == 0 || model == 0) {
         return 0;
     }

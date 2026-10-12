@@ -23,20 +23,20 @@ u32 fn_801654E0(u32 id, void* buffer, u32 size)
 }
 
 #pragma dont_inline on
-void fn_80165548(u32 id)
+void soundResumeMusic(u32 id)
 {
     if (id != (u32)-1) {
-        fn_801667D8(id, 0x3E8, 0);
+        soundResumeSong(id, 0x3E8, 0);
     }
 }
 
-u32 fn_8016557C(void)
+u32 soundPauseMusic(void)
 {
     u32 id = fn_801662E8(0, 0x406);
 
     if (id != (u32)-1) {
-        fn_801668DC(id, 0x32, 0);
-        fn_80165D0C(0x32);
+        soundPauseSong(id, 0x32, 0);
+        soundWaitMs(0x32);
     }
     return id;
 }
@@ -56,12 +56,12 @@ void fn_801655D4(u32 index)
     }
 }
 
-u32 fn_80165668(u32 id, void* buffer, u32 size)
+u32 std130_soundUnk_801653cc(u32 id, void* buffer, u32 size)
 {
-    u32 savedId = fn_8016557C();
-    u32 result = fn_801653CC(id, buffer, size);
+    u32 savedId = soundPauseMusic();
+    u32 result = soundPlayFanfare(id, buffer, size);
 
-    fn_80165548(savedId);
+    soundResumeMusic(savedId);
     return result;
 }
 
@@ -70,18 +70,18 @@ u32 fn_801656D8(u32 id)
     return fn_80166098(id);
 }
 
-u32 fn_801656F8(u32 id, u32 arg1, u32 arg2)
+u32 std137_soundStopAll(u32 id, u32 arg1, u32 arg2)
 {
-    return fn_80166670(id, arg1, arg2);
+    return soundSetVolume(id, arg1, arg2);
 }
 
-u32 fn_80165718(u32 volume, u32 fade)
+u32 std109_soundPlayEffectVariant(u32 volume, u32 fade)
 {
-    fn_80166D48(volume, fade, 1, 0);
+    soundMasterVolume(volume, fade, 1, 0);
     return 1;
 }
 
-u32 fn_80165744(void)
+u32 std108_soundIsAnyPlaying(void)
 {
     GSvec position;
     u32 result;
@@ -127,15 +127,15 @@ u32 soundStop(u32 id, u32 fade)
     }
 
     if (!(u8)fn_80166084(id)) {
-        fn_80165C70(fade, restartSe, 1);
+        soundFadeSlot(fade, restartSe, 1);
         if (restartSe != 0) {
             GSlogWrite(lbl_8027358C, id);
-            return fn_80165A44(1, 0, 0xFF, restartSe);
+            return soundPlay(1, 0, 0xFF, restartSe);
         }
-        fn_80166B18(id);
+        soundKill(id);
     } else {
-        fn_801669E4(id, fade, 0);
-        fn_80166B18(id);
+        soundStopRaw(id, fade, 0);
+        soundKill(id);
     }
 }
 
@@ -145,31 +145,31 @@ u32 fn_801658FC(u32 id, u32 fade, u32 volume, u32 priority)
         return 0;
     }
 
-    fn_80165C70(fade, 0, 1);
-    return fn_80165A44(id, volume, priority, 0);
+    soundFadeSlot(fade, 0, 1);
+    return soundPlay(id, volume, priority, 0);
 }
 
-u32 fn_8016597C(u32 id, u32 fade, u32 volume, u32 priority)
+u32 std138_soundPlayEffectEx(u32 id, u32 fade, u32 volume, u32 priority)
 {
     if (id == 0 || id >= *lbl_80478FA8) {
         return 0;
     }
 
-    fn_80165C70(fade, 1, 1);
-    return fn_80165A44(id, volume, priority, 1);
+    soundFadeSlot(fade, 1, 1);
+    return soundPlay(id, volume, priority, 1);
 }
 
-u32 fn_801659FC(u32 id, u32 volume, u32 priority)
+u32 std105_soundPlayEffect(u32 id, u32 volume, u32 priority)
 {
-    return fn_80165A44(id, volume, priority, 0);
+    return soundPlay(id, volume, priority, 0);
 }
 
-u32 fn_80165A20(u32 id, u32 volume, u32 priority)
+u32 std104_soundSetBackgroundMusic(u32 id, u32 volume, u32 priority)
 {
-    return fn_80165A44(id, volume, priority, 1);
+    return soundPlay(id, volume, priority, 1);
 }
 
-u32 fn_80165A44(u32 id, u32 volume, u32 priority, s32 kind)
+u32 soundPlay(u32 id, u32 volume, u32 priority, s32 kind)
 {
     u32 flags;
     u32 waveIndex;
@@ -183,16 +183,16 @@ u32 fn_80165A44(u32 id, u32 volume, u32 priority, s32 kind)
     flags = lbl_80478FAC[id].flags;
     if (((flags >> 7) & 1U) == 1U) {
         if (kind == 0) {
-            s32 status = fn_801666BC(id);
+            s32 status = soundGetStatus(id);
 
             if (status != 0 && status >= 0 && status < 4) {
-                fn_80166670(id, 0x32, 0);
-                fn_80165D0C(0x32);
-                fn_80166B18(id);
+                soundSetVolume(id, 0x32, 0);
+                soundWaitMs(0x32);
+                soundKill(id);
             }
             lbl_8047B0A8 = id;
         }
-        return fn_80166A50(id, volume, priority, 0);
+        return soundStart(id, volume, priority, 0);
     }
 
     {
@@ -216,12 +216,12 @@ u32 fn_80165A44(u32 id, u32 volume, u32 priority, s32 kind)
         currentId = fn_801662E8(0, resourceId);
         if (currentId != id) {
             if (currentId != (u32)-1) {
-                s32 status = fn_801666BC(currentId);
+                s32 status = soundGetStatus(currentId);
 
                 if (status != 0 && status >= 0 && status < 4) {
-                    fn_80166670(currentId, 0x32, 0);
-                    fn_80165D0C(0x32);
-                    fn_80166B18(currentId);
+                    soundSetVolume(currentId, 0x32, 0);
+                    soundWaitMs(0x32);
+                    soundKill(currentId);
                 }
             }
 
@@ -237,7 +237,7 @@ u32 fn_80165A44(u32 id, u32 volume, u32 priority, s32 kind)
                     return 0;
                 }
             }
-            fn_80166B3C(id, 0, resourceId);
+            soundAttachWork(id, 0, resourceId);
         }
 
         if (kind != 0) {
@@ -246,22 +246,22 @@ u32 fn_80165A44(u32 id, u32 volume, u32 priority, s32 kind)
         if (kind == 0) {
             lbl_8047B0A8 = id;
         }
-        return fn_80166A50(id, volume, priority, 0);
+        return soundStart(id, volume, priority, 0);
     }
 }
 
-void fn_80165C70(u32 volume, u32 isSe, s32 wait)
+void soundFadeSlot(u32 volume, u32 isSe, s32 wait)
 {
     u32 resourceId = isSe != 0 ? 0x406 : 0x407;
     u32 id = fn_801662E8(0, resourceId);
 
     if (id != (u32)-1) {
-        s32 status = fn_801666BC(id);
+        s32 status = soundGetStatus(id);
 
         if (status != 0 && status >= 0 && status < 4) {
-            fn_80166670(id, volume, 0);
+            soundSetVolume(id, volume, 0);
             if (wait != 0) {
-                fn_80165D0C(volume);
+                soundWaitMs(volume);
             }
         }
     }

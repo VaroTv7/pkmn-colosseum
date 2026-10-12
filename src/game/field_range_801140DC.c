@@ -23,7 +23,7 @@ extern u8 lbl_80408378[];
 #pragma optimization_level 0
 #pragma optimizewithasm off
 #pragma peephole off
-void fn_801140DC(u32 material, u32 palette, u8 slot) {
+void std246_saveSetStatus578(u32 material, u32 palette, u8 slot) {
 #pragma optimization_level 4
     extern u32 fn_80128E24(void);
     extern void* fn_80128E04(void);
@@ -46,7 +46,7 @@ void fn_801140DC(u32 material, u32 palette, u8 slot) {
 #pragma push
 #pragma optimization_level 0
 #pragma optimizewithasm off
-void fn_8011416C(u32 material, u32 palette, u8 materialSlot) {
+void std161_fieldSetPending(u32 material, u32 palette, u8 materialSlot) {
 #pragma optimization_level 4
     u8* state = lbl_80408378;
 
@@ -79,7 +79,7 @@ void fn_8011418C(u32* texture, u32* palette, u8* textureSlot) {
 #pragma push
 #pragma optimization_level 0
 #pragma optimizewithasm off
-void fn_801141D8(u32 texture, u32 palette, u8 textureSlot) {
+void std128_mapSetReturnMap(u32 texture, u32 palette, u8 textureSlot) {
 #pragma optimization_level 4
     u8* state = lbl_80408378;
 
@@ -118,7 +118,7 @@ void EvlogSet__FScUl(s8 event, u32 value) {
 #pragma optimization_level 0
 #pragma optimizewithasm off
 #pragma peephole off
-s32 fn_80114254(s32 param1, s32 param2, s32 param3) {
+s32 floorReadRelModulePostFunc(s32 param1, s32 param2, s32 param3) {
 #pragma optimization_level 4
     extern s32 GSresGetResource(s32);
     extern void fn_8017F484(s32, s32, s32);
@@ -135,7 +135,7 @@ s32 fn_80114254(s32 param1, s32 param2, s32 param3) {
 #pragma optimization_level 0
 #pragma optimizewithasm off
 #pragma peephole off
-void* fn_801142B4(void* group, void* model, u32 size) {
+void* floorReadRelModulePreFunc(void* group, void* model, u32 size) {
 #pragma optimization_level 4
     extern void* GSresAllocResourceAlign(u32 size, u32 alignment, void* group, void* model, u32 flags);
     void* result;
@@ -157,11 +157,11 @@ void* fn_801142B4(void* group, void* model, u32 size) {
 void* floorReadGFLPostFunc(u32 group, u32 modelId) {
 #pragma optimization_level 4
     extern void* GSresGetResource(u32, u32);
-    extern void fn_801ED680(void*);
+    extern void flareInit(void*);
     void* model;
 
     model = GSresGetResource(group, modelId);
-    fn_801ED680(model);
+    flareInit(model);
     return model;
 }
 #pragma peephole on

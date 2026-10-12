@@ -31,7 +31,7 @@ extern void OSReport(const char* fmt, ...);
 extern HSD_SList* fn_801A3E64(HSD_SList* node);   /* HSD_SListRemove  */
 extern HSD_SList* HSD_SListPrepend(HSD_SList* next, void* data);
 extern s32 fn_801ADC3C(s32 range);                /* HSD_Randi        */
-extern f32 fn_801ADC7C(void);                     /* HSD_Randf        */
+extern f32 HSD_Randf(void);                     /* HSD_Randf        */
 
 extern f64 sin(f64 x);
 extern f64 cos(f64 x);
@@ -234,7 +234,7 @@ f32 HSD_ByteCodeEval(u8* bytecode, f32* args, s32 nb_args)
             break;
         case 0x0C:
             BC_ASSERT(405, stack);
-            fv = fn_801ADC7C();
+            fv = HSD_Randf();
             stack->data = *(void**) &fv;
             break;
         case 0x0D:

@@ -1,6 +1,6 @@
 #include "dolphin/types.h"
 
-extern void fn_800D67BC(u16 count);
+extern void gfxBegin(u16 count);
 extern void fn_800D6028(u16 vertex);
 extern void fn_800D5FA4(u8 vertex);
 extern void fn_800D5DD0(u16 vertex);
@@ -9,7 +9,7 @@ extern void fn_800D5AB0(u32 layer, u16 vertex);
 extern void fn_800D5A38(u32 layer, u8 vertex);
 extern void fn_800D579C(u32 layer, u16 vertex);
 extern void fn_800D5724(u32 layer, u8 vertex);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 
 void fn_800D7940(u8* object, u16 vertexCount)
 {
@@ -18,7 +18,7 @@ void fn_800D7940(u8* object, u16 vertexCount)
     u32 layer;
     u8* entry;
 
-    fn_800D67BC(vertexCount);
+    gfxBegin(vertexCount);
     for (vertex = 0; vertex < vertexCount; vertex++) {
         if (*(s32*)(object + 0x28) == 2) {
             fn_800D6028(vertex);
@@ -58,5 +58,5 @@ void fn_800D7940(u8* object, u16 vertexCount)
             }
         }
     }
-    fn_800D6728();
+    gfxEnd();
 }

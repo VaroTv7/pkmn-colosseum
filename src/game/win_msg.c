@@ -17,9 +17,9 @@ extern void* memcpy(void* dst, const void* src, u32 n);
 extern void  GSlogWrite(const char* fmt, ...);         /* OSReport / GSlog */
 extern void  fn_800FE6D0(s16 x, s16 y);
 extern void  spriteSetEnv(void);
-extern void  fn_8001EC08(s32, s32, s16, s16, u8, s32);
+extern void  msgWinDrawBackground(s32, s32, s16, s16, u8, s32);
 extern void  winMsgDrawMessage(void* message, u32 state, u8 flag);
-extern void  fn_800FBD88(void* message);
+extern void  GSmsgFree(void* message);
 extern u32   GSmsgGetRect(void* message);
 extern void  GSmsgExec(void* message, u8 a, u8 b);
 extern s32   GSmsgIsCheck(void* message);
@@ -65,7 +65,7 @@ extern void* menuItemBiosGetPtr(s16 idx); /* node by index */
 extern void* menuSeBiosGetPtr(s32);
 extern u16   fn_8005D798(void*, s32);
 extern void* menuSpriteBiosGetPtr(s32);
-extern int   fn_80166A28(u16);
+extern int   soundStartSE(u16);
 extern s32   GSthreadGetCurrentThread(void);    /* poll/yield -- 0 if pending */
 extern void  _threadSwitch(void);    /* yield */
 extern u32   fn_800BE31C(void);    /* rand or tick */
@@ -126,19 +126,19 @@ extern u8  lbl_8035B3F0[];  /* module name string */
 /* Additional external functions (not already declared above) */
 extern void fn_800BF74C(void);
 extern void fn_800D9ED8(s32);
-extern void fn_800D88DC(s32);
-extern void fn_800D888C(s32);
-extern void fn_800D9B58(f32, f32, f32, f32);
-extern void fn_800DA4C4(s32, s32, s32);
-extern void fn_800DA2BC(s32, s32, s32);
-extern void fn_800DA1E8(s32, s32, s32);
-extern void fn_800DA028(s32);
-extern void fn_800D6A00(s32);
-extern void fn_800D7820(s32);
-extern void fn_800D67BC(s32);
-extern void fn_800D6680(f32);
+extern void gfxSetFlags(s32);
+extern void gfxClearFlags(s32);
+extern void gfxSetOrtho(f32, f32, f32, f32);
+extern void gfxSetBlendMode(s32, s32, s32);
+extern void gfxSetUpdates(s32, s32, s32);
+extern void gfxSetZMode(s32, s32, s32);
+extern void gfxSetCullMode(s32);
+extern void gfxSetPrimitive(s32);
+extern void gfxSetVtxDesc(s32);
+extern void gfxBegin(s32);
+extern void gfxVtxPos(f32);
 extern void fn_800D5CB8(s32, s32, s32, s32, s32);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 
 /* Forward declarations for functions defined later in this TU */
 extern u8    menuOffScreenCheckEnable(u8 param);
@@ -160,7 +160,7 @@ extern void* windowSearchItemID(void* head, s32 key);
 extern s32   menuOpenCustom(void* p, u32 r4, s32 r5, s32 r6, void* r7, s32 r8, ...);
 extern u8    menuOffScreenSetPriority(u8 val);
 extern u8    menuOffScreenSetDisp(u8 val);
-extern u32   fn_800D3088(void);
+extern u32   msgGetCharsPerFrame(void);
 extern u8    lbl_80404B68[];  /* scratch table for fn_80107F38, fn_801081F8 */
 extern u8    lbl_80404B8C[];  /* scratch table for winSeqSetMenu */
 extern u8    lbl_8047AD10;     /* resource request gate byte (sda21) - authoritative decl, use as-is */
@@ -376,10 +376,10 @@ s32 winMsgDraw(u8* window, u8* item) {
     case 0x40:
     case 0x50:
     case 0x51:
-        fn_8001EC08(0, 2, x, y, window[0x8B], 1);
+        msgWinDrawBackground(0, 2, x, y, window[0x8B], 1);
         break;
     case 0x10C:
-        fn_8001EC08(0, 2, x, y, window[0x8B], 0);
+        msgWinDrawBackground(0, 2, x, y, window[0x8B], 0);
         break;
     }
 
@@ -408,7 +408,7 @@ s32 winMsgCtrl(u8* window) {
     switch ((s8)window[1]) {
     case 0:
         if (*(void**)work != NULL) {
-            fn_800FBD88(*(void**)work);
+            GSmsgFree(*(void**)work);
         }
         *(u32*)work = windowGetParam(window, 0);
         work[4] = (u8)windowGetParam(window, 1);
@@ -452,7 +452,7 @@ s32 winMsgCtrl(u8* window) {
         }
         break;
     case 5:
-        fn_800FBD88(*(void**)work);
+        GSmsgFree(*(void**)work);
         *(void**)work = NULL;
         break;
     }

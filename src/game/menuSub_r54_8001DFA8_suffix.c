@@ -20,7 +20,7 @@ s32 fn_8001DFA8(u32 arg1, u8* arg2) {
 
 #pragma push
 #pragma peephole off
-s32 fn_8001E00C(u32 sp8) {
+s32 std158_menuOpenCustom43(u32 sp8) {
     extern void* windowGetActiveID();
     extern s32 menuOpenCustom(s32, ...);
     extern void menuCloseCustom(s32, s32, s32);
@@ -71,7 +71,7 @@ s8 menuSubOpenYesNo(u8 menuType, s16 x, s16 y, s32 initialValue) {
 #pragma optimization_level 4
 #pragma push
 #pragma peephole off
-s32 fn_8001E184(void) {
+s32 std011_dialogDisplayYesNoMenu(void) {
     extern void* windowGetActiveID();
     extern void menuOpenCustom(s32, ...);
     extern void windowCheckCursor();

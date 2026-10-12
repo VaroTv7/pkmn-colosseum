@@ -15,8 +15,8 @@
  * The movie playback functions sit in the early game code at approximately
  * 0x80035E04 - 0x800366D0. They call into the THP player library
  * (fn_801E1874 for THPPlayerGetState, fn_801E189C for THPPlayerOpen, etc.)
- * and coordinate with the sound system (fn_80165A20) and flag system
- * (fn_801902E0, fn_80190528) for proper sequencing.
+ * and coordinate with the sound system (std104_soundSetBackgroundMusic) and flag system
+ * (std081_flagCheckTrue, std078_flagSetFalse) for proper sequencing.
  *
  * fn_80035E04, fn_80035EE4, fn_80035F34, and fn_80035F64 are the real,
  * address/size-confirmed movie stop/cleanup, opening-demo, auto-demo, and

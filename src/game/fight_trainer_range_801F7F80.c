@@ -100,7 +100,7 @@ void* fightTrainerSearchInvalidFightPokemonPtr(void* context, u16 count) {
 
 /* 0x801F8000 | size: 0x100 */
 u32 fn_801F8000(void* context) {
-    extern u16 fn_801EF634(void* ctx);
+    extern u16 std103_battleGetResult(void* ctx);
     extern u8 heroCheckValid(void* ptr);
     extern void* fightTrainerGetStatus(void* ctx, u32 slot, u32 field, u32 index);
     extern u8* fightTrainerKindDataBiosGetPtr(u16 val);
@@ -116,7 +116,7 @@ u32 fn_801F8000(void* context) {
     if (context == NULL) {
         valid = 0;
     } else {
-        if ((u16)fn_801EF634(context) == 1) {
+        if ((u16)std103_battleGetResult(context) == 1) {
             valid = 0;
         } else if ((s32)fightTrainerGetStatus(context, 0, 0x43, 0) == 0) {
             valid = 0;
@@ -142,7 +142,7 @@ u32 fn_801F8000(void* context) {
 
 /* 0x801F8100 | size: 0xF8 */
 void* fightTrainerGetNamePtr(void* context) {
-    extern u16 fn_801EF634(void* ctx);
+    extern u16 std103_battleGetResult(void* ctx);
     extern u8 heroCheckValid(void* ptr);
     extern void* fightTrainerGetStatus(void* ctx, u32 slot, u32 field, u32 index);
     extern void* heroGetStatus(void* ptr, u32 param1, u32 param2);
@@ -155,7 +155,7 @@ void* fightTrainerGetNamePtr(void* context) {
     if (context == NULL) {
         valid = 0;
     } else {
-        if ((u16)fn_801EF634(context) == 1) {
+        if ((u16)std103_battleGetResult(context) == 1) {
             valid = 0;
         } else if ((s32)fightTrainerGetStatus(context, 0, 0x43, 0) == 0) {
             valid = 0;
@@ -992,7 +992,7 @@ void fightTrainerTimeOutSelectFightAction(void* unused, void* trainer, void* pok
 
 /* 0x801F923C | size: 0x1BC */
 u32 fightTrainerSelectFightAction(void* context, void* param) {
-    extern u16 fn_801EF634(void* ctx);
+    extern u16 std103_battleGetResult(void* ctx);
     extern void fightActionInit(void* ptr);
     extern void* fightTrainerGetStatus(void* ctx, u32 slot, u32 field, u16 idx);
     extern void fightOutPokemonInitFightActionBuff(void* ptr);
@@ -1013,7 +1013,7 @@ u32 fightTrainerSelectFightAction(void* context, void* param) {
         fightOutPokemonInitFightActionBuff(fightTrainerGetStatus(context, 0, 0x46, i));
     }
     fightOutPokemonInitFightActionBuff(fightTrainerGetStatus(context, 0, 0x47, 0));
-    if ((u16)fn_801EF634(context) == 1) {
+    if ((u16)std103_battleGetResult(context) == 1) {
         return 0;
     }
     slot = (u16)(u32)fightTrainerGetStatus(context, 0, 0x43, 0);
@@ -1344,7 +1344,7 @@ void fightTrainerSortFightTrainerDataIdToHeroTemotiPokemon(
     extern void pokemonInit(void*);
     extern u8 heroCheckValid(void*);
     extern void* heroGetStatus(void*, u32, u32);
-    extern u16 fn_801EF634(void*);
+    extern u16 std103_battleGetResult(void*);
     extern void* fightTrainerGetStatus(void*, u32, u32, u32);
     extern void fn_802331F4(void*, void*, void**, u16, u16);
     void* selected[6];
@@ -1356,7 +1356,7 @@ void fightTrainerSortFightTrainerDataIdToHeroTemotiPokemon(
     u16 validCount;
     u8 i;
 
-    if (trainer == NULL || fn_801EF634(trainer) == 1) {
+    if (trainer == NULL || std103_battleGetResult(trainer) == 1) {
         return;
     }
     trainerDataId = (u16)(u32)fightTrainerGetStatus(trainer, 0, 0x43, 0);
@@ -1909,7 +1909,7 @@ BOOL fightTrainerCheckTrainerDataIdValid(u32 arg0, s32 arg1) {
 #if !defined(FTR_BANK_EXACT_ACTIVE)
 /* 0x801FA524 | size: 0x110 */
 u32 fightTrainerCheckDoFight(void* context) {
-    extern u16 fn_801EF634(void* ctx);
+    extern u16 std103_battleGetResult(void* ctx);
     extern u8 heroCheckValid(void* ptr);
     extern void* fightTrainerGetStatus(void* ctx, u32 slot, u32 field, u32 idx);
     extern u8 fightPokemonCheckFightOut(void* ptr);
@@ -1919,7 +1919,7 @@ u32 fightTrainerCheckDoFight(void* context) {
 
     valid = 0;
     if (context != NULL) {
-        if ((u16)fn_801EF634(context) != 1) {
+        if ((u16)std103_battleGetResult(context) != 1) {
             if ((s32)fightTrainerGetStatus(context, 0, 0x43, 0) != 0) {
                 if (fightTrainerGetStatus(context, 0, 0x44, 0) != NULL) {
                     if ((u8)heroCheckValid(fightTrainerGetStatus(context, 0, 0x44, 0)) != 0) {
@@ -1947,7 +1947,7 @@ u32 fightTrainerCheckDoFight(void* context) {
     defined(FTR_EXACT_801FA634_801FAA58)
 /* 0x801FA634 | size: 0xA4 */
 u32 fightTrainerCheckValid(void* context) {
-    extern u16 fn_801EF634(void* ctx);
+    extern u16 std103_battleGetResult(void* ctx);
     extern u8 heroCheckValid(void* ptr);
     extern void* fightTrainerGetStatus(void* ctx, u32 slot, u32 field, u32 idx);
     void* result;
@@ -1955,7 +1955,7 @@ u32 fightTrainerCheckValid(void* context) {
     if (context == NULL) {
         return 0;
     }
-    if ((u16)fn_801EF634(context) == 1) {
+    if ((u16)std103_battleGetResult(context) == 1) {
         return 0;
     }
     if ((s32)fightTrainerGetStatus(context, 0, 0x43, 0) == 0) {

@@ -1,7 +1,7 @@
 #include "dolphin/types.h"
 #include "game/gs_gfx.h"
 
-extern void fn_800D4F98(s32 arg0, ...);
+extern void gfxRecordCommand(s32 arg0, ...);
 extern void GXFlush(void);
 extern void GSgfxBackFBDoFrame(void);
 extern void fn_801BF8A0(s32 value);
@@ -20,7 +20,7 @@ void fn_800D3074(u32 flag)
     lbl_8047AA80->renderEnabled = flag;
 }
 
-u32 fn_800D3088(void)
+u32 msgGetCharsPerFrame(void)
 {
     return lbl_8047AA80->frameDelta;
 }
@@ -38,7 +38,7 @@ void fn_800D30A0(u32 value)
 void fn_800D30AC(void)
 {
     if (lbl_8047AA80->mode == 1) {
-        fn_800D4F98(4, 0);
+        gfxRecordCommand(4, 0);
     } else {
         GXFlush();
     }

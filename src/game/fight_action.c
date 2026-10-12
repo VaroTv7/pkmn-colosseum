@@ -133,7 +133,7 @@ u32 fightActionFlowSyuuryouPost(void* action)
     extern void heroCheckSetMonohiroiAllTemotiPokemon();
     extern u32 heroGetStatus();
     extern void heroBiosCopy();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern void fn_801EFFC4();
     extern u8 fightFloorIsGcHeroWin();
     extern int fightFloorGetGcHeroFightTrainerPtr();
@@ -159,12 +159,12 @@ u32 fightActionFlowSyuuryouPost(void* action)
   u8 auStack_24 [8];
   
   uVar1 = fightFloorGetStatus(0,0,0x16,0);
-  sVar6 = fn_801EF634();
+  sVar6 = std103_battleGetResult();
   if (sVar6 != 1) {
     iVar2 = fightFloorGetGcHeroFightTrainerPtr(0);
     if ((iVar2 != 0) && (iVar3 = fightTrainerGetStatus(iVar2,0,0x44,0), iVar3 != 0)) {
       fightTrainerBackFightPokemonToTemotiPokemon(iVar2,0);
-      uVar4 = fn_801EF634();
+      uVar4 = std103_battleGetResult();
       cVar7 = fightFloorIsGcHeroWin(0,uVar4);
       if (cVar7 == 1) {
         cVar7 = fightFloorGetStatus(0,0,0x24,0);
@@ -224,7 +224,7 @@ u32 fightActionFlowSyuuryou(void* ctx)
     extern u32 fn_800896C0();
     extern void _threadSwitch();
     extern void msgctrlSetValue();
-    extern void fn_80165668();
+    extern void std130_soundUnk_801653cc();
     extern u32 battleCameraIsSimple();
     extern void fn_801DA8C4();
     extern u8 fn_801DA94C();
@@ -233,7 +233,7 @@ u32 fightActionFlowSyuuryou(void* ctx)
     extern void fn_801DDD28();
     extern void fn_801EF2D4();
     u16 uVar3;
-    extern u32 fn_801EF634();
+    extern u32 std103_battleGetResult();
     extern void fn_801EF8F4();
     extern void fightMainWaitFrame();
     extern u32 fightTargetGetPtrAsNowFightType();
@@ -292,7 +292,7 @@ u32 fightActionFlowSyuuryou(void* ctx)
                 fn_801DDD28(uVar4, 0x5a, 4, 0);
                 saved_r27 = battleCameraIsSimple();
             }
-            fn_80165668(0x3f5, 0, 0xff);
+            std130_soundUnk_801653cc(0x3f5, 0, 0xff);
             msgctrlSetValue(0x5d, 0);
             fightMenuOpenMsg(0x766c);
             fightMenuCloseMsg();
@@ -341,7 +341,7 @@ u32 fightActionFlowSyuuryou(void* ctx)
             fightMenuCloseMsg();
         }
     }
-    uVar1 = fn_801EF634();
+    uVar1 = std103_battleGetResult();
     cVar10 = fightFloorIsGcHeroWin(0, uVar1);
     if ((cVar10 == 1) && ((cVar10 = fightFloorGetStatus(0, 0, 0x25, 0), cVar10 == 1))) {
         fn_80211B94(ctx, (u32) lbl_80378801, 0);
@@ -358,14 +358,14 @@ u32 fightActionFlowSyuuryou(void* ctx)
 #pragma peephole on
 u32 fightActionFlowSyuuryouPre(void* action)
 {
-    extern void fn_8016597C();
+    extern void std138_soundPlayEffectEx();
     extern void fightMainWaitFrame();
     extern u32 fightFloorGetStatus();
     u32 uVar1;
 
     uVar1 = fightFloorGetStatus(0, 0, 0x12, 0);
     if (uVar1 != 0) {
-        fn_8016597C(1, 1000, 1000, 0xff);
+        std138_soundPlayEffectEx(1, 1000, 1000, 0xff);
         fightMainWaitFrame(0x3c);
     }
     return 1;
@@ -530,12 +530,12 @@ u32 fightActionFlowFightNigeru(void* ctx) {
 #pragma push
 #pragma peephole on
 u32 fightActionFlowOneTurnPost(void* ctx) {
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern void fightMainWaitFrame();
     extern void fightFloorInitFightTarget();
     extern void fightSeqPost();
     u16 sVar1;
-    sVar1 = fn_801EF634();
+    sVar1 = std103_battleGetResult();
     if (sVar1 != 0) { return 1; }
     fightSeqPost(ctx);
     fightMainWaitFrame(5);
@@ -548,7 +548,7 @@ u32 fightActionFlowOneTurnPost(void* ctx) {
 #pragma push
 #pragma peephole on
 u32 fightActionFlowAllFightOutPokemonDoFightAction(void* ctx) {
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern void fightFloorSortFightOutPokemonPtrAry();
     extern void fightFloorCreateFightOutPokemonPtrAry();
     extern u32 _fightActionFlowAllFightOutPokemonDoFightActionOneLoop__FP11FIGHT_FLOORUc();
@@ -560,7 +560,7 @@ u32 fightActionFlowAllFightOutPokemonDoFightAction(void* ctx) {
     fightFloorSortFightOutPokemonPtrAry(0, 1);
     uVar1 = _fightActionFlowAllFightOutPokemonDoFightActionOneLoop__FP11FIGHT_FLOORUc(0, 0);
     if ((u8)uVar1 != 1) { return uVar1; }
-    sVar3 = fn_801EF634();
+    sVar3 = std103_battleGetResult();
     if (sVar3 != 0) { return 1; }
     fn_80211A00(ctx);
     uVar2 = _fightActionFlowAllFightOutPokemonDoFightActionOneLoop__FP11FIGHT_FLOORUc(0, 1);
@@ -575,7 +575,7 @@ u32 fightActionFlowAllFightOutPokemonDoFightAction(void* ctx) {
 /* Address: 0x8020BC94 | Size: 0x1a4 | Ghidra import */
 u32 _fightActionFlowAllFightOutPokemonDoFightActionOneLoop__FP11FIGHT_FLOORUc(void* fightFloor, u8 phase)
 {
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern void fightFloorInitFightTarget();
     extern int fightFloorGetStatus();
     extern u8 fightOutPokemonCheckFightOut();
@@ -634,7 +634,7 @@ u32 _fightActionFlowAllFightOutPokemonDoFightActionOneLoop__FP11FIGHT_FLOORUc(vo
               fightActionFlowFifo(local_48);
               if (phase != 0) {
                 fightFloorInitFightTarget(0);
-                sVar6 = fn_801EF634();
+                sVar6 = std103_battleGetResult();
                 if (sVar6 != 0) {
                   return 1;
                 }
@@ -692,10 +692,10 @@ u32 fightActionFlowAllFightTrainerSelectFightAction(void* action) {
 #pragma push
 #pragma peephole on
 u32 _fightActionFlowFightTrainerSelectFightAction__FPvUsPv(void* ctx, u32 param) {
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern void fightFloorSetTuusinErrorFightResult();
     extern u8 fightTrainerSelectFightAction();
-    if (fn_801EF634() != 0) {
+    if (std103_battleGetResult() != 0) {
         return 1;
     }
     if (fightTrainerSelectFightAction(ctx, param) == 0) {
@@ -795,7 +795,7 @@ u32 fightActionFlowKaisiPre(void* action)
     extern void _threadSwitch();
     extern void menuGetKeyInfo();
     extern void msgctrlSetValue();
-    extern void fn_80165A20();
+    extern void std104_soundSetBackgroundMusic();
     extern s8 fadeCheck();
     extern void fadeSet();
     extern void fn_801DA4E8();
@@ -947,7 +947,7 @@ LAB_00209430:
     }
     iVar10 = fightFloorGetStatus(0,0,0x11,0);
     if (iVar10 != 0) {
-      fn_80165A20(iVar10,0,0xff);
+      std104_soundSetBackgroundMusic(iVar10,0,0xff);
     }
     cVar14 = fightFloorGetStatus(0,0,0x33,0);
     if (cVar14 == 1) {
@@ -1030,7 +1030,7 @@ LAB_00209430:
     fn_801DA8C4(uVar4,0x56,4);
     iVar9 = fightFloorGetStatus(0,0,0x11,0);
     if (iVar9 != 0) {
-      fn_80165A20(iVar9,0,0xff);
+      std104_soundSetBackgroundMusic(iVar9,0,0xff);
     }
   }
   return 1;

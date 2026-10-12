@@ -238,7 +238,7 @@ void _eyeTexAnimEnded(void* model, u8* callback) {
     extern u32 GSmodelGetAnimType(void*);
     extern void GSmodelGetAnimIndex(void*, u32*, u32*);
     extern void GSmodelSetTexAnimIndex(void*, u32);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern void GSmodelSetTexAnimFrame(void*, f32);
     extern void GSmodelSetTexAnimRate(void*, f32);
     extern void GSmodelSetTexAnimType(void*, u32);
@@ -279,7 +279,7 @@ void _eyeTexAnimEnded(void* model, u8* callback) {
             type = GSmodelGetAnimType(model);
             GSmodelGetAnimIndex(model, &animIndex, &unused);
             GSmodelSetTexAnimIndex(model, animIndex);
-            GSmodelSetTexAnimFrame(model, frame + rate * fn_800D3088());
+            GSmodelSetTexAnimFrame(model, frame + rate * msgGetCharsPerFrame());
             GSmodelSetTexAnimRate(model, rate);
             GSmodelSetTexAnimType(model, type);
             GSmodelStartTexAnimation(model);
@@ -487,7 +487,7 @@ s32 fn_801DF160(u8* obj) {
  */
 void fn_801DF1D0(void* obj) {
     extern u8 fn_801DAC54(void*);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern f32 fn_800E0BE4(void);
     extern void GSmodelLinkTexAnimToAnim(void*, u32);
     extern void GSmodelSetTexAnimIndex(void*, u32);
@@ -516,7 +516,7 @@ void fn_801DF1D0(void* obj) {
     if (*(s16*)(effect + 0x1C) < 0) {
         return;
     }
-    *(u16*)(effect + 0x20) += (u16)fn_800D3088();
+    *(u16*)(effect + 0x20) += (u16)msgGetCharsPerFrame();
     timer = *(u16*)(effect + 0x20);
     if (timer < 10) {
         return;
@@ -594,10 +594,10 @@ void fn_801DF3D4(u8* obj) {
 }
 
 /**
- * fn_801DF474 - Waza ability effect handler.
+ * std087_sequenceUnk87 - Waza ability effect handler.
  * Address: 0x801DF474 | Size: 0x31C
  */
-void fn_801DF474(s32 slot, s32 abilityID) {
+void std087_sequenceUnk87(s32 slot, s32 abilityID) {
     typedef struct AbilityItemWeight {
         u16 item;
         u16 weight;
@@ -611,20 +611,20 @@ void fn_801DF474(s32 slot, s32 abilityID) {
     extern AbilityItemWeight* lbl_80478EB4;
     extern f32 lbl_8047E3F0;
     extern u16 GSrand(void);
-    extern void* fn_8018D998(s32, s32);
+    extern void* peopleIsInGroup(s32, s32);
     extern void* peopleSearchID(void*);
     extern void* peopleGetPosition(void*);
     extern void heroMoveGetHeroPos(void*);
-    extern void* fn_8018FCBC(void*);
-    extern void fn_800E0168(void*, void*, void*);
+    extern void* peopleGetPositionPtr(void*);
+    extern void GSvecSub(void*, void*, void*);
     extern f64 atan2(f64, f64);
-    extern void fn_8018805C(s32, s32, f32, f32);
+    extern void peopleStartTurn(s32, s32, f32, f32);
     extern void peopleMoveCheck(s32, s32, u8);
-    extern u32 fn_801906A0(u32);
+    extern u32 std082_flagGetValue(u32);
     extern void _flagSet(u32, s32);
-    extern u8 fn_801902E0(u32);
+    extern u8 std081_flagCheckTrue(u32);
     extern void winMsgOpenFieldWithSE(s32, s32, s32, s32);
-    extern void fn_80165668(s32, s32, s32);
+    extern void std130_soundUnk_801653cc(s32, s32, s32);
     extern void msgctrlSetValue(s32, u32);
     extern void winMsgOpen(s32, s32, s32, s32);
     extern s32 heroItemAddItemDataId(void*, u32, u32, s32);
@@ -667,23 +667,23 @@ void fn_801DF474(s32 slot, s32 abilityID) {
     while (running != 0) {
         switch (state) {
         case 0:
-            person = peopleSearchID(fn_8018D998(slot, abilityID));
+            person = peopleSearchID(peopleIsInGroup(slot, abilityID));
             if (person != NULL) {
                 peopleGetPosition(person);
                 heroMoveGetHeroPos(&heroPosition);
-                fn_800E0168(&direction, &heroPosition,
-                            fn_8018FCBC(person));
-                fn_8018805C(slot, abilityID,
+                GSvecSub(&direction, &heroPosition,
+                            peopleGetPositionPtr(person));
+                peopleStartTurn(slot, abilityID,
                             (f32)atan2(direction.x, direction.z),
                             lbl_8047E3F0);
                 peopleMoveCheck(slot, abilityID, 1);
             }
 
-            if (fn_801906A0(0xD0) != 0) {
-                if (fn_801906A0(0xD1) >= 500) {
+            if (std082_flagGetValue(0xD0) != 0) {
+                if (std082_flagGetValue(0xD1) >= 500) {
                     _flagSet(0xD1, 0);
                     result = 1;
-                } else if (fn_801902E0(0xAFE) != 0) {
+                } else if (std081_flagCheckTrue(0xAFE) != 0) {
                     _flagSet(0xAFE, 0);
                     result = -1;
                 } else {
@@ -707,7 +707,7 @@ void fn_801DF474(s32 slot, s32 abilityID) {
             state = 2;
             break;
         case 2:
-            fn_80165668(0x3CA, 0, 0xFF);
+            std130_soundUnk_801653cc(0x3CA, 0, 0xFF);
             msgctrlSetValue(0x2D, selectedItem);
             winMsgOpen(3, 0x3CB8, 1, 0);
             result = heroItemAddItemDataId(NULL, selectedData, 1, -1);

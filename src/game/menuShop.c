@@ -747,7 +747,7 @@ s32 fn_8002A618(u8* self)
         u32 unused;
         s32* value;
     } ShopNumberContext;
-    extern void fn_80166A50(u32, u32, u32, u32);
+    extern void soundStart(u32, u32, u32, u32);
 
     ShopNumberContext* context;
     u16* keyInfo;
@@ -801,7 +801,7 @@ s32 fn_8002A618(u8* self)
             }
         }
         if (oldValue != *context->value) {
-            fn_80166A50(0x23, 0, 0xFF, 0);
+            soundStart(0x23, 0, 0xFF, 0);
         }
     }
 
@@ -839,7 +839,7 @@ s32 fn_8002A618(u8* self)
             }
         }
         if (oldValue != *context->value) {
-            fn_80166A50(0x23, 0, 0xFF, 0);
+            soundStart(0x23, 0, 0xFF, 0);
         }
     }
 
@@ -2387,7 +2387,7 @@ void fn_8002C284(u32 loc_idx, u32 mode)
 extern void savedataGetStatus(void);
 extern void pcboxGetItemCapacity(void);
 extern void heroItemCheckAddItemDataId(void);
-extern void fn_80166AB8(void);
+extern void soundStartRaw(void);
 extern void fn_80093574(void);
 extern void fn_80092C90(void);
 extern void fn_80093610(void);
@@ -2450,7 +2450,7 @@ void fn_8002C408(s32 mapIdx, u32 mode)
     extern s32   menuCloseSync(void* slot, u8 flag);       /* close menu (sync) */
     extern void  winMsgClose(s32 slot);                    /* close message box */
     extern s32   menuCloseCustom(void* slot, u32 m, u8 wait);  /* close menu group */
-    extern void  fn_80166AB8(s32 soundId, s32 p2, s32 p3); /* play SE */
+    extern void  soundStartRaw(s32 soundId, s32 p2, s32 p3); /* play SE */
     extern s32   fn_801D0748(u32 a, u32 b, u32 c);         /* confirm-state query */
     extern void  fn_80093574(s32 a);                       /* inventory list ops */
     extern void  fn_80092C90(s32 a, void* list, s32 c);
@@ -2764,7 +2764,7 @@ L_628:
     /* (7) commit purchase */
     fn_8002A1C4((u8*)mapIdx, 6, -1);       /* "thank you" */
     fn_80029EF4((void*)(u32)totalCost, sel, chosenQty, (u8)mode, (void*)&buf);
-    fn_80166AB8(0x3cc, 0, 0);              /* purchase SE */
+    soundStartRaw(0x3cc, 0, 0);              /* purchase SE */
 
     if ((mode & 0xff) == 4) {
         /* mode-4 "buy another?" loop */
@@ -2889,7 +2889,7 @@ done:
 #endif
 
 /* fn_8002CE6C - 0x8002CE6C | size: 0x2e8 */
-extern void fn_800D3088(void);
+extern void msgGetCharsPerFrame(void);
 extern void heroDecPokedoru(void);
 extern u32 lbl_804788A8;
 extern u32 lbl_80478E54;
@@ -2926,14 +2926,14 @@ void fn_8002CE6C(u8* obj, u8 slot) {
     extern u32  menuCloseCustom(u32 a, u32 b, u32 c);    /* display engine open/close */
     extern void fn_8002A2CC(u8* obj, s32 msgId, s32 arg2, ...); /* post format message */
     extern void _threadSwitch(void);                     /* GSthread yield */
-    extern void fn_800D3088(void);                     /* GSgfx tick / frame advance */
+    extern void msgGetCharsPerFrame(void);                     /* GSgfx tick / frame advance */
     extern u32  heroGetStatus(u8* ptr, u32 sel, u32 idx); /* interaction getter */
     extern u32  windowGetActiveID(void);                    /* get display context handle */
     extern s32 menuOpenCustom(u32 sceneId, u32 a, u32 b, u32 c, u32 d, u32 e, ...); /* show menu dialog */
     extern void itemDataBiosGetPtr(u32 speciesId);            /* load species data */
     extern u16  itemDataBiosGetPrice(void);                    /* get trade/field count */
     extern s32  heroItemCheckAddItemDataId(u8* ptr, u32 itemId);     /* check trade precondition */
-    extern void fn_80166AB8(u32 soundId, u32 a, u32 b); /* play sound */
+    extern void soundStartRaw(u32 soundId, u32 a, u32 b); /* play sound */
     extern void heroDecPokedoru(u8* ptr, u32 offset);     /* deduct from party (give Pokemon) */
     extern s32  heroItemAddItemDataId(u8* ptr, u32 itemId, u32 qty, u32 flags); /* execute trade/receive */
 
@@ -2997,12 +2997,12 @@ _loop_top:
     frames = 0;
     while (frames < 0x1e) {
         _threadSwitch();
-        fn_800D3088();
-        frames += 1; /* fn_800D3088 returns frame delta in r3 per usage elsewhere;
-                      * here the asm does: bl fn_800D3088; add r28,r28,r3 →
-                      * accumulate whatever fn_800D3088 returns (typically 1) */
-        /* FUNCTIONAL-TODO: original accumulates fn_800D3088's return value.
-         * Since fn_800D3088 is a gfx tick that returns 1 per frame, this is
+        msgGetCharsPerFrame();
+        frames += 1; /* msgGetCharsPerFrame returns frame delta in r3 per usage elsewhere;
+                      * here the asm does: bl msgGetCharsPerFrame; add r28,r28,r3 →
+                      * accumulate whatever msgGetCharsPerFrame returns (typically 1) */
+        /* FUNCTIONAL-TODO: original accumulates msgGetCharsPerFrame's return value.
+         * Since msgGetCharsPerFrame is a gfx tick that returns 1 per frame, this is
          * functionally equivalent to counting frames. */
     }
 
@@ -3142,7 +3142,7 @@ _loop_top:
         }
 
         /* 9. Execute trade: play sound, deduct, trade, then loop */
-        fn_80166AB8(0x3cb, 0, 0);
+        soundStartRaw(0x3cb, 0, 0);
         heroDecPokedoru(NULL, (u32)species);   /* give/deduct partner Pokemon by species offset */
         heroItemAddItemDataId(NULL, (u32)selection, 1, -1); /* execute trade/receive */
         fn_8002A2CC(obj, 4, 0x2d, (s32)(selection & 0xffff), -1);
@@ -3224,7 +3224,7 @@ void fn_8002D154(s32 mapIndex, u8 colorIndex)
     extern u32  heroItemCheckAddItemDataId(s32 a, u32 item);                      /* inventory count */
     extern void heroDecPokedoru(s32 a, s32 amount);                    /* spend money     */
     extern void heroItemAddItemDataId(s32 a, s32 item, u16 qty, s32 d);      /* add item        */
-    extern void fn_80166AB8(s32 sfx, s32 b, s32 c);               /* play sound      */
+    extern void soundStartRaw(s32 sfx, s32 b, s32 c);               /* play sound      */
     extern void winMsgOpenWithSE(s32 a, u32 b, s32 c, s32 d, u8 e);
     extern u32  fn_8002A0B8(u8* buf, s32 idx, s32 a, s32 b, ...);  /* format text     */
     extern void fn_8002A2CC(u8* idx, s32 a, s32 b, ...);          /* format/print txt*/
@@ -3402,7 +3402,7 @@ void fn_8002D154(s32 mapIndex, u8 colorIndex)
                 fn_8002A2CC((u8*)mapIndex, 6, -1);
                 continue;
             }
-            fn_80166AB8(0x3cb, 0, 0);
+            soundStartRaw(0x3cb, 0, 0);
             heroDecPokedoru(0, totalCost);
             heroItemAddItemDataId(0, selectedItem, (u16)chosenQty, -1);
             fn_8002A2CC((u8*)mapIndex, 4, -1);
@@ -3421,13 +3421,13 @@ close_and_return:
 }
 #endif
 
-/* fn_8002D5D4 - 0x8002D5D4 | size: 0x348 */
+/* std026_unkMenuSequence26 - 0x8002D5D4 | size: 0x348 */
 extern u32 lbl_8047A3FC;
 extern u32 lbl_80478E54;
 extern u32 lbl_8047A3DC;
 #if 0
-asm void fn_8002D5D4(void) {
-#include "src/game/gs_worldmap_fn_8002D5D4.inc"
+asm void std026_unkMenuSequence26(void) {
+#include "src/game/gs_worldmap_std026_unkMenuSequence26.inc"
 }
 #else
 typedef struct ShopLocationEntry {
@@ -3477,7 +3477,7 @@ static inline u32 shopMemoryAlloc(void)
 }
 
 /*
- * fn_8002D5D4  GSmap_CancelTravel  0x8002D5D4 | size: 0x348
+ * std026_unkMenuSequence26  GSmap_CancelTravel  0x8002D5D4 | size: 0x348
  *
  * Implements the "cancel travel" / travel-confirmation state machine for the
  * world map.  Dispatches on the NPC-state byte at lbl_80478E54[lbl_8047A3FC*4 + 1]:
@@ -3500,7 +3500,7 @@ static inline u32 shopMemoryAlloc(void)
  *   fn_800E24B0 / GSmemLock     : (u16 handle)
  *   fn_800E209C / GSmemFree     : (u16 handle)
  */
-void fn_8002D5D4(void)
+void std026_unkMenuSequence26(void)
 {
     ShopLocationEntry* location_entry;
     u32 location_offset;
@@ -3870,7 +3870,7 @@ void menuShopOpen(u32 flag)
     extern u32  fn_800D37CC(void);
     extern void menuCreateOffScreen(f32);
     extern void _flagSet(s32, s32);
-    extern void fn_800FF730(s32);
+    extern void std098_mapWarpToMenuRoom(s32);
     extern void floorSetFadeScript(s32, u32);
     extern void _threadSwitch(void);
     extern void menuReleaseOffScreen(f32);
@@ -3898,7 +3898,7 @@ void menuShopOpen(u32 flag)
     *(&lbl_8047A3FC + 1) = 1u;   /* lbl_8047A3FC+4 */
 
     _flagSet(1, 2);
-    fn_800FF730(0x38f);
+    std098_mapWarpToMenuRoom(0x38f);
     floorSetFadeScript(0, 0);
     _threadSwitch();   /* GSthreadYield / vsync yield */
 

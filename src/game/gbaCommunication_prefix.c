@@ -50,7 +50,7 @@ extern void fn_800E24B0(u32 status);
 extern void fn_800E209C(u32 status);
 extern u32 fn_800A13F8(void);
 extern void OSYieldThread(void);
-extern void fn_800FF730(u32 id);
+extern void std098_mapWarpToMenuRoom(u32 id);
 extern void floorSetFadeScript(u32 a, u32 b);
 extern u32 GSresGetResource(u32 ctx, u32 id);
 
@@ -88,16 +88,16 @@ extern void msgctrlSetValue(u32 id, u32 value);
 extern void windowDrawSprite(s32 x, s32 y, void* win, u16 sprite, u32 data);
 extern void windowDrawSprite2(s32 x, s32 y, s16 w, s16 h, s32 color, s32 data, s32 sprite, s32 arg7);
 extern void* menuModelRender(void* data);
-extern void fn_800D88DC(u32 arg);
-extern void fn_800D888C(u32 arg);
-extern void fn_800D6A00(u32 arg);
-extern void fn_800D7820(void* arg);
-extern void fn_800D85D4(u32 arg0, void* arg1);
-extern void fn_800D67BC(u32 arg);
+extern void gfxSetFlags(u32 arg);
+extern void gfxClearFlags(u32 arg);
+extern void gfxSetPrimitive(u32 arg);
+extern void gfxSetVtxDesc(void* arg);
+extern void gfxLoadTexture(u32 arg0, void* arg1);
+extern void gfxBegin(u32 arg);
 extern void fn_800D61E4(s32 x, s32 y);
 extern void fn_800D5CB8(u32 arg0, u32 r, u32 g, u32 b, u32 a);
-extern void fn_800D59B8(u32 arg0, f32 s, f32 t);
-extern void fn_800D6728(void);
+extern void gfxVtxTexCoord(u32 arg0, f32 s, f32 t);
+extern void gfxEnd(void);
 extern u32 fn_8001D624(void* pokemon, u32 arg);
 extern u8 menuSubGetPokemonSexForDisp(void* pokemon);
 
@@ -115,11 +115,11 @@ void fn_8008D348(u32 ctx) {
     extern void GSmodelSetAnimType(u32 handle, u32 type);
     extern void GSmodelLinkToGSparticleBank(u32 handle, u32 bank);
     extern void GSmodelSetGSparticleLinkAttachMode(u32 handle, u32 mode);
-    extern void fn_801CB7C4(u32 id);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
+    extern void std116_mapObjectStopAnimation(u32 id);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
     extern void fn_80118874(u32 ptr, u32 val);
-    extern u32 fn_801CBA0C(u32 id);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern u32 std112_modelGetResourceID(u32 id);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void cameraWaitSyncAnime(s32 sync);
 
@@ -148,7 +148,7 @@ void fn_8008D348(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames1 = 1;
     if (fn_800D37CC() == 0x32) {
@@ -159,10 +159,10 @@ void fn_8008D348(u32 ctx) {
     }
     for (elapsed1 = 0; elapsed1 < waitFrames1; ) {
         _threadSwitch();
-        elapsed1 += fn_800D3088();
+        elapsed1 += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     base = GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(*(u32*)(base + 0x144), 1);
@@ -181,13 +181,13 @@ void fn_8008D348(u32 ctx) {
     GSmodelLinkToGSparticleBank(GSresGetResource(ctx, 0x0CE61000), GSresGetResource(ctx, 0x11201400));
     GSmodelSetGSparticleLinkAttachMode(GSresGetResource(ctx, 0x0CE61000), 4);
 
-    h06af0400 = fn_801CBA0C(0x06AF0400);
-    h06bc0400 = fn_801CBA0C(0x06BC0400);
-    h06be0400a = fn_801CBA0C(0x06BE0400);
-    h06be0400b = fn_801CBA0C(0x06BE0400);
-    h06be0400c = fn_801CBA0C(0x06BE0400);
-    h06be0400d = fn_801CBA0C(0x06BE0400);
-    h06be0400e = fn_801CBA0C(0x06BE0400);
+    h06af0400 = std112_modelGetResourceID(0x06AF0400);
+    h06bc0400 = std112_modelGetResourceID(0x06BC0400);
+    h06be0400a = std112_modelGetResourceID(0x06BE0400);
+    h06be0400b = std112_modelGetResourceID(0x06BE0400);
+    h06be0400c = std112_modelGetResourceID(0x06BE0400);
+    h06be0400d = std112_modelGetResourceID(0x06BE0400);
+    h06be0400e = std112_modelGetResourceID(0x06BE0400);
 
     model = GSresGetResource(ctx, h06af0400);
     GSmodelSetShadowFlags(model, 2);
@@ -232,33 +232,33 @@ void fn_8008D348(u32 ctx) {
     }
     for (elapsed2 = 0; elapsed2 < waitFrames2; ) {
         _threadSwitch();
-        elapsed2 += fn_800D3088();
+        elapsed2 += msgGetCharsPerFrame();
     }
 
-    h0d091000 = fn_801CBA0C(0x0D091000);
-    h0d091001 = fn_801CBA0C(0x0D091001);
-    h0d091006 = fn_801CBA0C(0x0D091006);
-    h0d091002 = fn_801CBA0C(0x0D091002);
-    h0d091003 = fn_801CBA0C(0x0D091003);
-    h0d091004 = fn_801CBA0C(0x0D091004);
-    h0d091005 = fn_801CBA0C(0x0D091005);
+    h0d091000 = std112_modelGetResourceID(0x0D091000);
+    h0d091001 = std112_modelGetResourceID(0x0D091001);
+    h0d091006 = std112_modelGetResourceID(0x0D091006);
+    h0d091002 = std112_modelGetResourceID(0x0D091002);
+    h0d091003 = std112_modelGetResourceID(0x0D091003);
+    h0d091004 = std112_modelGetResourceID(0x0D091004);
+    h0d091005 = std112_modelGetResourceID(0x0D091005);
 
-    fn_801845E4(ctx, h06af0400, ctx, h0d091000, 0);
-    fn_801845E4(ctx, h06bc0400, ctx, h0d091001, 0);
-    fn_801845E4(ctx, h06be0400a, ctx, h0d091006, 0);
-    fn_801845E4(ctx, h06be0400b, ctx, h0d091002, 0);
-    fn_801845E4(ctx, h06be0400c, ctx, h0d091003, 0);
-    fn_801845E4(ctx, h06be0400d, ctx, h0d091004, 0);
-    fn_801845E4(ctx, h06be0400e, ctx, h0d091005, 0);
+    std070_characterAttachToCharacter(ctx, h06af0400, ctx, h0d091000, 0);
+    std070_characterAttachToCharacter(ctx, h06bc0400, ctx, h0d091001, 0);
+    std070_characterAttachToCharacter(ctx, h06be0400a, ctx, h0d091006, 0);
+    std070_characterAttachToCharacter(ctx, h06be0400b, ctx, h0d091002, 0);
+    std070_characterAttachToCharacter(ctx, h06be0400c, ctx, h0d091003, 0);
+    std070_characterAttachToCharacter(ctx, h06be0400d, ctx, h0d091004, 0);
+    std070_characterAttachToCharacter(ctx, h06be0400e, ctx, h0d091005, 0);
 
-    fn_801CB834(0x0CE61000, 1, 0, 0);
-    fn_801CB834(h06af0400, 9, 0, 0);
-    fn_801CB834(h06bc0400, 7, 0, 1);
-    fn_801CB834(h06be0400a, 0xA, 0, 1);
-    fn_801CB834(h06be0400b, 0xA, 0, 1);
-    fn_801CB834(h06be0400c, 0xA, 0, 1);
-    fn_801CB834(h06be0400d, 0xA, 0, 1);
-    fn_801CB834(h06be0400e, 0xA, 0, 1);
+    std115_mapObjectPlayAnimation(0x0CE61000, 1, 0, 0);
+    std115_mapObjectPlayAnimation(h06af0400, 9, 0, 0);
+    std115_mapObjectPlayAnimation(h06bc0400, 7, 0, 1);
+    std115_mapObjectPlayAnimation(h06be0400a, 0xA, 0, 1);
+    std115_mapObjectPlayAnimation(h06be0400b, 0xA, 0, 1);
+    std115_mapObjectPlayAnimation(h06be0400c, 0xA, 0, 1);
+    std115_mapObjectPlayAnimation(h06be0400d, 0xA, 0, 1);
+    std115_mapObjectPlayAnimation(h06be0400e, 0xA, 0, 1);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -279,11 +279,11 @@ void fn_80090100(u32 ctx) {
     extern void GSmodelGetFrameCount(u32 handle, f32* out, u32 arg);
     extern void GSmodelSetAnimFrame(u32 handle, f32 frame);
     extern void GSmodelSetAnimType(u32 handle, u32 type);
-    extern void fn_801CB7C4(u32 id);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
+    extern void std116_mapObjectStopAnimation(u32 id);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
     extern void fn_80118874(u32 ptr, u32 val);
-    extern u32 fn_801CBA0C(u32 id);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern u32 std112_modelGetResourceID(u32 id);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void cameraWaitSyncAnime(s32 sync);
 
@@ -316,7 +316,7 @@ void fn_80090100(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames1 = 1;
     if (fn_800D37CC() == 0x32) {
@@ -327,10 +327,10 @@ void fn_80090100(u32 ctx) {
     }
     for (elapsed1 = 0; elapsed1 < waitFrames1; ) {
         _threadSwitch();
-        elapsed1 += fn_800D3088();
+        elapsed1 += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     waitFrames2 = 1;
     if (fn_800D37CC() == 0x32) {
@@ -341,7 +341,7 @@ void fn_80090100(u32 ctx) {
     }
     for (elapsed2 = 0; elapsed2 < waitFrames2; ) {
         _threadSwitch();
-        elapsed2 += fn_800D3088();
+        elapsed2 += msgGetCharsPerFrame();
     }
 
     base = GSresGetResource(ctx, 0x0CE61000);
@@ -358,21 +358,21 @@ void fn_80090100(u32 ctx) {
     GSmodelSetAnimType(model, 0);
     GSmodelStartAnimation(model);
 
-    h06bc0400 = fn_801CBA0C(0x06BC0400);
-    h0cea1000 = fn_801CBA0C(0x0CEA1000);
+    h06bc0400 = std112_modelGetResourceID(0x06BC0400);
+    h0cea1000 = std112_modelGetResourceID(0x0CEA1000);
 
     model = GSresGetResource(ctx, h06bc0400);
     GSmodelSetShadowFlags(model, 2);
     GSmodelSetShadowLight(model, lbl_8047A690);
     GSmodelSetShadowSurface(model, 1, &lbl_8047A694);
 
-    h0d290400a = fn_801CBA0C(0x0D290400);
-    h06be0400a = fn_801CBA0C(0x06BE0400);
-    h0d240400a = fn_801CBA0C(0x0D240400);
-    h06be0400b = fn_801CBA0C(0x06BE0400);
-    h0d240400b = fn_801CBA0C(0x0D240400);
-    h0d290400b = fn_801CBA0C(0x0D290400);
-    h0d240400c = fn_801CBA0C(0x0D240400);
+    h0d290400a = std112_modelGetResourceID(0x0D290400);
+    h06be0400a = std112_modelGetResourceID(0x06BE0400);
+    h0d240400a = std112_modelGetResourceID(0x0D240400);
+    h06be0400b = std112_modelGetResourceID(0x06BE0400);
+    h0d240400b = std112_modelGetResourceID(0x0D240400);
+    h0d290400b = std112_modelGetResourceID(0x0D290400);
+    h0d240400c = std112_modelGetResourceID(0x0D240400);
 
     model = GSresGetResource(ctx, h0d290400a);
     GSmodelSetShadowFlags(model, 2);
@@ -414,34 +414,34 @@ void fn_80090100(u32 ctx) {
     }
     for (elapsed3 = 0; elapsed3 < waitFrames3; ) {
         _threadSwitch();
-        elapsed3 += fn_800D3088();
+        elapsed3 += msgGetCharsPerFrame();
     }
 
-    h0cea1006 = fn_801CBA0C(0x0CEA1006);
-    h0cea1007 = fn_801CBA0C(0x0CEA1007);
-    h0cea1001 = fn_801CBA0C(0x0CEA1001);
-    h0cea1002 = fn_801CBA0C(0x0CEA1002);
-    h0cea1003 = fn_801CBA0C(0x0CEA1003);
-    h0cea1004 = fn_801CBA0C(0x0CEA1004);
-    h0cea1005 = fn_801CBA0C(0x0CEA1005);
+    h0cea1006 = std112_modelGetResourceID(0x0CEA1006);
+    h0cea1007 = std112_modelGetResourceID(0x0CEA1007);
+    h0cea1001 = std112_modelGetResourceID(0x0CEA1001);
+    h0cea1002 = std112_modelGetResourceID(0x0CEA1002);
+    h0cea1003 = std112_modelGetResourceID(0x0CEA1003);
+    h0cea1004 = std112_modelGetResourceID(0x0CEA1004);
+    h0cea1005 = std112_modelGetResourceID(0x0CEA1005);
 
-    fn_801845E4(ctx, h06bc0400, ctx, h0cea1000, 0);
-    fn_801845E4(ctx, h0d290400a, ctx, h0cea1006, 0);
-    fn_801845E4(ctx, h06be0400a, ctx, h0cea1007, 0);
-    fn_801845E4(ctx, h0d240400a, ctx, h0cea1001, 0);
-    fn_801845E4(ctx, h06be0400b, ctx, h0cea1002, 0);
-    fn_801845E4(ctx, h0d240400b, ctx, h0cea1003, 0);
-    fn_801845E4(ctx, h0d290400b, ctx, h0cea1004, 0);
-    fn_801845E4(ctx, h0d240400c, ctx, h0cea1005, 0);
+    std070_characterAttachToCharacter(ctx, h06bc0400, ctx, h0cea1000, 0);
+    std070_characterAttachToCharacter(ctx, h0d290400a, ctx, h0cea1006, 0);
+    std070_characterAttachToCharacter(ctx, h06be0400a, ctx, h0cea1007, 0);
+    std070_characterAttachToCharacter(ctx, h0d240400a, ctx, h0cea1001, 0);
+    std070_characterAttachToCharacter(ctx, h06be0400b, ctx, h0cea1002, 0);
+    std070_characterAttachToCharacter(ctx, h0d240400b, ctx, h0cea1003, 0);
+    std070_characterAttachToCharacter(ctx, h0d290400b, ctx, h0cea1004, 0);
+    std070_characterAttachToCharacter(ctx, h0d240400c, ctx, h0cea1005, 0);
 
-    fn_801CB834(h06bc0400, 3, 0, 1);
-    fn_801CB834(h0d290400a, 4, 0, 1);
-    fn_801CB834(h06be0400a, 3, 0, 1);
-    fn_801CB834(h0d240400a, 4, 0, 1);
-    fn_801CB834(h06be0400b, 3, 0, 1);
-    fn_801CB834(h0d240400b, 5, 0, 1);
-    fn_801CB834(h0d290400b, 4, 0, 1);
-    fn_801CB834(h0d240400c, 4, 0, 1);
+    std115_mapObjectPlayAnimation(h06bc0400, 3, 0, 1);
+    std115_mapObjectPlayAnimation(h0d290400a, 4, 0, 1);
+    std115_mapObjectPlayAnimation(h06be0400a, 3, 0, 1);
+    std115_mapObjectPlayAnimation(h0d240400a, 4, 0, 1);
+    std115_mapObjectPlayAnimation(h06be0400b, 3, 0, 1);
+    std115_mapObjectPlayAnimation(h0d240400b, 5, 0, 1);
+    std115_mapObjectPlayAnimation(h0d290400b, 4, 0, 1);
+    std115_mapObjectPlayAnimation(h0d240400c, 4, 0, 1);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -453,19 +453,19 @@ void fn_8008CACC(u32 ctx) {
     #pragma peephole off
     extern u32 GSresGetResource(u32 ctx, u32 id);
     extern void GSmodelSetShadowTextureSize(u32 w, u32 h);
-    extern void fn_801CB7C4(u32 id);
+    extern void std116_mapObjectStopAnimation(u32 id);
     extern void GSmodelLinkToGSparticleBank(u32 handle, u32 val);
     extern void GSmodelSetGSparticleLinkAttachMode(u32 handle, u32 val);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
     extern s32 fn_800D37CC(void);
     extern void _threadSwitch(void);
-    extern u32 fn_800D3088(void);
-    extern u32 fn_801CBA0C(u32 id);
+    extern u32 msgGetCharsPerFrame(void);
+    extern u32 std112_modelGetResourceID(u32 id);
     extern u32 GSmodelSetShadowFlags(u32 handle, u32 val);
     extern void GSmodelSetShadowLight(u32 handle, u32 val);
     extern void GSmodelSetShadowSurface(u32 handle, u32 val, u32 *param);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
@@ -488,7 +488,7 @@ void fn_8008CACC(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames = 1;
     if (fn_800D37CC() == 0x32) {
@@ -499,10 +499,10 @@ void fn_8008CACC(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     material = (GSmaterialEntry *)GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(material->texture, 1);
@@ -521,7 +521,7 @@ void fn_8008CACC(u32 ctx) {
     GSmodelLinkToGSparticleBank(GSresGetResource(ctx, 0x0CE61000), GSresGetResource(ctx, 0x11211400));
     GSmodelSetGSparticleLinkAttachMode(GSresGetResource(ctx, 0x0CE61000), 4);
 
-    fn_801CB834(0x0CE61000, 2, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 2, 0, 0);
     waitFrames = 100;
     if (fn_800D37CC() == 0x32) {
         waitFrames = (u32)lbl_8047C1DC;
@@ -531,10 +531,10 @@ void fn_8008CACC(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    iconHandle = fn_801CBA0C(0x06BC0400);
+    iconHandle = std112_modelGetResourceID(0x06BC0400);
     iconResult = GSresGetResource(ctx, iconHandle);
     GSmodelSetShadowFlags(iconResult, 2);
     GSmodelSetShadowLight(iconResult, lbl_8047A690);
@@ -550,12 +550,12 @@ void fn_8008CACC(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    finalResult = fn_801CBA0C(0x0D0C1000);
-    fn_801845E4(ctx, iconHandle, ctx, finalResult, 0);
-    fn_801CB834(iconHandle, 4, 0, 1);
+    finalResult = std112_modelGetResourceID(0x0D0C1000);
+    std070_characterAttachToCharacter(ctx, iconHandle, ctx, finalResult, 0);
+    std115_mapObjectPlayAnimation(iconHandle, 4, 0, 1);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -567,17 +567,17 @@ void fn_8008FE94(u32 ctx) {
     #pragma peephole off
     extern u32 GSresGetResource(u32 ctx, u32 id);
     extern void GSmodelSetShadowTextureSize(u32 w, u32 h);
-    extern void fn_801CB7C4(u32 id);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
+    extern void std116_mapObjectStopAnimation(u32 id);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
     extern s32 fn_800D37CC(void);
     extern void _threadSwitch(void);
-    extern u32 fn_800D3088(void);
-    extern u32 fn_801CBA0C(u32 id);
+    extern u32 msgGetCharsPerFrame(void);
+    extern u32 std112_modelGetResourceID(u32 id);
     extern u32 GSmodelSetShadowFlags(u32 handle, u32 val);
     extern void GSmodelSetShadowLight(u32 handle, u32 val);
     extern void GSmodelSetShadowSurface(u32 handle, u32 val, u32 *param);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
@@ -600,7 +600,7 @@ void fn_8008FE94(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames = 1;
     if (fn_800D37CC() == 0x32) {
@@ -611,10 +611,10 @@ void fn_8008FE94(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     material = (GSmaterialEntry *)GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(material->texture, 1);
@@ -630,7 +630,7 @@ void fn_8008FE94(u32 ctx) {
     GSmodelSetAnimType(handle2, 0);
     GSmodelStartAnimation(handle2);
 
-    iconHandle = fn_801CBA0C(0x06BD0400);
+    iconHandle = std112_modelGetResourceID(0x06BD0400);
     iconResult = GSresGetResource(ctx, iconHandle);
     GSmodelSetShadowFlags(iconResult, 2);
     GSmodelSetShadowLight(iconResult, lbl_8047A690);
@@ -646,12 +646,12 @@ void fn_8008FE94(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    finalResult = fn_801CBA0C(0x0CEB1000);
-    fn_801845E4(ctx, iconHandle, ctx, finalResult, 0);
-    fn_801CB834(iconHandle, 2, 0, 1);
+    finalResult = std112_modelGetResourceID(0x0CEB1000);
+    std070_characterAttachToCharacter(ctx, iconHandle, ctx, finalResult, 0);
+    std115_mapObjectPlayAnimation(iconHandle, 2, 0, 1);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -663,20 +663,20 @@ void fn_8008CDD8(u32 ctx) {
     #pragma peephole off
     extern u32 GSresGetResource(u32 ctx, u32 id);
     extern void GSmodelSetShadowTextureSize(u32 w, u32 h);
-    extern void fn_801CB7C4(u32 id);
+    extern void std116_mapObjectStopAnimation(u32 id);
     extern void GSmodelLinkToGSparticleBank(u32 handle, u32 val);
     extern void GSmodelSetGSparticleLinkAttachMode(u32 handle, u32 val);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
     extern void scriptWaitSyncMotion(u32 id, u32 val);
     extern s32 fn_800D37CC(void);
     extern void _threadSwitch(void);
-    extern u32 fn_800D3088(void);
-    extern u32 fn_801CBA0C(u32 id);
+    extern u32 msgGetCharsPerFrame(void);
+    extern u32 std112_modelGetResourceID(u32 id);
     extern u32 GSmodelSetShadowFlags(u32 handle, u32 val);
     extern void GSmodelSetShadowLight(u32 handle, u32 val);
     extern void GSmodelSetShadowSurface(u32 handle, u32 val, u32 *param);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
@@ -699,7 +699,7 @@ void fn_8008CDD8(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames = 1;
     if (fn_800D37CC() == 0x32) {
@@ -710,10 +710,10 @@ void fn_8008CDD8(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     material = (GSmaterialEntry *)GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(material->texture, 1);
@@ -729,7 +729,7 @@ void fn_8008CDD8(u32 ctx) {
     GSmodelSetAnimType(handle2, 0);
     GSmodelStartAnimation(handle2);
 
-    iconHandle = fn_801CBA0C(0x06AF0400);
+    iconHandle = std112_modelGetResourceID(0x06AF0400);
     iconResult = GSresGetResource(ctx, iconHandle);
     GSmodelSetShadowFlags(iconResult, 2);
     GSmodelSetShadowLight(iconResult, lbl_8047A690);
@@ -748,14 +748,14 @@ void fn_8008CDD8(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    finalResult = fn_801CBA0C(0x0D0B1000);
-    fn_801845E4(ctx, iconHandle, ctx, finalResult, 0);
-    fn_801CB834(iconHandle, 0xB, 0, 0);
+    finalResult = std112_modelGetResourceID(0x0D0B1000);
+    std070_characterAttachToCharacter(ctx, iconHandle, ctx, finalResult, 0);
+    std115_mapObjectPlayAnimation(iconHandle, 0xB, 0, 0);
     scriptWaitSyncMotion(iconHandle, 1);
-    fn_801CB834(iconHandle, 0xC, 0, 0);
+    std115_mapObjectPlayAnimation(iconHandle, 0xC, 0, 0);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -767,19 +767,19 @@ void fn_8008D0A0(u32 ctx) {
     #pragma peephole off
     extern u32 GSresGetResource(u32 ctx, u32 id);
     extern void GSmodelSetShadowTextureSize(u32 w, u32 h);
-    extern void fn_801CB7C4(u32 id);
+    extern void std116_mapObjectStopAnimation(u32 id);
     extern void GSmodelLinkToGSparticleBank(u32 handle, u32 val);
     extern void GSmodelSetGSparticleLinkAttachMode(u32 handle, u32 val);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
     extern s32 fn_800D37CC(void);
     extern void _threadSwitch(void);
-    extern u32 fn_800D3088(void);
-    extern u32 fn_801CBA0C(u32 id);
+    extern u32 msgGetCharsPerFrame(void);
+    extern u32 std112_modelGetResourceID(u32 id);
     extern u32 GSmodelSetShadowFlags(u32 handle, u32 val);
     extern void GSmodelSetShadowLight(u32 handle, u32 val);
     extern void GSmodelSetShadowSurface(u32 handle, u32 val, u32 *param);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
@@ -802,7 +802,7 @@ void fn_8008D0A0(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames = 1;
     if (fn_800D37CC() == 0x32) {
@@ -813,10 +813,10 @@ void fn_8008D0A0(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     material = (GSmaterialEntry *)GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(material->texture, 1);
@@ -832,7 +832,7 @@ void fn_8008D0A0(u32 ctx) {
     GSmodelSetAnimType(handle2, 0);
     GSmodelStartAnimation(handle2);
 
-    iconHandle = fn_801CBA0C(0x06AF0400);
+    iconHandle = std112_modelGetResourceID(0x06AF0400);
     iconResult = GSresGetResource(ctx, iconHandle);
     GSmodelSetShadowFlags(iconResult, 2);
     GSmodelSetShadowLight(iconResult, lbl_8047A690);
@@ -851,12 +851,12 @@ void fn_8008D0A0(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    finalResult = fn_801CBA0C(0x0D0A1000);
-    fn_801845E4(ctx, iconHandle, ctx, finalResult, 0);
-    fn_801CB834(iconHandle, 9, 0, 1);
+    finalResult = std112_modelGetResourceID(0x0D0A1000);
+    std070_characterAttachToCharacter(ctx, iconHandle, ctx, finalResult, 0);
+    std115_mapObjectPlayAnimation(iconHandle, 9, 0, 1);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -875,10 +875,10 @@ void fn_8008E320(u32 ctx) {
     extern void GSmodelSetAnimType(u32 handle, u32 type);
     extern void GSmodelLinkToGSparticleBank(u32 handle, u32 bank);
     extern void GSmodelSetGSparticleLinkAttachMode(u32 handle, u32 mode);
-    extern void fn_801CB7C4(u32 id);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
-    extern u32 fn_801CBA0C(u32 id);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern void std116_mapObjectStopAnimation(u32 id);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
+    extern u32 std112_modelGetResourceID(u32 id);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void floorRequestChange(u32 id);
@@ -904,7 +904,7 @@ void fn_8008E320(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames1 = 1;
     if (fn_800D37CC() == 0x32) {
@@ -915,10 +915,10 @@ void fn_8008E320(u32 ctx) {
     }
     for (elapsed1 = 0; elapsed1 < waitFrames1; ) {
         _threadSwitch();
-        elapsed1 += fn_800D3088();
+        elapsed1 += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     handle2 = GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(((GSmaterialEntry*)handle2)->texture, 1);
@@ -937,7 +937,7 @@ void fn_8008E320(u32 ctx) {
     GSmodelLinkToGSparticleBank(GSresGetResource(ctx, 0x0CE61000), GSresGetResource(ctx, 0x111B1400));
     GSmodelSetGSparticleLinkAttachMode(GSresGetResource(ctx, 0x0CE61000), 4);
 
-    fn_801CB834(0x0CE61000, 3, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 3, 0, 0);
 
     waitFrames2 = 0x32;
     if (fn_800D37CC() == 0x32) {
@@ -948,13 +948,13 @@ void fn_8008E320(u32 ctx) {
     }
     for (elapsed2 = 0; elapsed2 < waitFrames2; ) {
         _threadSwitch();
-        elapsed2 += fn_800D3088();
+        elapsed2 += msgGetCharsPerFrame();
     }
 
-    h06af0400 = fn_801CBA0C(0x06AF0400);
-    h06bc0400 = fn_801CBA0C(0x06BC0400);
-    h06be0400a = fn_801CBA0C(0x06BE0400);
-    h06be0400b = fn_801CBA0C(0x06BE0400);
+    h06af0400 = std112_modelGetResourceID(0x06AF0400);
+    h06bc0400 = std112_modelGetResourceID(0x06BC0400);
+    h06be0400a = std112_modelGetResourceID(0x06BE0400);
+    h06be0400b = std112_modelGetResourceID(0x06BE0400);
 
     handle2 = GSresGetResource(ctx, h06af0400);
     GSmodelSetShadowFlags(handle2, 2);
@@ -987,23 +987,23 @@ void fn_8008E320(u32 ctx) {
     }
     for (elapsed3 = 0; elapsed3 < waitFrames3; ) {
         _threadSwitch();
-        elapsed3 += fn_800D3088();
+        elapsed3 += msgGetCharsPerFrame();
     }
 
-    h0d071000 = fn_801CBA0C(0x0D071000);
-    h0d071001 = fn_801CBA0C(0x0D071001);
-    h0d071003 = fn_801CBA0C(0x0D071003);
-    h0d071002 = fn_801CBA0C(0x0D071002);
+    h0d071000 = std112_modelGetResourceID(0x0D071000);
+    h0d071001 = std112_modelGetResourceID(0x0D071001);
+    h0d071003 = std112_modelGetResourceID(0x0D071003);
+    h0d071002 = std112_modelGetResourceID(0x0D071002);
 
-    fn_801845E4(ctx, h06af0400, ctx, h0d071000, 0);
-    fn_801845E4(ctx, h06bc0400, ctx, h0d071001, 0);
-    fn_801845E4(ctx, h06be0400a, ctx, h0d071003, 0);
-    fn_801845E4(ctx, h06be0400b, ctx, h0d071002, 0);
+    std070_characterAttachToCharacter(ctx, h06af0400, ctx, h0d071000, 0);
+    std070_characterAttachToCharacter(ctx, h06bc0400, ctx, h0d071001, 0);
+    std070_characterAttachToCharacter(ctx, h06be0400a, ctx, h0d071003, 0);
+    std070_characterAttachToCharacter(ctx, h06be0400b, ctx, h0d071002, 0);
 
-    fn_801CB834(h06af0400, 0xA, 0, 0);
-    fn_801CB834(h06bc0400, 5, 0, 1);
-    fn_801CB834(h06be0400a, 0xE, 0, 1);
-    fn_801CB834(h06be0400b, 0xE, 0, 1);
+    std115_mapObjectPlayAnimation(h06af0400, 0xA, 0, 0);
+    std115_mapObjectPlayAnimation(h06bc0400, 5, 0, 1);
+    std115_mapObjectPlayAnimation(h06be0400a, 0xE, 0, 1);
+    std115_mapObjectPlayAnimation(h06be0400b, 0xE, 0, 1);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -1021,10 +1021,10 @@ void fn_8008E7D4(u32 ctx) {
     extern void GSmodelSetAnimType(u32 handle, u32 type);
     extern void GSmodelLinkToGSparticleBank(u32 handle, u32 bank);
     extern void GSmodelSetGSparticleLinkAttachMode(u32 handle, u32 mode);
-    extern void fn_801CB7C4(u32 id);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
-    extern u32 fn_801CBA0C(u32 id);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern void std116_mapObjectStopAnimation(u32 id);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
+    extern u32 std112_modelGetResourceID(u32 id);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void scriptWaitSyncMotion(u32 id, u32 val);
@@ -1049,7 +1049,7 @@ void fn_8008E7D4(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames1 = 1;
     if (fn_800D37CC() == 0x32) {
@@ -1060,10 +1060,10 @@ void fn_8008E7D4(u32 ctx) {
     }
     for (elapsed1 = 0; elapsed1 < waitFrames1; ) {
         _threadSwitch();
-        elapsed1 += fn_800D3088();
+        elapsed1 += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     handle2 = GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(((GSmaterialEntry*)handle2)->texture, 1);
@@ -1082,7 +1082,7 @@ void fn_8008E7D4(u32 ctx) {
     GSmodelLinkToGSparticleBank(GSresGetResource(ctx, 0x0CE61000), GSresGetResource(ctx, 0x111B1400));
     GSmodelSetGSparticleLinkAttachMode(GSresGetResource(ctx, 0x0CE61000), 4);
 
-    fn_801CB834(0x0CE61000, 3, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 3, 0, 0);
 
     waitFrames2 = 0x32;
     if (fn_800D37CC() == 0x32) {
@@ -1093,12 +1093,12 @@ void fn_8008E7D4(u32 ctx) {
     }
     for (elapsed2 = 0; elapsed2 < waitFrames2; ) {
         _threadSwitch();
-        elapsed2 += fn_800D3088();
+        elapsed2 += msgGetCharsPerFrame();
     }
 
-    h06af0400 = fn_801CBA0C(0x06AF0400);
-    h06bc0400 = fn_801CBA0C(0x06BC0400);
-    h06be0400 = fn_801CBA0C(0x06BE0400);
+    h06af0400 = std112_modelGetResourceID(0x06AF0400);
+    h06bc0400 = std112_modelGetResourceID(0x06BC0400);
+    h06be0400 = std112_modelGetResourceID(0x06BE0400);
 
     handle2 = GSresGetResource(ctx, h06af0400);
     GSmodelSetShadowFlags(handle2, 2);
@@ -1127,22 +1127,22 @@ void fn_8008E7D4(u32 ctx) {
     }
     for (elapsed3 = 0; elapsed3 < waitFrames3; ) {
         _threadSwitch();
-        elapsed3 += fn_800D3088();
+        elapsed3 += msgGetCharsPerFrame();
     }
 
-    h0d061000 = fn_801CBA0C(0x0D061000);
-    h0d061001 = fn_801CBA0C(0x0D061001);
-    h0d061002 = fn_801CBA0C(0x0D061002);
+    h0d061000 = std112_modelGetResourceID(0x0D061000);
+    h0d061001 = std112_modelGetResourceID(0x0D061001);
+    h0d061002 = std112_modelGetResourceID(0x0D061002);
 
-    fn_801845E4(ctx, h06af0400, ctx, h0d061000, 2);
-    fn_801845E4(ctx, h06bc0400, ctx, h0d061001, 0);
-    fn_801845E4(ctx, h06be0400, ctx, h0d061002, 0);
+    std070_characterAttachToCharacter(ctx, h06af0400, ctx, h0d061000, 2);
+    std070_characterAttachToCharacter(ctx, h06bc0400, ctx, h0d061001, 0);
+    std070_characterAttachToCharacter(ctx, h06be0400, ctx, h0d061002, 0);
 
-    fn_801CB834(h06af0400, 7, 0, 0);
+    std115_mapObjectPlayAnimation(h06af0400, 7, 0, 0);
     scriptWaitSyncMotion(h06af0400, 1);
-    fn_801CB834(h06af0400, 8, 0, 0);
-    fn_801CB834(h06bc0400, 5, 0, 1);
-    fn_801CB834(h06be0400, 0xE, 0, 1);
+    std115_mapObjectPlayAnimation(h06af0400, 8, 0, 0);
+    std115_mapObjectPlayAnimation(h06bc0400, 5, 0, 1);
+    std115_mapObjectPlayAnimation(h06be0400, 0xE, 0, 1);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -1156,19 +1156,19 @@ void fn_8008D938(u32 ctx) {
     #pragma peephole off
     extern u32 GSresGetResource(u32 ctx, u32 id);
     extern void GSmodelSetShadowTextureSize(u32 w, u32 h);
-    extern void fn_801CB7C4(u32 id);
+    extern void std116_mapObjectStopAnimation(u32 id);
     extern void GSmodelLinkToGSparticleBank(u32 model, u32 bank);
     extern void GSmodelSetGSparticleLinkAttachMode(u32 model, u32 mode);
-    extern void fn_801CB834(u32 id, u32 motion, u32 arg2, u32 arg3);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 motion, u32 arg2, u32 arg3);
     extern void scriptWaitSyncMotion(u32 id, u32 sync);
     extern s32 fn_800D37CC(void);
-    extern u32 fn_800D3088(void);
-    extern u32 fn_801CBA0C(u32 id);
+    extern u32 msgGetCharsPerFrame(void);
+    extern u32 std112_modelGetResourceID(u32 id);
     extern u32 GSmodelSetShadowFlags(u32 model, u32 flags);
     extern void GSmodelSetShadowLight(u32 model, u32 light);
     extern void GSmodelSetShadowSurface(u32 model, u32 count, u32 *surface);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 arg2, u32 arg3);
-    extern void fn_801845E4(u32 ctx, u32 model, u32 ctx2, u32 motion, u32 flags);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 model, u32 ctx2, u32 motion, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 arg0, u32 arg1);
@@ -1212,7 +1212,7 @@ void fn_8008D938(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames = 1;
     if (fn_800D37CC() == 0x32) {
@@ -1223,10 +1223,10 @@ void fn_8008D938(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
     material = (GSmaterialEntry *)GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(material->texture, 1);
     material->texture = NULL;
@@ -1244,7 +1244,7 @@ void fn_8008D938(u32 ctx) {
     resource = GSresGetResource(ctx, 0x111B1400);
     GSmodelLinkToGSparticleBank(GSresGetResource(ctx, 0x0CE61000), resource);
     GSmodelSetGSparticleLinkAttachMode(GSresGetResource(ctx, 0x0CE61000), 4);
-    fn_801CB834(0x0CE61000, 3, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 3, 0, 0);
 
     waitFramesLater = 0x32;
     if (fn_800D37CC() == 0x32) {
@@ -1255,22 +1255,22 @@ void fn_8008D938(u32 ctx) {
     }
     for (elapsedLater = 0; elapsedLater < waitFramesLater; ) {
         _threadSwitch();
-        elapsedLater += fn_800D3088();
+        elapsedLater += msgGetCharsPerFrame();
     }
 
     resource = GSresGetResource(ctx, 0x111F1400);
     GSmodelLinkToGSparticleBank(GSresGetResource(ctx, 0x0CE61000), resource);
     GSmodelSetGSparticleLinkAttachMode(GSresGetResource(ctx, 0x0CE61000), 4);
 
-    model0 = fn_801CBA0C(0x06BC0400);
-    model1 = fn_801CBA0C(0x06BE0400);
-    model2 = fn_801CBA0C(0x0D290400);
-    model3 = fn_801CBA0C(0x06BE0400);
-    model4 = fn_801CBA0C(0x0D240400);
-    model5 = fn_801CBA0C(0x0D290400);
-    model6 = fn_801CBA0C(0x0D240400);
-    model7 = fn_801CBA0C(0x06BE0400);
-    model8 = fn_801CBA0C(0x0D240400);
+    model0 = std112_modelGetResourceID(0x06BC0400);
+    model1 = std112_modelGetResourceID(0x06BE0400);
+    model2 = std112_modelGetResourceID(0x0D290400);
+    model3 = std112_modelGetResourceID(0x06BE0400);
+    model4 = std112_modelGetResourceID(0x0D240400);
+    model5 = std112_modelGetResourceID(0x0D290400);
+    model6 = std112_modelGetResourceID(0x0D240400);
+    model7 = std112_modelGetResourceID(0x06BE0400);
+    model8 = std112_modelGetResourceID(0x0D240400);
 
 #define SET_MODEL_SHADOW(model)                                                    \
     resource = GSresGetResource(ctx, (model));                                     \
@@ -1300,62 +1300,40 @@ void fn_8008D938(u32 ctx) {
     }
     for (elapsedFinal = 0; elapsedFinal < waitFramesFinal; ) {
         _threadSwitch();
-        elapsedFinal += fn_800D3088();
+        elapsedFinal += msgGetCharsPerFrame();
     }
 
-    motion0 = fn_801CBA0C(0x0D081000);
-    motion8 = fn_801CBA0C(0x0D081008);
-    motion1 = fn_801CBA0C(0x0D081001);
-    motion2 = fn_801CBA0C(0x0D081002);
-    motion3 = fn_801CBA0C(0x0D081003);
-    motion4 = fn_801CBA0C(0x0D081004);
-    motion5 = fn_801CBA0C(0x0D081005);
-    motion6 = fn_801CBA0C(0x0D081006);
-    motion7 = fn_801CBA0C(0x0D081007);
+    motion0 = std112_modelGetResourceID(0x0D081000);
+    motion8 = std112_modelGetResourceID(0x0D081008);
+    motion1 = std112_modelGetResourceID(0x0D081001);
+    motion2 = std112_modelGetResourceID(0x0D081002);
+    motion3 = std112_modelGetResourceID(0x0D081003);
+    motion4 = std112_modelGetResourceID(0x0D081004);
+    motion5 = std112_modelGetResourceID(0x0D081005);
+    motion6 = std112_modelGetResourceID(0x0D081006);
+    motion7 = std112_modelGetResourceID(0x0D081007);
 
-    fn_801845E4(ctx, model0, ctx, motion0, 0);
-    fn_801845E4(ctx, model1, ctx, motion8, 0);
-    fn_801845E4(ctx, model2, ctx, motion1, 0);
-    fn_801845E4(ctx, model3, ctx, motion2, 0);
-    fn_801845E4(ctx, model4, ctx, motion3, 0);
-    fn_801845E4(ctx, model5, ctx, motion4, 0);
-    fn_801845E4(ctx, model6, ctx, motion5, 0);
-    fn_801845E4(ctx, model7, ctx, motion6, 0);
-    fn_801845E4(ctx, model8, ctx, motion7, 0);
+    std070_characterAttachToCharacter(ctx, model0, ctx, motion0, 0);
+    std070_characterAttachToCharacter(ctx, model1, ctx, motion8, 0);
+    std070_characterAttachToCharacter(ctx, model2, ctx, motion1, 0);
+    std070_characterAttachToCharacter(ctx, model3, ctx, motion2, 0);
+    std070_characterAttachToCharacter(ctx, model4, ctx, motion3, 0);
+    std070_characterAttachToCharacter(ctx, model5, ctx, motion4, 0);
+    std070_characterAttachToCharacter(ctx, model6, ctx, motion5, 0);
+    std070_characterAttachToCharacter(ctx, model7, ctx, motion6, 0);
+    std070_characterAttachToCharacter(ctx, model8, ctx, motion7, 0);
 
-    fn_801CB834(0x0CE61000, 0, 0, 0);
-    fn_801CB834(model0, 6, 0, 0);
-    fn_801CB834(model1, 9, 0, 0);
-    fn_801CB834(model2, 0xB, 0, 0);
-    fn_801CB834(model3, 9, 0, 0);
-    fn_801CB834(model4, 0xB, 0, 0);
-    fn_801CB834(model5, 9, 0, 0);
-    fn_801CB834(model6, 0xB, 0, 0);
-    fn_801CB834(model7, 9, 0, 0);
-    fn_801CB834(model7, 0xB, 0, 0);
-    fn_801CB834(model8, 0xB, 0, 0);
-
-    scriptWaitSyncMotion(model0, 1);
-    scriptWaitSyncMotion(model1, 1);
-    scriptWaitSyncMotion(model2, 1);
-    scriptWaitSyncMotion(model3, 1);
-    scriptWaitSyncMotion(model4, 1);
-    scriptWaitSyncMotion(model5, 1);
-    scriptWaitSyncMotion(model6, 1);
-    scriptWaitSyncMotion(model7, 1);
-    scriptWaitSyncMotion(model7, 1);
-    scriptWaitSyncMotion(model8, 1);
-
-    fn_801CB834(model0, 7, 0, 0);
-    fn_801CB834(model1, 0xA, 0, 0);
-    fn_801CB834(model2, 0xC, 0, 0);
-    fn_801CB834(model3, 0xA, 0, 0);
-    fn_801CB834(model5, 0xA, 0, 0);
-    fn_801CB834(model4, 0xC, 0, 0);
-    fn_801CB834(model6, 0xC, 0, 0);
-    fn_801CB834(model7, 0xA, 0, 0);
-    fn_801CB834(model7, 0xC, 0, 0);
-    fn_801CB834(model8, 0xC, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(model0, 6, 0, 0);
+    std115_mapObjectPlayAnimation(model1, 9, 0, 0);
+    std115_mapObjectPlayAnimation(model2, 0xB, 0, 0);
+    std115_mapObjectPlayAnimation(model3, 9, 0, 0);
+    std115_mapObjectPlayAnimation(model4, 0xB, 0, 0);
+    std115_mapObjectPlayAnimation(model5, 9, 0, 0);
+    std115_mapObjectPlayAnimation(model6, 0xB, 0, 0);
+    std115_mapObjectPlayAnimation(model7, 9, 0, 0);
+    std115_mapObjectPlayAnimation(model7, 0xB, 0, 0);
+    std115_mapObjectPlayAnimation(model8, 0xB, 0, 0);
 
     scriptWaitSyncMotion(model0, 1);
     scriptWaitSyncMotion(model1, 1);
@@ -1368,16 +1346,38 @@ void fn_8008D938(u32 ctx) {
     scriptWaitSyncMotion(model7, 1);
     scriptWaitSyncMotion(model8, 1);
 
-    fn_801CB834(model0, 6, 0, 0);
-    fn_801CB834(model1, 9, 0, 0);
-    fn_801CB834(model2, 0xB, 0, 0);
-    fn_801CB834(model3, 9, 0, 0);
-    fn_801CB834(model4, 0xB, 0, 0);
-    fn_801CB834(model5, 9, 0, 0);
-    fn_801CB834(model6, 0xB, 0, 0);
-    fn_801CB834(model7, 9, 0, 0);
-    fn_801CB834(model7, 0xB, 0, 0);
-    fn_801CB834(model8, 0xB, 0, 0);
+    std115_mapObjectPlayAnimation(model0, 7, 0, 0);
+    std115_mapObjectPlayAnimation(model1, 0xA, 0, 0);
+    std115_mapObjectPlayAnimation(model2, 0xC, 0, 0);
+    std115_mapObjectPlayAnimation(model3, 0xA, 0, 0);
+    std115_mapObjectPlayAnimation(model5, 0xA, 0, 0);
+    std115_mapObjectPlayAnimation(model4, 0xC, 0, 0);
+    std115_mapObjectPlayAnimation(model6, 0xC, 0, 0);
+    std115_mapObjectPlayAnimation(model7, 0xA, 0, 0);
+    std115_mapObjectPlayAnimation(model7, 0xC, 0, 0);
+    std115_mapObjectPlayAnimation(model8, 0xC, 0, 0);
+
+    scriptWaitSyncMotion(model0, 1);
+    scriptWaitSyncMotion(model1, 1);
+    scriptWaitSyncMotion(model2, 1);
+    scriptWaitSyncMotion(model3, 1);
+    scriptWaitSyncMotion(model4, 1);
+    scriptWaitSyncMotion(model5, 1);
+    scriptWaitSyncMotion(model6, 1);
+    scriptWaitSyncMotion(model7, 1);
+    scriptWaitSyncMotion(model7, 1);
+    scriptWaitSyncMotion(model8, 1);
+
+    std115_mapObjectPlayAnimation(model0, 6, 0, 0);
+    std115_mapObjectPlayAnimation(model1, 9, 0, 0);
+    std115_mapObjectPlayAnimation(model2, 0xB, 0, 0);
+    std115_mapObjectPlayAnimation(model3, 9, 0, 0);
+    std115_mapObjectPlayAnimation(model4, 0xB, 0, 0);
+    std115_mapObjectPlayAnimation(model5, 9, 0, 0);
+    std115_mapObjectPlayAnimation(model6, 0xB, 0, 0);
+    std115_mapObjectPlayAnimation(model7, 9, 0, 0);
+    std115_mapObjectPlayAnimation(model7, 0xB, 0, 0);
+    std115_mapObjectPlayAnimation(model8, 0xB, 0, 0);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -1390,19 +1390,19 @@ void fn_8008EC28(u32 ctx) {
     #pragma peephole off
     extern u32 GSresGetResource(u32 ctx, u32 id);
     extern void GSmodelSetShadowTextureSize(u32 w, u32 h);
-    extern void fn_801CB7C4(u32 id);
+    extern void std116_mapObjectStopAnimation(u32 id);
     extern void GSmodelLinkToGSparticleBank(u32 handle, u32 val);
     extern void GSmodelSetGSparticleLinkAttachMode(u32 handle, u32 val);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
     extern s32 fn_800D37CC(void);
     extern void _threadSwitch(void);
-    extern u32 fn_800D3088(void);
-    extern u32 fn_801CBA0C(u32 id);
+    extern u32 msgGetCharsPerFrame(void);
+    extern u32 std112_modelGetResourceID(u32 id);
     extern u32 GSmodelSetShadowFlags(u32 handle, u32 val);
     extern void GSmodelSetShadowLight(u32 handle, u32 val);
     extern void GSmodelSetShadowSurface(u32 handle, u32 val, u32 *param);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
@@ -1425,7 +1425,7 @@ void fn_8008EC28(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames = 1;
     if (fn_800D37CC() == 0x32) {
@@ -1436,10 +1436,10 @@ void fn_8008EC28(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     material = (GSmaterialEntry *)GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(material->texture, 1);
@@ -1455,7 +1455,7 @@ void fn_8008EC28(u32 ctx) {
     GSmodelSetAnimType(handle2, 0);
     GSmodelStartAnimation(handle2);
 
-    iconHandle = fn_801CBA0C(0x06AF0400);
+    iconHandle = std112_modelGetResourceID(0x06AF0400);
     iconResult = GSresGetResource(ctx, iconHandle);
     GSmodelSetShadowFlags(iconResult, 2);
     GSmodelSetShadowLight(iconResult, lbl_8047A690);
@@ -1474,12 +1474,12 @@ void fn_8008EC28(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    finalResult = fn_801CBA0C(0x0D051000);
-    fn_801845E4(ctx, iconHandle, ctx, finalResult, 0);
-    fn_801CB834(iconHandle, 7, 0, 1);
+    finalResult = std112_modelGetResourceID(0x0D051000);
+    std070_characterAttachToCharacter(ctx, iconHandle, ctx, finalResult, 0);
+    std115_mapObjectPlayAnimation(iconHandle, 7, 0, 1);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -1491,20 +1491,20 @@ void fn_8008EED0(u32 ctx) {
     #pragma peephole off
     extern u32 GSresGetResource(u32 ctx, u32 id);
     extern void GSmodelSetShadowTextureSize(u32 w, u32 h);
-    extern void fn_801CB7C4(u32 id);
+    extern void std116_mapObjectStopAnimation(u32 id);
     extern void GSmodelLinkToGSparticleBank(u32 handle, u32 val);
     extern void GSmodelSetGSparticleLinkAttachMode(u32 handle, u32 val);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
     extern void scriptWaitSyncMotion(u32 id, u32 val);
     extern s32 fn_800D37CC(void);
     extern void _threadSwitch(void);
-    extern u32 fn_800D3088(void);
-    extern u32 fn_801CBA0C(u32 id);
+    extern u32 msgGetCharsPerFrame(void);
+    extern u32 std112_modelGetResourceID(u32 id);
     extern u32 GSmodelSetShadowFlags(u32 handle, u32 val);
     extern void GSmodelSetShadowLight(u32 handle, u32 val);
     extern void GSmodelSetShadowSurface(u32 handle, u32 val, u32 *param);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
@@ -1527,7 +1527,7 @@ void fn_8008EED0(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames = 1;
     if (fn_800D37CC() == 0x32) {
@@ -1538,10 +1538,10 @@ void fn_8008EED0(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     material = (GSmaterialEntry *)GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(material->texture, 1);
@@ -1557,8 +1557,8 @@ void fn_8008EED0(u32 ctx) {
     GSmodelSetAnimType(handle2, 0);
     GSmodelStartAnimation(handle2);
 
-    iconHandle = fn_801CBA0C(0x06AF0400);
-    fn_801CB834(iconHandle, 4, 0, 0);
+    iconHandle = std112_modelGetResourceID(0x06AF0400);
+    std115_mapObjectPlayAnimation(iconHandle, 4, 0, 0);
     iconResult = GSresGetResource(ctx, iconHandle);
     GSmodelSetShadowFlags(iconResult, 2);
     GSmodelSetShadowLight(iconResult, lbl_8047A690);
@@ -1577,13 +1577,13 @@ void fn_8008EED0(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    finalResult = fn_801CBA0C(0x0D031000);
-    fn_801845E4(ctx, iconHandle, ctx, finalResult, 0);
+    finalResult = std112_modelGetResourceID(0x0D031000);
+    std070_characterAttachToCharacter(ctx, iconHandle, ctx, finalResult, 0);
     scriptWaitSyncMotion(iconHandle, 1);
-    fn_801CB834(iconHandle, 5, 0, 0);
+    std115_mapObjectPlayAnimation(iconHandle, 5, 0, 0);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -1595,20 +1595,20 @@ void fn_8008F190(u32 ctx) {
     #pragma peephole off
     extern u32 GSresGetResource(u32 ctx, u32 id);
     extern void GSmodelSetShadowTextureSize(u32 w, u32 h);
-    extern void fn_801CB7C4(u32 id);
+    extern void std116_mapObjectStopAnimation(u32 id);
     extern void GSmodelLinkToGSparticleBank(u32 handle, u32 val);
     extern void GSmodelSetGSparticleLinkAttachMode(u32 handle, u32 val);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
     extern void scriptWaitSyncMotion(u32 id, u32 val);
     extern s32 fn_800D37CC(void);
     extern void _threadSwitch(void);
-    extern u32 fn_800D3088(void);
-    extern u32 fn_801CBA0C(u32 id);
+    extern u32 msgGetCharsPerFrame(void);
+    extern u32 std112_modelGetResourceID(u32 id);
     extern u32 GSmodelSetShadowFlags(u32 handle, u32 val);
     extern void GSmodelSetShadowLight(u32 handle, u32 val);
     extern void GSmodelSetShadowSurface(u32 handle, u32 val, u32 *param);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
@@ -1631,7 +1631,7 @@ void fn_8008F190(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames = 1;
     if (fn_800D37CC() == 0x32) {
@@ -1642,10 +1642,10 @@ void fn_8008F190(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     material = (GSmaterialEntry *)GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(material->texture, 1);
@@ -1664,7 +1664,7 @@ void fn_8008F190(u32 ctx) {
     GSmodelLinkToGSparticleBank(GSresGetResource(ctx, 0x0CE61000), GSresGetResource(ctx, 0x111B1400));
     GSmodelSetGSparticleLinkAttachMode(GSresGetResource(ctx, 0x0CE61000), 4);
 
-    fn_801CB834(0x0CE61000, 3, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 3, 0, 0);
     waitFrames = 0x32;
     if (fn_800D37CC() == 0x32) {
         waitFrames = (u32)lbl_8047C1E0;
@@ -1674,11 +1674,11 @@ void fn_8008F190(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    iconHandle = fn_801CBA0C(0x06AF0400);
-    fn_801CB834(iconHandle, 0, 0, 0);
+    iconHandle = std112_modelGetResourceID(0x06AF0400);
+    std115_mapObjectPlayAnimation(iconHandle, 0, 0, 0);
     iconResult = GSresGetResource(ctx, iconHandle);
     GSmodelSetShadowFlags(iconResult, 2);
     GSmodelSetShadowLight(iconResult, lbl_8047A690);
@@ -1697,16 +1697,16 @@ void fn_8008F190(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    finalResult = fn_801CBA0C(0x0CF81000);
-    fn_801845E4(ctx, iconHandle, ctx, finalResult, 0);
-    fn_801CB834(iconHandle, 1, 0, 0);
+    finalResult = std112_modelGetResourceID(0x0CF81000);
+    std070_characterAttachToCharacter(ctx, iconHandle, ctx, finalResult, 0);
+    std115_mapObjectPlayAnimation(iconHandle, 1, 0, 0);
     scriptWaitSyncMotion(iconHandle, 1);
-    fn_801CB834(iconHandle, 2, 0, 0);
+    std115_mapObjectPlayAnimation(iconHandle, 2, 0, 0);
     scriptWaitSyncMotion(iconHandle, 1);
-    fn_801CB834(iconHandle, 3, 0, 0);
+    std115_mapObjectPlayAnimation(iconHandle, 3, 0, 0);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -1718,19 +1718,19 @@ void fn_8008F190(u32 ctx) {
 void fn_8008F524(u32 ctx) {
     extern u32 GSresGetResource(u32 ctx, u32 id);
     extern void GSmodelSetShadowTextureSize(u32 w, u32 h);
-    extern void fn_801CB7C4(u32 id);
+    extern void std116_mapObjectStopAnimation(u32 id);
     extern void GSmodelLinkToGSparticleBank(u32 handle, u32 val);
     extern void GSmodelSetGSparticleLinkAttachMode(u32 handle, u32 val);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
     extern s32 fn_800D37CC(void);
     extern void _threadSwitch(void);
-    extern u32 fn_800D3088(void);
-    extern u32 fn_801CBA0C(u32 id);
+    extern u32 msgGetCharsPerFrame(void);
+    extern u32 std112_modelGetResourceID(u32 id);
     extern u32 GSmodelSetShadowFlags(u32 handle, u32 val);
     extern void GSmodelSetShadowLight(u32 handle, u32 val);
     extern void GSmodelSetShadowSurface(u32 handle, u32 val, u32 *param);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
@@ -1758,7 +1758,7 @@ void fn_8008F524(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames = 1;
     if (fn_800D37CC() == 0x32) {
@@ -1769,10 +1769,10 @@ void fn_8008F524(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     handle2 = GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(((GSmaterialEntry *)handle2)->texture, 1);
@@ -1791,7 +1791,7 @@ void fn_8008F524(u32 ctx) {
     GSmodelLinkToGSparticleBank(GSresGetResource(ctx, 0x0CE61000), GSresGetResource(ctx, 0x111B1400));
     GSmodelSetGSparticleLinkAttachMode(GSresGetResource(ctx, 0x0CE61000), 4);
 
-    fn_801CB834(0x0CE61000, 3, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 3, 0, 0);
     waitFrames = 0x32;
     if (fn_800D37CC() == 0x32) {
         waitFrames = (u32)lbl_8047C1E0;
@@ -1801,12 +1801,12 @@ void fn_8008F524(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    modelA = fn_801CBA0C(0x06BC0400);
-    modelB = fn_801CBA0C(0x06BE0400);
-    modelC = fn_801CBA0C(0x06BE0400);
+    modelA = std112_modelGetResourceID(0x06BC0400);
+    modelB = std112_modelGetResourceID(0x06BE0400);
+    modelC = std112_modelGetResourceID(0x06BE0400);
 
     shadowTarget = GSresGetResource(ctx, modelA);
     GSmodelSetShadowFlags(shadowTarget, 2);
@@ -1833,20 +1833,20 @@ void fn_8008F524(u32 ctx) {
     }
     for (cameraElapsed = 0; cameraElapsed < cameraWaitFrames; ) {
         _threadSwitch();
-        cameraElapsed += fn_800D3088();
+        cameraElapsed += msgGetCharsPerFrame();
     }
 
-    animA = fn_801CBA0C(0x0CEE1000);
-    animB = fn_801CBA0C(0x0CEE1002);
-    animC = fn_801CBA0C(0x0CEE1001);
+    animA = std112_modelGetResourceID(0x0CEE1000);
+    animB = std112_modelGetResourceID(0x0CEE1002);
+    animC = std112_modelGetResourceID(0x0CEE1001);
 
-    fn_801845E4(ctx, modelA, ctx, animA, 0);
-    fn_801845E4(ctx, modelB, ctx, animB, 0);
-    fn_801845E4(ctx, modelC, ctx, animC, 0);
+    std070_characterAttachToCharacter(ctx, modelA, ctx, animA, 0);
+    std070_characterAttachToCharacter(ctx, modelB, ctx, animB, 0);
+    std070_characterAttachToCharacter(ctx, modelC, ctx, animC, 0);
 
-    fn_801CB834(modelA, 3, 0, 1);
-    fn_801CB834(modelB, 4, 0, 1);
-    fn_801CB834(modelC, 4, 0, 1);
+    std115_mapObjectPlayAnimation(modelA, 3, 0, 1);
+    std115_mapObjectPlayAnimation(modelB, 4, 0, 1);
+    std115_mapObjectPlayAnimation(modelC, 4, 0, 1);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -1858,17 +1858,17 @@ void fn_8008F524(u32 ctx) {
 void fn_8008F91C(u32 ctx) {
     extern u32 GSresGetResource(u32 ctx, u32 id);
     extern void GSmodelSetShadowTextureSize(u32 w, u32 h);
-    extern void fn_801CB7C4(u32 id);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
+    extern void std116_mapObjectStopAnimation(u32 id);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
     extern s32 fn_800D37CC(void);
     extern void _threadSwitch(void);
-    extern u32 fn_800D3088(void);
-    extern u32 fn_801CBA0C(u32 id);
+    extern u32 msgGetCharsPerFrame(void);
+    extern u32 std112_modelGetResourceID(u32 id);
     extern u32 GSmodelSetShadowFlags(u32 handle, u32 val);
     extern void GSmodelSetShadowLight(u32 handle, u32 val);
     extern void GSmodelSetShadowSurface(u32 handle, u32 val, u32 *param);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
@@ -1895,7 +1895,7 @@ void fn_8008F91C(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames = 1;
     if (fn_800D37CC() == 0x32) {
@@ -1906,10 +1906,10 @@ void fn_8008F91C(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     material = (GSmaterialEntry *)GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(material->texture, 1);
@@ -1925,8 +1925,8 @@ void fn_8008F91C(u32 ctx) {
     GSmodelSetAnimType(handle2, 0);
     GSmodelStartAnimation(handle2);
 
-    modelA = fn_801CBA0C(0x06BD0400);
-    modelB = fn_801CBA0C(0x06BA0400);
+    modelA = std112_modelGetResourceID(0x06BD0400);
+    modelB = std112_modelGetResourceID(0x06BA0400);
 
     animA = GSresGetResource(ctx, modelA);
     GSmodelSetShadowFlags(animA, 2);
@@ -1948,17 +1948,17 @@ void fn_8008F91C(u32 ctx) {
     }
     for (cameraElapsed = 0; cameraElapsed < cameraWaitFrames; ) {
         _threadSwitch();
-        cameraElapsed += fn_800D3088();
+        cameraElapsed += msgGetCharsPerFrame();
     }
 
-    animA = fn_801CBA0C(0x0CED1000);
-    animB = fn_801CBA0C(0x0CED1001);
+    animA = std112_modelGetResourceID(0x0CED1000);
+    animB = std112_modelGetResourceID(0x0CED1001);
 
-    fn_801845E4(ctx, modelB, ctx, animA, 0);
-    fn_801845E4(ctx, modelA, ctx, animB, 0);
+    std070_characterAttachToCharacter(ctx, modelB, ctx, animA, 0);
+    std070_characterAttachToCharacter(ctx, modelA, ctx, animB, 0);
 
-    fn_801CB834(modelB, 2, 0, 1);
-    fn_801CB834(modelA, 2, 0, 1);
+    std115_mapObjectPlayAnimation(modelB, 2, 0, 1);
+    std115_mapObjectPlayAnimation(modelA, 2, 0, 1);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -1970,19 +1970,19 @@ void fn_8008FBF4(u32 ctx) {
     #pragma peephole off
     extern u32 GSresGetResource(u32 ctx, u32 id);
     extern void GSmodelSetShadowTextureSize(u32 w, u32 h);
-    extern void fn_801CB7C4(u32 id);
+    extern void std116_mapObjectStopAnimation(u32 id);
     extern void GSmodelLinkToGSparticleBank(u32 handle, u32 val);
     extern void GSmodelSetGSparticleLinkAttachMode(u32 handle, u32 val);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
     extern s32 fn_800D37CC(void);
     extern void _threadSwitch(void);
-    extern u32 fn_800D3088(void);
-    extern u32 fn_801CBA0C(u32 id);
+    extern u32 msgGetCharsPerFrame(void);
+    extern u32 std112_modelGetResourceID(u32 id);
     extern u32 GSmodelSetShadowFlags(u32 handle, u32 val);
     extern void GSmodelSetShadowLight(u32 handle, u32 val);
     extern void GSmodelSetShadowSurface(u32 handle, u32 val, u32 *param);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
     extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
@@ -2005,7 +2005,7 @@ void fn_8008FBF4(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames = 1;
     if (fn_800D37CC() == 0x32) {
@@ -2016,10 +2016,10 @@ void fn_8008FBF4(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     material = (GSmaterialEntry *)GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(material->texture, 1);
@@ -2035,8 +2035,8 @@ void fn_8008FBF4(u32 ctx) {
     GSmodelSetAnimType(handle2, 0);
     GSmodelStartAnimation(handle2);
 
-    iconHandle = fn_801CBA0C(0x06AF0400);
-    fn_801CB834(iconHandle, 0, 0, 1);
+    iconHandle = std112_modelGetResourceID(0x06AF0400);
+    std115_mapObjectPlayAnimation(iconHandle, 0, 0, 1);
     iconResult = GSresGetResource(ctx, iconHandle);
     GSmodelSetShadowFlags(iconResult, 2);
     GSmodelSetShadowLight(iconResult, lbl_8047A690);
@@ -2055,11 +2055,11 @@ void fn_8008FBF4(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    finalResult = fn_801CBA0C(0x0CEC1000);
-    fn_801845E4(ctx, iconHandle, ctx, finalResult, 0);
+    finalResult = std112_modelGetResourceID(0x0CEC1000);
+    std070_characterAttachToCharacter(ctx, iconHandle, ctx, finalResult, 0);
 
     cameraWaitSyncAnime(1);
     floorRequestChange(0x89);
@@ -2070,21 +2070,21 @@ void fn_8008C7B0(u32 ctx) {
     #pragma peephole off
     extern u32 GSresGetResource(u32 ctx, u32 id);
     extern void GSmodelSetShadowTextureSize(u32 w, u32 h);
-    extern void fn_801CB7C4(u32 id);
+    extern void std116_mapObjectStopAnimation(u32 id);
     extern void GSmodelLinkToGSparticleBank(u32 handle, u32 val);
     extern void GSmodelSetGSparticleLinkAttachMode(u32 handle, u32 val);
-    extern void fn_801CB834(u32 id, u32 slot, u32 x, u32 y);
+    extern void std115_mapObjectPlayAnimation(u32 id, u32 slot, u32 x, u32 y);
     extern s32 fn_800D37CC(void);
     extern void _threadSwitch(void);
-    extern u32 fn_800D3088(void);
-    extern u32 fn_801CBA0C(u32 id);
+    extern u32 msgGetCharsPerFrame(void);
+    extern u32 std112_modelGetResourceID(u32 id);
     extern u32 GSmodelSetShadowFlags(u32 handle, u32 val);
     extern void GSmodelSetShadowLight(u32 handle, u32 val);
     extern void GSmodelSetShadowSurface(u32 handle, u32 val, u32 *param);
     extern void cameraPlayAnime(u32 ctx, u32 id, u32 a, u32 b);
-    extern void fn_801845E4(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
+    extern void std070_characterAttachToCharacter(u32 ctx, u32 modelHandle, u32 ctx2, u32 handle, u32 flags);
     extern void cameraWaitSyncAnime(s32 sync);
-    extern void fn_80190528(u32 id);
+    extern void std078_flagSetFalse(u32 id);
     extern void floorRequestChange(u32 id);
     extern void floorSetFadeScript(u32 a, u32 b);
     extern void fn_80118874(void *texture, u32 flag);
@@ -2108,7 +2108,7 @@ void fn_8008C7B0(u32 ctx) {
     lbl_8047A690 = GSresGetResource(ctx, 0x0CE61602);
     lbl_8047A694 = GSresGetResource(ctx, 0x0CE61002);
     GSmodelSetShadowTextureSize(0x280, 0x1E0);
-    fn_801CB834(0x0CE61000, 0, 0, 0);
+    std115_mapObjectPlayAnimation(0x0CE61000, 0, 0, 0);
 
     waitFrames = 1;
     if (fn_800D37CC() == 0x32) {
@@ -2119,10 +2119,10 @@ void fn_8008C7B0(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    fn_801CB7C4(0x0CE61000);
+    std116_mapObjectStopAnimation(0x0CE61000);
 
     material = (GSmaterialEntry *)GSresGetResource(ctx, 0x0CE61000);
     fn_80118874(material->texture, 1);
@@ -2138,8 +2138,8 @@ void fn_8008C7B0(u32 ctx) {
     GSmodelSetAnimType(handle2, 0);
     GSmodelStartAnimation(handle2);
 
-    iconHandle = fn_801CBA0C(0x06AF0400);
-    iconHandle2 = fn_801CBA0C(0x0B720400);
+    iconHandle = std112_modelGetResourceID(0x06AF0400);
+    iconHandle2 = std112_modelGetResourceID(0x0B720400);
 
     b2 = GSresGetResource(ctx, iconHandle);
     GSmodelSetShadowFlags(b2, 2);
@@ -2164,18 +2164,18 @@ void fn_8008C7B0(u32 ctx) {
     }
     for (elapsed = 0; elapsed < waitFrames; ) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    tmpA = fn_801CBA0C(0x0D0D1000);
-    tmpB = fn_801CBA0C(0x0D0D1001);
-    fn_801845E4(ctx, iconHandle, ctx, tmpA, 0);
-    fn_801845E4(ctx, iconHandle2, ctx, tmpB, 0);
-    fn_801CB834(iconHandle, 9, 0, 1);
-    fn_801CB834(iconHandle2, 6, 0, 1);
+    tmpA = std112_modelGetResourceID(0x0D0D1000);
+    tmpB = std112_modelGetResourceID(0x0D0D1001);
+    std070_characterAttachToCharacter(ctx, iconHandle, ctx, tmpA, 0);
+    std070_characterAttachToCharacter(ctx, iconHandle2, ctx, tmpB, 0);
+    std115_mapObjectPlayAnimation(iconHandle, 9, 0, 1);
+    std115_mapObjectPlayAnimation(iconHandle2, 6, 0, 1);
 
     cameraWaitSyncAnime(1);
-    fn_80190528(0x8D0);
+    std078_flagSetFalse(0x8D0);
     floorRequestChange(1);
     floorSetFadeScript(0, 0);
 }

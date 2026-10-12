@@ -39,24 +39,24 @@ extern void* GStextureLoad(void* data);
 extern u32 GSgappCreate(s32 state, u8 priority, u32 param,
                        void (*callback)(void));
 
-void fn_801ED780(void);
+void flareDraw(void);
 
-void fn_801ED640(u8 value)
+void flareSetEnable(u8 value)
 {
     lbl_8047B5C1 = value;
 }
 
-void fn_801ED648(BattleRangeVec* value)
+void flareSetSunPos(BattleRangeVec* value)
 {
     GSvecCopy(&lbl_80375230, value);
 }
 
-void fn_801ED674(void)
+void flareRelease(void)
 {
     lbl_8047B5C0 = 0;
 }
 
-void fn_801ED680(BattleRangeResource* resource)
+void flareInit(BattleRangeResource* resource)
 {
     s32 i;
     BattleRangeTextureEntry* entry;
@@ -82,9 +82,9 @@ void fn_801ED680(BattleRangeResource* resource)
     lbl_8047B5C0 = 1;
 }
 
-void fn_801ED740(void)
+void flareCreateTask(void)
 {
     lbl_8047B5C0 = 0;
     lbl_8047B5C1 = 0;
-    GSgappCreate(1, 0xF0, 0xA, fn_801ED780);
+    GSgappCreate(1, 0xF0, 0xA, flareDraw);
 }

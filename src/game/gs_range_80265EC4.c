@@ -75,8 +75,8 @@ void fn_80265F94(int r3)
     extern s8 winMsgCheck();
     extern u16 pokemonDataBiosGetVoice();
     extern void* pokemonDataBiosGetPtr();
-    extern int fn_801666BC();
-    extern int fn_80166A28();
+    extern int soundGetStatus();
+    extern int soundStartSE();
     extern u16 lbl_8047E6F8;
     extern f32 lbl_8047E6FC;
   u16 uVar1;
@@ -117,9 +117,9 @@ void fn_80265F94(int r3)
   }
   else {
     uVar8 = pokemonDataBiosGetVoice();
-    fn_80166A28(uVar8);
+    soundStartSE(uVar8);
   }
-  while (iVar4 = fn_801666BC(uVar8), iVar4 == 2) {
+  while (iVar4 = soundGetStatus(uVar8), iVar4 == 2) {
     fn_801DB088();
     effectStatus = fn_801DA94C(uVar3,uVar1,4);
     if (effectStatus == '\0') {
@@ -180,11 +180,11 @@ void fn_80266250(void)
     extern int fn_800FF660();
     extern u32 lbl_8047B680;
     extern int fn_801653BC();
-    extern int fn_801653C4();
+    extern int std228_soundGetCurrentBackgroundMusic();
     extern u32 fn_801656D8();
-    extern void fn_80165A20();
+    extern void std104_soundSetBackgroundMusic();
     extern void scriptSoundStop();
-    extern void fn_801659FC();
+    extern void std105_soundPlayEffect();
     extern void fn_801DADC0();
     extern void wazaSequenceSysRelease();
     extern void fn_80265F94();
@@ -195,10 +195,10 @@ void fn_80266250(void)
     u32 iVar1;
 
     uVar5 = lbl_8047B680;
-    iVar1 = fn_801653C4();
+    iVar1 = std228_soundGetCurrentBackgroundMusic();
     if (iVar1 != 0) {
         uVar3 = fn_801656D8();
-        fn_80165A20(1, 0x32, 0xff);
+        std104_soundSetBackgroundMusic(1, 0x32, 0xff);
     } else {
         uVar3 = 0;
     }
@@ -213,10 +213,10 @@ void fn_80266250(void)
     fn_80265F94(uVar5);
     wazaSequenceSysRelease();
     if (iVar1 != 0) {
-        fn_80165A20(iVar1, 0x32, uVar3);
+        std104_soundSetBackgroundMusic(iVar1, 0x32, uVar3);
     }
     if (iVar2 != 0) {
-        fn_801659FC(iVar2, 0x32, uVar4);
+        std105_soundPlayEffect(iVar2, 0x32, uVar4);
     }
     fn_800FF660();
     floorSetFadeScript(0, 0x5960008);
@@ -225,11 +225,11 @@ void fn_80266250(void)
 /* Address: 0x80266320 | Size: 0x3C */
 void d2presentOpen(int r3)
 {
-    extern void fn_800FF730(u32);
+    extern void std098_mapWarpToMenuRoom(u32);
     extern u32 lbl_8047B680;
 
     lbl_8047B680 = r3;
-    fn_800FF730(0x8f);
+    std098_mapWarpToMenuRoom(0x8f);
     floorSetFadeScript((0x596 << 16) | 0x9, 0);
     _threadSwitch();
 }

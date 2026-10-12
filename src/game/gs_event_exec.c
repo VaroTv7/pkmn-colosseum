@@ -86,13 +86,13 @@ extern void winMsgOpen(s32 slot, s32 msgId, s32 p3, s32 p4);
 extern void winMsgClose(s32 slot);
 
 /* Sound system */
-extern void fn_80166AB8(s32 soundId, s32 p2, s32 p3);   /* Play SE */
-extern void fn_801669E4(s32 soundId, s32 p2, s32 p3);   /* Play BGM */
+extern void soundStartRaw(s32 soundId, s32 p2, s32 p3);   /* Play SE */
+extern void soundStopRaw(s32 soundId, s32 p2, s32 p3);   /* Play BGM */
 
 /* Scene/camera */
 extern void floorLink(s32 cameraId, s32 mode);
 extern u8   fn_800FF548(void);                     /* Scene transition check */
-extern void fn_800FF56C(s32 floorId);              /* Floor load */
+extern void std092_getCurrentRoomID(s32 floorId);              /* Floor load */
 
 /* Frame control */
 extern void _threadSwitch(void);                     /* Frame advance */
@@ -139,7 +139,7 @@ extern void* windowAllocMemory(void*, s32);
 extern void* windowGetAllocPtr(void*);
 extern u8   windowSearchID(s32);
 extern void fn_80103F74(s32, s32, s32);
-extern void fn_801669BC(s32);
+extern void soundStopSE(s32);
 extern void* memcpy(void* dst, const void* src, u32 n);
 #pragma push
 #pragma peephole off
@@ -184,7 +184,7 @@ s32 fn_800129A8(u8* ctx) {
         *(s16*)(p + 0xE) += 1;
         if (*(s16*)(p + 0xE) > *(s16*)(p + 0xC)) {
             *(s16*)(p + 0xC) = 0;
-            fn_801669BC(0x4d0);
+            soundStopSE(0x4d0);
         }
     }
     *(u16*)(p + 6) += 1;
@@ -450,7 +450,7 @@ s32 menuPanelCursorDecimalInput(u8* ctx) {
 #endif
 
 /* fn_8001329C - 0x8001329C | size: 0x3cc */
-extern void fn_8001EC08(s32, s32, s32, s32, s32, s32);
+extern void msgWinDrawBackground(s32, s32, s32, s32, s32, s32);
 extern void msgctrlSetValue(s32, s32);
 extern void jumptable_802E4D90();
 #if 0
@@ -474,7 +474,7 @@ s32 fn_8001329C(u8* ctx, u8* tgt) {
         if (*(s32*)(ctx + 4) == 0x107) {
             fn_8001E644(0, 0, *(s16*)(tgt + 0x54), *(s16*)(tgt + 0x56), ctx[0x8B]);
         } else {
-            fn_8001EC08(0, 0, *(s16*)(tgt + 0x54), *(s16*)(tgt + 0x56), ctx[0x8B], 1);
+            msgWinDrawBackground(0, 0, *(s16*)(tgt + 0x54), *(s16*)(tgt + 0x56), ctx[0x8B], 1);
         }
         break;
     case 0x93:
@@ -1188,7 +1188,7 @@ s32 fn_80014550(u8* src_struct, u8* dst) {
 }
 
 /* fn_80014574 - 0x80014574 | size: 0x4d4 */
-extern void fn_80166A50(s32, s32, s32, s32);
+extern void soundStart(s32, s32, s32, s32);
 extern u32 lbl_8047A2FC;
 #if 0
 asm void fn_80014574(void) {
@@ -1284,7 +1284,7 @@ s32 fn_80014574(u8* ctx) {
                 if (value > max_value) {
                     lbl_8047A2FC = min_value;
                 }
-                fn_80166A50(0x23, 0, 0xFF, 0);
+                soundStart(0x23, 0, 0xFF, 0);
             } else {
                 current = lbl_8047A2FC;
                 digit = (current / place) % 10;
@@ -1339,7 +1339,7 @@ s32 fn_80014574(u8* ctx) {
                 if (value < min_value) {
                     lbl_8047A2FC = min_value;
                 } else {
-                    fn_80166A50(0x23, 0, 0xFF, 0);
+                    soundStart(0x23, 0, 0xFF, 0);
                 }
             }
         }
@@ -1355,7 +1355,7 @@ s32 fn_80014574(u8* ctx) {
                 if (value < min_value) {
                     lbl_8047A2FC = max_value;
                 }
-                fn_80166A50(0x23, 0, 0xFF, 0);
+                soundStart(0x23, 0, 0xFF, 0);
             } else {
                 current = lbl_8047A2FC;
                 digit = (current / place) % 10;
@@ -1410,7 +1410,7 @@ s32 fn_80014574(u8* ctx) {
                 if (value < min_value) {
                     lbl_8047A2FC = min_value;
                 } else {
-                    fn_80166A50(0x23, 0, 0xFF, 0);
+                    soundStart(0x23, 0, 0xFF, 0);
                 }
             }
         }

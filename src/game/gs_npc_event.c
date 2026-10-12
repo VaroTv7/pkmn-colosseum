@@ -37,16 +37,16 @@
  *     0x10CE: Load trainer model from lbl_803A3230
  *     0x10CF: Load trainer model from lbl_803A31E8
  *   Then sets up the renderer:
- *     - fn_800D88DC: Set render layer 3
- *     - fn_800D888C: Set render layer 4
- *     - fn_800D6A00: Set render mode 7
- *     - fn_800D7820: Load model resource
- *     - fn_800D85D4: Bind model to slot 0
- *     - fn_800D67BC: Set blend mode 2
+ *     - gfxSetFlags: Set render layer 3
+ *     - gfxClearFlags: Set render layer 4
+ *     - gfxSetPrimitive: Set render mode 7
+ *     - gfxSetVtxDesc: Load model resource
+ *     - gfxLoadTexture: Bind model to slot 0
+ *     - gfxBegin: Set blend mode 2
  *     - fn_800D61E4: Set position (x, y)
  *     - fn_800D5CB8: Set color RGBA (255, 255, 255, 255)
- *     - fn_800D59B8: Set scale (1.0, 1.0)
- *     - fn_800D6728: Commit render state
+ *     - gfxVtxTexCoord: Set scale (1.0, 1.0)
+ *     - gfxEnd: Commit render state
  *
  * fn_800302D0 (GSnpcEvt_ProcessOverworldNPC):
  *   Handles overworld NPC events based on the NPC's event type ID:
@@ -83,16 +83,16 @@
  * ========================================================================= */
 
 /* Model/Rendering system */
-extern void  fn_800D88DC(s32 layer);              /* Set render layer */
-extern void  fn_800D888C(s32 layer);              /* Set secondary layer */
-extern void  fn_800D6A00(s32 mode);               /* Set render mode */
-extern void  fn_800D7820(void* resource);          /* Load model resource */
-extern void  fn_800D85D4(s32 slot, void* model);  /* Bind model to slot */
-extern void  fn_800D67BC(s32 blendMode);           /* Set blend mode */
+extern void  gfxSetFlags(s32 layer);              /* Set render layer */
+extern void  gfxClearFlags(s32 layer);              /* Set secondary layer */
+extern void  gfxSetPrimitive(s32 mode);               /* Set render mode */
+extern void  gfxSetVtxDesc(void* resource);          /* Load model resource */
+extern void  gfxLoadTexture(s32 slot, void* model);  /* Bind model to slot */
+extern void  gfxBegin(s32 blendMode);           /* Set blend mode */
 extern void  fn_800D61E4(s32 x, s32 y);           /* Set position */
 extern void  fn_800D5CB8(s32 slot, s32 r, s32 g, s32 b, s32 a); /* Set color */
-extern void  fn_800D59B8(s32 slot, f32 scaleX, f32 scaleY);     /* Set scale */
-extern void  fn_800D6728(void);                    /* Commit render state */
+extern void  gfxVtxTexCoord(s32 slot, f32 scaleX, f32 scaleY);     /* Set scale */
+extern void  gfxEnd(void);                    /* Commit render state */
 
 /* NPC/interaction */
 extern void* menuModelRender(void* data);              /* Get model from data */
@@ -474,7 +474,7 @@ void fn_80031AC0(void* r3, void* r4) {
 /* 0x80031B10 | 0x3C */
 extern void _threadSwitch(void);
 extern u32 fn_8010B560(void);
-extern void fn_801CB9D8(u32);
+extern void std113_mapObjectUnk_8018db68(u32);
 extern u32 lbl_8047A418;
 #if 0
 asm void fn_80031B10(void) {
@@ -486,7 +486,7 @@ void fn_80031B10(void) {
     while ((u8)fn_8010B560() != 0) {
         _threadSwitch();
     }
-    fn_801CB9D8(lbl_8047A418);
+    std113_mapObjectUnk_8018db68(lbl_8047A418);
 }
 #pragma peephole on
 #endif
@@ -1158,13 +1158,13 @@ L_80032484:
 #endif
 
 /* 0x800324A0 | 0xC4 */
-extern void fn_80112260(s32);
-extern u32  fn_80113F48(void);
-extern u32  fn_801CBA0C(u32);
+extern void floorSetMapVisibility(s32);
+extern u32  std093_getCurrentGroupID(void);
+extern u32  std112_modelGetResourceID(u32);
 extern u32  GSresGetResource(u32);
 extern void cameraPlayAnime(s32, u32, s32, s32);
 extern void GSscene_SetMode(s32);
-extern void fn_801CB7C4(u32);
+extern void std116_mapObjectStopAnimation(u32);
 extern u8 lbl_8047A408;
 extern u32 lbl_8047A42C;
 extern u8 lbl_8047A409;
@@ -1188,7 +1188,7 @@ void fn_800324A0(void) {
     u32 handle;
     s32 minus_one;
 
-    fn_80112260(0);
+    floorSetMapVisibility(0);
     if (lbl_8047A408 != 0) {
         lbl_8047A408 = 0;
     } else {
@@ -1201,35 +1201,35 @@ void fn_800324A0(void) {
         lbl_8047A410 = 1;
         lbl_8047A41C = 1;
         lbl_8047A40A = 1;
-        handle = fn_80113F48();
-        value = fn_801CBA0C(0x0FFE1000);
+        handle = std093_getCurrentGroupID();
+        value = std112_modelGetResourceID(0x0FFE1000);
         lbl_8047A418 = value;
         lbl_8047A414 = GSresGetResource(handle);
         cameraPlayAnime(0x37C, 0x0FFF1800, 0, 1);
         GSscene_SetMode(4);
-        fn_801CB7C4(0x10B11000);
+        std116_mapObjectStopAnimation(0x10B11000);
     }
 }
 #pragma pop
 #endif
 
 /* 0x80032564 | 0x28 */
-extern void fn_800FF730(s32);
+extern void std098_mapWarpToMenuRoom(s32);
 #if 0
-asm void fn_80032564(void) {
-#include "src/game/gs_npc_event_fn_80032564.inc"
+asm void std198_menuEnterTradingMenu(void) {
+#include "src/game/gs_npc_event_std198_menuEnterTradingMenu.inc"
 }
 #else
 #pragma peephole off
-void fn_80032564(void) {
-    fn_800FF730(0x394);
+void std198_menuEnterTradingMenu(void) {
+    std098_mapWarpToMenuRoom(0x394);
     _threadSwitch();
 }
 #pragma peephole on
 #endif
 
 /* 0x8003258C | 0x270 */
-extern void fn_80166AB8(s32, s32, s32);
+extern void soundStartRaw(s32, s32, s32);
 extern void heroAddPokecoupon(s32, s32);
 extern void jumptable_802E4FE0();
 extern u32 lbl_8047A450;
@@ -1273,7 +1273,7 @@ void fn_8003258C(void) {
                 r31 = 0x258;
                 break;
             }
-            fn_80166AB8(0x3cc, 0, 0);
+            soundStartRaw(0x3cc, 0, 0);
             heroAddPokecoupon(0, r31);
             msgctrlSetValue(0x2f, r31);
             winMsgOpen(8, 0x3b60, 1, 0);
@@ -1281,7 +1281,7 @@ void fn_8003258C(void) {
         } else {
             switch (ctr) {
             case 0x1e:
-                fn_80166AB8(0x3cc, 0, 0);
+                soundStartRaw(0x3cc, 0, 0);
                 heroAddPokecoupon(0, 0x2580);
                 msgctrlSetValue(0x2f, 0x2580);
                 winMsgOpen(8, 0x3b8c, 1, 0);
@@ -1334,7 +1334,7 @@ extern u32 pokemonGetStatus(void*, u32, u32, u32);
 extern void fn_80082EA4(u32, s32, u8, u8);
 extern u32 menuIsCheck(u32);
 extern s32 fn_800D37CC(void);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern u8 lbl_8047A44A;
 extern u32 lbl_8047A430;
 extern u32 lbl_8047A43C;
@@ -1566,7 +1566,7 @@ void fn_800327FC(void)
         f32 elapsed = lbl_8047B9F8;
         while (elapsed < lbl_8047BA18) {
             _threadSwitch();
-            elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+            elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         }
     }
 
@@ -1592,8 +1592,8 @@ extern void fn_801FCC3C(s32);
 extern u8*  fightTrainerPokemonDataBiosGetPtr(void);
 extern void fightTrainerPokemonDataBiosSetPokemonDataId(s32, u16);
 extern u8*  fieldStartEncount(s32, s32, s32);
-extern u32  fn_801653C4(void);
-extern void fn_80165A20(s32, s32, s32);
+extern u32  std228_soundGetCurrentBackgroundMusic(void);
+extern void std104_soundSetBackgroundMusic(s32, s32, s32);
 extern u32 lbl_8047A444;
 extern u8 lbl_8047A439;
 extern void fn_800330B8(s32, u8*);
@@ -1658,15 +1658,15 @@ u8* fn_80032ED8(s32 arg0, s32 arg1, u8* arg2) {
     }
 
     result = fieldStartEncount(arg1, 1, 0);
-    cameraPlayAnime((s32)fn_80113F48(), 0x11171800, 0, 0);
+    cameraPlayAnime((s32)std093_getCurrentGroupID(), 0x11171800, 0, 0);
 
     if (lbl_8047A439 != 0) {
         sfx_id = 0x446;
     } else {
         sfx_id = 0x4CD;
     }
-    if (sfx_id != fn_801653C4()) {
-        fn_80165A20(sfx_id, 0, 0x7F);
+    if (sfx_id != std228_soundGetCurrentBackgroundMusic()) {
+        std104_soundSetBackgroundMusic(sfx_id, 0, 0x7F);
     }
     return result;
 }
@@ -1783,7 +1783,7 @@ void fn_80032ED8_legacy_disabled(void) {
     r5 = 0x0;
     fn_801CA5C4();
     r26 = r3;
-    fn_80113F48();
+    std093_getCurrentGroupID();
     r4 = 0x11170000;
     r5 = 0x0;
     r4 = r4 + 0x1800;
@@ -1796,12 +1796,12 @@ void fn_80032ED8_legacy_disabled(void) {
 
         r28 = 0x4cd;
     }
-    fn_801653C4();
+    std228_soundGetCurrentBackgroundMusic();
     if (r28 != r3) {
         r3 = r28;
         r4 = 0x0;
         r5 = 0x7f;
-        fn_80165A20();
+        std104_soundSetBackgroundMusic();
     }
     r3 = r26;
     return;
@@ -2352,19 +2352,19 @@ void fn_80030C14(void* r3, u8* r4) {
         break;
     }
     if (model != NULL) {
-        fn_800D88DC(3);
-        fn_800D888C(4);
-        fn_800D6A00(7);
-        fn_800D7820(lbl_80314F98);
-        fn_800D85D4(0, model);
-        fn_800D67BC(2);
+        gfxSetFlags(3);
+        gfxClearFlags(4);
+        gfxSetPrimitive(7);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxLoadTexture(0, model);
+        gfxBegin(2);
         fn_800D61E4(0, 0);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D59B8(0, lbl_8047B9D4, lbl_8047B9D4);
+        gfxVtxTexCoord(0, lbl_8047B9D4, lbl_8047B9D4);
         fn_800D61E4(*(s16*)(r4 + 0x54), *(s16*)(r4 + 0x56));
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D59B8(0, lbl_8047B9F0, lbl_8047B9F0);
-        fn_800D6728();
+        gfxVtxTexCoord(0, lbl_8047B9F0, lbl_8047B9F0);
+        gfxEnd();
     }
 }
 #pragma peephole on
@@ -2501,7 +2501,7 @@ void fn_800347B8(void) {
 #endif
 
 /* fn_800347C4 - 0x800347C4 | size: 0x24 */
-extern void fn_80166A28(s32);
+extern void soundStartSE(s32);
 #if 0
 asm void fn_800347C4(void) {
 #include "src/game/gs_npc_event_fn_800347C4.inc"
@@ -2510,7 +2510,7 @@ asm void fn_800347C4(void) {
 #pragma push
 #pragma scheduling off
 void fn_800347C4(void) {
-    fn_80166A28(0x26);
+    soundStartSE(0x26);
 }
 #pragma pop
 #endif
@@ -2524,7 +2524,7 @@ asm void fn_800347E8(void) {
 #pragma push
 #pragma scheduling off
 void fn_800347E8(void) {
-    fn_80166A28(0x26);
+    soundStartSE(0x26);
 }
 #pragma pop
 #endif
@@ -2538,7 +2538,7 @@ asm void fn_8003480C(void) {
 #pragma push
 #pragma scheduling off
 void fn_8003480C(void) {
-    fn_80166A28(0x26);
+    soundStartSE(0x26);
 }
 #pragma pop
 #endif
@@ -2580,18 +2580,18 @@ void fn_800301B0(void* r3, u8* r4) {
         break;
     }
     if (model != NULL) {
-        fn_800D88DC(3);
-        fn_800D888C(4);
-        fn_800D6A00(7);
-        fn_800D7820(lbl_80314F98);
-        fn_800D85D4(0, model);
-        fn_800D67BC(2);
+        gfxSetFlags(3);
+        gfxClearFlags(4);
+        gfxSetPrimitive(7);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxLoadTexture(0, model);
+        gfxBegin(2);
         fn_800D61E4(0, 0);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D59B8(0, lbl_8047B9D4, lbl_8047B9D4);
+        gfxVtxTexCoord(0, lbl_8047B9D4, lbl_8047B9D4);
         fn_800D61E4(*(s16*)(r4 + 0x54), *(s16*)(r4 + 0x56));
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D59B8(0, lbl_8047B9F0, lbl_8047B9F0);
-        fn_800D6728();
+        gfxVtxTexCoord(0, lbl_8047B9F0, lbl_8047B9F0);
+        gfxEnd();
     }
 }

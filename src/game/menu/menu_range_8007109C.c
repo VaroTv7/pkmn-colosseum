@@ -100,7 +100,7 @@ typedef struct MenuRankSprite {
 
 #define SET_EXDISC_VISIBILITY(id_, visible_)                       \
     do {                                                           \
-        void* model_ = GSresGetResource(fn_80113F48(), (id_));      \
+        void* model_ = GSresGetResource(std093_getCurrentGroupID(), (id_));      \
         if (model_ != 0) {                                         \
             GSmodelSetVisibility(model_, (visible_));              \
         }                                                          \
@@ -110,11 +110,11 @@ typedef struct MenuRankSprite {
     do {                                                           \
         fadeSet(3, lbl_8047C108);                                  \
         fadeCheck(1);                                              \
-        fn_801CB9D8((u32)(handle_));                               \
+        std113_mapObjectUnk_8018db68((u32)(handle_));                               \
         SET_EXDISC_VISIBILITY(0x104E1000, 1);                      \
         SET_EXDISC_VISIBILITY(0x104E1001, 1);                      \
         SET_EXDISC_VISIBILITY(0x104E1002, 1);                      \
-        cameraPlayAnime((s32)fn_80113F48(), 0x10941800, 0, 0);    \
+        cameraPlayAnime((s32)std093_getCurrentGroupID(), 0x10941800, 0, 0);    \
         fadeSet(2, lbl_8047C108);                                  \
         fadeCheck(1);                                              \
     } while (0)
@@ -162,14 +162,14 @@ extern void _threadSwitch(void);
  * later than the first call sites. */
 static inline void MenuWaitMotionInterval(void)
 {
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern s32 fn_800D37CC(void);
     f32 elapsed;
 
     elapsed = lbl_8047C0E0;
     while (elapsed < lbl_8047C0E4) {
         _threadSwitch();
-        elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+        elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
 }
 extern void winMsgOpenField(s32, s32, s32);
@@ -185,14 +185,14 @@ extern void fn_8007C23C(u8*);
 extern u32 lbl_803FAEF8[256];
 extern void* heroBiosGetNamePtr(void*);
 extern void* heroBiosGetPokemonPtr(void*, u16);
-extern void* fn_80113F48(void);
+extern void* std093_getCurrentGroupID(void);
 extern void* GSresGetResource(void*, u32);
 extern void GSmodelSetVisibility(void*, u32);
-extern void* fn_801CBA0C(u32);
+extern void* std112_modelGetResourceID(u32);
 extern void cameraPlayAnime(s32, u32, s32, s32);
 extern void fadeSet(s32, f32);
 extern s32 fadeCheck(s32);
-extern void fn_801CB9D8(u32);
+extern void std113_mapObjectUnk_8018db68(u32);
 extern void GSscene_SetMode(s32);
 extern u8 fn_80079EF4(s32, u32);
 extern void gbaCommandSetKeyState(s32 mode, s32 flag);
@@ -1348,10 +1348,10 @@ s32 fn_80073990(s32 chan) {
  * archive (archive/previous_campaign/src/game/menu/menu_tool2.c);
  * re-verified against this unit's own compiler flags.
  */
-extern s32 fn_80190528(s32);
-extern u8 fn_801902E0(s32);
+extern s32 std078_flagSetFalse(s32);
+extern u8 std081_flagCheckTrue(s32);
 extern s32 menuClose(s32);
-extern s32 fn_801906A0(s32);
+extern s32 std082_flagGetValue(s32);
 extern void _flagSet();
 
 /* fn_80074324 (0x80074324): prep key-state then perform per-channel reset path. */
@@ -1583,16 +1583,16 @@ void fn_8007581C(void)
 
 /* fn_80075A34 (0x80075A34): load the battle scene and start its camera. */
 void fn_80075A34(void) {
-    extern u32 fn_80113F48(void);
-    extern u32 fn_801CBA0C(u32 resourceId);
+    extern u32 std093_getCurrentGroupID(void);
+    extern u32 std112_modelGetResourceID(u32 resourceId);
     extern void GSresGetResource(u32 archive, u32 resource);
     extern void cameraPlayAnime(s32 cameraId, u32 animationId, s32 frame, s32 loop);
     extern void GSscene_SetMode(u32 mode);
     extern u8 lbl_8047A5D0;
     u32 archive;
 
-    archive = fn_80113F48();
-    GSresGetResource(archive, *(u32*)&lbl_8047A5D0 = fn_801CBA0C(0x10801000));
+    archive = std093_getCurrentGroupID();
+    GSresGetResource(archive, *(u32*)&lbl_8047A5D0 = std112_modelGetResourceID(0x10801000));
     cameraPlayAnime(0x5E0, 0x10821800, 0, 1);
     GSscene_SetMode(4);
 }
@@ -1986,47 +1986,47 @@ count_present:
 
 #pragma push
 #pragma scheduling off
-s32 fn_80075A9C(void) { return fn_80190528(0xab5); }
+s32 fn_80075A9C(void) { return std078_flagSetFalse(0xab5); }
 #pragma pop
 
 #pragma push
 #pragma scheduling off
-u8 fn_80075AC0(void) { return fn_801902E0(0xab5); }
+u8 fn_80075AC0(void) { return std081_flagCheckTrue(0xab5); }
 #pragma pop
 
 #pragma push
 #pragma scheduling off
-s32 fn_80075AE4(void) { return fn_80190528(0xab4); }
+s32 fn_80075AE4(void) { return std078_flagSetFalse(0xab4); }
 #pragma pop
 
 #pragma push
 #pragma scheduling off
-u8 fn_80075B08(void) { return fn_801902E0(0xab4); }
+u8 fn_80075B08(void) { return std081_flagCheckTrue(0xab4); }
 #pragma pop
 
 #pragma push
 #pragma scheduling off
-s32 fn_80075B2C(void) { return fn_80190528(0xab3); }
+s32 fn_80075B2C(void) { return std078_flagSetFalse(0xab3); }
 #pragma pop
 
 #pragma push
 #pragma scheduling off
-u8 fn_80075B50(void) { return fn_801902E0(0xab3); }
+u8 fn_80075B50(void) { return std081_flagCheckTrue(0xab3); }
 #pragma pop
 
 #pragma push
 #pragma scheduling off
-s32 fn_80075BFC(void) { return fn_80190528(0xab1); }
+s32 fn_80075BFC(void) { return std078_flagSetFalse(0xab1); }
 #pragma pop
 
 #pragma push
 #pragma scheduling off
-u8 fn_80075C20(void) { return fn_801902E0(0xab1); }
+u8 fn_80075C20(void) { return std081_flagCheckTrue(0xab1); }
 #pragma pop
 
 #pragma push
 #pragma scheduling off
-u8 fn_80075C44(void) { return fn_801902E0(0xa14); }
+u8 fn_80075C44(void) { return std081_flagCheckTrue(0xa14); }
 #pragma pop
 
 #pragma push
@@ -2131,7 +2131,7 @@ void fn_8007565C(void) {
 s32 fn_80075BC4(void) {
     u32 value;
 
-    value = fn_801906A0(0xab2);
+    value = std082_flagGetValue(0xab2);
     if (value > 0x30) {
         return 0;
     } else {
@@ -2147,7 +2147,7 @@ s32 fn_80075B74(void) {
     s32 result;
     u32 value;
 
-    value = fn_801906A0(0xab2) + 1;
+    value = std082_flagGetValue(0xab2) + 1;
     result = 1;
     if (value > 0x30) {
         value = 0x30;
@@ -2786,7 +2786,7 @@ s32 fn_80075638(void) { return menuIsCheck(0xd8); }
 extern u8 lbl_8047A5D0;
 /* fn_800757F0 (0x800757F0): release and clear the handle at lbl_8047A5D0. */
 void fn_800757F0(void) {
-    fn_801CB9D8(*(u32*)&lbl_8047A5D0);
+    std113_mapObjectUnk_8018db68(*(u32*)&lbl_8047A5D0);
     *(u32*)&lbl_8047A5D0 = 0;
 }
 
@@ -2803,7 +2803,7 @@ s32 fn_80075D9C(void) {
 }
 #pragma pop
 
-extern s32 fn_80165A20(s32, s32, s32);
+extern s32 std104_soundSetBackgroundMusic(s32, s32, s32);
 
 /* fn_80075EE0 (0x80075EE0): start the menu worker and fade in. */
 void fn_80075EE0(void) {
@@ -2817,7 +2817,7 @@ void fn_80075EE0(void) {
     if (lbl_8047A618 == 0) {
         GSthreadCreate(1, floorGetCurrentContext(), 0x4000, 1, 1, fn_80075F4C);
     } else {
-        fn_80165A20(0x46a, 0, 0x7f);
+        std104_soundSetBackgroundMusic(0x46a, 0, 0x7f);
     }
     fadeSet(2, lbl_8047C0C8);
 }
@@ -2825,7 +2825,7 @@ void fn_80075EE0(void) {
 /* fn_80075F4C (0x80075F4C): tail-call wrapper. */
 #pragma push
 #pragma scheduling off
-s32 fn_80075F4C(void) { return fn_80165A20(0x46a, 0, 0x7f); }
+s32 fn_80075F4C(void) { return std104_soundSetBackgroundMusic(0x46a, 0, 0x7f); }
 #pragma pop
 
 /* fn_80075F78 (0x80075F78): set the message value for the selected rule. */
@@ -3540,7 +3540,7 @@ void fn_80077ED4(void)
     extern void* savedataGetStatus(u32, u32);
     extern void fn_80075B74(void);
     extern s32 fn_801D0748(u32, u32, u32);
-    extern void fn_80166A28(u32);
+    extern void soundStartSE(u32);
     extern void* heroBiosGetPokemonPtr(void*, u32);
     extern void pokemonInit(void*);
     extern void* floorDataBiosGetCurrentPtr(void);
@@ -3555,7 +3555,7 @@ void fn_80077ED4(void)
     extern s32 fn_80093610(u32);
     extern void fn_80093698(u32);
     extern s32 fn_800D37CC(void);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
 
     void* pokemon;
     void* name;
@@ -3572,14 +3572,14 @@ void fn_80077ED4(void)
     fn_80075B74();
 
     if (fn_801D0748(4, 2, 0) != 4) {
-        fn_80166A28(0x4C7);
-        fn_801CB834(resource, 4, 0, 0);
+        soundStartSE(0x4C7);
+        std115_mapObjectPlayAnimation(resource, 4, 0, 0);
         scriptWaitSyncMotion(resource, 1);
         limit = lbl_8047C0E4;
         elapsed = lbl_8047C0E0;
         while (elapsed < limit) {
             _threadSwitch();
-            elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+            elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         }
         msgctrlSetValue(0x4D, (u32)name);
         menuSetEnablePort(1);
@@ -3627,14 +3627,14 @@ void fn_80077ED4(void)
             *(MenuSaveSnapshot*)savedataGetStatus(0, 0) =
                 *(MenuSaveSnapshot*)backup;
             fn_801D0748(4, 2, 0);
-            fn_80166A28(0x4C7);
-            fn_801CB834(resource, 4, 0, 0);
+            soundStartSE(0x4C7);
+            std115_mapObjectPlayAnimation(resource, 4, 0, 0);
             scriptWaitSyncMotion(resource, 1);
             limit = lbl_8047C0E4;
             elapsed = lbl_8047C0E0;
             while (elapsed < limit) {
                 _threadSwitch();
-                elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
             }
             msgctrlSetValue(0x4D, (u32)name);
             menuSetEnablePort(1);
@@ -3648,7 +3648,7 @@ void fn_80077ED4(void)
             menuSetEnablePort(1);
             winMsgOpen(2, 0x3D84, 1, 0);
             winMsgClose(1);
-            fn_80165668(0x3D2, 0, 0xFF);
+            std130_soundUnk_801653cc(0x3D2, 0, 0xFF);
             msgctrlSetValue(0x4D, (u32)name);
             menuSetEnablePort(1);
             winMsgOpenField(0x4435, 1, 0);
@@ -3676,24 +3676,24 @@ s32 fn_80078D38(void) {
 #pragma peephole off
 void fn_8007926C(void) {
     extern u32 lbl_8047A620;
-    extern u32 fn_801CBA0C(u32 resourceId);
-    extern void fn_801CB954(u32 object, s32 visible);
-    extern void fn_801CB61C(u32 object, u32 resourceId, s32 animationId);
-    extern void fn_801CB834(u32 object, s32 arg1, s32 arg2, s32 arg3);
+    extern u32 std112_modelGetResourceID(u32 resourceId);
+    extern void std114_mapObjectSetVisibility(u32 object, s32 visible);
+    extern void std166_mapObjectAttachToObject(u32 object, u32 resourceId, s32 animationId);
+    extern void std115_mapObjectPlayAnimation(u32 object, s32 arg1, s32 arg2, s32 arg3);
     u32 object;
 
     lbl_8047A620 = 1;
-    object = fn_801CBA0C(0x10BD1000);
-    fn_801CB954(object, 1);
-    fn_801CB61C(object, 0x104F1000, 0x207);
-    fn_801CB834(object, 0, 0, 1);
+    object = std112_modelGetResourceID(0x10BD1000);
+    std114_mapObjectSetVisibility(object, 1);
+    std166_mapObjectAttachToObject(object, 0x104F1000, 0x207);
+    std115_mapObjectPlayAnimation(object, 0, 0, 1);
 }
 #pragma pop
 
 extern s32 fn_800D37CC(void);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern s32 menuOpen(s32, s32);
-extern s32 fn_8001E184(void);
+extern s32 std011_dialogDisplayYesNoMenu(void);
 
 extern u32 lbl_804788F0;
 extern u32 lbl_802E61D8[];
@@ -3718,7 +3718,7 @@ extern f32 lbl_8047C128;
             u32 ticks_;                  \
             _threadSwitch();             \
             frames_ = fn_800D37CC();     \
-            ticks_ = fn_800D3088();      \
+            ticks_ = msgGetCharsPerFrame();      \
             elapsed_ += (f32)ticks_ / (f32)frames_; \
         }                                \
     } while (0)
@@ -4348,12 +4348,12 @@ void fn_80078390(void)
     winMsgClose(1);
     fadeSet(3, lbl_8047C100);
     fadeCheck(1);
-    fn_801CB834(resource, 2, 0, 0);
-    fn_80166A28(0x4C7);
+    std115_mapObjectPlayAnimation(resource, 2, 0, 0);
+    soundStartSE(0x4C7);
     fadeSet(2, lbl_8047C100);
     fadeCheck(1);
     scriptWaitSyncMotion(resource, 1);
-    fn_801CB834(resource, 3, 0, 1);
+    std115_mapObjectPlayAnimation(resource, 3, 0, 1);
     msgctrlSetValue(0x4D, (u32)name);
     menuSetEnablePort(1);
     winMsgOpenField(0x4434, 1, 0);
@@ -4362,14 +4362,14 @@ void fn_80078390(void)
     if (*(u16*)(lbl_803F6E40 + 0x0C) == 6) {
         menuSetEnablePort(1);
         winMsgOpenField(0x43A6, 1, 0);
-        fn_80166A28(0x4C7);
-        fn_801CB834(resource, 4, 0, 0);
+        soundStartSE(0x4C7);
+        std115_mapObjectPlayAnimation(resource, 4, 0, 0);
         scriptWaitSyncMotion(resource, 1);
         limit = lbl_8047C0E4;
     elapsed = lbl_8047C0E0;
         while (elapsed < limit) {
             _threadSwitch();
-            elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+            elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         }
         msgctrlSetValue(0x4D, (u32)name);
         menuSetEnablePort(1);
@@ -4381,14 +4381,14 @@ void fn_80078390(void)
         return;
     }
 
-    fn_80166A28(0x4C7);
-    fn_801CB834(resource, 5, 0, 0);
+    soundStartSE(0x4C7);
+    std115_mapObjectPlayAnimation(resource, 5, 0, 0);
     scriptWaitSyncMotion(resource, 1);
     limit = lbl_8047C0E4;
     elapsed = lbl_8047C0E0;
     while (elapsed < limit) {
         _threadSwitch();
-        elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+        elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
     msgctrlSetValue(0x4D, (u32)name);
     menuSetEnablePort(1);
@@ -4400,14 +4400,14 @@ void fn_80078390(void)
     switch (answer) {
     case -1:
     case 1:
-        fn_80166A28(0x4C7);
-        fn_801CB834(resource, 4, 0, 0);
+        soundStartSE(0x4C7);
+        std115_mapObjectPlayAnimation(resource, 4, 0, 0);
         scriptWaitSyncMotion(resource, 1);
         limit = lbl_8047C0E4;
         elapsed = lbl_8047C0E0;
         while (elapsed < limit) {
             _threadSwitch();
-            elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+            elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         }
         menuSetEnablePort(1);
         winMsgOpenField(0x44B0, 1, 0);
@@ -4439,9 +4439,9 @@ void fn_800788BC(void* backup)
     extern u32 floorDataBiosGetFloorID(void*);
     extern void heroPokemonGetCelebi(void*, u32);
     extern s32 fn_801D0748(u32, u32, u32);
-    extern void fn_80165668(u32, u32, u32);
+    extern void std130_soundUnk_801653cc(u32, u32, u32);
     extern s32 fn_800D37CC(void);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
 
     MenuSaveSnapshot* savedataBackup = backup;
     void* hero;
@@ -4456,12 +4456,12 @@ void fn_800788BC(void* backup)
 
     fadeSet(3, lbl_8047C100);
     fadeCheck(1);
-    fn_801CB834(resource, 2, 0, 0);
-    fn_80166A28(0x4C7);
+    std115_mapObjectPlayAnimation(resource, 2, 0, 0);
+    soundStartSE(0x4C7);
     fadeSet(2, lbl_8047C100);
     fadeCheck(1);
     scriptWaitSyncMotion(resource, 1);
-    fn_801CB834(resource, 3, 0, 1);
+    std115_mapObjectPlayAnimation(resource, 3, 0, 1);
 
     winMsgOpenField(0x43A3, 1, 0);
     winMsgClose(1);
@@ -4471,14 +4471,14 @@ void fn_800788BC(void* backup)
     hero = savedataGetStatus(0, 2);
     if (MenuHeroHasFreePartySlot(hero) == 0) {
         winMsgOpenField(0x43A6, 1, 0);
-        fn_80166A28(0x4C7);
-        fn_801CB834(resource, 4, 0, 0);
+        soundStartSE(0x4C7);
+        std115_mapObjectPlayAnimation(resource, 4, 0, 0);
         scriptWaitSyncMotion(resource, 1);
         limit = lbl_8047C0E4;
         elapsed = lbl_8047C0E0;
         while (elapsed < limit) {
             _threadSwitch();
-            elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+            elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         }
         winMsgOpenField(0x43AC, 1, 0);
         winMsgClose(1);
@@ -4486,14 +4486,14 @@ void fn_800788BC(void* backup)
         return;
     }
 
-    fn_80166A28(0x4C7);
-    fn_801CB834(resource, 5, 0, 0);
+    soundStartSE(0x4C7);
+    std115_mapObjectPlayAnimation(resource, 5, 0, 0);
     scriptWaitSyncMotion(resource, 1);
     limit = lbl_8047C0E4;
     elapsed = lbl_8047C0E0;
     while (elapsed < limit) {
         _threadSwitch();
-        elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+        elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
 
     *savedataBackup =
@@ -4503,14 +4503,14 @@ void fn_800788BC(void* backup)
         hero, floorDataBiosGetFloorID(floorDataBiosGetCurrentPtr()));
 
     if ((s8)fn_801D0748(4, 2, 0) != 4) {
-        fn_80166A28(0x4C7);
-        fn_801CB834(resource, 4, 0, 0);
+        soundStartSE(0x4C7);
+        std115_mapObjectPlayAnimation(resource, 4, 0, 0);
         scriptWaitSyncMotion(resource, 1);
         limit = lbl_8047C0E4;
         elapsed = lbl_8047C0E0;
         while (elapsed < limit) {
             _threadSwitch();
-            elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+            elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         }
         *(MenuSaveSnapshot*)savedataGetStatus(0, 0) =
             *savedataBackup;
@@ -4519,7 +4519,7 @@ void fn_800788BC(void* backup)
         return;
     }
 
-    fn_80165668(0x3D2, 0, 0xFF);
+    std130_soundUnk_801653cc(0x3D2, 0, 0xFF);
     winMsgOpenField(0x43A8, 1, 0);
     winMsgClose(1);
     winMsgOpenField(0x43AA, 1, 0);
@@ -4536,7 +4536,7 @@ void fn_80078D5C(void)
 {
     extern void* fn_801D036C();
     extern void fn_801D0314();
-    extern void* fn_80113F48();
+    extern void* std093_getCurrentGroupID();
     extern void cameraPlayAnime();
     extern u8 fn_80075C44();
     extern u8 fn_80075C20();
@@ -4544,17 +4544,17 @@ void fn_80078D5C(void)
     extern u32 fn_80075BC4();
     extern void winMsgOpenField();
     extern void winMsgClose();
-    extern void fn_80166A28();
+    extern void soundStartSE();
     extern void msgctrlSetValue();
-    extern s8 fn_8001E184();
+    extern s8 std011_dialogDisplayYesNoMenu();
     extern void fn_800788BC();
     extern void fn_80077ED4();
     extern void* GSresGetResource();
     extern void GSmodelSetVisibility();
-    extern u32 fn_801CBA0C();
+    extern u32 std112_modelGetResourceID();
     extern void GSscene_SetMode();
     extern s32 fn_800849B4();
-    extern void fn_801CB9D8();
+    extern void std113_mapObjectUnk_8018db68();
     extern u8 lbl_80268AA8[];
     extern u8 lbl_803F6E40[];
     extern u8 lbl_803F6F18[];
@@ -4571,8 +4571,8 @@ void fn_80078D5C(void)
     while ((s32)lbl_8047A620 > 0) {
         switch (lbl_8047A620) {
         case 1:
-            cameraPlayAnime(fn_80113F48(), 0x10951800, 0, 0);
-            fn_801CB834(0x104F1000, 6, 0, 1);
+            cameraPlayAnime(std093_getCurrentGroupID(), 0x10951800, 0, 0);
+            std115_mapObjectPlayAnimation(0x104F1000, 6, 0, 1);
             if (fn_80075C44() == 1) {
                 lbl_8047A620 = 2;
             } else {
@@ -4583,7 +4583,7 @@ void fn_80078D5C(void)
         case 2:
             fadeSet(3, lbl_8047C100);
             fadeCheck(1);
-            fn_801CB834(0x104F1000, 0, 0, 1);
+            std115_mapObjectPlayAnimation(0x104F1000, 0, 0, 1);
             fadeSet(2, lbl_8047C100);
             fadeCheck(1);
             fadeCheck(1);
@@ -4599,16 +4599,16 @@ void fn_80078D5C(void)
         case 3:
             fadeSet(3, lbl_8047C100);
             fadeCheck(1);
-            fn_801CB834(0x104F1000, 1, 0, 1);
+            std115_mapObjectPlayAnimation(0x104F1000, 1, 0, 1);
             fadeSet(2, lbl_8047C100);
             fadeCheck(1);
             fadeCheck(1);
             winMsgOpenField(0x43C0, 1, 0);
-            fn_80166A28(0x3F9);
+            soundStartSE(0x3F9);
             elapsed = lbl_8047C0E0;
             while (elapsed < lbl_8047C0E4) {
                 _threadSwitch();
-                elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
             }
             lbl_8047A620 = 0;
             break;
@@ -4633,7 +4633,7 @@ void fn_80078D5C(void)
             }
             msgctrlSetValue(0x2F, scene);
             winMsgOpenField(0x43BB, 1, 0);
-            answer = fn_8001E184();
+            answer = std011_dialogDisplayYesNoMenu();
             winMsgClose(1);
             switch (answer) {
             case -1:
@@ -4662,14 +4662,14 @@ void fn_80078D5C(void)
 
         case 8:
             loadData = *(MenuExDiscLoadData*)lbl_80268AA8;
-            context = fn_80113F48();
+            context = std093_getCurrentGroupID();
             fadeSet(3, lbl_8047C104);
             fadeCheck(1);
             model = GSresGetResource(context, 0x104F1000);
             if (model != 0) {
                 GSmodelSetVisibility(model, 0);
             }
-            scene = fn_801CBA0C(0x0FFE1000);
+            scene = std112_modelGetResourceID(0x0FFE1000);
             GSresGetResource(context, scene);
             cameraPlayAnime(0x5D5, 0x0FFF1800, 0, 1);
             GSscene_SetMode(4);
@@ -4682,7 +4682,7 @@ void fn_80078D5C(void)
             }
             fadeSet(3, lbl_8047C104);
             fadeCheck(1);
-            fn_801CB9D8(scene);
+            std113_mapObjectUnk_8018db68(scene);
             if (model != 0) {
                 GSmodelSetVisibility(model, 1);
                 cameraPlayAnime(context, 0x10951800, 0, 0);
@@ -4741,8 +4741,8 @@ void fn_800792D8(void) {
     SET_EXDISC_VISIBILITY(0x104E1001, 0);
     SET_EXDISC_VISIBILITY(0x104E1002, 0);
 
-    sceneHandle = fn_801CBA0C(0x0FFE1000);
-    GSresGetResource(fn_80113F48(), (u32)sceneHandle);
+    sceneHandle = std112_modelGetResourceID(0x0FFE1000);
+    GSresGetResource(std093_getCurrentGroupID(), (u32)sceneHandle);
     cameraPlayAnime(0x5d4, 0x0FFF1800, 0, 1);
     GSscene_SetMode(4);
     fadeSet(2, lbl_8047C108);
@@ -4840,7 +4840,7 @@ void fn_800792D8(void) {
     fn_80093698(1);
     winMsgClose(1);
     winMsgOpenField(0x43c5, 1, 0);
-    choice = (s8)fn_8001E184();
+    choice = (s8)std011_dialogDisplayYesNoMenu();
     if (choice != 0 && choice >= -1 && choice < 2) {
         winMsgOpenField(0x43ca, 1, 0);
         winMsgClose(1);
@@ -4859,7 +4859,7 @@ void fn_800792D8(void) {
  *
  * Retail keeps the compare and the sign/zero extension apart (`clrlwi`+`cmplwi`,
  * one `extsb` feeding three compares), so the peephole pass has to be off; the
- * flag getters then have to return u8 like the canonical fn_801902E0 in
+ * flag getters then have to return u8 like the canonical std081_flagCheckTrue in
  * src/game/gs_range_8018FE30.c, or peephole-off leaves a redundant truncation
  * in front of each `stb`. `hero` is declared after the party-loop counter
  * because that is what puts it above `backup` in the callee-saved ranking and
@@ -4966,7 +4966,7 @@ party_capacity_done:
     }
 
     winMsgOpenField(0x43C5, 1, 0);
-    choice = (s8)fn_8001E184();
+    choice = (s8)std011_dialogDisplayYesNoMenu();
     if (choice != 0) {
         if (choice < 0) {
             if (choice >= -1) {
@@ -5005,7 +5005,7 @@ cancelled:
             u32 ticks_;                  \
             _threadSwitch();             \
             frames_ = fn_800D37CC();     \
-            ticks_ = fn_800D3088();      \
+            ticks_ = msgGetCharsPerFrame();      \
             elapsed_ += (f32)ticks_ / (f32)frames_; \
         }                                \
     } while (0)
@@ -5095,7 +5095,7 @@ u8 fn_80079EF4(s32 arg0, u32 value) {
     }
 
     winMsgOpenField(0x43d1, 1, 0);
-    choice = fn_8001E184();
+    choice = std011_dialogDisplayYesNoMenu();
     winMsgClose(1);
     choice = (s8)choice;
     if (choice == 0 || choice < -1 || choice >= 2) {
@@ -5449,7 +5449,7 @@ void fn_8007A850(void)
         }
         case 2:
         {
-            extern u32 fn_800D3088(void);
+            extern u32 msgGetCharsPerFrame(void);
             extern s32 fn_800D37CC(void);
             f32 elapsed;
 
@@ -5458,7 +5458,7 @@ void fn_8007A850(void)
             elapsed = lbl_8047C114;
             while (elapsed < lbl_8047C108) {
                 _threadSwitch();
-                elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
             }
             lbl_8047A638 = 1;
             break;
@@ -5482,11 +5482,11 @@ void fn_8007AAFC(void) {
 
 /* fn_8007AA6C (0x8007AA6C): reset event flag + start menu animation. */
 void fn_8007AA6C(void) {
-    extern u32 fn_80113F48(void);
+    extern u32 std093_getCurrentGroupID(void);
     extern void cameraPlayAnime(u32, u32, u32, u32);
 
     lbl_8047A638 = 1;
-    cameraPlayAnime(fn_80113F48(), 0x10941800, 0, 0);
+    cameraPlayAnime(std093_getCurrentGroupID(), 0x10941800, 0, 0);
 }
 
 /* fn_8007AAA8 (0x8007AAA8): wait for the worker and release its state. */
@@ -5750,7 +5750,7 @@ int fn_80079C1C(s32 arg0, int arg1, int arg2, s32 arg3) {
     }
     if (lbl_8047A632 != 0) {
         fn_80132A38(0x2D, 0x47);
-        fn_80165668(0x3CA, 0, 0xFF);
+        std130_soundUnk_801653cc(0x3CA, 0, 0xFF);
         switch (arg0) {
         case 1:
             fn_801067E8(0x43AD, 1, 0);
@@ -5763,7 +5763,7 @@ int fn_80079C1C(s32 arg0, int arg1, int arg2, s32 arg3) {
         fn_801069FC(1);
     }
     if (lbl_8047A631 != 0) {
-        fn_80165668(0x3D2, 0, 0xFF);
+        std130_soundUnk_801653cc(0x3D2, 0, 0xFF);
         switch (arg0) {
         case 1:
             fn_801067E8(0x4437, 1, 0);
@@ -5777,7 +5777,7 @@ int fn_80079C1C(s32 arg0, int arg1, int arg2, s32 arg3) {
     }
     if (lbl_8047A630 != 0) {
         fn_80132A38(0x2D, 1);
-        fn_80165668(0x3CA, 0, 0xFF);
+        std130_soundUnk_801653cc(0x3CA, 0, 0xFF);
         switch (arg0) {
         case 1:
             fn_801067E8(0x43AD, 1, 0);
@@ -5941,16 +5941,16 @@ extern u8 menuModelCheck(void*, s32);
 extern void* menuModelRender(void*);
 extern void* fn_801DAC3C(void*);
 extern void fn_800E3DC4(void*, f32*);
-extern void fn_800D88DC(s32);
-extern void fn_800D888C(s32);
-extern void fn_800D6A00(s32);
-extern void fn_800D7820(void*);
-extern void fn_800D85D4(s32, void*);
-extern void fn_800D67BC(s32);
+extern void gfxSetFlags(s32);
+extern void gfxClearFlags(s32);
+extern void gfxSetPrimitive(s32);
+extern void gfxSetVtxDesc(void*);
+extern void gfxLoadTexture(s32, void*);
+extern void gfxBegin(s32);
 extern void fn_800D61E4(s32, s32);
 extern void fn_800D5CB8(s32, s32, s32, s32, s32);
-extern void fn_800D59B8(s32, f32, f32);
-extern void fn_800D6728(void);
+extern void gfxVtxTexCoord(s32, f32, f32);
+extern void gfxEnd(void);
 extern u8 lbl_80314F98[];
 
 void fn_800753D0(void)
@@ -5961,7 +5961,7 @@ void fn_800753D0(void)
     f32 frames;
 
     frames = (f32)fn_800D37CC();
-    *(f32*)lbl_8047A610 = (f32)fn_800D3088() / frames;
+    *(f32*)lbl_8047A610 = (f32)msgGetCharsPerFrame() / frames;
     work = (u8*)lbl_8047A610;
     *(f32*)(work + 0x18C) =
         lbl_8047C098 + lbl_8047C09C * (f32)sin(*(f32*)(work + 4));
@@ -6004,22 +6004,22 @@ void fn_80075518(u8* context, u8* message)
         return;
     }
 
-    fn_800D88DC(3);
-    fn_800D888C(4);
-    fn_800D6A00(7);
-    fn_800D7820(lbl_80314F98);
-    fn_800D85D4(0, model);
-    fn_800D67BC(2);
+    gfxSetFlags(3);
+    gfxClearFlags(4);
+    gfxSetPrimitive(7);
+    gfxSetVtxDesc(lbl_80314F98);
+    gfxLoadTexture(0, model);
+    gfxBegin(2);
     fn_800D61E4(0, 0);
     fn_800D5CB8(0, 0x28, 0x3E, 0xC8, alpha);
-    fn_800D59B8(0, lbl_8047C0A8, lbl_8047C0A8);
+    gfxVtxTexCoord(0, lbl_8047C0A8, lbl_8047C0A8);
     fn_800D61E4(*(s16*)(message + 0x54), *(s16*)(message + 0x56));
     fn_800D5CB8(0, 0x28, 0x3E, 0xC8, alpha);
-    fn_800D59B8(0, lbl_8047C0AC, lbl_8047C0AC);
-    fn_800D6728();
+    gfxVtxTexCoord(0, lbl_8047C0AC, lbl_8047C0AC);
+    gfxEnd();
 }
 
-extern u32 fn_800FF56C(void);
+extern u32 std092_getCurrentRoomID(void);
 extern u16 fn_800E2C04(s32, s32);
 extern void* fn_800E27B0(u16);
 extern void* gamedataGetStatus(s32, s32);
@@ -6034,7 +6034,7 @@ void fn_800756C8(s32 pokemonId)
     u8* work;
     u16 handle;
 
-    if (fn_800FF56C() != 0x43) {
+    if (std092_getCurrentRoomID() != 0x43) {
         return;
     }
     handle = fn_800E2C04(0x1A0, 0x20);
@@ -6059,7 +6059,7 @@ void fn_800756C8(s32 pokemonId)
     menuOpenCustom(0xD8, 0, 0, 0, 0, 0);
 }
 
-extern int fn_801CB834();
+extern int std115_mapObjectPlayAnimation();
 extern void floorSetFadeScript(s32, u32);
 
 void fn_80075DC8(void)
@@ -6068,7 +6068,7 @@ void fn_80075DC8(void)
     u32 elapsed;
     s32 destination;
 
-    cameraPlayAnime((s32)fn_80113F48(), 0x0B561800, 0, 0);
+    cameraPlayAnime((s32)std093_getCurrentGroupID(), 0x0B561800, 0, 0);
     waitTicks = 1;
     if (fn_800D37CC() == 0x32) {
         waitTicks = (u32)lbl_8047C0C0;
@@ -6079,10 +6079,10 @@ void fn_80075DC8(void)
     elapsed = 0;
     while (elapsed < waitTicks) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    fn_801CB834(0x0B541000, 2, 0, 1);
+    std115_mapObjectPlayAnimation(0x0B541000, 2, 0, 1);
     destination =
         menuOpenCustom(0xE2, 0, 0, 0x10, 1, 0) == 0 ? 0x321 : 0x384;
     fadeCheck(1);

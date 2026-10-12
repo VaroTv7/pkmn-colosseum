@@ -366,21 +366,21 @@ typedef union ColDrawColor {
 } ColDrawColor;
 
 extern ColDrawScene* fn_8010CBC0(void);
-extern void fn_800DA028(s32);
-extern void fn_800D7820(void*);
-extern void fn_800D88DC(s32);
-extern void fn_800D888C(s32);
-extern void fn_800DA4C4(s32, s32, s32);
-extern void fn_800DA1E8(s32, s32, s32);
+extern void gfxSetCullMode(s32);
+extern void gfxSetVtxDesc(void*);
+extern void gfxSetFlags(s32);
+extern void gfxClearFlags(s32);
+extern void gfxSetBlendMode(s32, s32, s32);
+extern void gfxSetZMode(s32, s32, s32);
 extern void fn_800D9ED8(s32);
 extern void fn_8010CA30(ColMtx out, u32 index);
 extern void fn_8010C8D0(ColMtx out, u32 index);
 extern void PSMTXMultVec(ColMtx, const ColVec3, ColVec3);
-extern void fn_800D6A00(s32);
-extern void fn_800D67BC(s32);
-extern void fn_800D6680(f32, f32, f32);
+extern void gfxSetPrimitive(s32);
+extern void gfxBegin(s32);
+extern void gfxVtxPos(f32, f32, f32);
 extern void fn_800D5CB8(s32, u8, u8, u8, u8);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 extern void* GScolsys2Draw(void);
 extern void GSgfxDLDraw(void*);
 extern void fn_800D30AC(void);
@@ -408,7 +408,7 @@ void fn_8010D20C(void* model, ColMtx matrix, ColMtx normalMatrix)
 
     group = model;
     triangle = group->data;
-    fn_800D6A00(3);
+    gfxSetPrimitive(3);
 
     for (i = 0; i < group->count; i++, triangle += 0x34) {
         memset(&color, 0, sizeof(color));
@@ -430,14 +430,14 @@ void fn_8010D20C(void* model, ColMtx matrix, ColMtx normalMatrix)
             color.channel.r = level * 4 + 0xC0;
         }
 
-        fn_800D67BC(3);
+        gfxBegin(3);
         for (vertex = 0; vertex < 3; vertex++) {
             PSMTXMultVec(matrix, *(ColVec3*)(triangle + vertex * 12),
                          transformed);
-            fn_800D6680(transformed[0], transformed[1], transformed[2]);
+            gfxVtxPos(transformed[0], transformed[1], transformed[2]);
             ColDrawSetColor(color);
         }
-        fn_800D6728();
+        gfxEnd();
     }
 }
 
@@ -459,20 +459,20 @@ static inline void ColDrawEdges(ColMtx matrix, ColDrawGroup* group,
             PSMTXMultVec(matrix, *(ColVec3*)(element + vertex * 12),
                          transformed[vertex]);
         }
-        fn_800D6A00(1);
+        gfxSetPrimitive(1);
         for (vertex = 0; vertex < 3; vertex++) {
             next = vertex + 1;
             if (next >= 3) {
                 next = 0;
             }
-            fn_800D67BC(2);
-            fn_800D6680(transformed[vertex][0], transformed[vertex][1],
+            gfxBegin(2);
+            gfxVtxPos(transformed[vertex][0], transformed[vertex][1],
                         transformed[vertex][2]);
             ColDrawSetColor(color);
-            fn_800D6680(transformed[next][0], transformed[next][1],
+            gfxVtxPos(transformed[next][0], transformed[next][1],
                         transformed[next][2]);
             ColDrawSetColor(color);
-            fn_800D6728();
+            gfxEnd();
         }
     }
 }
@@ -489,16 +489,16 @@ static inline void ColDrawFaces(ColMtx matrix, ColDrawGroup* group,
         return;
     }
     element = group->data;
-    fn_800D6A00(3);
+    gfxSetPrimitive(3);
     for (i = 0; i < group->count; i++, element += stride) {
-        fn_800D67BC(3);
+        gfxBegin(3);
         for (vertex = 0; vertex < 3; vertex++) {
             PSMTXMultVec(matrix, *(ColVec3*)(element + vertex * 12),
                          transformed);
-            fn_800D6680(transformed[0], transformed[1], transformed[2]);
+            gfxVtxPos(transformed[0], transformed[1], transformed[2]);
             ColDrawSetColor(color);
         }
-        fn_800D6728();
+        gfxEnd();
     }
 }
 
@@ -524,12 +524,12 @@ void* GScolsys2Draw(void)
         return NULL;
     }
 
-    fn_800DA028(1);
-    fn_800D7820(*(void**)((u8*)&lbl_80404C68 + 0x3708));
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800DA4C4(1, 6, 7);
-    fn_800DA1E8(1, 2, 1);
+    gfxSetCullMode(1);
+    gfxSetVtxDesc(*(void**)((u8*)&lbl_80404C68 + 0x3708));
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetBlendMode(1, 6, 7);
+    gfxSetZMode(1, 2, 1);
     fn_800D9ED8(0);
 
     if (GSgfxDLBegin(*(void**)((u8*)&lbl_80404C68 + 0x3708), 0x80000) == 0) {
@@ -586,13 +586,13 @@ void fn_8010D8D4(void)
         return;
     }
 
-    fn_800DA028(1);
+    gfxSetCullMode(1);
     state = (u8*)&lbl_80404C68;
-    fn_800D7820(*(void**)(state + 0x3708));
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800DA4C4(1, 6, 7);
-    fn_800DA1E8(1, 2, 1);
+    gfxSetVtxDesc(*(void**)(state + 0x3708));
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetBlendMode(1, 6, 7);
+    gfxSetZMode(1, 2, 1);
     fn_800D9ED8(0);
 
     object = scene->objects;
@@ -963,7 +963,7 @@ f32 GScolsys2UtilGetCpLinePoint(Vec3f*, Vec3f*, Vec3f*, Vec3f*);
 #pragma push
 #pragma optimization_level 0
 #pragma optimizewithasm off
-s32 fn_8010E53C(Vec3f* point, void* data, f32 radius, Vec3f* result) {
+s32 colsysWallSphere(Vec3f* point, void* data, f32 radius, Vec3f* result) {
     extern const f32 lbl_8047CF00;
     extern const f32 lbl_8047CF04;
     extern const f32 lbl_8047CF08[];
@@ -1349,7 +1349,7 @@ s32 fn_8010EB28(Vec3f* point, void* data, ColMtx inverse,
 #pragma pop
 
 /* 0x8010EFE4 | 0x1A4 */
-s32 fn_8010EFE4(Vec3f* segStart, Vec3f* segEnd, f32 radius,
+s32 colsysWallAll(Vec3f* segStart, Vec3f* segEnd, f32 radius,
                 Vec3f* result, s32 useAlternate)
 {
     ColDrawScene* scene;
@@ -1392,7 +1392,7 @@ s32 fn_8010EFE4(Vec3f* segStart, Vec3f* segEnd, f32 radius,
                                        radius, hitPointPtr);
             } else {
                 collided =
-                    fn_8010E53C(&current, group, radius, hitPointPtr);
+                    colsysWallSphere(&current, group, radius, hitPointPtr);
             }
             if (collided != 0) {
                 if (result == NULL) {
@@ -1458,7 +1458,7 @@ s32 fn_8010F188(Vec3f* start, Vec3f* end, f32 radius, Vec3f* result)
         PSVECAdd(&segmentStart, start, &segmentStart);
         PSVECScale(&direction, &segmentEnd, next);
         PSVECAdd(&segmentEnd, start, &segmentEnd);
-        if (fn_8010EFE4(&segmentStart, &segmentEnd, radius, result, 1)) {
+        if (colsysWallAll(&segmentStart, &segmentEnd, radius, result, 1)) {
             return 1;
         }
         if (step <= lbl_8047CF00) {
@@ -1470,7 +1470,7 @@ s32 fn_8010F188(Vec3f* start, Vec3f* end, f32 radius, Vec3f* result)
 }
 
 /* 0x8010F320 | 0x198 */
-s32 fn_8010F320(Vec3f* start, Vec3f* end, f32 radius, Vec3f* result)
+s32 colsysWallSweep(Vec3f* start, Vec3f* end, f32 radius, Vec3f* result)
 {
     extern f32 PSVECDistance(const Vec3f*, const Vec3f*);
     extern void PSVECSubtract(const Vec3f*, const Vec3f*, Vec3f*);
@@ -1510,7 +1510,7 @@ s32 fn_8010F320(Vec3f* start, Vec3f* end, f32 radius, Vec3f* result)
         PSVECAdd(&segmentStart, start, &segmentStart);
         PSVECScale(&direction, &segmentEnd, next);
         PSVECAdd(&segmentEnd, start, &segmentEnd);
-        if (fn_8010EFE4(&segmentStart, &segmentEnd, radius, result, 0)) {
+        if (colsysWallAll(&segmentStart, &segmentEnd, radius, result, 0)) {
             return 1;
         }
         if (step <= lbl_8047CF00) {

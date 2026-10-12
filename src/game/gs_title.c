@@ -49,7 +49,7 @@
  *   fn_80022478  GStitle_DrawCaseSwitch       -- 0x2A8 bytes, upper/lower case switch
  *   fn_80022720  GStitle_CameraFlythrough     -- 0x114 bytes, title camera movement
  *   fn_80022834  GStitle_CameraInterpolate    -- 0x308 bytes, camera spline interp
- *   fn_80022B3C  GStitle_ParticleEffects      -- 0x318 bytes, title particle system
+ *   std163_useCologne  GStitle_ParticleEffects      -- 0x318 bytes, title particle system
  *   fn_80022E54  GStitle_GetEffectCount       -- 0x90 bytes, count active particles
  *   fn_80022EE4  GStitle_SpawnEffect          -- 0x184 bytes, spawn new particle
  *   fn_80023068  GStitle_UpdateEffects        -- 0x20C bytes, update particle positions
@@ -61,10 +61,10 @@
  *   fn_80023DA8  GStitle_GetBGMState          -- 0x3C bytes
  *   fn_80023DE4  GStitle_GetSEState           -- 0x3C bytes
  *   fn_80023E20  GStitle_GetFadeState2        -- 0x3C bytes
- *   fn_80023E5C  GStitle_Nop                  -- 4 bytes, nop
- *   fn_80023E60  GStitle_AutodemoPlayback     -- 0x300 bytes, replay input recording
- *   fn_80024160  GStitle_AutodemoRecord       -- 0x1A8 bytes, record input (debug)
- *   fn_80024308  GStitle_AutodemoSetup        -- 0x130 bytes, setup autodemo
+ *   std018_nop18  GStitle_Nop                  -- 4 bytes, nop
+ *   wmapMenuUpdate  GStitle_AutodemoPlayback     -- 0x300 bytes, replay input recording
+ *   wmapCursorMove  GStitle_AutodemoRecord       -- 0x1A8 bytes, record input (debug)
+ *   wmapMenuInput  GStitle_AutodemoSetup        -- 0x130 bytes, setup autodemo
  *
  * fn_800203B4 (GStitle_MainLoop) structure:
  *   while (1) {
@@ -81,9 +81,9 @@
  *           // Check distance threshold for camera movement
  *           if (dist >= threshold[gCamPhase]) {
  *               if (gCamPhase == 0)
- *                   fn_80166AB8(0x46E, 0, 0);  // Play whoosh SE
+ *                   soundStartRaw(0x46E, 0, 0);  // Play whoosh SE
  *               else
- *                   fn_801669E4(0x46E, 0, 0);  // Play landing SE
+ *                   soundStopRaw(0x46E, 0, 0);  // Play landing SE
  *               gCamPhase++;
  *           }
  *       }
@@ -166,12 +166,12 @@
  *
  *   Original-name candidates for our extern fn_XXXXXXXX:
  *     menuItemBiosGetPtr / menuDataBiosGetPtr -- linked-list/menu accessors
- *     fn_800D3088 / fn_800D37CC -- frame timing (returns u32/s32 ticks)
+ *     msgGetCharsPerFrame / fn_800D37CC -- frame timing (returns u32/s32 ticks)
  *     fn_800E0CA0 / GSlerpGetLinearInterpolationVector -- vec3 transform helpers
  *     GSmsgGetGSchar / msgctrlSetValue -- message/window callbacks
  *     winMsgOpen / winMsgClose -- text print + wait
- *     fn_801902E0 -- config flag check (returns u8)
- *     fn_80165A20 / soundStop -- audio sequence control
+ *     std081_flagCheckTrue -- config flag check (returns u8)
+ *     std104_soundSetBackgroundMusic / soundStop -- audio sequence control
  *     fadeCheck / fadeSet -- BGM volume/fade
  *
  * --------------------------------------------------------------------------
@@ -196,11 +196,11 @@ extern void  GSthreadTerminate(void* threadCtx);
 /* Scene/camera */
 extern void  floorLink(s32 cameraId, s32 mode);
 extern u8    fn_800FF548(void);
-extern void  fn_800FF56C(s32 floorId);
+extern void  std092_getCurrentRoomID(s32 floorId);
 
 /* Sound */
-extern void  fn_80166AB8(s32 soundId, s32 p2, s32 p3);
-extern void  fn_801669E4(s32 soundId, s32 p2, s32 p3);
+extern void  soundStartRaw(s32 soundId, s32 p2, s32 p3);
+extern void  soundStopRaw(s32 soundId, s32 p2, s32 p3);
 
 /* Save system */
 extern void  floorSetFadeScript(s32 p1, s32 p2);
@@ -351,9 +351,9 @@ void fn_800203B4(void) {
 
                 if (GSmodelGetAnimFrame(lbl_8047A324) >= threshold) {
                     if (lbl_8047A33C == 0) {
-                        fn_80166AB8(0x46e, 0, 0);
+                        soundStartRaw(0x46e, 0, 0);
                     } else {
-                        fn_801669E4(0x46e, 0, 0);
+                        soundStopRaw(0x46e, 0, 0);
                     }
                     lbl_8047A33C++;
                 }
@@ -437,13 +437,13 @@ void fn_800216E0(u32 val) {
  * ========================================================================= */
 
 extern u32 lbl_80478DDC;
-extern u32 fn_801902E0(void*);
+extern u32 std081_flagCheckTrue(void*);
 
 /* 0x4C | fn_80024438 | check_then_call */
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80024438)
 void fn_80024438(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
-    u32 result = (u32)fn_801902E0(*(void**)((u8*)ctx + 0x80));
+    u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x80));
     if ((result & 0xFF) == 0) {
         winSpriteSetDisp(arg2, 0);
     }
@@ -453,7 +453,7 @@ void fn_80024438(u32 arg1, u32 arg2) {
 /* fn_80024484 - 0x80024484 | size: 0x4c */
 void fn_80024484(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
-    u32 result = (u32)fn_801902E0(*(void**)((u8*)ctx + 0x70));
+    u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x70));
     if ((result & 0xFF) == 0) {
         winSpriteSetDisp(arg2, 0);
     }
@@ -463,7 +463,7 @@ void fn_80024484(u32 arg1, u32 arg2) {
 /* fn_800244D0 - 0x800244D0 | size: 0x4c */
 void fn_800244D0(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
-    u32 result = (u32)fn_801902E0(*(void**)((u8*)ctx + 0x60));
+    u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x60));
     if ((result & 0xFF) == 0) {
         winSpriteSetDisp(arg2, 0);
     }
@@ -473,7 +473,7 @@ void fn_800244D0(u32 arg1, u32 arg2) {
 /* fn_8002451C - 0x8002451C | size: 0x4c */
 void fn_8002451C(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
-    u32 result = (u32)fn_801902E0(*(void**)((u8*)ctx + 0x50));
+    u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x50));
     if ((result & 0xFF) == 0) {
         winSpriteSetDisp(arg2, 0);
     }
@@ -483,7 +483,7 @@ void fn_8002451C(u32 arg1, u32 arg2) {
 /* fn_80024568 - 0x80024568 | size: 0x4c */
 void fn_80024568(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
-    u32 result = (u32)fn_801902E0(*(void**)((u8*)ctx + 0x40));
+    u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x40));
     if ((result & 0xFF) == 0) {
         winSpriteSetDisp(arg2, 0);
     }
@@ -493,7 +493,7 @@ void fn_80024568(u32 arg1, u32 arg2) {
 /* fn_800245B4 - 0x800245B4 | size: 0x4c */
 void fn_800245B4(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
-    u32 result = (u32)fn_801902E0(*(void**)((u8*)ctx + 0x30));
+    u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x30));
     if ((result & 0xFF) == 0) {
         winSpriteSetDisp(arg2, 0);
     }
@@ -503,7 +503,7 @@ void fn_800245B4(u32 arg1, u32 arg2) {
 /* fn_80024600 - 0x80024600 | size: 0x4c */
 void fn_80024600(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
-    u32 result = (u32)fn_801902E0(*(void**)((u8*)ctx + 0x20));
+    u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x20));
     if ((result & 0xFF) == 0) {
         winSpriteSetDisp(arg2, 0);
     }
@@ -513,7 +513,7 @@ void fn_80024600(u32 arg1, u32 arg2) {
 /* fn_8002464C - 0x8002464C | size: 0x4c */
 void fn_8002464C(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
-    u32 result = (u32)fn_801902E0(*(void**)((u8*)ctx + 0x10));
+    u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x10));
     if ((result & 0xFF) == 0) {
         winSpriteSetDisp(arg2, 0);
     }
@@ -555,11 +555,11 @@ void fn_800246CC(void) {
 
 /* 0x800246FC | 0x330
  *
- * fn_800246FC -- XD analogue: menuTitle (the top-level 0x330 driver).
+ * wmapDrawInfo -- XD analogue: menuTitle (the top-level 0x330 driver).
  *
  * Walks an array of menu slot records at lbl_80478DE4 (count in lbl_80478DE0,
  * stride 0x28). For each slot whose condition passes (slot entry == 0 OR
- * fn_801902E0(entry) returns non-zero), it performs three passes of the
+ * std081_flagCheckTrue(entry) returns non-zero), it performs three passes of the
  * linked-list walk + lookup table scan:
  *   case 1/subcase 1 (lbl_8047A370 == 1 && lbl_80478898 > lbl_8047B8D8):
  *       uses lbl_8047A368 as target index; alpha = lbl_8047B8DC * ((t-b)/b)
@@ -576,7 +576,7 @@ void fn_800246CC(void) {
  *
  * Status: 91.6% matched. Remaining diffs: 7 non-volatile reg allocation
  * (uses r25-r31 vs target r27-r31 - we have 2 extra locals) + one extra
- * clrlwi from the (u8)fn_801902E0 cast on ret.
+ * clrlwi from the (u8)std081_flagCheckTrue cast on ret.
  */
 extern void* menuDataBiosGetPtr(s32);
 extern void* menuItemBiosGetPtr(u32);
@@ -593,11 +593,11 @@ extern u8 lbl_802E4F58[];
 extern u32 lbl_80478DE0;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_800246FC)
 #if 0
-asm void fn_800246FC(void) {
-#include "src/game/gs_title_fn_800246FC.inc"
+asm void wmapDrawInfo(void) {
+#include "src/game/gs_title_wmapDrawInfo.inc"
 }
 #else
-void fn_800246FC(u8* arg0, u8* arg1) {
+void wmapDrawInfo(u8* arg0, u8* arg1) {
     extern u8 lbl_802E4F58[];
     extern f32 lbl_80478898;
     extern u32 lbl_80478DD8;
@@ -611,7 +611,7 @@ void fn_800246FC(u8* arg0, u8* arg1) {
     extern f32 lbl_8047B8DC;
     extern u8* menuItemBiosGetPtr(s32);
     extern u8* menuDataBiosGetPtr(u32);
-    extern u32 fn_801902E0(void*);
+    extern u32 std081_flagCheckTrue(void*);
     extern void* GSmsgGetGSchar(u32);
     extern void msgctrlSetValue(s32, void*);
     u8* node;
@@ -627,7 +627,7 @@ void fn_800246FC(u8* arg0, u8* arg1) {
     slot_offset = 0;
     while (slot < *(u32*)lbl_80478DE0) {
         if (*(u32*)(lbl_80478DE4 + slot_offset) == 0 ||
-            (u8)fn_801902E0((void*)*(u32*)(lbl_80478DE4 + slot_offset)) != 0) {
+            (u8)std081_flagCheckTrue((void*)*(u32*)(lbl_80478DE4 + slot_offset)) != 0) {
             switch ((s32)lbl_8047A370) {
             case 1:
                 if (lbl_80478898 > lbl_8047B8D8) {
@@ -749,12 +749,12 @@ void fn_800246FC(u8* arg0, u8* arg1) {
 
 /* 0x80024A2C | 0x178
  *
- * fn_80024A2C -- simplified version of fn_800246FC (one inner block only).
+ * fn_80024A2C -- simplified version of wmapDrawInfo (one inner block only).
  * Walks the linked list to find the node whose counter-position matches
  * lbl_8047A368, then scans lbl_80478DDC[] for a matching pbVar3 and writes
  * either alpha computed via the fade curve OR 0xFF into arg1[0x67]. If the
  * table lookup succeeds, writes the corresponding entry value to arg1[0x58]
- * (special-cased to 0xC5F1200 when the entry id is 0x66 and fn_801902E0(0x45D)
+ * (special-cased to 0xC5F1200 when the entry id is 0x66 and std081_flagCheckTrue(0x45D)
  * returns non-zero - likely an "override" for a specific menu option).
  *
  * Status: 90.7% matched. Remaining diffs: register allocation swap
@@ -825,7 +825,7 @@ LAB_80024aec:
     if ((u32)index < *(u32*)lbl_80478DD8) {
         u32 val;
         ptr = (u8*)lbl_80478DDC + (index << 4);
-        if (*(u32*)(ptr + 4) == 0x66 && (u8)fn_801902E0((void*)0x45D) != 0) {
+        if (*(u32*)(ptr + 4) == 0x66 && (u8)std081_flagCheckTrue((void*)0x45D) != 0) {
             val = 0x0C5F1200;
         } else {
             val = *(u32*)(ptr + 0xC);
@@ -839,7 +839,7 @@ LAB_80024aec:
  *
  * fn_80024BA4 -- same linked-list walk as fn_80024A2C, but without the alpha
  * computation. Just finds the menu item matching lbl_8047A36C and writes the
- * entry payload to arg1[0x58] (with the 0x66 + fn_801902E0(0x45D) override).
+ * entry payload to arg1[0x58] (with the 0x66 + std081_flagCheckTrue(0x45D) override).
  *
  * Likely corresponds to a menu cursor hover-highlight update:
  *   arg0 = menu context, arg1 = cursor/sprite target receiving the entry
@@ -861,7 +861,7 @@ void fn_80024BA4(s32 arg0, u8* arg1) {
     extern u32 lbl_8047A36C;
     extern u8* menuItemBiosGetPtr(s32);
     extern u8* menuDataBiosGetPtr(u32);
-    extern u32 fn_801902E0(s32);
+    extern u32 std081_flagCheckTrue(s32);
     /* Declaration order: iVar6->r30, iVar29->r29, uVar7->r28 (shared with iVar6 dead).
      * iVar2->r28 (overlaps uVar7 but not iVar6). pbVar3 saved for loop-1. */
     s32 iVar6;
@@ -899,7 +899,7 @@ LAB_80024c64:
     if (uVar7 < *(u32*)lbl_80478DD8) {
         u8 *entry = (u8*)lbl_80478DDC + (uVar7 << 4);
         u32 val;
-        if (*(u32*)(entry + 4) == 0x66 && (u8)fn_801902E0(0x45D) != 0) {
+        if (*(u32*)(entry + 4) == 0x66 && (u8)std081_flagCheckTrue(0x45D) != 0) {
             val = 0x0C5F1200;
         } else {
             val = *(u32*)(entry + 0xC);
@@ -927,7 +927,7 @@ LAB_80024c64:
  * / lbl_8047B8B8). Both are deep CW internal heuristics; source-level
  * tricks cannot force them.
  */
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern u32 lbl_8047A390;
 extern f64 lbl_8047B8D0;
 extern f64 lbl_8047B8B8;
@@ -949,7 +949,7 @@ void fn_80024CDC(s32 arg0, u8* arg1) {
     }
 
     iVar4 = *(u8*)(arg1 + 0x67);          /* current alpha (0..255)    */
-    uVar3 = fn_800D3088();                /* u32 tick counter          */
+    uVar3 = msgGetCharsPerFrame();                /* u32 tick counter          */
     fVar2 = lbl_8047A37C;                 /* f32 pulse speed           */
     /* (f32)(u32)uVar3 -> unsigned int-to-float magic (no xor).  */
     /* (f32)(s32)iVar4 -> signed int-to-float (xoris + stw).     */
@@ -1490,29 +1490,29 @@ LAB_80025564:
  *     soundStop(0x449, 0)            -- play SE cue
  *     while (accumulator < limit) {    -- time-based integration loop
  *       _threadSwitch();                 -- frame advance
- *       accumulator += (f32)fn_800D3088() / (f32)(s32)fn_800D37CC();
+ *       accumulator += (f32)msgGetCharsPerFrame() / (f32)(s32)fn_800D37CC();
  *     }
- *     fn_801653C4(); fn_801656F8(0x7d0, 0)
+ *     std228_soundGetCurrentBackgroundMusic(); std137_soundStopAll(0x7d0, 0)
  *   ELSE:
  *     fadeSet(lbl_8047B8E8, 3)     -- different fade curve
- *     fn_801653C4(); fn_801656F8(0x1f4, 0)
+ *     std228_soundGetCurrentBackgroundMusic(); std137_soundStopAll(0x1f4, 0)
  *   Check sound channels 0xbd and 0xc3; stop them if still active.
  *   If lbl_8047A388/38C particle handles set, free them via GStextureFree.
  *
  * fn_800D37CC returns s32 (signed ticks; negative if paused).
- * fn_800D3088 returns u32 (absolute frame count).
+ * msgGetCharsPerFrame returns u32 (absolute frame count).
  *
  * Status: 97.5% matched. Remaining 8 diffs are register-numbering
  * (limit ends up in f28 vs target f31) and anonymous @257/@255 bias
  * constants vs named lbl_8047B8B8/lbl_8047B8D0 (unfixable without
  * explicit manual int-to-float idiom). Frame size 0x70 now correct.
- * fn_801653C4 chains into fn_801656F8 (3 args).
+ * std228_soundGetCurrentBackgroundMusic chains into std137_soundStopAll (3 args).
  */
 extern void fadeSet(f32, s32);
 extern void soundStop(void);
 extern void fn_800D37CC(void);
-extern void fn_801653C4(void);
-extern void fn_801656F8(void);
+extern void std228_soundGetCurrentBackgroundMusic(void);
+extern void std137_soundStopAll(void);
 extern void fadeCheck(s32);
 extern void menuIsCheck(void);
 extern void menuClose(void);
@@ -1539,14 +1539,14 @@ void worldMapPost(void) {
     extern f32 lbl_8047B8B0;
     extern f32 lbl_8047B8E4;
     extern f32 lbl_8047B8E8;
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern s32 fn_800D37CC(void);
     extern void GStextureFree(u32);
     extern void _threadSwitch(void);
     extern u8 menuIsCheck(s32);
     extern void menuClose(s32);
-    extern u32 fn_801653C4(void);
-    extern void fn_801656F8(u32, s32, s32);
+    extern u32 std228_soundGetCurrentBackgroundMusic(void);
+    extern void std137_soundStopAll(u32, s32, s32);
     extern void soundStop(s32, s32);
     extern void fadeCheck(s32);
     extern void fadeSet(f32, s32);
@@ -1560,12 +1560,12 @@ void worldMapPost(void) {
         limit = lbl_8047B8B0;
         while (accum < limit) {
             _threadSwitch();
-            accum = accum + (f32)fn_800D3088() / (f32)fn_800D37CC();
+            accum = accum + (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         }
-        fn_801656F8(fn_801653C4(), 0x7d0, 0);
+        std137_soundStopAll(std228_soundGetCurrentBackgroundMusic(), 0x7d0, 0);
     } else {
         fadeSet(lbl_8047B8E8, 3);
-        fn_801656F8(fn_801653C4(), 0x1f4, 0);
+        std137_soundStopAll(std228_soundGetCurrentBackgroundMusic(), 0x1f4, 0);
     }
     fadeCheck(1);
     if (menuIsCheck(0xbd) == 1) menuClose(0xbd);
@@ -1616,8 +1616,8 @@ void worldMapMain(void) {
     extern void menuOpenCustom();
     extern void windowGetActiveID();
     extern void floorGetPrevFloorID();
-    extern void fn_801902E0();
-    extern void fn_80025F74();
+    extern void std081_flagCheckTrue();
+    extern void wmapCaptureDone();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -1661,7 +1661,7 @@ void worldMapMain(void) {
         r30 = 0x1;
         r3 = *(u32*)(r3 + r31);
         if (r3 != 0) {
-            fn_801902E0();
+            std081_flagCheckTrue();
             tmp = r3 & 0xFF;
             if (tmp == 0) {
                 r30 = 0x0;
@@ -1716,7 +1716,7 @@ void worldMapMain(void) {
         do {
         if (tmp != 0x66) break;
             r3 = 0x45d;
-            fn_801902E0();
+            std081_flagCheckTrue();
             tmp = r3 & 0xFF;
             if (tmp == 0) break;
             r30 = 0x7b;
@@ -1762,9 +1762,9 @@ L_80025910:
         r6 = 0x0;
         r7 = 0x0;
         GStextureCreate();
-        r4 = (u32)fn_80025F74;
+        r4 = (u32)wmapCaptureDone;
         lbl_8047A388 = r3;
-        r4 = (u32)fn_80025F74;
+        r4 = (u32)wmapCaptureDone;
         r5 = 0x0;
         GSgfxBeginBackFBCapture();
         while (1) {
@@ -1789,7 +1789,7 @@ L_80025910:
 #endif
 
 /* 0x800259B0 | 0xCC */
-extern void fn_801CB954(void);
+extern void std114_mapObjectSetVisibility(void);
 extern f32 lbl_8047B8A8;
 extern f32 lbl_8047B8AC;
 extern f32 lbl_8047B8E8;
@@ -1815,7 +1815,7 @@ asm void fn_800259B0(void) {
 void worldMapPre(void) {
     extern u8 lbl_803A2058[];
     extern u8 lbl_803A204C[];
-    extern void fn_801CB954(s32, s32);
+    extern void std114_mapObjectSetVisibility(s32, s32);
     extern u32 floorGetPrevFloorID(void);
     f32* vec1 = (f32*)lbl_803A2058;
     f32* vec2 = (f32*)lbl_803A204C;
@@ -1838,9 +1838,9 @@ void worldMapPre(void) {
     lbl_8047A384 = 0;
     lbl_8047A388 = 0;
     lbl_8047A390 = 0;
-    fn_801CB954(0x0C6A1000, 0);
-    fn_801CB954(0x0C6A1001, 0);
-    fn_801CB954(0x0C6A1002, 0);
+    std114_mapObjectSetVisibility(0x0C6A1000, 0);
+    std114_mapObjectSetVisibility(0x0C6A1001, 0);
+    std114_mapObjectSetVisibility(0x0C6A1002, 0);
     result = floorGetPrevFloorID();
     lbl_8047A3AC = result;
     if (result == 0x7b) {
@@ -1870,7 +1870,7 @@ void fn_800259B0_old(void) {
     extern f32 lbl_8047B8E8;
     extern f32 lbl_8047B8EC;
     extern void floorGetPrevFloorID();
-    extern void fn_801CB954();
+    extern void std114_mapObjectSetVisibility();
     u8 sp[0x10];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -1911,15 +1911,15 @@ void fn_800259B0_old(void) {
     lbl_8047A384 = tmp;
     lbl_8047A388 = tmp;
     lbl_8047A390 = tmp;
-    fn_801CB954();
+    std114_mapObjectSetVisibility();
     r3 = 0xC6A0000;
     r4 = 0x0;
     r3 = r3 + 0x1001;
-    fn_801CB954();
+    std114_mapObjectSetVisibility();
     r3 = 0xC6A0000;
     r4 = 0x0;
     r3 = r3 + 0x1002;
-    fn_801CB954();
+    std114_mapObjectSetVisibility();
     floorGetPrevFloorID();
     lbl_8047A3AC = r3;
     if (r3 == 0x7b) {
@@ -1942,10 +1942,10 @@ void fn_80025A7C(void) { }
 
 /* 0x80025A80 | 0x19C
  *
- * fn_80025A80(s32 param_1) -> s32 -- cursor quad rendering + decay.
- *   1. Set up GX state (fn_800D9B58/A4C4/A2BC/A1E8/A100/A028/9ED8) for
+ * wmapRideOverlay(s32 param_1) -> s32 -- cursor quad rendering + decay.
+ *   1. Set up GX state (gfxSetOrtho/A4C4/A2BC/A1E8/A100/A028/9ED8) for
  *      blended additive rendering with channel configuration.
- *   2. Call fn_80025C1C twice to draw two blended quads:
+ *   2. Call wmapDrawCaptureQuad twice to draw two blended quads:
  *        first at the cursor current position using lbl_8047A3A0 (x scale)
  *        second at offset from lbl_803A204C[0,1] using lbl_8047A3A4 (y scale)
  *   3. Decay both scales:
@@ -1957,14 +1957,14 @@ void fn_80025A7C(void) { }
  * returns 0 (fully faded).
  *
  * Status: 90.6% matched. Remaining diffs: FP register swaps in the
- * call-arg plumbing between fn_80025C1C calls.
+ * call-arg plumbing between wmapDrawCaptureQuad calls.
  */
-extern void fn_800D9B58(void);
-extern void fn_800DA4C4(void);
-extern void fn_800DA2BC(void);
-extern void fn_800DA1E8(void);
+extern void gfxSetOrtho(void);
+extern void gfxSetBlendMode(void);
+extern void gfxSetUpdates(void);
+extern void gfxSetZMode(void);
 extern void fn_800DA100(void);
-extern void fn_800DA028(void);
+extern void gfxSetCullMode(void);
 extern void fn_800D9ED8(void);
 extern f32 lbl_8047B8AC;
 extern f32 lbl_8047B8F8;
@@ -1980,14 +1980,14 @@ extern u32 lbl_8047A388;
 extern f32 lbl_8047A3A4;
 extern f32 lbl_8047B8E4;
 extern f32 lbl_8047B8C8;
-extern void fn_80025C1C(f32, f32, f32, s32, s32, s32, f32*);
+extern void wmapDrawCaptureQuad(f32, f32, f32, s32, s32, s32, f32*);
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80025A80)
 #if 0
-asm void fn_80025A80(void) {
-#include "src/game/gs_title_fn_80025A80.inc"
+asm void wmapRideOverlay(void) {
+#include "src/game/gs_title_wmapRideOverlay.inc"
 }
 #else
-s32 fn_80025A80(s32 param_1) {
+s32 wmapRideOverlay(s32 param_1) {
     extern u8 lbl_803A204C[];
     extern u32 lbl_8047A388;
     extern f32 lbl_8047A3A0;
@@ -2003,28 +2003,28 @@ s32 fn_80025A80(s32 param_1) {
     extern f32 lbl_8047B8FC;
     extern f32 lbl_8047B904;
     extern f32 lbl_8047B908;
-    extern void fn_80025C1C(f32, f32, f32, s32, s32, s32, f32*);
-    extern void fn_800D9B58(f32, f32, f32, f32);
+    extern void wmapDrawCaptureQuad(f32, f32, f32, s32, s32, s32, f32*);
+    extern void gfxSetOrtho(f32, f32, f32, f32);
     extern void fn_800D9ED8(s32);
-    extern void fn_800DA028(s32);
+    extern void gfxSetCullMode(s32);
     extern void fn_800DA100(s32, s32, s32, s32, s32, s32);
-    extern void fn_800DA1E8(s32, s32, s32);
-    extern void fn_800DA2BC(s32, s32, s32);
-    extern void fn_800DA4C4(s32, s32, s32);
+    extern void gfxSetZMode(s32, s32, s32);
+    extern void gfxSetUpdates(s32, s32, s32);
+    extern void gfxSetBlendMode(s32, s32, s32);
     f32 local_18[3];
 
-    fn_800D9B58(lbl_8047B8AC, lbl_8047B8AC, lbl_8047B8F8, lbl_8047B8FC);
-    fn_800DA4C4(1, 6, 7);
-    fn_800DA2BC(1, 1, 0);
-    fn_800DA1E8(0, 1, 1);
+    gfxSetOrtho(lbl_8047B8AC, lbl_8047B8AC, lbl_8047B8F8, lbl_8047B8FC);
+    gfxSetBlendMode(1, 6, 7);
+    gfxSetUpdates(1, 1, 0);
+    gfxSetZMode(0, 1, 1);
     fn_800DA100(0, 7, 0, 1, 7, 0);
-    fn_800DA028(0);
+    gfxSetCullMode(0);
     fn_800D9ED8(1);
 
     local_18[0] = lbl_8047B8F0;
     local_18[1] = lbl_8047B8F4;
     local_18[2] = lbl_8047B8AC;
-    fn_80025C1C(lbl_8047A3A0, lbl_8047B8B0, lbl_8047B904, param_1, 1, 0, local_18);
+    wmapDrawCaptureQuad(lbl_8047A3A0, lbl_8047B8B0, lbl_8047B904, param_1, 1, 0, local_18);
 
     lbl_8047A3A0 = lbl_8047A3A0 - lbl_8047B908;
     if (lbl_8047A3A0 < lbl_8047B8AC) lbl_8047A3A0 = lbl_8047B8AC;
@@ -2032,7 +2032,7 @@ s32 fn_80025A80(s32 param_1) {
     local_18[0] = lbl_8047B8F8 - (lbl_8047B8E0 + ((f32*)lbl_803A204C)[0]);
     local_18[1] = lbl_8047B8FC - (lbl_8047B8E0 + ((f32*)lbl_803A204C)[1]);
     local_18[2] = *(volatile f32*)&lbl_8047B8AC;
-    fn_80025C1C(lbl_8047A3A4, lbl_8047B8B0, lbl_8047B8E4, (s32)lbl_8047A388, 1, 1, local_18);
+    wmapDrawCaptureQuad(lbl_8047A3A4, lbl_8047B8B0, lbl_8047B8E4, (s32)lbl_8047A388, 1, 1, local_18);
 
     lbl_8047A3A4 = lbl_8047A3A4 - lbl_8047B8C8;
     if (lbl_8047A3A4 < lbl_8047B8AC) lbl_8047A3A4 = lbl_8047B8AC;
@@ -2046,7 +2046,7 @@ s32 fn_80025A80(s32 param_1) {
 
 /* 0x80025C1C | 0x358
  *
- * fn_80025C1C(f32 rot, f32 size, f32 uv_ext, s32 tex, s32 flag_a,
+ * wmapDrawCaptureQuad(f32 rot, f32 size, f32 uv_ext, s32 tex, s32 flag_a,
  *             s32 flag_b, f32 *pos)  -- GX quad render primitive.
  *
  *   1. Build two vec3s (vec_a, vec_b) based on flag_a (1 = symmetric scale,
@@ -2058,15 +2058,15 @@ s32 fn_80025A80(s32 param_1) {
  *   4. Third set: combine pos[0], pos[1] with lbl_8047B8F0/F4 UV corners,
  *      via fn_800E0CA0+090C+fn_800E03B4 for the inverse transform.
  *   5. Set GX render state (TEV stage 3, prim TRIANGLE_FAN count 4):
- *        fn_800D88DC(3), fn_800D888C(4), fn_800D6A00(4),
- *        fn_800D7820(lbl_80314AE8), fn_800D85D4(0, tex), fn_800D67BC(4)
+ *        gfxSetFlags(3), gfxClearFlags(4), gfxSetPrimitive(4),
+ *        gfxSetVtxDesc(lbl_80314AE8), gfxLoadTexture(0, tex), gfxBegin(4)
  *   6. Emit 4 vertices forming a textured quad. Each vertex:
  *        GSvecTransform(vert_out, result_2, uv_corner)  -- compute position
- *        fn_800D6680(vert.x, vert.y, vert.z)         -- write pos
+ *        gfxVtxPos(vert.x, vert.y, vert.z)         -- write pos
  *        fn_800D5CB8(0, 0xff, 0xff, 0xff, scaled)    -- RGBA color
- *        fn_800D59B8(0, u, v)                        -- UV
+ *        gfxVtxTexCoord(0, u, v)                        -- UV
  *      4 UV corners: (0,0) (1,0) (0,1) (1,1) via lbl_8047B8AC/B8B0.
- *   7. fn_800D6728() to flush the primitive.
+ *   7. gfxEnd() to flush the primitive.
  *
  * Status: 94.8% matched. Remaining diffs are FP register allocation inside
  * the vertex emission loop (4 similar call chains get slightly different
@@ -2074,17 +2074,17 @@ s32 fn_80025A80(s32 param_1) {
  */
 extern void fn_800E042C(void);
 extern void fn_800E03B4(void);
-extern void fn_800D88DC(void);
-extern void fn_800D888C(void);
-extern void fn_800D6A00(void);
-extern void fn_800D7820(void);
-extern void fn_800D85D4(void);
-extern void fn_800D67BC(void);
+extern void gfxSetFlags(void);
+extern void gfxClearFlags(void);
+extern void gfxSetPrimitive(void);
+extern void gfxSetVtxDesc(void);
+extern void gfxLoadTexture(void);
+extern void gfxBegin(void);
 extern void GSvecTransform(void);
-extern void fn_800D6680(void);
+extern void gfxVtxPos(void);
 extern void fn_800D5CB8(void);
-extern void fn_800D59B8(void);
-extern void fn_800D6728(void);
+extern void gfxVtxTexCoord(void);
+extern void gfxEnd(void);
 extern f32 lbl_8047B8AC;
 extern f32 lbl_8047B8DC;
 extern f32 lbl_8047B8B0;
@@ -2094,11 +2094,11 @@ extern u8 lbl_80314AE8[];
 extern f32 lbl_8047B90C;
 extern f32 lbl_8047B910;
 #if 0
-asm void fn_80025C1C(void) {
-#include "src/game/gs_title_fn_80025C1C.inc"
+asm void wmapDrawCaptureQuad(void) {
+#include "src/game/gs_title_wmapDrawCaptureQuad.inc"
 }
 #else
-void fn_80025C1C(f32 arg_f1, f32 arg_f2, f32 arg_f3,
+void wmapDrawCaptureQuad(f32 arg_f1, f32 arg_f2, f32 arg_f3,
                  s32 arg_r3, s32 arg_r4, s32 arg_r5, f32 *arg_r6) {
     extern u8 lbl_80314AE8[];
     extern f32 lbl_8047B8AC;
@@ -2108,16 +2108,16 @@ void fn_80025C1C(f32 arg_f1, f32 arg_f2, f32 arg_f3,
     extern f32 lbl_8047B8F4;
     extern f32 lbl_8047B90C;
     extern f32 lbl_8047B910;
-    extern void fn_800D59B8(s32, f32, f32);
+    extern void gfxVtxTexCoord(s32, f32, f32);
     extern void fn_800D5CB8(s32, s32, s32, s32, s32);
-    extern void fn_800D6680(f32, f32, f32);
-    extern void fn_800D6728(void);
-    extern void fn_800D67BC(s32);
-    extern void fn_800D6A00(s32);
-    extern void fn_800D7820(u8*);
-    extern void fn_800D85D4(s32, s32);
-    extern void fn_800D888C(s32);
-    extern void fn_800D88DC(s32);
+    extern void gfxVtxPos(f32, f32, f32);
+    extern void gfxEnd(void);
+    extern void gfxBegin(s32);
+    extern void gfxSetPrimitive(s32);
+    extern void gfxSetVtxDesc(u8*);
+    extern void gfxLoadTexture(s32, s32);
+    extern void gfxClearFlags(s32);
+    extern void gfxSetFlags(s32);
     extern void GSvecTransform(f32*, f32*, f32*);
     extern void fn_800E03B4(f32*, f32*);
     extern void fn_800E042C(f32*, f32*);
@@ -2161,38 +2161,38 @@ void fn_80025C1C(f32 arg_f1, f32 arg_f2, f32 arg_f3,
     GSlerpGetLinearInterpolationVector(result_1, vec_b, vec_a);
     fn_800E03B4(result_2, result_1);
 
-    fn_800D88DC(3);
-    fn_800D888C(4);
-    fn_800D6A00(4);
-    fn_800D7820(lbl_80314AE8);
-    fn_800D85D4(0, arg_r3);
-    fn_800D67BC(4);
+    gfxSetFlags(3);
+    gfxClearFlags(4);
+    gfxSetPrimitive(4);
+    gfxSetVtxDesc(lbl_80314AE8);
+    gfxLoadTexture(0, arg_r3);
+    gfxBegin(4);
 
     vec_b[0] = lbl_8047B90C; vec_b[1] = lbl_8047B910; vec_b[2] = lbl_8047B8AC;
     GSvecTransform(vert_out, result_2, vec_b);
-    fn_800D6680(vert_out[0], vert_out[1], vert_out[2]);
+    gfxVtxPos(vert_out[0], vert_out[1], vert_out[2]);
     fn_800D5CB8(0, 0xff, 0xff, 0xff, (s32)(u8)scaled);
-    fn_800D59B8(0, lbl_8047B8AC, lbl_8047B8AC);
+    gfxVtxTexCoord(0, lbl_8047B8AC, lbl_8047B8AC);
 
     vec_b[0] = lbl_8047B8F0; vec_b[1] = lbl_8047B910; vec_b[2] = lbl_8047B8AC;
     GSvecTransform(vert_out, result_2, vec_b);
-    fn_800D6680(vert_out[0], vert_out[1], vert_out[2]);
+    gfxVtxPos(vert_out[0], vert_out[1], vert_out[2]);
     fn_800D5CB8(0, 0xff, 0xff, 0xff, (s32)(u8)scaled);
-    fn_800D59B8(0, lbl_8047B8B0, lbl_8047B8AC);
+    gfxVtxTexCoord(0, lbl_8047B8B0, lbl_8047B8AC);
 
     vec_b[0] = lbl_8047B90C; vec_b[1] = lbl_8047B8F4; vec_b[2] = lbl_8047B8AC;
     GSvecTransform(vert_out, result_2, vec_b);
-    fn_800D6680(vert_out[0], vert_out[1], vert_out[2]);
+    gfxVtxPos(vert_out[0], vert_out[1], vert_out[2]);
     fn_800D5CB8(0, 0xff, 0xff, 0xff, (s32)(u8)scaled);
-    fn_800D59B8(0, lbl_8047B8AC, lbl_8047B8B0);
+    gfxVtxTexCoord(0, lbl_8047B8AC, lbl_8047B8B0);
 
     vec_b[0] = lbl_8047B8F0; vec_b[1] = lbl_8047B8F4; vec_b[2] = lbl_8047B8AC;
     GSvecTransform(vert_out, result_2, vec_b);
-    fn_800D6680(vert_out[0], vert_out[1], vert_out[2]);
+    gfxVtxPos(vert_out[0], vert_out[1], vert_out[2]);
     fn_800D5CB8(0, 0xff, 0xff, 0xff, (s32)(u8)scaled);
-    fn_800D59B8(0, lbl_8047B8B0, lbl_8047B8B0);
+    gfxVtxTexCoord(0, lbl_8047B8B0, lbl_8047B8B0);
 
-    fn_800D6728();
+    gfxEnd();
 }
 #endif
 #endif
@@ -2201,11 +2201,11 @@ void fn_80025C1C(f32 arg_f1, f32 arg_f2, f32 arg_f3,
 extern u8 lbl_8047A3A8;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80025F74)
 #if 0
-asm void fn_80025F74(void) {
-#include "src/game/gs_title_fn_80025F74.inc"
+asm void wmapCaptureDone(void) {
+#include "src/game/gs_title_wmapCaptureDone.inc"
 }
 #else
-s32 fn_80025F74(void) {
+s32 wmapCaptureDone(void) {
     lbl_8047A3A8 = 1;
     return 0;
 }
@@ -2215,12 +2215,12 @@ s32 fn_80025F74(void) {
 /* 0x80025F84 | 0x3EC
  *
  * worldMapBikeRide -- title splash setup (called once when title first shown).
- *   1. Activate 3 sprite handles 0xC6A1000/1001/1002 (fn_801CB954 activate=1).
- *   2. Pick an intro texture based on fn_801902E0(0x3E5):
+ *   1. Activate 3 sprite handles 0xC6A1000/1001/1002 (std114_mapObjectSetVisibility activate=1).
+ *   2. Pick an intro texture based on std081_flagCheckTrue(0x3E5):
  *        ret == 1: use 0xC6B1000 variant
  *        else:     use 0xC6C1000 variant
- *      Load it via fn_801CBA0C + fn_801CB954(activate=0).
- *   3. Set up TEV/sprite chain via fn_80113F48 + GSresGetResource composition:
+ *      Load it via std112_modelGetResourceID + std114_mapObjectSetVisibility(activate=0).
+ *   3. Set up TEV/sprite chain via std093_getCurrentGroupID + GSresGetResource composition:
  *        GSmodelSetBoundCheck, GSmodelSetShadowFlags(2), GSmodelSetShadowLight, GSmodelSetShadowSurface(1, &obj_c),
  *        GSmodelSetShadowTextureSize(0x280, 0x1E0)  -- viewport 640x480
  *        GSmodelLinkToGSparticleBank, GSmodelSetGSparticleLinkAttachMode(4)
@@ -2229,9 +2229,9 @@ s32 fn_80025F74(void) {
  *   4. Per lbl_8047A380 (debug flag?), pick one of two frame-sequence tables
  *      (lbl_80478DEC + idx*0x10), read 2 u32s, advance index (wrap > 9).
  *   5. Reset cursor scales: lbl_8047A3A4 = lbl_8047A3A0 = lbl_8047B8A8 (0).
- *   6. Register fn_80025A80 as a particle callback (GSgfxBeginBackFBCapture).
+ *   6. Register wmapRideOverlay as a particle callback (GSgfxBeginBackFBCapture).
  *   7. Start BGM via cameraPlayAnime, then run two timing delay loops
- *      (_threadSwitch + fn_800D3088 accumulator vs 1 or 0xAE target).
+ *      (_threadSwitch + msgGetCharsPerFrame accumulator vs 1 or 0xAE target).
  *   8. Store title origin coords to lbl_803A2040[0..2] and start the final
  *      fade-in loop using __cvt_fp2unsigned for FP-to-int conversion.
  *
@@ -2239,8 +2239,8 @@ s32 fn_80025F74(void) {
  * register allocation (frame_a/b in table section, first timing loop delay),
  * and anonymous f64 bias constants (lbl_8047B8B8/B8D0, unfixable per CW heuristic).
  */
-extern void fn_801CBA0C(void);
-extern void fn_80113F48(void);
+extern void std112_modelGetResourceID(void);
+extern void std093_getCurrentGroupID(void);
 extern void GSresGetResource(void);
 extern void GSmodelSetBoundCheck(void);
 extern void GSmodelSetShadowFlags(void);
@@ -2249,9 +2249,9 @@ extern void GSmodelSetShadowSurface(void);
 extern void GSmodelSetShadowTextureSize(void);
 extern void GSmodelLinkToGSparticleBank(void);
 extern void GSmodelSetGSparticleLinkAttachMode(void);
-extern void fn_801CB61C(void);
-extern void fn_801CB834(void);
-extern void fn_80165A20(void);
+extern void std166_mapObjectAttachToObject(void);
+extern void std115_mapObjectPlayAnimation(void);
+extern void std104_soundSetBackgroundMusic(void);
 extern void cameraPlayAnime(void);
 extern void __cvt_fp2unsigned(void);
 extern u8 lbl_8047A380;
@@ -2300,7 +2300,7 @@ void worldMapBikeRide(void) {
     extern f32 lbl_8047B914;
     extern f32 lbl_8047B918;
     extern u32 __cvt_fp2unsigned(f64);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern s32 fn_800D37CC(void);
     extern void GSgfxBeginBackFBCapture(u32, void*, s32);
     extern void GSmodelSetGSparticleLinkAttachMode(u32, s32);
@@ -2313,15 +2313,15 @@ void worldMapBikeRide(void) {
     extern u32 GStextureCreate(s32, s32, s32, s32, s32);
     extern void _threadSwitch(void);
     extern u32 GSresGetResource(u32, u32);
-    extern u32 fn_80113F48(void);
-    extern void fn_80165A20(s32, s32, s32);
+    extern u32 std093_getCurrentGroupID(void);
+    extern void std104_soundSetBackgroundMusic(s32, s32, s32);
     extern void cameraPlayAnime(u32, u32, s32, s32);
-    extern u8 fn_801902E0(s32);
-    extern void fn_801CB61C(u32, u32, s32);
-    extern void fn_801CB834(u32, u32, s32, s32);
-    extern void fn_801CB954(u32, s32);
-    extern u32 fn_801CBA0C(u32);
-    extern s32 fn_80025A80(s32);
+    extern u8 std081_flagCheckTrue(s32);
+    extern void std166_mapObjectAttachToObject(u32, u32, s32);
+    extern void std115_mapObjectPlayAnimation(u32, u32, s32, s32);
+    extern void std114_mapObjectSetVisibility(u32, s32);
+    extern u32 std112_modelGetResourceID(u32);
+    extern s32 wmapRideOverlay(s32);
     u32 obj_a, obj_b, obj_c, obj_d, obj_e;
     u32 frame_a, frame_b;
     u32 tex;
@@ -2329,24 +2329,24 @@ void worldMapBikeRide(void) {
     u32 delay;
     s32 tick;
 
-    fn_801CB954(0xC6A1000, 1);
-    fn_801CB954(0xC6A1001, 1);
-    fn_801CB954(0xC6A1002, 1);
-    if (fn_801902E0(0x3e5) == 1) {
-        tex = fn_801CBA0C(0xC6B1000);
-        fn_801CB954(tex, 0);
+    std114_mapObjectSetVisibility(0xC6A1000, 1);
+    std114_mapObjectSetVisibility(0xC6A1001, 1);
+    std114_mapObjectSetVisibility(0xC6A1002, 1);
+    if (std081_flagCheckTrue(0x3e5) == 1) {
+        tex = std112_modelGetResourceID(0xC6B1000);
+        std114_mapObjectSetVisibility(tex, 0);
         frame_a = 0;
     } else {
-        tex = fn_801CBA0C(0xC6C1000);
-        fn_801CB954(tex, 0);
+        tex = std112_modelGetResourceID(0xC6C1000);
+        std114_mapObjectSetVisibility(tex, 0);
         frame_a = 0;
     }
 
-    obj_a = GSresGetResource(fn_80113F48(), tex);
+    obj_a = GSresGetResource(std093_getCurrentGroupID(), tex);
     GSmodelSetBoundCheck(obj_a, 0);
-    obj_b = GSresGetResource(fn_80113F48(), tex);
-    obj_c = GSresGetResource(fn_80113F48(), 0xC6A1002);
-    obj_d = GSresGetResource(fn_80113F48(), 0xC6A1603);
+    obj_b = GSresGetResource(std093_getCurrentGroupID(), tex);
+    obj_c = GSresGetResource(std093_getCurrentGroupID(), 0xC6A1002);
+    obj_d = GSresGetResource(std093_getCurrentGroupID(), 0xC6A1603);
     {
         u32 obj_c_local = obj_c;
         GSmodelSetShadowFlags(obj_b, 2);
@@ -2354,13 +2354,13 @@ void worldMapBikeRide(void) {
         GSmodelSetShadowSurface(obj_b, 1, &obj_c_local);
     }
     GSmodelSetShadowTextureSize(0x280, 0x1e0);
-    obj_e = GSresGetResource(fn_80113F48(), 0xC831400);
-    GSmodelLinkToGSparticleBank(GSresGetResource(fn_80113F48(), tex), obj_e);
-    GSmodelSetGSparticleLinkAttachMode(GSresGetResource(fn_80113F48(), tex), 4);
-    fn_801CB954(tex, 1);
-    fn_801CB61C(tex, 0xC6A1000, 0);
-    fn_801CB834(tex, frame_a, 0, 1);
-    fn_80165A20(0x449, 0, 0xff);
+    obj_e = GSresGetResource(std093_getCurrentGroupID(), 0xC831400);
+    GSmodelLinkToGSparticleBank(GSresGetResource(std093_getCurrentGroupID(), tex), obj_e);
+    GSmodelSetGSparticleLinkAttachMode(GSresGetResource(std093_getCurrentGroupID(), tex), 4);
+    std114_mapObjectSetVisibility(tex, 1);
+    std166_mapObjectAttachToObject(tex, 0xC6A1000, 0);
+    std115_mapObjectPlayAnimation(tex, frame_a, 0, 1);
+    std104_soundSetBackgroundMusic(0x449, 0, 0xff);
     lbl_8047A384 = tex;
 
     {
@@ -2383,8 +2383,8 @@ void worldMapBikeRide(void) {
         lbl_8047A3A4 = lbl_8047B8A8;
         lbl_8047A3A0 = lbl_8047B8A8;
         lbl_8047A38C = GStextureCreate(0, 0, 0x44, 0, 0);
-        GSgfxBeginBackFBCapture(lbl_8047A38C, (void*)fn_80025A80, 0);
-        cameraPlayAnime(fn_80113F48(), frame_b, 0, 0);
+        GSgfxBeginBackFBCapture(lbl_8047A38C, (void*)wmapRideOverlay, 0);
+        cameraPlayAnime(std093_getCurrentGroupID(), frame_b, 0, 0);
 
         delay = 1;
         tick = fn_800D37CC();
@@ -2394,9 +2394,9 @@ void worldMapBikeRide(void) {
         }
         for (elapsed = 0; elapsed < delay; elapsed = elapsed + tick) {
             _threadSwitch();
-            tick = fn_800D3088();
+            tick = msgGetCharsPerFrame();
         }
-        fn_801CB834(0xC6A1000, frame_a, 0, 0);
+        std115_mapObjectPlayAnimation(0xC6A1000, frame_a, 0, 0);
         delay = 0xae;
         tick = fn_800D37CC();
         if (tick == 0x32) {
@@ -2405,14 +2405,14 @@ void worldMapBikeRide(void) {
         }
         for (elapsed = 0; elapsed < delay; elapsed = elapsed + tick) {
             _threadSwitch();
-            tick = fn_800D3088();
+            tick = msgGetCharsPerFrame();
         }
     }
 
     *(f32*)lbl_803A2040 = lbl_8047B8F0;
     *(f32*)(lbl_803A2040 + 4) = lbl_8047B8F4;
     *(f32*)(lbl_803A2040 + 8) = lbl_8047B8AC;
-    lbl_8047A39C = GSresGetResource(fn_80113F48(), lbl_8047A384);
+    lbl_8047A39C = GSresGetResource(std093_getCurrentGroupID(), lbl_8047A384);
     lbl_8047A3A4 = lbl_8047B8A8;
 
     delay = 0x78 - __cvt_fp2unsigned((f64)((f32)fn_800D37CC() * lbl_8047B8E4));
@@ -2425,7 +2425,7 @@ void worldMapBikeRide(void) {
     }
     for (elapsed = 0; elapsed < delay; elapsed = elapsed + tick) {
         _threadSwitch();
-        tick = fn_800D3088();
+        tick = msgGetCharsPerFrame();
     }
 }
 #endif
@@ -2529,7 +2529,7 @@ s32 fn_80020618(void) {
     keyInfo = windowGetKeyInfo();
     tickScale = (f32)(s32)fn_800D37CC();
     state = (TitleOptionState*)lbl_803A1FC8;
-    state->delta = (f32)(u32)fn_800D3088() / tickScale;
+    state->delta = (f32)(u32)msgGetCharsPerFrame() / tickScale;
     state->phase += state->delta;
     if (state->phase >= *(f32*)&lbl_8047B868) {
         state->phase = *(f32*)&lbl_8047B86C;
@@ -2896,16 +2896,16 @@ asm void fn_80020F54(void) {
 }
 #else
 void fn_80020F54(u8* arg0, u8* arg1) {
-    extern void fn_800D88DC(s32);
-    extern void fn_800D888C(s32);
-    extern void fn_800D6A00(s32);
-    extern void fn_800D7820(u8*);
-    extern void fn_800D85D4(s32, void*);
-    extern void fn_800D67BC(s32);
+    extern void gfxSetFlags(s32);
+    extern void gfxClearFlags(s32);
+    extern void gfxSetPrimitive(s32);
+    extern void gfxSetVtxDesc(u8*);
+    extern void gfxLoadTexture(s32, void*);
+    extern void gfxBegin(s32);
     extern void fn_800D61E4(s32, s32);
     extern void fn_800D5CB8(s32, s32, s32, s32, s32);
-    extern void fn_800D59B8(s32, f32, f32);
-    extern void fn_800D6728(void);
+    extern void gfxVtxTexCoord(s32, f32, f32);
+    extern void gfxEnd(void);
 
     void* model;
     s16 code;
@@ -2920,19 +2920,19 @@ void fn_80020F54(u8* arg0, u8* arg1) {
     case 0x2D2:
         model = menuModelRender(lbl_803A1FF8);
         if (model != 0) {
-            fn_800D88DC(3);
-            fn_800D888C(4);
-            fn_800D6A00(7);
-            fn_800D7820(lbl_80314F98);
-            fn_800D85D4(0, model);
-            fn_800D67BC(2);
+            gfxSetFlags(3);
+            gfxClearFlags(4);
+            gfxSetPrimitive(7);
+            gfxSetVtxDesc(lbl_80314F98);
+            gfxLoadTexture(0, model);
+            gfxBegin(2);
             fn_800D61E4(0, 0);
             fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-            fn_800D59B8(0, *(f32*)&lbl_8047B898, *(f32*)&lbl_8047B898);
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047B898, *(f32*)&lbl_8047B898);
             fn_800D61E4(*(s16*)(arg1 + 0x54), *(s16*)(arg1 + 0x56));
             fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-            fn_800D59B8(0, *(f32*)&lbl_8047B89C, *(f32*)&lbl_8047B89C);
-            fn_800D6728();
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047B89C, *(f32*)&lbl_8047B89C);
+            gfxEnd();
         }
         /* FALL THROUGH */
     case 0x2CD:
@@ -2962,7 +2962,7 @@ void fn_80020F54(u8* arg0, u8* arg1) {
 extern void menuColosseumBattle(void);
 extern void floorRequestChange(void);
 extern void fn_8006A718(void);
-extern void fn_801CB9D8(u32);
+extern void std113_mapObjectUnk_8018db68(u32);
 extern void fn_8010A420(void*);
 extern void menuNameEntryOpen(void);
 extern void menuNameEntryGetLastName(void);
@@ -3009,7 +3009,7 @@ s32 fn_800210F0(void)
     extern s32 menuNameEntryOpen(s32, s32);
     extern void menuNameEntryGetLastName(void*);
     extern void savedataCreate(u32, const void*);
-    extern void fn_80165A20(s32, s32, s32);
+    extern void std104_soundSetBackgroundMusic(s32, s32, s32);
     extern void fn_800056E4(u8);
     extern void fn_800056EC(f32);
     extern void floorLink(s32, s32);
@@ -3088,9 +3088,9 @@ s32 fn_800210F0(void)
                 menuCloseCustom(0xAA, 0, 1);
                 menuCloseCustom(0x7A, 0, 1);
                 menuCloseCustom(0x7F, 0, 1);
-                fn_801CB9D8(lbl_8047A35C);
+                std113_mapObjectUnk_8018db68(lbl_8047A35C);
                 fn_8010A420(lbl_803A1FF8);
-                fn_80165A20(1, 0x3E8, 0xFF);
+                std104_soundSetBackgroundMusic(1, 0x3E8, 0xFF);
                 menuNameEntryOpen(0, 0);
                 menuNameEntryGetLastName(nameBuf);
                 savedataCreate(0, nameBuf);
@@ -3174,7 +3174,7 @@ s32 fn_800210F0(void)
     menuCloseCustom(0xAA, 0, 1);
     menuCloseCustom(0x7A, 0, 1);
     menuCloseCustom(0x7F, 0, 1);
-    fn_801CB9D8(lbl_8047A35C);
+    std113_mapObjectUnk_8018db68(lbl_8047A35C);
     return lbl_8047A360;
 }
 #endif
@@ -3192,7 +3192,7 @@ void fn_800215C4(void) {
     menuCloseCustom(0xaa, 0, 1);
     menuCloseCustom(0x7a, 0, 1);
     menuCloseCustom(0x7f, 0, 1);
-    fn_801CB9D8(lbl_8047A35C);
+    std113_mapObjectUnk_8018db68(lbl_8047A35C);
     fn_8010A420(lbl_803A1FF8);
 }
 #endif
@@ -3222,18 +3222,18 @@ asm void fn_80021644(void) {
 }
 #else
 void fn_80021644(void) {
-    extern void fn_80165A20(s32, s32, s32);
-    extern void* fn_80113F48(void);
-    extern u32 fn_801CBA0C(s32);
+    extern void std104_soundSetBackgroundMusic(s32, s32, s32);
+    extern void* std093_getCurrentGroupID(void);
+    extern u32 std112_modelGetResourceID(s32);
     extern void GSresGetResource(void*, u32);
     extern void cameraPlayAnime(s32, s32, s32, s32);
     extern void GSscene_SetMode(s32);
     void* handle;
 
     if (fn_800FF548() == 0) {
-        fn_80165A20(0x446, 0, 0xff);
-        handle = fn_80113F48();
-        lbl_8047A35C = fn_801CBA0C(0x0FFE1000);
+        std104_soundSetBackgroundMusic(0x446, 0, 0xff);
+        handle = std093_getCurrentGroupID();
+        lbl_8047A35C = std112_modelGetResourceID(0x0FFE1000);
         GSresGetResource(handle, lbl_8047A35C);
         cameraPlayAnime(0x632, 0x0FFF1800, 0, 1);
         GSscene_SetMode(4);
@@ -3439,7 +3439,7 @@ extern void fn_801431AC(void);
 extern s32 fn_80014110(void);
 extern s32 fn_80121ADC(s32, s32);
 extern s16 fn_80144574(void*, s32, s32, u16, s32);
-extern void fn_80166A50(s32, s32, s32, s32);
+extern void soundStart(s32, s32, s32, s32);
 extern void fn_8001D378(void);
 extern u8 lbl_80478890[8];
 extern u8 lbl_80266DB0[];
@@ -3509,7 +3509,7 @@ s32 fn_80021B14(u32 arg0, u32* arg1) {
             } else {
                 result = 0x465;
             }
-            fn_80166A50(result, 0, 0xFF, 0);
+            soundStart(result, 0, 0xFF, 0);
             fn_8001D378();
         }
 
@@ -3581,7 +3581,7 @@ s32 fn_80021B14(u32 arg0, u32* arg1) {
                     } else {
                         result = 0x465;
                     }
-                    fn_80166A50(result, 0, 0xFF, 0);
+                    soundStart(result, 0, 0xFF, 0);
                     fn_8001D378();
                 }
 
@@ -3736,7 +3736,7 @@ s32 fn_8002217C(u16 wazaDataId, u32* result) {
             }
         }
         soundId = bgmIndex < 5 ? 0x466 : 0x465;
-        fn_80166A50(soundId, 0, 0xFF, 0);
+        soundStart(soundId, 0, 0xFF, 0);
         fn_8001D378();
     }
 
@@ -3849,7 +3849,7 @@ s32 fn_80022478(u32 arg0, u32* arg1) {
                             sound_id = 0x465;
                         }
                     }
-                    fn_80166A50(sound_id, 0, 0xFF, 0);
+                    soundStart(sound_id, 0, 0xFF, 0);
                     fn_8001D378();
                 }
                 ((void(*)(void*, s32, u8*, s16, s32))fn_800216E8)(name_buf, 0x40, (u8*)sd, effect, sc);
@@ -3993,7 +3993,7 @@ s32 fn_80022834(u32 arg0, u32* arg1) {
     handle = itemDataBiosGetPtr((u16)arg0);
     status = (u8)itemDataBiosGetWazaMachineNo(handle);
     value16 = itemDataBiosGetWazaIDByWazaMachineNo(status);
-    fn_80166A50(0x4CB, 0, 0xFF, 0);
+    soundStart(0x4CB, 0, 0xFF, 0);
     type_byte = itemDataBiosGetHidenMachineNo(handle);
     if ((u8)type_byte != 0xFF) {
         msg = 0x4260;
@@ -4069,22 +4069,22 @@ s32 fn_80022834(u32 arg0, u32* arg1) {
 }
 #endif
 
-/* fn_80022B3C - 0x80022B3C | size: 0x318 */
+/* std163_useCologne - 0x80022B3C | size: 0x318 */
 extern s32 pokemonDataBiosGetVoice(void);
-extern void fn_80166A28(s32);
-extern s32 fn_801666BC(s32);
+extern void soundStartSE(s32);
+extern s32 soundGetStatus(s32);
 extern void fn_80121B4C(s32, s32);
 extern void pokemonAddDpFormPokemonDpFilterId(s32, s32, s32);
 extern u8 lbl_80266C30[];
 extern u32 lbl_8047B8A0;
 #if 0
-asm void fn_80022B3C(void) {
-#include "src/game/gs_title_fn_80022B3C.inc"
+asm void std163_useCologne(void) {
+#include "src/game/gs_title_std163_useCologne.inc"
 }
 #else
 #pragma optimization_level 4
 #pragma scheduling off
-s32 fn_80022B3C(s32 arg0, s32 arg1) {
+s32 std163_useCologne(s32 arg0, s32 arg1) {
     s32 sp8;
     s32 spC;
     s32 sp10;
@@ -4162,7 +4162,7 @@ s32 fn_80022B3C(s32 arg0, s32 arg1) {
             
             while (count < 0x3C) {
                 _threadSwitch();
-                count += fn_800D3088();
+                count += msgGetCharsPerFrame();
             }
         }
         
@@ -4172,7 +4172,7 @@ s32 fn_80022B3C(s32 arg0, s32 arg1) {
         
         while (count < 0x60) {
             _threadSwitch();
-            count += fn_800D3088();
+            count += msgGetCharsPerFrame();
         }
     }
     
@@ -4195,11 +4195,11 @@ s32 fn_80022B3C(s32 arg0, s32 arg1) {
         temp_r29 = 0;
     } else {
         temp_r29 = result & 0xFFFF;
-        fn_80166A28(temp_r29);
+        soundStartSE(temp_r29);
     }
     
     /* Wait for particle completion */
-    while (fn_801666BC(temp_r29) == 2) {
+    while (soundGetStatus(temp_r29) == 2) {
         _threadSwitch();
     }
     
@@ -4235,7 +4235,7 @@ s32 fn_80022B3C(s32 arg0, s32 arg1) {
 #endif
 
 /* fn_80022E54 - 0x80022E54 | size: 0x90 */
-extern void fn_800190D8(void*, s32);
+extern void std017_menuQueueAdd(void*, s32);
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80022E54)
 #if 0
 asm void fn_80022E54(void) {
@@ -4255,7 +4255,7 @@ s32 fn_80022E54(void* r3, u32* r4) {
     }
     fn_80014198(r31);
     if (r31 >= 0) {
-        fn_800190D8(r29, 0x5960010);
+        std017_menuQueueAdd(r29, 0x5960010);
         *r30 = 1;
         return 2;
     }
@@ -4385,7 +4385,7 @@ s32 fn_80023068(u32 arg0, u32* arg1) {
                         sound_id = 0x465;
                     }
                 }
-                fn_80166A50(sound_id, 0, 0xFF, 0);
+                soundStart(sound_id, 0, 0xFF, 0);
                 fn_8001D378();
             }
             
@@ -4435,7 +4435,7 @@ s32 cbForgetWazaSelect__FP7PokemonUsl(s32 r3, s32 r4) {
 
 /* fn_800232F0 - 0x800232F0 | size: 0x470 */
 extern s32 pokemonGetStatus(u32, s32, s32, s32);
-extern void fn_80165668(void);
+extern void std130_soundUnk_801653cc(void);
 extern void pokemonBiosGetLevel(void);
 extern void winMsgOpenLevelUpFiledStatus(void);
 extern void winMsgCloseLevelUpStatus(void);
@@ -4542,7 +4542,7 @@ s32 fn_800232F0(u32 wazaDataId, u32* result) {
             ((void (*)(s32))fn_801069FC)(1);
             break;
         default:
-            ((void (*)(s32, s32, s32))fn_80165668)(0x4CA, 0, 0xFF);
+            ((void (*)(s32, s32, s32))std130_soundUnk_801653cc)(0x4CA, 0, 0xFF);
             msgctrlSetValue(0x32, pokemonBiosGetNicknamePtr(pokemon));
             msgctrlSetValue(0x2F, (void*)(u32)pokemonBiosGetLevel(pokemon));
             ((void (*)(s32, s32, s32, s32))fn_80106D3C)(2, 0x423E, 1, 0);
@@ -4648,7 +4648,7 @@ s32 fn_80023760(u32 arg0, u32* arg1) {
                         } else {
                             species = 0x465;
                         }
-                        fn_80166A50(species, 0, 0xFF, 0);
+                        soundStart(species, 0, 0xFF, 0);
                         fn_8001D378();
                         fn_800216E8(buf, 0x40, (u8*)sd, effect, sc);
                         msgctrlSetValue(0x4D, buf);
@@ -4742,7 +4742,7 @@ s32 fn_80023968(u32 arg0, u32* arg1)
                 } else {
                     soundId = 0x465;
                 }
-                fn_80166A50(soundId, 0, 0xFF, 0);
+                soundStart(soundId, 0, 0xFF, 0);
                 fn_8001D378();
             }
             fn_800216E8(nameBuf, 0x40, textBuf, effect, sc);
@@ -4806,7 +4806,7 @@ s32 fn_80023B9C(u32 arg0, u32* arg1) {
                 } else {
                     sound_id = 0x465;
                 }
-                fn_80166A50(sound_id, 0, 0xFF, 0);
+                soundStart(sound_id, 0, 0xFF, 0);
                 fn_8001D378();
             }
             fn_800216E8(name_buf, 0x40, text_buf, effect, sc);
@@ -4881,17 +4881,17 @@ s32 fn_80023E20(void) {
 }
 #endif
 
-/* fn_80023E5C - 0x80023E5C | size: 0x4 */
+/* std018_nop18 - 0x80023E5C | size: 0x4 */
 #if 0
-asm void fn_80023E5C(void) {
-#include "src/game/gs_title_fn_80023E5C.inc"
+asm void std018_nop18(void) {
+#include "src/game/gs_title_std018_nop18.inc"
 }
 #else
-void fn_80023E5C(void) { }
+void std018_nop18(void) { }
 #endif
 #endif
 
-/* fn_80023E60 - 0x80023E60 | size: 0x300 */
+/* wmapMenuUpdate - 0x80023E60 | size: 0x300 */
 extern void windowGetCursorToItem(void);
 extern void fn_800E0060(void);
 extern void fn_800E0000(void);
@@ -4905,23 +4905,23 @@ extern f32 lbl_8047B8AC;
 extern u32 lbl_8047A390;
 extern f32 lbl_8047B8B0;
 extern u8 lbl_8047A380;
-extern void fn_80024160(u8*, void*, u16*, u8*);
+extern void wmapCursorMove(u8*, void*, u16*, u8*);
 extern u8 lbl_803A2058[];
 extern u8 lbl_803A204C[];
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80023E60)
 #if 0
-asm void fn_80023E60(void) {
-#include "src/game/gs_title_fn_80023E60.inc"
+asm void wmapMenuUpdate(void) {
+#include "src/game/gs_title_wmapMenuUpdate.inc"
 }
 #else
-s32 fn_80023E60(u8* arg0) {
+s32 wmapMenuUpdate(u8* arg0) {
     extern s32 windowGetCursorToItem(u8*);
     extern u16* windowGetKeyInfo(void);
     extern u8* menuDataBiosGetPtr(u32);
     extern u8* menuItemBiosGetPtr(s32);
     extern void fn_800E0060(f32*, f32*);
     extern f32 fn_800E0000(f32*, f32*);
-    extern void fn_80165A20(s32, s32, s32);
+    extern void std104_soundSetBackgroundMusic(s32, s32, s32);
     extern f64 lbl_8047B8B8;
     /* nonvol alloc: r31=arg0, r30=DA18 result (called first), r29=104318 result (called second) */
     u8* r104318;
@@ -4948,7 +4948,7 @@ s32 fn_80023E60(u8* arg0) {
     }
 
     temp_r5 = windowGetKeyInfo();
-    fn_80024160(arg0, r104318, temp_r5, da18);
+    wmapCursorMove(arg0, r104318, temp_r5, da18);
 
     result = (s32)(s8)arg0[0x95] + (s32)(s8)arg0[0x94];
     target = (s32)lbl_8047A368;
@@ -5021,23 +5021,23 @@ MATCH2:
             }
         }
 
-        fn_80165A20(0x464, 0, 0xFF);
+        std104_soundSetBackgroundMusic(0x464, 0, 0xFF);
     }
 
     return 0;
 }
 #endif
 
-/* fn_80024160 - 0x80024160 | size: 0x1a8 */
+/* wmapCursorMove - 0x80024160 | size: 0x1a8 */
 extern u32 lbl_8047A368;
 extern u32 lbl_80478DF4;
 extern u32 lbl_80478DF0;
 #if 0
-asm void fn_80024160(u8* arg0, void* arg1, u16* arg2, u8* arg3) {
-#include "src/game/gs_title_fn_80024160.inc"
+asm void wmapCursorMove(u8* arg0, void* arg1, u16* arg2, u8* arg3) {
+#include "src/game/gs_title_wmapCursorMove.inc"
 }
 #else
-void fn_80024160(u8* arg0, void* arg1, u16* arg2, u8* arg3) {
+void wmapCursorMove(u8* arg0, void* arg1, u16* arg2, u8* arg3) {
     s32 chain_index;
     s32 active_index;
     s32 offset;
@@ -5112,13 +5112,13 @@ void fn_80024160(u8* arg0, void* arg1, u16* arg2, u8* arg3) {
 }
 #endif
 
-/* fn_80024308 - 0x80024308 | size: 0x130
+/* wmapMenuInput - 0x80024308 | size: 0x130
  *
  * Status: 99.1% matched. Remaining: reg-alloc choice in second branch
  * (f0/f1/f2 ordering: B8C8 in f1 vs f2, stack in f2 vs f0, B8898 in f0 vs f1),
  * plus 2 anonymous @NNN@sda21 f64 magic constants for u32->f32 conversion
  * (CW heuristic; target uses lbl_8047B8D0 name).
- * Second branch: separate f3=(f32)(u32)fn_800D3088() to avoid __cvt_fp2unsigned.
+ * Second branch: separate f3=(f32)(u32)msgGetCharsPerFrame() to avoid __cvt_fp2unsigned.
  */
 extern u32 lbl_8047A370;
 extern f64 lbl_8047B8D0;
@@ -5132,8 +5132,8 @@ extern f32 lbl_8047B8AC;
 extern u32 lbl_8047A36C;
 extern u32 lbl_8047A368;
 #if 0
-asm void fn_80024308(void) {
-#include "src/game/gs_title_fn_80024308.inc"
+asm void wmapMenuInput(void) {
+#include "src/game/gs_title_wmapMenuInput.inc"
 }
 #else
 #pragma push
@@ -5141,7 +5141,7 @@ asm void fn_80024308(void) {
 #pragma scheduling on
 #pragma fp_contract on
 #pragma peephole off
-s32 fn_80024308(u8* arg0) {
+s32 wmapMenuInput(u8* arg0) {
     extern u8* windowGetKeyInfo(void);
     u8* ctx;
     f32 f0;
@@ -5162,7 +5162,7 @@ s32 fn_80024308(u8* arg0) {
         }
     }
 
-    f2 = (f32)(u32)fn_800D3088();
+    f2 = (f32)(u32)msgGetCharsPerFrame();
     f3 = lbl_8047A378;
     f0 = f3 * f2 + lbl_8047A374;
     lbl_8047A374 = f0;
@@ -5179,7 +5179,7 @@ s32 fn_80024308(u8* arg0) {
     }
 
     if ((s32)lbl_8047A370 == 1) {
-        f3 = (f32)(u32)fn_800D3088();
+        f3 = (f32)(u32)msgGetCharsPerFrame();
         f1 = lbl_80478898 - lbl_8047B8C8 * f3;
         lbl_80478898 = f1;
         if (f1 < lbl_8047B8AC) {

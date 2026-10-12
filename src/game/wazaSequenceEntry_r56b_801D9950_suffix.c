@@ -11,7 +11,7 @@ typedef struct WazaSequenceScaleCtx {
 
 void fn_801D9950(void* owner, f32* scale, s32 selector)
 {
-    extern void fn_800E013C(void* dst, void* src, f32 scale);
+    extern void vecScale(void* dst, void* src, f32 scale);
     extern const f32 lbl_8047E348;
     extern const f32 lbl_8047E34C;
     extern const f32 lbl_8047E354;
@@ -40,32 +40,32 @@ void fn_801D9950(void* owner, f32* scale, s32 selector)
 
     switch (ctx->field_2C) {
     case 0x8F:
-        if (ctx->field_2E == 2) fn_800E013C(scale, scale, lbl_8047E364);
+        if (ctx->field_2E == 2) vecScale(scale, scale, lbl_8047E364);
         break;
     case 0xB1:
-        fn_800E013C(scale, scale, lbl_8047E348);
+        vecScale(scale, scale, lbl_8047E348);
         break;
     case 0xC4:
-        if (ctx->field_2E == 1) fn_800E013C(scale, scale, lbl_8047E368);
-        else if (ctx->field_2E == 2) fn_800E013C(scale, scale, lbl_8047E348);
+        if (ctx->field_2E == 1) vecScale(scale, scale, lbl_8047E368);
+        else if (ctx->field_2E == 2) vecScale(scale, scale, lbl_8047E348);
         break;
     case 0xFA:
-        if (ctx->field_2E == 1) fn_800E013C(scale, scale, lbl_8047E36C);
-        else if (ctx->field_2E == 2) fn_800E013C(scale, scale, lbl_8047E370);
+        if (ctx->field_2E == 1) vecScale(scale, scale, lbl_8047E36C);
+        else if (ctx->field_2E == 2) vecScale(scale, scale, lbl_8047E370);
         break;
     case 0x119:
-        fn_800E013C(scale, scale, lbl_8047E374);
+        vecScale(scale, scale, lbl_8047E374);
         break;
     case 0x133:
     case 0x13B:
-        if (ctx->field_2E == 2) fn_800E013C(scale, scale, lbl_8047E374);
+        if (ctx->field_2E == 2) vecScale(scale, scale, lbl_8047E374);
         break;
     case 0x143:
-        if (ctx->field_2E == 2) fn_800E013C(scale, scale, lbl_8047E378);
+        if (ctx->field_2E == 2) vecScale(scale, scale, lbl_8047E378);
         break;
     case 0x149:
     case 0x162:
-        if (ctx->field_2E == 2) fn_800E013C(scale, scale, lbl_8047E37C);
+        if (ctx->field_2E == 2) vecScale(scale, scale, lbl_8047E37C);
         break;
     }
 }

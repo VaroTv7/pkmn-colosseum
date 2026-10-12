@@ -592,7 +592,7 @@ extern void fn_801B2878(u32 mode);
 extern void fn_801B3884(void);
 extern void fn_801B3408(HSDShadowTevDesc* desc);
 extern void fn_801B3890(void);
-extern void fn_801B29E4(u32 flags, HSD_PEDesc* pe);
+extern void HSD_SetupPEMode(u32 flags, HSD_PEDesc* pe);
 extern void fn_801B3998(HSDShadowChan* chan);
 extern void fn_801A13CC(void* jobj, Mtx vmtx, HSD_TrspMask flags,
                         u32 rendermode);
@@ -691,7 +691,7 @@ void fn_801B0EB8(HSDShadow* shadow) {
         fn_801B3884();
         fn_801B3408(&tev);
         fn_801B3890();
-        fn_801B29E4(0, &pedesc);
+        HSD_SetupPEMode(0, &pedesc);
 
         chan.mat_color.r = 0xFF;
         chan.mat_color.g = 0xFF;

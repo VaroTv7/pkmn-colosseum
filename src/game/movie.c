@@ -39,11 +39,11 @@ extern void GSmovieOpen(const char* path, u32 loop);  /* THPPlayerOpen */
 
 /* ===== GS Engine external functions ===== */
 extern void _threadSwitch(void);                        /* GSthread yield / step */
-extern void fn_80165A20(u32 sndId, u32 fade, u32 vol); /* sndPlay (BGM start) */
+extern void std104_soundSetBackgroundMusic(u32 sndId, u32 fade, u32 vol); /* sndPlay (BGM start) */
 extern void fadeSet(u32 mode, f32 speed);         /* fade set mode+speed */
 extern void fadeCheck(u32 enable);                   /* fade enable */
-extern void fn_80190528(u32 flagId);                   /* GSflagSet (used for cutscene flags) */
-extern u32  fn_801902E0(u32 flagId);                   /* GSflagGet */
+extern void std078_flagSetFalse(u32 flagId);                   /* GSflagSet (used for cutscene flags) */
+extern u32  std081_flagCheckTrue(u32 flagId);                   /* GSflagGet */
 extern void floorLink(u32 a, u32 b);                /* floor resource unload helper */
 extern void floorSetFadeScript(u32 a, u32 b);                /* floor resource alloc helper */
 extern u32  floorGetPrevFloorID(void);                         /* floor state query */
@@ -85,7 +85,7 @@ extern f32 lbl_8047BA30; /* 1.0f -- fade speed */
  *    li r3, 0x495
  *    li r4, 0
  *    li r5, 0x7F
- *    bl fn_80165A20                  ; sndPlay(0x495, 0, 127) -- opening BGM
+ *    bl std104_soundSetBackgroundMusic                  ; sndPlay(0x495, 0, 127) -- opening BGM
  *    blr
  * ======================================================================= */
 #pragma push
@@ -99,7 +99,7 @@ void movieOpeningStart(void) {
     GSmovieOpen(lbl_80266FE8, 0);
 
     /* Start opening BGM: sound ID 0x0495, no fade, max volume */
-    fn_80165A20(0x0495, 0, 0x7F);
+    std104_soundSetBackgroundMusic(0x0495, 0, 0x7F);
 }
 #pragma peephole on
 #pragma pop
@@ -149,11 +149,11 @@ void fn_80035F34(void) {
  *    li r3, 1                    ; sound group 1 (BGM)
  *    li r4, 0                    ; fade time 0
  *    li r5, 0x7F                 ; volume 127
- *    bl fn_80165A20              ; sndPlay -- stops/fades BGM
+ *    bl std104_soundSetBackgroundMusic              ; sndPlay -- stops/fades BGM
  *
  *    ; Set game flag 0x08D0
  *    li r3, 0x08D0
- *    bl fn_80190528              ; GSflagSet
+ *    bl std078_flagSetFalse              ; GSflagSet
  *
  *    ; Unload floor resources
  *    li r3, 1
@@ -174,7 +174,7 @@ void fn_80035E04(void) {
     } MovieCue;
     extern const MovieCue lbl_802E51A8[5];
     extern s32 GSmovieGetFrame(void);
-    extern void fn_80166A28(u32);
+    extern void soundStartSE(u32);
     u32 nextIndex;
     u32 cueIndex = 0;
 
@@ -185,10 +185,10 @@ void fn_80035E04(void) {
             s32 frame = GSmovieGetFrame();
             if (frame >= 0 && frame >= lbl_802E51A8[cueIndex].frame) {
                 if (lbl_802E51A8[cueIndex].sound0 != 0) {
-                    fn_80166A28(lbl_802E51A8[cueIndex].sound0);
+                    soundStartSE(lbl_802E51A8[cueIndex].sound0);
                 }
                 if (lbl_802E51A8[cueIndex].sound1 != 0) {
-                    fn_80166A28(lbl_802E51A8[cueIndex].sound1);
+                    soundStartSE(lbl_802E51A8[cueIndex].sound1);
                 }
                 nextIndex++;
             }
@@ -198,10 +198,10 @@ void fn_80035E04(void) {
     }
 
     /* Stop BGM: group 1, fade 0, volume 127 */
-    fn_80165A20(1, 0, 0x7F);
+    std104_soundSetBackgroundMusic(1, 0, 0x7F);
 
     /* Set game flag to mark movie as completed */
-    fn_80190528(0x08D0);
+    std078_flagSetFalse(0x08D0);
 
     /* Unload floor resources that were active during movie */
     floorLink(1, 0);
@@ -238,7 +238,7 @@ void fn_80035E04(void) {
  *
  *    ; Stop BGM
  *    li r3, 1; li r4, 0; li r5, 0x7F
- *    bl fn_80165A20
+ *    bl std104_soundSetBackgroundMusic
  *
  *    ; Check floor state
  *    bl floorGetPrevFloorID
@@ -247,12 +247,12 @@ void fn_80035E04(void) {
  *
  *    ; Check game flags
  *    li r3, 0x0476
- *    bl fn_801902E0            ; GSflagGet
+ *    bl std081_flagCheckTrue            ; GSflagGet
  *    cmplwi r0, 1
  *    bne .skipSpecial
  *
  *    li r3, 0x0478
- *    bl fn_80190528            ; GSflagSet
+ *    bl std078_flagSetFalse            ; GSflagSet
  *
  *    ; Set up battle/effect state for credits scene
  *    li r3, 0; li r4, 1
@@ -288,7 +288,7 @@ void fn_80035F64(void) {
     } while ((u32)(state & 0xFF) == THP_STATE_PLAYING);
 
     /* Step 2: Stop BGM */
-    fn_80165A20(1, 0, 0x7F);
+    std104_soundSetBackgroundMusic(1, 0, 0x7F);
 
     /* Step 3: Check floor state */
     floorState = (u32)floorGetPrevFloorID();
@@ -297,13 +297,13 @@ void fn_80035F64(void) {
     }
 
     /* Step 4: Check game flags for special credits conditions */
-    flagVal = (u8)fn_801902E0(0x0476);
+    flagVal = (u8)std081_flagCheckTrue(0x0476);
     if ((flagVal & 0xFF) != 1) {
         goto openMovie;
     }
 
     /* Set post-game flag */
-    fn_80190528(0x0478);
+    std078_flagSetFalse(0x0478);
 
     /* Step 5: Set up battle/effect state for credits scene */
     effectCtx = savedataGetStatus(0, 1);
@@ -409,16 +409,16 @@ openMovie:
     } while ((u32)(state & 0xFF) == THP_STATE_PLAYING);
 
     /* Stop sound and restore state */
-    fn_80165A20(1, 0, 0x7F);
-    fn_80190528(0x08D0);
+    std104_soundSetBackgroundMusic(1, 0, 0x7F);
+    std078_flagSetFalse(0x08D0);
     floorLink(1, 0);
     floorSetFadeScript(0, 0x59608);
     return;
 
 cleanup:
     /* Early exit cleanup path */
-    fn_80165A20(1, 0, 0x7F);
-    fn_80190528(0x08D0);
+    std104_soundSetBackgroundMusic(1, 0, 0x7F);
+    std078_flagSetFalse(0x08D0);
     floorLink(1, 0);
     floorSetFadeScript(0, 0x59608);
 }
@@ -492,7 +492,7 @@ void fn_800361C0(void) {
     fadeSet(2, lbl_8047BA30);
     fadeCheck(1);
     GSmovieOpen(lbl_80267000, 0);
-    fn_80165A20(0x04C9, 0, 0x7F);
+    std104_soundSetBackgroundMusic(0x04C9, 0, 0x7F);
 }
 #pragma pop
 #endif
@@ -518,8 +518,8 @@ extern u32 fn_800F7AF0(u32);
 extern u32 fn_800F7BC4(u32);
 extern void GSmovieClose();
 extern s32 GSmovieGetFrame();
-extern void fn_80166A28(u32);
-extern void fn_8016597C(u32, u32, u32, u32);
+extern void soundStartSE(u32);
+extern void std138_soundPlayEffectEx(u32, u32, u32, u32);
 extern u8 lbl_802E50E0[];
 #if 0
 asm void fn_80036240(void) {
@@ -558,11 +558,11 @@ void fn_80036240(void) {
             if (r3 >= (s32)*(u16*)(r30_tbl + 0x0)) {
     r0 = *(u16*)(r30_tbl + 0x2);
     if (r0 != 0) {
-        fn_80166A28(r0);
+        soundStartSE(r0);
     }
     r0 = *(u16*)(r30_tbl + 0x4);
     if (r0 != 0) {
-        fn_80166A28(r0);
+        soundStartSE(r0);
     }
     r31 = r31 + 1;
             }
@@ -576,7 +576,7 @@ void fn_80036240(void) {
     if ((u8)r3 == 1) goto loop_body;
 
     loop_exit:
-    fn_8016597C(1, 0x3e8, 0, 0x7f);
+    std138_soundPlayEffectEx(1, 0x3e8, 0, 0x7f);
     floorRequestChange(0x384);
     floorSetFadeScript(0, 0x5960008);
 }
@@ -595,7 +595,7 @@ void movieStartAttract(void) {
     fadeSet(2, lbl_8047BA30);
     fadeCheck(1);
     GSmovieOpen(lbl_80267014, 0);
-    fn_80165A20(0x0494, 0, 0x7F);
+    std104_soundSetBackgroundMusic(0x0494, 0, 0x7F);
 }
 #pragma pop
 #endif
@@ -688,7 +688,7 @@ void movieGsLogoStart(void) {
     fadeSet(2, lbl_8047BA30);
     fadeCheck(1);
     GSmovieOpen(lbl_8026702C, 0);
-    fn_80165A20(0x04D1, 0, 0x7F);
+    std104_soundSetBackgroundMusic(0x04D1, 0, 0x7F);
     memset((void*)0x80001805, 0, 0x17FB);
 }
 #endif

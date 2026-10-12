@@ -38,7 +38,7 @@ extern void  fn_800E032C(void* matrix, f32 angle);
 extern void  GSvecAdd(void* out, void* a, void* b);  /* cross product */
 extern void  GSvecTransform(void* out, void* a, void* b);  /* vector subtract */
 extern void  GScameraSetPosition(void* obj, void* mtx);         /* set model matrix */
-extern void* fn_800FF56C(void);                         /* GSfloor get active */
+extern void* std092_getCurrentRoomID(void);                         /* GSfloor get active */
 
 /* Script/generator */
 extern void  fn_80169520(void* obj);                    /* status flag update */

@@ -35,30 +35,30 @@ extern f64 lbl_8047E500;
 extern void* GScameraGetActiveCamera(void);
 extern void GScameraGetPosition(void*, void*);
 extern s32 GScolsys2Sun(void*, void*);
-extern void* fn_800D2F34(void*, void*);
-extern f32 fn_800E008C(void*);
-extern void fn_800D88DC(u32);
-extern void fn_800D888C(u32);
-extern void fn_800D9B58(f32, f32, f32, f32);
-extern void fn_800DA4C4(u32, u32, u32);
-extern void fn_800DA2BC(u32, u32, u32);
-extern void fn_800DA1E8(u32, u32, u32);
-extern void fn_800DA028(u32);
+extern void* gfxWorldToScreen(void*, void*);
+extern f32 vecMag(void*);
+extern void gfxSetFlags(u32);
+extern void gfxClearFlags(u32);
+extern void gfxSetOrtho(f32, f32, f32, f32);
+extern void gfxSetBlendMode(u32, u32, u32);
+extern void gfxSetUpdates(u32, u32, u32);
+extern void gfxSetZMode(u32, u32, u32);
+extern void gfxSetCullMode(u32);
 extern void fn_800D9ED8(u32);
-extern void fn_800E00AC(void*, void*, f32);
+extern void vecNormalize(void*, void*, f32);
 extern u32 fn_800EF4FC(void*);
 extern u32 fn_800EF4F4(void*);
-extern void fn_800E013C(void*, void*, f32);
-extern void fn_800D85D4(u32, void*);
-extern void fn_800D67BC(u32);
-extern void fn_800D6680(f32, f32, f32);
-extern void fn_800D5C18(u32, u32, u32, u32);
-extern void fn_800D59B8(f32, f32);
-extern void fn_800D6728(void);
-extern void fn_800D6A00(u32);
-extern void fn_800D7820(void*);
+extern void vecScale(void*, void*, f32);
+extern void gfxLoadTexture(u32, void*);
+extern void gfxBegin(u32);
+extern void gfxVtxPos(f32, f32, f32);
+extern void gfxVtxColor(u32, u32, u32, u32);
+extern void gfxVtxTexCoord(f32, f32);
+extern void gfxEnd(void);
+extern void gfxSetPrimitive(u32);
+extern void gfxSetVtxDesc(void*);
 
-void fn_801ED780(void)
+void flareDraw(void)
 {
     f32 camera_pos[3];
     f32 col_pos[3];
@@ -91,7 +91,7 @@ void fn_801ED780(void)
         return;
     }
 
-    mode = (s32)fn_800D2F34(lbl_80375230, col_pos);
+    mode = (s32)gfxWorldToScreen(lbl_80375230, col_pos);
     if (mode == 0) {
         return;
     }
@@ -99,7 +99,7 @@ void fn_801ED780(void)
     delta[0] = lbl_8047E4D0 - col_pos[0];
     delta[1] = lbl_8047E4D4 - col_pos[1];
     delta[2] = lbl_8047E4D8;
-    distance = fn_800E008C(delta);
+    distance = vecMag(delta);
     if ((distance > lbl_8047E4D8 ? distance : -distance) < lbl_8047E4DC) {
         return;
     }
@@ -108,17 +108,17 @@ void fn_801ED780(void)
         return;
     }
 
-    fn_800D88DC(3);
-    fn_800D888C(4);
-    fn_800D9B58(lbl_8047E4D8, lbl_8047E4D8, lbl_8047E4E0, lbl_8047E4E4);
-    fn_800DA4C4(1, 1, 1);
-    fn_800DA2BC(1, 1, 0);
-    fn_800DA1E8(0, 1, 1);
-    fn_800DA028(0);
+    gfxSetFlags(3);
+    gfxClearFlags(4);
+    gfxSetOrtho(lbl_8047E4D8, lbl_8047E4D8, lbl_8047E4E0, lbl_8047E4E4);
+    gfxSetBlendMode(1, 1, 1);
+    gfxSetUpdates(1, 1, 0);
+    gfxSetZMode(0, 1, 1);
+    gfxSetCullMode(0);
     fn_800D9ED8(1);
 
     if (mode == 2) {
-        fn_800E00AC(delta, delta, distance);
+        vecNormalize(delta, delta, distance);
 
         if (distance < (f32)FIELD_U32((void*)lbl_8047B5C4, 0x0C)) {
             span_ratio = lbl_8047E4E8;
@@ -136,8 +136,8 @@ void fn_801ED780(void)
         }
 
         alpha = (u32)(lbl_8047E4EC * span_ratio);
-        fn_800D6A00(4);
-        fn_800D7820(lbl_80314C78);
+        gfxSetPrimitive(4);
+        gfxSetVtxDesc(lbl_80314C78);
 
         entry_list = (u8*)lbl_8047B5C8;
         tex_table = (u32*)lbl_8046D630;
@@ -152,32 +152,32 @@ void fn_801ED780(void)
                 x1 = col_pos[0] + FIELD_F32(entry_list, 0x08) * (f32)fn_800EF4FC(tex);
                 y1 = col_pos[1] + FIELD_F32(entry_list, 0x08) * (f32)fn_800EF4F4(tex);
             } else {
-                fn_800E013C(&delta[0], &delta[0], lbl_8047E4F0 * FIELD_F32(entry_list, 0x04) * distance);
+                vecScale(&delta[0], &delta[0], lbl_8047E4F0 * FIELD_F32(entry_list, 0x04) * distance);
                 x0 = lbl_8047E4D0 + delta[0] - FIELD_F32(entry_list, 0x08) * (f32)fn_800EF4FC(tex);
                 y0 = lbl_8047E4D4 + delta[1] - FIELD_F32(entry_list, 0x08) * (f32)fn_800EF4F4(tex);
                 x1 = lbl_8047E4D0 + delta[0] + FIELD_F32(entry_list, 0x08) * (f32)fn_800EF4FC(tex);
                 y1 = lbl_8047E4D4 + delta[1] + FIELD_F32(entry_list, 0x08) * (f32)fn_800EF4F4(tex);
             }
 
-            fn_800D85D4(0, tex);
-            fn_800D67BC(4);
+            gfxLoadTexture(0, tex);
+            gfxBegin(4);
 
-            fn_800D6680(x0, y0, lbl_8047E4D8);
-            fn_800D5C18(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
-            fn_800D59B8(lbl_8047E4D8, lbl_8047E4D8);
+            gfxVtxPos(x0, y0, lbl_8047E4D8);
+            gfxVtxColor(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
+            gfxVtxTexCoord(lbl_8047E4D8, lbl_8047E4D8);
 
-            fn_800D6680(x1, y0, lbl_8047E4D8);
-            fn_800D5C18(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
-            fn_800D59B8(lbl_8047E4E8, lbl_8047E4D8);
+            gfxVtxPos(x1, y0, lbl_8047E4D8);
+            gfxVtxColor(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
+            gfxVtxTexCoord(lbl_8047E4E8, lbl_8047E4D8);
 
-            fn_800D6680(x0, y1, lbl_8047E4D8);
-            fn_800D5C18(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
-            fn_800D59B8(lbl_8047E4D8, lbl_8047E4E8);
+            gfxVtxPos(x0, y1, lbl_8047E4D8);
+            gfxVtxColor(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
+            gfxVtxTexCoord(lbl_8047E4D8, lbl_8047E4E8);
 
-            fn_800D6680(x1, y1, lbl_8047E4D8);
-            fn_800D5C18(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
-            fn_800D59B8(lbl_8047E4E8, lbl_8047E4E8);
-            fn_800D6728();
+            gfxVtxPos(x1, y1, lbl_8047E4D8);
+            gfxVtxColor(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
+            gfxVtxTexCoord(lbl_8047E4E8, lbl_8047E4E8);
+            gfxEnd();
 
             entry_list += 0x0C;
         }
@@ -202,24 +202,24 @@ void fn_801ED780(void)
         }
 
         alpha = (u32)(lbl_8047E4EC * span_ratio);
-        fn_800D888C(2);
-        fn_800D6A00(4);
-        fn_800D7820(lbl_80314958);
-        fn_800D67BC(4);
+        gfxClearFlags(2);
+        gfxSetPrimitive(4);
+        gfxSetVtxDesc(lbl_80314958);
+        gfxBegin(4);
 
-        fn_800D6680(lbl_8047E4D8, lbl_8047E4D8, lbl_8047E4D8);
-        fn_800D5C18(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
-        fn_800D6680(lbl_8047E4E0, lbl_8047E4D8, lbl_8047E4D8);
-        fn_800D5C18(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
-        fn_800D6680(lbl_8047E4D8, lbl_8047E4E4, lbl_8047E4D8);
-        fn_800D5C18(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
-        fn_800D6680(lbl_8047E4E0, lbl_8047E4E4, lbl_8047E4D8);
-        fn_800D5C18(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
-        fn_800D6728();
+        gfxVtxPos(lbl_8047E4D8, lbl_8047E4D8, lbl_8047E4D8);
+        gfxVtxColor(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
+        gfxVtxPos(lbl_8047E4E0, lbl_8047E4D8, lbl_8047E4D8);
+        gfxVtxColor(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
+        gfxVtxPos(lbl_8047E4D8, lbl_8047E4E4, lbl_8047E4D8);
+        gfxVtxColor(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
+        gfxVtxPos(lbl_8047E4E0, lbl_8047E4E4, lbl_8047E4D8);
+        gfxVtxColor(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
+        gfxEnd();
         return;
     }
 
-    fn_800DA4C4(2, 1, 1);
+    gfxSetBlendMode(2, 1, 1);
 
     if (distance >= (f32)FIELD_U32((void*)lbl_8047B5C4, 0x0C)) {
         return;
@@ -241,18 +241,18 @@ void fn_801ED780(void)
     }
 
     alpha = (u32)(lbl_8047E4EC * span_ratio);
-    fn_800D888C(2);
-    fn_800D6A00(4);
-    fn_800D7820(lbl_80314958);
-    fn_800D67BC(4);
+    gfxClearFlags(2);
+    gfxSetPrimitive(4);
+    gfxSetVtxDesc(lbl_80314958);
+    gfxBegin(4);
 
-    fn_800D6680(lbl_8047E4D8, lbl_8047E4D8, lbl_8047E4D8);
-    fn_800D5C18(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
-    fn_800D6680(lbl_8047E4E0, lbl_8047E4D8, lbl_8047E4D8);
-    fn_800D5C18(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
-    fn_800D6680(lbl_8047E4D8, lbl_8047E4E4, lbl_8047E4D8);
-    fn_800D5C18(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
-    fn_800D6680(lbl_8047E4E0, lbl_8047E4E4, lbl_8047E4D8);
-    fn_800D5C18(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
-    fn_800D6728();
+    gfxVtxPos(lbl_8047E4D8, lbl_8047E4D8, lbl_8047E4D8);
+    gfxVtxColor(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
+    gfxVtxPos(lbl_8047E4E0, lbl_8047E4D8, lbl_8047E4D8);
+    gfxVtxColor(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
+    gfxVtxPos(lbl_8047E4D8, lbl_8047E4E4, lbl_8047E4D8);
+    gfxVtxColor(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
+    gfxVtxPos(lbl_8047E4E0, lbl_8047E4E4, lbl_8047E4D8);
+    gfxVtxColor(0, alpha & 0xFF, alpha & 0xFF, alpha & 0xFF);
+    gfxEnd();
 }

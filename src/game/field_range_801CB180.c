@@ -124,17 +124,17 @@ extern void* GSthreadGetCurrentThread(void);
 extern s32 fn_800F036C(void);
 extern void GSlogWrite(const void* format, const void* text, ...);
 extern s32 fn_800F7318(s32 task, void* callback, s32 stack_size, s32 arg3, s32 arg4, s32 arg5, ...);
-extern void fn_800F7434(void* callback, s32 arg, ...);
-extern u32 fn_80113F48(void);
+extern void cmsRunSync(void* callback, s32 arg, ...);
+extern u32 std093_getCurrentGroupID(void);
 extern void* GSresGetResource(u32 group, u32 resource);
 extern void fn_80118874(void* resource, u32 arg);
 extern void GSmodelLinkToGSparticleBank(void* model, void* particle_bank);
 extern void GSmodelSetGSparticleLinkAttachMode(void* model, s32 mode);
-extern void* fn_8018D998(u32 group, u32 resource);
-extern void fn_80184470(u32 group, u32 resource);
-extern void fn_801845E4(u32 group, u32 resource, u32 part_group, u32 part_resource, s32 part);
+extern void* peopleIsInGroup(u32 group, u32 resource);
+extern void std168_characterDetachFromCharacter(u32 group, u32 resource);
+extern void std070_characterAttachToCharacter(u32 group, u32 resource, u32 part_group, u32 part_resource, s32 part);
 extern void fn_8018B220(u32 group, u32 resource);
-extern void fn_8018B368(u32 group, u32 resource, u32 anim_index, s32 frame, u8 loop);
+extern void std154_characterPlayAnimation(u32 group, u32 resource, u32 anim_index, s32 frame, u8 loop);
 extern void GSmodelStopAnimation(void* model);
 extern void fn_8018DB68(u32 group, u32 resource);
 extern void peopleSetVisible(u32 group, u32 resource, u8 visible);
@@ -160,7 +160,7 @@ extern void* peopleGetModel(void* people);
 extern void GSmodelSetBoundCheck(void* model, s32 enabled);
 extern s32 floorRequestChange(s32 msg_id);
 extern void winMsgOpen(s32 id, s32 msg_id, s32 arg2, s32 arg3);
-extern s32 fn_8001E184(void);
+extern s32 std011_dialogDisplayYesNoMenu(void);
 extern s32 fn_800889E4(s32 arg);
 extern void* fn_800E202C(void* ptr);
 extern void fn_800E24B0(void);
@@ -335,12 +335,12 @@ s32 scriptIsMoveButtonPush(void)
 
 #pragma push
 #pragma scheduling off
-void fn_801CB394(s32 id)
+void std005_threadIsRunning(s32 id)
 {
     fn_800F7068(id, 0);
 }
 
-void fn_801CB3B8(s32 id)
+void std006_threadWaitForCompletion(s32 id)
 {
     fn_800F7068(id, 1);
 }
@@ -373,9 +373,9 @@ s32 scriptExecTask(void* callback, u32 priority, u32 arg2, u32 arg3, u32 arg4, u
 
 #pragma push
 #pragma peephole off
-void fn_801CB4A8(void* callback, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
+void std209_threadRunScriptMode4(void* callback, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
 {
-    fn_800F7434(callback, 4, arg1, arg2, arg3, arg4);
+    cmsRunSync(callback, 4, arg1, arg2, arg3, arg4);
 }
 #pragma pop
 
@@ -383,7 +383,7 @@ void fn_801CB4A8(void* callback, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
 #pragma peephole off
 void fn_801CB4E8(u32 resource, u32 arg)
 {
-    void* object = GSresGetResource(fn_80113F48(), resource);
+    void* object = GSresGetResource(std093_getCurrentGroupID(), resource);
 
     fn_80118874(object, arg);
 }
@@ -391,10 +391,10 @@ void fn_801CB4E8(u32 resource, u32 arg)
 
 #pragma push
 #pragma peephole off
-void fn_801CB530(u32 model_id, u32 particle_bank_id)
+void std221_mapObjectLinkParticles(u32 model_id, u32 particle_bank_id)
 {
-    void* model = GSresGetResource(fn_80113F48(), model_id);
-    void* particle_bank = GSresGetResource(fn_80113F48(), particle_bank_id);
+    void* model = GSresGetResource(std093_getCurrentGroupID(), model_id);
+    void* particle_bank = GSresGetResource(std093_getCurrentGroupID(), particle_bank_id);
 
     GSmodelLinkToGSparticleBank(model, particle_bank);
     GSmodelSetGSparticleLinkAttachMode(model, 4);
@@ -406,11 +406,11 @@ void fn_801CB530(u32 model_id, u32 particle_bank_id)
 #if defined(FIELD_801CB180_RANGE_801CB59C)
 s32 fn_801CB59C(u32 resource)
 {
-    u32 group = fn_80113F48();
+    u32 group = std093_getCurrentGroupID();
     void* model;
 
-    if (fn_8018D998(group, resource) != NULL) {
-        fn_80184470(group, resource);
+    if (peopleIsInGroup(group, resource) != NULL) {
+        std168_characterDetachFromCharacter(group, resource);
     } else {
         model = GSresGetResource(group, resource);
         if (model == NULL) {
@@ -427,14 +427,14 @@ s32 fn_801CB59C(u32 resource)
 #pragma push
 #pragma scheduling off
 #pragma peephole off
-s32 fn_801CB61C(u32 resource, u32 part_resource, s32 part)
+s32 std166_mapObjectAttachToObject(u32 resource, u32 part_resource, s32 part)
 {
-    u32 group = fn_80113F48();
+    u32 group = std093_getCurrentGroupID();
     void* model;
     void* part_model;
 
-    if (fn_8018D998(group, resource) != NULL) {
-        fn_801845E4(group, resource, group, part_resource, part);
+    if (peopleIsInGroup(group, resource) != NULL) {
+        std070_characterAttachToCharacter(group, resource, group, part_resource, part);
     } else {
         model = GSresGetResource(group, resource);
         if (model == NULL) {
@@ -459,10 +459,10 @@ s32 fn_801CB61C(u32 resource, u32 part_resource, s32 part)
 #pragma peephole off
 s32 scriptWaitSyncMotion(u32 resource, s32 wait)
 {
-    u32 group = fn_80113F48();
+    u32 group = std093_getCurrentGroupID();
     void* model;
 
-    if (fn_8018D998(group, resource) != NULL) {
+    if (peopleIsInGroup(group, resource) != NULL) {
         return (u8)peopleWaitSyncMotion(group, resource, wait);
     }
 
@@ -486,12 +486,12 @@ s32 scriptWaitSyncMotion(u32 resource, s32 wait)
 #endif
 
 #if defined(FIELD_801CB180_RANGE_801CB7C4)
-void fn_801CB7C4(u32 resource)
+void std116_mapObjectStopAnimation(u32 resource)
 {
-    u32 group = fn_80113F48();
+    u32 group = std093_getCurrentGroupID();
     void* model;
 
-    if (fn_8018D998(group, resource) != NULL) {
+    if (peopleIsInGroup(group, resource) != NULL) {
         fn_8018B220(group, resource);
     } else {
         model = GSresGetResource(group, resource);
@@ -505,13 +505,13 @@ void fn_801CB7C4(u32 resource)
 #if defined(FIELD_801CB180_RANGE_801CB834)
 #pragma push
 #pragma peephole off
-void fn_801CB834(u32 resource, u32 anim_index, s32 frame, s32 loop)
+void std115_mapObjectPlayAnimation(u32 resource, u32 anim_index, s32 frame, s32 loop)
 {
-    u32 group = fn_80113F48();
+    u32 group = std093_getCurrentGroupID();
     void* model;
 
-    if (fn_8018D998(group, resource) != NULL) {
-        fn_8018B368(group, resource, anim_index, frame, (u8)loop);
+    if (peopleIsInGroup(group, resource) != NULL) {
+        std154_characterPlayAnimation(group, resource, anim_index, frame, (u8)loop);
         return;
     }
 
@@ -535,12 +535,12 @@ void fn_801CB834(u32 resource, u32 anim_index, s32 frame, s32 loop)
 
 #pragma push
 #pragma peephole off
-void fn_801CB954(u32 resource, s32 visible)
+void std114_mapObjectSetVisibility(u32 resource, s32 visible)
 {
-    u32 group = fn_80113F48();
+    u32 group = std093_getCurrentGroupID();
     void* model;
 
-    if (fn_8018D998(group, resource) != NULL) {
+    if (peopleIsInGroup(group, resource) != NULL) {
         peopleSetVisible(group, resource, (u8)visible);
     } else {
         model = GSresGetResource(group, resource);
@@ -553,16 +553,16 @@ void fn_801CB954(u32 resource, s32 visible)
 #endif
 
 #if defined(FIELD_801CB180_RANGE_801CB9D8)
-void fn_801CB9D8(u32 resource)
+void std113_mapObjectUnk_8018db68(u32 resource)
 {
-    fn_8018DB68(fn_80113F48(), resource);
+    fn_8018DB68(std093_getCurrentGroupID(), resource);
 }
 #endif
 
 #if defined(FIELD_801CB180_RANGE_801CBA0C)
 #pragma push
 #pragma scheduling off
-s32 fn_801CBA0C(void* param)
+s32 std112_modelGetResourceID(void* param)
 {
     s32 people_id;
     u32 raw_id;
@@ -572,7 +572,7 @@ s32 fn_801CBA0C(void* param)
     lbl_8047B3C8 = raw_id + 1;
     people_id = (s8)raw_id | 0x7FFE0000;
 
-    people = fn_8018E050(fn_80113F48(), people_id, param);
+    people = fn_8018E050(std093_getCurrentGroupID(), people_id, param);
     if (people == NULL) {
 #pragma scheduling on
         return 0;
@@ -595,7 +595,7 @@ void fn_801CBA84(void)
 #if defined(FIELD_801CBA90_RANGE_PREFIX)
 #pragma push
 #pragma scheduling off
-s32 fn_801CBA90(void)
+s32 std229_mapLoad395(void)
 {
     floorRequestChange(0x395);
     return 0;
@@ -604,7 +604,7 @@ s32 fn_801CBA90(void)
 
 #pragma push
 #pragma scheduling off
-s32 fn_801CBAB8(void)
+s32 std223_askYesNoThenWarp395(void)
 {
     s32 state;
     s32 done;
@@ -617,7 +617,7 @@ s32 fn_801CBAB8(void)
         switch (state) {
         case 0:
             winMsgOpen(2, 0x3C46, 1, 1);
-            input = (s8)fn_8001E184();
+            input = (s8)std011_dialogDisplayYesNoMenu();
             winMsgClose(1);
             if (input != 0) {
                 done = 1;

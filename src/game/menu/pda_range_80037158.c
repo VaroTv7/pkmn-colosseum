@@ -196,19 +196,19 @@ void fn_80037300(void* window, PdaSprite* sprite)
     extern u8 lbl_80314E08[];
     extern void fn_800D5BA0(s32 index, u32 color);
     extern void fn_800D61E4(s32 x, s32 y);
-    extern void fn_800D6728(void);
-    extern void fn_800D67BC(s32 count);
-    extern void fn_800D6A00(s32 primitive);
-    extern void fn_800D7820(void* data);
-    extern void fn_800D888C(s32 mode);
-    extern void fn_800D88DC(s32 mode);
+    extern void gfxEnd(void);
+    extern void gfxBegin(s32 count);
+    extern void gfxSetPrimitive(s32 primitive);
+    extern void gfxSetVtxDesc(void* data);
+    extern void gfxClearFlags(s32 mode);
+    extern void gfxSetFlags(s32 mode);
 
     (void)window;
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D7820(lbl_80314E08);
-    fn_800D6A00(6);
-    fn_800D67BC(4);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetVtxDesc(lbl_80314E08);
+    gfxSetPrimitive(6);
+    gfxBegin(4);
     fn_800D61E4(0, 0);
     fn_800D5BA0(0, 0x003B6DFF);
     fn_800D61E4(sprite->x, 0);
@@ -217,7 +217,7 @@ void fn_80037300(void* window, PdaSprite* sprite)
     fn_800D5BA0(0, 0x489DECFF);
     fn_800D61E4(0, sprite->y);
     fn_800D5BA0(0, 0x003B6DFF);
-    fn_800D6728();
+    gfxEnd();
 }
 #pragma peephole reset
 
@@ -827,11 +827,11 @@ void fn_800388C4(void)
 void fn_80038990(void)
 {
     extern s32 fn_800D37CC(void);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern void _threadSwitch(void);
 
     while (1) {
-        lbl_8047A494 = (f32)fn_800D3088() / (f32)fn_800D37CC();
+        lbl_8047A494 = (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         _threadSwitch();
     }
 }
@@ -870,13 +870,13 @@ static inline void pdaResetPeopleTables(u8* base, u8* tbl)
 /* People screen driver: run the top-level menu, dispatch the four entries,
    and tear the menu down on exit. */
 #pragma peephole off
-void fn_8003842C(void)
+void std024_dialogDisplayPCBoxMenu(void)
 {
     extern u8 lbl_802E51C8[];
     extern u8 lbl_802EF0A8[];
     extern s32 menuOpen(s32 menu, s32 mode);
-    extern void fn_801661D0(s32 a, s32 b, s32 c, s32 d);
-    extern void fn_801660D8(s32 a, s32 b, s32 c);
+    extern void soundDuck(s32 a, s32 b, s32 c, s32 d);
+    extern void soundUnduck(s32 a, s32 b, s32 c);
     extern void fn_800FF660(void);
     extern void fn_80058150(void);
     extern void fn_8003A520(void);
@@ -899,7 +899,7 @@ void fn_8003842C(void)
     tbl = lbl_802E51C8;
     state = 0;
     running = 1;
-    fn_801661D0(0x55, 0x1f4, 1, 1);
+    soundDuck(0x55, 0x1f4, 1, 1);
     do {
         switch (state) {
         case 0:
@@ -973,7 +973,7 @@ void fn_8003842C(void)
             break;
         }
     } while (running);
-    fn_801660D8(0x3e8, 1, 1);
+    soundUnduck(0x3e8, 1, 1);
     fn_800FF660();
 }
 #pragma peephole reset
@@ -1268,7 +1268,7 @@ s32 fn_80039A84(void)
     extern void* itemDataBiosGetPtr(u16 id);
     extern s32 itemDataBiosGetDoc(void* data);
     extern void pcboxSwapItemSlot(s32 box, s16 from, s16 to);
-    extern void fn_80166A50(s32 id, s32 a, s32 b, s32 c);
+    extern void soundStart(s32 id, s32 a, s32 b, s32 c);
     extern f32 lbl_8047BAB4;
     extern f32 lbl_8047BAB8;
     PdaKeyInfo* keyInfo;
@@ -1314,7 +1314,7 @@ s32 fn_80039A84(void)
         haveHeld:
             if (itemId != 0) {
                 lbl_8047A4B8 = target;
-                fn_80166A50(0x3c6, 0, 0xff, 0);
+                soundStart(0x3c6, 0, 0xff, 0);
             }
         }
     } else {
@@ -1336,14 +1336,14 @@ s32 fn_80039A84(void)
         haveSwap:
             if (itemId != 0) {
                 pcboxSwapItemSlot(0, (s16)lbl_8047A4B8, (s16)target);
-                fn_80166A50(0x3c6, 0, 0xff, 0);
+                soundStart(0x3c6, 0, 0xff, 0);
             } else {
-                fn_80166A50(0x3c7, 0, 0xff, 0);
+                soundStart(0x3c7, 0, 0xff, 0);
             }
             lbl_8047A4B8 = -1;
         } else if ((keys & 0x20) != 0) {
             lbl_8047A4B8 = -1;
-            fn_80166A50(0x3c7, 0, 0xff, 0);
+            soundStart(0x3c7, 0, 0xff, 0);
         }
     }
     total = 0;
@@ -1370,7 +1370,7 @@ s32 fn_80039A84(void)
             }
             lbl_8047A4C0 = lbl_8047BAB4;
             moved = 1;
-            fn_80166A50(0x3c5, 0, 0xff, 0);
+            soundStart(0x3c5, 0, 0xff, 0);
         }
     }
     if ((keyInfo->buttons & 1) != 0 && moved == 0) {
@@ -1386,7 +1386,7 @@ s32 fn_80039A84(void)
             }
             lbl_8047A4C0 = lbl_8047BAB8;
             moved = 1;
-            fn_80166A50(0x3c5, 0, 0xff, 0);
+            soundStart(0x3c5, 0, 0xff, 0);
         }
     }
     if ((keyInfo->buttons & 8) != 0 && moved == 0) {
@@ -1397,14 +1397,14 @@ s32 fn_80039A84(void)
                 lbl_8047A4AC = max - top - 1;
             }
             moved = 1;
-            fn_80166A50(0x3c5, 0, 0xff, 0);
+            soundStart(0x3c5, 0, 0xff, 0);
         }
     }
     if ((keyInfo->buttons & 4) != 0 && moved == 0) {
         top = lbl_8047A4A8 - 8;
         if (top >= 0) {
             lbl_8047A4A8 = top;
-            fn_80166A50(0x3c5, 0, 0xff, 0);
+            soundStart(0x3c5, 0, 0xff, 0);
         }
     }
     if (lbl_8047A4B8 >= 0) {
@@ -1663,7 +1663,7 @@ s32 fn_8003A7F0(PdaNumberWork* work)
 {
     extern PdaKeyInfo* windowGetKeyInfo(void);
     extern s32 lbl_8047A4C8;
-    extern void fn_80166A50(s32 id, s32 a, s32 b, s32 c);
+    extern void soundStart(s32 id, s32 a, s32 b, s32 c);
     PdaKeyInfo* keyInfo;
     PdaNumberRange* range;
     s32 step;
@@ -1689,7 +1689,7 @@ s32 fn_8003A7F0(PdaNumberWork* work)
                 if (value > range->max) {
                     lbl_8047A4C8 = range->min;
                 }
-                fn_80166A50(0x3c5, 0, 0xff, 0);
+                soundStart(0x3c5, 0, 0xff, 0);
             } else {
                 cur = lbl_8047A4C8;
                 digit = (cur / step) % 10;
@@ -1708,7 +1708,7 @@ s32 fn_8003A7F0(PdaNumberWork* work)
                 if (value < range->min) {
                     lbl_8047A4C8 = range->min;
                 } else {
-                    fn_80166A50(0x3c5, 0, 0xff, 0);
+                    soundStart(0x3c5, 0, 0xff, 0);
                 }
             }
         }
@@ -1719,7 +1719,7 @@ s32 fn_8003A7F0(PdaNumberWork* work)
                 if (value < range->min) {
                     lbl_8047A4C8 = range->max;
                 }
-                fn_80166A50(0x3c5, 0, 0xff, 0);
+                soundStart(0x3c5, 0, 0xff, 0);
             } else {
                 cur = lbl_8047A4C8;
                 digit = (cur / step) % 10;
@@ -1738,7 +1738,7 @@ s32 fn_8003A7F0(PdaNumberWork* work)
                 if (value < range->min) {
                     lbl_8047A4C8 = range->min;
                 } else {
-                    fn_80166A50(0x3c5, 0, 0xff, 0);
+                    soundStart(0x3c5, 0, 0xff, 0);
                 }
             }
         }
@@ -2336,16 +2336,16 @@ extern f32 lbl_8047BAC0;
 extern f32 lbl_8047BDAC;
 extern f32 lbl_8047BDF0;
 
-extern u32 fn_800D59B8();
+extern u32 gfxVtxTexCoord();
 extern u32 fn_800D5CB8();
 extern u32 fn_800D61E4();
-extern u32 fn_800D6728();
-extern u32 fn_800D67BC();
-extern u32 fn_800D6A00();
-extern u32 fn_800D7820();
-extern u32 fn_800D85D4();
-extern u32 fn_800D888C();
-extern u32 fn_800D88DC();
+extern u32 gfxEnd();
+extern u32 gfxBegin();
+extern u32 gfxSetPrimitive();
+extern u32 gfxSetVtxDesc();
+extern u32 gfxLoadTexture();
+extern u32 gfxClearFlags();
+extern u32 gfxSetFlags();
 extern u32 fn_800E202C();
 extern u32 fn_800E209C();
 extern u32 fn_800E24B0();
@@ -2365,7 +2365,7 @@ extern u32 fn_8011DFE0();
 extern u32 pokemonGetSex();
 extern u32 fn_801240C4();
 extern u32 fn_80132A38();
-extern u32 fn_80166AB8(u32, u32, u32);
+extern u32 soundStartRaw(u32, u32, u32);
 extern u32 fn_8017B1CC();
 extern u32 fn_8017B2CC();
 extern u32 fn_8017B3E4();
@@ -2408,19 +2408,19 @@ void fn_8003AFDC(u8* context, PdaSprite* sprite)
             fn_80109B90((u8*)&lbl_803A6748 + 0x4C, 0) == 0) {
             texture = menuModelRender((u8*)&lbl_803A6748 + 0x4C);
             if (texture != 0) {
-                fn_800D88DC(3);
-                fn_800D888C(4);
-                fn_800D6A00(7);
-                fn_800D7820(lbl_80314F98);
-                fn_800D85D4(0, texture);
-                fn_800D67BC(2);
+                gfxSetFlags(3);
+                gfxClearFlags(4);
+                gfxSetPrimitive(7);
+                gfxSetVtxDesc(lbl_80314F98);
+                gfxLoadTexture(0, texture);
+                gfxBegin(2);
                 fn_800D61E4(0, 0);
                 fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-                fn_800D59B8(0, lbl_8047BAC4, lbl_8047BAC4);
+                gfxVtxTexCoord(0, lbl_8047BAC4, lbl_8047BAC4);
                 fn_800D61E4(sprite->x, sprite->y);
                 fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-                fn_800D59B8(0, lbl_8047BAC8, lbl_8047BAC8);
-                fn_800D6728();
+                gfxVtxTexCoord(0, lbl_8047BAC8, lbl_8047BAC8);
+                gfxEnd();
             }
         }
         break;
@@ -2504,36 +2504,36 @@ void fn_800492CC(u8* context, PdaSprite* sprite)
     }
     alpha = lbl_8047BCA0 * *(f32*)((u8*)&lbl_803A6818 + 0x5C);
     if (firstTexture != 0) {
-        fn_800D88DC(3);
-        fn_800D888C(4);
-        fn_800D6A00(7);
-        fn_800D7820(lbl_80314F98);
-        fn_800D85D4(0, firstTexture);
-        fn_800D67BC(2);
+        gfxSetFlags(3);
+        gfxClearFlags(4);
+        gfxSetPrimitive(7);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxLoadTexture(0, firstTexture);
+        gfxBegin(2);
         fn_800D61E4(lbl_804788C8[0], lbl_804788C8[1]);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-        fn_800D59B8(0, lbl_8047BC94, lbl_8047BC94);
+        gfxVtxTexCoord(0, lbl_8047BC94, lbl_8047BC94);
         fn_800D61E4(lbl_804788C8[0] + sprite->x,
                      lbl_804788C8[1] + sprite->y);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-        fn_800D59B8(0, lbl_8047BCBC, lbl_8047BCBC);
-        fn_800D6728();
+        gfxVtxTexCoord(0, lbl_8047BCBC, lbl_8047BCBC);
+        gfxEnd();
     }
     if (secondTexture != 0) {
-        fn_800D88DC(3);
-        fn_800D888C(4);
-        fn_800D6A00(7);
-        fn_800D7820(lbl_80314F98);
-        fn_800D85D4(0, secondTexture);
-        fn_800D67BC(2);
+        gfxSetFlags(3);
+        gfxClearFlags(4);
+        gfxSetPrimitive(7);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxLoadTexture(0, secondTexture);
+        gfxBegin(2);
         fn_800D61E4(lbl_804788C8[0], lbl_804788C8[1]);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-        fn_800D59B8(0, lbl_8047BC94, lbl_8047BC94);
+        gfxVtxTexCoord(0, lbl_8047BC94, lbl_8047BC94);
         fn_800D61E4(lbl_804788C8[0] + sprite->x,
                      lbl_804788C8[1] + sprite->y);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-        fn_800D59B8(0, lbl_8047BCBC, lbl_8047BCBC);
-        fn_800D6728();
+        gfxVtxTexCoord(0, lbl_8047BCBC, lbl_8047BCBC);
+        gfxEnd();
     }
 }
 #pragma peephole reset
@@ -2638,18 +2638,18 @@ void fn_80040018(u8* menu)
         buttons = *(u16*)(keyInfo + 4);
         if (lbl_804788C0 != 0) {
             if (buttons & 0x10) {
-                fn_80166AB8(0x24, 0, 0);
+                soundStartRaw(0x24, 0, 0);
                 menu[0x98] = 1;
                 *(s32*)(scene + 0x18) = 0;
             }
             if (buttons & 0x40) {
-                fn_80166AB8(0x24, 0, 0);
+                soundStartRaw(0x24, 0, 0);
                 menu[0x98] = 1;
                 *(s32*)(scene + 0x18) = 1;
             }
         }
         if (buttons & 0x20) {
-            fn_80166AB8(0x25, 0, 0);
+            soundStartRaw(0x25, 0, 0);
             *(s32*)(scene + 0x18) = -1;
             menu[0x98] = 1;
             menu[0x99] = 1;
@@ -3063,14 +3063,14 @@ u32 fn_80043728(u32 unused, s32 mode, u16 buttons)
     if ((buttons & 2) && total != 0 &&
         *(s32*)scene < (s32)total - 1) {
         *(s32*)scene += 1;
-        fn_80166AB8(0x23, 0, 0);
+        soundStartRaw(0x23, 0, 0);
         *(f32*)(scene + 0x38) -= lbl_8047BCF4;
         *(s32*)(scene + 8) += 1;
         *(s32*)(scene + 0xC) += 1;
     } else if ((buttons & 1) && total != 0 &&
                *(s32*)scene > 0) {
         *(s32*)scene -= 1;
-        fn_80166AB8(0x23, 0, 0);
+        soundStartRaw(0x23, 0, 0);
         *(f32*)(scene + 0x38) += lbl_8047BCF4;
         *(s32*)(scene + 8) -= 1;
         *(s32*)(scene + 0xC) -= 1;
@@ -3091,7 +3091,7 @@ u32 fn_80043728(u32 unused, s32 mode, u16 buttons)
             *(f32*)(scene + 0x38) -= lbl_8047BCF8;
             *(s32*)(scene + 8) += 10;
             *(s32*)(scene + 0xC) += 10;
-            fn_80166AB8(0x23, 0, 0);
+            soundStartRaw(0x23, 0, 0);
         }
     } else if ((buttons & 4) && mode == 0 && total != 0) {
         selected = *(s32*)scene;
@@ -3113,7 +3113,7 @@ u32 fn_80043728(u32 unused, s32 mode, u16 buttons)
             *(f32*)(scene + 0x38) += lbl_8047BCF8;
             *(s32*)(scene + 8) -= 10;
             *(s32*)(scene + 0xC) -= 10;
-            fn_80166AB8(0x23, 0, 0);
+            soundStartRaw(0x23, 0, 0);
         }
     }
     return 0;
@@ -3248,19 +3248,19 @@ void fn_80037180(u32 unused, u8* p) {
         fn_80132A38(0x2f, fn_801EF274());
         fn_80132A38(0x30, fn_801EF214());
         if ((result = menuModelRender(lbl_803A6498)) != 0) {
-            fn_800D88DC(3);
-            fn_800D888C(4);
-            fn_800D6A00(7);
-            fn_800D7820(lbl_80314F98);
-            fn_800D85D4(0, result);
-            fn_800D67BC(2);
+            gfxSetFlags(3);
+            gfxClearFlags(4);
+            gfxSetPrimitive(7);
+            gfxSetVtxDesc(lbl_80314F98);
+            gfxLoadTexture(0, result);
+            gfxBegin(2);
             fn_800D61E4(0, 0);
             fn_800D5CB8(0, 0xff, 0xff, 0xff, 0xff);
-            fn_800D59B8(0, lbl_8047BA58, lbl_8047BA58);
+            gfxVtxTexCoord(0, lbl_8047BA58, lbl_8047BA58);
             fn_800D61E4(*(s16*)(p + 0x54), *(s16*)(p + 0x56));
             fn_800D5CB8(0, 0xff, 0xff, 0xff, 0xff);
-            fn_800D59B8(0, lbl_8047BA5C, lbl_8047BA5C);
-            fn_800D6728();
+            gfxVtxTexCoord(0, lbl_8047BA5C, lbl_8047BA5C);
+            gfxEnd();
         }
         break;
     default:
@@ -3572,11 +3572,11 @@ void fn_80044630(void) {
     extern void  fn_80048918(void);
     extern void  fn_80046168(void);
     extern void  fn_8004BDB8(s32 a, s32 b);
-    extern void* fn_801CBA0C(u32 id);
+    extern void* std112_modelGetResourceID(u32 id);
     extern void* GSresGetResource();
-    extern void* fn_80113F48(void);
-    extern void  fn_801CB9D8(void* h);
-    extern void  fn_801CB954(void* h, s32 b);
+    extern void* std093_getCurrentGroupID(void);
+    extern void  std113_mapObjectUnk_8018db68(void* h);
+    extern void  std114_mapObjectSetVisibility(void* h, s32 b);
     extern void  GSmodelSetVisibility(void* a, s32 b);
     extern void  GSmodelSetAnimRate(f32 v);
     extern void  GSmodelSet60fpsAnimFlag(void* h, s32 b);
@@ -3812,9 +3812,9 @@ void fn_80044630(void) {
             *(s32*)(S + 0x14) = 1;
             menuCloseCustom(0x35, 0, 1);
             h = *(void**)(S + 0x10C);
-            fn_801CB954(h, 0);
+            std114_mapObjectSetVisibility(h, 0);
             {
-                void* rv = GSresGetResource(fn_80113F48(), h);
+                void* rv = GSresGetResource(std093_getCurrentGroupID(), h);
                 if (rv != 0)
                     GSmodelSetVisibility(rv, 0);
             }
@@ -3828,16 +3828,16 @@ void fn_80044630(void) {
                 f32   pos[3];
                 f32   mtx[3];
 
-                fn_801CB9D8(h);
+                std113_mapObjectUnk_8018db68(h);
 
                 *(f32*)(S + 0x6C) = lbl_8047BC94;
                 *(f32*)(S + 0x70) = lbl_8047BC94;
                 *(f32*)(S + 0x74) = lbl_8047BC94;
                 *(f32*)(S + 0x64) = lbl_8047BCF0;
 
-                cam = fn_801CBA0C(0x0D181000);
+                cam = std112_modelGetResourceID(0x0D181000);
                 *(void**)(S + 0x10C) = cam;
-                *(void**)(S + 0x110) = GSresGetResource(fn_80113F48(), cam);
+                *(void**)(S + 0x110) = GSresGetResource(std093_getCurrentGroupID(), cam);
                 GSmodelSetAnimRate(lbl_8047BD18);
                 GSmodelSet60fpsAnimFlag(*(void**)(S + 0x110), 1);
                 GSmodelSetBoundCheck(*(void**)(S + 0x110), 0);
@@ -4030,22 +4030,22 @@ void fn_80044630(void) {
                 menuCloseCustom(0xA2, 0, 1);
 
                 h = *(void**)(S + 0x10C);
-                fn_801CB954(h, 0);
+                std114_mapObjectSetVisibility(h, 0);
                 {
-                    void* rv = GSresGetResource(fn_80113F48(), h);
+                    void* rv = GSresGetResource(std093_getCurrentGroupID(), h);
                     if (rv != 0)
                         GSmodelSetVisibility(rv, 0);
                 }
-                fn_801CB9D8(h);
+                std113_mapObjectUnk_8018db68(h);
 
                 *(f32*)(S + 0x6C) = lbl_8047BC94;
                 *(f32*)(S + 0x70) = lbl_8047BC94;
                 *(f32*)(S + 0x74) = lbl_8047BC94;
                 *(f32*)(S + 0x64) = lbl_8047BCF0;
 
-                h = fn_801CBA0C(0x0D171000);
+                h = std112_modelGetResourceID(0x0D171000);
                 *(void**)(S + 0x10C) = h;
-                *(void**)(S + 0x110) = GSresGetResource(fn_80113F48(), h);
+                *(void**)(S + 0x110) = GSresGetResource(std093_getCurrentGroupID(), h);
                 GSmodelSetAnimRate(lbl_8047BD18);
 
                 ((u32*)mtx)[0] = ((const u32*)tbl)[0];
@@ -4208,23 +4208,23 @@ void fn_80044630(void) {
             menuCloseCustom(0xa2, 0, 1);
 
             h = *(void**)(S + 0x10C);
-            fn_801CB954(h, 0);
+            std114_mapObjectSetVisibility(h, 0);
             {
-                void* rv = GSresGetResource(fn_80113F48(), h);
+                void* rv = GSresGetResource(std093_getCurrentGroupID(), h);
                 if (rv != 0)
                     GSmodelSetVisibility(rv, 0);
             }
 
             /* .L_800453AC camera-setup */
-            fn_801CB9D8(h);
+            std113_mapObjectUnk_8018db68(h);
             *(f32*)(S + 0x6C) = lbl_8047BC94;
             *(f32*)(S + 0x70) = lbl_8047BC94;
             *(f32*)(S + 0x74) = lbl_8047BC94;
             *(f32*)(S + 0x64) = lbl_8047BCF0;
 
-            h = fn_801CBA0C(0x0D171000);
+            h = std112_modelGetResourceID(0x0D171000);
             *(void**)(S + 0x10C) = h;
-            *(void**)(S + 0x110) = GSresGetResource(fn_80113F48(), h);
+            *(void**)(S + 0x110) = GSresGetResource(std093_getCurrentGroupID(), h);
             GSmodelSetAnimRate(lbl_8047BD18);
 
             ((u32*)mtx)[0] = ((const u32*)tbl)[0];
@@ -4379,9 +4379,9 @@ void fn_80044630(void) {
             menuCloseCustom(0x96, 0, 1);
             menuCloseCustom(0xA2, 0, 1);
             h = *(void**)(S + 0x10C);
-            fn_801CB954(h, 0);
+            std114_mapObjectSetVisibility(h, 0);
             {
-                void* rv = GSresGetResource(fn_80113F48(), h);
+                void* rv = GSresGetResource(std093_getCurrentGroupID(), h);
                 if (rv != 0)
                     GSmodelSetVisibility(rv, 0);
             }
@@ -4394,17 +4394,17 @@ void fn_80044630(void) {
                 f32 pos[3];
                 f32 mtx[3];
 
-                fn_801CB9D8(h);
+                std113_mapObjectUnk_8018db68(h);
 
                 *(f32*)(S + 0x6C) = lbl_8047BC94;
                 *(f32*)(S + 0x70) = lbl_8047BC94;
                 *(f32*)(S + 0x74) = lbl_8047BC94;
                 *(f32*)(S + 0x64) = lbl_8047BCF0;
 
-                h = fn_801CBA0C(0x0D171000);
+                h = std112_modelGetResourceID(0x0D171000);
                 *(void**)(S + 0x10C) = h;
 
-                *(void**)(S + 0x110) = GSresGetResource(fn_80113F48(), h);
+                *(void**)(S + 0x110) = GSresGetResource(std093_getCurrentGroupID(), h);
                 GSmodelSetAnimRate(lbl_8047BD18);
 
                 ((u32*)mtx)[0] = ((const u32*)tbl)[0];
@@ -4873,22 +4873,22 @@ void fn_80044630(void) {
 
     /* === EXIT / cleanup epilogue (.L_80046054 fall-through .. blr) === */
     h = *(void**)(S + 0x10C);
-    fn_801CB954(h, 0);
+    std114_mapObjectSetVisibility(h, 0);
     {
-        void* rv = GSresGetResource(fn_80113F48(), h);
+        void* rv = GSresGetResource(std093_getCurrentGroupID(), h);
         if (rv != 0)
             GSmodelSetVisibility(rv, 0);
     }
-    fn_801CB9D8(h);
+    std113_mapObjectUnk_8018db68(h);
 
         h = *(void**)((u8*)&lbl_803A6818 + 0x150);
-    fn_801CB954(h, 0);
+    std114_mapObjectSetVisibility(h, 0);
     {
-        void* rv = GSresGetResource(fn_80113F48(), h);
+        void* rv = GSresGetResource(std093_getCurrentGroupID(), h);
         if (rv != 0)
             GSmodelSetVisibility(rv, 0);
     }
-    fn_801CB9D8(h);
+    std113_mapObjectUnk_8018db68(h);
 
     if (lbl_8047A4E0 != 0) {
         h = (void*)fn_800E202C(lbl_8047A4E0);
@@ -5292,7 +5292,7 @@ void fn_800439BC(void* scene)
     extern s8 fn_800F7A08(s32 chan, s32 index);
     extern s8 fn_800F7A7C(s32 chan, s32 index);
     extern u32 fn_800F7BC4(s32 chan);
-    extern s8 fn_800D3088(void);
+    extern s8 msgGetCharsPerFrame(void);
     extern f64 atan2(f64 y, f64 x);
     s8 x;
     s8 y;
@@ -5368,7 +5368,7 @@ void fn_800439BC(void* scene)
             work[i + 0xa] = 15;
             trig |= mask;
         } else if ((buttons & mask) != 0) {
-            work[i + 0xa] -= fn_800D3088();
+            work[i + 0xa] -= msgGetCharsPerFrame();
             if ((s8)work[i + 0xa] <= 0) {
                 work[i + 0xa] = lbl_804788C4;
                 trig |= mask;
@@ -5944,19 +5944,19 @@ void fn_800473E0(PdaOrbitPoint* point)
     for (i = 0; i < *(s32*)(p + 0x18) - 1; i++) {
         GSvecCopy(&v0, (u8*)*(void**)((u8*)spline + 0xc) + off);
         GSvecCopy(&v1, (u8*)*(void**)((u8*)spline + 0xc) + (i + 1) * 0xc);
-        fn_800D88DC(1);
-        fn_800D888C(6);
-        fn_800D7820(lbl_80314E08);
-        fn_800D6A00(1);
+        gfxSetFlags(1);
+        gfxClearFlags(6);
+        gfxSetVtxDesc(lbl_80314E08);
+        gfxSetPrimitive(1);
         fn_800D5648(lbl_8047BCA8);
-        fn_800D67BC(2);
+        gfxBegin(2);
         fn_800D61E4((s32)(lbl_8047BD24 + v0.x),
                     (s32)(lbl_8047BD2C * v0.y + lbl_8047BD28));
         fn_800D5BA0(0, (u8)(s32)v0.z | 0x361e0500);
         fn_800D61E4((s32)(lbl_8047BD24 + v1.x),
                     (s32)(lbl_8047BD2C * v1.y + lbl_8047BD28));
         fn_800D5BA0(0, (u8)(s32)v1.z | 0x361e0500);
-        fn_800D6728();
+        gfxEnd();
         fn_800D5648(lbl_8047BCBC);
         off += 0xc;
     }
@@ -6901,7 +6901,7 @@ static inline void pdaRamp(f32* cur, f32 dst, f32 rate)
 #pragma peephole on
 s32 fn_80041E48(void* work, s32 mode)
 {
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern s32 fn_800D37CC(void);
     u16 keys;
     u8* S = (u8*)&lbl_803A6818;
@@ -6913,7 +6913,7 @@ s32 fn_80041E48(void* work, s32 mode)
     (void)work;
     (void)mode;
     keys = *(u16*)(lbl_803A67FC + 6);
-    dt = (f32)fn_800D3088() / (f32)fn_800D37CC();
+    dt = (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     *(f32*)(S + 0x3c) = dt;
     *(f32*)(S + 0x40) = *(f32*)(S + 0x40) + dt;
     if (*(f32*)(S + 0x40) >= lbl_8047BCBC) {
@@ -6967,12 +6967,12 @@ s32 fn_80041E48(void* work, s32 mode)
         if (*(s8*)(S + 0x15d) == 2) {
             if ((keys & 0x4) != 0) {
                 if (*(s8*)(S + 0x15e) != 0) {
-                    fn_80166AB8(0x23, 0, 0);
+                    soundStartRaw(0x23, 0, 0);
                 }
                 *(s8*)(S + 0x15e) = 0;
             } else if ((keys & 0x8) != 0) {
                 if (*(s8*)(S + 0x15e) == 0) {
-                    fn_80166AB8(0x23, 0, 0);
+                    soundStartRaw(0x23, 0, 0);
                 }
                 *(s8*)(S + 0x15e) = 1;
             }
@@ -6984,13 +6984,13 @@ s32 fn_80041E48(void* work, s32 mode)
                 return 0;
             }
             *(s8*)(S + 0x15d) = *(s8*)(S + 0x15d) + 1;
-            fn_80166AB8(0x23, 0, 0);
+            soundStartRaw(0x23, 0, 0);
         } else if ((keys & 0x1) != 0) {
             if (*(s8*)(S + 0x15d) <= 0) {
                 return 0;
             }
             *(s8*)(S + 0x15d) = *(s8*)(S + 0x15d) - 1;
-            fn_80166AB8(0x23, 0, 0);
+            soundStartRaw(0x23, 0, 0);
         }
         return 0;
     }
@@ -6998,7 +6998,7 @@ s32 fn_80041E48(void* work, s32 mode)
     if ((keys & 0x2) != 0) {
         if (*(s8*)(S + 0x15f) < *(s8*)(S + 0x160) - 1) {
             *(s8*)(S + 0x15f) = *(s8*)(S + 0x15f) + 1;
-            fn_80166AB8(0x23, 0, 0);
+            soundStartRaw(0x23, 0, 0);
         }
         if (*(s8*)(S + 0x15f) >= *(s8*)(S + 0x1c9)) {
             *(f32*)(S + 0x1d8) = *(f32*)(S + 0x1d8) - lbl_8047BCAC;
@@ -7008,7 +7008,7 @@ s32 fn_80041E48(void* work, s32 mode)
     } else if ((keys & 0x1) != 0) {
         if (*(s8*)(S + 0x15f) > 0) {
             *(s8*)(S + 0x15f) = *(s8*)(S + 0x15f) - 1;
-            fn_80166AB8(0x23, 0, 0);
+            soundStartRaw(0x23, 0, 0);
         }
         if (*(s8*)(S + 0x15f) < *(s8*)(S + 0x1c8)) {
             *(f32*)(S + 0x1d8) = *(f32*)(S + 0x1d8) + lbl_8047BCAC;
@@ -7101,7 +7101,7 @@ static inline void pdaCloseLevelWindows(u8* S)
 #pragma peephole off
 s32 fn_80042658(void* work, s32 mode)
 {
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern s32 fn_800D37CC(void);
     u8* K = lbl_803A67FC;
     PdaVec3 spin;
@@ -7134,7 +7134,7 @@ s32 fn_80042658(void* work, s32 mode)
     if ((*(u16*)K & 3) != 0) {
         held = 1;
     }
-    dt = (f32)fn_800D3088() / (f32)fn_800D37CC();
+    dt = (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     *(f32*)((u8*)&lbl_803A6818 + 0x3c) = dt;
     *(f32*)((u8*)&lbl_803A6818 + 0x40) = *(f32*)((u8*)&lbl_803A6818 + 0x40) + dt;
     if (*(f32*)((u8*)&lbl_803A6818 + 0x40) >= lbl_8047BCBC) {
@@ -7260,7 +7260,7 @@ s32 fn_80042658(void* work, s32 mode)
                     pdaCloseLevelWindows((u8*)&lbl_803A6818);
                     *(s32*)((u8*)&lbl_803A6818 + 0x28) =
                         *(s32*)((u8*)&lbl_803A6818 + 0x28) - 1;
-                    fn_80166AB8(0x23, 0, 0);
+                    soundStartRaw(0x23, 0, 0);
                     pdaPopLevel((u8*)&lbl_803A6818);
                 }
             }
@@ -7271,7 +7271,7 @@ s32 fn_80042658(void* work, s32 mode)
                     pdaCloseLevelWindows((u8*)&lbl_803A6818);
                     *(s32*)((u8*)&lbl_803A6818 + 0x28) =
                         *(s32*)((u8*)&lbl_803A6818 + 0x28) + 1;
-                    fn_80166AB8(0x23, 0, 0);
+                    soundStartRaw(0x23, 0, 0);
                     pdaPopLevel((u8*)&lbl_803A6818);
                 }
             }
@@ -7321,10 +7321,10 @@ typedef struct PdaCamBlock {
 extern f32 lbl_8047BCCC;
 extern const f32 lbl_80267150[];
 extern void menuOffScreenSetDisp(s32 disp);
-extern void fn_801CB954(void* h, s32 b);
-extern void fn_801CB9D8(void* h);
-extern void* fn_801CBA0C(u32 id);
-extern void* fn_80113F48(void);
+extern void std114_mapObjectSetVisibility(void* h, s32 b);
+extern void std113_mapObjectUnk_8018db68(void* h);
+extern void* std112_modelGetResourceID(u32 id);
+extern void* std093_getCurrentGroupID(void);
 extern void* GSresGetResource(u32 group, u32 id);
 extern void GSmodelSetVisibility(void* model, s32 vis);
 extern void GSmodelSetAnimRate(void* model, f32 rate);
@@ -7364,19 +7364,19 @@ void fn_80048918(void)
     *(s32*)((u8*)&lbl_803A6818 + 0x110) = 0;
     *(s32*)((u8*)&lbl_803A6818 + 0x114) = 0;
     *(s32*)((u8*)&lbl_803A6818 + 0x10c) = 0;
-    fn_801CB954(NULL, 0);
-    res = GSresGetResource((u32)fn_80113F48(), 0);
+    std114_mapObjectSetVisibility(NULL, 0);
+    res = GSresGetResource((u32)std093_getCurrentGroupID(), 0);
     if (res != NULL) {
         GSmodelSetVisibility(res, 0);
     }
-    fn_801CB9D8(NULL);
+    std113_mapObjectUnk_8018db68(NULL);
     *(f32*)((u8*)&lbl_803A6818 + 0x6c) = lbl_8047BC94;
     *(f32*)((u8*)&lbl_803A6818 + 0x70) = lbl_8047BC94;
     *(f32*)((u8*)&lbl_803A6818 + 0x74) = lbl_8047BC94;
     *(f32*)((u8*)&lbl_803A6818 + 0x64) = lbl_8047BCF0;
-    anim = fn_801CBA0C(0xd171000);
+    anim = std112_modelGetResourceID(0xd171000);
     *(void**)((u8*)&lbl_803A6818 + 0x10c) = anim;
-    res = GSresGetResource((u32)fn_80113F48(), (u32)anim);
+    res = GSresGetResource((u32)std093_getCurrentGroupID(), (u32)anim);
     *(void**)((u8*)&lbl_803A6818 + 0x110) = res;
     GSmodelSetAnimRate(res, lbl_8047BD18);
     blk = *tbl;
@@ -7631,7 +7631,7 @@ void fn_80040308(void* menu)
                        menuDataBiosGetPtr(*(s32*)((u8*)menu + 4))) +
                    4);
     if ((keys & 0x10) != 0) {
-        fn_80166AB8(0x24, 0, 0);
+        soundStartRaw(0x24, 0, 0);
         page = *(s8*)(L + 9);
         if (page == 4) {
             switch (*(s32*)(L + 0x90)) {
@@ -7777,7 +7777,7 @@ void fn_80040308(void* menu)
         }
     }
     if ((keys & 0x20) != 0) {
-        fn_80166AB8(0x25, 0, 0);
+        soundStartRaw(0x25, 0, 0);
         switch (*(s32*)L) {
         case 0:
             if (lbl_8047BCCC == *(f32*)(L + 0x88)) {
@@ -7858,7 +7858,7 @@ extern u32 lbl_8047A4EC;
 extern f32 lbl_8047BD1C;
 extern u16 pokemonDataBiosGetVoice(void* data);
 extern void* pokemonNakigoeDataBiosGetDataAddress(void* data);
-extern s32 fn_801666BC(u32 voice);
+extern s32 soundGetStatus(u32 voice);
 extern u32 fn_800F7AF0(s32 chan);
 extern s32 menuOpen(s32 id, s32 flag);
 
@@ -7959,7 +7959,7 @@ void fn_80046168(void)
                 if (pdaEntrySeen() != 0) {
                     menuOpen(0x3e, 0);
                     voice = pdaCurrentVoice();
-                    fn_80166AB8(voice, 0, 0);
+                    soundStartRaw(voice, 0, 0);
                     pdaPushCry(pdaCurrentCry(), voice);
                     *(s32*)(S + 0x20) = 1;
                 }
@@ -7978,7 +7978,7 @@ void fn_80046168(void)
             playing = 0;
             for (i = 0; i < 8; i++) {
                 if (t[i].data != NULL) {
-                    switch (fn_801666BC(t[i].voice)) {
+                    switch (soundGetStatus(t[i].voice)) {
                     case 0:
                         break;
                     case 2:
@@ -8022,7 +8022,7 @@ void fn_80046168(void)
             } else {
                 if ((fn_800F7BC4(1) & fn_800F7AF0(1) & 0x100) != 0) {
                     voice = pdaCurrentVoice();
-                    fn_80166AB8(voice, 0, 0);
+                    soundStartRaw(voice, 0, 0);
                     pdaPushCry(pdaCurrentCry(), voice);
                 }
                 if ((fn_800F7BC4(1) & fn_800F7AF0(1) & 0x200) != 0) {
@@ -8114,11 +8114,11 @@ s32 fn_800495C8(void* work, PdaSprite* sprite)
         *(f32*)(G + 0x2c) = lbl_8047BDA0;
     }
 
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D7820(lbl_80314E08);
-    fn_800D6A00(4);
-    fn_800D67BC(4);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetVtxDesc(lbl_80314E08);
+    gfxSetPrimitive(4);
+    gfxBegin(4);
     alpha = (s32)(lbl_8047BDB0 * *(f32*)(G + 0x28));
     fn_800D61E4(0, 0);
     color = (u8)alpha | 0x03140e00;
@@ -8129,20 +8129,20 @@ s32 fn_800495C8(void* work, PdaSprite* sprite)
     fn_800D5BA0(0, color);
     fn_800D61E4(sprite->x, sprite->y);
     fn_800D5BA0(0, color);
-    fn_800D6728();
+    gfxEnd();
 
     for (i = 0; i < 0x1e0; i += 4) {
-        fn_800D88DC(1);
-        fn_800D888C(6);
-        fn_800D7820(lbl_80314E08);
-        fn_800D6A00(1);
+        gfxSetFlags(1);
+        gfxClearFlags(6);
+        gfxSetVtxDesc(lbl_80314E08);
+        gfxSetPrimitive(1);
         fn_800D5648(lbl_8047BDA0);
-        fn_800D67BC(2);
+        gfxBegin(2);
         fn_800D61E4(0, (s16)i);
         fn_800D5BA0(0, 0x00800080);
         fn_800D61E4(sprite->x, (s16)i);
         fn_800D5BA0(0, 0x00800080);
-        fn_800D6728();
+        gfxEnd();
     }
 
     top = **(f32**)(data + 8);
@@ -8159,18 +8159,18 @@ s32 fn_800495C8(void* work, PdaSprite* sprite)
             y = y + kOne;
         }
         row = (s32)(kScale * y);
-        fn_800D88DC(1);
-        fn_800D888C(6);
-        fn_800D7820(lbl_80314E08);
-        fn_800D6A00(1);
+        gfxSetFlags(1);
+        gfxClearFlags(6);
+        gfxSetVtxDesc(lbl_80314E08);
+        gfxSetPrimitive(1);
         fn_800D5648(lbl_8047BDA0);
-        fn_800D67BC(2);
+        gfxBegin(2);
         fn_800D61E4(0, row);
         color = (u8)alpha | 0x00800000;
         fn_800D5BA0(0, color);
         fn_800D61E4(sprite->x, row);
         fn_800D5BA0(0, color);
-        fn_800D6728();
+        gfxEnd();
     }
     return 0;
 }
@@ -8180,14 +8180,14 @@ extern f32 lbl_8047BDD8;
 extern f32 lbl_8047BDDC;
 extern f32 lbl_8047BDE0;
 extern f32 lbl_8047BDE4;
-extern u8 fn_801902E0(s32 id);
+extern u8 std081_flagCheckTrue(s32 id);
 extern void menuItemBiosSetSelectFlag(s32 id, s32 flag);
 
 /* Per-frame timing, scroll easing and page-flip for the mail list. */
 #pragma peephole off
 s32 fn_8004B278(u8* work)
 {
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern s32 fn_800D37CC(void);
     u8* data;
     f32 delta;
@@ -8196,8 +8196,8 @@ s32 fn_8004B278(u8* work)
     f32* p;
 
     data = *(u8**)(work + 0x60);
-    *(f32*)((u8*)&lbl_803A6A60 + 8) = (f32)fn_800D3088() / (f32)fn_800D37CC();
-    if (fn_801902E0(0x3f0) != 0) {
+    *(f32*)((u8*)&lbl_803A6A60 + 8) = (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
+    if (std081_flagCheckTrue(0x3f0) != 0) {
         menuItemBiosSetSelectFlag(0x438, 1);
     } else {
         menuItemBiosSetSelectFlag(0x438, 0);
@@ -8326,7 +8326,7 @@ void fn_8004A47C(void)
     topWide[1] = lbl_8047BD7C;
     topNarrow[0] = lbl_8047BD80;
     topNarrow[1] = lbl_8047BD84;
-    if (fn_801902E0(0x3f0) != 0) {
+    if (std081_flagCheckTrue(0x3f0) != 0) {
         *(s16*)(lbl_802EF0A8 + 0x7608) = topWide[0].x - 6;
         *(s16*)(lbl_802EF0A8 + 0x7624) = topWide[0].y - 6;
         *(s16*)(lbl_802EF0A8 + 0x7640) = topWide[1].x - 6;
@@ -8340,7 +8340,7 @@ void fn_8004A47C(void)
 
     wide = lbl_8026719C;
     narrow = lbl_802671B4;
-    if (fn_801902E0(0x3f0) != 0) {
+    if (std081_flagCheckTrue(0x3f0) != 0) {
         *(s16*)(lbl_802EF0A8 + 0xc148) = wide.v[0];
         *(s16*)(lbl_802EF0A8 + 0xc164) = wide.v[1];
         *(s16*)(lbl_802EF0A8 + 0xc180) = wide.v[2];
@@ -8372,7 +8372,7 @@ void fn_8004A47C(void)
     botWide[1] = lbl_8047BD8C;
     botNarrow[0] = lbl_8047BD90;
     botNarrow[1] = lbl_8047BD94;
-    if (fn_801902E0(0x3f0) != 0) {
+    if (std081_flagCheckTrue(0x3f0) != 0) {
         *(s16*)(lbl_802EF0A8 + 0xc0d8) = botWide[0].x - 6;
         *(s16*)(lbl_802EF0A8 + 0xc0f4) = botWide[0].y - 6;
         *(s16*)(lbl_802EF0A8 + 0xc110) = botWide[1].x - 6;
@@ -8470,7 +8470,7 @@ s32 fn_800499BC(void* work, PdaSprite* sprite)
         }
         break;
     case 0x438:
-        if (fn_801902E0(0x3f0) != 0) {
+        if (std081_flagCheckTrue(0x3f0) != 0) {
             sprite->flags |= 2;
         } else {
             sprite->flags &= ~2;
@@ -8483,7 +8483,7 @@ s32 fn_800499BC(void* work, PdaSprite* sprite)
     case 0x43a:
         *(s32*)(lbl_803A6A60 + 0x24) = GSmsgGetRect(sprite->messageId) >> 16;
         cursor = menuGetCursorItemID(*(s32*)((u8*)work + 4));
-        if (fn_801902E0(0x3f0) != 0) {
+        if (std081_flagCheckTrue(0x3f0) != 0) {
             switch (cursor) {
             case 0x437:
                 lbl_803A6A60[0] = 0;
@@ -8690,7 +8690,7 @@ s32 fn_800499BC(void* work, PdaSprite* sprite)
                       0xa8);
         }
         if (sprite->eventId == 0x6e4) {
-            if (fn_801902E0(0x3f0) != 0) {
+            if (std081_flagCheckTrue(0x3f0) != 0) {
                 sprite->flags |= 2;
             } else {
                 sprite->flags &= ~2;
@@ -9044,7 +9044,7 @@ extern void pokemonBiosSetDp(u32 work, s32 dp);
 #pragma peephole off
 s32 fn_8003B85C(void* window, s32 enabled)
 {
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern s32 fn_800D37CC(void);
     u16* keys;
     s32 prevIndex;
@@ -9065,7 +9065,7 @@ s32 fn_8003B85C(void* window, s32 enabled)
     keys = windowGetKeyInfo(window);
     held = 0;
     prevIndex = *(s32*)&lbl_803A6748;
-    dt = (f32)fn_800D3088() / (f32)fn_800D37CC();
+    dt = (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     *(f32*)((u8*)&lbl_803A6748 + 0x24) = dt;
     *(f32*)((u8*)&lbl_803A6748 + 0x28) = *(f32*)((u8*)&lbl_803A6748 + 0x28) + dt;
     if (*(f32*)((u8*)&lbl_803A6748 + 0x28) >= lbl_8047BAC8) {
@@ -9182,7 +9182,7 @@ s32 fn_8003B85C(void* window, s32 enabled)
                     fn_801EEDEC(lbl_8047A4D4[*(s32*)&lbl_803A6748].battleId, 0);
                 }
                 *(s32*)&lbl_803A6748 = *(s32*)&lbl_803A6748 + 1;
-                fn_80166AB8(0x23, 0, 0);
+                soundStartRaw(0x23, 0, 0);
             }
             if (*(s32*)&lbl_803A6748 >= *(s32*)((u8*)&lbl_803A6748 + 0xc)) {
                 *(f32*)((u8*)&lbl_803A6748 + 0x20) = *(f32*)((u8*)&lbl_803A6748 + 0x20) - lbl_8047BAD8;
@@ -9197,7 +9197,7 @@ s32 fn_8003B85C(void* window, s32 enabled)
                 fn_801EEDEC(lbl_8047A4D4[*(s32*)&lbl_803A6748].battleId, 0);
             }
             *(s32*)&lbl_803A6748 = *(s32*)&lbl_803A6748 - 1;
-            fn_80166AB8(0x23, 0, 0);
+            soundStartRaw(0x23, 0, 0);
         }
         if (*(s32*)&lbl_803A6748 < *(s32*)((u8*)&lbl_803A6748 + 0x8)) {
             *(f32*)((u8*)&lbl_803A6748 + 0x20) = *(f32*)((u8*)&lbl_803A6748 + 0x20) + lbl_8047BAD8;
@@ -9343,7 +9343,7 @@ void fn_8003C7C0(void)
             if (menuOpen(0x32, 1) >= 0) {
                 if (*(s32*)((u8*)&lbl_803A6748 + 0x10) != 0) {
                     state = 2;
-                    fn_80166AB8(0x24, 0, 0);
+                    soundStartRaw(0x24, 0, 0);
                     work = lbl_8047A4D0;
                     idx = *(s32*)&lbl_803A6748;
                     entry = lbl_8047A4D4[(u16)idx].battleId;
@@ -9419,7 +9419,7 @@ void fn_8003C7C0(void)
             menuOpen(0x33, 0);
             if (menuOpen(0x34, 1) < 0) {
                 state = 4;
-                fn_80166AB8(0x25, 0, 0);
+                soundStartRaw(0x25, 0, 0);
                 *(f32*)((u8*)&lbl_803A6748 + 0x48) = lbl_8047BAC4;
             }
             break;

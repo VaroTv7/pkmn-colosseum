@@ -11,6 +11,6 @@ extern const char lbl_80274E5C[];
 void MObjSetupTev(HSD_MObj* mobj, HSD_TObj* tobj, u32 rendermode)
 {
     MOBJ_ASSERT(798, mobj->tevdesc, lbl_80274E5C);
-    fn_801B45A4(mobj->tevdesc, mobj->texp);
+    HSD_TExpSetupTev(mobj->tevdesc, mobj->texp);
     HSD_TObjSetupVolatileTev(tobj, rendermode);
 }

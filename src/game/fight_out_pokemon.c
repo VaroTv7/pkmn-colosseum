@@ -801,7 +801,7 @@ void fightOutPokemonSetMeetEnemyFightPokemonEnemySideAll(int r3,u32 r4)
 {
     extern s8 pokemonCheckFightOut();
     extern s8 pokemonCheckValid();
-    extern short fn_801EF634();
+    extern short std103_battleGetResult();
     extern u32 fightFloorGetStatus();
     extern u32 fightSideGetStatus();
     extern s8 fightTrainerCheckValid();
@@ -837,7 +837,7 @@ void fightOutPokemonSetMeetEnemyFightPokemonEnemySideAll(int r3,u32 r4)
           bVar1 = 0;
         }
         else {
-          sVar8 = fn_801EF634();
+          sVar8 = std103_battleGetResult();
           if (sVar8 == 1) {
             bVar1 = 0;
           }
@@ -847,7 +847,7 @@ void fightOutPokemonSetMeetEnemyFightPokemonEnemySideAll(int r3,u32 r4)
               bVar1 = 0;
             }
             else {
-              sVar8 = fn_801EF634();
+              sVar8 = std103_battleGetResult();
               if (sVar8 == 1) {
                 bVar1 = 0;
               }
@@ -908,7 +908,7 @@ void fightOutPokemonSetMeetEnemyFightPokemonEnemySideAll(int r3,u32 r4)
                 bVar1 = 0;
               }
               else {
-                sVar8 = fn_801EF634();
+                sVar8 = std103_battleGetResult();
                 if (sVar8 == 1) {
                   bVar1 = 0;
                 }
@@ -997,7 +997,7 @@ void fightOutPokemonSetMeetEnemyFightPokemonEnemySideAll(int r3,u32 r4)
             bVar1 = 0;
           }
           else {
-            sVar8 = fn_801EF634();
+            sVar8 = std103_battleGetResult();
             if (sVar8 == 1) {
               bVar1 = 0;
             }
@@ -1049,7 +1049,7 @@ void fightOutPokemonSetMeetEnemyFightPokemonEnemySideAll(int r3,u32 r4)
                 bVar1 = 0;
               }
               else {
-                sVar8 = fn_801EF634();
+                sVar8 = std103_battleGetResult();
                 if (sVar8 == 1) {
                   bVar1 = 0;
                 }
@@ -1131,7 +1131,7 @@ u32 fightOutPokemonCheckMeetEnemyFightPokemon(void* r3, void* r4)
 
 {
     extern u8 pokemonCheckValid();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
   u8 bVar1;
   u32 iVar2;
   u8 cVar5;
@@ -1147,7 +1147,7 @@ u32 fightOutPokemonCheckMeetEnemyFightPokemon(void* r3, void* r4)
       bVar1 = 0;
     }
     else {
-      sVar3 = fn_801EF634();
+      sVar3 = std103_battleGetResult();
       if (sVar3 == 1) {
         bVar1 = 0;
       }
@@ -1283,7 +1283,7 @@ u32 fightOutPokemonCheckFightActionSelect(void* r3,u8 r4)
     extern u8 fn_80121ADC();
     extern u8 pokemonCheckFightOut();
     extern u8 pokemonCheckValid();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern u32 fightTargetGetTragetPtrToRelativeHostSideFightTargetId();
     extern u32 fightFloorGetStatus();
     extern void fightWazaCreate();
@@ -1301,7 +1301,7 @@ u32 fightOutPokemonCheckFightActionSelect(void* r3,u8 r4)
 
   uVar5 = fightFloorGetStatus(0,0,0x14,0);
   if (r3 != 0) {
-    sVar6 = fn_801EF634();
+    sVar6 = std103_battleGetResult();
     if (sVar6 == 1) {
       bVar1 = 0;
     }
@@ -1311,7 +1311,7 @@ u32 fightOutPokemonCheckFightActionSelect(void* r3,u8 r4)
         bVar1 = 0;
       }
       else {
-        sVar6 = fn_801EF634();
+        sVar6 = std103_battleGetResult();
         if (sVar6 == 1) {
           bVar1 = 0;
         }
@@ -1372,7 +1372,7 @@ u32 fightOutPokemonCheckFightActionSelect(void* r3,u8 r4)
           bVar1 = 0;
         }
         else {
-          sVar6 = fn_801EF634();
+          sVar6 = std103_battleGetResult();
           if (sVar6 == 1) {
             bVar1 = 0;
           }
@@ -1574,7 +1574,7 @@ u8 fightOutPokemonCheckFightOut(void* r3)
 {
     extern u8 pokemonCheckFightOut();
     extern u8 pokemonCheckValid();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
   u32 bVar1;
   int iVar2;
   u16 sVar4;
@@ -1586,7 +1586,7 @@ u8 fightOutPokemonCheckFightOut(void* r3)
     uVar6 = 0;
   }
   else {
-    sVar4 = fn_801EF634();
+    sVar4 = std103_battleGetResult();
     if (sVar4 == 1) {
       bVar1 = 0;
     }
@@ -1596,7 +1596,7 @@ u8 fightOutPokemonCheckFightOut(void* r3)
         bVar1 = 0;
       }
       else {
-        sVar4 = fn_801EF634();
+        sVar4 = std103_battleGetResult();
         if (sVar4 == 1) {
           bVar1 = 0;
         }
@@ -1657,7 +1657,7 @@ u8 fightOutPokemonCheckFightOut(void* r3)
           uVar6 = 0;
         }
         else {
-          sVar4 = fn_801EF634();
+          sVar4 = std103_battleGetResult();
           if (sVar4 == 1) {
             bVar1 = 0;
           }
@@ -1746,7 +1746,7 @@ u32 fightPokemonCheckFightOut(void* r3)
 {
     extern u8 pokemonCheckFightOut(void*);
     extern u8 pokemonCheckValid();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
   u16 sVar2;
   void* iVar1;
   u8 cVar3;
@@ -1759,7 +1759,7 @@ u32 fightPokemonCheckFightOut(void* r3)
     bVar4 = 0;
   }
   else {
-    sVar2 = fn_801EF634();
+    sVar2 = std103_battleGetResult();
     if (sVar2 == 1) {
       bVar4 = 0;
     }
@@ -1827,7 +1827,7 @@ u32 fightPokemonCheckFightOut(void* r3)
 #pragma peephole on
 u8 fightOutPokemonCheckValid(void* p1) {
     extern u8 pokemonCheckValid();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     u16 sVar3;
     void* iVar1;
     void* iVar2;
@@ -1837,7 +1837,7 @@ u8 fightOutPokemonCheckValid(void* p1) {
     if (p1 == 0) {
         uVar5 = 0;
     } else {
-        sVar3 = fn_801EF634();
+        sVar3 = std103_battleGetResult();
         if (sVar3 == 1) {
             uVar5 = 0;
         } else {
@@ -1845,7 +1845,7 @@ u8 fightOutPokemonCheckValid(void* p1) {
             if (iVar1 == 0) {
                 uVar5 = 0;
             } else {
-                sVar3 = fn_801EF634();
+                sVar3 = std103_battleGetResult();
                 if (sVar3 == 1) {
                     uVar5 = 0;
                 } else {

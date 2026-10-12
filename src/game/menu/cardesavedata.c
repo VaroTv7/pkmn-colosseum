@@ -20,7 +20,7 @@ extern void fn_800932F0();
 extern void fn_800934E4();
 extern void fn_80093610();
 extern void fn_80093698();
-extern void fn_800D3088();
+extern void msgGetCharsPerFrame();
 extern void fn_800D37CC();
 extern void menuCloseCustom();
 extern s32 menuIsCheck();
@@ -83,8 +83,8 @@ extern void fn_800EC9DC(void*, f32);
 extern void fn_800EC990(void*);
 extern void fn_800ECB74(void*, u32);
 extern u8 fn_800EC960(void*);
-extern void fn_80166A28();
-extern u32 fn_801666BC();
+extern void soundStartSE();
+extern u32 soundGetStatus();
 
 extern void GScharLenCpy(void*, const void*, u32);
 extern u16 fn_800E2C04(u32, u32);
@@ -1878,7 +1878,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
     extern void msgctrlSetValue();
     extern u8 gamedataAttestBiosGetLangareaId(void*);
     extern u32 gamedataBiosGetGamedataAtttestPtr(void*);
-    extern void fn_80166A28();
+    extern void soundStartSE();
     extern void __assert();
     extern u8 jumptable_802EEB78[];
     u8 sp[0xBF0];
@@ -2026,7 +2026,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                 *(u32*)(sp + 0xC14) = tmp;
                 f0 = *(f64*)(sp + 0xC10);
                 f30 = f0 - f31;
-                r3 = ((u32 (*)(void))fn_800D3088)();
+                r3 = ((u32 (*)(void))msgGetCharsPerFrame)();
                 *(u32*)(sp + 0xC1C) = r3;
                 *(u32*)(sp + 0xC18) = r17;
                 f0 = *(f64*)(sp + 0xC18);
@@ -2155,7 +2155,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                     if ((s32)r15 < 0xf) goto L_80084EB4;
                 }
                 r3 = 0x26;
-                fn_80166A28();
+                soundStartSE();
                 r15 = 0x0;
                 tmp = *(u32*)((u8*)r24 + 0x0);
                 if ((s32)tmp != 7) {
@@ -2300,7 +2300,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                     if ((s32)r15 < 0xf) goto L_80085150;
                 }
                 r3 = 0x26;
-                fn_80166A28();
+                soundStartSE();
                 r15 = 0x0;
                 tmp = *(u32*)((u8*)r24 + 0x0);
                 if ((s32)tmp != 7) {
@@ -2449,7 +2449,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                 if ((s32)r15 < 0xf) goto L_800853EC;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r15 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -2548,7 +2548,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                 if ((s32)r20 < 0xf) goto L_800855B8;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r16 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -2674,7 +2674,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                 *(u32*)(sp + 0xC1C) = tmp;
                 f0 = *(f64*)(sp + 0xC18);
                 f29 = f0 - f28;
-                r3 = ((u32 (*)(void))fn_800D3088)();
+                r3 = ((u32 (*)(void))msgGetCharsPerFrame)();
                 *(u32*)(sp + 0xC14) = r3;
                 *(u32*)(sp + 0xC10) = r16;
                 f0 = *(f64*)(sp + 0xC10);
@@ -2769,7 +2769,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
             if ((s32)r15 < 0xf) goto L_80085978;
         }
         r3 = 0x26;
-        fn_80166A28();
+        soundStartSE();
         r15 = 0x0;
         tmp = *(u32*)((u8*)r24 + 0x0);
         if ((s32)tmp != 7) {
@@ -2871,7 +2871,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                 if ((s32)r20 < 0xf) goto L_80085B54;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r16 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -3044,7 +3044,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                 if ((s32)r20 < 0xf) goto L_80085E2C;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r16 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -3179,7 +3179,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
             if ((s32)r20 < 0xf) goto L_80086074;
         }
         r3 = 0x26;
-        fn_80166A28();
+        soundStartSE();
         r16 = 0x0;
         tmp = *(u32*)((u8*)r24 + 0x0);
         if ((s32)tmp != 7) {
@@ -3326,7 +3326,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                 if ((s32)r20 < 0xf) goto L_800862EC;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r16 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -3459,7 +3459,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                     if ((s32)r20 < 0xf) goto L_80086530;
                 }
                 r3 = 0x26;
-                fn_80166A28();
+                soundStartSE();
                 r16 = 0x0;
                 tmp = *(u32*)((u8*)r24 + 0x0);
                 if ((s32)tmp != 7) {
@@ -3735,7 +3735,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
             if ((s32)r15 < 0xf) goto L_800869C8;
         }
         r3 = 0x26;
-        fn_80166A28();
+        soundStartSE();
         r15 = 0x0;
         tmp = *(u32*)((u8*)r24 + 0x0);
         if ((s32)tmp != 7) {
@@ -3834,7 +3834,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
             if ((s32)r20 < 0xf) goto L_80086B94;
         }
         r3 = 0x26;
-        fn_80166A28();
+        soundStartSE();
         r16 = 0x0;
         tmp = *(u32*)((u8*)r24 + 0x0);
         if ((s32)tmp != 7) {
@@ -3968,7 +3968,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                 if ((s32)r20 < 0xf) goto L_80086DD8;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r16 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -4066,7 +4066,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
     do {
         fn_80093698(r28);
         r3 = 0x3cc;
-        fn_80166A28();
+        soundStartSE();
         tmp = 0x5;
         *(u32*)(r24 + r27) = tmp;
         r3 = ((u8 (*)(void))menuGetEnablePort)();
@@ -4139,7 +4139,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                     if ((s32)r15 < 0xf) goto L_800870D4;
                 }
                 r3 = 0x26;
-                fn_80166A28();
+                soundStartSE();
                 r15 = 0x0;
                 tmp = *(u32*)((u8*)r24 + 0x0);
                 if ((s32)tmp != 7) {
@@ -4250,7 +4250,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                 if ((s32)r15 < 0xf) goto L_800872D4;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r15 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -4361,7 +4361,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
             if ((s32)r15 < 0xf) goto L_800874D4;
         }
         r3 = 0x26;
-        fn_80166A28();
+        soundStartSE();
         r15 = 0x0;
         tmp = *(u32*)((u8*)r24 + 0x0);
         if ((s32)tmp != 7) {
@@ -4472,7 +4472,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                 if ((s32)r15 < 0xf) goto L_800876D4;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r15 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -4581,7 +4581,7 @@ void fn_80084A8C(s32 mode, u32 command, void* input, void* output) {
                 if ((s32)r15 < 0xf) goto L_800878CC;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r15 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -4774,8 +4774,8 @@ u32 fn_80087C64(const u16* expected)
 
                     if (matches < 3) {
                         s32 clearRow;
-                        fn_80166A28(0x26);
-                        while (fn_801666BC(0x26) == 2) {
+                        soundStartSE(0x26);
+                        while (soundGetStatus(0x26) == 2) {
                             _threadSwitch();
                         }
                         for (clearRow = 0; clearRow < 3; clearRow++) {
@@ -4816,13 +4816,13 @@ u32 fn_80087C64(const u16* expected)
                             }
                         }
                     } else {
-                        fn_80166A28(0x4A1);
-                        while (fn_801666BC(0x4A1) == 2) {
+                        soundStartSE(0x4A1);
+                        while (soundGetStatus(0x4A1) == 2) {
                             _threadSwitch();
                         }
                     }
                 } else {
-                    fn_80166A28(0x3C6);
+                    soundStartSE(0x3C6);
                 }
                 handled = 1;
             }
@@ -4838,7 +4838,7 @@ u32 fn_80087C64(const u16* expected)
                 break;
             }
 
-            fn_80166A28(0x3C7);
+            soundStartSE(0x3C7);
             choice = &choices[count];
             memcpy(cells, data->cell, sizeof(cells));
             if (choice->row >= 0 && choice->row < 3 &&

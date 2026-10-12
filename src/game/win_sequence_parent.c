@@ -119,7 +119,7 @@ extern void* menuItemBiosGetPtr(s16 idx); /* node by index */
 extern void* menuSeBiosGetPtr(s32);
 extern u16   fn_8005D798(void*, s32);
 extern void* menuSpriteBiosGetPtr(s32);
-extern int   fn_80166A28(u16);
+extern int   soundStartSE(u16);
 extern s32   GSthreadGetCurrentThread(void);    /* poll/yield -- 0 if pending */
 extern void  _threadSwitch(void);    /* yield */
 extern u32   fn_800BE31C(void);    /* rand or tick */
@@ -181,19 +181,19 @@ extern u8  lbl_8035B3F0[];  /* module name string */
 /* Additional external functions (not already declared above) */
 extern void fn_800BF74C(void);
 extern void fn_800D9ED8(s32);
-extern void fn_800D88DC(s32);
-extern void fn_800D888C(s32);
-extern void fn_800D9B58(f32, f32, f32, f32);
-extern void fn_800DA4C4(s32, s32, s32);
-extern void fn_800DA2BC(s32, s32, s32);
-extern void fn_800DA1E8(s32, s32, s32);
-extern void fn_800DA028(s32);
-extern void fn_800D6A00(s32);
-extern void fn_800D7820(s32);
-extern void fn_800D67BC(s32);
-extern void fn_800D6680(f32);
+extern void gfxSetFlags(s32);
+extern void gfxClearFlags(s32);
+extern void gfxSetOrtho(f32, f32, f32, f32);
+extern void gfxSetBlendMode(s32, s32, s32);
+extern void gfxSetUpdates(s32, s32, s32);
+extern void gfxSetZMode(s32, s32, s32);
+extern void gfxSetCullMode(s32);
+extern void gfxSetPrimitive(s32);
+extern void gfxSetVtxDesc(s32);
+extern void gfxBegin(s32);
+extern void gfxVtxPos(f32);
 extern void fn_800D5CB8(s32, s32, s32, s32, s32);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 
 /* Forward declarations for functions defined later in this TU */
 extern u8    menuOffScreenCheckEnable(u8 param);
@@ -215,7 +215,7 @@ extern void* windowSearchItemID(void* head, s32 key);
 extern void  menuOpenCustom(void* p, u32 r4, s32 r5, s32 r6, void* r7, s32 r8, ...);
 extern u8    menuOffScreenSetPriority(u8 val);
 extern u8    menuOffScreenSetDisp(u8 val);
-extern u32   fn_800D3088(void);
+extern u32   msgGetCharsPerFrame(void);
 extern u8    lbl_80404B68[];  /* scratch table for fn_80107F38, fn_801081F8 */
 extern u8    lbl_80404B8C[];  /* scratch table for winSeqSetMenu */
 extern u8    lbl_8047AD10;     /* resource request gate byte (sda21) - authoritative decl, use as-is */
@@ -367,7 +367,7 @@ void fn_80106F98(s32 windowId) {
         *(s16*)(scratch + 0x08) = *(s16*)(item + 0x02);
         item = menuItemBiosGetPtr(*(s16*)(node + 0x06));
         *(s16*)(scratch + 0x0A) = *(s16*)(item + 0x04);
-        for (i = 0; i < fn_800D3088(); i++) {
+        for (i = 0; i < msgGetCharsPerFrame(); i++) {
             _winSeqMoveSub(scratch, node + 0x0C);
         }
         *(s16*)(node + 0x50) = *(s16*)(scratch + 0x00);
@@ -431,7 +431,7 @@ void winSeqMoveMenu(void* windowPtr) {
     *(s16*)(scratch + 0x08) = *(s16*)(menuData + 0x06);
     menuData = menuDataBiosGetPtr((void*)*(u32*)(window + 0x04));
     *(s16*)(scratch + 0x0A) = *(s16*)(menuData + 0x08);
-    for (i = 0; i < fn_800D3088(); i++) {
+    for (i = 0; i < msgGetCharsPerFrame(); i++) {
         _winSeqMoveSub(scratch, window + 0x24);
     }
     *(s16*)(window + 0x84) = *(s16*)(scratch + 0x00);
@@ -457,7 +457,7 @@ void winSeqMoveMenu(void* windowPtr) {
         *(s16*)(scratch + 0x08) = *(s16*)(item + 0x02);
         item = menuItemBiosGetPtr(*(s16*)(node + 0x06));
         *(s16*)(scratch + 0x0A) = *(s16*)(item + 0x04);
-        for (i = 0; i < fn_800D3088(); i++) {
+        for (i = 0; i < msgGetCharsPerFrame(); i++) {
             _winSeqMoveSub(scratch, node + 0x0C);
         }
         *(s16*)(node + 0x50) = *(s16*)(scratch + 0x00);
@@ -491,7 +491,7 @@ void winSeqMoveMenu(void* windowPtr) {
         *(s16*)(scratch + 0x08) = *(s16*)(item + 0x02);
         item = menuItemBiosGetPtr(*(s16*)(node + 0x06));
         *(s16*)(scratch + 0x0A) = *(s16*)(item + 0x04);
-        for (i = 0; i < fn_800D3088(); i++) {
+        for (i = 0; i < msgGetCharsPerFrame(); i++) {
             _winSeqMoveSub(scratch, node + 0x0C);
         }
         *(s16*)(node + 0x50) = *(s16*)(scratch + 0x00);
@@ -792,7 +792,7 @@ void fn_80107F38(s32 param, u32 key) {
             *(s16*)(r31 + 0x8) = *(s16*)((u8*)menuItemBiosGetPtr(*(s16*)((u8*)r29 + 0x6)) + 0x2);
             *(s16*)(r31 + 0xa) = *(s16*)((u8*)menuItemBiosGetPtr(*(s16*)((u8*)r29 + 0x6)) + 0x4);
             r28 = 0;
-            while (r28 < fn_800D3088()) {
+            while (r28 < msgGetCharsPerFrame()) {
                 _winSeqMoveSub(r31, (u8*)r29 + 0xc);
                 r28++;
             }
@@ -844,7 +844,7 @@ void winSeqSetMenu(s32 param, u32 key) {
           r30 = lbl_80404B8C;
           r28 = 0;
           *(s16*)(r30 + 0xa) = *(s16*)((u8*)t + 0x8); }
-        while (r28 < fn_800D3088()) {
+        while (r28 < msgGetCharsPerFrame()) {
             _winSeqMoveSub(r30, (u8*)r31 + 0x24);
             r28++;
         }
@@ -900,7 +900,7 @@ void fn_801081F8(void* r3_arg, u16 r4, u16 r5) {
                     do {
                         _winSeqMoveSub(r24, r27 + 0xc);
                         r23++;
-                    } while ((u32)r23 < fn_800D3088());
+                    } while ((u32)r23 < msgGetCharsPerFrame());
                 }
                 *(s16*)(r27 + 0x50) = *(s16*)(r30 + 0x0);
                 *(s16*)(r27 + 0x52) = *(s16*)(r30 + 0x2);
@@ -952,7 +952,7 @@ void fn_801081F8(void* r3_arg, u16 r4, u16 r5) {
                     do {
                         _winSeqMoveSub(r25b, (u8*)r30 + 0xc);
                         r23++;
-                    } while ((u32)r23 < fn_800D3088());
+                    } while ((u32)r23 < msgGetCharsPerFrame());
                 }
             }
             *(s16*)((u8*)r30 + 0x50) = *(s16*)(r31 + 0x0);

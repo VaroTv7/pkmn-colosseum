@@ -60,7 +60,7 @@
 /** 0x80176758 */ void   cameraSetRotY(f32 angle);
 /** 0x801767E0 */ void   cameraSetDistance(f32 distance);
 /** 0x80176868 */ void   cameraSetHeight(f32 height);
-/** 0x80176948 */ void   fn_80176948(f32 x, f32 y, f32 z);
+/** 0x80176948 */ void   std040_cameraSetPosition(f32 x, f32 y, f32 z);
 /** 0x8017697C */ void   cameraSetTargetPosXYZ(f32 x, f32 y, f32 z);
 /** 0x801769B0 */ void   cameraSetTargetOfsXYZ(f32 x, f32 y, f32 z);
 /** 0x80176B48 */ s32    cameraWaitSyncAnime(s32 sync);

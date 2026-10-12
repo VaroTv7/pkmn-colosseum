@@ -28,8 +28,8 @@ extern void fn_801EF8F4();
 
 /* Sound functions */
 extern void soundStop();     /* Stop sound */
-extern void fn_80165A20();     /* Fade out music */
-extern void fn_801659FC();     /* Start BGM */
+extern void std104_soundSetBackgroundMusic();     /* Fade out music */
+extern void std105_soundPlayEffect();     /* Start BGM */
 
 /* SDA2 float constants used by asm wrappers */
 extern f32 lbl_8047E678;
@@ -214,7 +214,7 @@ int doWazaSequence(u32 *r3,int r4,int r5,u32 r6)
 
 {
     extern u8 lbl_8027A488[];
-    extern int fn_800D3088();
+    extern int msgGetCharsPerFrame();
     extern u32 fn_800F7AF0();
     extern u32 fn_800F7BC4();
     extern f32 lbl_8047E6C0;
@@ -293,7 +293,7 @@ int doWazaSequence(u32 *r3,int r4,int r5,u32 r6)
       savedView[1] = view[1];
       savedView[2] = view[2];
       ((volatile float *)savedView)[3] = local_a8;
-      iVar3 = fn_800D3088();
+      iVar3 = msgGetCharsPerFrame();
       iVar8 = iVar8 + iVar3;
       if (r5 != 0) {
         uVar4 = fn_800F7AF0(1);
@@ -457,10 +457,10 @@ evolutionStart(u32 r3,u32 r4,u32 r5,u16 *r6,
     bVar2 = 0;
   }
   if (bVar2) {
-    iVar9 = fn_801653C4();
+    iVar9 = std228_soundGetCurrentBackgroundMusic();
     if (iVar9 != 0) {
       uVar4 = fn_801656D8();
-      fn_80165A20(1,0x32,0xff);
+      std104_soundSetBackgroundMusic(1,0x32,0xff);
     }
     else {
       uVar4 = 0;
@@ -479,10 +479,10 @@ evolutionStart(u32 r3,u32 r4,u32 r5,u16 *r6,
     local_16c = uVar5;
     iVar9 = evolutionDemo(&local_184,r5,r3,r4);
     if (local_178 != 0) {
-      fn_80165A20(local_178,0x32,local_170 & 0xff);
+      std104_soundSetBackgroundMusic(local_178,0x32,local_170 & 0xff);
     }
     if (local_174 != 0) {
-      fn_801659FC(local_174,0x32,local_16c & 0xff);
+      std105_soundPlayEffect(local_174,0x32,local_16c & 0xff);
     }
     if (iVar9 == 0) {
       bVar2 = 0;
@@ -525,7 +525,7 @@ evolutionStart(u32 r3,u32 r4,u32 r5,u16 *r6,
 u32 evolutionOpen(u32 r3, u32 r4, u32 r5, u16 *r6, u32 r7, u8 *r8)
 {
     extern u32 lbl_804787E0[];
-    extern void fn_800FF730(u32);
+    extern void std098_mapWarpToMenuRoom(u32);
     extern void floorSetFadeScript(u32, u32);
     extern void _threadSwitch(void);
     u32 *base;
@@ -537,7 +537,7 @@ u32 evolutionOpen(u32 r3, u32 r4, u32 r5, u16 *r6, u32 r7, u8 *r8)
     base[3] = r7;
     base[4] = (u32)r6;
     base[5] = (u32)r8;
-    fn_800FF730(0x386);
+    std098_mapWarpToMenuRoom(0x386);
     floorSetFadeScript(0, 0);
     _threadSwitch();
     return base[6];
@@ -592,7 +592,7 @@ evolutionWazaLearn(u32 r3,u32 r4,u8 *r5,int r6,void *r7,
       winMsgOpen(2,0x4243,1,0);
     }
     if (r6 == 0) {
-      cVar5 = fn_8001E184();
+      cVar5 = std011_dialogDisplayYesNoMenu();
     }
     else {
       cVar5 = fn_8001E074(0,0xffffffff,0xffffffff,0);
@@ -636,7 +636,7 @@ done_1:
       winMsgOpen(2,0x4242,1,0);
     }
     if (r6 == 0) {
-      cVar5 = fn_8001E184();
+      cVar5 = std011_dialogDisplayYesNoMenu();
     }
     else {
       cVar5 = fn_8001E074(0,0xffffffff,0xffffffff,0);
@@ -689,7 +689,7 @@ LAB_waza_set:
     winMsgOpen(2,0x4248,1,0);
   }
 LAB_0025d3c4:
-  fn_80165668(0x4ca,0,0xff);
+  std130_soundUnk_801653cc(0x4ca,0,0xff);
   uVar2 = pokemonBiosGetNicknamePtr(r3);
   msgctrlSetValue(0x32,uVar2);
   msgctrlSetValue(0x39,r4 & 0xffff);
@@ -770,7 +770,7 @@ u32 evolutionDemo(u32 *r3,int r4,u32 r5,u32 r6)
   }
   else {
     uVar9 = pokemonDataBiosGetVoice() & 0xffff;
-    fn_80166A28(uVar9);
+    soundStartSE(uVar9);
   }
   selectorTable = (u32 *)(lbl_8027A488 + 4);
   uVar2 = *(u16 *)lbl_8027A488;
@@ -811,20 +811,20 @@ u32 evolutionDemo(u32 *r3,int r4,u32 r5,u32 r6)
     if (!bVar5) goto LAB_0025db60;
     switch (uVar11) {
     case 0:
-      iVar6 = fn_801666BC(uVar9);
+      iVar6 = soundGetStatus(uVar9);
       if (iVar6 != 2) {
-        fn_80165A20(0x3d3,0,0xff);
+        std104_soundSetBackgroundMusic(0x3d3,0,0xff);
         saved_r29 = 0;
         uVar11 = 1;
       }
       break;
     case 1:
-      iVar6 = fn_801666BC(0x3d3);
+      iVar6 = soundGetStatus(0x3d3);
       if (iVar6 != 2) {
-        iVar6 = fn_800D3088();
+        iVar6 = msgGetCharsPerFrame();
         saved_r29 = saved_r29 + iVar6;
         if (saved_r29 >= 0x1e) {
-          fn_80165A20(0x3d4,0,0xff);
+          std104_soundSetBackgroundMusic(0x3d4,0,0xff);
           uVar11 = 2;
         }
       }
@@ -835,7 +835,7 @@ u32 evolutionDemo(u32 *r3,int r4,u32 r5,u32 r6)
       bVar3 = 0;
     }
     _threadSwitch();
-    iVar6 = fn_800D3088();
+    iVar6 = msgGetCharsPerFrame();
     uVar12 = uVar12 + iVar6;
 LAB_0025db58:
     if (uVar12 >= 0x23a) break;
@@ -868,7 +868,7 @@ LAB_0025db60:
   fVar1 = lbl_8047E6B0;
   while (dVar13 = (double)fVar1, dVar13 < dVar14) {
     _threadSwitch();
-    uVar5 = fn_800D3088();
+    uVar5 = msgGetCharsPerFrame();
     local_8 = 0x43300000;
     local_c = uVar5;
     fVar1 = (float)(dVar13 + (double)(float)(*(double *)&local_8 - dVar15));
@@ -899,9 +899,9 @@ LAB_0025db60:
     }
     else {
       uVar9 = pokemonDataBiosGetVoice() & 0xffff;
-      fn_80166A28(uVar9);
+      soundStartSE(uVar9);
     }
-    while (iVar6 = fn_801666BC(uVar9), iVar6 == 2) {
+    while (iVar6 = soundGetStatus(uVar9), iVar6 == 2) {
       _threadSwitch();
     }
     uVar5 = pokemonBiosGetNicknamePtr(r5);
@@ -936,9 +936,9 @@ LAB_0025db60:
     }
     else {
       uVar9 = pokemonDataBiosGetVoice() & 0xffff;
-      fn_80166A28(uVar9);
+      soundStartSE(uVar9);
     }
-    while (iVar6 = fn_801666BC(uVar9), iVar6 == 2) {
+    while (iVar6 = soundGetStatus(uVar9), iVar6 == 2) {
       _threadSwitch();
     }
     uVar5 = pokemonBiosGetNicknamePtr(r5);
@@ -953,7 +953,7 @@ LAB_0025db60:
     fVar1 = lbl_8047E6B0;
     while (dVar13 = (double)fVar1, dVar13 < dVar15) {
       _threadSwitch();
-      uVar5 = fn_800D3088();
+      uVar5 = msgGetCharsPerFrame();
       local_8 = 0x43300000;
       local_c = uVar5;
       fVar1 = (float)(dVar13 + (double)(float)(*(double *)&local_8 - dVar14));

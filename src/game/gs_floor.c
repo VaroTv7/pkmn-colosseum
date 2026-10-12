@@ -81,7 +81,7 @@ extern u32   fn_80100B24(GSFloorContext* ctx);
 extern void  floorTerminateScriptThreads(u16 handle);
 extern u8    floorCheckFightKind(s32 floorIndex);
 extern void  floorCheckFade(void);
-extern void  fn_80117C84(void);
+extern void  tvRelease(void);
 extern void  fn_8018DB04(s32 arg);
 extern void  fn_800F716C(u32 groupId);
 extern void  fn_800F915C(u32 groupId);
@@ -91,7 +91,7 @@ extern void  GSthreadUnblock(void* thread);
 extern void  GSthreadBlockGroup(u32 groupId);
 extern void  GSthreadUnblockGroup(u32 groupId);
 extern void  menuCloseFloor(void);
-extern void  fn_800D2B90(s32 arg);
+extern void  gfxSetFog(s32 arg);
 extern void  psRemoveParticle(void);
 extern void  psRemoveGenerator(void);
 extern void  psRemoveAppSRT(void);
@@ -195,7 +195,7 @@ static inline void floorTeardownSubsystems(void* entry, s32 fadeArg) {
     if (!floorCheckFightKind(lbl_80478B18)) {
         floorCheckFade();
     }
-    fn_80117C84();
+    tvRelease();
     fn_8018DB04(fadeArg);
 }
 
@@ -386,7 +386,7 @@ void fn_800FF970(void) {
             fn_800F716C(lbl_8047ACC8->floorId);
             GSthreadTerminateGroup(lbl_8047ACC8->floorId);
             menuCloseFloor();
-            fn_800D2B90(0);
+            gfxSetFog(0);
             fn_8017B1CC(floorDataBiosGetFileGroupID(entry));
             fn_800F915C(floorDataBiosGetGroupID(entry));
             psRemoveParticle();
@@ -453,7 +453,7 @@ void fn_800FF970(void) {
             entry = lbl_8047ACC8->floorDataEntry;
             floorTeardownSubsystems(entry, 0);
             menuCloseFloor();
-            fn_800D2B90(0);
+            gfxSetFog(0);
             fn_8017B1CC(floorDataBiosGetFileGroupID(entry));
             fn_800F915C(floorDataBiosGetGroupID(entry));
             psRemoveParticle();
@@ -482,7 +482,7 @@ void fn_800FF970(void) {
             fn_800F716C(lbl_8047ACC8->floorId);
             GSthreadTerminateGroup(lbl_8047ACC8->floorId);
             menuCloseFloor();
-            fn_800D2B90(0);
+            gfxSetFog(0);
             fn_8017B1CC(floorDataBiosGetFileGroupID(entry));
             fn_800F915C(floorDataBiosGetGroupID(entry));
             fn_8010D038();

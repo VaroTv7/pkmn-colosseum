@@ -103,18 +103,18 @@ typedef struct HSD_TevDesc {
 extern HSD_TevDesc lbl_8036D48C;
 extern HSD_TevDesc lbl_8036D510;
 extern s32 HSD_StateAssignTev(void);
-extern void fn_801B3638(HSD_TevDesc* desc);
+extern void HSD_SetupTevStage(HSD_TevDesc* desc);
 
-extern HSD_TExp* fn_801B707C(HSD_TExp** list);
-extern void fn_801B5E40(HSD_TExp* exp, HSD_TObj* tobj, u32 chan);
-extern void fn_801B6E74(HSD_TExp* exp, u32 op, u32 bias, u32 scale,
+extern HSD_TExp* HSD_TExpTev(HSD_TExp** list);
+extern void HSD_TExpOrder(HSD_TExp* exp, HSD_TObj* tobj, u32 chan);
+extern void HSD_TExpColorOp(HSD_TExp* exp, u32 op, u32 bias, u32 scale,
                         u32 clamp);
-extern void fn_801B6CD8(HSD_TExp* exp, u32 op, u32 bias, u32 scale,
+extern void HSD_TExpAlphaOp(HSD_TExp* exp, u32 op, u32 bias, u32 scale,
                         u32 clamp);
-extern void fn_801B64EC(HSD_TExp* exp, u32 sel_a, HSD_TExp* a, u32 sel_b,
+extern void HSD_TExpColorIn(HSD_TExp* exp, u32 sel_a, HSD_TExp* a, u32 sel_b,
                         HSD_TExp* b, u32 sel_c, HSD_TExp* c, u32 sel_d,
                         HSD_TExp* d);
-extern void fn_801B5F08(HSD_TExp* exp, u32 sel_a, HSD_TExp* a, u32 sel_b,
+extern void HSD_TExpAlphaIn(HSD_TExp* exp, u32 sel_a, HSD_TExp* a, u32 sel_b,
                         HSD_TExp* b, u32 sel_c, HSD_TExp* c, u32 sel_d,
                         HSD_TExp* d);
 extern HSD_TExp* HSD_TExpCnst(void* ptr, u32 comp, u32 type,
@@ -130,16 +130,16 @@ extern HSD_TExp* HSD_TExpCnst(void* ptr, u32 comp, u32 type,
 #define HSD_TE_4_8 12
 #define HSD_TE_U8 0
 #define HSD_TE_F32 3
-#define HSD_TExpTev(list) fn_801B707C(list)
-#define HSD_TExpOrder(exp, tobj, chan) fn_801B5E40(exp, tobj, chan)
+#define HSD_TExpTev(list) HSD_TExpTev(list)
+#define HSD_TExpOrder(exp, tobj, chan) HSD_TExpOrder(exp, tobj, chan)
 #define HSD_TExpColorOp(exp, op, bias, scale, clamp) \
-    fn_801B6E74(exp, op, bias, scale, clamp)
+    HSD_TExpColorOp(exp, op, bias, scale, clamp)
 #define HSD_TExpAlphaOp(exp, op, bias, scale, clamp) \
-    fn_801B6CD8(exp, op, bias, scale, clamp)
+    HSD_TExpAlphaOp(exp, op, bias, scale, clamp)
 #define HSD_TExpColorIn(exp, sa, a, sb, b, sc, c, sd, d) \
-    fn_801B64EC(exp, sa, a, sb, b, sc, c, sd, d)
+    HSD_TExpColorIn(exp, sa, a, sb, b, sc, c, sd, d)
 #define HSD_TExpAlphaIn(exp, sa, a, sb, b, sc, c, sd, d) \
-    fn_801B5F08(exp, sa, a, sb, b, sc, c, sd, d)
+    HSD_TExpAlphaIn(exp, sa, a, sb, b, sc, c, sd, d)
 
 /* .sdata2 strings */
 extern const char lbl_8047DEB0[7]; /* __FILE__ */
@@ -472,7 +472,7 @@ static inline void setupTextureCoordGenBump(HSD_TObj* bump)
                      GX_IDENTITY);
 }
 
-void fn_801BDA58(HSD_TObj* tobj)
+void HSD_TObjSetupTextureCoordGen(HSD_TObj* tobj)
 {
     for (; tobj != NULL; tobj = tobj->next) {
         if (tobj->id == GX_TEXMAP_NULL) {
@@ -490,7 +490,7 @@ void fn_801BDA58(HSD_TObj* tobj)
     }
 }
 
-void fn_801BD8D0(HSD_TObj* tobj, u32 rendermode)
+void HSD_TObjSetupVolatileTev(HSD_TObj* tobj, u32 rendermode)
 {
     HSD_TevDesc* desc;
 
@@ -507,14 +507,14 @@ void fn_801BD8D0(HSD_TObj* tobj, u32 rendermode)
             desc->color_op = GX_TEV_ADD;
             desc->alpha_op = GX_TEV_ADD;
             desc->color_clamp = GX_DISABLE;
-            fn_801B3638(desc);
+            HSD_SetupTevStage(desc);
 
             desc->stage = HSD_StateAssignTev();
             desc->coord = tobj->coord + 1;
             desc->color_op = GX_TEV_SUB;
             desc->alpha_op = GX_TEV_SUB;
             desc->color_clamp = GX_ENABLE;
-            fn_801B3638(desc);
+            HSD_SetupTevStage(desc);
         }
         if (tobj_lightmap(tobj) & TEX_LIGHTMAP_SHADOW) {
             desc = &lbl_8036D48C;
@@ -522,7 +522,7 @@ void fn_801BD8D0(HSD_TObj* tobj, u32 rendermode)
                 desc->stage = HSD_StateAssignTev();
                 desc->coord = tobj->coord;
                 desc->map = tobj->id;
-                fn_801B3638(desc);
+                HSD_SetupTevStage(desc);
                 tobj = tobj->next;
             }
             break;

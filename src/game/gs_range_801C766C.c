@@ -40,7 +40,7 @@ extern void gamedatasaveBiosSetPrevfloorid(void* save, s32 floorId);
 extern void gamedatasaveBiosSetFloorposindex(void* save, u8 floorPosIndex);
 extern s32 fn_801D0748(s32, s32, s32);
 
-extern u32 fn_801906A0(u32 flag);
+extern u32 std082_flagGetValue(u32 flag);
 extern void fn_801D0AFC(s32);
 extern void* heroBiosGetPokemonPtr(void* status, u16 index);
 extern u8 pokemonCheckValid(void* pokemon);
@@ -51,14 +51,14 @@ extern void cursorBiosSetPos(s32 cursor, const CursorPos* pos);
 extern void fn_8000D710(s32);
 extern s32 fn_80075638(void);
 extern void fn_8007565C(void);
-extern void fn_80189990(s32, s32, s32);
-extern s8 fn_8001E184(void);
+extern void std054_characterTalk(s32, s32, s32);
+extern s8 std011_dialogDisplayYesNoMenu(void);
 extern void GBAInit(void);
 extern void gbaCommandSetKeyState(s32, s32);
 extern void fn_8007B090(s32);
 extern s32 fn_8007AB10(s32, s32*);
 extern s32 fn_8007AAA8(void);
-extern void fn_80189490(s32, s32);
+extern void std055_characterEndSpeech(s32, s32);
 extern void menuSubOpenSelect(s32, s32, s32, s32, s32, s32);
 extern u8 heroMoveGetResID(s32* floorId, s32* resId, s32 member);
 extern u32 heroMoveChkHinderClear(s32 member);
@@ -77,7 +77,7 @@ extern void fn_8012F1FC(s32 member);
 extern void heroMoveDismissMember(s32 member);
 extern u32 _fadeEffectGetRandom__FUl(u32 limit);
 extern s32 fn_800D37CC(void);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern void fn_8025D164(void);
 extern s32 fn_8006ADEC(void);
 extern f32 fn_8025D0A8(void* status);
@@ -90,7 +90,7 @@ extern const f32 lbl_8047E114;
 extern const f64 lbl_8047E120;
 extern const f64 lbl_8047E128;
 
-u8 fn_801C766C(void)
+u8 std235_menuShowSaveMenu(void)
 {
     void* save;
     s32 floorId;
@@ -135,13 +135,13 @@ s32 _fnDistanceSortFunc__FPCvPCv(const void* lhs, const void* rhs)
     return -1;
 }
 
-void fn_801C852C(s32 mode)
+void std216_partyStatusUpdate_8ae(s32 mode)
 {
     void* status;
     void* pokemon;
     u16 i;
 
-    if (fn_801906A0(0x8AE) == 0) {
+    if (std082_flagGetValue(0x8AE) == 0) {
         switch (mode) {
         case 0:
             fn_801D0AFC(0);
@@ -166,7 +166,7 @@ void fn_801C852C(s32 mode)
     }
 }
 
-void fn_801C8628(void)
+void std208_promptDNASampleSelection(void)
 {
     CursorPos initial;
     CursorPos pos;
@@ -186,7 +186,7 @@ void fn_801C8628(void)
 
 extern u32 fn_800884BC(u32 arg0, u32 arg1, u32 arg2);
 
-u8 fn_801C8688(u16 arg0, u16 arg1, u16 arg2)
+u8 std204_promptDNAKeyCode(u16 arg0, u16 arg1, u16 arg2)
 {
     u32 v0;
     u32 v1;
@@ -234,7 +234,7 @@ u8 fn_801C8688(u16 arg0, u16 arg1, u16 arg2)
     return fn_800884BC(v0, v1, v2) == 0;
 }
 
-void fn_801C8804(void)
+void std207_gbaUnk_80075638(void)
 {
     u32 ready = (u8)fn_80075638();
 
@@ -247,7 +247,7 @@ extern u32 fn_800756C8(s32 pokemonId);
 extern s32 heroItemAddItemDataId(u8* ptr, u32 itemId, u32 count, u32 arg4);
 extern s32 heroItemDecItemDataId(u8* ptr, u32 itemId, u32 count, u32 arg4);
 
-s32 fn_801C8834(u16 arg0)
+s32 std205_getDNASampleSepcies(u16 arg0)
 {
     u16 v31;
     u16 v30;
@@ -290,7 +290,7 @@ s32 fn_801C8834(u16 arg0)
     return v31;
 }
 
-s32 fn_801C89F8(s32 arg0, s32 arg1)
+s32 std200_gbaConnectEvent(s32 arg0, s32 arg1)
 {
     s32 linkState;
     s32 linkWork;
@@ -299,12 +299,12 @@ s32 fn_801C89F8(s32 arg0, s32 arg1)
     s32 answer;
     f32 elapsed;
 
-    fn_80189990(arg0, arg1, 0x3B61);
-    if (fn_8001E184() == 0) {
+    std054_characterTalk(arg0, arg1, 0x3B61);
+    if (std011_dialogDisplayYesNoMenu() == 0) {
         GBAInit();
         gbaCommandSetKeyState(2, 0);
         fn_8007B090(1);
-        fn_80189990(arg0, arg1, 0x3B62);
+        std054_characterTalk(arg0, arg1, 0x3B62);
 
         linkWork = 0;
         linkState = 1;
@@ -322,32 +322,32 @@ s32 fn_801C89F8(s32 arg0, s32 arg1)
 
             switch (linkState) {
             case 2:
-                fn_80189990(arg0, arg1, 0x3B63);
-                if (fn_8001E184() != 0) {
+                std054_characterTalk(arg0, arg1, 0x3B63);
+                if (std011_dialogDisplayYesNoMenu() != 0) {
                     linkState = 29;
                 } else {
                     linkState = 4;
                 }
                 break;
             case 4:
-                fn_80189990(arg0, arg1, 0x3B64);
-                if (fn_8001E184() != 0) {
+                std054_characterTalk(arg0, arg1, 0x3B64);
+                if (std011_dialogDisplayYesNoMenu() != 0) {
                     linkState = 9;
                 } else {
                     linkState = 5;
                 }
                 break;
             case 5:
-                fn_80189990(arg0, arg1, 0x3B66);
-                if (fn_8001E184() != 0) {
+                std054_characterTalk(arg0, arg1, 0x3B66);
+                if (std011_dialogDisplayYesNoMenu() != 0) {
                     linkState = 29;
                 } else {
                     linkState = 6;
                 }
                 break;
             case 7:
-                fn_80189990(arg0, arg1, 0x3B82);
-                if (fn_8001E184() != 0) {
+                std054_characterTalk(arg0, arg1, 0x3B82);
+                if (std011_dialogDisplayYesNoMenu() != 0) {
                     linkState = 29;
                 } else {
                     linkState = 8;
@@ -355,8 +355,8 @@ s32 fn_801C89F8(s32 arg0, s32 arg1)
                 fn_8007AB10(7, &linkWork);
                 break;
             case 9:
-                fn_80189990(arg0, arg1, 0x3B6C);
-                if (fn_8001E184() != 0) {
+                std054_characterTalk(arg0, arg1, 0x3B6C);
+                if (std011_dialogDisplayYesNoMenu() != 0) {
                     linkState = 29;
                 } else {
                     linkState = 10;
@@ -364,8 +364,8 @@ s32 fn_801C89F8(s32 arg0, s32 arg1)
                 fn_8007AB10(9, &linkWork);
                 break;
             case 11:
-                fn_80189990(arg0, arg1, 0x3B82);
-                answer = (s8)fn_8001E184();
+                std054_characterTalk(arg0, arg1, 0x3B82);
+                answer = (s8)std011_dialogDisplayYesNoMenu();
                 fn_8007AB10(9, &linkWork);
                 if (answer != 0) {
                     linkState = 29;
@@ -375,33 +375,33 @@ s32 fn_801C89F8(s32 arg0, s32 arg1)
                 fn_8007AB10(11, &linkWork);
                 break;
             case 14:
-                fn_80189990(arg0, arg1, 0x3B6F);
+                std054_characterTalk(arg0, arg1, 0x3B6F);
                 repeat = 1;
                 break;
             case 15:
-                fn_80189990(arg0, arg1, 0x3B80);
+                std054_characterTalk(arg0, arg1, 0x3B80);
                 repeat = 1;
                 break;
             case 16:
                 if (linkWork != 0) {
                     fn_8007AAA8();
                 }
-                fn_80189990(arg0, arg1, 0x3B81);
-                fn_80189990(arg0, arg1, 0x3B6A);
-                fn_80189490(arg0, arg1);
+                std054_characterTalk(arg0, arg1, 0x3B81);
+                std054_characterTalk(arg0, arg1, 0x3B6A);
+                std055_characterEndSpeech(arg0, arg1);
                 return 1;
             case 17:
-                fn_80189990(arg0, arg1, 0x3B68);
+                std054_characterTalk(arg0, arg1, 0x3B68);
                 elapsed = lbl_8047E114;
                 while (elapsed < lbl_8047E100) {
                     _threadSwitch();
-                    elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                    elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                 }
                 linkState = 16;
                 break;
             case 19:
-                fn_80189990(arg0, arg1, 0x3B82);
-                if (fn_8001E184() != 0) {
+                std054_characterTalk(arg0, arg1, 0x3B82);
+                if (std011_dialogDisplayYesNoMenu() != 0) {
                     linkState = 29;
                 } else {
                     linkState = 1;
@@ -420,12 +420,12 @@ s32 fn_801C89F8(s32 arg0, s32 arg1)
         }
     }
 
-    fn_80189990(arg0, arg1, 0x3B83);
-    fn_80189490(arg0, arg1);
+    std054_characterTalk(arg0, arg1, 0x3B83);
+    std055_characterEndSpeech(arg0, arg1);
     return 0;
 }
 
-void fn_801C8DD0(s32 a, s32 b, s32 c, s32 d, s32 e)
+void std199_menuDisplayCustomMenu(s32 a, s32 b, s32 c, s32 d, s32 e)
 {
     menuSubOpenSelect(1, a, b, c, d, e);
 }
@@ -440,7 +440,7 @@ extern u8 lbl_8047B3C4;
 u8 fn_801C9910(void)
 {
     extern u8 fn_8012B19C(s32 arg0, s32 arg1, Vec3* pos);
-    extern void fn_8018BDF4(s32 arg0, s32 arg1, Vec3* out);
+    extern void std172_characterGetPosition(s32 arg0, s32 arg1, Vec3* out);
     extern f32 PSVECDistance(const Vec3* a, const Vec3* b);
     extern void PSVECSubtract(const Vec3* a, const Vec3* b, Vec3* out);
     extern void PSVECScale(f32 scale, const Vec3* src, Vec3* dst);
@@ -469,8 +469,8 @@ u8 fn_801C9910(void)
         return 1;
     }
 
-    fn_8018BDF4(0, 0x65, &vA);
-    fn_8018BDF4(0, 0x64, &vB);
+    std172_characterGetPosition(0, 0x65, &vA);
+    std172_characterGetPosition(0, 0x64, &vB);
 
     if (fn_8012B19C(1, 0, &vB)) {
         lbl_80467090[0] = vB;
@@ -553,7 +553,7 @@ void fn_801C9C9C(void)
     }
 }
 
-u8 fn_801C9CDC(s32 lightId, s32 wait)
+u8 std193_lightWaitForAnimation(s32 lightId, s32 wait)
 {
     void* light = fn_800F92D4(lightId);
 
@@ -587,7 +587,7 @@ void scriptLightStopMotion(s32 lightId)
     }
 }
 
-void fn_801C9DC4(s32 lightId, s32 animIndex, s32 frame, s32 loop)
+void std191_mapTransformElement(s32 lightId, s32 animIndex, s32 frame, s32 loop)
 {
     void* light = fn_800F92D4(lightId);
 
@@ -605,7 +605,7 @@ void fn_801C9DC4(s32 lightId, s32 animIndex, s32 frame, s32 loop)
     }
 }
 
-void fn_801C9E7C(s32 lightId, s32 active)
+void std190_lightSetActive(s32 lightId, s32 active)
 {
     void* light = fn_800F92D4(lightId);
 
@@ -621,7 +621,7 @@ void scriptSetMemoFlag(void)
     memoDataSetMemoFlag(0);
 }
 
-void fn_801C9F00(s32 active)
+void std035_setPartnerFollowing(s32 active)
 {
     u32 enabled = (u8)active;
 
@@ -634,9 +634,9 @@ void fn_801C9F00(s32 active)
     }
 }
 
-extern u8 fn_801CA358(void);
+extern u8 std211_tvSetChannelByStory(void);
 
-u8 fn_801C9F5C(void)
+u8 std182_tvNewsEvent(void)
 {
     extern void heroMoveInitEvent(void);
     extern void heroMoveTermEvent(void);
@@ -652,65 +652,65 @@ u8 fn_801C9F5C(void)
 
     if (fn_801EEAD0(0x43)) {
         mode = 4;
-    } else if (fn_801902E0(0xADA)) {
-        fn_80190528(0xA0F);
-        fn_80117AE4(0xC);
+    } else if (std081_flagCheckTrue(0xADA)) {
+        std078_flagSetFalse(0xA0F);
+        std171_mapSetTextureChange(0xC);
 
         elapsed = lbl_8047E114;
         while (elapsed < lbl_8047E11C) {
             _threadSwitch();
-            elapsed += (f32)(u32)fn_800D3088() / (f32)fn_800D37CC();
+            elapsed += (f32)(u32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         }
 
         winMsgOpenFieldWithSE(0x439F, 1, 0, 5);
         winMsgCloseField(1);
-        fn_80117AE4(0xF);
+        std171_mapSetTextureChange(0xF);
         winMsgOpenFieldWithSE(0x43A0, 1, 0, 5);
         winMsgCloseField(1);
-        fn_801CA358();
+        std211_tvSetChannelByStory();
         heroMoveTermEvent();
         return 1;
-    } else if (fn_801902E0(0xADB)) {
-        fn_80190528(0x483);
-        fn_80117AE4(0xC);
+    } else if (std081_flagCheckTrue(0xADB)) {
+        std078_flagSetFalse(0x483);
+        std171_mapSetTextureChange(0xC);
 
         elapsed = lbl_8047E114;
         while (elapsed < lbl_8047E11C) {
             _threadSwitch();
-            elapsed += (f32)(u32)fn_800D3088() / (f32)fn_800D37CC();
+            elapsed += (f32)(u32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         }
 
         winMsgOpenFieldWithSE(0x439D, 1, 0, 5);
         winMsgCloseField(1);
-        fn_80117AE4(0xE);
+        std171_mapSetTextureChange(0xE);
         winMsgOpenFieldWithSE(0x439E, 1, 0, 5);
         winMsgCloseField(1);
-        fn_801CA358();
+        std211_tvSetChannelByStory();
         heroMoveTermEvent();
         return 1;
-    } else if (fn_801902E0(0x42C)) {
-        fn_80190528(0x42D);
+    } else if (std081_flagCheckTrue(0x42C)) {
+        std078_flagSetFalse(0x42D);
         mode = 4;
-    } else if (fn_801902E0(0xAD3)) {
-        fn_80190528(0xA08);
+    } else if (std081_flagCheckTrue(0xAD3)) {
+        std078_flagSetFalse(0xA08);
         mode = 3;
-    } else if (fn_801902E0(0xAD0)) {
-        fn_80190528(0xA07);
+    } else if (std081_flagCheckTrue(0xAD0)) {
+        std078_flagSetFalse(0xA07);
         mode = 2;
-    } else if (fn_801902E0(0xACF)) {
-        fn_80190528(0xA06);
+    } else if (std081_flagCheckTrue(0xACF)) {
+        std078_flagSetFalse(0xA06);
         mode = 1;
     } else {
-        fn_80190528(0xA05);
+        std078_flagSetFalse(0xA05);
         mode = 0;
     }
 
-    fn_801CA358();
+    std211_tvSetChannelByStory();
 
     elapsed = lbl_8047E114;
     while (elapsed < lbl_8047E11C) {
         _threadSwitch();
-        elapsed += (f32)(u32)fn_800D3088() / (f32)fn_800D37CC();
+        elapsed += (f32)(u32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
 
     switch (mode) {
@@ -742,52 +742,52 @@ u8 fn_801C9F5C(void)
     return 1;
 }
 
-u8 fn_801CA358(void)
+u8 std211_tvSetChannelByStory(void)
 {
     u32 cameraMode;
 
-    if (fn_801902E0(0xADA) != 0) {
-        if (fn_801902E0(0xA0F) == 0) {
+    if (std081_flagCheckTrue(0xADA) != 0) {
+        if (std081_flagCheckTrue(0xA0F) == 0) {
             cameraMode = 11;
         } else {
             cameraMode = 12;
         }
-    } else if (fn_801902E0(0xADB) != 0) {
-        if (fn_801902E0(0x483) == 0) {
+    } else if (std081_flagCheckTrue(0xADB) != 0) {
+        if (std081_flagCheckTrue(0x483) == 0) {
             cameraMode = 11;
         } else {
             cameraMode = 12;
         }
-    } else if (fn_801902E0(0x42C) != 0) {
-        if (fn_801902E0(0x42D) == 0) {
+    } else if (std081_flagCheckTrue(0x42C) != 0) {
+        if (std081_flagCheckTrue(0x42D) == 0) {
             cameraMode = 3;
         } else {
             cameraMode = 4;
         }
-    } else if (fn_801902E0(0xAD3) != 0) {
-        if (fn_801902E0(0xA08) == 0) {
+    } else if (std081_flagCheckTrue(0xAD3) != 0) {
+        if (std081_flagCheckTrue(0xA08) == 0) {
             cameraMode = 3;
         } else {
             cameraMode = 4;
         }
-    } else if (fn_801902E0(0xAD0) != 0) {
-        if (fn_801902E0(0xA07) == 0) {
+    } else if (std081_flagCheckTrue(0xAD0) != 0) {
+        if (std081_flagCheckTrue(0xA07) == 0) {
             cameraMode = 3;
         } else {
             cameraMode = 4;
         }
-    } else if (fn_801902E0(0xACF) != 0) {
-        if (fn_801902E0(0xA06) == 0) {
+    } else if (std081_flagCheckTrue(0xACF) != 0) {
+        if (std081_flagCheckTrue(0xA06) == 0) {
             cameraMode = 1;
         } else {
             cameraMode = 2;
         }
     } else {
-        fn_80190528(0xA05);
+        std078_flagSetFalse(0xA05);
         cameraMode = 0;
     }
 
-    fn_80117AE4(cameraMode);
+    std171_mapSetTextureChange(cameraMode);
     return 1;
 }
 
@@ -796,27 +796,27 @@ u32 fadeEffectGetRandom(u32 limit)
     return _fadeEffectGetRandom__FUl(limit);
 }
 
-void fn_801CA4F8(f32 frames)
+void std157_sleep(f32 frames)
 {
     f32 elapsed = lbl_8047E114;
 
     while (elapsed < frames) {
         _threadSwitch();
-        elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+        elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
 }
 
 u16 fieldStartEncount(u32 arg0, u8 arg1, s32 arg2)
 {
     extern void fn_80112700(void);
-    extern void fn_801903B0(u32 flagId);
+    extern void std079_flagSetTrue(u32 flagId);
     extern void* fightEncountDataBiosGetPtr(u32 index);
     extern u16 fn_8006A65C(void);
-    extern void fn_801CBA90(s32 value);
+    extern void std229_mapLoad395(s32 value);
     extern void floorSetFadeScript(s32 a, s32 b);
     extern u32 fightStartEncount(u32 arg0);
     extern u8 fightEncountDataBiosGetZenmetuFlag(void* ptr);
-    extern u32 fn_801EF634(void);
+    extern u32 std103_battleGetResult(void);
     extern u8 fightFloorIsGcHeroWin(u32 obj, u32 side);
     extern int fadeSet();
     extern const f32 lbl_8047E108;
@@ -826,29 +826,29 @@ u16 fieldStartEncount(u32 arg0, u8 arg1, s32 arg2)
     u32 old;
     u16 input;
 
-    fn_801903B0(0xE05);
+    std079_flagSetTrue(0xE05);
     result = (u32)fightEncountDataBiosGetPtr(arg0);
 
-    if (fn_801906A0(0x8AE)) {
-        fn_801903B0(0xE05);
+    if (std082_flagGetValue(0x8AE)) {
+        std079_flagSetTrue(0xE05);
         result = fn_8006A65C();
 
-        if (fn_801906A0(0x8AE)) {
+        if (std082_flagGetValue(0x8AE)) {
             fn_80112700();
         } else {
-            fn_801CBA90(0);
+            std229_mapLoad395(0);
             floorSetFadeScript(0, 0x5960008);
         }
     } else {
         if (arg1 != 0 || arg2 != 0) {
-            fn_80190528(0xE05);
+            std078_flagSetFalse(0xE05);
         }
 
         old = result;
         result = fightStartEncount(arg0);
 
         if (fightEncountDataBiosGetZenmetuFlag((void*)old)) {
-            input = fn_801EF634();
+            input = std103_battleGetResult();
             if (!fightFloorIsGcHeroWin(0, input)) {
                 _threadSwitch();
                 _threadSwitch();
@@ -862,11 +862,11 @@ u16 fieldStartEncount(u32 arg0, u8 arg1, s32 arg2)
         }
     }
 
-    fn_801903B0(0xE05);
+    std079_flagSetTrue(0xE05);
     return (u16)result;
 }
 
-void fn_801CA708(void)
+void std239_playerGetCouponsEarnedInLastArea(void)
 {
     fn_8025D164();
 }
@@ -889,40 +889,40 @@ void fn_801CA7AC(s32 value)
     fn_8006ADB4(value);
 }
 
-s32 fn_801CA7CC(void)
+s32 std236_playerGetCouponsEarnedOnCurrentRun(void)
 {
     return fn_8006ADEC();
 }
 
 
 /* Eight-direction collision search used to place a battle actor. */
-s32 fn_801C7730(s32 side, s32 slot)
+s32 std232_characterApproachPlayer(s32 side, s32 slot)
 {
     extern const Vec3 lbl_802758A0;
     extern const f32 lbl_8047E100, lbl_8047E104, lbl_8047E10C;
     extern const f32 lbl_8047E110, lbl_8047E118, lbl_8047E11C;
-    extern void fn_8018BDF4(s32 arg0, s32 arg1, Vec3* out);
-    extern u32 fn_8018D998();
+    extern void std172_characterGetPosition(s32 arg0, s32 arg1, Vec3* out);
+    extern u32 peopleIsInGroup();
     extern void* peopleSearchID();
     extern void* peopleInfoBiosGetPtr();
     extern f32 fn_8018F5E4();
     extern f32 GSvecDistance();
     extern void GSvecAdd();
-    extern void fn_800E013C();
-    extern void fn_800E0168(Vec3*, const Vec3*, const Vec3*);
+    extern void vecScale();
+    extern void GSvecSub(Vec3*, const Vec3*, const Vec3*);
     extern void fn_800E0060(Vec3*, const Vec3*);
     extern void fn_800DFFCC(Vec3*, const Vec3*, const Vec3*);
     extern s32 GScolsys2UtilGetCpPlaneLine(
         Vec3*, f32*, const Vec3*, const Vec3*, const Vec3*, const Vec3*);
     extern u8 fn_8018D680();
-    extern s32 fn_8010F320();
+    extern s32 colsysWallSweep();
     extern void qsort();
-    extern void fn_80183350();
+    extern void std076_characterEventFlagsClear();
     extern void fn_8018AACC();
     extern u8 peopleMoveCheck();
     extern void fn_8018BA04();
     extern void peopleTurnToPoint();
-    extern void fn_80183018();
+    extern void std077_characterEventFlagsSet();
     extern f64 cos(f64);
     extern f64 sin(f64);
 
@@ -942,7 +942,7 @@ s32 fn_801C7730(s32 side, s32 slot)
         (out) = fn_8018D680((a), (b), (c), lbl_8047E118);                 \
     } else {                                                               \
         GSvecAdd(&midpoint, (a), (b));                                    \
-        fn_800E013C(&midpoint, &midpoint, lbl_8047E108);                  \
+        vecScale(&midpoint, &midpoint, lbl_8047E108);                  \
         (out) = fn_8018D680((a), &midpoint, (c), lbl_8047E118);           \
         if ((out) == 0)                                                    \
             (out) = fn_8018D680(&midpoint, (b), (c), lbl_8047E118);       \
@@ -954,19 +954,19 @@ s32 fn_801C7730(s32 side, s32 slot)
     timeout = lbl_8047E11C;                                                \
     while (peopleMoveCheck(0, 0x65, 0) != 0) {                            \
         _threadSwitch();                                                   \
-        timeout -= (f32)(u32)fn_800D3088() / (f32)fn_800D37CC();          \
+        timeout -= (f32)(u32)msgGetCharsPerFrame() / (f32)fn_800D37CC();          \
         if (timeout <= lbl_8047E114) { (out) = 1; break; }                 \
     }                                                                      \
 } while (0)
 
     if (heroMoveGetResID(&floorId, &resId, 1) == 0) return 0;
-    fn_8018BDF4(resId, floorId, &origin);
+    std172_characterGetPosition(resId, floorId, &origin);
     if (heroMoveGetResID(&floorId2, &resId2, 0) == 0) return 0;
-    fn_8018BDF4(resId2, floorId2, &partner);
-    fn_8018BDF4(side, slot, &requested);
+    std172_characterGetPosition(resId2, floorId2, &partner);
+    std172_characterGetPosition(side, slot, &requested);
 
     {
-        void* person = peopleSearchID(fn_8018D998(side, slot));
+        void* person = peopleSearchID(peopleIsInGroup(side, slot));
         void* info;
         if (person == NULL) return 0;
         info = peopleInfoBiosGetPtr(*(u32*)((u8*)person + 0x30));
@@ -980,7 +980,7 @@ s32 fn_801C7730(s32 side, s32 slot)
                           radius + lbl_8047E100);
     } else {
         GSvecAdd(&midpoint, &partner, &requested);
-        fn_800E013C(&midpoint, &midpoint, lbl_8047E108);
+        vecScale(&midpoint, &midpoint, lbl_8047E108);
         hit = fn_8018D680(&partner, &midpoint, &center,
                           radius + lbl_8047E100);
         if (hit == 0)
@@ -996,7 +996,7 @@ s32 fn_801C7730(s32 side, s32 slot)
         offset.y = lbl_8047E114;
         offset.z = lbl_8047E110 * (f32)sin(angle);
         GSvecAdd(&entries[i].pos, &offset, &partner);
-        if (fn_8010F320(&partner, &entries[i].pos, 0) != 0) {
+        if (colsysWallSweep(&partner, &entries[i].pos, 0) != 0) {
             entries[i].blocked = 1;
         } else {
             entries[i].blocked = 0;
@@ -1016,9 +1016,9 @@ s32 fn_801C7730(s32 side, s32 slot)
 
         requestedFlat = requested;
         requestedFlat.y = lbl_8047E100;
-        fn_800E0168(&fullDirection, &partner, &requested);
+        GSvecSub(&fullDirection, &partner, &requested);
         fn_800E0060(&fullDirection, &fullDirection);
-        fn_800E0168(&flatDirection, &partner, &requestedFlat);
+        GSvecSub(&flatDirection, &partner, &requestedFlat);
         fn_800E0060(&flatDirection, &flatDirection);
         fn_800DFFCC(&planeNormal, &fullDirection, &flatDirection);
         if (GScolsys2UtilGetCpPlaneLine(
@@ -1028,7 +1028,7 @@ s32 fn_801C7730(s32 side, s32 slot)
             continue;
         }
 
-        fn_80183350(resId, floorId);
+        std076_characterEventFlagsClear(resId, floorId);
         fn_8018AACC(resId, floorId, 1, &entries[i].pos);
         WAIT_MOVE(done);
         if (done != 0) break;
@@ -1055,7 +1055,7 @@ s32 fn_801C7730(s32 side, s32 slot)
             peopleTurnToPoint(resId, floorId, saved.x, saved.y, saved.z,
                         lbl_8047E100);
             WAIT_MOVE(done);
-            fn_80183018(resId, floorId);
+            std077_characterEventFlagsSet(resId, floorId);
             return 0;
         }
     }
@@ -1067,7 +1067,7 @@ s32 fn_801C7730(s32 side, s32 slot)
         offset.y = lbl_8047E114;
         offset.z = lbl_8047E110 * (f32)sin(angle);
         GSvecAdd(&entries[i].pos, &offset, &origin);
-        if (fn_8010F320(&origin, &entries[i].pos, 0) != 0) {
+        if (colsysWallSweep(&origin, &entries[i].pos, 0) != 0) {
             entries[i].blocked = 1;
         } else {
             entries[i].blocked = 0;
@@ -1086,9 +1086,9 @@ s32 fn_801C7730(s32 side, s32 slot)
         if (hit != 0) continue;
         requestedFlat = requested;
         requestedFlat.y = lbl_8047E100;
-        fn_800E0168(&fullDirection, &partner, &requested);
+        GSvecSub(&fullDirection, &partner, &requested);
         fn_800E0060(&fullDirection, &fullDirection);
-        fn_800E0168(&flatDirection, &partner, &requestedFlat);
+        GSvecSub(&flatDirection, &partner, &requestedFlat);
         fn_800E0060(&flatDirection, &flatDirection);
         fn_800DFFCC(&planeNormal, &fullDirection, &flatDirection);
         if (GScolsys2UtilGetCpPlaneLine(
@@ -1097,7 +1097,7 @@ s32 fn_801C7730(s32 side, s32 slot)
             planeT < lbl_8047E114 || planeT > lbl_8047E100) {
             continue;
         }
-        fn_80183350(resId, floorId);
+        std076_characterEventFlagsClear(resId, floorId);
         fn_8018AACC(resId, floorId, 1, &entries[i].pos);
         WAIT_MOVE(done);
         if (done == 0) {
@@ -1105,7 +1105,7 @@ s32 fn_801C7730(s32 side, s32 slot)
             peopleTurnToPoint(resId, floorId, saved.x, saved.y, saved.z,
                         lbl_8047E100);
             WAIT_MOVE(done);
-            fn_80183018(resId, floorId);
+            std077_characterEventFlagsSet(resId, floorId);
             return 0;
         }
     }
@@ -1151,17 +1151,17 @@ s32 fn_801C8E14(s32 floorDataId, u32 actorIndex, u16 mode, u8 direction)
     extern void* floorGetResource();
     extern void* floorDataBiosGetPtr();
     extern s32 floorDataBiosGetGroupID();
-    extern void fn_801845E4();
-    extern void fn_801860F8();
-    extern void fn_80188AF4();
-    extern void fn_80184470();
-    extern void fn_80188F78();
-    extern void fn_8018805C();
+    extern void std070_characterAttachToCharacter();
+    extern void std059_characterSetPosition();
+    extern void std067_characterStopLookAt();
+    extern void std168_characterDetachFromCharacter();
+    extern void std065_characterLookAtPlayer();
+    extern void peopleStartTurn();
     extern void fn_8018AACC();
     extern void peopleSetPositionByIndex();
     extern u8 peopleMoveCheck();
-    extern void fn_80166A28();
-    extern void fn_801669BC();
+    extern void soundStartSE();
+    extern void soundStopSE();
     extern void GSmodelSetAnimIndex();
     extern void GSmodelSetAnimFrame();
     extern void GSmodelSetAnimRate();
@@ -1212,7 +1212,7 @@ s32 fn_801C8E14(s32 floorDataId, u32 actorIndex, u16 mode, u8 direction)
         timer = lbl_8047E114;                                               \
         while (timer < (amount)) {                                         \
             _threadSwitch();                                                \
-            timer += (f32)(u32)fn_800D3088() / (f32)fn_800D37CC();         \
+            timer += (f32)(u32)msgGetCharsPerFrame() / (f32)fn_800D37CC();         \
         }                                                                   \
     } while (0)
 
@@ -1225,7 +1225,7 @@ s32 fn_801C8E14(s32 floorDataId, u32 actorIndex, u16 mode, u8 direction)
                 break;                                                      \
             }                                                               \
             _threadSwitch();                                                \
-            timer -= (f32)(u32)fn_800D3088() / (f32)fn_800D37CC();         \
+            timer -= (f32)(u32)msgGetCharsPerFrame() / (f32)fn_800D37CC();         \
         }                                                                   \
         if (timer <= lbl_8047E114) {                                       \
             (out) = 1;                                                      \
@@ -1250,35 +1250,35 @@ s32 fn_801C8E14(s32 floorDataId, u32 actorIndex, u16 mode, u8 direction)
     groupId = floorDataBiosGetGroupID(floorDataBiosGetPtr(floorDataId));
 
     if (direction >= 2 && direction <= 5) {
-        fn_801845E4(0, 0x64, groupId, actor->resource, actor->partIndex);
-        fn_801845E4(0, 0x65, groupId, actor->resource, actor->partIndex);
+        std070_characterAttachToCharacter(0, 0x64, groupId, actor->resource, actor->partIndex);
+        std070_characterAttachToCharacter(0, 0x65, groupId, actor->resource, actor->partIndex);
         switch (direction) {
         case 2:
-            fn_801860F8(0, 0x64, lbl_8047E114, lbl_8047E114,
+            std059_characterSetPosition(0, 0x64, lbl_8047E114, lbl_8047E114,
                         lbl_8047E130);
-            fn_801860F8(0, 0x65, lbl_8047E114, lbl_8047E114,
+            std059_characterSetPosition(0, 0x65, lbl_8047E114, lbl_8047E114,
                         lbl_8047E134);
             break;
         case 3:
-            fn_801860F8(0, 0x64, lbl_8047E114, lbl_8047E114,
+            std059_characterSetPosition(0, 0x64, lbl_8047E114, lbl_8047E114,
                         lbl_8047E134);
-            fn_801860F8(0, 0x65, lbl_8047E114, lbl_8047E114,
+            std059_characterSetPosition(0, 0x65, lbl_8047E114, lbl_8047E114,
                         lbl_8047E130);
             break;
         case 4:
-            fn_801860F8(0, 0x64, lbl_8047E130, lbl_8047E114,
+            std059_characterSetPosition(0, 0x64, lbl_8047E130, lbl_8047E114,
                         lbl_8047E114);
-            fn_801860F8(0, 0x65, lbl_8047E134, lbl_8047E114,
+            std059_characterSetPosition(0, 0x65, lbl_8047E134, lbl_8047E114,
                         lbl_8047E114);
             break;
         case 5:
-            fn_801860F8(0, 0x64, lbl_8047E134, lbl_8047E114,
+            std059_characterSetPosition(0, 0x64, lbl_8047E134, lbl_8047E114,
                         lbl_8047E114);
-            fn_801860F8(0, 0x65, lbl_8047E130, lbl_8047E114,
+            std059_characterSetPosition(0, 0x65, lbl_8047E130, lbl_8047E114,
                         lbl_8047E114);
             break;
         }
-        fn_80188AF4(0, 0x65);
+        std067_characterStopLookAt(0, 0x65);
         START_MODEL_ANIM(mode, lbl_8047E114);
         return 0;
     }
@@ -1291,7 +1291,7 @@ s32 fn_801C8E14(s32 floorDataId, u32 actorIndex, u16 mode, u8 direction)
     case 0x82:
         START_MODEL_ANIM(actor->enterAnim, frame);
         if ((mode & 0x80) != 0) {
-            fn_80166A28(0x44);
+            soundStartSE(0x44);
         }
         WAIT_MODEL();
 
@@ -1300,7 +1300,7 @@ s32 fn_801C8E14(s32 floorDataId, u32 actorIndex, u16 mode, u8 direction)
         GSpartFree(part);
 
         if ((mode & 1) != 0) {
-            fn_80188AF4(0, 0x65);
+            std067_characterStopLookAt(0, 0x65);
             transform.position.z -= lbl_8047E130;
             fn_8018AACC(0, 0x64, 1, &transform.position);
             firstPos.x = transform.position.x;
@@ -1324,18 +1324,18 @@ s32 fn_801C8E14(s32 floorDataId, u32 actorIndex, u16 mode, u8 direction)
             if (timedOut == 0) {
                 WAIT_ACTOR65(timedOut);
             }
-            fn_8018805C(0, 0x64, lbl_8047E114, lbl_8047E108);
+            peopleStartTurn(0, 0x64, lbl_8047E114, lbl_8047E108);
             if (timedOut == 0) {
-                fn_8018805C(0, 0x65, lbl_8047E114, lbl_8047E108);
+                peopleStartTurn(0, 0x65, lbl_8047E114, lbl_8047E108);
             }
             peopleMoveCheck(0, 0x64, 1);
             if (timedOut == 0) {
                 WAIT_ACTOR65(timedOut);
             }
         } else {
-            fn_80184470(0, 0x64);
-            fn_80184470(0, 0x65);
-            fn_80188F78(0, 0x65);
+            std168_characterDetachFromCharacter(0, 0x64);
+            std168_characterDetachFromCharacter(0, 0x65);
+            std065_characterLookAtPlayer(0, 0x65);
 
             part = GSmodelGetPart(model, actor->partIndex);
             GSpartGetTransform(part, &transform, 0, 0);
@@ -1358,15 +1358,15 @@ s32 fn_801C8E14(s32 floorDataId, u32 actorIndex, u16 mode, u8 direction)
 
         START_MODEL_ANIM(actor->exitAnim, frame);
         if ((mode & 0x80) != 0) {
-            fn_80166A28(0x44);
+            soundStartSE(0x44);
         }
         WAIT_MODEL();
         break;
     case 0xC0:
         WAIT_MODEL();
         if ((mode & 0x80) != 0) {
-            fn_801669BC(0x45);
-            fn_80166A28(0x46);
+            soundStopSE(0x45);
+            soundStartSE(0x46);
         }
         break;
     case 0x100:
@@ -1382,22 +1382,22 @@ s32 fn_801C8E14(s32 floorDataId, u32 actorIndex, u16 mode, u8 direction)
         }
 
         if ((mode & 0x20) != 0) {
-            fn_801845E4(0, 0x64, groupId, actor->resource,
+            std070_characterAttachToCharacter(0, 0x64, groupId, actor->resource,
                         actor->partIndex);
-            fn_801845E4(0, 0x65, groupId, actor->resource,
+            std070_characterAttachToCharacter(0, 0x65, groupId, actor->resource,
                         actor->partIndex);
             if (direction != 0) {
-                fn_801860F8(0, 0x64, lbl_8047E114, lbl_8047E114,
+                std059_characterSetPosition(0, 0x64, lbl_8047E114, lbl_8047E114,
                             lbl_8047E130);
-                fn_801860F8(0, 0x65, lbl_8047E114, lbl_8047E114,
+                std059_characterSetPosition(0, 0x65, lbl_8047E114, lbl_8047E114,
                             lbl_8047E134);
             } else {
-                fn_801860F8(0, 0x64, lbl_8047E114, lbl_8047E114,
+                std059_characterSetPosition(0, 0x64, lbl_8047E114, lbl_8047E114,
                             lbl_8047E134);
-                fn_801860F8(0, 0x65, lbl_8047E114, lbl_8047E114,
+                std059_characterSetPosition(0, 0x65, lbl_8047E114, lbl_8047E114,
                             lbl_8047E130);
             }
-            fn_80188AF4(0, 0x65);
+            std067_characterStopLookAt(0, 0x65);
         }
         if ((mode & 0x10) != 0) {
             GSmodelSetAnimIndex(model, animIndex);
@@ -1408,7 +1408,7 @@ s32 fn_801C8E14(s32 floorDataId, u32 actorIndex, u16 mode, u8 direction)
         if ((mode & 0x40) != 0) {
             fn_801C8E14(floorDataId, actorIndex, 0xC0, direction);
         } else if ((mode & 0x80) != 0) {
-            fn_80166A28(0x45);
+            soundStartSE(0x45);
         }
         break;
     }

@@ -40,7 +40,7 @@ typedef struct GbaConvChannelState {
 typedef struct GbaConvPlayerMemo {
     /* 0x00 */ u8  valid;
     /* 0x01 */ u8  _pad01[3];
-    /* 0x04 */ u32 unk04;        /* fn_800FF56C() result */
+    /* 0x04 */ u32 unk04;        /* std092_getCurrentRoomID() result */
     /* 0x08 */ u32 prevFloorId;  /* floorGetPrevFloorID() result */
     /* 0x0C */ f32 posX;
     /* 0x10 */ f32 posY;
@@ -48,10 +48,10 @@ typedef struct GbaConvPlayerMemo {
     /* 0x18 */ f32 rotX;
     /* 0x1C */ f32 rotY;
     /* 0x20 */ f32 rotZ;
-    /* 0x24 */ u32 flagAfc;      /* fn_801906A0(0xafc) */
-    /* 0x28 */ u32 flagAfd;      /* fn_801906A0(0xafd) */
-    /* 0x2C */ u32 flagB11;      /* fn_801906A0(0xb11) */
-    /* 0x30 */ u32 flagDe1;      /* fn_801906A0(0xde1) */
+    /* 0x24 */ u32 flagAfc;      /* std082_flagGetValue(0xafc) */
+    /* 0x28 */ u32 flagAfd;      /* std082_flagGetValue(0xafd) */
+    /* 0x2C */ u32 flagB11;      /* std082_flagGetValue(0xb11) */
+    /* 0x30 */ u32 flagDe1;      /* std082_flagGetValue(0xde1) */
 } GbaConvPlayerMemo; /* size 0x34 */
 
 #endif /* GAME_GBA_GBA_CONV_H */

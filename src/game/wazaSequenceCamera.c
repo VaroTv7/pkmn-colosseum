@@ -220,13 +220,13 @@ void fn_801D2D28(void) {
     } CameraFovKey;
     extern CameraFovKey lbl_804673D4[];
     extern u8 lbl_8047B3F4;
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern void* GSmodelGetPart(void*, u32);
     extern void GSpartGetTransform(void*, Vec*, void*, void*);
     extern void GSpartFree(void*);
     extern void GSmodelGetPosition(void*, Vec*);
     extern void GSscene_GetCameraPositionVector(Vec*);
-    extern void fn_800E0168(Vec*, Vec*, Vec*);
+    extern void GSvecSub(Vec*, Vec*, Vec*);
     extern void cameraMoveTargetOfs(s32, Vec*, f32);
     extern f32 GSlerpGetLinearInterpolationFloat(f32, f32, f32);
     extern void cameraSetFov(f32);
@@ -252,7 +252,7 @@ void fn_801D2D28(void) {
         return;
     }
 
-    frame = fn_800D3088();
+    frame = msgGetCharsPerFrame();
     sequence = lbl_8047B3EC;
     model = *(u8**)(sequence + 0x24);
     key = (CameraFovKey*)(*(u8**)(sequence + 0x2C) +
@@ -272,7 +272,7 @@ void fn_801D2D28(void) {
         } else {
             GSmodelGetPosition(*(u8**)((u8*)lbl_8047B3EC + 0x24), &origin);
         }
-        fn_800E0168(&target, &target, &origin);
+        GSvecSub(&target, &target, &origin);
         cameraMoveTargetOfs(7, &target, lbl_8047E1E0);
         GSpartFree(part);
     }
@@ -920,8 +920,8 @@ void _wazaSequenceCameraDoDollyPosition__FP21TemplateExpFileHeaderP24wazaSequenc
     extern void cameraUpdate(void);
     extern void GSscene_GetCameraDirectionVector(Vec*);
     extern void GSscene_GetCameraPositionVector(Vec*);
-    extern void fn_800E0168(Vec*, Vec*, Vec*);
-    extern void fn_800E013C(Vec*, Vec*, f32);
+    extern void GSvecSub(Vec*, Vec*, Vec*);
+    extern void vecScale(Vec*, Vec*, f32);
     extern void GSvecAdd(Vec*, Vec*, Vec*);
     extern s32 fn_800D37CC(void);
     extern void cameraMovePosition(s32, Vec*, f32);
@@ -1013,9 +1013,9 @@ void _wazaSequenceCameraDoDollyPosition__FP21TemplateExpFileHeaderP24wazaSequenc
     cameraUpdate();
     GSscene_GetCameraDirectionVector(&direction);
     GSscene_GetCameraPositionVector(&position);
-    fn_800E0168(&direction, &direction, &position);
+    GSvecSub(&direction, &direction, &position);
     direction.z = lbl_8047E1FC;
-    fn_800E013C(&direction, &direction, farDistance / nearDistance);
+    vecScale(&direction, &direction, farDistance / nearDistance);
     direction.z = height;
     GSvecAdd(&direction, &direction, &position);
     delay = duration - randomDelay;
@@ -1548,7 +1548,7 @@ void _wazaSequenceCameraCalculateParams__FP13ModelSequenceiP24wazaSequenceCamera
 {
     extern void* GSmodelGetBound(void*);
     extern void GSmodelGetRotation(void*, Vec*);
-    extern f32 fn_800E008C(Vec*);
+    extern f32 vecMag(Vec*);
     extern f32 lbl_8047E1F4, lbl_8047E1FC, lbl_8047E200, lbl_8047E20C;
     extern f32 lbl_8047E240, lbl_8047E244, lbl_8047E248, lbl_8047E24C;
     extern f32 lbl_8047E250, lbl_8047E288, lbl_8047E28C, lbl_8047E290;
@@ -1656,7 +1656,7 @@ void _wazaSequenceCameraCalculateParams__FP13ModelSequenceiP24wazaSequenceCamera
 
     *(f32*)(params + 0x20) *= distanceScale;
     *(f32*)(params + 0x24) *= distanceScale;
-    magnitude = fn_800E008C((Vec*)(bound + 0x28));
+    magnitude = vecMag((Vec*)(bound + 0x28));
     *(f32*)(params + 0x04) = lbl_8047E2CC * magnitude;
     *(f32*)(params + 0x08) = *(f32*)(bound + 0x2C);
     *(f32*)(params + 0x18) = *(f32*)(bound + 0x14);

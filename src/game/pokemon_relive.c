@@ -28,8 +28,8 @@ extern void fn_801EF8F4();
 
 /* Sound functions */
 extern void soundStop();     /* Stop sound */
-extern void fn_80165A20();     /* Fade out music */
-extern void fn_801659FC();     /* Start BGM */
+extern void std104_soundSetBackgroundMusic();     /* Fade out music */
+extern void std105_soundPlayEffect();     /* Start BGM */
 
 /* SDA2 float constants used by asm wrappers */
 extern f32 lbl_8047E678;
@@ -85,10 +85,10 @@ void fn_8025DCBC(int *param)
 {
     u32 *r3 = (u32 *)param;
     if (*r3 != 0) {
-        fn_80165A20(*r3, 0x32, 0xff);
+        std104_soundSetBackgroundMusic(*r3, 0x32, 0xff);
     }
     if (r3[1] != 0) {
-        fn_801659FC(r3[1], 0x32, 0xff);
+        std105_soundPlayEffect(r3[1], 0x32, 0xff);
     }
 }
 
@@ -99,18 +99,18 @@ void fn_8025DCBC(int *param)
 void fn_8025DD14(int *r3)
 {
     extern int fn_801653BC();
-    extern int fn_801653C4();
+    extern int std228_soundGetCurrentBackgroundMusic();
     extern int fn_801656D8();
-    extern void fn_80165A20();
+    extern void std104_soundSetBackgroundMusic();
     int iVar1;
     int iVar2;
     int iVar3;
     int iVar4;
 
-    iVar1 = fn_801653C4();
+    iVar1 = std228_soundGetCurrentBackgroundMusic();
     if (iVar1 != 0) {
         iVar2 = fn_801656D8();
-        fn_80165A20(1, 0x32, 0xff);
+        std104_soundSetBackgroundMusic(1, 0x32, 0xff);
     } else {
         iVar2 = 0;
     }
@@ -215,7 +215,7 @@ u32 fn_8025DF38(int *r3,u32 r4,u16 *r5,int r6)
     extern int GSmodelSetShadowSurface();
     extern int GSmodelClearShadowFlags();
     extern int GSmodelSetShadowFlags();
-    extern u32 fn_800FF56C();
+    extern u32 std092_getCurrentRoomID();
     extern int floorGetResource();
     extern int floorDataBiosGetShadowReciveNum();
     extern u32 floorDataBiosGetShadowReciveID();
@@ -257,7 +257,7 @@ u32 fn_8025DF38(int *r3,u32 r4,u16 *r5,int r6)
 	        if (iVar5 == 1) {
 	          for (uVar7 = 0; uVar7 < iVar5; uVar7 = uVar7 + 1) {
 	            uVar6 = floorDataBiosGetShadowReciveID(iVar4,uVar7);
-	            uVar6 = floorGetResource(fn_800FF56C(),uVar6);
+	            uVar6 = floorGetResource(std092_getCurrentRoomID(),uVar6);
 	            if (uVar6 != 0) {
 	              local_68[iVar9] = uVar6;
               iVar9 = iVar9 + 1;
@@ -326,8 +326,8 @@ u32 loadSequence(int *r3,u32 r4,u16 *r5,int r6)
 #pragma optimization_level 0
 #pragma optimizewithasm off
 #if 0
-asm void fn_8025E1BC(void) {
-#include "src/game/colosseum_battle_fn_8025E1BC.inc"
+asm void std244_spawnEffectAtPosition(void) {
+#include "src/game/colosseum_battle_std244_spawnEffectAtPosition.inc"
 }
 #endif
 #pragma pop
@@ -343,7 +343,7 @@ static inline u32 *validptr_8025E1BC(u32 *p) {
 
 #pragma push
 #pragma optimize_for_size off
-void fn_8025E1BC(float f1, float f2, float f3, float f4, float f5, float f6) {
+void std244_spawnEffectAtPosition(float f1, float f2, float f3, float f4, float f5, float f6) {
   extern u32 lbl_8047B658;
   extern u16 lbl_80478DA0;
   extern f32 lbl_8047E678;
@@ -397,10 +397,10 @@ void _preReliveDisplayHokoraParticleThreadFunc__Fv(void)
 {
     extern u32 lbl_8027A478[];
     extern u32 GSresGetResource();
-    extern u32 fn_80113F48();
+    extern u32 std093_getCurrentGroupID();
     extern int fn_80118A68();
     extern int fn_80118F04();
-    extern u32 fn_801190DC();
+    extern u32 gsParticleCreate();
     extern int waitTime__Ff();
     extern u32 lbl_8047B660;
     extern u32 lbl_8047B664;
@@ -420,9 +420,9 @@ void _preReliveDisplayHokoraParticleThreadFunc__Fv(void)
     lbl_8047B660 = 0;
     lbl_8047B664 = 0;
 skip_cleanup:
-    uVar2 = fn_80113F48();
+    uVar2 = std093_getCurrentGroupID();
     uVar2 = GSresGetResource(uVar2, 0x108a1400);
-    uVar2 = fn_801190DC(uVar2, 0, 0);
+    uVar2 = gsParticleCreate(uVar2, 0, 0);
     lbl_8047B660 = uVar2;
     fn_80118F04(uVar2, local_buf);
     fVar1 = lbl_8047E684;
@@ -469,7 +469,7 @@ u32 _expRecover__FP7PokemonUl(u32 r3,u32 r4)
     extern int pokemonWazaCreate();
     extern int pokemonResetBasisStatus();
     extern int msgctrlSetValue();
-    extern int fn_80165668();
+    extern int std130_soundUnk_801653cc();
     /* evolutionWazaLearn forward-declared at file scope */
   u32 bVar11;
   int iVar1;
@@ -509,7 +509,7 @@ u32 _expRecover__FP7PokemonUl(u32 r3,u32 r4)
       uVar3 = pokemonGetSoubiItemSoubiDataId(r3);
       pokemonGetFriendFormPokemonFriendFilterId(r3,uVar3,0);
       uVar2 = pokemonBiosGetLevel(r3);
-      fn_80165668(0x4ca,0,0xff);
+      std130_soundUnk_801653cc(0x4ca,0,0xff);
       msgctrlSetValue(0x2f,uVar2 & 0xff);
       winMsgOpenField(0x44ce,1,0);
       pokemonGetStatus(r3,0,0x87,0);
@@ -553,7 +553,7 @@ void preReliveMain(void)
     extern u32 _DAT_804782c0;
     extern u32 _DAT_804782c4;
     extern u32 menuPokemonOpen();
-    extern int fn_800FF730();
+    extern int std098_mapWarpToMenuRoom();
     extern int winMsgCloseField();
     extern int floorSetFadeScript();
     extern int pokemonBiosGetDarkpokemonDataId();
@@ -637,14 +637,14 @@ void preReliveMain(void)
     }
     if (iVar1 == 2) {
       fn_8025DD14((int*)auStack_28);
-      fn_80165668(0x3c8,0,0xff);
+      std130_soundUnk_801653cc(0x3c8,0,0xff);
       uVar2 = heroGetStatus(0,3,lbl_8047B66C & 0xffff);
       _DAT_804782c0 = (int)pokemonGetStatus(uVar2,0,0x6e,0);
       _DAT_804782bc = 1;
       _DAT_804782c4 = lbl_8047B66C;
       fadeSet((double)lbl_8047E680,3);
       fadeCheck(1);
-      fn_800FF730(0x385);
+      std098_mapWarpToMenuRoom(0x385);
       floorSetFadeScript(0,0);
       _threadSwitch();
       fadeSet((double)lbl_8047E68C,2);
@@ -674,7 +674,7 @@ void preReliveMain(void)
           fadeSet((double)lbl_8047E680,3);
           fadeCheck(1);
           fn_8025DD14((int*)auStack_28);
-          fn_800FF730(0x385);
+          std098_mapWarpToMenuRoom(0x385);
           floorSetFadeScript(0,0);
           _threadSwitch();
           fadeSet((double)lbl_8047E68C,2);
@@ -791,7 +791,7 @@ int _cbWazaForget__FP7PokemonUsl(u32 r3,u32 r4)
 void reliveCeremonyAll(u32 r3)
 
 {
-    extern s8 fn_8001E184();
+    extern s8 std011_dialogDisplayYesNoMenu();
     extern int menuNameEntryOpenNoFade();
     extern int pokemonBiosSetFriend();
     extern int pokemonBiosSetPoolFriend();
@@ -839,7 +839,7 @@ void reliveCeremonyAll(u32 r3)
       fn_80121B4C(uVar1,0x3e);
     }
     pokemonSetDp((double)lbl_8047E688,uVar1);
-    fn_80165668(0x3f7,0,0xff);
+    std130_soundUnk_801653cc(0x3f7,0,0xff);
     sVar5 = pokemonBiosGetPokemonWazaDataId(uVar1,0);
     if (sVar5 != 0) {
       uVar2 = pokemonBiosGetNicknamePtr(uVar1);
@@ -886,11 +886,11 @@ void reliveCeremonyAll(u32 r3)
         }
       }
     }
-    fn_80165668(0x3ca,0,0xff);
+    std130_soundUnk_801653cc(0x3ca,0,0xff);
     exribbonSetNarionalRibbon(uVar1);
     winMsgOpenField(0x3b0c,1,0);
     winMsgOpenField(0x3b0d,1,1);
-    cVar7 = fn_8001E184();
+    cVar7 = std011_dialogDisplayYesNoMenu();
     if (cVar7 != '\0') {
       winMsgCloseField(1);
     }
@@ -1011,7 +1011,7 @@ void waitTime__Ff(float r3)
   fVar1 = lbl_8047E660;
   while (fVar1 < dVar4) {
     _threadSwitch();
-    uVar2 = fn_800D3088();
+    uVar2 = msgGetCharsPerFrame();
     fVar1 += (float)uVar2;
   }
 

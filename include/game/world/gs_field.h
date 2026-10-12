@@ -135,12 +135,12 @@ typedef struct GSFieldCamera {
 s32 GSfield_RayCast(void* origin, void* direction);
 
 /**
- * fn_8010E53C -- Perform a swept-sphere collision test.
+ * colsysWallSphere -- Perform a swept-sphere collision test.
  */
 s32 GSfield_SphereSweep(void* origin, void* direction, f32 radius);
 
 /**
- * fn_8010EFE4 -- Test a line segment against a collision plane.
+ * colsysWallAll -- Test a line segment against a collision plane.
  */
 s32 GSfield_LinePlaneTest(void* segStart, void* segEnd,
                            void* planeNormal, s32 doubleSided);
@@ -161,7 +161,7 @@ void* floorReadMapPreFunc(void* owner, u32 param, u32 alloc_size);
  * Public API -- Field Camera (gs_field_world.c)
  * =================================================================== */
 
-u8 fn_80117AE4(u32 mode);
+u8 std171_mapSetTextureChange(u32 mode);
 
 /**
  * floorUpdateFieldCamera -- Update the field camera each frame.

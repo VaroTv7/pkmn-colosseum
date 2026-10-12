@@ -7,14 +7,14 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
         u32 fieldId;
         u32 modelResId;
     } BattleIntroModelMap;
-    extern u32 fn_80113F48(void);
+    extern u32 std093_getCurrentGroupID(void);
     extern void* fn_80113D58(u32 id);
     extern void* fn_800F92D4(u32 id);
-    extern void* fn_8018D998(s32 group, s32 id);
+    extern void* peopleIsInGroup(s32 group, s32 id);
     extern void* peopleSearchID(void*);
     extern void* peopleGetPosition(void* person);
-    extern void* fn_8018FCBC(void* person);
-    extern void fn_800E0168(void* dst, const void* a, const void* b);
+    extern void* peopleGetPositionPtr(void* person);
+    extern void GSvecSub(void* dst, const void* a, const void* b);
     extern void peopleMoveCheck(s32 group, s32 id, s32 wait);
     extern void fn_8018A280(s32 group, s32 id, s32 wait);
     extern void GSmodelSetAnimIndex(void* model, s32 index);
@@ -37,10 +37,10 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
     extern void fn_800E4014(void* model, u8 visible);
     extern void fn_800E4BF4(void* model);
     extern s32 fn_801662E8(u32 arg0, u32 arg1);
-    extern void fn_801668DC(u32 id, u32 volume, u32 arg2);
-    extern void fn_80165548(u32 handle);
-    extern void fn_801653CC(s32 id, s32 fade, s32 volume);
-    extern void fn_80166AB8(s32 id, s32 pan, s32 volume);
+    extern void soundPauseSong(u32 id, u32 volume, u32 arg2);
+    extern void soundResumeMusic(u32 handle);
+    extern void soundPlayFanfare(s32 id, s32 fade, s32 volume);
+    extern void soundStartRaw(s32 id, s32 pan, s32 volume);
     extern void _threadSwitch(void);
     extern f32 lbl_8047B3E0;
     extern f32 lbl_8047E188;
@@ -81,7 +81,7 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
     color = lbl_8047E180;
     effectModel = NULL;
     for (i = 0; i < 11; i++) {
-        if (map[i].fieldId == fn_80113F48()) {
+        if (map[i].fieldId == std093_getCurrentGroupID()) {
             effectModel = fn_800F92D4(map[i].modelResId);
             break;
         }
@@ -90,7 +90,7 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
     for (i = 0; i < 6; i++) {
         lbl_80467378[i] = NULL;
     }
-    person = peopleSearchID(fn_8018D998(peopleGroup, peopleId));
+    person = peopleSearchID(peopleIsInGroup(peopleGroup, peopleId));
     hadPerson = person != NULL;
     if (person != NULL) {
         void* part = (void*)fn_800EE150((u32)effectModel, 0xE);
@@ -101,8 +101,8 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
         ((u32*)personPosition)[0] = ((u32*)personPos)[0];
         ((u32*)personPosition)[1] = ((u32*)personPos)[1];
         ((u32*)personPosition)[2] = ((u32*)personPos)[2];
-        fn_800E0168(delta, pos, fn_8018FCBC(person));
-        fn_8018805C(peopleGroup, peopleId,
+        GSvecSub(delta, pos, peopleGetPositionPtr(person));
+        peopleStartTurn(peopleGroup, peopleId,
                     (f32)fn_800CE2D8(delta[0], delta[2]),
                     lbl_8047E18C);
         state = 1;
@@ -122,7 +122,7 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
         case 3:
             handle = fn_801662E8(0, 0x406);
             if ((u32)(handle + 0x10000) != 0xFFFFFFFFU) {
-                fn_801668DC(handle, 0x1068, 0);
+                soundPauseSong(handle, 0x1068, 0);
             }
             if ((u32)i < 6) {
                 void* part = (void*)fn_800EE150((u32)effectModel, (s32)partTable[i]);
@@ -133,12 +133,12 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
                 fn_800E43A4(lbl_80467378[i], pos, lbl_80467378);
                 fn_800E407C(lbl_80467378[i], scale);
                 fn_800E5BE0(lbl_80467378[i], &color);
-                fn_80166AB8(0x3C3, 0, 0);
+                soundStartRaw(0x3C3, 0, 0);
             }
             state = 4;
             break;
         case 4:
-            frameDelta = (f32)fn_800D3088() / (f32)fn_800D37CC();
+            frameDelta = (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
             timer += frameDelta;
             lbl_8047B3E0 = frameDelta;
             if (timer >= lbl_8047E190) {
@@ -160,7 +160,7 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
                 GSmodelSetAnimType(effectModel, 0);
                 GSmodelStartAnimation(effectModel);
             }
-            fn_801653CC(0x19, 2000, 0xFF);
+            soundPlayFanfare(0x19, 2000, 0xFF);
             state = 6;
             break;
         case 6:
@@ -169,7 +169,7 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
             }
             timer = lbl_8047E188;
             while (timer < lbl_8047E198) {
-                frameDelta = (f32)fn_800D3088() / (f32)fn_800D37CC();
+                frameDelta = (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                 timer += frameDelta;
                 lbl_8047B3E0 = frameDelta;
                 _threadSwitch();
@@ -185,18 +185,18 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
             }
             timer = lbl_8047E188;
             while (timer < lbl_8047E198) {
-                frameDelta = (f32)fn_800D3088() / (f32)fn_800D37CC();
+                frameDelta = (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                 timer += frameDelta;
                 lbl_8047B3E0 = frameDelta;
                 _threadSwitch();
             }
-            fn_80165548(handle);
+            soundResumeMusic(handle);
             state = 8;
             break;
         case 8:
             if (hadPerson != 0) {
-                peopleSearchID(fn_8018D998(peopleGroup, peopleId));
-                fn_8018805C(peopleGroup, peopleId, personPosition[1],
+                peopleSearchID(peopleIsInGroup(peopleGroup, peopleId));
+                peopleStartTurn(peopleGroup, peopleId, personPosition[1],
                             lbl_8047E18C);
                 state = 2;
             } else {

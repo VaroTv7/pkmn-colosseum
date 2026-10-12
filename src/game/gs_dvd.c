@@ -89,7 +89,7 @@ typedef struct GSsndReverbState {
 /* ===== External SDK / engine functions ===== */
 extern void  GSlogWrite(const char* fmt, ...);         /* OSReport / GSlog */
 extern void* GSresGetResource(void* ptr, u32 param);        /* resource resolution */
-extern void  fn_801669E4(u32 a, u32 b, u32 c);         /* sound subsystem */
+extern void  soundStopRaw(u32 a, u32 b, u32 c);         /* sound subsystem */
 extern void  fn_8016A644(void* ptr);                    /* resource cleanup */
 extern void  fn_80169520(void* ptr);                    /* status flag update */
 
@@ -128,7 +128,7 @@ void fn_80167FA4(void);
  *   lbl_80273764: "_sndCheckSndWorkALL:End"
  * ================================================================== */
 extern u32 lbl_8047B0E8;
-extern void fn_801666BC(u32 index);
+extern void soundGetStatus(u32 index);
 
 void _sndCheckSndWorkALL(void)
 {
@@ -136,7 +136,7 @@ void _sndCheckSndWorkALL(void)
 
     GSlogWrite(lbl_80273748);
     for (i = 0; i < lbl_8047B0E8; i++) {
-        fn_801666BC(i);
+        soundGetStatus(i);
     }
     GSlogWrite(lbl_80273764);
 }
@@ -531,7 +531,7 @@ extern u32 sndFXCtrl(u32 voice, u8 control, u8 value);
 extern u32 sndFXKeyOff(u32 voice);
 extern void sndSeqVolume(u8 group, u16 volume, u32 sequence, u8 fade);
 extern u32 sndFXCheck(u32 voice);
-extern u32 fn_80166B3C(u32 id, u32 arg1, u32 arg2);
+extern u32 soundAttachWork(u32 id, u32 arg1, u32 arg2);
 extern BOOL DVDSeekAsyncPrio(void* fileInfo, s32 offset,
                             void (*callback)(s32 result, void* fileInfo),
                             s32 priority);
@@ -563,7 +563,7 @@ extern u32 ARGetDMAStatus(void);
 extern void __assert(const char* file, u32 line, const char* condition);
 extern BOOL DVDOpen(const char* path, void* fileInfo);
 extern u32 sndFXStartEx(u16 id, u8 volume, u8 pan, u8 studio);
-extern void fn_80166C34(u32 reverb);
+extern void soundApplyReverb(u32 reverb);
 extern u32 fn_8015A368(u8 group, u16 id, void* resource, void* params,
                       u32 flags);
 extern void DCFlushRange(void* address, u32 size);
@@ -583,21 +583,21 @@ extern u8 fn_80159EF0(void* resource, u16 soundId, void* sampleData,
 extern const f32 lbl_8047D5A0;
 extern const f32 lbl_8047D5A4;
 extern const f32 lbl_8047D5A8;
-extern void fn_800D88DC(u32 enable);
-extern void fn_800D888C(u32 value);
-extern void fn_800D9B58(f32 red, f32 green, f32 blue, f32 alpha);
-extern void fn_800DA4C4(u32, u32, u32);
-extern void fn_800DA2BC(u32, u32, u32);
+extern void gfxSetFlags(u32 enable);
+extern void gfxClearFlags(u32 value);
+extern void gfxSetOrtho(f32 red, f32 green, f32 blue, f32 alpha);
+extern void gfxSetBlendMode(u32, u32, u32);
+extern void gfxSetUpdates(u32, u32, u32);
 extern void fn_800DA100(u32, u32, u32, u32, u32, u32);
-extern void fn_800DA1E8(u32, u32, u32);
+extern void gfxSetZMode(u32, u32, u32);
 extern void fn_800D9ED8(u32);
-extern void fn_800DA028(u32);
-extern void fn_800D7820(u32);
-extern void fn_800D6A00(u32);
-extern void fn_800D67BC(u32);
+extern void gfxSetCullMode(u32);
+extern void gfxSetVtxDesc(u32);
+extern void gfxSetPrimitive(u32);
+extern void gfxBegin(u32);
 extern void fn_800D5FA4(u32);
 extern void fn_800D5A38(u32, u32);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 extern u16 _toolentryAlloc__FUl(u32 size);
 extern void* fn_800D7894(void);
 extern void fn_800D7868(void*, u32, u32, u32, u32, u8, void*, u8);
@@ -668,7 +668,7 @@ u8 fn_80167070(u32 index, u32 stop)
         return 0;
     }
     if ((u8)stop == 1) {
-        fn_801669E4(index, 0, 0);
+        soundStopRaw(index, 0, 0);
     }
     _sndInitParms(entry, work);
     fn_8016782C((u8*)work);
@@ -677,7 +677,7 @@ u8 fn_80167070(u32 index, u32 stop)
     return 1;
 }
 
-u8 fn_80167118(u32 slot, u32 stream, const char* path, u32 offset,
+u8 soundPushWave(u32 slot, u32 stream, const char* path, u32 offset,
                void* resourceOwner, u32 resourceId3, u32 resourceId1,
                u32 resourceId2)
 {
@@ -755,12 +755,12 @@ void* _sndSetSampleDataUploadCallbackFunction(u32 offset, u32 length)
     return lbl_8047B0C0;
 }
 
-u32 fn_8016758C(GSsndEntry* entry, u32 id)
+u32 soundStartFX(GSsndEntry* entry, u32 id)
 {
     GSsndWork* work;
 
     if (((GSsndFlagBits*)&entry->flags)->active != 1) {
-        fn_80166B3C(id, 0, 0);
+        soundAttachWork(id, 0, 0);
     }
     work = entry->work;
     if (work != NULL) {
@@ -791,7 +791,7 @@ u32 fn_8016761C(GSsndEntry* entry, u16 value)
     if (resource == NULL) {
         return 0;
     }
-    fn_80166C34(entry->reverb);
+    soundApplyReverb(entry->reverb);
     params.unk00 = 4;
     params.unk04 = 0;
     params.unk08 = 0;
@@ -956,19 +956,19 @@ void fn_80168284(void)
         if (lbl_804526E0.drawingCount != 0) {
             capacity = lbl_804526E0.capacity;
             filter = lbl_804526E0.filters;
-            fn_800D88DC(1);
-            fn_800D888C(6);
-            fn_800D9B58(lbl_8047D5A0, lbl_8047D5A0, lbl_8047D5A4,
+            gfxSetFlags(1);
+            gfxClearFlags(6);
+            gfxSetOrtho(lbl_8047D5A0, lbl_8047D5A0, lbl_8047D5A4,
                         lbl_8047D5A8);
-            fn_800DA4C4(1, 6, 7);
-            fn_800DA2BC(1, 1, 0);
+            gfxSetBlendMode(1, 6, 7);
+            gfxSetUpdates(1, 1, 0);
             fn_800DA100(0, 7, 0, 0, 7, 0);
-            fn_800DA1E8(1, 1, 1);
+            gfxSetZMode(1, 1, 1);
             fn_800D9ED8(1);
-            fn_800DA028(0);
-            fn_800D7820(lbl_804526E0.renderState);
-            fn_800D6A00(6);
-            fn_800D67BC((u16)(lbl_804526E0.drawingCount * 4));
+            gfxSetCullMode(0);
+            gfxSetVtxDesc(lbl_804526E0.renderState);
+            gfxSetPrimitive(6);
+            gfxBegin((u16)(lbl_804526E0.drawingCount * 4));
             for (index = 0; (u8)index < capacity; index++, filter++) {
                 if (filter->drawing != 0) {
                     fn_800D5FA4(0);
@@ -981,7 +981,7 @@ void fn_80168284(void)
                     fn_800D5A38(0, index);
                 }
             }
-            fn_800D6728();
+            gfxEnd();
             fn_800D9ED8(0);
         }
     }
@@ -1161,7 +1161,7 @@ u8 _sndSetVolumeWork(u32 id, u32 volume)
 
     if (((GSsndFlagBits*)&entry->flags)->active != 1) {
         if (((GSsndFlagBits*)&entry->flags)->isSe == 1) {
-            fn_80166B3C(id, 0, 0);
+            soundAttachWork(id, 0, 0);
         } else {
             return 0;
         }
@@ -1231,7 +1231,7 @@ u32 fn_80167720(u32 handle)
     return 0;
 }
 
-u32 fn_80167768(u32 unkC, u32 unk10)
+u32 soundFindOwner(u32 unkC, u32 unk10)
 {
     GSsndEntry* entry;
     u32 count;

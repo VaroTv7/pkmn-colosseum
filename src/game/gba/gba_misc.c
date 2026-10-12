@@ -136,8 +136,8 @@ typedef struct GbaPokemon {
  * Source-level names only: the macros preserve the original fn_* linker
  * symbols for objdiff while documenting the recovered behavior.
  */
-#define GbaMisc_GetMappedContextByte fn_80089B8C
-#define GbaMisc_HasActiveContextState fn_80089C10
+#define GbaMisc_GetMappedContextByte std213_gbaGetLinkedGameId
+#define GbaMisc_HasActiveContextState std212_gbaIsLinkActive
 #define GbaMisc_PollEntryStatusA fn_80089CA8
 #define GbaMisc_ResetEntryStatusA fn_80089D30
 #define GbaMisc_GetEntryStatus fn_8008A9E4
@@ -165,7 +165,7 @@ typedef struct GbaPokemon {
     GbaMisc_EntryCounterBAtHalfOffset(GBA_MISC_ENTRY_HALF_OFFSET(idx))
 
 /* ===== External function declarations ===== */
-extern void fn_8001E184();
+extern void std011_dialogDisplayYesNoMenu();
 extern void fn_80071700();
 extern void fn_800719A8();
 extern s32 fn_80071AE4();
@@ -187,7 +187,7 @@ extern void fn_80083D30();
 extern void fn_80083ECC();
 extern void __cvt_fp2unsigned();
 extern void memmove();
-extern void fn_800D3088();
+extern void msgGetCharsPerFrame();
 extern void fn_800D37CC();
 extern void GSmodelSetGSparticleLinkAttachMode();
 extern void GSmodelLinkToGSparticleBank();
@@ -206,7 +206,7 @@ extern void fn_800F9AEC();
 extern void fn_800F9C04();
 extern void floorRequestChange();
 extern void floorSetFadeScript();
-extern void fn_80113F48();
+extern void std093_getCurrentGroupID();
 extern void fn_80118874();
 extern void pokemonBiosSetEventGetFlag();
 extern void pokemonBiosSetFightTrainerPokemonDataId();
@@ -262,11 +262,11 @@ u32 fn_800896C8(void);
 void fn_800896D0(u32 v);
 void fn_800896D8(u32 v);
 void fn_800896E0(u32 v);
-void fn_800896E8(void);
+void std215_battleStartTrainerWithPrompt(void);
 void fn_80089978(void);
 u8 GbaMisc_GetMappedContextByte(void);
 s32 GbaMisc_HasActiveContextState(void);
-s32 fn_80089C54(void);
+s32 std220_gbaUnk_80083bf8(void);
 void fn_80089C84(s32 param);
 s32 GbaMisc_PollEntryStatusA(s32 r31);
 s32 GbaMisc_ResetEntryStatusA(s32 param);
@@ -452,10 +452,10 @@ void fn_800896E0(u32 v) {
 }
 
 /* 0x800896E8 | size: 0x290 */
-void fn_800896E8(void) {
+void std215_battleStartTrainerWithPrompt(void) {
     extern void fn_80089978();
     extern void msgctrlSetValue();
-    extern void fn_80189990();
+    extern void std054_characterTalk();
     extern void peopleSetVisible();
     extern void fadeCheck();
     extern void fieldStartEncount();
@@ -501,7 +501,7 @@ void fn_800896E8(void) {
         r3 = r30;
         r4 = r26;
         r5 = 0xe0;
-        fn_80189990();
+        std054_characterTalk();
 
     } else {
         r4 = r31 + 0x4060;
@@ -510,8 +510,8 @@ void fn_800896E8(void) {
         r3 = r30;
         r4 = r26;
         r5 = 0xe0;
-        fn_80189990();
-        ((void(*)(void))fn_8001E184)();
+        std054_characterTalk();
+        ((void(*)(void))std011_dialogDisplayYesNoMenu)();
         tmp = (s8)r3;
         if ((s32)tmp != 0) {
             if ((s32)tmp < 0) {
@@ -853,7 +853,7 @@ s32 GbaMisc_HasActiveContextState(void) {
 /* 0x80089C54 | size: 0x30 */
 #pragma push
 #pragma scheduling off
-s32 fn_80089C54(void) {
+s32 std220_gbaUnk_80083bf8(void) {
     extern s32 fn_80083BF8(s32);
     return fn_80083BF8(0) > 0;
 }
@@ -1044,7 +1044,7 @@ u32 fn_80089F78(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     extern u16 pokemonBiosGetPokemonDataId(void*);
     extern void pokemonGetSex();
     extern void gamedataAttestBiosGetLangareaId();
-    extern void fn_801EF634();
+    extern void std103_battleGetResult();
     extern void fightTargetGetPtr();
     extern void fightFloorIsUseFightTimerCommand();
     extern void fightFloorCheckFightActionFightOutPokemonIrekaeSelect();
@@ -1683,7 +1683,7 @@ u32 fn_80089F78(u32 arg0, u32 arg1, u32 arg2, u32 arg3) {
     r5 = r5 + 0x24;
     ((void(*)(void))fn_80072D58)();
     do {
-        fn_801EF634();
+        std103_battleGetResult();
         tmp = r3 & 0xFFFF;
         if (tmp == 1) {
             r3 = r15;
@@ -2619,8 +2619,8 @@ void fn_8008C6FC(void) {
 #pragma push
 #pragma peephole off
 void GbaMisc_RunFlagDispatch(void) {
-    extern s32 fn_80113F48(void);
-    extern s32 fn_801906A0(s32);
+    extern s32 std093_getCurrentGroupID(void);
+    extern s32 std082_flagGetValue(s32);
     extern void _flagSet(s32, s32);
     s32 arg;
     u32 state;
@@ -2631,8 +2631,8 @@ void GbaMisc_RunFlagDispatch(void) {
     *(u32*)&lbl_8047A694 = 0;
     *(u32*)((u8*)&lbl_8047A694 + 0x4) = 0;
     *(u32*)&lbl_8047A690 = 0;
-    arg = fn_80113F48();
-    state = fn_801906A0(0xb5d);
+    arg = std093_getCurrentGroupID();
+    state = std082_flagGetValue(0xb5d);
     offset = state << 2;
     handler = *(void (**)(s32))((u8*)lbl_802EEC70 + offset);
     handler(arg);
@@ -2648,8 +2648,8 @@ void GbaMisc_RunFlagDispatch(void) {
 #pragma push
 #pragma scheduling off
 s32 fn_8008C78C(void) {
-    extern s32 fn_801906A0(s32);
-    return fn_801906A0(0xb5d);
+    extern s32 std082_flagGetValue(s32);
+    return std082_flagGetValue(0xb5d);
 }
 #pragma pop
 
@@ -2657,11 +2657,11 @@ s32 fn_8008C78C(void) {
 void fn_8008C7B0(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_80190528();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std078_flagSetFalse();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x30];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -2695,7 +2695,7 @@ void fn_8008C7B0(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -2710,13 +2710,13 @@ void fn_8008C7B0(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r31;
     r4 = r4 + 0x1000;
@@ -2757,11 +2757,11 @@ void fn_8008C7B0(void) {
     ((void(*)(void))GSmodelStartAnimation)();
     r3 = 0x6AF0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xB720000;
     r28 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r27 = tmp;
@@ -2825,17 +2825,17 @@ void fn_8008C7B0(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xD0D0000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD0D0000;
     r29 = r3;
     r3 = r4 + 0x1001;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r30 = tmp;
@@ -2843,27 +2843,27 @@ void fn_8008C7B0(void) {
     r5 = r31;
     r6 = r29;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r27;
     r5 = r31;
     r6 = r30;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = 0x9;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r27;
     r4 = 0x6;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x8d0;
-    fn_80190528();
+    std078_flagSetFalse();
     r3 = 0x1;
     ((void(*)(void))floorRequestChange)();
     r3 = 0x0;
@@ -2876,10 +2876,10 @@ void fn_8008C7B0(void) {
 void fn_8008CACC(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -2912,7 +2912,7 @@ void fn_8008CACC(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -2927,13 +2927,13 @@ void fn_8008CACC(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r31;
     r4 = r4 + 0x1000;
@@ -2994,7 +2994,7 @@ void fn_8008CACC(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r30 = 0x64;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -3009,13 +3009,13 @@ void fn_8008CACC(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0x6BC0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r28 = tmp;
@@ -3051,25 +3051,25 @@ void fn_8008CACC(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xD0C0000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r6 = tmp;
     r4 = r28;
     r5 = r31;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = 0x4;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -3084,11 +3084,11 @@ void fn_8008CACC(void) {
 void fn_8008CDD8(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
+    extern void std070_characterAttachToCharacter();
     extern void scriptWaitSyncMotion();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -3121,7 +3121,7 @@ void fn_8008CDD8(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -3136,13 +3136,13 @@ void fn_8008CDD8(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r31;
     r4 = r4 + 0x1000;
@@ -3183,7 +3183,7 @@ void fn_8008CDD8(void) {
     ((void(*)(void))GSmodelStartAnimation)();
     r3 = 0x6AF0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r28 = tmp;
@@ -3234,25 +3234,25 @@ void fn_8008CDD8(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xD0B0000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r6 = tmp;
     r4 = r28;
     r5 = r31;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = 0xb;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = 0x1;
     scriptWaitSyncMotion();
@@ -3260,7 +3260,7 @@ void fn_8008CDD8(void) {
     r4 = 0xc;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -3275,10 +3275,10 @@ void fn_8008CDD8(void) {
 void fn_8008D0A0(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -3311,7 +3311,7 @@ void fn_8008D0A0(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -3326,13 +3326,13 @@ void fn_8008D0A0(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r31;
     r4 = r4 + 0x1000;
@@ -3373,7 +3373,7 @@ void fn_8008D0A0(void) {
     ((void(*)(void))GSmodelStartAnimation)();
     r3 = 0x6AF0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r28 = tmp;
@@ -3424,25 +3424,25 @@ void fn_8008D0A0(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xD0A0000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r6 = tmp;
     r4 = r28;
     r5 = r31;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = 0x9;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -3457,10 +3457,10 @@ void fn_8008D0A0(void) {
 void fn_8008D348(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x50];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -3504,7 +3504,7 @@ void fn_8008D348(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r22 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -3519,13 +3519,13 @@ void fn_8008D348(void) {
     while (r21 < r22) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r21 = r21 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r31;
     r4 = r4 + 0x1000;
@@ -3583,31 +3583,31 @@ void fn_8008D348(void) {
     ((void(*)(void))GSmodelSetGSparticleLinkAttachMode)();
     r3 = 0x6AF0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BC0000;
     r30 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r24 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r25 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r26 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r27 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r29 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r28 = tmp;
@@ -3736,37 +3736,37 @@ void fn_8008D348(void) {
     while (r21 < r22) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r21 = r21 + r3;
 
     }
     r3 = 0xD090000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD090000;
     r23 = r3;
     r3 = r4 + 0x1001;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD090000;
     r22 = r3;
     r3 = r4 + 0x1006;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD090000;
     r21 = r3;
     r3 = r4 + 0x1002;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD090000;
     r20 = r3;
     r3 = r4 + 0x1003;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD090000;
     r19 = r3;
     r3 = r4 + 0x1004;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD090000;
     r18 = r3;
     r3 = r4 + 0x1005;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r17 = tmp;
@@ -3774,84 +3774,84 @@ void fn_8008D348(void) {
     r5 = r31;
     r6 = r23;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r24;
     r5 = r31;
     r6 = r22;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r25;
     r5 = r31;
     r6 = r21;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r26;
     r5 = r31;
     r6 = r20;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r27;
     r5 = r31;
     r6 = r19;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r29;
     r5 = r31;
     r6 = r18;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r28;
     r5 = r31;
     r6 = r17;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = 0xCE60000;
     r4 = 0x1;
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r30;
     r4 = 0x9;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r24;
     r4 = 0x7;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r25;
     r4 = 0xa;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r26;
     r4 = 0xa;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r27;
     r4 = 0xa;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r29;
     r4 = 0xa;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = 0xa;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -3866,11 +3866,11 @@ void fn_8008D348(void) {
 void fn_8008D938(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
+    extern void std070_characterAttachToCharacter();
     extern void scriptWaitSyncMotion();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x60];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -3917,7 +3917,7 @@ void fn_8008D938(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r16 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -3932,13 +3932,13 @@ void fn_8008D938(void) {
     while (r14 < r16) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r14 = r14 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r15;
     r4 = r4 + 0x1000;
@@ -3999,7 +3999,7 @@ void fn_8008D938(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r16 = 0x32;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -4014,7 +4014,7 @@ void fn_8008D938(void) {
     while (r14 < r16) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r14 = r14 + r3;
 
     }
@@ -4037,39 +4037,39 @@ void fn_8008D938(void) {
     ((void(*)(void))GSmodelSetGSparticleLinkAttachMode)();
     r3 = 0x6BC0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r31 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD290000;
     r30 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r29 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r28 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD290000;
     r27 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r26 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r25 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r24 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r15;
     r23 = tmp;
@@ -4209,155 +4209,155 @@ void fn_8008D938(void) {
     while (r14 < r16) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r14 = r14 + r3;
 
     }
     r3 = 0xD080000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD080000;
     r3 = r4 + 0x1008;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD080000;
     r14 = r3;
     r3 = r4 + 0x1001;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD080000;
     r22 = r3;
     r3 = r4 + 0x1002;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD080000;
     r21 = r3;
     r3 = r4 + 0x1003;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD080000;
     r20 = r3;
     r3 = r4 + 0x1004;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD080000;
     r19 = r3;
     r3 = r4 + 0x1005;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD080000;
     r18 = r3;
     r3 = r4 + 0x1006;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD080000;
     r17 = r3;
     r3 = r4 + 0x1007;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r15;
     r4 = r31;
     r16 = tmp;
     r5 = r15;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r30;
     r5 = r15;
     r6 = r14;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r29;
     r5 = r15;
     r6 = r22;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r28;
     r5 = r15;
     r6 = r21;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r27;
     r5 = r15;
     r6 = r20;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r26;
     r5 = r15;
     r6 = r19;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r25;
     r5 = r15;
     r6 = r18;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r24;
     r5 = r15;
     r6 = r17;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r23;
     r5 = r15;
     r6 = r16;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = 0xCE60000;
     r4 = 0x0;
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r31;
     r4 = 0x6;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r30;
     r4 = 0x9;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r29;
     r4 = 0xb;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = 0x9;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r27;
     r4 = 0xb;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r26;
     r4 = 0x9;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r25;
     r4 = 0xb;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r24;
     r4 = 0x9;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r24;
     r4 = 0xb;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r23;
     r4 = 0xb;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r31;
     r4 = 0x1;
     scriptWaitSyncMotion();
@@ -4392,52 +4392,52 @@ void fn_8008D938(void) {
     r4 = 0x7;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r30;
     r4 = 0xa;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r29;
     r4 = 0xc;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = 0xa;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r26;
     r4 = 0xa;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r27;
     r4 = 0xc;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r25;
     r4 = 0xc;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r24;
     r4 = 0xa;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r24;
     r4 = 0xc;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r23;
     r4 = 0xc;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r31;
     r4 = 0x1;
     scriptWaitSyncMotion();
@@ -4472,52 +4472,52 @@ void fn_8008D938(void) {
     r4 = 0x6;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r30;
     r4 = 0x9;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r29;
     r4 = 0xb;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = 0x9;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r27;
     r4 = 0xb;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r26;
     r4 = 0x9;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r25;
     r4 = 0xb;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r24;
     r4 = 0x9;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r24;
     r4 = 0xb;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r23;
     r4 = 0xb;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -4532,10 +4532,10 @@ void fn_8008D938(void) {
 void fn_8008E320(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x40];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -4573,7 +4573,7 @@ void fn_8008E320(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r27 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -4588,13 +4588,13 @@ void fn_8008E320(void) {
     while (r26 < r27) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r26 = r26 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r31;
     r4 = r4 + 0x1000;
@@ -4655,7 +4655,7 @@ void fn_8008E320(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r27 = 0x32;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -4670,25 +4670,25 @@ void fn_8008E320(void) {
     while (r26 < r27) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r26 = r26 + r3;
 
     }
     r3 = 0x6AF0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BC0000;
     r30 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r29 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r28 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r27 = tmp;
@@ -4778,25 +4778,25 @@ void fn_8008E320(void) {
     while (r26 < r25) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r26 = r26 + r3;
 
     }
     r3 = 0xD070000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD070000;
     r25 = r3;
     r3 = r4 + 0x1001;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD070000;
     r26 = r3;
     r3 = r4 + 0x1003;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD070000;
     r24 = r3;
     r3 = r4 + 0x1002;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r23 = tmp;
@@ -4804,45 +4804,45 @@ void fn_8008E320(void) {
     r5 = r31;
     r6 = r25;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r29;
     r5 = r31;
     r6 = r26;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r28;
     r5 = r31;
     r6 = r24;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r27;
     r5 = r31;
     r6 = r23;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r30;
     r4 = 0xa;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r29;
     r4 = 0x5;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = 0xe;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r27;
     r4 = 0xe;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -4857,11 +4857,11 @@ void fn_8008E320(void) {
 void fn_8008E7D4(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
+    extern void std070_characterAttachToCharacter();
     extern void scriptWaitSyncMotion();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x30];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -4897,7 +4897,7 @@ void fn_8008E7D4(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -4912,13 +4912,13 @@ void fn_8008E7D4(void) {
     while (r27 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r27 = r27 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r28;
     r4 = r4 + 0x1000;
@@ -4979,7 +4979,7 @@ void fn_8008E7D4(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x32;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -4994,21 +4994,21 @@ void fn_8008E7D4(void) {
     while (r27 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r27 = r27 + r3;
 
     }
     r3 = 0x6AF0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BC0000;
     r31 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r30 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r28;
     r29 = tmp;
@@ -5085,21 +5085,21 @@ void fn_8008E7D4(void) {
     while (r27 < r26) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r27 = r27 + r3;
 
     }
     r3 = 0xD060000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD060000;
     r26 = r3;
     r3 = r4 + 0x1001;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD060000;
     r27 = r3;
     r3 = r4 + 0x1002;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r28;
     r25 = tmp;
@@ -5107,24 +5107,24 @@ void fn_8008E7D4(void) {
     r5 = r28;
     r6 = r26;
     r7 = 0x2;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = r30;
     r5 = r28;
     r6 = r27;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = r29;
     r5 = r28;
     r6 = r25;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = 0x7;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r31;
     r4 = 0x1;
     scriptWaitSyncMotion();
@@ -5132,17 +5132,17 @@ void fn_8008E7D4(void) {
     r4 = 0x8;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r30;
     r4 = 0x5;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r29;
     r4 = 0xe;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -5157,10 +5157,10 @@ void fn_8008E7D4(void) {
 void fn_8008EC28(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -5193,7 +5193,7 @@ void fn_8008EC28(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -5208,13 +5208,13 @@ void fn_8008EC28(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r31;
     r4 = r4 + 0x1000;
@@ -5255,7 +5255,7 @@ void fn_8008EC28(void) {
     ((void(*)(void))GSmodelStartAnimation)();
     r3 = 0x6AF0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r28 = tmp;
@@ -5306,25 +5306,25 @@ void fn_8008EC28(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xD050000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r6 = tmp;
     r4 = r28;
     r5 = r31;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = 0x7;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -5339,11 +5339,11 @@ void fn_8008EC28(void) {
 void fn_8008EED0(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
+    extern void std070_characterAttachToCharacter();
     extern void scriptWaitSyncMotion();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -5376,7 +5376,7 @@ void fn_8008EED0(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -5391,13 +5391,13 @@ void fn_8008EED0(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r31;
     r4 = r4 + 0x1000;
@@ -5438,12 +5438,12 @@ void fn_8008EED0(void) {
     ((void(*)(void))GSmodelStartAnimation)();
     r3 = 0x6AF0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x4;
     r28 = r3;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r31;
     r4 = r28;
     ((void(*)(void))GSresGetResource)();
@@ -5492,20 +5492,20 @@ void fn_8008EED0(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xD030000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r6 = tmp;
     r4 = r28;
     r5 = r31;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = 0x1;
     scriptWaitSyncMotion();
@@ -5513,7 +5513,7 @@ void fn_8008EED0(void) {
     r4 = 0x5;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -5528,11 +5528,11 @@ void fn_8008EED0(void) {
 void fn_8008F190(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
+    extern void std070_characterAttachToCharacter();
     extern void scriptWaitSyncMotion();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -5567,7 +5567,7 @@ void fn_8008F190(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -5582,13 +5582,13 @@ void fn_8008F190(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r31;
     r4 = r4 + 0x1000;
@@ -5649,7 +5649,7 @@ void fn_8008F190(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r30 = 0x32;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -5664,18 +5664,18 @@ void fn_8008F190(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0x6AF0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x0;
     r28 = r3;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r31;
     r4 = r28;
     ((void(*)(void))GSresGetResource)();
@@ -5724,25 +5724,25 @@ void fn_8008F190(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xCF80000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r6 = tmp;
     r4 = r28;
     r5 = r31;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = 0x1;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = 0x1;
     scriptWaitSyncMotion();
@@ -5750,7 +5750,7 @@ void fn_8008F190(void) {
     r4 = 0x2;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = 0x1;
     scriptWaitSyncMotion();
@@ -5758,7 +5758,7 @@ void fn_8008F190(void) {
     r4 = 0x3;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -5773,10 +5773,10 @@ void fn_8008F190(void) {
 void fn_8008F524(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x30];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -5813,7 +5813,7 @@ void fn_8008F524(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r30 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -5828,13 +5828,13 @@ void fn_8008F524(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r28;
     r4 = r4 + 0x1000;
@@ -5895,7 +5895,7 @@ void fn_8008F524(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r30 = 0x32;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -5910,21 +5910,21 @@ void fn_8008F524(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0x6BC0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r31 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r30 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r28;
     r29 = tmp;
@@ -5986,21 +5986,21 @@ void fn_8008F524(void) {
     while (r27 < r26) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r27 = r27 + r3;
 
     }
     r3 = 0xCEE0000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xCEE0000;
     r26 = r3;
     r3 = r4 + 0x1002;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xCEE0000;
     r27 = r3;
     r3 = r4 + 0x1001;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r28;
     r25 = tmp;
@@ -6008,34 +6008,34 @@ void fn_8008F524(void) {
     r5 = r28;
     r6 = r26;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = r30;
     r5 = r28;
     r6 = r27;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = r29;
     r5 = r28;
     r6 = r25;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = 0x3;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r30;
     r4 = 0x4;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r29;
     r4 = 0x4;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -6050,10 +6050,10 @@ void fn_8008F524(void) {
 void fn_8008F91C(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x30];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -6088,7 +6088,7 @@ void fn_8008F91C(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -6103,13 +6103,13 @@ void fn_8008F91C(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r31;
     r4 = r4 + 0x1000;
@@ -6150,11 +6150,11 @@ void fn_8008F91C(void) {
     ((void(*)(void))GSmodelStartAnimation)();
     r3 = 0x6BD0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BA0000;
     r28 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r27 = tmp;
@@ -6203,17 +6203,17 @@ void fn_8008F91C(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xCED0000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xCED0000;
     r30 = r3;
     r3 = r4 + 0x1001;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r29 = tmp;
@@ -6221,23 +6221,23 @@ void fn_8008F91C(void) {
     r5 = r31;
     r6 = r30;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r28;
     r5 = r31;
     r6 = r29;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r27;
     r4 = 0x2;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = 0x2;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -6252,10 +6252,10 @@ void fn_8008F91C(void) {
 void fn_8008FBF4(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -6289,7 +6289,7 @@ void fn_8008FBF4(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -6304,13 +6304,13 @@ void fn_8008FBF4(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r31;
     r4 = r4 + 0x1000;
@@ -6351,12 +6351,12 @@ void fn_8008FBF4(void) {
     ((void(*)(void))GSmodelStartAnimation)();
     r3 = 0x6AF0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x0;
     r28 = r3;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r31;
     r4 = r28;
     ((void(*)(void))GSresGetResource)();
@@ -6405,20 +6405,20 @@ void fn_8008FBF4(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xCEC0000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r6 = tmp;
     r4 = r28;
     r5 = r31;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -6433,10 +6433,10 @@ void fn_8008FBF4(void) {
 void fn_8008FE94(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -6470,7 +6470,7 @@ void fn_8008FE94(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -6485,13 +6485,13 @@ void fn_8008FE94(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r31;
     r4 = r4 + 0x1000;
@@ -6532,7 +6532,7 @@ void fn_8008FE94(void) {
     ((void(*)(void))GSmodelStartAnimation)();
     r3 = 0x6BD0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r28 = tmp;
@@ -6568,25 +6568,25 @@ void fn_8008FE94(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xCEB0000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r6 = tmp;
     r4 = r28;
     r5 = r31;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = 0x2;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -6601,10 +6601,10 @@ void fn_8008FE94(void) {
 void fn_80090100(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x60];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -6651,7 +6651,7 @@ void fn_80090100(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r18 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -6666,13 +6666,13 @@ void fn_80090100(void) {
     while (r17 < r18) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r17 = r17 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r18 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -6687,7 +6687,7 @@ void fn_80090100(void) {
     while (r17 < r18) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r17 = r17 + r3;
 
     }
@@ -6731,11 +6731,11 @@ void fn_80090100(void) {
     ((void(*)(void))GSmodelStartAnimation)();
     r3 = 0x6BC0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xCEA0000;
     r23 = r3;
     r3 = r4 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r22 = tmp;
@@ -6753,31 +6753,31 @@ void fn_80090100(void) {
     ((void(*)(void))GSmodelSetShadowSurface)();
     r3 = 0xD290000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r24 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r25 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r26 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r27 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD290000;
     r30 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r29 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r28 = tmp;
@@ -6891,37 +6891,37 @@ void fn_80090100(void) {
     while (r17 < r18) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r17 = r17 + r3;
 
     }
     r3 = 0xCEA0000;
     r3 = r3 + 0x1006;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xCEA0000;
     r21 = r3;
     r3 = r4 + 0x1007;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xCEA0000;
     r20 = r3;
     r3 = r4 + 0x1001;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xCEA0000;
     r19 = r3;
     r3 = r4 + 0x1002;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xCEA0000;
     r18 = r3;
     r3 = r4 + 0x1003;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xCEA0000;
     r17 = r3;
     r3 = r4 + 0x1004;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xCEA0000;
     r16 = r3;
     r3 = r4 + 0x1005;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r15 = tmp;
@@ -6929,89 +6929,89 @@ void fn_80090100(void) {
     r5 = r31;
     r6 = r22;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r24;
     r5 = r31;
     r6 = r21;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r25;
     r5 = r31;
     r6 = r20;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r26;
     r5 = r31;
     r6 = r19;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r27;
     r5 = r31;
     r6 = r18;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r30;
     r5 = r31;
     r6 = r17;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r29;
     r5 = r31;
     r6 = r16;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r28;
     r5 = r31;
     r6 = r15;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r23;
     r4 = 0x3;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r24;
     r4 = 0x4;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r25;
     r4 = 0x3;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r26;
     r4 = 0x4;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r27;
     r4 = 0x3;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r30;
     r4 = 0x5;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r29;
     r4 = 0x4;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = 0x4;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -7026,11 +7026,11 @@ void fn_80090100(void) {
 void fn_80090720(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
+    extern void std070_characterAttachToCharacter();
     extern void scriptWaitSyncMotion();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -7092,7 +7092,7 @@ void fn_80090720(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -7107,13 +7107,13 @@ void fn_80090720(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r31;
     r4 = r4 + 0x1000;
@@ -7126,7 +7126,7 @@ void fn_80090720(void) {
     r3 = 0x6BC0000;
     *(u32*)((u8*)r30 + 0x144) = tmp;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r28 = tmp;
@@ -7162,31 +7162,31 @@ void fn_80090720(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xCE90000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r6 = tmp;
     r4 = r28;
     r5 = r31;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = 0x1;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0xCE60000;
     r4 = 0x0;
     r3 = r3 + 0x1004;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = 0x1;
     scriptWaitSyncMotion();
@@ -7194,7 +7194,7 @@ void fn_80090720(void) {
     r4 = 0x2;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = 0x1;
     scriptWaitSyncMotion();
@@ -7202,7 +7202,7 @@ void fn_80090720(void) {
     r4 = 0x3;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -7217,10 +7217,10 @@ void fn_80090720(void) {
 void fn_800909E4(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x30];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -7282,7 +7282,7 @@ void fn_800909E4(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -7297,13 +7297,13 @@ void fn_800909E4(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0x111B0000;
     r3 = r31;
     r4 = r4 + 0x1400;
@@ -7326,7 +7326,7 @@ void fn_800909E4(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r30 = 0x32;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -7341,17 +7341,17 @@ void fn_800909E4(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0x6BD0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BA0000;
     r28 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r27 = tmp;
@@ -7400,17 +7400,17 @@ void fn_800909E4(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xCE80000;
     r3 = r3 + 0x1001;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xCE80000;
     r29 = r3;
     r3 = r4 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r30 = tmp;
@@ -7418,23 +7418,23 @@ void fn_800909E4(void) {
     r5 = r31;
     r6 = r29;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r27;
     r5 = r31;
     r6 = r30;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = 0x2;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r27;
     r4 = 0x2;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -7449,10 +7449,10 @@ void fn_800909E4(void) {
 void fn_80090D34(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x30];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -7514,7 +7514,7 @@ void fn_80090D34(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -7529,13 +7529,13 @@ void fn_80090D34(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xCE60000;
     r3 = r31;
     r4 = r4 + 0x1000;
@@ -7548,11 +7548,11 @@ void fn_80090D34(void) {
     r3 = 0x6BD0000;
     *(u32*)((u8*)r30 + 0x144) = tmp;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BA0000;
     r28 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r27 = tmp;
@@ -7601,17 +7601,17 @@ void fn_80090D34(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xCE70000;
     r3 = r3 + 0x1001;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xCE70000;
     r29 = r3;
     r3 = r4 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r30 = tmp;
@@ -7619,23 +7619,23 @@ void fn_80090D34(void) {
     r5 = r31;
     r6 = r29;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r27;
     r5 = r31;
     r6 = r30;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r28;
     r4 = 0x2;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r27;
     r4 = 0x2;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -7650,9 +7650,9 @@ void fn_80090D34(void) {
 void fn_8009100C(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x60];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -7695,39 +7695,39 @@ void fn_8009100C(void) {
     ((void(*)(void))GSmodelSetShadowTextureSize)();
     r3 = 0x6BC0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r24 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r23 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD290000;
     r22 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r21 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r20 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD290000;
     r19 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r18 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6BE0000;
     r17 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r15;
     r16 = tmp;
@@ -7867,144 +7867,144 @@ void fn_8009100C(void) {
     while (r14 < r25) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r14 = r14 + r3;
 
     }
     r3 = 0xC380000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xC380000;
     r3 = r4 + 0x1008;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xC380000;
     r14 = r3;
     r3 = r4 + 0x1001;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xC380000;
     r31 = r3;
     r3 = r4 + 0x1002;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xC380000;
     r30 = r3;
     r3 = r4 + 0x1003;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xC380000;
     r29 = r3;
     r3 = r4 + 0x1004;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xC380000;
     r28 = r3;
     r3 = r4 + 0x1005;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xC380000;
     r27 = r3;
     r3 = r4 + 0x1006;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xC380000;
     r26 = r3;
     r3 = r4 + 0x1007;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r15;
     r4 = r24;
     r25 = tmp;
     r5 = r15;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r23;
     r5 = r15;
     r6 = r14;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r22;
     r5 = r15;
     r6 = r31;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r21;
     r5 = r15;
     r6 = r30;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r20;
     r5 = r15;
     r6 = r29;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r19;
     r5 = r15;
     r6 = r28;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r18;
     r5 = r15;
     r6 = r27;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r17;
     r5 = r15;
     r6 = r26;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r15;
     r4 = r16;
     r5 = r15;
     r6 = r25;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r24;
     r4 = 0x3;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r23;
     r4 = 0x5;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r22;
     r4 = 0xe;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r21;
     r4 = 0xf;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r20;
     r4 = 0x4;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r19;
     r4 = 0x4;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r18;
     r4 = 0xe;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r17;
     r4 = 0xe;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r16;
     r4 = 0xe;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -8019,10 +8019,10 @@ void fn_8009100C(void) {
 void fn_80091564(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -8051,7 +8051,7 @@ void fn_80091564(void) {
     ((void(*)(void))GSmodelSetShadowTextureSize)();
     r3 = 0x6DC0000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0x11260000;
     r3 = r31;
     r4 = r4 + 0x1400;
@@ -8074,7 +8074,7 @@ void fn_80091564(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x64;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -8089,18 +8089,18 @@ void fn_80091564(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0x6BD0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x7;
     r28 = r3;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r31;
     r4 = r28;
     ((void(*)(void))GSresGetResource)();
@@ -8134,20 +8134,20 @@ void fn_80091564(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xC3D0000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r6 = tmp;
     r4 = r28;
     r5 = r31;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x81;
@@ -8162,10 +8162,10 @@ void fn_80091564(void) {
 void fn_80091774(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -8194,7 +8194,7 @@ void fn_80091774(void) {
     ((void(*)(void))GSmodelSetShadowTextureSize)();
     r3 = 0x6DC0000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0x11250000;
     r3 = r31;
     r4 = r4 + 0x1400;
@@ -8217,7 +8217,7 @@ void fn_80091774(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x64;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -8232,18 +8232,18 @@ void fn_80091774(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0x6BD0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6;
     r28 = r3;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r31;
     r4 = r28;
     ((void(*)(void))GSresGetResource)();
@@ -8277,20 +8277,20 @@ void fn_80091774(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xC3C0000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r6 = tmp;
     r4 = r28;
     r5 = r31;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x82;
@@ -8305,10 +8305,10 @@ void fn_80091774(void) {
 void fn_80091984(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -8337,7 +8337,7 @@ void fn_80091984(void) {
     ((void(*)(void))GSmodelSetShadowTextureSize)();
     r3 = 0x6DC0000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0x11240000;
     r3 = r31;
     r4 = r4 + 0x1400;
@@ -8360,7 +8360,7 @@ void fn_80091984(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x64;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -8375,18 +8375,18 @@ void fn_80091984(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0x6BD0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x5;
     r28 = r3;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r31;
     r4 = r28;
     ((void(*)(void))GSresGetResource)();
@@ -8420,20 +8420,20 @@ void fn_80091984(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xC3B0000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r6 = tmp;
     r4 = r28;
     r5 = r31;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x82;
@@ -8448,10 +8448,10 @@ void fn_80091984(void) {
 void fn_80091B94(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -8480,7 +8480,7 @@ void fn_80091B94(void) {
     ((void(*)(void))GSmodelSetShadowTextureSize)();
     r3 = 0x6DC0000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0x11220000;
     r3 = r31;
     r4 = r4 + 0x1400;
@@ -8503,7 +8503,7 @@ void fn_80091B94(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r29 = 0x64;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -8518,18 +8518,18 @@ void fn_80091B94(void) {
     while (r30 < r29) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
     r3 = 0x6BD0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x1;
     r28 = r3;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r31;
     r4 = r28;
     ((void(*)(void))GSresGetResource)();
@@ -8563,20 +8563,20 @@ void fn_80091B94(void) {
     while (r29 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0x10490000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r6 = tmp;
     r4 = r28;
     r5 = r31;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x82;
@@ -8591,8 +8591,8 @@ void fn_80091B94(void) {
 void fn_80091DA4(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -8619,13 +8619,13 @@ void fn_80091DA4(void) {
     ((void(*)(void))GSmodelSetShadowTextureSize)();
     r3 = 0xCE60000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r3 = 0xCE60000;
     r4 = 0x1;
     r3 = r3 + 0x1004;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r4 = 0x111B0000;
     r3 = r29;
     r4 = r4 + 0x1400;
@@ -8648,7 +8648,7 @@ void fn_80091DA4(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r30 = 0x32;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -8663,7 +8663,7 @@ void fn_80091DA4(void) {
     while (r31 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r31 = r31 + r3;
 
     }
@@ -8687,7 +8687,7 @@ void fn_80091DA4(void) {
     while (r30 < r31) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
@@ -8705,10 +8705,10 @@ void fn_80091DA4(void) {
 void fn_80091F48(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
+    extern void std070_characterAttachToCharacter();
     extern void scriptWaitSyncMotion();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -8738,11 +8738,11 @@ void fn_80091F48(void) {
     ((void(*)(void))GSmodelSetShadowTextureSize)();
     r3 = 0x6BB0000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r31 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r30;
     r27 = tmp;
@@ -8791,17 +8791,17 @@ void fn_80091F48(void) {
     while (r29 < r28) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r29 = r29 + r3;
 
     }
     r3 = 0xB860000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xB860000;
     r29 = r3;
     r3 = r4 + 0x1001;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r30;
     r28 = tmp;
@@ -8809,23 +8809,23 @@ void fn_80091F48(void) {
     r5 = r30;
     r6 = r29;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r30;
     r4 = r27;
     r5 = r30;
     r6 = r28;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r27;
     r4 = 0x8;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r31;
     r4 = 0x8;
     r5 = 0x32;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r31;
     r4 = 0x0;
     scriptWaitSyncMotion();
@@ -8833,7 +8833,7 @@ void fn_80091F48(void) {
     r4 = 0x9;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x89;
@@ -8848,9 +8848,9 @@ void fn_80091F48(void) {
 void fn_80092140(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x40];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -8886,23 +8886,23 @@ void fn_80092140(void) {
     ((void(*)(void))GSmodelSetShadowTextureSize)();
     r3 = 0xD240000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r30 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r29 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r28 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r27 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r26 = tmp;
@@ -8990,29 +8990,29 @@ void fn_80092140(void) {
     while (r25 < r24) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r25 = r25 + r3;
 
     }
     r3 = 0xB850000;
     r3 = r3 + 0x1004;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xB850000;
     r24 = r3;
     r3 = r4 + 0x1003;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xB850000;
     r25 = r3;
     r3 = r4 + 0x1001;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xB850000;
     r23 = r3;
     r3 = r4 + 0x1002;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xB850000;
     r22 = r3;
     r3 = r4 + 0x1003;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r21 = tmp;
@@ -9020,56 +9020,56 @@ void fn_80092140(void) {
     r5 = r31;
     r6 = r24;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r29;
     r5 = r31;
     r6 = r25;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r28;
     r5 = r31;
     r6 = r23;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r27;
     r5 = r31;
     r6 = r22;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r26;
     r5 = r31;
     r6 = r21;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r30;
     r4 = 0x6;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r29;
     r4 = 0x6;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = 0x8;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r27;
     r4 = 0x8;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r26;
     r4 = 0x7;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x83;
@@ -9084,8 +9084,8 @@ void fn_80092140(void) {
 void fn_80092498(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -9115,7 +9115,7 @@ void fn_80092498(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r30 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -9130,13 +9130,13 @@ void fn_80092498(void) {
     while (r31 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r31 = r31 + r3;
 
     }
     r3 = 0xB630000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xB630000;
     r3 = r29;
     r4 = r4 + 0x1000;
@@ -9184,7 +9184,7 @@ void fn_80092498(void) {
     while (r30 < r31) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
@@ -9193,7 +9193,7 @@ void fn_80092498(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x83;
@@ -9208,9 +9208,9 @@ void fn_80092498(void) {
 void fn_80092664(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x40];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -9246,23 +9246,23 @@ void fn_80092664(void) {
     ((void(*)(void))GSmodelSetShadowTextureSize)();
     r3 = 0xD240000;
     r3 = r3 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r30 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r29 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r28 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xD240000;
     r27 = r3;
     r3 = r4 + 0x400;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r26 = tmp;
@@ -9350,29 +9350,29 @@ void fn_80092664(void) {
     while (r25 < r24) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r25 = r25 + r3;
 
     }
     r3 = 0xB840000;
     r3 = r3 + 0x1004;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xB840000;
     r24 = r3;
     r3 = r4 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xB840000;
     r25 = r3;
     r3 = r4 + 0x1001;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xB840000;
     r23 = r3;
     r3 = r4 + 0x1002;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0xB840000;
     r22 = r3;
     r3 = r4 + 0x1003;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r31;
     r21 = tmp;
@@ -9380,56 +9380,56 @@ void fn_80092664(void) {
     r5 = r31;
     r6 = r24;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r29;
     r5 = r31;
     r6 = r25;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r28;
     r5 = r31;
     r6 = r23;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r27;
     r5 = r31;
     r6 = r22;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r31;
     r4 = r26;
     r5 = r31;
     r6 = r21;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = r30;
     r4 = 0x1;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r29;
     r4 = 0x1;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = 0x1;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r27;
     r4 = 0x2;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r26;
     r4 = 0x2;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x87;
@@ -9444,8 +9444,8 @@ void fn_80092664(void) {
 void fn_800929BC(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801CB7C4();
-    extern void fn_801CB834();
+    extern void std116_mapObjectStopAnimation();
+    extern void std115_mapObjectPlayAnimation();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -9475,7 +9475,7 @@ void fn_800929BC(void) {
     r3 = r3 + 0x1000;
     r5 = 0x0;
     r6 = 0x0;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r30 = 0x1;
     ((void(*)(void))fn_800D37CC)();
     if ((s32)r3 == 0x32) {
@@ -9490,13 +9490,13 @@ void fn_800929BC(void) {
     while (r31 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r31 = r31 + r3;
 
     }
     r3 = 0xB630000;
     r3 = r3 + 0x1000;
-    fn_801CB7C4();
+    std116_mapObjectStopAnimation();
     r4 = 0xB630000;
     r3 = r29;
     r4 = r4 + 0x1000;
@@ -9507,7 +9507,7 @@ void fn_800929BC(void) {
     ((void(*)(void))fn_80118874)();
     tmp = 0x0;
     *(u32*)((u8*)r31 + 0x144) = tmp;
-    ((void(*)(void))fn_80113F48)();
+    ((void(*)(void))std093_getCurrentGroupID)();
     r4 = 0xB660000;
     r5 = 0x0;
     r4 = r4 + 0x1800;
@@ -9527,7 +9527,7 @@ void fn_800929BC(void) {
     while (r30 < r31) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r30 = r30 + r3;
 
     }
@@ -9545,9 +9545,9 @@ void fn_800929BC(void) {
 void fn_80092B2C(void) {
     extern void fn_80176B48();
     extern void cameraPlayAnime();
-    extern void fn_801845E4();
-    extern void fn_801CB834();
-    extern void fn_801CBA0C();
+    extern void std070_characterAttachToCharacter();
+    extern void std115_mapObjectPlayAnimation();
+    extern void std112_modelGetResourceID();
     u8 sp[0x20];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -9576,12 +9576,12 @@ void fn_80092B2C(void) {
     ((void(*)(void))GSmodelSetShadowTextureSize)();
     r3 = 0xB720000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     r4 = 0x6;
     r29 = r3;
     r5 = 0x0;
     r6 = 0x1;
-    fn_801CB834();
+    std115_mapObjectPlayAnimation();
     r3 = r28;
     r4 = r29;
     ((void(*)(void))GSresGetResource)();
@@ -9595,7 +9595,7 @@ void fn_80092B2C(void) {
     r4 = 0x1;
     r5 = (u32)&lbl_8047A694;
     ((void(*)(void))GSmodelSetShadowSurface)();
-    ((void(*)(void))fn_80113F48)();
+    ((void(*)(void))std093_getCurrentGroupID)();
     r4 = 0xB650000;
     r5 = 0x0;
     r4 = r4 + 0x1800;
@@ -9615,20 +9615,20 @@ void fn_80092B2C(void) {
     while (r31 < r30) {
 
         ((void(*)(void))_threadSwitch)();
-        ((void(*)(void))fn_800D3088)();
+        ((void(*)(void))msgGetCharsPerFrame)();
         r31 = r31 + r3;
 
     }
     r3 = 0xB730000;
     r3 = r3 + 0x1000;
-    fn_801CBA0C();
+    std112_modelGetResourceID();
     tmp = r3;
     r3 = r28;
     r6 = tmp;
     r4 = r29;
     r5 = r28;
     r7 = 0x0;
-    fn_801845E4();
+    std070_characterAttachToCharacter();
     r3 = 0x1;
     fn_80176B48();
     r3 = 0x87;

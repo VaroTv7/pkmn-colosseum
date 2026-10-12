@@ -67,7 +67,7 @@ extern void* menuItemBiosGetPtr(s16 idx); /* node by index */
 extern void* menuSeBiosGetPtr(s32);
 extern u16   fn_8005D798(void*, s32);
 extern void* menuSpriteBiosGetPtr(s32);
-extern int   fn_80166A28(u16);
+extern int   soundStartSE(u16);
 u8 fn_800F7EF8(s32 pad_id);
 u32 fn_800F7A08(s32 pad_id, s32 axis);
 u32 fn_800F7A7C(s32 pad_id, s32 axis);
@@ -152,19 +152,19 @@ extern u8  lbl_8035B3F0[];  /* module name string */
 /* Additional external functions (not already declared above) */
 extern void fn_800BF74C(void);
 extern void fn_800D9ED8(s32);
-extern void fn_800D88DC(s32);
-extern void fn_800D888C(s32);
-extern void fn_800D9B58(f32, f32, f32, f32);
-extern void fn_800DA4C4(s32, s32, s32);
-extern void fn_800DA2BC(s32, s32, s32);
-extern void fn_800DA1E8(s32, s32, s32);
-extern void fn_800DA028(s32);
-extern void fn_800D6A00(s32);
-extern void fn_800D7820(s32);
-extern void fn_800D67BC(s32);
-extern void fn_800D6680(f32);
+extern void gfxSetFlags(s32);
+extern void gfxClearFlags(s32);
+extern void gfxSetOrtho(f32, f32, f32, f32);
+extern void gfxSetBlendMode(s32, s32, s32);
+extern void gfxSetUpdates(s32, s32, s32);
+extern void gfxSetZMode(s32, s32, s32);
+extern void gfxSetCullMode(s32);
+extern void gfxSetPrimitive(s32);
+extern void gfxSetVtxDesc(s32);
+extern void gfxBegin(s32);
+extern void gfxVtxPos(f32);
 extern void fn_800D5CB8(s32, s32, s32, s32, s32);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 
 /* Forward declarations for functions defined later in this TU */
 extern u8    menuOffScreenCheckEnable(u8 param);
@@ -186,7 +186,7 @@ extern void* windowSearchItemID(void* head, s32 key);
 s32   menuOpenCustom(void* menu_id, u32 parent_id, s32* cursor_out, s32 close_flags, void* check_cursor, s32 open_param, ...);
 extern u8    menuOffScreenSetPriority(u8 val);
 extern u8    menuOffScreenSetDisp(u8 val);
-extern u32   fn_800D3088(void);
+extern u32   msgGetCharsPerFrame(void);
 extern u8    lbl_80404B68[];  /* scratch table for fn_80107F38, fn_801081F8 */
 extern u8    lbl_80404B8C[];  /* scratch table for winSeqSetMenu */
 extern u8    lbl_8047AD10;     /* resource request gate byte (sda21) - authoritative decl, use as-is */
@@ -827,7 +827,7 @@ void menuDaemon(void)
                 if (sound != NULL) {
                     u16 se = fn_8005D798(sound, 5);
                     if (se != 0) {
-                        fn_80166A28(se);
+                        soundStartSE(se);
                     }
                 }
                 node->phase = 3;
@@ -865,7 +865,7 @@ void menuDaemon(void)
                         }
                         break;
                     case 3:
-                        fn_800F7434(data->buttonCallback, 0);
+                        cmsRunSync(data->buttonCallback, 0);
                         break;
                     case 4:
                         data->buttonCallback(node);
@@ -899,7 +899,7 @@ void menuDaemon(void)
                     if (sound != NULL) {
                         u16 se = fn_8005D798(sound, 3);
                         if (se != 0) {
-                            fn_80166A28(se);
+                            soundStartSE(se);
                         }
                     }
                 } else if (node->close != 0) {
@@ -908,7 +908,7 @@ void menuDaemon(void)
                     if (sound != NULL) {
                         u16 se = fn_8005D798(sound, 2);
                         if (se != 0) {
-                            fn_80166A28(se);
+                            soundStartSE(se);
                         }
                     }
                 }
@@ -931,7 +931,7 @@ void menuDaemon(void)
                         menuCursorNormal(node);
                         break;
                     case 3:
-                        fn_800F7434(data->cursorCallback, 0);
+                        cmsRunSync(data->cursorCallback, 0);
                         break;
                     case 4:
                         data->cursorCallback(node);
@@ -952,7 +952,7 @@ void menuDaemon(void)
                     if (sound != NULL) {
                         se = fn_8005D798(sound, 1);
                         if (se != 0) {
-                            fn_80166A28(se);
+                            soundStartSE(se);
                         }
                     }
                 }
@@ -966,7 +966,7 @@ void menuDaemon(void)
         if ((node->flags & 4) != 0) {
             winSeqMoveMenu(node);
             if (data->tickCallback != NULL) {
-                for (i = 0; i < fn_800D3088(); i++) {
+                for (i = 0; i < msgGetCharsPerFrame(); i++) {
                     data->tickCallback(node);
                 }
             }
@@ -1006,7 +1006,7 @@ void menuDaemon(void)
 
     fn_800FE6D0(0, 0);
     fn_800FE35C();
-    fn_800DA4C4(1, 6, 7);
+    gfxSetBlendMode(1, 6, 7);
     if (doFade != 0) {
         fadeDaemon();
     }
@@ -1334,7 +1334,7 @@ void menuPlaySe(void* p, void* q) {
     {
         u32 v = (u32)(u16)fn_8005D798(r3c, r31);
         if (v == 0) { return; }
-        fn_80166A28((u16)v);
+        soundStartSE((u16)v);
     }
 }
 #pragma pop
@@ -1503,7 +1503,7 @@ void _menuUpdateKeyInfo__FP15WINDOW_SYS_WORK(void* unused) {
                 keyInfo->repeatTimer[i] = 15;
                 repeat |= bit;
             } else if (keys & bit) {
-                keyInfo->repeatTimer[i] -= fn_800D3088();
+                keyInfo->repeatTimer[i] -= msgGetCharsPerFrame();
                 if (keyInfo->repeatTimer[i] <= 0) {
                     keyInfo->repeatTimer[i] = 5;
                     repeat |= bit;

@@ -7,7 +7,7 @@ typedef struct GXLightObj_800BA424 {
     f32 nz;
 } GXLightObj_800BA424;
 
-void fn_800BA424(GXLightObj_800BA424* light, f32 x, f32 y, f32 z) {
+void GXInitLightDir(GXLightObj_800BA424* light, f32 x, f32 y, f32 z) {
     light->nx = -x;
     light->ny = -y;
     light->nz = -z;

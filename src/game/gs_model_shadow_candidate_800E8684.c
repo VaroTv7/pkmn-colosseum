@@ -32,7 +32,7 @@ extern void* modelGetRenderJObj(GSmodel* model);
 extern void fn_800E3D14(GSmodel* model, GSshadowVec* out);
 extern void GSvecAdd(void* dst, void* a, void* b);
 extern void set__5GSvecFfff(void* dst, f32 x, f32 y, f32 z);
-extern void fn_800E00AC(void* dst, void* src, f32 scalar);
+extern void vecNormalize(void* dst, void* src, f32 scalar);
 extern void* ObjInfoInit(void* bound, GSshadowVec* out);
 extern void* HSD_ViewingRectCheck(void* rect);
 extern void fn_801B0408(void* rect, void* eyePos, void* interest, void* up, u32 persp);
@@ -236,7 +236,7 @@ void modelShadowRender__FP10GSgfxLayer(void* layer)
             HSD_CObjSetProjectionType(*(u8**)((u8*)slot->obj + 0x04), 2);
         }
 
-        fn_800E00AC(&avgPos, &avgPos, (f32)activeCount);
+        vecNormalize(&avgPos, &avgPos, (f32)activeCount);
         HSD_CObjSetInterest(*(u8**)((u8*)slot->obj + 0x04), &avgPos);
         fn_801B0A98(slot->obj, *(u8**)((u8*)slot->light + 0x0C), lbl_8047CBCC);
         HSD_CObjSetNear(*(u8**)((u8*)slot->obj + 0x04), lbl_8047CBD0);

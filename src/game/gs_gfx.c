@@ -14,7 +14,7 @@
  * in configure.py), so that whole block was dead code that could never
  * be compiled into any real target. None of the seven names appear in
  * config/GC6E01/symbols.txt, and their claimed sizes didn't consistently
- * match the real fn_ symbols living at those addresses (e.g. fn_800D3088
+ * match the real fn_ symbols living at those addresses (e.g. msgGetCharsPerFrame
  * is really 0xC bytes, not the claimed 0x68; fn_800D30F0 is really 0xA0,
  * not the claimed 0xF0). It was fiction from the old campaign transplant
  * and has been deleted wholesale.
@@ -39,7 +39,7 @@ void fn_800D3074(u32 flag) {
     ((GSgfxState*)lbl_8047AA80)->renderEnabled = flag;
 }
 
-u32 fn_800D3088(void) {
+u32 msgGetCharsPerFrame(void) {
     return lbl_8047AA80->frameDelta;
 }
 
@@ -49,7 +49,7 @@ u32 fn_800D3094(void) {
 void fn_800D30A0(u32 val) {
     *(u32*)((u8*)lbl_8047AA80 + 0x48) = val;
 }
-extern void fn_800D4F98(s32 arg0, ...);
+extern void gfxRecordCommand(s32 arg0, ...);
 extern void GXFlush(void);
 #if 0
 asm void fn_800D30AC(void) {
@@ -60,7 +60,7 @@ void fn_800D30AC(void) {
     u8* state = (u8*)lbl_8047AA80;
 
     if (*(s32*)(state + 0x0) == 1) {
-        fn_800D4F98(4, 0);
+        gfxRecordCommand(4, 0);
     } else {
         GXFlush();
     }
@@ -77,7 +77,7 @@ extern void GStextureConvertFromHW(void* a, s32 b);
 extern void fn_800B8E74(void);
 extern void GXInvalidateTexAll(void);
 extern void fn_800D1070(void* a);
-extern void fn_800DC6D8(void* a);
+extern void GSlightUpdate(void* a);
 extern void fn_800E3884(void* a, s32 b);
 extern void fn_801181B0(s32 a);
 extern u32 OSGetTick(void);
@@ -204,7 +204,7 @@ void fn_800D3190(void) {
     ((u32*)&lbl_804001F0)[0x2C / 4] += tick - startTick;
 
     startTick = OSGetTick();
-    fn_800DC6D8((void*)*(u32*)((u8*)lbl_8047AA80 + 0x54));
+    GSlightUpdate((void*)*(u32*)((u8*)lbl_8047AA80 + 0x54));
     tick = OSGetTick();
     ((u32*)&lbl_804001F0)[0x30 / 4] += tick - startTick;
 
@@ -231,7 +231,7 @@ void fn_800D3190(void) {
 #endif
 extern void fn_800D13C4(void* a);
 extern void fn_800DC874(void* a);
-extern void fn_801183EC(void* a);
+extern void gsParticleUpdate(void* a);
 extern void modelShadowRender__FP10GSgfxLayer(void);
 extern void fn_8019C708(s32 a);
 extern void HSD_SetEraseColor(u8 a, u8 b, u8 c, u8 d);
@@ -306,7 +306,7 @@ void fn_800D3410(void* arg0, u8 arg1) {
         ((u32*)&lbl_804001F0)[0x34 / 4] = tick - startTick;
 
         startTick = OSGetTick();
-        fn_801183EC((void*)*(u32*)((u8*)lbl_8047AA80 + 0x54));
+        gsParticleUpdate((void*)*(u32*)((u8*)lbl_8047AA80 + 0x54));
         tick = OSGetTick();
         ((u32*)&lbl_804001F0)[0x38 / 4] = tick - startTick;
     }
@@ -507,7 +507,7 @@ void GSgfxInit__FP15_GSgfxInitParms(u32 heapSize, u32 matrixSize,
     extern void* fn_800E27B0(u16);
     extern void GSlogWrite(const char*, ...);
     extern void fn_8019C3C4(s32, ...);
-    extern void fn_8019CB70(void);
+    extern void HSD_GXInit(void);
     extern void fn_800D37D4(u32, u32, u32, u32, u32, u32);
     extern void fn_801BF4C4(u32);
     extern void fn_8019C690(u32, u32);
@@ -525,14 +525,14 @@ void GSgfxInit__FP15_GSgfxInitParms(u32 heapSize, u32 matrixSize,
     extern void fn_800D9D68(u32, u32, u32, u32);
     extern void fn_800D9C24(u32, u32, u32, u32);
     extern void fn_800D87AC(s32);
-    extern void fn_800DA2BC(u32, u32, u32);
-    extern void fn_800DA1E8(u32, u32, u32);
+    extern void gfxSetUpdates(u32, u32, u32);
+    extern void gfxSetZMode(u32, u32, u32);
     extern void fn_800DA100(u32, u32, u32, u32, u32, u32);
-    extern void fn_800DA028(u32);
+    extern void gfxSetCullMode(u32);
     extern void fn_800D9F40(u32);
     extern void fn_800DA08C(u32);
     extern void fn_800D9ED8(u32);
-    extern void fn_800DC224(u32, u32, u32, u32, u32);
+    extern void gfxSetTevStage(u32, u32, u32, u32, u32);
     extern void fn_800D9BD0(f32, f32, f32, f32);
     extern void GSgfxBackFBInit__Fv(void);
     extern u32 lbl_8047AAA0;
@@ -647,7 +647,7 @@ void GSgfxInit__FP15_GSgfxInitParms(u32 heapSize, u32 matrixSize,
 
     fn_8019C3C4(1, 2);
     fn_8019C3C4(4, renderMode);
-    fn_8019CB70();
+    HSD_GXInit();
     fn_800D37D4(videoMode, 2, 0, 2, 0, 0);
     fn_801BF4C4(1);
     fn_8019C690(0, 0);
@@ -676,16 +676,16 @@ void GSgfxInit__FP15_GSgfxInitParms(u32 heapSize, u32 matrixSize,
     fn_800D9C24(0, 0, (u16)(*(u16*)(display + 4) - 1),
                  (u16)(*(u16*)(display + 6) - 1));
     fn_800D87AC(-1);
-    fn_800DA2BC(1, 1, 1);
-    fn_800DA1E8(1, 2, 1);
+    gfxSetUpdates(1, 1, 1);
+    gfxSetZMode(1, 2, 1);
     fn_800DA100(0, 7, 0, 1, 7, 0);
-    fn_800DA028(2);
+    gfxSetCullMode(2);
     fn_800D9F40(0);
     fn_800DA08C(1);
     fn_800D9ED8(0);
 
     for (i = 0; i < 0x10; i++) {
-        fn_800DC224(i, 0, i, i, 0);
+        gfxSetTevStage(i, 0, i, i, 0);
     }
     fn_800D9BD0(lbl_8047CA10, lbl_8047CA14,
                 lbl_8047CA18, lbl_8047CA1C);

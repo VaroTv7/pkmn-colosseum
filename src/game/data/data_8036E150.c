@@ -43,10 +43,10 @@ extern u8 _wazaSequenceEffectEntryStart[];
 extern u8 wazaSequenceSysGetWazaTime[];
 extern u8 wazaSequenceLoadData[];
 extern u8 _wazaSequenceEffectEntryLoad[];
-extern u8 fn_801DF474[];
-extern u8 fn_801DF790[];
-extern u8 fn_801DFC30[];
-extern u8 fn_801E03D4[];
+extern u8 std087_sequenceUnk87[];
+extern u8 std086_sequenceJump86[];
+extern u8 std085_sequenceJump85[];
+extern u8 std084_sequenceJump84[];
 extern u8 wazaSequenceEntryStart[];
 extern u8 wazaSequenceEntryUpdate[];
 
@@ -2612,73 +2612,73 @@ u8 lbl_803750C8[56] = {
 };
 
 void* jumptable_80375100[8] = {
-    (void*)((u8*)fn_801DF474 + 0x140),
-    (void*)((u8*)fn_801DF474 + 0x240),
-    (void*)((u8*)fn_801DF474 + 0x25C),
-    (void*)((u8*)fn_801DF474 + 0x2C4),
-    (void*)((u8*)fn_801DF474 + 0x2E0),
-    (void*)((u8*)fn_801DF474 + 0x300),
-    (void*)((u8*)fn_801DF474 + 0x300),
-    (void*)((u8*)fn_801DF474 + 0x2FC),
+    (void*)((u8*)std087_sequenceUnk87 + 0x140),
+    (void*)((u8*)std087_sequenceUnk87 + 0x240),
+    (void*)((u8*)std087_sequenceUnk87 + 0x25C),
+    (void*)((u8*)std087_sequenceUnk87 + 0x2C4),
+    (void*)((u8*)std087_sequenceUnk87 + 0x2E0),
+    (void*)((u8*)std087_sequenceUnk87 + 0x300),
+    (void*)((u8*)std087_sequenceUnk87 + 0x300),
+    (void*)((u8*)std087_sequenceUnk87 + 0x2FC),
 };
 
 void* jumptable_80375120[16] = {
-    (void*)((u8*)fn_801DF790 + 0x40),
-    (void*)((u8*)fn_801DF790 + 0x5C),
-    (void*)((u8*)fn_801DF790 + 0x78),
-    (void*)((u8*)fn_801DF790 + 0x94),
-    (void*)((u8*)fn_801DF790 + 0xBC),
-    (void*)((u8*)fn_801DF790 + 0x130),
-    (void*)((u8*)fn_801DF790 + 0x1A0),
-    (void*)((u8*)fn_801DF790 + 0x1BC),
-    (void*)((u8*)fn_801DF790 + 0x244),
-    (void*)((u8*)fn_801DF790 + 0x2B0),
-    (void*)((u8*)fn_801DF790 + 0x2CC),
-    (void*)((u8*)fn_801DF790 + 0x2E4),
-    (void*)((u8*)fn_801DF790 + 0x3E0),
-    (void*)((u8*)fn_801DF790 + 0x3FC),
-    (void*)((u8*)fn_801DF790 + 0x42C),
-    (void*)((u8*)fn_801DF790 + 0x480),
+    (void*)((u8*)std086_sequenceJump86 + 0x40),
+    (void*)((u8*)std086_sequenceJump86 + 0x5C),
+    (void*)((u8*)std086_sequenceJump86 + 0x78),
+    (void*)((u8*)std086_sequenceJump86 + 0x94),
+    (void*)((u8*)std086_sequenceJump86 + 0xBC),
+    (void*)((u8*)std086_sequenceJump86 + 0x130),
+    (void*)((u8*)std086_sequenceJump86 + 0x1A0),
+    (void*)((u8*)std086_sequenceJump86 + 0x1BC),
+    (void*)((u8*)std086_sequenceJump86 + 0x244),
+    (void*)((u8*)std086_sequenceJump86 + 0x2B0),
+    (void*)((u8*)std086_sequenceJump86 + 0x2CC),
+    (void*)((u8*)std086_sequenceJump86 + 0x2E4),
+    (void*)((u8*)std086_sequenceJump86 + 0x3E0),
+    (void*)((u8*)std086_sequenceJump86 + 0x3FC),
+    (void*)((u8*)std086_sequenceJump86 + 0x42C),
+    (void*)((u8*)std086_sequenceJump86 + 0x480),
 };
 
 void* jumptable_80375160[22] = {
-    (void*)((u8*)fn_801DFC30 + 0x60),
-    (void*)((u8*)fn_801DFC30 + 0x80),
-    (void*)((u8*)fn_801DFC30 + 0xB0),
-    (void*)((u8*)fn_801DFC30 + 0x120),
-    (void*)((u8*)fn_801DFC30 + 0x13C),
-    (void*)((u8*)fn_801DFC30 + 0x158),
-    (void*)((u8*)fn_801DFC30 + 0x174),
-    (void*)((u8*)fn_801DFC30 + 0x19C),
-    (void*)((u8*)fn_801DFC30 + 0x2E4),
-    (void*)((u8*)fn_801DFC30 + 0x300),
-    (void*)((u8*)fn_801DFC30 + 0x31C),
-    (void*)((u8*)fn_801DFC30 + 0x358),
-    (void*)((u8*)fn_801DFC30 + 0x3B8),
-    (void*)((u8*)fn_801DFC30 + 0x3E8),
-    (void*)((u8*)fn_801DFC30 + 0x438),
-    (void*)((u8*)fn_801DFC30 + 0x454),
-    (void*)((u8*)fn_801DFC30 + 0x518),
-    (void*)((u8*)fn_801DFC30 + 0x630),
-    (void*)((u8*)fn_801DFC30 + 0x648),
-    (void*)((u8*)fn_801DFC30 + 0x664),
-    (void*)((u8*)fn_801DFC30 + 0x680),
-    (void*)((u8*)fn_801DFC30 + 0x754),
+    (void*)((u8*)std085_sequenceJump85 + 0x60),
+    (void*)((u8*)std085_sequenceJump85 + 0x80),
+    (void*)((u8*)std085_sequenceJump85 + 0xB0),
+    (void*)((u8*)std085_sequenceJump85 + 0x120),
+    (void*)((u8*)std085_sequenceJump85 + 0x13C),
+    (void*)((u8*)std085_sequenceJump85 + 0x158),
+    (void*)((u8*)std085_sequenceJump85 + 0x174),
+    (void*)((u8*)std085_sequenceJump85 + 0x19C),
+    (void*)((u8*)std085_sequenceJump85 + 0x2E4),
+    (void*)((u8*)std085_sequenceJump85 + 0x300),
+    (void*)((u8*)std085_sequenceJump85 + 0x31C),
+    (void*)((u8*)std085_sequenceJump85 + 0x358),
+    (void*)((u8*)std085_sequenceJump85 + 0x3B8),
+    (void*)((u8*)std085_sequenceJump85 + 0x3E8),
+    (void*)((u8*)std085_sequenceJump85 + 0x438),
+    (void*)((u8*)std085_sequenceJump85 + 0x454),
+    (void*)((u8*)std085_sequenceJump85 + 0x518),
+    (void*)((u8*)std085_sequenceJump85 + 0x630),
+    (void*)((u8*)std085_sequenceJump85 + 0x648),
+    (void*)((u8*)std085_sequenceJump85 + 0x664),
+    (void*)((u8*)std085_sequenceJump85 + 0x680),
+    (void*)((u8*)std085_sequenceJump85 + 0x754),
 };
 
 void* jumptable_803751B8[13] = {
-    (void*)((u8*)fn_801E03D4 + 0x40),
-    (void*)((u8*)fn_801E03D4 + 0x70),
-    (void*)((u8*)fn_801E03D4 + 0x8C),
-    (void*)((u8*)fn_801E03D4 + 0xC8),
-    (void*)((u8*)fn_801E03D4 + 0x104),
-    (void*)((u8*)fn_801E03D4 + 0x178),
-    (void*)((u8*)fn_801E03D4 + 0x1B8),
-    (void*)((u8*)fn_801E03D4 + 0x20C),
-    (void*)((u8*)fn_801E03D4 + 0x244),
-    (void*)((u8*)fn_801E03D4 + 0x284),
-    (void*)((u8*)fn_801E03D4 + 0x2D8),
-    (void*)((u8*)fn_801E03D4 + 0x318),
-    (void*)((u8*)fn_801E03D4 + 0x358),
+    (void*)((u8*)std084_sequenceJump84 + 0x40),
+    (void*)((u8*)std084_sequenceJump84 + 0x70),
+    (void*)((u8*)std084_sequenceJump84 + 0x8C),
+    (void*)((u8*)std084_sequenceJump84 + 0xC8),
+    (void*)((u8*)std084_sequenceJump84 + 0x104),
+    (void*)((u8*)std084_sequenceJump84 + 0x178),
+    (void*)((u8*)std084_sequenceJump84 + 0x1B8),
+    (void*)((u8*)std084_sequenceJump84 + 0x20C),
+    (void*)((u8*)std084_sequenceJump84 + 0x244),
+    (void*)((u8*)std084_sequenceJump84 + 0x284),
+    (void*)((u8*)std084_sequenceJump84 + 0x2D8),
+    (void*)((u8*)std084_sequenceJump84 + 0x318),
+    (void*)((u8*)std084_sequenceJump84 + 0x358),
 };
 

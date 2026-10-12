@@ -189,10 +189,10 @@ extern void heroBiosCopy();
 extern void heroMoveSyncWithHero();
 extern void msgctrlSetValue();
 extern void gamedatasaveGetStatus();
-extern void fn_80166A28();
-extern void fn_80166A50(s32, s32, s32, s32);
+extern void soundStartSE();
+extern void soundStart(s32, s32, s32, s32);
 extern void fn_8019075C();
-extern void fn_801CB9D8(void*);
+extern void std113_mapObjectUnk_8018db68(void*);
 extern u8 pokemonCheckValid(void*);
 extern u8 pokemonIsDarkPokemon(void*);
 extern void __assert();
@@ -224,7 +224,7 @@ extern s32 fn_8017B2CC(s32);
 extern void fn_8017B1CC(s32);
 extern void fn_800F915C(s32);
 extern void fn_80055B98(s32);
-extern void fn_80190528(s32);
+extern void std078_flagSetFalse(s32);
 extern s32 fn_800576B4(void);
 extern void* fn_800574E0(void);
 extern void fn_800576C4(s32);
@@ -317,7 +317,7 @@ void menuColosseumBattleMain(void) {
     extern u8* fn_8006AFE4(s32);
     extern s32 fn_8006ADEC(void);
     extern u32 fn_800FF540(void);
-    extern u32 fn_801906A0(s32);
+    extern u32 std082_flagGetValue(s32);
     extern void* windowSearchID(s32);
     extern s32 windowGetActiveID(void);
     extern u8* windowGetKeyInfo(void);
@@ -360,7 +360,7 @@ void menuColosseumBattleMain(void) {
     if (fn_800FF540() != 0) {
         __assert((char*)(dat + 0x98), 0x267, (char*)(dat + 0xB0));
     }
-    if (fn_801906A0(0x8AE) != 0) {
+    if (std082_flagGetValue(0x8AE) != 0) {
         __assert((char*)(dat + 0x98), 0x268, (char*)(dat + 0xD0));
     }
     while (fn_8007162C() > 0) {
@@ -709,7 +709,7 @@ void menuColosseumBattleMain(void) {
                 if ((u16)m == 0) {
                     __assert((char*)(dat + 0x98), 0x1BB, (char*)(dat + 0x1E0));
                 }
-                fn_80166A28(0x26);
+                soundStartSE(0x26);
                 winMsgOpen(7, (u16)m, 1, 0);
                 winMsgOpen(7, 0x440A, 1, 0);
                 menuCloseCustom(0xDA, 0, 0);
@@ -837,7 +837,7 @@ void menuColosseumBattleMain(void) {
                 memcpy(lbl_8047A5A0 + 0x4318, savedataGetStatus(0, 0xE), 0xCC2C);
                 fn_8006AF44(savedataGetStatus(0, 0xE), lbl_8047A5A0);
                 if ((u8)fn_801D04E8() == 0) {
-                    fn_80166A28(0x26);
+                    soundStartSE(0x26);
                     winMsgOpen(2, 0x3C60, 1, 0);
                     if (fn_8006A7E8(lbl_8047A5A0) != 0) {
                         winMsgOpen(2, 0x3D55, 1, 0);
@@ -1755,7 +1755,7 @@ void menuColosseumBattleExit(void) {
 
     menuClose(0xD3);
     toolentryTaisenFreePokemonData();
-    fn_801CB9D8(((ColosseumMenuHeap*)lbl_8047A5A0)->resourceHandle);
+    std113_mapObjectUnk_8018db68(((ColosseumMenuHeap*)lbl_8047A5A0)->resourceHandle);
     handle = fn_800E202C(lbl_8047A5A0);
     if ((u16)handle == 0) {
         __assert(lbl_802678D8, 0x252, &lbl_8047BF28);
@@ -1768,10 +1768,10 @@ void menuColosseumBattleExit(void) {
 
 void menuColosseumBattleInit(void)
 {
-    extern void fn_80165A20(s32, s32, s32);
+    extern void std104_soundSetBackgroundMusic(s32, s32, s32);
     extern u32 fn_800E2C04(u32 size, u32 alignment);
-    extern void* fn_80113F48(void);
-    extern void* fn_801CBA0C(u32 size);
+    extern void* std093_getCurrentGroupID(void);
+    extern void* std112_modelGetResourceID(u32 size);
     extern void GSresGetResource(void* archive, void* destination);
     extern void cameraPlayAnime(s32 id, u32 data, s32 start, s32 loop);
     extern void GSscene_SetMode(s32 mode);
@@ -1781,7 +1781,7 @@ void menuColosseumBattleInit(void)
     u32 heap;
     void* archive;
 
-    fn_80165A20(0x1E, 0, 0xFF);
+    std104_soundSetBackgroundMusic(0x1E, 0, 0xFF);
     _flagSet(0x8AE, 0);
 
     if (lbl_8047A5A0 != NULL) {
@@ -1797,9 +1797,9 @@ void menuColosseumBattleInit(void)
         __assert(lbl_80267840 + 0x98, 0x213, lbl_80267840 + 0x22C);
     }
 
-    archive = fn_80113F48();
+    archive = std093_getCurrentGroupID();
     ((ColosseumMenuHeap*)lbl_8047A5A0)->resourceHandle =
-        fn_801CBA0C(0x0FFE1000);
+        std112_modelGetResourceID(0x0FFE1000);
     GSresGetResource(
         archive, ((ColosseumMenuHeap*)lbl_8047A5A0)->resourceHandle);
     cameraPlayAnime(0x531, 0x0FFF1800, 0, 1);

@@ -38,7 +38,7 @@ s32 dbgMenuLogDraw(void* window)
     extern DebugMenuKeyInfo* windowGetKeyInfo(void);
     extern s32 windowGetParam(void*, s32);
     extern void windowSetParam(void*, s32, s32);
-    extern void fn_800DA1E8(s32, s32, s32);
+    extern void gfxSetZMode(s32, s32, s32);
     extern void fn_8001E58C(s32, s32, s32, s32, u32*);
     extern s32 GSlogGetLineCount(void);
     extern char* GSlogGetLine(s32);
@@ -79,7 +79,7 @@ s32 dbgMenuLogDraw(void* window)
         break;
     }
 
-    fn_800DA1E8(0, 7, 2);
+    gfxSetZMode(0, 7, 2);
     fn_8001E58C(0xF, y - 5, 0x25D, width + 0x12, &color);
     for (i = 0; i < lines; i++) {
         line = i + GSlogGetLineCount() - lines;
@@ -159,7 +159,7 @@ s32 dbgMenuFieldCameraChangeDisp(void)
     extern u8 menuIsCheck(s32 menuId);
     extern s32 menuOpenCustom(s32 menuId, ...);
     extern void menuSetPosition(s32 menuId, s32 x, s32 y);
-    extern u32 fn_800FF56C(void);
+    extern u32 std092_getCurrentRoomID(void);
     extern void fn_801176C8(u32 floorId);
     extern u32 fn_80117AD4(void);
     extern u32 lbl_8047A5B0;
@@ -169,7 +169,7 @@ s32 dbgMenuFieldCameraChangeDisp(void)
     u32 floorId;
 
     if (!menuIsCheck(0xCA)) {
-        floorId = fn_800FF56C();
+        floorId = std092_getCurrentRoomID();
         if (floorId != fn_80117AD4()) {
             fn_801176C8(floorId);
             lbl_8047A5B0 = 0;

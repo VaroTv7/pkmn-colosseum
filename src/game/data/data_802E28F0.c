@@ -40,8 +40,8 @@ extern u8 fn_8001EF78[];
 extern u8 fn_8001F1E8[];
 extern u8 fn_80020618[];
 extern u8 fn_80020E9C[];
-extern u8 fn_80023E60[];
-extern u8 fn_80024308[];
+extern u8 wmapMenuUpdate[];
+extern u8 wmapMenuInput[];
 extern u8 menuNameEntryCursor[];
 extern u8 menuNameEntryButton[];
 extern u8 menuNameEntrySelectButton[];
@@ -1600,8 +1600,8 @@ void* lbl_802E2DB8[1904] = {
     (void*)0xE0900000,
     (void*)0x09060000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80023E60),
-    (void*)((u8*)fn_80024308),
+    (void*)((u8*)wmapMenuUpdate),
+    (void*)((u8*)wmapMenuInput),
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)0x60240000,

@@ -53,7 +53,7 @@ extern u8 __GXShutdown_800C6260[];
 extern u8 fn_800B7874[];
 extern u8 fn_800B7D74[];
 extern u8 fn_800B80CC[];
-extern u8 fn_800B857C[];
+extern u8 GXSetTexCoordGen2[];
 
 /* Auto-carved .data unit 0x803127F0..0x80313364 (44 objects). Non-relocated data as byte-exact u8[]; pointer/jump tables as void*[] for R_PPC_ADDR32 relocations. */
 

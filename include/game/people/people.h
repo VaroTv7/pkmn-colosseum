@@ -283,13 +283,13 @@ s32 peopleGetMaxCount(void);
 /** Get a PeopleEntry by slot index. fn_8018FD88 */
 PeopleEntry* peopleGetEntry(s32 index);
 
-/** Allocate a free people slot and initialize it. fn_8018FCE0 */
+/** Allocate a free people slot and initialize it. peopleCreate */
 PeopleEntry* peopleAlloc(void);
 
 /** Free/despawn a people entry. fn_8018FDBC */
 s32 peopleFree(PeopleEntry* entry);
 
-/** Main per-frame update for all active people. fn_80181850 */
+/** Main per-frame update for all active people. peopleMain */
 void peopleUpdate(void);
 
 /** Initialize people for a floor (draw 30 blank frames). fn_80181224 */
@@ -324,16 +324,16 @@ void* peopleGetTransform(PeopleEntry* entry);
 
 u32 fn_8018F470(u32 index);
 u32 fn_8018F490(const PeopleInfoBiosEntry* info);
-u32 fn_8018F4AC(const PeopleInfoBiosEntry* info);
+u32 characterModelGetTalkSE(const PeopleInfoBiosEntry* info);
 f32 fn_8018F5B4(const PeopleInfoBiosEntry* info);
 f32 fn_8018F5CC(const PeopleInfoBiosEntry* info);
 f32 fn_8018F5E4(const PeopleInfoBiosEntry* info);
 u32 fn_8018F5FC(const PeopleInfoBiosEntry* info);
-f32 fn_8018F618(const PeopleInfoBiosEntry* info);
-f32 fn_8018F638(const PeopleInfoBiosEntry* info);
-f32 fn_8018F658(const PeopleInfoBiosEntry* info);
-f32 fn_8018F678(const PeopleInfoBiosEntry* info);
-s32 fn_8018F698(const PeopleInfoBiosEntry* info);
+f32 charModelGetHeadPitchMax(const PeopleInfoBiosEntry* info);
+f32 charModelGetHeadPitchMin(const PeopleInfoBiosEntry* info);
+f32 charModelGetHeadYawMax(const PeopleInfoBiosEntry* info);
+f32 charModelGetHeadYawMin(const PeopleInfoBiosEntry* info);
+s32 charModelGetHeadPart(const PeopleInfoBiosEntry* info);
 void* fn_8018F6B4(const PeopleInfoBiosEntry* info);
 PeopleInfoBiosEntry* peopleInfoBiosGetPtrFromIndex(u32 index);
 
@@ -342,20 +342,20 @@ PeopleInfoBiosEntry* peopleInfoBiosGetPtrFromIndex(u32 index);
  * ========================================================================= */
 
 /** Tick-update one NPC's movement (called 60 times per update cycle).
- *  fn_801812C4 -> fn_8018ECEC */
+ *  fn_801812C4 -> peopleHeadLookUpdate */
 void peopleMoveUpdate(PeopleEntry* entry);
 
-/** Main movement dispatch by moveType. fn_8018ECEC */
+/** Main movement dispatch by moveType. peopleHeadLookUpdate */
 void peopleMoveDispatch(f32 dt);
 
-/** Walk-path movement handler. fn_80188FA0 */
+/** Walk-path movement handler. std181_characterTurnHeadTowardsCharacter */
 void peopleMoveWalkPath(u32 groupId, u32 index, u32 pathId, u32 pathParam);
 
-/** Walk-to-position movement handler. fn_80188CA0 */
+/** Walk-to-position movement handler. std066_characterLookAtPosition */
 void peopleMoveWalkPosition(u32 groupId, u32 index, u32 targetX, u32 targetY, u32 targetZ);
 
 /** Walk-list "add" handler -- self-tag string proven at 0x80183FC4
- * (named peopleAddWalkList; the old fn_80188AF4 attribution here was
+ * (named peopleAddWalkList; the old std067_characterStopLookAt attribution here was
  * wrong, same class as the peopleMoveCheck fix). */
 
 /** Check movement completion (self-tag string lbl_8036C52C; scrCmd table
@@ -371,11 +371,11 @@ BOOL peopleIsWithinRange(u32 posA, u32 posB, u32 posC, f32 range);
  * ========================================================================= */
 
 /** Look up a people entry by (groupId, index) and handle talk state.
- *  fn_801812E8 -- called from psinterpret (script system). */
+ *  peopleTalkPause -- called from psinterpret (script system). */
 s32 peopleFindAndInteract(u32 groupId, u32 index, u8 doInteract);
 
 /** Extended find-and-interact with motion/animation setup.
- *  fn_80181478 -- sets walk target, animation, and motion data. */
+ *  std231_characterSetPathPaused -- sets walk target, animation, and motion data. */
 s32 peopleFindAndSetupMotion(u32 groupId, u32 index, u8 doSetup);
 
 /** Open an NPC and configure its model, motion, and initial state.
@@ -390,11 +390,9 @@ void peopleOpenFromSpawnData(void* spawnDataArray, u32 count, u32 groupId);
 /** Set the NPC's animation bank. fn_8018FB60 */
 void peopleSetAnim(PeopleEntry* entry, u8 animId);
 
-/** Set the NPC's shadow animation. fn_8018FB2C */
+/** Set the NPC's shadow animation. peopleSetHumanCollision */
 void peopleSetShadowAnim(PeopleEntry* entry, u8 animId);
 
-/** Get rotation data from model. fn_8018FC2C */
-void peopleGetRotation(PeopleEntry* entry);
 
 /** Historical name; returns the model rotation-vector pointer. fn_8018FC50 */
 struct GSvec* peopleGetPosition(PeopleEntry* entry);
@@ -405,7 +403,7 @@ void peopleGetScale(PeopleEntry* entry);
 /** Set position on model. fn_8018FC98 */
 void peopleSetPosition(PeopleEntry* entry, void* pos);
 
-/** Get model position (world coords). fn_8018FCBC */
+/** Get model position (world coords). peopleGetPositionPtr */
 void* peopleGetModelPosition(PeopleEntry* entry);
 
 /** Get model rotation. fn_8018FC08 */

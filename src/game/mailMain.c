@@ -16,11 +16,11 @@
  * Address: 0x801D2080 | Size: 0xEC
  */
 void mailMainSendByScrpt(s32 seqHandle, f32 alpha, f32 speed) {
-    extern u32 fn_8016557C(void);
+    extern u32 soundPauseMusic(void);
     extern void* GSresAllocResourceAlign(u32, u32, u32, u32, u32);
     extern u32 fn_801654E0(u32, void*, u32);
-    extern u32 fn_80166B3C(u32, u32, u32);
-    extern u32 fn_80166A50(u32, u32, u32, u32);
+    extern u32 soundAttachWork(u32, u32, u32);
+    extern u32 soundStart(u32, u32, u32, u32);
     u32 soundId;
     u32 workId;
 
@@ -34,12 +34,12 @@ void mailMainSendByScrpt(s32 seqHandle, f32 alpha, f32 speed) {
     }
     soundId = fn_801D1650(fn_801D16C4());
     if (soundId != 0) {
-        workId = fn_8016557C();
+        workId = soundPauseMusic();
         fn_801654E0(soundId,
                     GSresAllocResourceAlign(0x10000, 0x20, 0, 0x408, 0),
                     0x10000);
-        fn_80166B3C(soundId, 0, 0x408);
-        fn_80166A50(soundId, 0, 0xFF, 0);
+        soundAttachWork(soundId, 0, 0x408);
+        soundStart(soundId, 0, 0xFF, 0);
     } else {
         workId = 0;
     }
@@ -55,11 +55,11 @@ void mailMainSendByScrpt(s32 seqHandle, f32 alpha, f32 speed) {
  */
 void mailMainSendAllMail(s32 seqHandle, f32 targetScale, f32 speed) {
     extern f32 lbl_8047E1B0;
-    extern u32 fn_8016557C(void);
+    extern u32 soundPauseMusic(void);
     extern void* GSresAllocResourceAlign(u32, u32, u32, u32, u32);
     extern u32 fn_801654E0(u32, void*, u32);
-    extern u32 fn_80166B3C(u32, u32, u32);
-    extern u32 fn_80166A50(u32, u32, u32, u32);
+    extern u32 soundAttachWork(u32, u32, u32);
+    extern u32 soundStart(u32, u32, u32, u32);
     u32 soundId;
     u32 workId;
     s32 count;
@@ -77,12 +77,12 @@ void mailMainSendAllMail(s32 seqHandle, f32 targetScale, f32 speed) {
     if (sent && lbl_80467390[0] == 0) {
         soundId = fn_801D1650(fn_801D16C4());
         if (soundId != 0) {
-            workId = fn_8016557C();
+            workId = soundPauseMusic();
             fn_801654E0(soundId,
                         GSresAllocResourceAlign(0x10000, 0x20, 0, 0x408, 0),
                         0x10000);
-            fn_80166B3C(soundId, 0, 0x408);
-            fn_80166A50(soundId, 0, 0xFF, 0);
+            soundAttachWork(soundId, 0, 0x408);
+            soundStart(soundId, 0, 0xFF, 0);
         } else {
             workId = 0;
         }
@@ -98,11 +98,11 @@ void mailMainSendAllMail(s32 seqHandle, f32 targetScale, f32 speed) {
  * Address: 0x801D228C | Size: 0x134
  */
 void fn_801D228C(s32 seqHandle) {
-    extern void fn_80190528(s32);
+    extern void std078_flagSetFalse(s32);
     extern void fn_801EED30(s32, s32);
     extern u16 fn_801EE614(s32);
-    extern void fn_801EE67C(s32);
-    extern void fn_800F7434(s32, s32, ...);
+    extern void std243_shadowPokemonSetState(s32);
+    extern void cmsRunSync(s32, s32, ...);
     extern void heroMoveAddAutoEvent(s32, u16, s32, s32, s32);
     u16 handle;
     u16 count;
@@ -114,7 +114,7 @@ void fn_801D228C(s32 seqHandle) {
 
     object = fn_801D1504(handle);
     if (object != -1 && object != 0) {
-        fn_80190528(object);
+        std078_flagSetFalse(object);
     }
 
     i = (u16)fn_801D139C(handle);
@@ -129,14 +129,14 @@ void fn_801D228C(s32 seqHandle) {
             fn_801EED30(object, 1);
             limit = ((s32 (*)(s32, s32))fn_801D1734)(handle, i);
             if (fn_801EE614(object) < (u8)limit) {
-                fn_801EE67C(object);
+                std243_shadowPokemonSetState(object);
             }
         }
     }
 
     object = fn_801D14C0(handle);
     if (object != -1 && object != 0) {
-        fn_800F7434(object, 0);
+        cmsRunSync(object, 0);
     }
 
     object = fn_801D147C(handle);
@@ -175,7 +175,7 @@ void mailMainReceiveTerminate(void) {
     lbl_80467390[1] = 0x258;
     handle = lbl_80467390[2];
     if (handle != 0) {
-        fn_801669E4(handle, 0, 0);
+        soundStopRaw(handle, 0, 0);
     }
 }
 #pragma peephole on
@@ -211,23 +211,23 @@ void fn_801D2404(void) {
     extern void fn_800FE35C(void);
     extern void spriteSetEnv(void);
     extern void fn_800D9ED8(s32);
-    extern void fn_800D7820(void*);
-    extern void fn_800D88DC(s32);
-    extern void fn_800D888C(s32);
-    extern void fn_800D85D4(s32, void*);
-    extern void fn_800D6A00(s32);
-    extern void fn_800D67BC(s32);
+    extern void gfxSetVtxDesc(void*);
+    extern void gfxSetFlags(s32);
+    extern void gfxClearFlags(s32);
+    extern void gfxLoadTexture(s32, void*);
+    extern void gfxSetPrimitive(s32);
+    extern void gfxBegin(s32);
     extern void fn_800D61E4(s16, s16);
     extern void fn_800D5CB8(s32, u8, u8, u8, u8);
-    extern void fn_800D59B8(s32, f32, f32);
-    extern void fn_800D6728(void);
+    extern void gfxVtxTexCoord(s32, f32, f32);
+    extern void gfxEnd(void);
     extern s32 gamedatasaveGetStatus(s32, s32);
     extern void fn_800F78A4(s32, s32, s32, s32, s32);
-    extern s32 fn_800D3088(void);
-    extern s32 fn_801666BC(u32);
+    extern s32 msgGetCharsPerFrame(void);
+    extern s32 soundGetStatus(u32);
     extern void fn_800F9210(s32, s32);
-    extern void fn_80166B18(u32);
-    extern void fn_801667D8(u32, s32, s32);
+    extern void soundKill(u32);
+    extern void soundResumeSong(u32, s32, s32);
     extern u8 lbl_80314F98[];
     extern f32 lbl_8047E1B4, lbl_8047E1B8, lbl_8047E1BC;
     void* texture;
@@ -254,19 +254,19 @@ void fn_801D2404(void) {
         fn_800FE35C();
         spriteSetEnv();
         fn_800D9ED8(1);
-        fn_800D7820(lbl_80314F98);
-        fn_800D88DC(3);
-        fn_800D888C(4);
-        fn_800D85D4(0, texture);
-        fn_800D6A00(7);
-        fn_800D67BC(2);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxSetFlags(3);
+        gfxClearFlags(4);
+        gfxLoadTexture(0, texture);
+        gfxSetPrimitive(7);
+        gfxBegin(2);
         fn_800D61E4(0x15, 0x25);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D59B8(0, lbl_8047E1B4, lbl_8047E1B4);
+        gfxVtxTexCoord(0, lbl_8047E1B4, lbl_8047E1B4);
         fn_800D61E4((s16)(width + 0x15), (s16)(height + 0x25));
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D59B8(0, lbl_8047E1B8, lbl_8047E1B8);
-        fn_800D6728();
+        gfxVtxTexCoord(0, lbl_8047E1B8, lbl_8047E1B8);
+        gfxEnd();
         fn_800D9ED8(0);
         if (gamedatasaveGetStatus(0, 9) == 0 &&
             (f32)lbl_80467390[1] < lbl_8047E1BC) {
@@ -274,14 +274,14 @@ void fn_801D2404(void) {
         }
     }
 
-    lbl_80467390[1] += fn_800D3088();
+    lbl_80467390[1] += msgGetCharsPerFrame();
     sound = lbl_80467390[2];
-    if (sound != 0 && fn_801666BC(sound) != 2) {
+    if (sound != 0 && soundGetStatus(sound) != 2) {
         fn_800F9210(0, 0x408);
-        fn_80166B18(sound);
+        soundKill(sound);
         work = lbl_80467390[3];
         if (work != 0 && work != 0xFFFFFFFF) {
-            fn_801667D8(work, 0, 0);
+            soundResumeSong(work, 0, 0);
         }
         lbl_80467390[2] = 0;
     }
@@ -295,11 +295,11 @@ void fn_801D2404(void) {
  * Address: 0x801D268C | Size: 0xD8
  */
 void mailMainReceiveStart(s32 seqHandle, s32 slot, s32 boneIdx) {
-    extern u32 fn_8016557C(void);
+    extern u32 soundPauseMusic(void);
     extern void* GSresAllocResourceAlign(u32, u32, u32, u32, u32);
     extern u32 fn_801654E0(u32, void*, u32);
-    extern u32 fn_80166B3C(u32, u32, u32);
-    extern u32 fn_80166A50(u32, u32, u32, u32);
+    extern u32 soundAttachWork(u32, u32, u32);
+    extern u32 soundStart(u32, u32, u32, u32);
     u32 workId;
     u32 soundId;
     void* buffer;
@@ -312,11 +312,11 @@ void mailMainReceiveStart(s32 seqHandle, s32 slot, s32 boneIdx) {
     }
     soundId = fn_801D1650(fn_801D16C4());
     if (soundId != 0) {
-        workId = fn_8016557C();
+        workId = soundPauseMusic();
         buffer = GSresAllocResourceAlign(0x10000, 0x20, 0, 0x408, 0);
         fn_801654E0(soundId, buffer, 0x10000);
-        fn_80166B3C(soundId, 0, 0x408);
-        fn_80166A50(soundId, 0, 0xFF, 0);
+        soundAttachWork(soundId, 0, 0x408);
+        soundStart(soundId, 0, 0xFF, 0);
     } else {
         workId = 0;
     }
@@ -340,8 +340,8 @@ s32 chkMailSend(s32 seqHandle, f32 step) {
     extern u16 fn_801D1338(u16);
     extern u8 mailGetSendCondType(s32);
     extern u32 mailGetSendCondition(s32);
-    extern void* fn_801906A0(u32);
-    extern s32 fn_800F7434(u32, s32, ...);
+    extern void* std082_flagGetValue(u32);
+    extern s32 cmsRunSync(u32, s32, ...);
     extern f32 lbl_8047E1C8, lbl_8047E1CC;
     u16 rate;
     u16 expected;
@@ -409,13 +409,13 @@ s32 chkMailSend(s32 seqHandle, f32 step) {
     } else if (conditionType == 1) {
         condition = mailGetSendCondition(seqHandle);
         if (condition != 0xFFFFFFFF &&
-            fn_801906A0(condition) != NULL) {
+            std082_flagGetValue(condition) != NULL) {
             eligible = TRUE;
         }
     } else if (conditionType == 2) {
         condition = mailGetSendCondition(seqHandle);
         if (condition != 0xFFFFFFFF && condition != 0 &&
-            fn_800F7434(condition, 0) != 0) {
+            cmsRunSync(condition, 0) != 0) {
             eligible = TRUE;
         }
     }
@@ -428,11 +428,11 @@ s32 chkMailSend(s32 seqHandle, f32 step) {
  */
 void cbStep(s32 moveID, s32 hitCount) {
     extern f32 fn_800E0BE4(void);
-    extern u32 fn_8016557C(void);
+    extern u32 soundPauseMusic(void);
     extern void* GSresAllocResourceAlign(u32, u32, u32, u32, u32);
     extern u32 fn_801654E0(u32, void*, u32);
-    extern u32 fn_80166B3C(u32, u32, u32);
-    extern u32 fn_80166A50(u32, u32, u32, u32);
+    extern u32 soundAttachWork(u32, u32, u32);
+    extern u32 soundStart(u32, u32, u32, u32);
     u32 soundId;
     u32 workId;
     void* buffer;
@@ -453,11 +453,11 @@ void cbStep(s32 moveID, s32 hitCount) {
     if (sent && lbl_80467390[0] == 0) {
         soundId = fn_801D1650(fn_801D16C4());
         if (soundId != 0) {
-            workId = fn_8016557C();
+            workId = soundPauseMusic();
             buffer = GSresAllocResourceAlign(0x10000, 0x20, 0, 0x408, 0);
             fn_801654E0(soundId, buffer, 0x10000);
-            fn_80166B3C(soundId, 0, 0x408);
-            fn_80166A50(soundId, 0, 0xFF, 0);
+            soundAttachWork(soundId, 0, 0x408);
+            soundStart(soundId, 0, 0xFF, 0);
         } else {
             workId = 0;
         }

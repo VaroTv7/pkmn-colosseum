@@ -25,9 +25,9 @@ extern void* memset(void* dst, int val, u32 size);
 extern void DCFlushRange(void* addr, u32 size);
 extern u64 OSGetTime(void);
 extern void fn_800D3EC4(s32, f32, f32, f32, f32, f32, f32);
-extern void fn_800D4F98(u32, ...);
-extern void fn_800D67BC(u16);
-extern void fn_800D892C(u32);
+extern void gfxRecordCommand(u32, ...);
+extern void gfxBegin(u16);
+extern void gfxSetupChannelsTev(u32);
 
 /* GSmem */
 extern u16   _toolentryAlloc__FUl(u32 size);                    /* GSmemAllocRaw */
@@ -92,7 +92,7 @@ extern void fn_800D75AC(void);
 extern void fn_800D7650(u8*);
 extern void fn_800D7868(u8*, u32, u32, u32, u32, u8, u32, u8);
 extern void fn_800D7940(u32, u16);
-extern void fn_800D7A70(u32);
+extern void gfxLoadVtxDesc(u32);
 extern void fn_800DB098(void);
 extern void fn_800DB758(u16);
 extern void lightGetFrameCount__FP9_HSD_AObj(u8*);
@@ -162,7 +162,7 @@ extern u8 lbl_80400948[];
 extern u32 lbl_8047AAC4;
 extern u32 lbl_8047AABC;
 extern u16 lbl_8047AAB8;
-extern void fn_800B857C(u32, u32, u32, u32, u32, u32);
+extern void GXSetTexCoordGen2(u32, u32, u32, u32, u32, u32);
 extern void GXLoadTexMtxImm(void*, u32, u32);
 extern u8 lbl_80314404[];
 extern u8 lbl_80314454[];
@@ -179,20 +179,20 @@ extern u8 lbl_80314510[];
 extern u8 lbl_803144F0[];
 extern void fn_800BBC34(u32);
 extern void fn_800BBC0C(u32);
-extern void fn_800BA6B0();
-extern void fn_800BA6F4();
+extern void GXSetNumChans();
+extern void GXSetChanCtrl();
 extern void fn_800B884C();
 extern void fn_800BC8C8();
 extern void fn_800BBAF8();
 extern void fn_800BB97C();
 extern void fn_800BB81C();
-extern void fn_800BC6F0();
-extern void fn_800BC228();
-extern void fn_800BC290();
-extern void fn_800BC1A0();
-extern void fn_800BC1E4();
-extern void fn_800BC454();
-extern void fn_800BC4C0();
+extern void GXSetTevOrder();
+extern void GXSetTevColorOp();
+extern void GXSetTevAlphaOp();
+extern void GXSetTevColorIn();
+extern void GXSetTevAlphaIn();
+extern void GXSetTevKColorSel();
+extern void GXSetTevKAlphaSel();
 extern void fn_800BB780();
 extern void fn_800BBC7C();
 extern void fn_800BBCE0();
@@ -200,7 +200,7 @@ extern void fn_800BBE8C();
 extern void fn_800BBF98();
 extern void fn_800BBFDC();
 extern void fn_800BC3E0();
-extern void fn_800BC580();
+extern void GXSetTevSwapModeTable();
 extern void fn_800BD2E0(void*, u32);
 extern f32 lbl_8047CA50;
 extern f32 lbl_8047CA54;
@@ -327,11 +327,11 @@ extern u8 lbl_8036CB30[];
 extern void HSD_TExpGetType();
 extern void fn_801B6DC0();
 extern void HSD_TExpCnst();
-extern void fn_801B707C();
-extern void fn_801B6E74();
-extern void fn_801B64EC();
-extern void fn_801B6CD8();
-extern void fn_801B5F08();
+extern void HSD_TExpTev();
+extern void HSD_TExpColorOp();
+extern void HSD_TExpColorIn();
+extern void HSD_TExpAlphaOp();
+extern void HSD_TExpAlphaIn();
 extern void HSD_ImageDescRemove(void);
 extern void HSD_TObjLoadDesc(void);
 extern void HSD_MObjGetTObj(void);
@@ -374,7 +374,7 @@ extern u32 lbl_8047CB00;
 extern u32 lbl_8047CAF8;
 extern u32 lbl_8047CB08;
 extern u32 lbl_8047CAFC;
-extern f32 fn_801ADC7C(void);
+extern f32 HSD_Randf(void);
 extern f32 lbl_8047CB10;
 extern u32 fn_801ADCD8(void);
 extern u32 lbl_80478C94;
@@ -430,12 +430,12 @@ void fn_800D9B24(u16* a, u16* b, u16* c, u16* d) { *a = *(u16*)(lbl_8047AA80 + 0
 extern f32 lbl_8047CA50;
 extern f32 lbl_8047CA54;
 #if 0
-asm void fn_800D9B58(void) {
-#include "src/game/gs_render_fn_800D9B58.inc"
+asm void gfxSetOrtho(void) {
+#include "src/game/gs_render_gfxSetOrtho.inc"
 }
 #else
-void fn_800D9B58(f32 a, f32 b, f32 c, f32 d) {
-    if (*(s32*)lbl_8047AA80 == 1) { fn_800D4F98(0x3a, 0xe, a); }
+void gfxSetOrtho(f32 a, f32 b, f32 c, f32 d) {
+    if (*(s32*)lbl_8047AA80 == 1) { gfxRecordCommand(0x3a, 0xe, a); }
     else {
         u8 tmp[0x48];
         GSmtx44Ortho(tmp, b, d, a, c, lbl_8047CA50, lbl_8047CA54);
@@ -451,7 +451,7 @@ asm void fn_800D9BD0(void) {
 }
 #else
 void fn_800D9BD0(f32 a, f32 b, f32 c, f32 d) {
-    if (*(s32*)lbl_8047AA80 == 1) { fn_800D4F98(0x39, 0xe, a); }
+    if (*(s32*)lbl_8047AA80 == 1) { gfxRecordCommand(0x39, 0xe, a); }
     else { u8 tmp[0x48]; GSmtx44Perspective(tmp); fn_800BD2E0(tmp, 0); }
 }
 #endif
@@ -467,7 +467,7 @@ void fn_800D9C24(u32 x0, u32 y0, u32 x1, u32 y1) {
     u32 camera;
 
     if (*(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x38, 4, (u16)x0, (u16)y0, (u16)x1, (u16)y1);
+        gfxRecordCommand(0x38, 4, (u16)x0, (u16)y0, (u16)x1, (u16)y1);
         return;
     }
 

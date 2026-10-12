@@ -27,7 +27,7 @@
 #include "hsd/hsd_robj.h"
 
 void fn_8019CE50(void);
-extern void fn_80197998(HSD_JObj* jobj, f32 vmtx[3][4], f32 pmtx[3][4],
+extern void HSD_JObjDispDObj(HSD_JObj* jobj, f32 vmtx[3][4], f32 pmtx[3][4],
                         HSD_TrspMask trsp_mask, u32 rendermode);
 extern void HSD_JObjMakePositionMtx(HSD_JObj* jobj, f32 mtx[3][4],
                                     f32 rmtx[3][4]);
@@ -36,7 +36,7 @@ s32 JObjInit(HSD_Class* object);
 void JObjRelease(HSD_JObj* jobj);
 void JObjAmnesia(void* info);
 s32 JObjLoad(HSD_JObj* jobj, HSD_Joint* joint, HSD_JObj* parent);
-void fn_801A20C8(void* obj, u32 type, HSD_ObjData* val);
+void HSD_JObjAnimCallback(void* obj, u32 type, HSD_ObjData* val);
 void fn_801A3600(HSD_JObj* jobj);
 void fn_801A1B7C(HSD_JObj* jobj);
 extern u8 lbl_8036C8E0[];
@@ -474,10 +474,10 @@ void fn_8019CE50(void)
         (void (*)(HSD_ClassInfo*)) JObjAmnesia;
     HSD_JOBJ_INFO(lbl_8036C8E0)->make_mtx = fn_801A3600;
     HSD_JOBJ_INFO(lbl_8036C8E0)->make_pmtx = HSD_JObjMakePositionMtx;
-    HSD_JOBJ_INFO(lbl_8036C8E0)->disp = fn_80197998;
+    HSD_JOBJ_INFO(lbl_8036C8E0)->disp = HSD_JObjDispDObj;
     HSD_JOBJ_INFO(lbl_8036C8E0)->load = JObjLoad;
     HSD_JOBJ_INFO(lbl_8036C8E0)->release_child = JObjReleaseChild;
-    ((HSD_JObjInfoColosseum*) lbl_8036C8E0)->update = fn_801A20C8;
+    ((HSD_JObjInfoColosseum*) lbl_8036C8E0)->update = HSD_JObjAnimCallback;
 }
 #pragma pop
 
@@ -689,7 +689,7 @@ void fn_8019D610(void* value)
     lbl_8047B2A8 = value;
 }
 
-void fn_8019D618(void* value)
+void HSD_JObjSetPtclCallback(void* value)
 {
     lbl_8047B2A0 = value;
 }
@@ -3141,7 +3141,7 @@ void fn_801A1F2C(HSD_JObj* jobj)
 }
 #pragma pop
 
-void fn_801A20C8(void* obj, u32 type, HSD_ObjData* val)
+void HSD_JObjAnimCallback(void* obj, u32 type, HSD_ObjData* val)
 {
     typedef struct JVec3 { f32 x, y, z; } JVec3;
     typedef void (*UserCallback)(HSD_JObj*, u32, f32);

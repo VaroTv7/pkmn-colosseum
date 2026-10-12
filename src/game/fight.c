@@ -223,23 +223,23 @@ u32 fightKoukaDoFightKoukaJoukenAndKouka(void* target, u16 koukaDataIndex) {
 #pragma peephole on
 u32 fightStartEncount(u32 p1) {
     extern void _threadSwitch();
-    extern u32 fn_800FF56C();
-    extern void fn_800FF730();
+    extern u32 std092_getCurrentRoomID();
+    extern void std098_mapWarpToMenuRoom();
     extern void fn_80112700();
     extern void floorSetFadeScript();
     extern void floorSetPrevFloorID();
     extern void fn_80113FE8();
-    extern void fn_801140C8();
+    extern void std162_fieldClearPending();
     extern void heroDecPokedoru();
     extern u32 heroGetStatus();
     extern void msgctrlSetValue();
     extern void scriptSoundStop();
-    extern void fn_80165A20();
-    extern void fn_80166AB8();
+    extern void std104_soundSetBackgroundMusic();
+    extern void soundStartRaw();
     extern void fn_8018DA88();
-    extern u8 fn_801902E0();
-    extern void fn_801903B0();
-    extern void fn_80190528();
+    extern u8 std081_flagCheckTrue();
+    extern void std079_flagSetTrue();
+    extern void std078_flagSetFalse();
     extern void fadeCheck();
     extern void fadeSetEX(f32, f32, u32, u32, u32);
     extern void fadeSet();
@@ -247,7 +247,7 @@ u32 fightStartEncount(u32 p1) {
     extern void mailMainReceiveTerminate();
     extern void fightSetEncountId();
     extern void fn_801EF62C();
-    extern u32 fn_801EF634();
+    extern u32 std103_battleGetResult();
     extern void fn_801EF7B4();
     extern u8 fightFloorIsGcHeroWin();
     extern void fightFloorSetStatus();
@@ -290,9 +290,9 @@ u32 fightStartEncount(u32 p1) {
     } else {
         uVar1 = fightEncountDataBiosGetPtr();
         fn_801EF62C(0);
-        fn_801903B0(0x9b0);
+        std079_flagSetTrue(0x9b0);
         fightSetEncountId(p1);
-        uVar2 = fn_800FF56C();
+        uVar2 = std092_getCurrentRoomID();
         fightFloorSetStatus(0, 0, 0x4a, 0, uVar2);
         uVar4 = fightEncountDataBiosGetFightFloorDataId(uVar1);
         uVar7 = fightFloorGetStatus(0, uVar4, 2, 0);
@@ -306,12 +306,12 @@ u32 fightStartEncount(u32 p1) {
                 msgValue = fn_801FCC7C();
                 sVar8 = charNameBiosSearchIndex();
                 if ((sVar8 != 0) && (sVar8 = charNameBiosGetHearFlag(), sVar8 != 0)) {
-                    fn_80190528(sVar8);
+                    std078_flagSetFalse(sVar8);
                 }
                 msgctrlSetValue(0x59, msgValue);
             }
         }
-        fn_80165A20(1, 1000, 0xff);
+        std104_soundSetBackgroundMusic(1, 1000, 0xff);
         scriptSoundStop(1000);
         wipeData = fightEncountWipeDataBiosGetPtr(fightEncountDataBiosGetWipeId(uVar1));
         fadeSetEX(lbl_8047E528, fightEncountDataBiosGetWipeEffectTime(wipeData), 9,
@@ -319,20 +319,20 @@ u32 fightStartEncount(u32 p1) {
                   fightEncountDataBiosGetWipeSnapshotUse(wipeData));
         sVar8 = fightEncountDataBiosGetWipeEffectSndID(wipeData);
         if (sVar8 != 0) {
-            fn_80166AB8(sVar8, 0, 0);
+            soundStartRaw(sVar8, 0, 0);
         }
         fn_801EF7B4();
-        fn_800FF730(uVar7);
+        std098_mapWarpToMenuRoom(uVar7);
         floorSetFadeScript(0, 0);
         _threadSwitch();
         floorSetPrevFloorID(uVar7);
         cVar10 = fightEncountDataBiosGetZenmetuFlag(uVar1);
         if (cVar10 != 0) {
-            uVar1 = fn_801EF634();
+            uVar1 = std103_battleGetResult();
             cVar10 = fightFloorIsGcHeroWin(0, uVar1);
             if (cVar10 == 0) {
                 fightSetEncountId(0);
-                fn_801903B0(0xe05);
+                std079_flagSetTrue(0xe05);
                 uVar6 = heroGetStatus(0, 0xc, 0);
                 heroDecPokedoru(0, (s32)uVar6 / 2);
                 fn_801D0AFC(1);
@@ -340,20 +340,20 @@ u32 fightStartEncount(u32 p1) {
                 fn_80113FE8();
                 floorSetFadeScript(0, 0x5960008);
                 _threadSwitch();
-                uVar1 = fn_801EF634();
+                uVar1 = std103_battleGetResult();
                 return uVar1;
             }
         }
-        fn_80190528(0x9b0);
+        std078_flagSetFalse(0x9b0);
         fn_80112700();
-        fn_801140C8();
-        cVar10 = fn_801902E0(0xe05);
+        std162_fieldClearPending();
+        cVar10 = std081_flagCheckTrue(0xe05);
         if (cVar10 == 0) {
             fadeSet(lbl_8047E52C, 2);
             fadeCheck(1);
         }
         fightSetEncountId(0);
-        uVar1 = fn_801EF634();
+        uVar1 = std103_battleGetResult();
     }
     return uVar1;
 }

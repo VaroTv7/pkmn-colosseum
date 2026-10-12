@@ -18,7 +18,7 @@ u32 fn_8018F490(const PeopleInfoBiosEntry* info)
     return 0;
 }
 
-u32 fn_8018F4AC(const PeopleInfoBiosEntry* info)
+u32 characterModelGetTalkSE(const PeopleInfoBiosEntry* info)
 {
     if (info != NULL) {
         return (info->flags >> 5) & 7;

@@ -393,15 +393,15 @@ void fn_80056C54(u8* a, u8* b, u32 c) {
     extern void* fn_80057F94(void*);
     extern u16 GStextureGetXsize(void*);
     extern u16 GStextureGetYsize(void*);
-    extern void fn_800D7820(void*);
-    extern void fn_800D85D4(s32, void*);
-    extern void fn_800D6A00(s32);
-    extern void fn_800D67BC(s32);
+    extern void gfxSetVtxDesc(void*);
+    extern void gfxLoadTexture(s32, void*);
+    extern void gfxSetPrimitive(s32);
+    extern void gfxBegin(s32);
     extern void fn_800D61E4(s16, s16);
     extern void fn_800D5CB8(s32, s32, s32, s32, s32);
-    extern void fn_800D59B8(s32, f32, f32);
-    extern void fn_800D6728(void);
-    extern void fn_800D88DC(u32);
+    extern void gfxVtxTexCoord(s32, f32, f32);
+    extern void gfxEnd(void);
+    extern void gfxSetFlags(u32);
     extern void* menuSpriteBiosGetPtr(s32);
     extern void windowDrawSprite2(s32, s32, s16, s16, s32, void*, s32, s32);
     u8* pokemon;
@@ -464,7 +464,7 @@ void fn_80056C54(u8* a, u8* b, u32 c) {
             top = *(s16*)(b + 0x56);
             right = *(s16*)(b + 0x56);
             bottom = *(s16*)(b + 0x54);
-            fn_800D88DC(-0x7ffffffe);
+            gfxSetFlags(-0x7ffffffe);
             fn_800DC0D4(0, 0xf, 0xb, 0xa, 8);
             fn_800DC14C(0, 0, 0, 0, 1, 0);
             fn_800DBFD4(0, 7, 7, 7, 4);
@@ -475,18 +475,18 @@ void fn_80056C54(u8* a, u8* b, u32 c) {
             scaleT0 = lbl_8047BF00 / (f32)GStextureGetYsize(texture);
             scaleT1 = (f32)right / (f32)GStextureGetYsize(texture);
 
-            fn_800D7820(lbl_80314F98);
-            fn_800D85D4(0, texture);
-            fn_800D6A00(7);
-            fn_800D67BC(2);
+            gfxSetVtxDesc(lbl_80314F98);
+            gfxLoadTexture(0, texture);
+            gfxSetPrimitive(7);
+            gfxBegin(2);
             fn_800D61E4(insetX, insetY);
             fn_800D5CB8(0, 0x3c, 0xc, 0xff, alpha);
-            fn_800D59B8(0, scaleS0, scaleT0);
+            gfxVtxTexCoord(0, scaleS0, scaleT0);
             fn_800D61E4((s16)(insetX + width), (s16)(insetY + height));
             fn_800D5CB8(0, 0x3c, 0xc, 0xff, alpha);
-            fn_800D59B8(0, scaleS1, scaleT1);
-            fn_800D6728();
-            fn_800D888C(0x80000000);
+            gfxVtxTexCoord(0, scaleS1, scaleT1);
+            gfxEnd();
+            gfxClearFlags(0x80000000);
             return;
         }
 

@@ -474,31 +474,31 @@ extern u32 lbl_8047AEBC;
 
 extern void fn_800D37D4(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f);
 
-extern void fn_800D88DC(u32);
+extern void gfxSetFlags(u32);
 
-extern void fn_800D888C(u32);
+extern void gfxClearFlags(u32);
 
-extern void fn_800D9B58(f32, f32, f32, f32);
+extern void gfxSetOrtho(f32, f32, f32, f32);
 
-extern void fn_800DA4C4(u32, u32, u32);
+extern void gfxSetBlendMode(u32, u32, u32);
 
-extern void fn_800DA2BC(u32, u32, u32);
+extern void gfxSetUpdates(u32, u32, u32);
 
-extern void fn_800DA1E8(u32, u32, u32);
+extern void gfxSetZMode(u32, u32, u32);
 
-extern void fn_800DA028(u32);
+extern void gfxSetCullMode(u32);
 
-extern void fn_800D6A00(u32);
+extern void gfxSetPrimitive(u32);
 
-extern void fn_800D7820(u32);
+extern void gfxSetVtxDesc(u32);
 
-extern void fn_800D67BC(u32);
+extern void gfxBegin(u32);
 
-extern void fn_800D6680(f32, f32, f32);
+extern void gfxVtxPos(f32, f32, f32);
 
 extern void fn_800D5CB8(u32, u32, u32, u32, u32);
 
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 
 extern f32 lbl_8047D0F0;
 
@@ -670,9 +670,9 @@ extern f32 lbl_8047D11C;
 
 extern f32 lbl_8047D120;
 
-extern s32 fn_801666BC(u16);
+extern s32 soundGetStatus(u16);
 
-extern void fn_80165A20(u16, u32, u32);
+extern void std104_soundSetBackgroundMusic(u16, u32, u32);
 
 extern void GSmsgAdjustAlign(void);
 
