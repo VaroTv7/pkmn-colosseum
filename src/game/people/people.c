@@ -1029,7 +1029,7 @@ static inline void peopleGetPositionByID(u32 groupId, u32 index, GSvec* position
 }
 
 /* fn_8018C1E8: show or hide a person; its shadow follows. */
-static inline void peopleSetVisible(u32 groupId, u32 index, u8 visible)
+static inline void peopleSetVisibleInline(u32 groupId, u32 index, u8 visible)
 {
     PeopleEntry* entry;
 
@@ -1644,7 +1644,7 @@ void* peopleOpen(u32 groupId, u32 index, s32 objectId)
  */
 void fn_8018DCA8(PeopleEntry* entry, u8 releaseWalkList)
 {
-    peopleSetVisible(entry->groupId, entry->index, FALSE);
+    peopleSetVisibleInline(entry->groupId, entry->index, FALSE);
     if (releaseWalkList) {
         peopleFreeWalkList(entry->groupId, entry->index);
     }
@@ -3936,7 +3936,7 @@ void fn_801821B8(u32 groupId, u32 index)
     }
     peopleGetPositionByID(groupId, index, &position);
     ground = position.y;
-    peopleSetVisible(groupId, index, TRUE);
+    peopleSetVisibleInline(groupId, index, TRUE);
     peopleClearFlags(entry, 8);
     fn_80166A28(0x49E);
     peopleSetMotionIndex(entry, 7);
