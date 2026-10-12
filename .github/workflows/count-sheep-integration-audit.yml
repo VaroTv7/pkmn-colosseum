@@ -1,0 +1,62 @@
+name: Count-Sheep integration audit
+
+on:
+  push:
+    branches: [integrate/count-sheep-full-20261011]
+    paths: [.github/workflows/count-sheep-integration-audit.yml]
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container: ghcr.io/dougchansan/pkmn-colosseum-build:main
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Export public source history and inspect merge conflicts
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          mkdir -p /tmp/colosseum-audit
+          git update-ref refs/heads/audit-upstream 5cfe5ca3d09f20c4adc3c9b2a4e8d3c29046f10f
+          git update-ref refs/heads/audit-import a57d34f2dd688d669bd5cfe12a4085ef1cbed857
+          git bundle create /tmp/colosseum-audit/source.bundle refs/heads/audit-upstream refs/heads/audit-import
+          git merge-base audit-upstream audit-import
+          git log --oneline audit-import..audit-upstream
+          set +e
+          git merge --no-commit --no-ff audit-upstream > /tmp/colosseum-audit/merge.txt 2>&1
+          rc=$?
+          set -e
+          cat /tmp/colosseum-audit/merge.txt
+          if [ "$rc" -gt 1 ]; then exit "$rc"; fi
+          git diff --name-only --diff-filter=U > /tmp/colosseum-audit/conflicts.txt
+          echo '=== CONFLICTING SOURCE PATHS ==='
+          cat /tmp/colosseum-audit/conflicts.txt
+          git merge --abort
+      - name: Inspect validation input inventory without copying game data
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== EXISTING PRIVATE CONTAINER INPUTS (filenames and sizes only) ==='
+          python - <<'PY'
+          from pathlib import Path
+          for root in (Path('/orig'), Path('/compilers'), Path('/binutils')):
+              files = sorted(p for p in root.rglob('*') if p.is_file())
+              print(str(root), 'file_count=', len(files))
+              for p in files[:150]:
+                  print(p.relative_to(root), p.stat().st_size)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: count-sheep-public-source-audit
+          path: /tmp/colosseum-audit/
+          retention-days: 3
