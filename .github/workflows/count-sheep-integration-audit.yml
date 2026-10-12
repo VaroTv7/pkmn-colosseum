@@ -20,9 +20,9 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Export public source history and inspect merge conflicts
-        shell: bash
+        shell: sh
         run: |
-          set -euo pipefail
+          set -eu
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -43,9 +43,10 @@ jobs:
           cat /tmp/colosseum-audit/conflicts.txt
           git merge --abort
       - name: Inspect validation input inventory without copying game data
-        shell: bash
+        if: always()
+        shell: sh
         run: |
-          set -euo pipefail
+          set -eu
           echo '=== EXISTING PRIVATE CONTAINER INPUTS (filenames and sizes only) ==='
           python - <<'PY'
           from pathlib import Path
@@ -56,6 +57,7 @@ jobs:
                   print(p.relative_to(root), p.stat().st_size)
           PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: count-sheep-public-source-audit
           path: /tmp/colosseum-audit/
