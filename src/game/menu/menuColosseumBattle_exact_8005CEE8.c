@@ -18,7 +18,7 @@ extern void fn_800347E8(s32);
 extern void fn_8003480C(s32);
 extern void fn_8006B8F0();
 extern void fn_8006E0CC();
-extern void fn_800FF58C(s32);
+extern void floorRequestChange(s32);
 extern void fn_80166A28();
 extern void* savedataGetStatus();
 extern void menuSetPosition();
@@ -41,7 +41,7 @@ void menuColosseumBattle(s32 battleKind) {
     fn_8006B8F0();
     work = (ColosseumSaveWork*)savedataGetStatus(0, 0xE);
     work->battleKind = battleKind;
-    fn_800FF58C(0x395);
+    floorRequestChange(0x395);
 }
 
 /* Address: 0x8005CF2C | Size: 0x168 */

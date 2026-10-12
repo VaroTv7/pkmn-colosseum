@@ -565,7 +565,7 @@ void fn_801E1300(void)
     GSgappCreate(1, 0xFD, 10, _vtrTexDispFunc);
 }
 
-s32 fn_801E16D0(void)
+s32 GSmovieGetFrame(void)
 {
     extern s32 fn_801E25C8(void);
 
@@ -754,7 +754,7 @@ s32 fn_801E1924(GsVtrStartArgs* args)
     return 0;
 }
 
-void fn_801E1810(void)
+void GSmovieClose(void)
 {
     extern u8 lbl_8047B441;
     extern u32 lbl_8047B450;
@@ -779,7 +779,7 @@ void fn_801E1810(void)
     }
 }
 
-s32 fn_801E1874(void)
+s32 GSmovieIsActive(void)
 {
     extern u8 lbl_8047B440;
     extern u8 lbl_8047B441;
@@ -790,7 +790,7 @@ s32 fn_801E1874(void)
     return 1;
 }
 
-void fn_801E189C(char *path, u8 flag)
+void GSmovieOpen(char *path, u8 flag)
 {
     struct ThreadArgs {
         char *path;

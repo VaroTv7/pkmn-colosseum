@@ -76,7 +76,7 @@ extern void fn_800D6A00();
 extern void fn_800D7820();
 extern void fn_800D888C();
 extern void fn_800D88DC();
-extern void fn_800E0C54();
+extern void GSrand();
 extern void _threadSwitch();
 extern void GScharMakeFromSJIS();
 extern u32 GSmsgGetGSchar();
@@ -612,7 +612,7 @@ void fn_80069C0C(void* arg0) {
                 r0 = r0 << 3;
                 r27 = r4 + r0;
                 r27 = r3 + r27;
-                ((void(*)(void))fn_800E0C54)();
+                ((void(*)(void))GSrand)();
                 r0 = r3 & 0xFFFF;
                 r4 = MENU_MIDDLE_U32_0004(r31)->unk_0004;
                 r0 = r0 & 0x7;
@@ -642,7 +642,7 @@ void fn_80069C0C(void* arg0) {
             }
                 r26 = r25 & 0xFFFF;
                 do {
-                    ((void(*)(void))fn_800E0C54)();
+                    ((void(*)(void))GSrand)();
                     r0 = r3 & 0xFFFF;
                     r4 = MENU_MIDDLE_U32_0004(r31)->unk_0004;
                     r0 = r0 & 0x7;
@@ -704,7 +704,7 @@ void fn_80069C0C(void* arg0) {
 
 
                 }
-                ((void(*)(void))fn_800E0C54)();
+                ((void(*)(void))GSrand)();
                 r4 = (0xaaab << 16);
                 r5 = r3 & 0xFFFF;
                 /* subi r0, r4, 0x5555 */;

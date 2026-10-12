@@ -18,7 +18,7 @@ extern void  GSlogWrite(const char* fmt, ...);         /* OSReport / GSlog */
 extern void  fn_800FE6D0(s16 x, s16 y);
 extern void  spriteSetEnv(void);
 extern void  fn_8001EC08(s32, s32, s16, s16, u8, s32);
-extern void  fn_800FBE7C(void* message, u32 state, u8 flag);
+extern void  winMsgDrawMessage(void* message, u32 state, u8 flag);
 extern void  fn_800FBD88(void* message);
 extern u32   GSmsgGetRect(void* message);
 extern void  GSmsgExec(void* message, u8 a, u8 b);
@@ -386,7 +386,7 @@ s32 winMsgDraw(u8* window, u8* item) {
     switch ((s8)window[1]) {
     case 2:
         if (*(s32*)(window + 0x04) != 0x51) {
-            fn_800FBE7C(*(void**)work, *(u32*)(work + 0x08),
+            winMsgDrawMessage(*(void**)work, *(u32*)(work + 0x08),
                         (window[0] & 4) == 0);
             *(u32*)(work + 0x08) = 0;
         }

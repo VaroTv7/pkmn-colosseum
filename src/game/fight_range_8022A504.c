@@ -117,7 +117,7 @@ u32 fn_8022A504(u32 r3, u32 r4, u32* r5)
 u32 fn_8022A6C8(u32 r3)
 
 {
-    extern u16 fn_800E0C54();
+    extern u16 GSrand();
     extern u32 fn_800FA280();
     extern void fn_8011BBD8();
     extern u32 fn_8011BEB4();
@@ -209,7 +209,7 @@ u32 fn_8022A6C8(u32 r3)
     if ((cVar15 != 0) && ((u8)fn_802026E4(r3,0x3e) != 0) &&
         ((u16)activeMove != 0x164)) {
       fn_80132A38(0x13,fn_801F8100(iVar5));
-      uVar17 = fn_800E0C54() % 100;
+      uVar17 = GSrand() % 100;
       fn_8011CE18(uVar14);
       uVarMove = fn_8011CCE4();
       if (uVar17 < (uVarMove & 0xff)) {
@@ -235,7 +235,7 @@ u32 fn_8022A6C8(u32 r3)
           u32 randomValue;
           s32 quotient;
           short selectedSlot;
-          randomValue = fn_800E0C54();
+          randomValue = GSrand();
           quotient = (s32)(randomValue & 0xffff) / (u8)bVar16;
           selectedSlot = *(short *)((int)local_44 +
                                    (((randomValue & 0xffff) - quotient * (u8)bVar16)

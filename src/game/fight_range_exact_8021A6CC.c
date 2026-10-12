@@ -26,7 +26,7 @@ extern u8 lbl_80378A8E[];
 extern u32 fn_80232024();
 extern void fn_80234A0C();
 extern u32 fightOutPokemonGetPokemonPtr();
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 extern u8* fn_801440A0(u16 idx);
 extern u8* itemDataBiosGetPtr(u16 idx);
 extern u8   fn_80143DFC(u8* p);
@@ -67,7 +67,7 @@ extern u8  lbl_8047B626;
 extern void fn_80207448(void* p);
 extern void fightOutPokemonInitOneSelfTurn(void* p);
 extern void fn_802249B8();
-extern void fn_802271E0(char, char);
+extern void fightApplyDamageVariance(char, char);
 extern void fn_802274F0(u32, char, char, char);
 extern void* fn_801F025C();
 extern u8 fn_802624CC();
@@ -530,7 +530,7 @@ void fn_8021AB9C(void) {
 #undef fn_8012640C
 #undef fn_801F025C
 
-/* 0x8021AC1C size 0x390: fn_8021AC1C (owner line 14662) */
+/* 0x8021AC1C size 0x390: fightCheckOneHitKO (owner line 14662) */
 #pragma optimization_level reset
 #pragma optimize_for_size on
 #pragma scheduling reset
@@ -539,10 +539,10 @@ void fn_8021AB9C(void) {
 #pragma opt_propagation off
 #pragma opt_common_subs reset
 #pragma switch_tables reset
-void fn_8021AC1C(void)
+void fightCheckOneHitKO(void)
 
 {
-    extern u32 fn_800E0C54();
+    extern u32 GSrand();
     extern void wazaSetStatus();
     extern u32 wazaGetStatus();
     extern u32 fightTargetGetTragetPtrToRelativeHostSideFightTargetId();
@@ -598,7 +598,7 @@ void fn_8021AC1C(void)
   defenderLevel = figthOutPokemonGetLevel(attacker);
   fightFloorSetStatus(0,0,0x49,0,attacker);
   if ((u16)itemSubDataId == 0x27) {
-    randomValue = (u16)fn_800E0C54();
+    randomValue = (u16)GSrand();
     if ((int)randomValue % 100 < itemBuff) {
       pokemonSetStatus(attacker,0,0x11a,0,1);
     }
@@ -622,7 +622,7 @@ void fn_8021AC1C(void)
     stealBonus = wazaGetStatus(0,attackerMove,6,0);
     levelDelta = (u8)attackerLevel - (u8)defenderLevel;
     threshold = levelDelta + stealBonus;
-    randomValue = (u16)fn_800E0C54();
+    randomValue = (u16)GSrand();
     if (((int)randomValue % 100 + 1 < (int)threshold) &&
         ((u8)attackerLevel >= (u8)defenderLevel)) {
       canSteal = 1;
@@ -780,7 +780,7 @@ skipB0B0:
 void fn_8021B1A4(void)
 
 {
-    extern u16 fn_800E0C54();
+    extern u16 GSrand();
     extern u32 GSmsgGetGSchar();
     extern void fn_8010C4D4();
     extern void msgctrlSetValue();
@@ -850,7 +850,7 @@ failed:
     }
 
     selected = (pokemon.value,
-        candidates[(u8)((s32)(u16)fn_800E0C54() % (s32)(u8)state.count)]);
+        candidates[(u8)((s32)(u16)GSrand() % (s32)(u8)state.count)]);
     if ((s32)selected < 0) {
         goto failed;
     }
@@ -943,7 +943,7 @@ u32 fn_8021B364(u32 r3, u32 r4)
 #pragma switch_tables reset
 void fn_8021B484(void)
 {
-    extern u32 fn_800E0C54();
+    extern u32 GSrand();
     extern u32 fightTargetGetPtrAsNowFightType();
     extern u32 fightFloorGetFightOutPokemonPtrToFightTrainerPtr();
     extern void fightFloorSetStatus();
@@ -987,7 +987,7 @@ success:
     goto check_proceed;
 
 random_check:
-    random = fn_800E0C54();
+    random = GSrand();
     if ((u16)(((s32)(((u8)attackerLevel + (u8)defenderLevel) *
                      (u8)random) >> 8) + 1) >
         (s32)((defenderLevel >> 2) & 0x3f)) {
@@ -1000,7 +1000,7 @@ check_proceed:
     if ((u8)proceed == 0) {
         goto done;
     }
-    random = fn_800E0C54();
+    random = GSrand();
     selected = choices[(u16)((s32)(u16)random % (s32)(u16)count)];
     if (selected == 0) {
         goto failed;
@@ -1057,12 +1057,12 @@ void fn_8021B628(void) {
     if (flag != 0) {
         fn_8011BBD8(fieldD9, 0, 0x31, 0, flag);
     } else {
-        roll = fn_800E0C54();
+        roll = GSrand();
         val = roll % 4;
         if (val < 2) {
             val = val + 2;
         } else {
-            roll = fn_800E0C54();
+            roll = GSrand();
             val = roll % 4 + 2;
         }
         fn_8011BBD8(fieldD9, 0, 0x31, 0, val);

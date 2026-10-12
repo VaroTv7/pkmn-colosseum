@@ -1508,7 +1508,7 @@ void fn_8007581C(void)
     extern s32 fn_80062948(void*);
     extern u8 fn_800FF52C(void);
     extern void fn_800FF660(void);
-    extern void fn_800FF58C(s32);
+    extern void floorRequestChange(s32);
     extern void floorSetFadeScript(s32, u32);
     extern char lbl_802688F8[];
     extern char lbl_8026890C[];
@@ -1577,7 +1577,7 @@ void fn_8007581C(void)
             fadeCheck(1);
         }
     } else {
-        fn_800FF58C(0x395);
+        floorRequestChange(0x395);
     }
 }
 
@@ -2809,13 +2809,13 @@ extern s32 fn_80165A20(s32, s32, s32);
 void fn_80075EE0(void) {
     extern s32 lbl_8047A618;
     extern f32 lbl_8047C0C8;
-    extern u32 fn_800FF560(void);
+    extern u32 floorGetCurrentContext(void);
     extern void* GSthreadCreate(s32, u32, u32, s32, s32, void*);
     extern void fadeSet(s32, f32);
     extern s32 fn_80075F4C(void);
 
     if (lbl_8047A618 == 0) {
-        GSthreadCreate(1, fn_800FF560(), 0x4000, 1, 1, fn_80075F4C);
+        GSthreadCreate(1, floorGetCurrentContext(), 0x4000, 1, 1, fn_80075F4C);
     } else {
         fn_80165A20(0x46a, 0, 0x7f);
     }

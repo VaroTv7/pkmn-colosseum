@@ -14,7 +14,7 @@
  * in exactly the same relative order as in XD, which is strong evidence
  * this is still one TU rather than several.
  *
- * fn_801123D4 and fn_801129CC previously carried invented
+ * fn_801123D4 and floorResolveEntryPosition previously carried invented
  * "GSfield_ResourceInit" / "GSfield_UpdateObjects" names/signatures
  * from an earlier bad campaign pass (same class of issue documented in
  * include/game/gs_colsys.h); reverted to the standard fn_<addr>
@@ -249,7 +249,7 @@ void fn_801127BC(void) {
     extern void floorDataBiosGetCurrentPtr(void);
     extern u8 floorDataBiosGetFloorKind(void);
     extern void fn_800D3074(s32);
-    extern u32 fn_800FF560(void);
+    extern u32 floorGetCurrentContext(void);
     extern void fn_800FF2A0(u32, u32, void*);
     extern void fn_80112844(void);
     s32 kind;
@@ -271,7 +271,7 @@ void fn_801127BC(void) {
         break;
     }
     if (*(u32*)(lbl_80408378 + 0x28) != 0) {
-        fn_800FF2A0(0, fn_800FF560(), (void*)fn_80112844);
+        fn_800FF2A0(0, floorGetCurrentContext(), (void*)fn_80112844);
     }
 }
 
@@ -324,7 +324,7 @@ void fn_801128A0(void) {
     extern void fn_800FF788(u32);
     extern void fn_800FF784(u32);
     extern void fn_80118020(void);
-    extern void fn_801129CC(void);
+    extern void floorResolveEntryPosition(void);
     extern void fn_801129AC(void);
     u32 sp8[3];
     u32 r;
@@ -332,7 +332,7 @@ void fn_801128A0(void) {
     sp8[0] = lbl_80272094[0];
     sp8[1] = lbl_80272094[1];
     sp8[2] = lbl_80272094[2];
-    fn_800FF3C0(0, 0x5000, (void*)fn_801129CC);
+    fn_800FF3C0(0, 0x5000, (void*)floorResolveEntryPosition);
     fn_800FF178(0xFF, 0x5000, (void*)fn_801129AC);
     fn_800FF4D4(sp8, 1);
     fn_800FF4D4(sp8, 2);
@@ -379,7 +379,7 @@ void fn_801129AC(void) {
 #pragma push
 #pragma optimization_level 0
 #pragma optimizewithasm off
-void fn_801129CC(void* floor) {
+void floorResolveEntryPosition(void* floor) {
     typedef struct FloorVec { f32 x, y, z; } FloorVec;
     extern u8 lbl_80408378[];
     extern f32 lbl_8047CF70, lbl_8047CF74, lbl_8047CF78, lbl_8047CF7C;
@@ -409,7 +409,7 @@ void fn_801129CC(void* floor) {
     extern void GSmodelSetShadowTextureSize(u32, u32);
     extern u32 fn_80115960(void*);
     extern void fn_800F7434(u32);
-    extern u32 fn_800FF560(void);
+    extern u32 floorGetCurrentContext(void);
     extern u32 fn_801158D0(void*);
     extern u32 fn_80115918(void*);
     extern u32 fn_80115888(void*);
@@ -521,7 +521,7 @@ void fn_801129CC(void* floor) {
     if (fn_80115960(floor) != 0) {
         fn_800F7434(0);
     }
-    task = fn_800FF560();
+    task = floorGetCurrentContext();
     if (fn_800FF548() == 0) {
         switch (kind) {
         case 1:
@@ -566,14 +566,14 @@ void fn_801129CC(void* floor) {
 #pragma peephole off
 void fn_80112F8C(void) {
     extern void* floorDataBiosGetMainFunc(void);
-    extern u32 fn_800FF560(void);
+    extern u32 floorGetCurrentContext(void);
     extern void GSthreadCreate(s32 a, u32 b, u32 c, u32 d, u32 e, void* f);
     extern void fn_800FF0A0(void (*callback)(void));
     void* obj;
 
     obj = floorDataBiosGetMainFunc();
     if (obj != NULL) {
-        GSthreadCreate(1, fn_800FF560(), 0x4000, 1, 1, obj);
+        GSthreadCreate(1, floorGetCurrentContext(), 0x4000, 1, 1, obj);
     }
     fn_800FF0A0(fn_80112F8C);
 }
@@ -599,11 +599,11 @@ void fn_80112FEC(void* floor)
     extern void* fn_8018E050(u32, u32, u32);
     extern void* fn_8018D998(u32, u32);
     extern void set__5GSvecFfff(void*, f32, f32, f32);
-    extern void fn_8018C0A8(u32, u32, void*);
-    extern void fn_8018BF24(u32, u32, void*);
+    extern void peopleSetPositionByIndex(u32, u32, void*);
+    extern void peopleSetRotation(u32, u32, void*);
     extern void fn_8018CB5C(u32, u32);
-    extern void fn_8018C7C8(u32, u32, s32);
-    extern void fn_8018C1E8(u32, u32, s32);
+    extern void peopleSetFlagsByIndex(u32, u32, s32);
+    extern void peopleSetVisible(u32, u32, s32);
     extern void* GSresGetResource(u32, u32);
     extern void GSmodelClearShadowFlags(void*, u32);
     extern u8 fn_801902E0(u16);
@@ -655,14 +655,14 @@ void fn_80112FEC(void* floor)
         }
 
         set__5GSvecFfff(position, entry->x, entry->y, entry->z);
-        fn_8018C0A8(group, resourceId, position);
+        peopleSetPositionByIndex(group, resourceId, position);
         set__5GSvecFfff(rotation, lbl_8047CF70,
                         lbl_8047CF74 * entry->rotation,
                         lbl_8047CF70);
-        fn_8018BF24(group, resourceId, rotation);
+        peopleSetRotation(group, resourceId, rotation);
         fn_8018CB5C(group, resourceId);
-        fn_8018C7C8(group, resourceId, 4);
-        fn_8018C1E8(group, resourceId, 1);
+        peopleSetFlagsByIndex(group, resourceId, 4);
+        peopleSetVisible(group, resourceId, 1);
 
         if (((entry->flags >> 5) & 7) == 2) {
             object = GSresGetResource(group, resourceId);
@@ -677,7 +677,7 @@ void fn_80112FEC(void* floor)
                 floorEventCtrlTresure(group, resourceId, 1);
                 if (entry->hideFlag != 0 &&
                     !fn_801902E0(entry->hideFlag)) {
-                    fn_8018C1E8(group, resourceId, 0);
+                    peopleSetVisible(group, resourceId, 0);
                 }
                 fn_801837D8(group, resourceId, 0x0596000A,
                             entry->eventFlag, entry->hideFlag);
@@ -703,14 +703,14 @@ void _floorInitCharacters__FP11GSfloor_dd_(void* a) {
     extern u32 fn_8018D998(u32 model, u32 i);
     extern s32 fn_80183958(u32 model, u32 i);
     extern void fn_801837D8(u32 model, u32 i, s32 a, u32 b, s32 c);
-    extern void fn_8018C7C8(u32 model, u32 i, s32 flag);
+    extern void peopleSetFlagsByIndex(u32 model, u32 i, s32 flag);
     extern void floorCharacterBiosGetPos(u8* obj, void* out);
-    extern void fn_8018C0A8(u32 model, u32 i, void* p);
+    extern void peopleSetPositionByIndex(u32 model, u32 i, void* p);
     extern void floorCharacterBiosGetRot(u8* obj, void* out);
-    extern void fn_8018BF24(u32 model, u32 i, void* p);
+    extern void peopleSetRotation(u32 model, u32 i, void* p);
     extern void fn_8018CB5C(u32 model, u32 i);
     extern s32 floorCharacterBiosGetVisibility(u8* obj);
-    extern void fn_8018C1E8(u32 model, u32 i, s32 x);
+    extern void peopleSetVisible(u32 model, u32 i, s32 x);
     extern s32 floorCharacterBiosGetLoadInit(u8* obj);
     extern void fn_8018CA20(u32 model, u32 i, s32 x);
     extern u8 floorCharacterBiosGetMoveType(u8* obj);
@@ -718,7 +718,7 @@ void _floorInitCharacters__FP11GSfloor_dd_(void* a) {
     extern void fn_801839A0(u32 model, u32 i, f32 x, f32 y);
     extern u8 floorCharacterBiosGetTalkStartType(u8* obj);
     extern u8 floorCharacterBiosGetTalkEndType(u8* obj);
-    extern void fn_8018C69C(u32 model, u32 i, s32 flag);
+    extern void peopleClearFlagsByIndex(u32 model, u32 i, s32 flag);
     extern void fn_80188F78(u32 model, u32 i);
     extern const char lbl_802720CC[];
     extern const char lbl_8035B888[];
@@ -753,14 +753,14 @@ void _floorInitCharacters__FP11GSfloor_dd_(void* a) {
                 emitId = fn_80183958(model, i);
                 fn_801837D8(model, i, emitId, result, 0);
             }
-            fn_8018C7C8(model, i, 4);
-            fn_8018C7C8(model, i, 8);
+            peopleSetFlagsByIndex(model, i, 4);
+            peopleSetFlagsByIndex(model, i, 8);
             floorCharacterBiosGetPos(obj, v14);
-            fn_8018C0A8(model, i, v14);
+            peopleSetPositionByIndex(model, i, v14);
             floorCharacterBiosGetRot(obj, v8);
-            fn_8018BF24(model, i, v8);
+            peopleSetRotation(model, i, v8);
             fn_8018CB5C(model, i);
-            fn_8018C1E8(model, i, floorCharacterBiosGetVisibility(obj));
+            peopleSetVisible(model, i, floorCharacterBiosGetVisibility(obj));
             fn_8018CA20(model, i, floorCharacterBiosGetLoadInit(obj));
             switch (floorCharacterBiosGetMoveType(obj)) {
             case 0:
@@ -777,18 +777,18 @@ void _floorInitCharacters__FP11GSfloor_dd_(void* a) {
             case 0:
                 break;
             case 1:
-                fn_8018C7C8(model, i, 0x10);
+                peopleSetFlagsByIndex(model, i, 0x10);
                 break;
             case 2:
-                fn_8018C7C8(model, i, 0x20);
+                peopleSetFlagsByIndex(model, i, 0x20);
                 break;
             }
             switch (floorCharacterBiosGetTalkEndType(obj)) {
             case 0:
-                fn_8018C69C(model, i, 0x40);
+                peopleClearFlagsByIndex(model, i, 0x40);
                 break;
             case 1:
-                fn_8018C7C8(model, i, 0x40);
+                peopleSetFlagsByIndex(model, i, 0x40);
                 break;
             }
             if (((u32)((*obj >> 5) & 1)) != 0U) {
@@ -924,7 +924,7 @@ void floorChangePos(u32 floorId, s16 direction, f32 x, f32 y, f32 z) {
     extern const f32 lbl_8047CF70;
     extern const f32 lbl_8047CF74;
     extern u32 fn_800FF56C(void);
-    extern void fn_800FF58C(u32);
+    extern void floorRequestChange(u32);
     if (floorId == 0) {
         return;
     }
@@ -934,7 +934,7 @@ void floorChangePos(u32 floorId, s16 direction, f32 x, f32 y, f32 z) {
     *(u32*)(lbl_80408378 + 0x0) = fn_800FF56C();
     *(u32*)(lbl_80408378 + 0x4) = floorId;
     *(u8*)(lbl_80408378 + 0x8) = 0;
-    fn_800FF58C(floorId);
+    floorRequestChange(floorId);
 }
 
 /* 0x80113828 | 0x64 */
@@ -942,14 +942,14 @@ void floorChangePos(u32 floorId, s16 direction, f32 x, f32 y, f32 z) {
 #pragma peephole off
 void floorLink(u32 arg0, s32 arg1) {
     extern u32 fn_800FF56C(void);
-    extern void fn_800FF58C(s32);
+    extern void floorRequestChange(s32);
 
     if (arg0 != 0) {
         *(u32*)(lbl_80408378 + 0x0) = fn_800FF56C();
         *(s32*)(lbl_80408378 + 0x4) = arg0;
         *(u8*)(lbl_80408378 + 0x8) = 1;
         *(s32*)(lbl_80408378 + 0xC) = arg1;
-        fn_800FF58C(arg0);
+        floorRequestChange(arg0);
     }
 }
 #pragma peephole on
@@ -965,7 +965,7 @@ void floorLinkWithSE(void* a, void* b, s32 c) {
     extern u8 lbl_80408378[];
     extern u32 fn_800FF56C(void);
     extern void fn_80166A28(u32);
-    extern void fn_800FF58C(void*);
+    extern void floorRequestChange(void*);
     u32 sndId;
 
     if (a == NULL) {
@@ -987,7 +987,7 @@ void floorLinkWithSE(void* a, void* b, s32 c) {
     if (sndId != 0) {
         fn_80166A28(sndId);
     }
-    fn_800FF58C(a);
+    floorRequestChange(a);
 }
 #pragma peephole on
 #pragma pop
@@ -1405,7 +1405,7 @@ void fn_80113FE8(void) {
     extern u8 lbl_80408378[];
     extern u32 gamedatasaveGetStatus(s32, s32);
     extern u32 fn_800FF56C(void);
-    extern void fn_800FF58C(u32);
+    extern void floorRequestChange(u32);
     u8* state = lbl_80408378;
     u32 a;
     u32 b;
@@ -1425,7 +1425,7 @@ void fn_80113FE8(void) {
         *(u32*)(lbl_80408378 + 0x4) = a;
         *(u8*)(lbl_80408378 + 0x8) = 1;
         *(u32*)(lbl_80408378 + 0xC) = c;
-        fn_800FF58C(a);
+        floorRequestChange(a);
     }
     *(u8*)(state + 0x51) = 0;
     *(u32*)(lbl_80408378 + 0x0) = b;

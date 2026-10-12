@@ -40,7 +40,7 @@ extern void fightEncountDataBiosSetFightTrainerDataId(void* encounter, u32 slot,
 extern void* memcpy(void* dst, const void* src, u32 size);
 extern void __assert(const char* file, s32 line, const char* condition);
 extern void fn_801903B0(u32 id);
-extern u16 fn_8020DAD0();
+extern u16 fightStartEncount();
 
 #pragma push
 #pragma peephole off
@@ -99,7 +99,7 @@ u32 menuCB_Battle(MenuCBBattleSetup* setup)
     }
 
     fn_801903B0(0xE05);
-    encounter = fn_8020DAD0(current);
+    encounter = fightStartEncount(current);
 
     switch (p->battleMode) {
     case 0:

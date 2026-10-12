@@ -167,14 +167,14 @@ u32 fightTimerCommandBlock(void)
 void fightTimerCommandStart(void)
 {
     extern ColosseumBattleTimerState lbl_80478800;
-    extern u32 fn_800FF560(void);
+    extern u32 floorGetCurrentContext(void);
     extern u32 GSthreadCreate(u32, u32, u32, u32, u32, u32);
     extern void GSthreadSetArgs(u32, u32, ...);
     extern void fightTimerThreadFunc(u8 *);
     u32 thread;
 
     if (lbl_80478800.forceDone != 1) {
-        thread = GSthreadCreate(1, fn_800FF560(), 0x4000, 1, 0, (u32)fightTimerThreadFunc);
+        thread = GSthreadCreate(1, floorGetCurrentContext(), 0x4000, 1, 0, (u32)fightTimerThreadFunc);
         if (thread != 0) {
             lbl_80478800.thread = thread;
             GSthreadSetArgs(thread, 1);
@@ -283,14 +283,14 @@ u32 fightTimerAllBlock(void)
 void fightTimerAllStart(void)
 {
     extern ColosseumBattleTimerState lbl_80478810;
-    extern u32 fn_800FF560(void);
+    extern u32 floorGetCurrentContext(void);
     extern u32 GSthreadCreate(u32, u32, u32, u32, u32, u32);
     extern void GSthreadSetArgs(u32, u32, ...);
     extern void fightTimerThreadFunc(u8 *);
     u32 thread;
 
     if (lbl_80478810.forceDone != 1) {
-        thread = GSthreadCreate(1, fn_800FF560(), 0x4000, 1, 0, (u32)fightTimerThreadFunc);
+        thread = GSthreadCreate(1, floorGetCurrentContext(), 0x4000, 1, 0, (u32)fightTimerThreadFunc);
         if (thread != 0) {
             lbl_80478810.thread = thread;
             GSthreadSetArgs(thread, 1);

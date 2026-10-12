@@ -97,7 +97,7 @@ s32 fightTrainerAiSelectIrekaeDasuFightPokemon(void* ctx, u32 param1, u32 param2
     extern u8 lbl_8027A434[];
     extern u32 lbl_80478B38;
     extern void fn_8000815C();
-    extern void fn_800E0C54();
+    extern void GSrand();
     extern void fightFloorGetFightTrainerFightPokemonPtrAry();
     extern void fightFloorGetFightTrainerFightOutPokemonPtrAry();
     extern void fightFloorGetFightPokemonPtrToFightTrainerPtr();
@@ -273,7 +273,7 @@ s32 fightTrainerAiSelectIrekaeDasuFightPokemon(void* ctx, u32 param1, u32 param2
         r9 = 0x0;
         r10 = 0x0;
         fn_8023A118();
-        fn_800E0C54();
+        GSrand();
         r5 = r3 & 0xFFFF;
         r4 = r20 & 0xFFFF;
         r0 = (s32)r5 / (s32)r4;
@@ -369,7 +369,7 @@ s32 fightTrainerAiSelectIrekaeDasuFightPokemon(void* ctx, u32 param1, u32 param2
 
         r0 = r19 & 0xFFFF;
         if (r0 != (u32)0xe) {
-            fn_800E0C54();
+            GSrand();
             r5 = r3 & 0xFFFF;
             r4 = r19 & 0xFFFF;
             r0 = (s32)r5 / (s32)r4;
@@ -1191,7 +1191,7 @@ s32 fightTrainerAiSelectIrekaeDasuFightPokemon(void* ctx, u32 param1, u32 param2
                 fn_8000815C();
                 r0 = r3 & 0xFF;
                 if (r0 == (u32)0x1) {
-                    fn_800E0C54();
+                    GSrand();
                     r0 = *(u32*)(sp + 0x7F4);
                     r5 = r3 & 0xFFFF;
                     r3 = *(u32*)(r29 + r30);

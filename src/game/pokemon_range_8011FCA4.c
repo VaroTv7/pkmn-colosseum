@@ -40,12 +40,12 @@ s32 pokemonCheckSetMonohiroi(u8* pokemon)
 
     if (ability != 0x35 ||
         (u16)pokemonGetStatus(pokemon, 0, 0x82, 0) != 0 ||
-        fn_800E0C54() % 10 != 0) {
+        GSrand() % 10 != 0) {
         return 0;
     }
 
     item = 0;
-    roll = fn_800E0C54() % 100;
+    roll = GSrand() % 100;
     for (i = 0; i < 20; i += 2) {
         if (((u16*)table)[i + 1] > roll) {
             item = ((u16*)table)[i];

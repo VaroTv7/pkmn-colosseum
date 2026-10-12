@@ -26,7 +26,7 @@ extern u8 lbl_80378A8E[];
 extern u32 fn_80232024();
 extern void fn_80234A0C();
 extern u32 fightOutPokemonGetPokemonPtr();
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 extern u8* fn_801440A0(u16 idx);
 extern u8* itemDataBiosGetPtr(u16 idx);
 extern u8   fn_80143DFC(u8* p);
@@ -67,7 +67,7 @@ extern u8  lbl_8047B626;
 extern void fn_80207448(void* p);
 extern void fightOutPokemonInitOneSelfTurn(void* p);
 extern void fn_802249B8();
-extern void fn_802271E0(char, char);
+extern void fightApplyDamageVariance(char, char);
 extern void fn_802274F0(u32, char, char, char);
 extern void* fn_801F025C();
 extern u8 fn_802624CC();
@@ -750,7 +750,7 @@ void fn_8021847C(void)
 #pragma switch_tables reset
 void fn_80218824(void)
 {
-    extern u16 fn_800E0C54();
+    extern u16 GSrand();
     extern u32 GSmsgGetGSchar();
     extern u32 wazaGetStatus();
     extern void msgctrlSetValue();
@@ -796,7 +796,7 @@ void fn_80218824(void)
             if (pp < 2) {
                 lbl_8047B610 = (u8*)*(u32*)(lbl_8047B610 + 1);
             } else {
-                amount = (u8)((fn_800E0C54() % 4) + 2);
+                amount = (u8)((GSrand() % 4) + 2);
                 if (pp < amount) {
                     amount = pp;
                 }

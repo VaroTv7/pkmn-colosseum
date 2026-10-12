@@ -244,7 +244,7 @@ void fn_801DFC30(void) {
     extern void heroDecPokedoru(void*, u32);
     extern void winMsgOpenField(u32, s32, s32, s32);
     extern void fn_80183350(u32, u32);
-    extern void fn_8018C69C(u32, u32, u32);
+    extern void peopleClearFlagsByIndex(u32, u32, u32);
     extern void fn_8018B76C(u32, u32, u32, u32, u32);
     extern void fn_80183018(u32, u32);
     extern void fn_801ECFE0(s32, void*);
@@ -460,7 +460,7 @@ void fn_801DFC30(void) {
             }
             fn_801ECFE0(0, firstOpen);
             fn_80183350(0x4D, 1);
-            fn_8018C69C(0x4D, 1, 8);
+            peopleClearFlagsByIndex(0x4D, 1, 8);
             fn_8018B76C(0x4D, 1, 5, 0, 1);
             fn_80183018(0x4D, 1);
             break;

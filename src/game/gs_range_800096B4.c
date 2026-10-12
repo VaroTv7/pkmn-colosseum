@@ -13,7 +13,7 @@ extern void menuDbgItemCreate(void);
 extern s32 menuOpen(u32 a, u32 b);
 extern void heroAddPokecoupon(u32 a, s32 b);
 extern void heroAddPokedoru(u32 a, s32 b);
-extern u8 fn_801EF63C(void);
+extern u8 fightIsBattleActive(void);
 extern void pokemonInit(u8* a);
 extern void heroCatchPokemon(u32 a, u8* b, u32 c, u32 d, u32 e);
 extern u32 heroGetStatus(u8* a, u32 b, u32 c);
@@ -723,7 +723,7 @@ s32 fn_8000BB00(void) {
 
 /* dbgMenuHeroPokemonAdd - 0x8000BB48 | size: 0xA4 */
 s32 dbgMenuHeroPokemonAdd(void) {
-    if ((u8)fn_801EF63C() == 1) { return -1; }
+    if ((u8)fightIsBattleActive() == 1) { return -1; }
     if (lbl_80478840 != 0) {
         pokemonInit(lbl_803A1A48);
         lbl_80478840 = 0;
@@ -736,7 +736,7 @@ s32 dbgMenuHeroPokemonAdd(void) {
 /* fn_8000BBEC - 0x8000BBEC | size: 0x6C */
 s32 fn_8000BBEC(void) {
     u32 val;
-    if ((u8)fn_801EF63C() == 1) { return -1; }
+    if ((u8)fightIsBattleActive() == 1) { return -1; }
     val = heroGetStatus(NULL, 3, 5);
     if (val == 0) { return -1; }
     return fn_800096B4(val, 0, 0, 0, 0, 0);
@@ -745,7 +745,7 @@ s32 fn_8000BBEC(void) {
 /* fn_8000BC58 - 0x8000BC58 | size: 0x6C */
 s32 fn_8000BC58(void) {
     u32 val;
-    if ((u8)fn_801EF63C() == 1) { return -1; }
+    if ((u8)fightIsBattleActive() == 1) { return -1; }
     val = heroGetStatus(NULL, 3, 4);
     if (val == 0) { return -1; }
     return fn_800096B4(val, 0, 0, 0, 0, 0);
@@ -754,7 +754,7 @@ s32 fn_8000BC58(void) {
 /* fn_8000BCC4 - 0x8000BCC4 | size: 0x6C */
 s32 fn_8000BCC4(void) {
     u32 val;
-    if ((u8)fn_801EF63C() == 1) { return -1; }
+    if ((u8)fightIsBattleActive() == 1) { return -1; }
     val = heroGetStatus(NULL, 3, 3);
     if (val == 0) { return -1; }
     return fn_800096B4(val, 0, 0, 0, 0, 0);
@@ -763,7 +763,7 @@ s32 fn_8000BCC4(void) {
 /* fn_8000BD30 - 0x8000BD30 | size: 0x6C */
 s32 fn_8000BD30(void) {
     u32 val;
-    if ((u8)fn_801EF63C() == 1) { return -1; }
+    if ((u8)fightIsBattleActive() == 1) { return -1; }
     val = heroGetStatus(NULL, 3, 2);
     if (val == 0) { return -1; }
     return fn_800096B4(val, 0, 0, 0, 0, 0);
@@ -772,7 +772,7 @@ s32 fn_8000BD30(void) {
 /* fn_8000BD9C - 0x8000BD9C | size: 0x6C */
 s32 fn_8000BD9C(void) {
     u32 val;
-    if ((u8)fn_801EF63C() == 1) { return -1; }
+    if ((u8)fightIsBattleActive() == 1) { return -1; }
     val = heroGetStatus(NULL, 3, 1);
     if (val == 0) { return -1; }
     return fn_800096B4(val, 0, 0, 0, 0, 0);
@@ -781,7 +781,7 @@ s32 fn_8000BD9C(void) {
 /* fn_8000BE08 - 0x8000BE08 | size: 0x6C */
 s32 fn_8000BE08(void) {
     u32 val;
-    if ((u8)fn_801EF63C() == 1) { return -1; }
+    if ((u8)fightIsBattleActive() == 1) { return -1; }
     val = heroGetStatus(NULL, 3, 0);
     if (val == 0) { return -1; }
     return fn_800096B4(val, 0, 0, 0, 0, 0);

@@ -2177,7 +2177,7 @@ asm void fn_800FBE7C(void) {
 }
 #else
 #pragma optimization_level 2
-s32 fn_800FBE7C(u32 key, u32 r4arg) {
+s32 winMsgDrawMessage(u32 key, u32 r4arg) {
     u8* head;
     u8* entry;
 

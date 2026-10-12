@@ -44,7 +44,7 @@ u8 fn_800FF554(void)
     return *(u8*)((u8*)lbl_8047ACC8 + 0xA);
 }
 
-u32 fn_800FF560(void)
+u32 floorGetCurrentContext(void)
 {
     return *(u32*)((u8*)lbl_8047ACC8 + 0x4);
 }

@@ -48,7 +48,7 @@ extern s32 OSCreateThread(void* thread, void* func, void* arg, void* stack, u32 
 extern void OSResumeThread(void* thread);
 extern s32 _menuSoundReadWaveThread__FPv(u32* arg);
 
-void fn_8003686C(void) {
+void bootWaitLogo(void) {
     s32 selection;
     s32 pending;
     s32 cursorOutA;

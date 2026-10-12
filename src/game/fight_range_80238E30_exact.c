@@ -6,7 +6,7 @@
 
 extern u8 lbl_80375CA8[];
 extern u32 lbl_8047B618;
-extern u16 fn_800E0C54(void);
+extern u16 GSrand(void);
 
 #pragma optimize_for_size on
 u8 fn_80238E30(u32 ctx, void *param2, u16 target) {
@@ -299,7 +299,7 @@ s32 fightTrainerAiGetValueAryMaxBanme(s32 *valueAry, u16 count, u8 useRandom) {
   if (tieCount == 1) {
     idx = 0;
   } else if (useRandom == 1) {
-    idx = fn_800E0C54() % tieCount;
+    idx = GSrand() % tieCount;
   } else {
     idx = 0;
   }

@@ -710,7 +710,7 @@ s32 fightFloorGetEnemyFightSideLittleNokoriHpRate(u32 r3_arg, u32 r4_arg) {
 /* 0x801F2598 | size: 0xBC | medium -- best: 76.17%, arr-init/prologue/peephole walls */
 u32 fightFloorGetFightOutPokemonPtrRandom(u32 param_1, u32 param_2, u32 param_3, u32 param_4) {
     extern u32 _fightFloorCreateFightOutPokemonPtrAry__FP11FIGHT_FLOORPP15FightOutPokemonbUcP15FightOutPokemon(u32 a, u32* arr, u32 b, u32 c);
-    extern u32 fn_800E0C54(void);
+    extern u32 GSrand(void);
     u32 arr[8];
     u32 r31;
     u32 i = 0;
@@ -721,7 +721,7 @@ u32 fightFloorGetFightOutPokemonPtrRandom(u32 param_1, u32 param_2, u32 param_3,
     r31 = _fightFloorCreateFightOutPokemonPtrAry__FP11FIGHT_FLOORPP15FightOutPokemonbUcP15FightOutPokemon(param_1, arr, param_2, param_3);
     if ((u16)r31 == 0) return 0;
     {
-        u32 r4 = (u16)fn_800E0C54();
+        u32 r4 = (u16)GSrand();
         r4 = (u16)((u16)r4 % (u16)r31);
         if ((u16)r4 >= 8) return 0;
         r4 = arr[(u16)r4];
@@ -941,7 +941,7 @@ void fightFloorLoopValidFightTrainer(u32 param_1, void (*param_2)(u32, u32, u32)
     extern void _threadSwitch(void);
     extern u32 GSthreadIsRunning(u32 task);
     extern void GSthreadClose(u32 task);
-    extern u32 fn_800FF560(void);
+    extern u32 floorGetCurrentContext(void);
     extern u32 GSthreadCreate(u32 type, u32 data, u32 flags, u32 unk1, u32 unk2, u32 unk3);
     extern void GSthreadSetArgs(u32 task, ...);
     extern u32 fightFloorGetStatus(u32 poke, u32 b, u32 field, u32 d);
@@ -983,7 +983,7 @@ void fightFloorLoopValidFightTrainer(u32 param_1, void (*param_2)(u32, u32, u32)
                         fightTrainerGetStatus(r21, 0, 0x4b, 0);
                         if (r20 == 0) {
                             if ((u16)r22 < 4) {
-                                { u32 task = fn_800FF560(); arr[(u16)r22] = GSthreadCreate(0x12, task, 0x2000, 1, 0, (u32)param_2); }
+                                { u32 task = floorGetCurrentContext(); arr[(u16)r22] = GSthreadCreate(0x12, task, 0x2000, 1, 0, (u32)param_2); }
                                 if (arr != NULL) {
                                     GSthreadSetArgs(arr[(u16)r22], 3, r21, r25, r29);
                                     r22++;
@@ -1641,7 +1641,7 @@ s32 fightFloorCmpfightOutPokemonNimbleness(void *p1, void *p2, void *p3, u8 p4) 
     extern u32 fightOutPokemonGetNowNimbleness(void*, u32, u32, u32, void*);
     extern u32 fightOutPokemonGetCmpNimblenessWazaDataId(void*);
     extern s32 wazaGetStatus(u32, u32, u32, u32);
-    extern s32 fn_800E0C54(void);
+    extern s32 GSrand(void);
     u32 walkCtx1[4];
     u32 walkCtx2[4];
     u32 abilCat;
@@ -1804,7 +1804,7 @@ s32 fightFloorCmpfightOutPokemonNimbleness(void *p1, void *p2, void *p3, u8 p4) 
             }
             if (cmp1 > cmp2) return 1;
             if (cmp1 < cmp2) return 0;
-            if (fn_800E0C54() & 1) return 1;
+            if (GSrand() & 1) return 1;
             return 0;
         }
     }

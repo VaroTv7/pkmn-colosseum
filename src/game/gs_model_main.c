@@ -246,7 +246,7 @@ extern void fn_800D6A5C(s32 vertexCount, s32 polygonCount);
 extern void fn_80195A48(void);
 extern void fn_800D87AC(s32 mode);
 
-void fn_800E3604(s32 flags, u8 slot)
+void GSmodelDrawAll(s32 flags, u8 slot)
 {
     void* camera;
 

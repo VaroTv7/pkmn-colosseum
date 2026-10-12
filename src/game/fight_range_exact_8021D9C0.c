@@ -209,7 +209,7 @@ void fn_8021DE4C(void) {
 #pragma dont_inline reset
 #pragma opt_propagation reset
 void WS_KORAERU_CHECK(void) {
-    fn_802271E0(1, 0);
+    fightApplyDamageVariance(1, 0);
     lbl_8047B610 = lbl_8047B610 + 1;
 }
 
@@ -847,7 +847,7 @@ void fn_8021EF24(void) {
     extern void fn_80211B94();
     extern void fn_8022D084();
     extern void fn_8022E410();
-    extern void fn_8022E6F0();
+    extern void fightCheckRuiShadowSense();
     extern u32 fightOutPokemonGetTokuseiDataId();
     extern void pokemonSetStatus(void*, u32, u32, u32, u32);
     extern s32 pokemonGetStatus();
@@ -903,10 +903,10 @@ void fn_8021EF24(void) {
     if ((u16)sVar6 == 0x36) {
         pokemonSetStatus((void*)uVar2, 0, 0xf9, 0, 1);
     }
-    fn_8022E6F0(uVar2, 0);
+    fightCheckRuiShadowSense(uVar2, 0);
     fn_8022E410(uVar2);
     fn_8022D084(uVar2);
-    fn_8022E6F0(uVar2, 1);
+    fightCheckRuiShadowSense(uVar2, 1);
     fightFloorCreateFightPokemonEnemyAryEnemySideAll(0);
     fightSideSetStatus(uVar3, 0, 8, 0, 0);
     lbl_8047B610 = lbl_8047B610 + 2;

@@ -131,14 +131,14 @@ asm void dbgMenuMovieTest(void) {
 u32 dbgMenuMovieTest(void) {
     u8 buf[0x18];
     s32 id;
-    while ((u32)(fn_801E1874() & 0xFF) == 1) {
-        fn_801E1810();
+    while ((u32)(GSmovieIsActive() & 0xFF) == 1) {
+        GSmovieClose();
         _threadSwitch();
     }
     id = menuOpen(2, 1);
     if (id != -1) {
         sprintf(buf, lbl_80272AA8, lbl_8047D0E8, id);
-        fn_801E189C(buf, 0);
+        GSmovieOpen(buf, 0);
     }
     return 0;
 }

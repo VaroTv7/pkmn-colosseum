@@ -274,7 +274,7 @@ extern f32 lbl_8047B85C;
 extern f32 lbl_8047B860;
 extern u32 lbl_8047B808;
 extern u32 lbl_8047B80C;
-extern void* fn_800FF560(void);
+extern void* floorGetCurrentContext(void);
 
 /* Forward declarations for same-TU callees used before their definitions. */
 void fn_8002058C(void);
@@ -289,7 +289,7 @@ void fn_8002049C(void) {
     void* ctx;
 
     lbl_8047A32C = 0;
-    ctx = fn_800FF560();
+    ctx = floorGetCurrentContext();
     lbl_8047A330 = GSthreadCreate(0x14, ctx, 0x2000, 1, 0, fn_8002058C);
     lbl_8047A314 = 0;
     lbl_8047A344 = lbl_8047B814;
@@ -1484,7 +1484,7 @@ LAB_80025564:
 
 /* 0x800255A4 | 0x18C
  *
- * fn_800255A4 -- title-screen audio/timing update driven by lbl_8047A384.
+ * worldMapPost -- title-screen audio/timing update driven by lbl_8047A384.
  *   IF title active (lbl_8047A384 != 0):
  *     fadeSet(lbl_8047B8E4, 3)     -- set BGM volume fade target
  *     soundStop(0x449, 0)            -- play SE cue
@@ -1531,7 +1531,7 @@ asm void fn_800255A4(void) {
 #include "src/game/gs_title_fn_800255A4.inc"
 }
 #else
-void fn_800255A4(void) {
+void worldMapPost(void) {
     extern u32 lbl_8047A384;
     extern u32 lbl_8047A388;
     extern u32 lbl_8047A38C;
@@ -1592,20 +1592,20 @@ extern u32 lbl_8047A3AC;
 extern u32 lbl_80478DD8;
 extern u8 lbl_8047A3A8;
 extern u32 lbl_8047A388;
-extern void fn_80025F84(void);
+extern void worldMapBikeRide(void);
 #if 0
 asm void fn_80025730(void) {
 #include "src/game/gs_title_fn_80025730.inc"
 }
 #else
-void fn_80025730(void) {
+void worldMapMain(void) {
     extern u32 lbl_80478DD8;
     extern u32 lbl_8047A368;
     extern u32 lbl_8047A388;
     extern u32 lbl_8047A390;
     extern u8 lbl_8047A3A8;
     extern u32 lbl_8047A3AC;
-    extern void fn_80025F84();
+    extern void worldMapBikeRide();
     extern void menuItemBiosSetSelectFlag();
     extern void menuItemBiosGetPtr();
     extern void fn_800D3074();
@@ -1778,7 +1778,7 @@ L_80025910:
         menuOpen();
         r3 = 0xbd;
         menuClose();
-        fn_80025F84();
+        worldMapBikeRide();
     }
     r3 = r30;
     r4 = 0x0;
@@ -1812,7 +1812,7 @@ asm void fn_800259B0(void) {
 #include "src/game/gs_title_fn_800259B0.inc"
 }
 #else
-void fn_800259B0(void) {
+void worldMapPre(void) {
     extern u8 lbl_803A2058[];
     extern u8 lbl_803A204C[];
     extern void fn_801CB954(s32, s32);
@@ -2214,7 +2214,7 @@ s32 fn_80025F74(void) {
 
 /* 0x80025F84 | 0x3EC
  *
- * fn_80025F84 -- title splash setup (called once when title first shown).
+ * worldMapBikeRide -- title splash setup (called once when title first shown).
  *   1. Activate 3 sprite handles 0xC6A1000/1001/1002 (fn_801CB954 activate=1).
  *   2. Pick an intro texture based on fn_801902E0(0x3E5):
  *        ret == 1: use 0xC6B1000 variant
@@ -2281,7 +2281,7 @@ asm void fn_80025F84(void) {
 }
 #else
 #pragma optimization_level 2
-void fn_80025F84(void) {
+void worldMapBikeRide(void) {
     extern u8 lbl_803A2040[];
     extern u32 lbl_80478DEC;
     extern u8 lbl_8047A380;
@@ -2960,7 +2960,7 @@ void fn_80020F54(u8* arg0, u8* arg1) {
 
 /* fn_800210F0 - 0x800210F0 | size: 0x4d4 */
 extern void menuColosseumBattle(void);
-extern void fn_800FF58C(void);
+extern void floorRequestChange(void);
 extern void fn_8006A718(void);
 extern void fn_801CB9D8(u32);
 extern void fn_8010A420(void*);
@@ -3000,7 +3000,7 @@ s32 fn_800210F0(void)
     extern u32 gamedatasaveGetStatus(s32, s32);
     extern u16 fn_8006A718(s32);
     extern u8 fn_801D04E8(void);
-    extern s32 fn_800FF58C(s32);
+    extern s32 floorRequestChange(s32);
     extern void menuModelInit(void*, s16, s16);
     extern s32 menuModelSetMotion(void*, u32);
     extern void fn_8010A010(void*, u32);
@@ -3066,7 +3066,7 @@ s32 fn_800210F0(void)
                 break;
             default:
                 fn_800205B8(1);
-                fn_800FF58C(0x384);
+                floorRequestChange(0x384);
                 state = 0x64;
                 break;
             }

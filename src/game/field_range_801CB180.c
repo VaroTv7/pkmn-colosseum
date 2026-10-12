@@ -119,7 +119,7 @@ extern u32 fn_800F7BC4(s32 pad);
 extern s32 fn_800F7A7C(s32 pad, s32 axis);
 extern s32 fn_800F7A08(s32 pad, s32 axis);
 extern void fn_800F7068(s32 id, s32 value);
-extern void fn_800F7274(s32 id);
+extern void floorTerminateScriptThreads(s32 id);
 extern void* GSthreadGetCurrentThread(void);
 extern s32 fn_800F036C(void);
 extern void GSlogWrite(const void* format, const void* text, ...);
@@ -137,7 +137,7 @@ extern void fn_8018B220(u32 group, u32 resource);
 extern void fn_8018B368(u32 group, u32 resource, u32 anim_index, s32 frame, u8 loop);
 extern void GSmodelStopAnimation(void* model);
 extern void fn_8018DB68(u32 group, u32 resource);
-extern void fn_8018C1E8(u32 group, u32 resource, u8 visible);
+extern void peopleSetVisible(u32 group, u32 resource, u8 visible);
 extern void GSmodelSetVisibility(void* model, u8 visible);
 extern void GSmodelDetachFromGSpart(void* model, s32 arg);
 extern void* GSmodelGetPart(void* model, s32 part);
@@ -158,7 +158,7 @@ extern void* fn_8018E050(u32 group, s32 people_id, void* param);
 extern void* peopleSearchID(void* people);
 extern void* peopleGetModel(void* people);
 extern void GSmodelSetBoundCheck(void* model, s32 enabled);
-extern s32 fn_800FF58C(s32 msg_id);
+extern s32 floorRequestChange(s32 msg_id);
 extern void winMsgOpen(s32 id, s32 msg_id, s32 arg2, s32 arg3);
 extern s32 fn_8001E184(void);
 extern s32 fn_800889E4(s32 arg);
@@ -211,7 +211,7 @@ void gamedatasaveBiosSetMemcardID(void* data, u64 memcard_id);
 u16 fn_8006A718(void* data);
 void fn_8006AF44(void* data, void* value);
 void fn_801CBE44(void* data, u32 size, void* hash, u32 offset);
-u16 fn_800E0C54(void);
+u16 GSrand(void);
 void* heroGetStatus(void* data, s32 status, s32 index);
 void heroSetStatus(void* data, s32 status, void* value);
 extern char* strcpy(char*, const char*);
@@ -347,7 +347,7 @@ void fn_801CB3B8(s32 id)
 
 void fn_801CB3DC(s32 id)
 {
-    fn_800F7274(id);
+    floorTerminateScriptThreads(id);
 }
 #pragma pop
 
@@ -541,7 +541,7 @@ void fn_801CB954(u32 resource, s32 visible)
     void* model;
 
     if (fn_8018D998(group, resource) != NULL) {
-        fn_8018C1E8(group, resource, (u8)visible);
+        peopleSetVisible(group, resource, (u8)visible);
     } else {
         model = GSresGetResource(group, resource);
         if (model != NULL) {
@@ -597,7 +597,7 @@ void fn_801CBA84(void)
 #pragma scheduling off
 s32 fn_801CBA90(void)
 {
-    fn_800FF58C(0x395);
+    floorRequestChange(0x395);
     return 0;
 }
 #pragma pop
@@ -634,7 +634,7 @@ s32 fn_801CBAB8(void)
             }
             break;
         case 3:
-            fn_800FF58C(0x395);
+            floorRequestChange(0x395);
             state = 4;
             break;
         case 4:
@@ -1793,7 +1793,7 @@ static inline void memcardSetSaveId(void* data, u32 serial_hi, u32 serial_lo)
 static inline void memcardFillRandom(u8* random, s32 count)
 {
     while (count-- != 0) {
-        *random++ = fn_800E0C54();
+        *random++ = GSrand();
     }
 }
 
