@@ -4,86 +4,80 @@ on:
   push:
   pull_request:
 
-# The chart commit on master needs write access. An explicit block replaces the
-# default scopes wholesale, so packages: read must be restated here or the
-# private build container can no longer be pulled.
 permissions:
   contents: write
   packages: read
 
+concurrency:
+  group: build-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    # This is a *private* build container.
-    # See docs/github_actions.md for more information.
+    # This container and its original inputs must remain private.
     container: ghcr.io/dougchansan/pkmn-colosseum-build:main
-
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
-        # Add game versions here
         version: [GC6E01]
 
     steps:
-    # Checkout the repository
     - name: Checkout
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
         submodules: recursive
 
-    # Set Git config
     - name: Git config
       run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-    # Normalize file mod times
-    - name: Restore timestamps
+    - name: Prepare and verify private original inputs
       run: |
-        uv run https://raw.githubusercontent.com/MestreLion/git-tools/refs/tags/v2022.12/git-restore-mtime \
-            --merge --commit-time
+        mkdir -p orig
+        cp -a /orig/. orig/
+        python3 tools/ci_retail.py \
+            --manifest config/${{ matrix.version }}/build.sha1 \
+            --orig orig/${{ matrix.version }}
 
-    # Copy the original files to the workspace
-    - name: Prepare
-      run: cp -a /orig .
-
-    # Restore cached files
-    - name: Cache build
-      uses: actions/cache@v4
-      with:
-        path: |
-          build
-          .ninja_deps
-          .ninja_log
-        key: ${{ runner.os }}-${{ matrix.version }}-${{ github.sha }}
-        restore-keys: ${{ runner.os }}-${{ matrix.version }}-
-
-    # Build the project
-    - name: Build
+    # Do not cache build/: it contains objects extracted from original game
+    # files, and public-repository caches can be read by fork pull requests.
+    # Fresh builds also remove the need for git-restore-mtime, whose old
+    # git-whatchanged invocation is incompatible with the current runner Git.
+    - name: Build all source, full retail outputs and report
       run: |
         python configure.py --map --version ${{ matrix.version }} \
             --binutils /binutils --compilers /compilers
-        ninja all_source progress build/${{ matrix.version }}/report.json
+        ninja -j2 all_source build/${{ matrix.version }}/report.json
+        ninja -j2
+        sha1sum -c config/${{ matrix.version }}/build.sha1
+        python3 tools/ci_retail.py \
+            --manifest config/${{ matrix.version }}/build.sha1 \
+            --orig orig/${{ matrix.version }} --outputs
 
-    # Upload map files
+    - name: Require metric and topology integrity
+      run: |
+        python3 .github/scripts/check_metric_integrity.py \
+            build/${{ matrix.version }}/report.json orig/${{ matrix.version }}/sys/main.dol
+        python3 tools/check_object_map_freeze.py \
+            --report build/${{ matrix.version }}/report.json --strict-source-status
+        python3 tools/update_readme_progress.py \
+            --report build/${{ matrix.version }}/report.json --check
+
     - name: Upload map
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.version }}_maps
         path: build/${{ matrix.version }}/**/*.MAP
 
-    # Upload progress report
     - name: Upload report
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.version }}_report
         path: build/${{ matrix.version }}/report.json
 
-    # Render the progress chart from the report this run just built. Every point
-    # on the chart is a real objdiff measurement, never a hand-entered number.
-    #
-    # The chart and its series live on the unprotected `progress-chart` branch,
-    # not on master: master requires status checks, so a push from inside a
-    # check is rejected (GH006) and would turn every master build red.
+    # Chart history contains report measurements only, never original bytes.
     - name: Render progress chart
       if: matrix.version == 'GC6E01'
       env:
@@ -98,15 +92,11 @@ jobs:
           git -C /tmp/chart rm -rq --cached .
           find /tmp/chart -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
         fi
-        # Writes nothing when the metrics are unchanged, so an ordinary no-op
-        # push produces no commit and cannot fill the branch with duplicate PNGs.
         uv run --with matplotlib tools/plot_progress.py \
             --append build/${{ matrix.version }}/report.json \
             --history /tmp/chart/progress_history.json \
             --write-history -o /tmp/chart/progress.png
 
-    # On a PR the chart is a preview artifact only: it is not committed, and a
-    # fork PR has no write token anyway.
     - name: Upload chart preview
       if: github.event_name == 'pull_request' && matrix.version == 'GC6E01'
       uses: actions/upload-artifact@v4
@@ -115,9 +105,6 @@ jobs:
         path: /tmp/chart/progress.png
         if-no-files-found: ignore
 
-    # On master the measured point is published so the README image stays
-    # current. The branch carries only the chart and its series, so master's
-    # history stays free of regenerated binaries.
     - name: Publish progress chart
       if: >-
         github.event_name == 'push'
