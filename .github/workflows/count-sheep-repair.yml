@@ -1,0 +1,155 @@
+name: Count-Sheep repair validation
+
+on:
+  push:
+    branches: [integrate/count-sheep-full-20261011]
+    paths: [.github/workflows/count-sheep-repair.yml]
+
+permissions:
+  contents: write
+  packages: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container: ghcr.io/dougchansan/pkmn-colosseum-build:main
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Repair the inline-helper collision without changing either body
+        shell: sh
+        run: |
+          set -eu
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          test "$(git rev-parse HEAD^)" = e09eb5af7741653950f4ec3306dc95ef126f377e
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, re
+          p = Path('src/game/people/people.c')
+          b = p.read_bytes()
+          assert hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest() == 'c9a70ef401a7cd4aecf62a4e16afefafeaecf445'
+          s = b.decode()
+          replacements = {
+              'static inline void peopleSetVisible(u32 groupId, u32 index, u8 visible)': 'static inline void peopleSetVisibleInline(u32 groupId, u32 index, u8 visible)',
+              '    peopleSetVisible(entry->groupId, entry->index, FALSE);': '    peopleSetVisibleInline(entry->groupId, entry->index, FALSE);',
+              '    peopleSetVisible(groupId, index, TRUE);': '    peopleSetVisibleInline(groupId, index, TRUE);',
+          }
+          for old, new in replacements.items():
+              assert s.count(old) == 1, old
+              s = s.replace(old,new)
+          assert len(re.findall(r'^void peopleSetVisible\(',s,re.M)) == 1
+          p.write_text(s)
+          PY
+          git add src/game/people/people.c
+          git diff --cached --check
+          git commit -m 'Fix public peopleSetVisible collision with donor inline helper' -m 'Preserve the canonical runtime name at 0x8018C1E8. Give the pre-existing static inline expansion a distinct name and retain its original two callers and both function bodies.'
+      - name: Prepare isolated DOL diagnostic and public-source patch
+        shell: sh
+        run: |
+          set -eu
+          cp -a /orig .
+          mkdir -p /tmp/repair-evidence
+          git diff --binary a57d34f2dd688d669bd5cfe12a4085ef1cbed857 HEAD > /tmp/repair-evidence/integration.patch
+          git log -1 --format='%H%n%T%n%P' > /tmp/repair-evidence/commit.txt
+          python - <<'PY'
+          from pathlib import Path
+          import json,subprocess
+          root=Path('config/GC6E01')
+          original=root/'config.yml'
+          (root/'config.dol-diagnostic.yml').write_text(original.read_text().split('\nmodules:',1)[0]+'\n')
+          lines=[s for s in (root/'build.sha1').read_text().splitlines() if s.rstrip().endswith('/main.dol')]
+          assert len(lines)==1
+          (root/'build.dol-diagnostic.sha1').write_text(lines[0]+'\n')
+          p=Path('configure.py');s=p.read_text();marker='if args.mode == "configure":'
+          assert s.count(marker)==1
+          override='''# Disposable DOL diagnostic only; canonical configuration remains unchanged.
+          excluded=set(config.gnu_ld_modules)
+          config.libs=[lib for lib in config.libs if lib["lib"] not in excluded]
+          config.gnu_ld_modules=[]
+          config.custom_build_steps={}
+          config.config_path=Path("config/GC6E01/config.dol-diagnostic.yml")
+          config.check_sha_path=Path("config/GC6E01/build.dol-diagnostic.sha1")
+          '''
+          p.write_text(s.replace(marker,override+'\n'+marker))
+          Path('/tmp/repair-evidence/scope.json').write_text(json.dumps({'scope':'DOL-only; original REL inputs absent; not full-retail validation','source_revision':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()},indent=2)+'\n')
+          PY
+          git diff --exit-code -- src include config/GC6E01/config.yml config/GC6E01/build.sha1 config/GC6E01/splits.txt
+      - name: Compile every DOL source and regenerate report
+        id: compile
+        shell: sh
+        run: |
+          set -eu
+          python configure.py --map --version GC6E01 --binutils /binutils --compilers /compilers
+          if ! ninja -j2 -k0 all_source build/GC6E01/report.json > /tmp/source.log 2>&1; then
+            grep -A18 -B2 -E 'job failed:|Error:|error:' /tmp/source.log | head -350
+            exit 1
+          fi
+          cp build/GC6E01/report.json /tmp/repair-evidence/report.json
+          tail -10 /tmp/source.log
+      - name: Link and require the unchanged canonical DOL hash
+        id: link
+        shell: sh
+        run: |
+          set -eu
+          if ! ninja -j2 > /tmp/link.log 2>&1; then
+            grep -A12 -B2 -E 'job failed:|Error:|FAILED|checksum' /tmp/link.log | head -160
+            exit 1
+          fi
+          sha1sum -c config/GC6E01/build.dol-diagnostic.sha1
+      - name: Record mismatch locations without publishing retail bytes
+        if: always()
+        shell: sh
+        env:
+          COMPILE_OUTCOME: ${{ steps.compile.outcome }}
+          LINK_OUTCOME: ${{ steps.link.outcome }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from collections import Counter
+          import bisect,hashlib,json,os,re,struct
+          out=Path('/tmp/repair-evidence');out.mkdir(exist_ok=True)
+          result={'scope':'DOL-only; RELs NOT validated','compile':os.environ['COMPILE_OUTCOME'],'link_and_hash':os.environ['LINK_OUTCOME']}
+          p=Path('build/GC6E01/report.json')
+          if p.exists():
+              report=json.loads(p.read_text());result['measures']=report['measures'];(out/'report.json').write_text(p.read_text())
+          old=Path('orig/GC6E01/sys/main.dol');new=Path('build/GC6E01/main.dol')
+          if old.exists() and new.exists():
+              a=old.read_bytes();b=new.read_bytes()
+              result.update(original_sha1=hashlib.sha1(a).hexdigest(),rebuilt_sha1=hashlib.sha1(b).hexdigest(),original_size=len(a),rebuilt_size=len(b))
+              offsets=struct.unpack_from('>18I',a,0);addrs=struct.unpack_from('>18I',a,0x48);sizes=struct.unpack_from('>18I',a,0x90)
+              boff=struct.unpack_from('>18I',b,0);baddrs=struct.unpack_from('>18I',b,0x48);bsizes=struct.unpack_from('>18I',b,0x90)
+              syms=sorted((int(addr,16),name,int(size,16)) for name,addr,size in re.findall(r'^(\w+) = [^:]+:0x([0-9a-fA-F]+);[^\n]*?size:0x([0-9a-fA-F]+)',Path('config/GC6E01/symbols.txt').read_text(),re.M))
+              starts=[s[0] for s in syms];owners=Counter();sections=[]
+              for i,(offset,addr,size) in enumerate(zip(offsets,addrs,sizes)):
+                  if not size:continue
+                  diffs=[j for j,(x,y) in enumerate(zip(a[offset:offset+size],b[boff[i]:boff[i]+bsizes[i]])) if x!=y]
+                  sections.append({'index':i,'address':hex(addr),'size':size,'rebuilt_address':hex(baddrs[i]),'rebuilt_size':bsizes[i],'different_bytes':len(diffs)})
+                  for d in diffs:
+                      va=addr+d;k=bisect.bisect_right(starts,va)-1
+                      owner=syms[k][1] if k>=0 and va<syms[k][0]+syms[k][2] else 'unattributed'
+                      owners[owner]+=1
+              result['sections']=sections;result['top_mismatch_symbols']=owners.most_common(60)
+          (out/'result.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
+          PY
+      - name: Publish the compile-validated source fix on the integration branch only
+        if: steps.compile.outcome == 'success'
+        shell: sh
+        run: |
+          set -eu
+          git restore configure.py
+          python -m unittest discover -s .github/scripts -p 'test_*.py'
+          python .github/scripts/quality_scan.py HEAD^ HEAD
+          git diff --exit-code
+          test "$GITHUB_REF" = refs/heads/integrate/count-sheep-full-20261011
+          git push origin HEAD:refs/heads/integrate/count-sheep-full-20261011
+          echo 'Published source fix, not merged into master.'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: count-sheep-repair-evidence
+          path: /tmp/repair-evidence/
+          retention-days: 7
