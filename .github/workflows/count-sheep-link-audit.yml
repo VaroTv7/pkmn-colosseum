@@ -41,7 +41,7 @@ jobs:
           PY
           python configure.py --map --version GC6E01 --binutils /binutils --compilers /compilers
           if ! ninja -j2 all_source build/GC6E01/report.json >/tmp/source.log 2>&1; then tail -100 /tmp/source.log; exit 1; fi
-          ninja -j2 build/GC6E01/main.dol >/tmp/baseline-link.log 2>&1
+          ninja -d keeprsp -j2 build/GC6E01/main.dol >/tmp/baseline-link.log 2>&1
       - name: Compare targeted retail symbol retention with identical source objects
         shell: sh
         run: |
@@ -70,7 +70,7 @@ jobs:
           for label,names in roots.items():
               if names:lcf.write_text(patch_forceactive_block(pristine,names))
               with open(f'/tmp/{label}-link.log','w') as log:
-                  rc=sp.run(['ninja','-j2','build/GC6E01/main.dol'],stdout=log,stderr=sp.STDOUT).returncode
+                  rc=sp.run(['ninja','-d','keeprsp','-j2','build/GC6E01/main.dol'],stdout=log,stderr=sp.STDOUT).returncode
               log=Path(f'/tmp/{label}-link.log').read_text(errors='replace')
               errors='\n'.join(line for line in log.splitlines() if re.search('error|Error|FAILED|failed|undefined|Undefined|unresolved',line))
               (out/f'{label}-errors.txt').write_text(errors+'\n')
