@@ -1608,8 +1608,8 @@ void fn_800FAEF8(s32 x, s32 y, u32 color, const char* fmt, ...) {
 #pragma optimization_level 2
 #pragma optimizewithasm off
 #if 0
-asm void std001_messageFormatLookup(void) {
-#include "src/game/gs_thread_std001_messageFormatLookup.inc"
+asm void fn_800FB43C(void) {
+#include "src/game/gs_thread_fn_800FB43C.inc"
 }
 #else
 #pragma peephole on
@@ -2128,8 +2128,8 @@ loop_19:
 #pragma optimization_level 2
 #pragma optimizewithasm off
 #if 0
-asm void GSmsgFree(void) {
-#include "src/game/gs_thread_GSmsgFree.inc"
+asm void fn_800FBD88(void) {
+#include "src/game/gs_thread_fn_800FBD88.inc"
 }
 #else
 #pragma optimization_level 2
@@ -2653,12 +2653,12 @@ s32 GSmsgInit(arg0, arg1)
 #pragma optimizewithasm off
 #pragma peephole off
 #if 0
-asm s32 msgTaskDraw(entry, type, arg)
+asm s32 fn_800FC7E0(entry, type, arg)
     void* entry;
     u8 type;
     u32 arg;
 {
-#include "src/game/gs_thread_msgTaskDraw.inc"
+#include "src/game/gs_thread_fn_800FC7E0.inc"
 }
 #else
 s32 msgTaskDraw(arg0, arg1, arg2, arg3)

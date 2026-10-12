@@ -1459,8 +1459,8 @@ extern u8 lbl_80272708[];
 extern u32 lbl_80478EC4;
 extern u32 lbl_80478EC0;
 #if 0
-asm void heroDispatchEvent(void) {
-#include "src/game/gs_field_world_heroDispatchEvent.inc"
+asm void fn_80116D30(void) {
+#include "src/game/gs_field_world_fn_80116D30.inc"
 }
 #else
 void heroDispatchEvent(u32 kind, u32 arg)

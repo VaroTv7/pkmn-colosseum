@@ -7,7 +7,7 @@
  * Named with a _range_ suffix per convention pending call-graph
  * confirmation of the exact XD TU boundary.
  *
- * colsysPassGetEventID previously carried an invented "GSfield_BuildCollisionGrid"
+ * fn_801101B4 previously carried an invented "GSfield_BuildCollisionGrid"
  * name/signature from an earlier bad campaign pass (same class of issue
  * documented in include/game/gs_colsys.h); reverted to the standard
  * fn_<addr> placeholder since no confirmed symbols.txt name exists yet.

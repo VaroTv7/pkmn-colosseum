@@ -594,7 +594,7 @@ void fn_801DF3D4(u8* obj) {
 }
 
 /**
- * std087_sequenceUnk87 - Waza ability effect handler.
+ * fn_801DF474 - Waza ability effect handler.
  * Address: 0x801DF474 | Size: 0x31C
  */
 void std087_sequenceUnk87(s32 slot, s32 abilityID) {

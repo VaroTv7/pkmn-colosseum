@@ -85,7 +85,7 @@ extern f32 lbl_8047BA30; /* 1.0f -- fade speed */
  *    li r3, 0x495
  *    li r4, 0
  *    li r5, 0x7F
- *    bl std104_soundSetBackgroundMusic                  ; sndPlay(0x495, 0, 127) -- opening BGM
+ *    bl fn_80165A20                  ; sndPlay(0x495, 0, 127) -- opening BGM
  *    blr
  * ======================================================================= */
 #pragma push
@@ -149,11 +149,11 @@ void fn_80035F34(void) {
  *    li r3, 1                    ; sound group 1 (BGM)
  *    li r4, 0                    ; fade time 0
  *    li r5, 0x7F                 ; volume 127
- *    bl std104_soundSetBackgroundMusic              ; sndPlay -- stops/fades BGM
+ *    bl fn_80165A20              ; sndPlay -- stops/fades BGM
  *
  *    ; Set game flag 0x08D0
  *    li r3, 0x08D0
- *    bl std078_flagSetFalse              ; GSflagSet
+ *    bl fn_80190528              ; GSflagSet
  *
  *    ; Unload floor resources
  *    li r3, 1
@@ -238,7 +238,7 @@ void fn_80035E04(void) {
  *
  *    ; Stop BGM
  *    li r3, 1; li r4, 0; li r5, 0x7F
- *    bl std104_soundSetBackgroundMusic
+ *    bl fn_80165A20
  *
  *    ; Check floor state
  *    bl floorGetPrevFloorID
@@ -247,12 +247,12 @@ void fn_80035E04(void) {
  *
  *    ; Check game flags
  *    li r3, 0x0476
- *    bl std081_flagCheckTrue            ; GSflagGet
+ *    bl fn_801902E0            ; GSflagGet
  *    cmplwi r0, 1
  *    bne .skipSpecial
  *
  *    li r3, 0x0478
- *    bl std078_flagSetFalse            ; GSflagSet
+ *    bl fn_80190528            ; GSflagSet
  *
  *    ; Set up battle/effect state for credits scene
  *    li r3, 0; li r4, 1

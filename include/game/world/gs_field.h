@@ -135,12 +135,12 @@ typedef struct GSFieldCamera {
 s32 GSfield_RayCast(void* origin, void* direction);
 
 /**
- * colsysWallSphere -- Perform a swept-sphere collision test.
+ * fn_8010E53C -- Perform a swept-sphere collision test.
  */
 s32 GSfield_SphereSweep(void* origin, void* direction, f32 radius);
 
 /**
- * colsysWallAll -- Test a line segment against a collision plane.
+ * fn_8010EFE4 -- Test a line segment against a collision plane.
  */
 s32 GSfield_LinePlaneTest(void* segStart, void* segEnd,
                            void* planeNormal, s32 doubleSided);

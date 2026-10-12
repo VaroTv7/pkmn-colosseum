@@ -14,7 +14,7 @@
  * in configure.py), so that whole block was dead code that could never
  * be compiled into any real target. None of the seven names appear in
  * config/GC6E01/symbols.txt, and their claimed sizes didn't consistently
- * match the real fn_ symbols living at those addresses (e.g. msgGetCharsPerFrame
+ * match the real fn_ symbols living at those addresses (e.g. fn_800D3088
  * is really 0xC bytes, not the claimed 0x68; fn_800D30F0 is really 0xA0,
  * not the claimed 0xF0). It was fiction from the old campaign transplant
  * and has been deleted wholesale.

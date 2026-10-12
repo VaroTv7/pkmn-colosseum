@@ -4859,7 +4859,7 @@ void fn_800792D8(void) {
  *
  * Retail keeps the compare and the sign/zero extension apart (`clrlwi`+`cmplwi`,
  * one `extsb` feeding three compares), so the peephole pass has to be off; the
- * flag getters then have to return u8 like the canonical std081_flagCheckTrue in
+ * flag getters then have to return u8 like the canonical fn_801902E0 in
  * src/game/gs_range_8018FE30.c, or peephole-off leaves a redundant truncation
  * in front of each `stb`. `hero` is declared after the party-loop counter
  * because that is what puts it above `backup` in the callee-saved ranking and

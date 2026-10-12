@@ -66,18 +66,7 @@ extern void HSD_TExpCompile(HSD_TExp* texp, HSD_TExpTevDesc** tevdesc,
                             HSD_TExp** list);
 extern void HSD_TExpFreeTevDesc(HSD_TExpTevDesc* tevdesc);
 
-#define HSD_TExpTev(list) HSD_TExpTev(list)
-#define HSD_TExpOrder(exp, tobj, chan) HSD_TExpOrder(exp, tobj, chan)
-#define HSD_TExpColorOp(exp, op, bias, scale, clamp) \
-    HSD_TExpColorOp(exp, op, bias, scale, clamp)
-#define HSD_TExpAlphaOp(exp, op, bias, scale, clamp) \
-    HSD_TExpAlphaOp(exp, op, bias, scale, clamp)
-#define HSD_TExpColorIn(exp, sa, a, sb, b, sc, c, sd, d) \
-    HSD_TExpColorIn(exp, sa, a, sb, b, sc, c, sd, d)
-#define HSD_TExpAlphaIn(exp, sa, a, sb, b, sc, c, sd, d) \
-    HSD_TExpAlphaIn(exp, sa, a, sb, b, sc, c, sd, d)
 #define HSD_TExpFreeList(texp, type, flag) fn_801B7178(texp, type, flag)
-#define HSD_TExpSetupTev(tevdesc, texp) HSD_TExpSetupTev(tevdesc, texp)
 
 /* ========================================================================= */
 /*  Render state (hsd_state.c) and TObj helpers (hsd_tobj.c)                 */
@@ -98,8 +87,6 @@ extern void fn_801BBE3C(HSD_TObj* tobj, HSD_TObj* next);
 
 #define HSD_StateInitTev() fn_801B3884()
 #define HSD_SetMaterialShininess(s) fn_801B28B8(s)
-#define HSD_SetMaterialColor(a, d, s, al) HSD_SetMaterialColor(a, d, s, al)
-#define HSD_SetupRenderModeWithCustomPE(r, pe) HSD_SetupRenderModeWithCustomPE(r, pe)
 #define HSD_TObjAddNext(t, n) fn_801BBE3C(t, n)
 
 /* ========================================================================= */

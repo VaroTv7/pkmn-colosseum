@@ -116,13 +116,13 @@
  *   GSresGetResource (floor resource lookup)
  *   GSmodelGetPosition (GSmem / resource helper)
  *   _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID, GScameraGetActiveCamera, GScameraGetPosition, GScameraGetPerspective -- matrix/vector ops
- *   gfxSetBlendMode, gfxSetUpdates, gfxSetZMode, gfxSetCullMode -- GX TEV/material setup
- *   gfxSetFlags, gfxClearFlags -- GX blend/alpha mode
- *   gfxSetVtxDesc -- GX draw begin
+ *   fn_800DA4C4, fn_800DA2BC, fn_800DA1E8, fn_800DA028 -- GX TEV/material setup
+ *   fn_800D88DC, fn_800D888C -- GX blend/alpha mode
+ *   fn_800D7820 -- GX draw begin
  *   fn_800E05C0, fn_800E048C -- matrix position/rotation
  *   fn_800D7F14 -- GX load matrix
- *   gfxSetPrimitive -- GX cull mode
- *   gfxBegin, gfxVtxPos, fn_800D5CB8 -- GX position/color/texcoord
+ *   fn_800D6A00 -- GX cull mode
+ *   fn_800D67BC, fn_800D6680, fn_800D5CB8 -- GX position/color/texcoord
  *   fn_800B9404 -- fog setup
  *   GXDrawDone, fn_800B856C -- GX begin/end frame
  *   GStextureFree -- model release

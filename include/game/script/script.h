@@ -345,7 +345,7 @@ void psPeopleDetachStandalone(PSParticle* pp);    /* psAttachGeneratorAppSRT */
 void psGeneratorInit(PSParticle* gen, void* owner);   /* fn_80172930 */
 
 /** Random number generator (0.0 to 1.0). */
-f32 psRandom(void);                              /* HSD_Randf */
+f32 psRandom(void);                              /* fn_801ADC7C */
 
 /** Clamp a color byte with random variation. */
 u8 psClampColorByte(u8 current);                  /* U8ClampAdd */

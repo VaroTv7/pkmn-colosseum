@@ -1,6 +1,6 @@
 /**
  * @file data_80312C40_suffix.c
- * @brief Data following GXSetTexCoordGen2's compiler-owned jump tables.
+ * @brief Data following fn_800B857C's compiler-owned jump tables.
  */
 
 #define DATA_80312C40_SUFFIX

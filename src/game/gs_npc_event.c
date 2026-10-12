@@ -37,16 +37,16 @@
  *     0x10CE: Load trainer model from lbl_803A3230
  *     0x10CF: Load trainer model from lbl_803A31E8
  *   Then sets up the renderer:
- *     - gfxSetFlags: Set render layer 3
- *     - gfxClearFlags: Set render layer 4
- *     - gfxSetPrimitive: Set render mode 7
- *     - gfxSetVtxDesc: Load model resource
- *     - gfxLoadTexture: Bind model to slot 0
- *     - gfxBegin: Set blend mode 2
+ *     - fn_800D88DC: Set render layer 3
+ *     - fn_800D888C: Set render layer 4
+ *     - fn_800D6A00: Set render mode 7
+ *     - fn_800D7820: Load model resource
+ *     - fn_800D85D4: Bind model to slot 0
+ *     - fn_800D67BC: Set blend mode 2
  *     - fn_800D61E4: Set position (x, y)
  *     - fn_800D5CB8: Set color RGBA (255, 255, 255, 255)
- *     - gfxVtxTexCoord: Set scale (1.0, 1.0)
- *     - gfxEnd: Commit render state
+ *     - fn_800D59B8: Set scale (1.0, 1.0)
+ *     - fn_800D6728: Commit render state
  *
  * fn_800302D0 (GSnpcEvt_ProcessOverworldNPC):
  *   Handles overworld NPC events based on the NPC's event type ID:
@@ -1216,8 +1216,8 @@ void fn_800324A0(void) {
 /* 0x80032564 | 0x28 */
 extern void std098_mapWarpToMenuRoom(s32);
 #if 0
-asm void std198_menuEnterTradingMenu(void) {
-#include "src/game/gs_npc_event_std198_menuEnterTradingMenu.inc"
+asm void fn_80032564(void) {
+#include "src/game/gs_npc_event_fn_80032564.inc"
 }
 #else
 #pragma peephole off
@@ -1783,7 +1783,7 @@ void fn_80032ED8_legacy_disabled(void) {
     r5 = 0x0;
     fn_801CA5C4();
     r26 = r3;
-    std093_getCurrentGroupID();
+    fn_80113F48();
     r4 = 0x11170000;
     r5 = 0x0;
     r4 = r4 + 0x1800;
@@ -1796,12 +1796,12 @@ void fn_80032ED8_legacy_disabled(void) {
 
         r28 = 0x4cd;
     }
-    std228_soundGetCurrentBackgroundMusic();
+    fn_801653C4();
     if (r28 != r3) {
         r3 = r28;
         r4 = 0x0;
         r5 = 0x7f;
-        std104_soundSetBackgroundMusic();
+        fn_80165A20();
     }
     r3 = r26;
     return;

@@ -2881,7 +2881,7 @@ void fn_8021EA94(void) {
 }
 #undef fn_80262308
 
-/* ctx = fn_801F025C(byte@pc+1, 0); play sound via soundStart; pc += 2. */
+/* ctx = fn_801F025C(byte@pc+1, 0); play sound via fn_80166A50; pc += 2. */
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_802036D4 fightOutPokemonGetVoiceSndId
 void fn_8021EE48(void) {

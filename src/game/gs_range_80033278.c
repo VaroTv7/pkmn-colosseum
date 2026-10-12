@@ -1995,7 +1995,7 @@ void fn_80035C48(void) {
 }
 #pragma pop
 
-/* std202_warpToMenuRoom393 - 0x80035D70 | size: 0x30 */
+/* fn_80035D70 - 0x80035D70 | size: 0x30 */
 #pragma push
 #pragma peephole off
 void std202_warpToMenuRoom393(void) {

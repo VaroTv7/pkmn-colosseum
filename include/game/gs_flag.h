@@ -179,7 +179,7 @@ typedef struct GSflagSceneEntry {
 void GSflagSet(s32 flagID);
 
 /**
- * std081_flagCheckTrue -- Read a boolean flag.
+ * fn_801902E0 -- Read a boolean flag.
  * Address: 0x801902E0, Size: 0xD0
  *
  * Reads a single flag and returns 0 or 1.
@@ -195,7 +195,7 @@ u8 std081_flagCheckTrue(s32 flagID);
  * GSflagSet16 -- Set a flag to 0 (clear).
  * Address: 0x801903B0, Size: 0x178
  *
- * Identical structure to std078_flagSetFalse but writes value = 0.
+ * Identical structure to fn_80190528 but writes value = 0.
  * Used to explicitly clear a multi-bit flag to zero.
  *
  * @param flagID  The flag index to clear.
@@ -203,7 +203,7 @@ u8 std081_flagCheckTrue(s32 flagID);
 void GSflagSet16(s32 flagID);
 
 /**
- * std078_flagSetFalse -- Set a flag to 1 (assert).
+ * fn_80190528 -- Set a flag to 1 (assert).
  * Address: 0x80190528, Size: 0x178
  *
  * Identical structure to GSflagSet16 but writes value = 1.

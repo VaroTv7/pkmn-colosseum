@@ -1087,7 +1087,7 @@ void fn_800D2B44(void* obj) {
 }
 
 /* ==================================================================
- * gfxSetFog - GS render: set current lighting context
+ * fn_800D2B90 - GS render: set current lighting context
  * Address: 0x800D2B90, Size: 0x258
  * ================================================================== */
 #pragma push
@@ -1220,7 +1220,7 @@ s32 fn_800D2DE8(void* arg1, void* arg2, u32 count) {
 }
 
 /* ==================================================================
- * gfxWorldToScreen - GS render: single sphere/ray intersection
+ * fn_800D2F34 - GS render: single sphere/ray intersection
  * Address: 0x800D2F34, Size: 0x128
  * ================================================================== */
 s32 gfxWorldToScreen(void* arg1, void* arg2) {

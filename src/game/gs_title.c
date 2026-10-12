@@ -49,7 +49,7 @@
  *   fn_80022478  GStitle_DrawCaseSwitch       -- 0x2A8 bytes, upper/lower case switch
  *   fn_80022720  GStitle_CameraFlythrough     -- 0x114 bytes, title camera movement
  *   fn_80022834  GStitle_CameraInterpolate    -- 0x308 bytes, camera spline interp
- *   std163_useCologne  GStitle_ParticleEffects      -- 0x318 bytes, title particle system
+ *   fn_80022B3C  GStitle_ParticleEffects      -- 0x318 bytes, title particle system
  *   fn_80022E54  GStitle_GetEffectCount       -- 0x90 bytes, count active particles
  *   fn_80022EE4  GStitle_SpawnEffect          -- 0x184 bytes, spawn new particle
  *   fn_80023068  GStitle_UpdateEffects        -- 0x20C bytes, update particle positions
@@ -61,10 +61,10 @@
  *   fn_80023DA8  GStitle_GetBGMState          -- 0x3C bytes
  *   fn_80023DE4  GStitle_GetSEState           -- 0x3C bytes
  *   fn_80023E20  GStitle_GetFadeState2        -- 0x3C bytes
- *   std018_nop18  GStitle_Nop                  -- 4 bytes, nop
- *   wmapMenuUpdate  GStitle_AutodemoPlayback     -- 0x300 bytes, replay input recording
- *   wmapCursorMove  GStitle_AutodemoRecord       -- 0x1A8 bytes, record input (debug)
- *   wmapMenuInput  GStitle_AutodemoSetup        -- 0x130 bytes, setup autodemo
+ *   fn_80023E5C  GStitle_Nop                  -- 4 bytes, nop
+ *   fn_80023E60  GStitle_AutodemoPlayback     -- 0x300 bytes, replay input recording
+ *   fn_80024160  GStitle_AutodemoRecord       -- 0x1A8 bytes, record input (debug)
+ *   fn_80024308  GStitle_AutodemoSetup        -- 0x130 bytes, setup autodemo
  *
  * fn_800203B4 (GStitle_MainLoop) structure:
  *   while (1) {
@@ -81,9 +81,9 @@
  *           // Check distance threshold for camera movement
  *           if (dist >= threshold[gCamPhase]) {
  *               if (gCamPhase == 0)
- *                   soundStartRaw(0x46E, 0, 0);  // Play whoosh SE
+ *                   fn_80166AB8(0x46E, 0, 0);  // Play whoosh SE
  *               else
- *                   soundStopRaw(0x46E, 0, 0);  // Play landing SE
+ *                   fn_801669E4(0x46E, 0, 0);  // Play landing SE
  *               gCamPhase++;
  *           }
  *       }
@@ -166,12 +166,12 @@
  *
  *   Original-name candidates for our extern fn_XXXXXXXX:
  *     menuItemBiosGetPtr / menuDataBiosGetPtr -- linked-list/menu accessors
- *     msgGetCharsPerFrame / fn_800D37CC -- frame timing (returns u32/s32 ticks)
+ *     fn_800D3088 / fn_800D37CC -- frame timing (returns u32/s32 ticks)
  *     fn_800E0CA0 / GSlerpGetLinearInterpolationVector -- vec3 transform helpers
  *     GSmsgGetGSchar / msgctrlSetValue -- message/window callbacks
  *     winMsgOpen / winMsgClose -- text print + wait
- *     std081_flagCheckTrue -- config flag check (returns u8)
- *     std104_soundSetBackgroundMusic / soundStop -- audio sequence control
+ *     fn_801902E0 -- config flag check (returns u8)
+ *     fn_80165A20 / soundStop -- audio sequence control
  *     fadeCheck / fadeSet -- BGM volume/fade
  *
  * --------------------------------------------------------------------------
@@ -555,11 +555,11 @@ void fn_800246CC(void) {
 
 /* 0x800246FC | 0x330
  *
- * wmapDrawInfo -- XD analogue: menuTitle (the top-level 0x330 driver).
+ * fn_800246FC -- XD analogue: menuTitle (the top-level 0x330 driver).
  *
  * Walks an array of menu slot records at lbl_80478DE4 (count in lbl_80478DE0,
  * stride 0x28). For each slot whose condition passes (slot entry == 0 OR
- * std081_flagCheckTrue(entry) returns non-zero), it performs three passes of the
+ * fn_801902E0(entry) returns non-zero), it performs three passes of the
  * linked-list walk + lookup table scan:
  *   case 1/subcase 1 (lbl_8047A370 == 1 && lbl_80478898 > lbl_8047B8D8):
  *       uses lbl_8047A368 as target index; alpha = lbl_8047B8DC * ((t-b)/b)
@@ -576,7 +576,7 @@ void fn_800246CC(void) {
  *
  * Status: 91.6% matched. Remaining diffs: 7 non-volatile reg allocation
  * (uses r25-r31 vs target r27-r31 - we have 2 extra locals) + one extra
- * clrlwi from the (u8)std081_flagCheckTrue cast on ret.
+ * clrlwi from the (u8)fn_801902E0 cast on ret.
  */
 extern void* menuDataBiosGetPtr(s32);
 extern void* menuItemBiosGetPtr(u32);
@@ -593,8 +593,8 @@ extern u8 lbl_802E4F58[];
 extern u32 lbl_80478DE0;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_800246FC)
 #if 0
-asm void wmapDrawInfo(void) {
-#include "src/game/gs_title_wmapDrawInfo.inc"
+asm void fn_800246FC(void) {
+#include "src/game/gs_title_fn_800246FC.inc"
 }
 #else
 void wmapDrawInfo(u8* arg0, u8* arg1) {
@@ -749,12 +749,12 @@ void wmapDrawInfo(u8* arg0, u8* arg1) {
 
 /* 0x80024A2C | 0x178
  *
- * fn_80024A2C -- simplified version of wmapDrawInfo (one inner block only).
+ * fn_80024A2C -- simplified version of fn_800246FC (one inner block only).
  * Walks the linked list to find the node whose counter-position matches
  * lbl_8047A368, then scans lbl_80478DDC[] for a matching pbVar3 and writes
  * either alpha computed via the fade curve OR 0xFF into arg1[0x67]. If the
  * table lookup succeeds, writes the corresponding entry value to arg1[0x58]
- * (special-cased to 0xC5F1200 when the entry id is 0x66 and std081_flagCheckTrue(0x45D)
+ * (special-cased to 0xC5F1200 when the entry id is 0x66 and fn_801902E0(0x45D)
  * returns non-zero - likely an "override" for a specific menu option).
  *
  * Status: 90.7% matched. Remaining diffs: register allocation swap
@@ -839,7 +839,7 @@ LAB_80024aec:
  *
  * fn_80024BA4 -- same linked-list walk as fn_80024A2C, but without the alpha
  * computation. Just finds the menu item matching lbl_8047A36C and writes the
- * entry payload to arg1[0x58] (with the 0x66 + std081_flagCheckTrue(0x45D) override).
+ * entry payload to arg1[0x58] (with the 0x66 + fn_801902E0(0x45D) override).
  *
  * Likely corresponds to a menu cursor hover-highlight update:
  *   arg0 = menu context, arg1 = cursor/sprite target receiving the entry
@@ -1490,23 +1490,23 @@ LAB_80025564:
  *     soundStop(0x449, 0)            -- play SE cue
  *     while (accumulator < limit) {    -- time-based integration loop
  *       _threadSwitch();                 -- frame advance
- *       accumulator += (f32)msgGetCharsPerFrame() / (f32)(s32)fn_800D37CC();
+ *       accumulator += (f32)fn_800D3088() / (f32)(s32)fn_800D37CC();
  *     }
- *     std228_soundGetCurrentBackgroundMusic(); std137_soundStopAll(0x7d0, 0)
+ *     fn_801653C4(); fn_801656F8(0x7d0, 0)
  *   ELSE:
  *     fadeSet(lbl_8047B8E8, 3)     -- different fade curve
- *     std228_soundGetCurrentBackgroundMusic(); std137_soundStopAll(0x1f4, 0)
+ *     fn_801653C4(); fn_801656F8(0x1f4, 0)
  *   Check sound channels 0xbd and 0xc3; stop them if still active.
  *   If lbl_8047A388/38C particle handles set, free them via GStextureFree.
  *
  * fn_800D37CC returns s32 (signed ticks; negative if paused).
- * msgGetCharsPerFrame returns u32 (absolute frame count).
+ * fn_800D3088 returns u32 (absolute frame count).
  *
  * Status: 97.5% matched. Remaining 8 diffs are register-numbering
  * (limit ends up in f28 vs target f31) and anonymous @257/@255 bias
  * constants vs named lbl_8047B8B8/lbl_8047B8D0 (unfixable without
  * explicit manual int-to-float idiom). Frame size 0x70 now correct.
- * std228_soundGetCurrentBackgroundMusic chains into std137_soundStopAll (3 args).
+ * fn_801653C4 chains into fn_801656F8 (3 args).
  */
 extern void fadeSet(f32, s32);
 extern void soundStop(void);
@@ -1870,7 +1870,7 @@ void fn_800259B0_old(void) {
     extern f32 lbl_8047B8E8;
     extern f32 lbl_8047B8EC;
     extern void floorGetPrevFloorID();
-    extern void std114_mapObjectSetVisibility();
+    extern void fn_801CB954();
     u8 sp[0x10];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -1911,15 +1911,15 @@ void fn_800259B0_old(void) {
     lbl_8047A384 = tmp;
     lbl_8047A388 = tmp;
     lbl_8047A390 = tmp;
-    std114_mapObjectSetVisibility();
+    fn_801CB954();
     r3 = 0xC6A0000;
     r4 = 0x0;
     r3 = r3 + 0x1001;
-    std114_mapObjectSetVisibility();
+    fn_801CB954();
     r3 = 0xC6A0000;
     r4 = 0x0;
     r3 = r3 + 0x1002;
-    std114_mapObjectSetVisibility();
+    fn_801CB954();
     floorGetPrevFloorID();
     lbl_8047A3AC = r3;
     if (r3 == 0x7b) {
@@ -1942,10 +1942,10 @@ void fn_80025A7C(void) { }
 
 /* 0x80025A80 | 0x19C
  *
- * wmapRideOverlay(s32 param_1) -> s32 -- cursor quad rendering + decay.
- *   1. Set up GX state (gfxSetOrtho/A4C4/A2BC/A1E8/A100/A028/9ED8) for
+ * fn_80025A80(s32 param_1) -> s32 -- cursor quad rendering + decay.
+ *   1. Set up GX state (fn_800D9B58/A4C4/A2BC/A1E8/A100/A028/9ED8) for
  *      blended additive rendering with channel configuration.
- *   2. Call wmapDrawCaptureQuad twice to draw two blended quads:
+ *   2. Call fn_80025C1C twice to draw two blended quads:
  *        first at the cursor current position using lbl_8047A3A0 (x scale)
  *        second at offset from lbl_803A204C[0,1] using lbl_8047A3A4 (y scale)
  *   3. Decay both scales:
@@ -1957,7 +1957,7 @@ void fn_80025A7C(void) { }
  * returns 0 (fully faded).
  *
  * Status: 90.6% matched. Remaining diffs: FP register swaps in the
- * call-arg plumbing between wmapDrawCaptureQuad calls.
+ * call-arg plumbing between fn_80025C1C calls.
  */
 extern void gfxSetOrtho(void);
 extern void gfxSetBlendMode(void);
@@ -1983,8 +1983,8 @@ extern f32 lbl_8047B8C8;
 extern void wmapDrawCaptureQuad(f32, f32, f32, s32, s32, s32, f32*);
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80025A80)
 #if 0
-asm void wmapRideOverlay(void) {
-#include "src/game/gs_title_wmapRideOverlay.inc"
+asm void fn_80025A80(void) {
+#include "src/game/gs_title_fn_80025A80.inc"
 }
 #else
 s32 wmapRideOverlay(s32 param_1) {
@@ -2046,7 +2046,7 @@ s32 wmapRideOverlay(s32 param_1) {
 
 /* 0x80025C1C | 0x358
  *
- * wmapDrawCaptureQuad(f32 rot, f32 size, f32 uv_ext, s32 tex, s32 flag_a,
+ * fn_80025C1C(f32 rot, f32 size, f32 uv_ext, s32 tex, s32 flag_a,
  *             s32 flag_b, f32 *pos)  -- GX quad render primitive.
  *
  *   1. Build two vec3s (vec_a, vec_b) based on flag_a (1 = symmetric scale,
@@ -2058,15 +2058,15 @@ s32 wmapRideOverlay(s32 param_1) {
  *   4. Third set: combine pos[0], pos[1] with lbl_8047B8F0/F4 UV corners,
  *      via fn_800E0CA0+090C+fn_800E03B4 for the inverse transform.
  *   5. Set GX render state (TEV stage 3, prim TRIANGLE_FAN count 4):
- *        gfxSetFlags(3), gfxClearFlags(4), gfxSetPrimitive(4),
- *        gfxSetVtxDesc(lbl_80314AE8), gfxLoadTexture(0, tex), gfxBegin(4)
+ *        fn_800D88DC(3), fn_800D888C(4), fn_800D6A00(4),
+ *        fn_800D7820(lbl_80314AE8), fn_800D85D4(0, tex), fn_800D67BC(4)
  *   6. Emit 4 vertices forming a textured quad. Each vertex:
  *        GSvecTransform(vert_out, result_2, uv_corner)  -- compute position
- *        gfxVtxPos(vert.x, vert.y, vert.z)         -- write pos
+ *        fn_800D6680(vert.x, vert.y, vert.z)         -- write pos
  *        fn_800D5CB8(0, 0xff, 0xff, 0xff, scaled)    -- RGBA color
- *        gfxVtxTexCoord(0, u, v)                        -- UV
+ *        fn_800D59B8(0, u, v)                        -- UV
  *      4 UV corners: (0,0) (1,0) (0,1) (1,1) via lbl_8047B8AC/B8B0.
- *   7. gfxEnd() to flush the primitive.
+ *   7. fn_800D6728() to flush the primitive.
  *
  * Status: 94.8% matched. Remaining diffs are FP register allocation inside
  * the vertex emission loop (4 similar call chains get slightly different
@@ -2094,8 +2094,8 @@ extern u8 lbl_80314AE8[];
 extern f32 lbl_8047B90C;
 extern f32 lbl_8047B910;
 #if 0
-asm void wmapDrawCaptureQuad(void) {
-#include "src/game/gs_title_wmapDrawCaptureQuad.inc"
+asm void fn_80025C1C(void) {
+#include "src/game/gs_title_fn_80025C1C.inc"
 }
 #else
 void wmapDrawCaptureQuad(f32 arg_f1, f32 arg_f2, f32 arg_f3,
@@ -2201,8 +2201,8 @@ void wmapDrawCaptureQuad(f32 arg_f1, f32 arg_f2, f32 arg_f3,
 extern u8 lbl_8047A3A8;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80025F74)
 #if 0
-asm void wmapCaptureDone(void) {
-#include "src/game/gs_title_wmapCaptureDone.inc"
+asm void fn_80025F74(void) {
+#include "src/game/gs_title_fn_80025F74.inc"
 }
 #else
 s32 wmapCaptureDone(void) {
@@ -2215,12 +2215,12 @@ s32 wmapCaptureDone(void) {
 /* 0x80025F84 | 0x3EC
  *
  * worldMapBikeRide -- title splash setup (called once when title first shown).
- *   1. Activate 3 sprite handles 0xC6A1000/1001/1002 (std114_mapObjectSetVisibility activate=1).
- *   2. Pick an intro texture based on std081_flagCheckTrue(0x3E5):
+ *   1. Activate 3 sprite handles 0xC6A1000/1001/1002 (fn_801CB954 activate=1).
+ *   2. Pick an intro texture based on fn_801902E0(0x3E5):
  *        ret == 1: use 0xC6B1000 variant
  *        else:     use 0xC6C1000 variant
- *      Load it via std112_modelGetResourceID + std114_mapObjectSetVisibility(activate=0).
- *   3. Set up TEV/sprite chain via std093_getCurrentGroupID + GSresGetResource composition:
+ *      Load it via fn_801CBA0C + fn_801CB954(activate=0).
+ *   3. Set up TEV/sprite chain via fn_80113F48 + GSresGetResource composition:
  *        GSmodelSetBoundCheck, GSmodelSetShadowFlags(2), GSmodelSetShadowLight, GSmodelSetShadowSurface(1, &obj_c),
  *        GSmodelSetShadowTextureSize(0x280, 0x1E0)  -- viewport 640x480
  *        GSmodelLinkToGSparticleBank, GSmodelSetGSparticleLinkAttachMode(4)
@@ -2229,9 +2229,9 @@ s32 wmapCaptureDone(void) {
  *   4. Per lbl_8047A380 (debug flag?), pick one of two frame-sequence tables
  *      (lbl_80478DEC + idx*0x10), read 2 u32s, advance index (wrap > 9).
  *   5. Reset cursor scales: lbl_8047A3A4 = lbl_8047A3A0 = lbl_8047B8A8 (0).
- *   6. Register wmapRideOverlay as a particle callback (GSgfxBeginBackFBCapture).
+ *   6. Register fn_80025A80 as a particle callback (GSgfxBeginBackFBCapture).
  *   7. Start BGM via cameraPlayAnime, then run two timing delay loops
- *      (_threadSwitch + msgGetCharsPerFrame accumulator vs 1 or 0xAE target).
+ *      (_threadSwitch + fn_800D3088 accumulator vs 1 or 0xAE target).
  *   8. Store title origin coords to lbl_803A2040[0..2] and start the final
  *      fade-in loop using __cvt_fp2unsigned for FP-to-int conversion.
  *
@@ -4069,7 +4069,7 @@ s32 fn_80022834(u32 arg0, u32* arg1) {
 }
 #endif
 
-/* std163_useCologne - 0x80022B3C | size: 0x318 */
+/* fn_80022B3C - 0x80022B3C | size: 0x318 */
 extern s32 pokemonDataBiosGetVoice(void);
 extern void soundStartSE(s32);
 extern s32 soundGetStatus(s32);
@@ -4078,8 +4078,8 @@ extern void pokemonAddDpFormPokemonDpFilterId(s32, s32, s32);
 extern u8 lbl_80266C30[];
 extern u32 lbl_8047B8A0;
 #if 0
-asm void std163_useCologne(void) {
-#include "src/game/gs_title_std163_useCologne.inc"
+asm void fn_80022B3C(void) {
+#include "src/game/gs_title_fn_80022B3C.inc"
 }
 #else
 #pragma optimization_level 4
@@ -4881,17 +4881,17 @@ s32 fn_80023E20(void) {
 }
 #endif
 
-/* std018_nop18 - 0x80023E5C | size: 0x4 */
+/* fn_80023E5C - 0x80023E5C | size: 0x4 */
 #if 0
-asm void std018_nop18(void) {
-#include "src/game/gs_title_std018_nop18.inc"
+asm void fn_80023E5C(void) {
+#include "src/game/gs_title_fn_80023E5C.inc"
 }
 #else
 void std018_nop18(void) { }
 #endif
 #endif
 
-/* wmapMenuUpdate - 0x80023E60 | size: 0x300 */
+/* fn_80023E60 - 0x80023E60 | size: 0x300 */
 extern void windowGetCursorToItem(void);
 extern void fn_800E0060(void);
 extern void fn_800E0000(void);
@@ -4910,8 +4910,8 @@ extern u8 lbl_803A2058[];
 extern u8 lbl_803A204C[];
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80023E60)
 #if 0
-asm void wmapMenuUpdate(void) {
-#include "src/game/gs_title_wmapMenuUpdate.inc"
+asm void fn_80023E60(void) {
+#include "src/game/gs_title_fn_80023E60.inc"
 }
 #else
 s32 wmapMenuUpdate(u8* arg0) {
@@ -5028,13 +5028,13 @@ MATCH2:
 }
 #endif
 
-/* wmapCursorMove - 0x80024160 | size: 0x1a8 */
+/* fn_80024160 - 0x80024160 | size: 0x1a8 */
 extern u32 lbl_8047A368;
 extern u32 lbl_80478DF4;
 extern u32 lbl_80478DF0;
 #if 0
-asm void wmapCursorMove(u8* arg0, void* arg1, u16* arg2, u8* arg3) {
-#include "src/game/gs_title_wmapCursorMove.inc"
+asm void fn_80024160(u8* arg0, void* arg1, u16* arg2, u8* arg3) {
+#include "src/game/gs_title_fn_80024160.inc"
 }
 #else
 void wmapCursorMove(u8* arg0, void* arg1, u16* arg2, u8* arg3) {
@@ -5112,13 +5112,13 @@ void wmapCursorMove(u8* arg0, void* arg1, u16* arg2, u8* arg3) {
 }
 #endif
 
-/* wmapMenuInput - 0x80024308 | size: 0x130
+/* fn_80024308 - 0x80024308 | size: 0x130
  *
  * Status: 99.1% matched. Remaining: reg-alloc choice in second branch
  * (f0/f1/f2 ordering: B8C8 in f1 vs f2, stack in f2 vs f0, B8898 in f0 vs f1),
  * plus 2 anonymous @NNN@sda21 f64 magic constants for u32->f32 conversion
  * (CW heuristic; target uses lbl_8047B8D0 name).
- * Second branch: separate f3=(f32)(u32)msgGetCharsPerFrame() to avoid __cvt_fp2unsigned.
+ * Second branch: separate f3=(f32)(u32)fn_800D3088() to avoid __cvt_fp2unsigned.
  */
 extern u32 lbl_8047A370;
 extern f64 lbl_8047B8D0;
@@ -5132,8 +5132,8 @@ extern f32 lbl_8047B8AC;
 extern u32 lbl_8047A36C;
 extern u32 lbl_8047A368;
 #if 0
-asm void wmapMenuInput(void) {
-#include "src/game/gs_title_wmapMenuInput.inc"
+asm void fn_80024308(void) {
+#include "src/game/gs_title_fn_80024308.inc"
 }
 #else
 #pragma push

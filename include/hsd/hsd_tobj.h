@@ -429,8 +429,6 @@ void HSD_TObjSetupTextureCoordGen(HSD_TObj* tobj);
 #define HSD_TObjAnimAll fn_801BE800
 #define HSD_TObjReqAnimAllByFlags fn_801BEE68
 #define HSD_TObjAddAnimAll fn_801BEEDC
-#define HSD_TObjSetupVolatileTev HSD_TObjSetupVolatileTev
-#define HSD_TObjSetupTextureCoordGen HSD_TObjSetupTextureCoordGen
 
 HSD_TObj* HSD_TObjLoadDesc(HSD_TObjDesc* td);
 HSD_TObj* _HSD_TObjGetCurrentByType(HSD_TObj* from, u32 mapping);

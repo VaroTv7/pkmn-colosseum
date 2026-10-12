@@ -2250,11 +2250,11 @@ u16 fn_80018A68(void) {
 }
 #endif
 
-/* std016_menuUnk_80018a68 - 0x80018F30 | size: 0x24 */
+/* fn_80018F30 - 0x80018F30 | size: 0x24 */
 extern u32 lbl_8047A2F0;
 #if 0
-asm void std016_menuUnk_80018a68(void) {
-#include "src/game/gs_pcbox_std016_menuUnk_80018a68.inc"
+asm void fn_80018F30(void) {
+#include "src/game/gs_pcbox_fn_80018F30.inc"
 }
 #else
 void std016_menuUnk_80018a68(void) {
@@ -2388,10 +2388,10 @@ u32 fn_80019070(u32 species) {
 }
 #endif
 
-/* std017_menuQueueAdd - 0x800190D8 | size: 0x40 */
+/* fn_800190D8 - 0x800190D8 | size: 0x40 */
 #if 0
-asm void std017_menuQueueAdd(void) {
-#include "src/game/gs_pcbox_std017_menuQueueAdd.inc"
+asm void fn_800190D8(void) {
+#include "src/game/gs_pcbox_fn_800190D8.inc"
 }
 #else
 #pragma push

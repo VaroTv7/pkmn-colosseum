@@ -1707,8 +1707,8 @@ u32 fn_801174C4(void) {
 /* 0x801174F4 | 0xC */
 extern u8 lbl_8047AD71;
 #if 0
-asm void std136_fieldClearFlag_8047ad71(void) {
-#include "src/game/gs_field_world_std136_fieldClearFlag_8047ad71.inc"
+asm void fn_801174F4(void) {
+#include "src/game/gs_field_world_fn_801174F4.inc"
 }
 #else
 void std136_fieldClearFlag_8047ad71(void) {
@@ -1880,8 +1880,8 @@ extern u32 lbl_8047AD84;
 #pragma push
 #pragma peephole off
 #if 0
-asm void std171_mapSetTextureChange(void) {
-#include "src/game/gs_field_world_std171_mapSetTextureChange.inc"
+asm void fn_80117AE4(void) {
+#include "src/game/gs_field_world_fn_80117AE4.inc"
 }
 #else
 u8 std171_mapSetTextureChange(u32 arg1) {
@@ -1959,8 +1959,8 @@ extern u32 lbl_80478B40;
 extern u32 lbl_8047AD80;
 extern u32 lbl_8047AD84;
 #if 0
-asm void tvRelease(void) {
-#include "src/game/gs_field_world_tvRelease.inc"
+asm void fn_80117C84(void) {
+#include "src/game/gs_field_world_fn_80117C84.inc"
 }
 #else
 #pragma peephole off
@@ -1996,8 +1996,8 @@ extern u32 lbl_8047AD90;
 extern u32 lbl_8047AD8C;
 extern u32 lbl_8047AD94;
 #if 0
-asm void tvRender(void) {
-#include "src/game/gs_field_world_tvRender.inc"
+asm void fn_80117D14(void) {
+#include "src/game/gs_field_world_fn_80117D14.inc"
 }
 #else
 #pragma push

@@ -26,7 +26,7 @@ extern u32 dbgMenuFightGetMsgSpeedToFrame(void);
 /* _threadSwitch: VSync/frame wait - called in frame loop */
 extern void _threadSwitch(void);
 
-/* msgGetCharsPerFrame: Returns frame delta or similar timing value */
+/* fn_800D3088: Returns frame delta or similar timing value */
 extern u32 msgGetCharsPerFrame(void);
 
 /**

@@ -79,14 +79,14 @@
  * Public API -- GSlog
  * =================================================================== */
 
-/** gfxPlayCommands */ void GSlog_PrintFormatted(u32 channel, u32 paramCount, ...);
-/** gfxRecordCommand */ void GSlog_QueueCommand(u32 opcode, u32 paramCount, ...);
+/** fn_800D461C */ void GSlog_PrintFormatted(u32 channel, u32 paramCount, ...);
+/** fn_800D4F98 */ void GSlog_QueueCommand(u32 opcode, u32 paramCount, ...);
 
 /* ===================================================================
  * Public API -- GSgfx pipeline
  * =================================================================== */
 
-/** gfxSetupChannelsTev */ void GSgfx_ConfigurePipeline(void);
+/** fn_800D892C */ void GSgfx_ConfigurePipeline(void);
 
 /* ===================================================================
  * Public API -- GS math

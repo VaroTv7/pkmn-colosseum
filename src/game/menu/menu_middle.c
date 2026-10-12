@@ -2459,7 +2459,7 @@ static void fn_8006BB34_deadcode(void) {
                     r0 = MENU_MIDDLE_U8_0011(r31)->unk_0011;
                     if (r0 != (u32)r23) {
                         r3 = 0x24;
-                        soundStartSE();
+                        fn_80166A28();
                     }
                     MENU_MIDDLE_U8_0011(r31)->unk_0011 = r23;
                     return;
@@ -2468,7 +2468,7 @@ static void fn_8006BB34_deadcode(void) {
                 r0 = MENU_MIDDLE_U8_0012(r31)->unk_0012;
                 if (r0 != (u32)r23) {
                     r3 = 0x24;
-                    soundStartSE();
+                    fn_80166A28();
                 }
                 MENU_MIDDLE_U8_0012(r31)->unk_0012 = r23;
                 return;
@@ -2477,7 +2477,7 @@ static void fn_8006BB34_deadcode(void) {
             r0 = MENU_MIDDLE_U8_0013(r31)->unk_0013;
             if (r0 != (u32)r23) {
                 r3 = 0x24;
-                soundStartSE();
+                fn_80166A28();
             }
             MENU_MIDDLE_U8_0013(r31)->unk_0013 = r23;
             return;
@@ -2490,7 +2490,7 @@ static void fn_8006BB34_deadcode(void) {
                 r22 = r22 - r3;
                 if ((s32)r0 == (s32)r23) {
                     r3 = 0x24;
-                    soundStartSE();
+                    fn_80166A28();
                 }
                 if (r23 != (u32)0x0) {
                     r0 = r22;
@@ -2524,7 +2524,7 @@ static void fn_8006BB34_deadcode(void) {
             r22 = r22 - r3;
             if ((s32)r0 == (s32)r23) {
                 r3 = 0x24;
-                soundStartSE();
+                fn_80166A28();
             }
             if (r23 != (u32)0x0) {
                 r0 = r22;

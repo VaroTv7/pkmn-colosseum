@@ -5,7 +5,7 @@
  * XD source unit: game/pxdvs/GSAPI/GSlight/GSlight.cpp
  * Address range: 0x800DC560 - 0x800DD270 (24 functions)
  *
- * 20 anchors, ALL in XD GSlight.cpp. 19/20 monotonic (0x800EDF2C..0x800EEBF0); sole inversion is GSlightSetupLights (XD 0x800EDC74): XD refactored it to TU head while Colosseum keeps it last - a pure intra-TU reorder, whitelist it rather than split. Leading fn_800DC560(0x178)/GSlightUpdate(0x19C) ~ XD statics _lightPostUpdate(0x134)/_lightPreUpdate(0x88)+GSlightDeleteCurrentAll(0x24).
+ * 20 anchors, ALL in XD GSlight.cpp. 19/20 monotonic (0x800EDF2C..0x800EEBF0); sole inversion is GSlightSetupLights (XD 0x800EDC74): XD refactored it to TU head while Colosseum keeps it last - a pure intra-TU reorder, whitelist it rather than split. Leading fn_800DC560(0x178)/fn_800DC6D8(0x19C) ~ XD statics _lightPostUpdate(0x134)/_lightPreUpdate(0x88)+GSlightDeleteCurrentAll(0x24).
  *
  * Split from src/game/gs_render.c (physical XD source-unit split).
  * The dead #ifdef PCPORT reference block (never defined in configure.py,
@@ -488,8 +488,8 @@ extern u32 lbl_8047CA74;
 extern f32 lbl_8047CA78;
 extern u32 lbl_8047AAF0;
 #if 0
-asm void GSlightUpdate(void) {
-#include "src/game/gs_render_GSlightUpdate.inc"
+asm void fn_800DC6D8(void) {
+#include "src/game/gs_render_fn_800DC6D8.inc"
 }
 #else
 void GSlightUpdate(u32 delta) {

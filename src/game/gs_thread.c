@@ -3251,8 +3251,8 @@ s32 fn_800FAEF8(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, farg0, farg1, fa
 #pragma optimization_level 2
 #pragma optimizewithasm off
 #if 0
-asm void std001_messageFormatLookup(void) {
-#include "src/game/gs_thread_std001_messageFormatLookup.inc"
+asm void fn_800FB43C(void) {
+#include "src/game/gs_thread_fn_800FB43C.inc"
 }
 #else
 s32 std001_messageFormatLookup(arg0, arg1, arg2)
@@ -3768,8 +3768,8 @@ loop_19:
 #pragma optimization_level 2
 #pragma optimizewithasm off
 #if 0
-asm void GSmsgFree(void) {
-#include "src/game/gs_thread_GSmsgFree.inc"
+asm void fn_800FBD88(void) {
+#include "src/game/gs_thread_fn_800FBD88.inc"
 }
 #else
 #pragma optimization_level 2
@@ -4287,12 +4287,12 @@ s32 GSmsgInit(arg0, arg1)
 #pragma optimization_level 2
 #pragma optimizewithasm off
 #if 0
-asm s32 msgTaskDraw(entry, type, arg)
+asm s32 fn_800FC7E0(entry, type, arg)
     void* entry;
     u8 type;
     u32 arg;
 {
-#include "src/game/gs_thread_msgTaskDraw.inc"
+#include "src/game/gs_thread_fn_800FC7E0.inc"
 }
 #else
 s32 msgTaskDraw(arg0, arg1, arg2, arg3)
@@ -5302,8 +5302,8 @@ extern u32 lbl_8047AC38;
 extern u32 lbl_8047AC3C;
 extern u32 lbl_8047AC40;
 #if 0
-asm void cms_CallStdTrampoline(void) {
-#include "src/game/gs_thread_cms_CallStdTrampoline.inc"
+asm void fn_800F106C(void) {
+#include "src/game/gs_thread_fn_800F106C.inc"
 }
 #else
 #pragma optimization_level 2
@@ -5330,8 +5330,8 @@ extern u32 lbl_8047AC3C;
 extern u32 lbl_8047AC40;
 extern u8 lbl_8027107C[];
 #if 0
-asm void cms_op37_callStandard(void) {
-#include "src/game/gs_thread_cms_op37_callStandard.inc"
+asm void fn_800F10E8(void) {
+#include "src/game/gs_thread_fn_800F10E8.inc"
 }
 #else
 s32 cms_op37_callStandard(arg0)
@@ -5400,8 +5400,8 @@ s32 cms_op37_callStandard(arg0)
 /* 0x800F13D0 | 0x2F0 */
 extern void _threadSwitch(void);
 #if 0
-asm void cms_op36_yield(void) {
-#include "src/game/gs_thread_cms_op36_yield.inc"
+asm void fn_800F13D0(void) {
+#include "src/game/gs_thread_fn_800F13D0.inc"
 }
 #else
 #pragma optimization_level 2
@@ -5516,8 +5516,8 @@ extern u8 lbl_80401AB8[];
 extern u8 lbl_80401A78[];
 extern u8 lbl_8047CCB8[];
 #if 0
-asm void cms_op35_printf(void) {
-#include "src/game/gs_thread_cms_op35_printf.inc"
+asm void fn_800F16C0(void) {
+#include "src/game/gs_thread_fn_800F16C0.inc"
 }
 #else
 #pragma optimization_level 2
@@ -5656,8 +5656,8 @@ s32 cms_op35_printf(void* obj) {
 extern u32 lbl_8047E710;
 extern u32 lbl_8047CCBC;
 #if 0
-asm void cms_op34_orl(void) {
-#include "src/game/gs_thread_cms_op34_orl.inc"
+asm void fn_800F1A0C(void) {
+#include "src/game/gs_thread_fn_800F1A0C.inc"
 }
 #else
 s32 cms_op34_orl(void* obj) {
@@ -5744,8 +5744,8 @@ s32 cms_op34_orl(void* obj) {
 extern u32 lbl_8047E710;
 extern u32 lbl_8047CCBC;
 #if 0
-asm void cms_op33_andl(void) {
-#include "src/game/gs_thread_cms_op33_andl.inc"
+asm void fn_800F1E38(void) {
+#include "src/game/gs_thread_fn_800F1E38.inc"
 }
 #else
 s32 cms_op33_andl(void* obj) {
@@ -5830,8 +5830,8 @@ s32 cms_op33_andl(void* obj) {
 
 /* 0x800F2264 | 0x290 */
 #if 0
-asm void cms_op32_copyStruct(void) {
-#include "src/game/gs_thread_cms_op32_copyStruct.inc"
+asm void fn_800F2264(void) {
+#include "src/game/gs_thread_fn_800F2264.inc"
 }
 #else
 s32 cms_op32_copyStruct(void* obj) {
@@ -5898,8 +5898,8 @@ s32 cms_op32_copyStruct(void* obj) {
 extern u32 lbl_8047E710;
 extern u32 lbl_8047CCC0;
 #if 0
-asm void cms_op31_setVar(void) {
-#include "src/game/gs_thread_cms_op31_setVar.inc"
+asm void fn_800F24F4(void) {
+#include "src/game/gs_thread_fn_800F24F4.inc"
 }
 #else
 s32 cms_op31_setVar(void* obj) {
@@ -5978,8 +5978,8 @@ s32 cms_op31_setVar(void* obj) {
 
 /* 0x800F27D4 | 0x414 */
 #if 0
-asm void cms_op30_notEqual(void) {
-#include "src/game/gs_thread_cms_op30_notEqual.inc"
+asm void fn_800F27D4(void) {
+#include "src/game/gs_thread_fn_800F27D4.inc"
 }
 #else
 s32 cms_op30_notEqual(void* obj) {
@@ -6077,8 +6077,8 @@ s32 cms_op30_notEqual(void* obj) {
 
 /* 0x800F2BE8 | 0x410 */
 #if 0
-asm void cms_op29_equal(void) {
-#include "src/game/gs_thread_cms_op29_equal.inc"
+asm void fn_800F2BE8(void) {
+#include "src/game/gs_thread_fn_800F2BE8.inc"
 }
 #else
 s32 cms_op29_equal(void* obj) {
@@ -6176,8 +6176,8 @@ s32 cms_op29_equal(void* obj) {
 
 /* 0x800F2FF8 | 0x420 */
 #if 0
-asm void cms_op28_greaterThanEqual(void) {
-#include "src/game/gs_thread_cms_op28_greaterThanEqual.inc"
+asm void fn_800F2FF8(void) {
+#include "src/game/gs_thread_fn_800F2FF8.inc"
 }
 #else
 #pragma optimization_level 2
@@ -6276,8 +6276,8 @@ s32 cms_op28_greaterThanEqual(void* obj) {
 
 /* 0x800F3418 | 0x418 */
 #if 0
-asm void cms_op27_greaterThan(void) {
-#include "src/game/gs_thread_cms_op27_greaterThan.inc"
+asm void fn_800F3418(void) {
+#include "src/game/gs_thread_fn_800F3418.inc"
 }
 #else
 s32 cms_op27_greaterThan(void* obj) {
@@ -6375,8 +6375,8 @@ s32 cms_op27_greaterThan(void* obj) {
 
 /* 0x800F3830 | 0x420 */
 #if 0
-asm void cms_op26_lessThanEqual(void) {
-#include "src/game/gs_thread_cms_op26_lessThanEqual.inc"
+asm void fn_800F3830(void) {
+#include "src/game/gs_thread_fn_800F3830.inc"
 }
 #else
 s32 cms_op26_lessThanEqual(void* obj) {
@@ -6474,8 +6474,8 @@ s32 cms_op26_lessThanEqual(void* obj) {
 
 /* 0x800F3C50 | 0x418 */
 #if 0
-asm void cms_op25_lessThan(void) {
-#include "src/game/gs_thread_cms_op25_lessThan.inc"
+asm void fn_800F3C50(void) {
+#include "src/game/gs_thread_fn_800F3C50.inc"
 }
 #else
 s32 cms_op25_lessThan(void* obj) {
@@ -6573,8 +6573,8 @@ s32 cms_op25_lessThan(void* obj) {
 
 /* 0x800F4068 | 0x3D8 */
 #if 0
-asm void cms_op24_subtract(void) {
-#include "src/game/gs_thread_cms_op24_subtract.inc"
+asm void fn_800F4068(void) {
+#include "src/game/gs_thread_fn_800F4068.inc"
 }
 #else
 s32 cms_op24_subtract(void* obj) {
@@ -6673,8 +6673,8 @@ s32 cms_op24_subtract(void* obj) {
 
 /* 0x800F4440 | 0x3D8 */
 #if 0
-asm void cms_op23_add(void) {
-#include "src/game/gs_thread_cms_op23_add.inc"
+asm void fn_800F4440(void) {
+#include "src/game/gs_thread_fn_800F4440.inc"
 }
 #else
 s32 cms_op23_add(void* obj) {
@@ -6774,8 +6774,8 @@ s32 cms_op23_add(void* obj) {
 /* 0x800F4818 | 0x420 */
 extern f64 fmod(f64 value, f64 modulus);
 #if 0
-asm void cms_op22_mod(void) {
-#include "src/game/gs_thread_cms_op22_mod.inc"
+asm void fn_800F4818(void) {
+#include "src/game/gs_thread_fn_800F4818.inc"
 }
 #else
 s32 cms_op22_mod(void* obj) {
@@ -6881,8 +6881,8 @@ s32 cms_op22_mod(void* obj) {
 
 /* 0x800F4C38 | 0x3F4 */
 #if 0
-asm void cms_op21_divide(void) {
-#include "src/game/gs_thread_cms_op21_divide.inc"
+asm void fn_800F4C38(void) {
+#include "src/game/gs_thread_fn_800F4C38.inc"
 }
 #else
 s32 cms_op21_divide(void* obj) {
@@ -6984,8 +6984,8 @@ s32 cms_op21_divide(void* obj) {
 
 /* 0x800F502C | 0x3D8 */
 #if 0
-asm void cms_op20_multiply(void) {
-#include "src/game/gs_thread_cms_op20_multiply.inc"
+asm void fn_800F502C(void) {
+#include "src/game/gs_thread_fn_800F502C.inc"
 }
 #else
 s32 cms_op20_multiply(void* obj) {
@@ -7085,8 +7085,8 @@ s32 cms_op20_multiply(void* obj) {
 /* 0x800F5404 | 0x1D8 */
 extern u32 lbl_8047E710;
 #if 0
-asm void cms_op19_pushVar2(void) {
-#include "src/game/gs_thread_cms_op19_pushVar2.inc"
+asm void fn_800F5404(void) {
+#include "src/game/gs_thread_fn_800F5404.inc"
 }
 #else
 #pragma optimization_level 2
@@ -7175,8 +7175,8 @@ s32 cms_op19_pushVar2(void* obj) {
 
 /* 0x800F55DC | 0x214 */
 #if 0
-asm void cms_op18_negate(void) {
-#include "src/game/gs_thread_cms_op18_negate.inc"
+asm void fn_800F55DC(void) {
+#include "src/game/gs_thread_fn_800F55DC.inc"
 }
 #else
 #pragma optimization_level 2
@@ -7275,8 +7275,8 @@ extern u32 lbl_8047E710;
 extern u32 lbl_8047CCBC;
 extern u32 lbl_8047CCC0;
 #if 0
-asm void cms_op17_not(void) {
-#include "src/game/gs_thread_cms_op17_not.inc"
+asm void fn_800F57F0(void) {
+#include "src/game/gs_thread_fn_800F57F0.inc"
 }
 #else
 #pragma push
@@ -7355,8 +7355,8 @@ s32 cms_op17_not(GSVMCtx* context)
 /* 0x800F5A3C | 0x264 */
 extern u32 lbl_8047E710;
 #if 0
-asm void cms_op16_pushMultiVar(void) {
-#include "src/game/gs_thread_cms_op16_pushMultiVar.inc"
+asm void fn_800F5A3C(void) {
+#include "src/game/gs_thread_fn_800F5A3C.inc"
 }
 #else
 #pragma push
@@ -7387,8 +7387,8 @@ s32 cms_op16_pushMultiVar(arg0)
 /* 0x800F5CA0 | 0x24C */
 extern u32 lbl_8047E710;
 #if 0
-asm void cms_op15_pushVarRef(void) {
-#include "src/game/gs_thread_cms_op15_pushVarRef.inc"
+asm void fn_800F5CA0(void) {
+#include "src/game/gs_thread_fn_800F5CA0.inc"
 }
 #else
 #pragma push
@@ -7413,8 +7413,8 @@ s32 cms_op15_pushVarRef(arg0)
 
 /* 0x800F5EEC | 0x3D0 */
 #if 0
-asm void cms_op14_or(void) {
-#include "src/game/gs_thread_cms_op14_or.inc"
+asm void fn_800F5EEC(void) {
+#include "src/game/gs_thread_fn_800F5EEC.inc"
 }
 #else
 s32 cms_op14_or(void* obj) {
@@ -7510,8 +7510,8 @@ s32 cms_op14_or(void* obj) {
 
 /* 0x800F62BC | 0x3D0 */
 #if 0
-asm void cms_op13_and(void) {
-#include "src/game/gs_thread_cms_op13_and.inc"
+asm void fn_800F62BC(void) {
+#include "src/game/gs_thread_fn_800F62BC.inc"
 }
 #else
 s32 cms_op13_and(void* obj) {
@@ -7607,8 +7607,8 @@ s32 cms_op13_and(void* obj) {
 
 /* 0x800F668C | 0x80 */
 #if 0
-asm s32 cms_op08_pushImmediate(void* obj) {
-#include "src/game/gs_thread_cms_op08_pushImmediate.inc"
+asm s32 fn_800F668C(void* obj) {
+#include "src/game/gs_thread_fn_800F668C.inc"
 }
 #else
 #pragma optimization_level 2
@@ -7633,8 +7633,8 @@ s32 cms_op08_pushImmediate(void* obj) {
 
 /* 0x800F670C | 0xA0 */
 #if 0
-asm s32 cms_op07_jumpFalse(void* obj) {
-#include "src/game/gs_thread_cms_op07_jumpFalse.inc"
+asm s32 fn_800F670C(void* obj) {
+#include "src/game/gs_thread_fn_800F670C.inc"
 }
 #else
 #pragma optimization_level 4
@@ -7661,8 +7661,8 @@ s32 cms_op07_jumpFalse(u8* ptr) {
 
 /* 0x800F67AC | 0x1C */
 #if 0
-asm void cms_op06_jump(void) {
-#include "src/game/gs_thread_cms_op06_jump.inc"
+asm void fn_800F67AC(void) {
+#include "src/game/gs_thread_fn_800F67AC.inc"
 }
 #else
 #pragma optimization_level 2
@@ -7678,8 +7678,8 @@ s32 cms_op06_jump(u32* ptr) {
 
 /* 0x800F67C8 | 0x184 */
 #if 0
-asm s32 cms_op05_return(void* obj) {
-#include "src/game/gs_thread_cms_op05_return.inc"
+asm s32 fn_800F67C8(void* obj) {
+#include "src/game/gs_thread_fn_800F67C8.inc"
 }
 #else
 #pragma optimization_level 2
@@ -7753,8 +7753,8 @@ s32 cms_op05_return(void* obj) {
 /* 0x800F694C | 0x168 */
 extern u8 lbl_8027115C[];
 #if 0
-asm s32 cms_op04_call(void* obj) {
-#include "src/game/gs_thread_cms_op04_call.inc"
+asm s32 fn_800F694C(void* obj) {
+#include "src/game/gs_thread_fn_800F694C.inc"
 }
 #else
 #pragma optimization_level 2
@@ -7824,10 +7824,10 @@ s32 cms_op04_call(void* obj) {
 
 /* 0x800F6AB4 | 0xA0 */
 #if 0
-asm s32 cms_op03_pop(obj)
+asm s32 fn_800F6AB4(obj)
     void* obj;
 {
-#include "src/game/gs_thread_cms_op03_pop.inc"
+#include "src/game/gs_thread_fn_800F6AB4.inc"
 }
 #else
 #pragma optimization_level 2
@@ -7860,8 +7860,8 @@ s32 cms_op03_pop(obj)
 
 /* 0x800F6B54 | 0x58 */
 #if 0
-asm s32 cms_op02_pushMinus1(void* obj) {
-#include "src/game/gs_thread_cms_op02_pushMinus1.inc"
+asm s32 fn_800F6B54(void* obj) {
+#include "src/game/gs_thread_fn_800F6B54.inc"
 }
 #else
 #pragma optimization_level 2
@@ -7880,8 +7880,8 @@ u32 cms_op02_pushMinus1(u8* ptr) {
 
 /* 0x800F6BAC | 0x10 */
 #if 0
-asm void cms_op01_exit(void) {
-#include "src/game/gs_thread_cms_op01_exit.inc"
+asm void fn_800F6BAC(void) {
+#include "src/game/gs_thread_fn_800F6BAC.inc"
 }
 #else
 #pragma optimization_level 2
@@ -7893,8 +7893,8 @@ s32 cms_op01_exit(u8* ptr) {
 
 /* 0x800F6BBC | 0x8 */
 #if 0
-asm void cms_op00_nop(void) {
-#include "src/game/gs_thread_cms_op00_nop.inc"
+asm void fn_800F6BBC(void) {
+#include "src/game/gs_thread_fn_800F6BBC.inc"
 }
 #else
 #pragma optimization_level 2
@@ -7906,8 +7906,8 @@ s32 cms_op00_nop(void) {
 /* 0x800F6BC4 | 0x154 */
 extern u8 lbl_803155D0[];
 #if 0
-asm u32 cms_ScriptExecute(void* obj) {
-#include "src/game/gs_thread_cms_ScriptExecute.inc"
+asm u32 fn_800F6BC4(void* obj) {
+#include "src/game/gs_thread_fn_800F6BC4.inc"
 }
 #else
 #pragma optimization_level 2
@@ -7978,12 +7978,12 @@ done:
 extern u32 *__va_arg(void *, u32);
 extern u32 lbl_80478B00;
 #if 0
-asm void* cms_ScriptCreateThread(callback, arg, list)
+asm void* fn_800F6D18(callback, arg, list)
     void* callback;
     u32 arg;
     void* list;
 {
-#include "src/game/gs_thread_cms_ScriptCreateThread.inc"
+#include "src/game/gs_thread_fn_800F6D18.inc"
 }
 #else
 #pragma push
@@ -8374,8 +8374,8 @@ u32 fn_800F7318(u32 r27, void* callback, u32 r28, u32 r29, u32 r30, u32 r8, ...)
 #pragma pop
 #endif
 #if 0
-asm u32 cmsRunSync(void* callback, u32 arg, ...) {
-#include "src/game/gs_thread_cmsRunSync.inc"
+asm u32 fn_800F7434(void* callback, u32 arg, ...) {
+#include "src/game/gs_thread_fn_800F7434.inc"
 }
 #else
 #pragma optimization_level 4

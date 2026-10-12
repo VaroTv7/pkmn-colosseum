@@ -499,11 +499,11 @@ s32 fn_8001DFA8(u32 arg1, u8* arg2) {
 }
 #pragma pop
 
-/* 0x68 | std158_menuOpenCustom43 | call_sequence */
-/* std158_menuOpenCustom43 - 0x8001E00C | size: 0x68 */
+/* 0x68 | fn_8001E00C | call_sequence */
+/* fn_8001E00C - 0x8001E00C | size: 0x68 */
 #if 0
-asm void std158_menuOpenCustom43(void) {
-#include "src/game/gs_pcbox_std158_menuOpenCustom43.inc"
+asm void fn_8001E00C(void) {
+#include "src/game/gs_pcbox_fn_8001E00C.inc"
 }
 #else
 #pragma push
@@ -586,10 +586,10 @@ s8 menuSubOpenYesNo(u8 menuType, s16 x, s16 y, s32 initialValue) {
 #pragma pop
 #endif
 
-/* std011_dialogDisplayYesNoMenu - 0x8001E184 | size: 0x7c */
+/* fn_8001E184 - 0x8001E184 | size: 0x7c */
 #if 0
-asm void std011_dialogDisplayYesNoMenu(void) {
-#include "src/game/gs_pcbox_std011_dialogDisplayYesNoMenu.inc"
+asm void fn_8001E184(void) {
+#include "src/game/gs_pcbox_fn_8001E184.inc"
 }
 #else
 #pragma optimization_level 4

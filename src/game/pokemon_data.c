@@ -1447,7 +1447,7 @@ extern u32 heroMoveGetResID(u32* out_zero, u32* out_val, s32 index);
  * matched at 100% further below in this file. A prior fictional
  * (void)-signature "GSfield_ObjectBatchUpdate" duplicate claiming
  * this address has been removed. */
-/* Note: partnerApplyMove (field movement/heading processor, 2104 bytes) is
+/* Note: fn_8012CA84 (field movement/heading processor, 2104 bytes) is
  * implemented further below in this file. A prior fictional
  * (void)-signature "GSfield_ProcessTriggers" duplicate claiming this
  * address has been removed. */

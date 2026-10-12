@@ -2558,8 +2558,8 @@ void HSD_SetEraseColor(u8 a, u8 b, u8 c, u8 d) {
 #pragma optimization_level 4
 #pragma optimizewithasm off
 #if 0
-asm void HSD_JObjSetSPtclCallback(void) {
-#include "src/hsd/hsd_cobj_HSD_JObjSetSPtclCallback.inc"
+asm void fn_8019733C(void) {
+#include "src/hsd/hsd_cobj_fn_8019733C.inc"
 }
 #else
 void HSD_JObjSetSPtclCallback(u32 val) { extern u32 lbl_8047B240; lbl_8047B240 = val; }

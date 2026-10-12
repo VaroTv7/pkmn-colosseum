@@ -390,11 +390,11 @@ void fn_8002FC58(void)
  * runs the full encounter setup sequence:
  *   1. Fade/audio transition (fadeSet/fadeCheck)
  *   2. Hide marker objects (fn_8010A420)
- *   3. Wait for trainer anim (std113_mapObjectUnk_8018db68)
+ *   3. Wait for trainer anim (fn_801CB9D8)
  *   4. Yield one frame (_threadSwitch)
  *   5. Spawn/configure encounter objects (pokemonEvolutionAll)
  *   6. Re-anchor NPC handles (fn_80109C88, menuModelInit)
- *   7. Scene-load BGM/scene (cameraPlayAnime, std112_modelGetResourceID, GSresGetResource)
+ *   7. Scene-load BGM/scene (cameraPlayAnime, fn_801CBA0C, GSresGetResource)
  *   8. Restore people state (GSscene_SetMode)
  *   9. Mark availability flag and advance state (lbl_8047A42C = 0x12)
  */
@@ -427,9 +427,9 @@ void stateFunctionEvolution(void)
     extern void menuClose(s32 id);
     /* fn_8010A420 - model marker hide  (u8* obj) */
     extern void fn_8010A420(u8 *obj);
-    /* std113_mapObjectUnk_8018db68 - scene trainer anim state  (u32 handle) */
+    /* fn_801CB9D8 - scene trainer anim state  (u32 handle) */
     extern void std113_mapObjectUnk_8018db68(u32 handle);
-    /* floorSetMapVisibility - field collision query reset  (s32 flag) */
+    /* fn_80112260 - field collision query reset  (s32 flag) */
     extern void floorSetMapVisibility(s32 flag);
     /* _threadSwitch - GS vsync yield */
     extern void _threadSwitch(void);
@@ -441,9 +441,9 @@ void stateFunctionEvolution(void)
     extern void fn_80109C88(u8 *obj, u8 *npc_handle);
     /* cameraPlayAnime - scene render/BGM start (s32 scene_id, u32 color_key, s32 a, s32 b) */
     extern void cameraPlayAnime(s32 scene_id, u32 color_key, s32 a, s32 b);
-    /* std093_getCurrentGroupID - get current scene/resource handle */
+    /* fn_80113F48 - get current scene/resource handle */
     extern u32  std093_getCurrentGroupID(void);
-    /* std112_modelGetResourceID - scene transition fade-out: (u32 color_key) -> u32 fade_handle */
+    /* fn_801CBA0C - scene transition fade-out: (u32 color_key) -> u32 fade_handle */
     extern u32  std112_modelGetResourceID(u32 color_key);
     /* GSresGetResource - resolve resource pointer from handle (u32 handle) -> void* */
     extern void* GSresGetResource(u32 handle);
@@ -458,7 +458,7 @@ void stateFunctionEvolution(void)
     u8  *npc_a;         /* r28: NPC handle for slot A (lbl_8047A424) */
     u8  *npc_b;         /* r30: NPC handle for slot B (lbl_8047A420) */
     u8   need_update;   /* r29: set to 1 if either slot is valid */
-    u32  scene_handle;  /* r28 reused: result of std093_getCurrentGroupID */
+    u32  scene_handle;  /* r28 reused: result of fn_80113F48 */
     u32  npc_result;    /* return of pokemonEvolutionCheck (cast to u16 for validity check) */
     s32  enc_result;    /* return of pokemonEvolutionAll */
 
@@ -655,7 +655,7 @@ void stateFunctionExChangeMain(void)
     u8  *base  = lbl_803A2518;
     void *obj_a;   /* r30: result of first  heroGetStatus */
     void *obj_b;   /* r29: result of second heroGetStatus */
-    u32   handle;  /* r3 after std093_getCurrentGroupID              */
+    u32   handle;  /* r3 after fn_80113F48              */
 
     /* --- Initialise interaction objects --- */
     pokemonInit(base);
@@ -1023,9 +1023,9 @@ asm void fn_8002EA5C(void) {
  *      advance state lbl_8047A42C = 0xC.
  *
  * The triple frame-wait loop is the engine's time-integration idiom:
- *   accum += (f32)msgGetCharsPerFrame() / (f32)(s32)fn_800D37CC()  per vsync yield
+ *   accum += (f32)fn_800D3088() / (f32)(s32)fn_800D37CC()  per vsync yield
  * (the 0x43300000 double-word int->float magic in the asm is normalized to
- * plain casts here). msgGetCharsPerFrame = elapsed frame ticks (unsigned numerator),
+ * plain casts here). fn_800D3088 = elapsed frame ticks (unsigned numerator),
  * fn_800D37CC = ticks-per-unit (signed denominator).
  */
 void fn_8002EA5C(void)

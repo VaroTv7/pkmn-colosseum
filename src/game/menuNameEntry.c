@@ -1954,7 +1954,7 @@ asm void selectLetter__FP14NAME_ENTRY_ARG(void) {
  * World-map travel / UI state machine tick.
  * Reads two indirect sub-state counters from the context object,
  * decides which action to perform (0-6), then optionally fires a
- * scheduler/sound event via soundStartSE before returning a flag.
+ * scheduler/sound event via fn_80166A28 before returning a flag.
  *
  * param r3  - pointer to the world-map controller object ("self")
  * return    - 1 if a "complete / next-scene" transition was triggered,
@@ -1969,7 +1969,7 @@ s32 selectLetter__FP14NAME_ENTRY_ARG(void* r3) {
     extern u8   lbl_80266E18[];   /* 2D array: [2][0x18], each 0x18 entry has sub-arrays of void* at +8 */
 
     u8*   self;          /* r28 -- self pointer (reused as byte-offset after case 1/2) */
-    u32   r29;           /* event code sent to soundStartSE (0 = no call) */
+    u32   r29;           /* event code sent to fn_80166A28 (0 = no call) */
     s32   r30;           /* return value */
     u16   r31;           /* current travel-target ID */
     s32   r27;           /* animation sub-counter (from self+0x28 indirect) */

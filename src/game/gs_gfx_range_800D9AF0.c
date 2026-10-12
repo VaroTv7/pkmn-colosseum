@@ -430,8 +430,8 @@ void fn_800D9B24(u16* a, u16* b, u16* c, u16* d) { *a = *(u16*)(lbl_8047AA80 + 0
 extern f32 lbl_8047CA50;
 extern f32 lbl_8047CA54;
 #if 0
-asm void gfxSetOrtho(void) {
-#include "src/game/gs_render_gfxSetOrtho.inc"
+asm void fn_800D9B58(void) {
+#include "src/game/gs_render_fn_800D9B58.inc"
 }
 #else
 void gfxSetOrtho(f32 a, f32 b, f32 c, f32 d) {

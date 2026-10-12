@@ -6,9 +6,9 @@
  *   fn_8018FDD0 (peopleInit)         -- allocate array for N people slots
  *   fn_8018FDB4 (peopleGetMaxCount)  -- return max slot count
  *   fn_8018FD88 (peopleGetEntry)     -- index -> PeopleEntry*
- *   peopleCreate (peopleAlloc)        -- find free slot, memset, mark active
+ *   fn_8018FCE0 (peopleAlloc)        -- find free slot, memset, mark active
  *   fn_8018FDBC (peopleFree)         -- mark slot inactive
- *   peopleMain (peopleUpdate)       -- per-frame update loop for all NPCs
+ *   fn_80181850 (peopleUpdate)       -- per-frame update loop for all NPCs
  *   fn_80181224 (peopleFloorInit)    -- draw 30 blank frames at floor start
  *   fn_80180C78 (peopleOpenCallback) -- floor loader callback (opens people)
  *   fn_80181094 (peopleOpenThread)   -- continuation callback after open
@@ -343,7 +343,7 @@ PeopleEntry* peopleGetEntry(s32 index)
 #pragma dont_inline reset
 
 /* =======================================================================
- * peopleCreate -- peopleAlloc
+ * fn_8018FCE0 -- peopleAlloc
  *
  * Find the first free (inactive) slot in the people array, zero it,
  * and mark it as active. Sets up self-pointer, shadow ID, and move speed.
@@ -534,10 +534,10 @@ void fn_80181224(void)
 #pragma optimization_level reset
 
 /* =======================================================================
- * peopleMain -- peopleUpdate
+ * fn_80181850 -- peopleUpdate
  *
  * Main per-frame update loop for all active people entries.
- * Called from the main game loop (via fn_80005FE0 -> bl peopleMain).
+ * Called from the main game loop (via fn_80005FE0 -> bl fn_80181850).
  *
  * For each active entry:
  *   1. Check HAS_MODEL flag -> update collision position if set
@@ -711,8 +711,8 @@ extern f32 lbl_8047D814;
 extern f32 lbl_8047D7C0;
 extern u32 lbl_8047D7C8;
 #if 0
-asm void std068_characterTurnToAngle(void) {
-#include "src/game/people/people_std068_characterTurnToAngle.inc"
+asm void fn_8018A44C(void) {
+#include "src/game/people/people_fn_8018A44C.inc"
 }
 #else
 void std068_characterTurnToAngle(u32 groupId, u32 index, f32 amount) {
@@ -751,8 +751,8 @@ extern f32 lbl_8047D800;
 extern f32 lbl_8047D7A0;
 extern f32 lbl_8047D79C;
 #if 0
-asm void std177_characterMoveToCharacter(void) {
-#include "src/game/people/people_std177_characterMoveToCharacter.inc"
+asm void fn_8018A700(void) {
+#include "src/game/people/people_fn_8018A700.inc"
 }
 #else
 void std177_characterMoveToCharacter(u32 groupId, u32 index, u32 targetGroupId,
@@ -867,8 +867,8 @@ extern f32 lbl_8047D7A0;
 extern u32 lbl_8047D7C8;
 extern f32 lbl_8047D7A4;
 #if 0
-asm void std154_characterPlayAnimation(void) {
-#include "src/game/people/people_std154_characterPlayAnimation.inc"
+asm void fn_8018B368(void) {
+#include "src/game/people/people_fn_8018B368.inc"
 }
 #else
 void std154_characterPlayAnimation(u32 groupId, u32 index, s32 animIndex, s32 frame,
@@ -1137,8 +1137,8 @@ extern u32 lbl_8047D898;
 extern u32 lbl_8047D7D0;
 extern u32 lbl_8047D89C;
 #if 0
-asm void peopleHeadLookUpdate(void) {
-#include "src/game/people/people_peopleHeadLookUpdate.inc"
+asm void fn_8018ECEC(void) {
+#include "src/game/people/people_fn_8018ECEC.inc"
 }
 #else
 #pragma dont_inline on
@@ -1289,8 +1289,8 @@ extern void fn_800EC308(void*, f32);
 extern void fn_800ECB74(void*, u32);
 extern void fn_800EC990(void*);
 #if 0
-asm void std231_characterSetPathPaused(void) {
-#include "src/game/people/people_std231_characterSetPathPaused.inc"
+asm void fn_80181478(void) {
+#include "src/game/people/people_fn_80181478.inc"
 }
 #else
 s32 std231_characterSetPathPaused(u32 groupId, u32 index, u8 doSetup)
@@ -1376,8 +1376,8 @@ extern void std115_mapObjectPlayAnimation(u32, u32, u32, u32);
 extern void soundStartSE(u32);
 extern u16 fn_800F7318(u32, ...);
 #if 0
-asm void std131_characterSurpriseAnimation(void) {
-#include "src/game/people/people_std131_characterSurpriseAnimation.inc"
+asm void fn_80181EB0(void) {
+#include "src/game/people/people_fn_80181EB0.inc"
 }
 #else
 void std131_characterSurpriseAnimation(u32 groupId, u32 index) {
@@ -1431,8 +1431,8 @@ extern u32 lbl_8047D7D0;
 extern const f64 lbl_8047D7E0;
 extern u8 lbl_8036C4F8[];
 #if 0
-asm void std178_characterPlayAnimationAndWait(void) {
-#include "src/game/people/people_std178_characterPlayAnimationAndWait.inc"
+asm void fn_801821B8(void) {
+#include "src/game/people/people_fn_801821B8.inc"
 }
 #else
 void std178_characterPlayAnimationAndWait(u32 groupId, u32 index)
@@ -1756,8 +1756,8 @@ s32 fn_80183B44(u32 groupId, u32 index, f32 field80) {
 
 /* 0x80183CE0 | 0x17C */
 #if 0
-asm void std075_characterAllocPathAlt(void) {
-#include "src/game/people/people_std075_characterAllocPathAlt.inc"
+asm void fn_80183CE0(void) {
+#include "src/game/people/people_fn_80183CE0.inc"
 }
 #else
 s32 std075_characterAllocPathAlt(u32 groupId, u32 index) {
@@ -1910,8 +1910,8 @@ u8 peopleReserveWalkList(u32 groupId, u32 index, u16 count) {
 
 /* 0x80184450 | 0x20 */
 #if 0
-asm void std071_threadYield(void) {
-#include "src/game/people/people_std071_threadYield.inc"
+asm void fn_80184450(void) {
+#include "src/game/people/people_fn_80184450.inc"
 }
 #else
 #pragma optimization_level 4
@@ -1950,8 +1950,8 @@ extern f32 lbl_8047D810;
 extern f32 lbl_8047D814;
 extern u32 lbl_8047D7D0;
 #if 0
-asm void peopleTurnUpdate(void) {
-#include "src/game/people/people_peopleTurnUpdate.inc"
+asm void fn_80184A90(void) {
+#include "src/game/people/people_fn_80184A90.inc"
 }
 #else
 void peopleTurnUpdate(PeopleEntry* entry) {
@@ -2690,8 +2690,8 @@ extern u32 lbl_8047D848;
 void fn_80186B5C(GSvec* output, u32 groupId, u32 index);
 u8 fn_801870E8(void*, void*, void*, void*, void*, f32);
 #if 0
-asm void std170_cameraFocusOnCharacter(void) {
-#include "src/game/people/people_std170_cameraFocusOnCharacter.inc"
+asm void fn_80186620(void) {
+#include "src/game/people/people_fn_80186620.inc"
 }
 #else
 s32 std170_cameraFocusOnCharacter(u32 groupId, u32 index, u8 mode, f32 x0, f32 z0,
@@ -3127,8 +3127,8 @@ u8 fn_801870E8(void* resultArg, void* pointArg, void* startArg, void* endArg,
 /* 0x801874BC | 0x450 */
 extern u32 lbl_8047D844;
 #if 0
-asm void std058_characterCheckWithinBounds(void) {
-#include "src/game/people/people_std058_characterCheckWithinBounds.inc"
+asm void fn_801874BC(void) {
+#include "src/game/people/people_fn_801874BC.inc"
 }
 #else
 u8 std058_characterCheckWithinBounds(u32 groupId, u32 index, f32 x0, f32 z0, f32 x1, f32 z1)
@@ -3208,8 +3208,8 @@ u8 std058_characterCheckWithinBounds(u32 groupId, u32 index, f32 x0, f32 z0, f32
 extern f32 lbl_8047D7C0;
 extern u32 lbl_8047D7C8;
 #if 0
-asm void std165_characterFaceCharacter(void) {
-#include "src/game/people/people_std165_characterFaceCharacter.inc"
+asm void fn_80187A60(void) {
+#include "src/game/people/people_fn_80187A60.inc"
 }
 #else
 void std165_characterFaceCharacter(u32 groupId, u32 index, u32 targetGroupId,
@@ -3353,8 +3353,8 @@ u32 fn_8018F490(const PeopleInfoBiosEntry* info) {
 #pragma optimization_level 0
 #pragma optimizewithasm off
 #if 0
-asm void characterModelGetTalkSE(void) {
-#include "src/game/people/people_characterModelGetTalkSE.inc"
+asm void fn_8018F4AC(void) {
+#include "src/game/people/people_fn_8018F4AC.inc"
 }
 #else
 #pragma optimization_level 4
@@ -3880,7 +3880,7 @@ void fn_801812C4(PeopleEntry* entry) {
 }
 #pragma optimization_level reset
 
-/* peopleTalkPause = peopleFindAndInteract (see people.h) -- find a people entry
+/* fn_801812E8 = peopleFindAndInteract (see people.h) -- find a people entry
  * by (groupId, index) and toggle it in/out of the "interacting" state
  * (saving/restoring the previous state around states 4-5). */
 s32 peopleTalkPause(u32 groupId, u32 index, u8 doInteract) {
@@ -4008,7 +4008,7 @@ u32 fn_8018397C(u8* arg1, u32 arg2) {
     return floorCharacterBiosGetTalkSctID((void*)fn_801170A4(arg1, arg2));
 }
 
-/* std168_characterDetachFromCharacter -- not recovered, gap in archive campaign (size 0x174) */
+/* fn_80184470 -- not recovered, gap in archive campaign (size 0x174) */
 void std168_characterDetachFromCharacter(u32 groupId, u32 index) {
     PeopleEntry* entry;
     void* model;
@@ -4027,7 +4027,7 @@ void std168_characterDetachFromCharacter(u32 groupId, u32 index) {
     }
 }
 
-/* std070_characterAttachToCharacter -- attach a model part and record its resource identifiers */
+/* fn_801845E4 -- attach a model part and record its resource identifiers */
 void std070_characterAttachToCharacter(u32 groupId, u32 index, s32 nodeA, s32 nodeB, s32 nodeC) {
     PeopleEntry* entry;
     PeopleEntry* cleanup;
@@ -4084,14 +4084,14 @@ void fn_801848D0(void* a, s32 b, s32 c, s32 d) {
     }
 }
 
-/* std061_characterMoveToPosition -- not recovered, gap in archive campaign (size 0x5C) */
+/* fn_80185EE8 -- not recovered, gap in archive campaign (size 0x5C) */
 void std061_characterMoveToPosition(u32 a, u32 b, u8 c) {
     u8 local[24];
     set__5GSvecFfff(local);
     fn_8018AACC(a, b, c, (GSvec*)local);
 }
 
-/* std059_characterSetPosition -- not recovered, gap in archive campaign (size 0x15C) */
+/* fn_801860F8 -- not recovered, gap in archive campaign (size 0x15C) */
 void std059_characterSetPosition(u32 groupId, u32 index) {
     GSvec position;
     PeopleEntry* entry;
@@ -4104,7 +4104,7 @@ void std059_characterSetPosition(u32 groupId, u32 index) {
     }
 }
 
-/* peopleStopTurn -- not recovered, gap in archive campaign (size 0x154) */
+/* fn_8018790C -- not recovered, gap in archive campaign (size 0x154) */
 void peopleStopTurn(u32 groupId, u32 index) {
     extern GSvec* peopleGetPosition(PeopleEntry*);
     PeopleEntry* entry;
@@ -4149,7 +4149,7 @@ void peopleTurnToPoint(u32 groupId, u32 index, f32 targetX, f32 targetY,
     }
 }
 
-/* peopleStartTurn -- not recovered, gap in archive campaign (size 0x1B8) */
+/* fn_8018805C -- not recovered, gap in archive campaign (size 0x1B8) */
 void peopleStartTurn(u32 groupId, u32 index, f32 rotationOffset, f32 value) {
     PeopleEntry* entry;
     GSvec rotation;
@@ -4261,9 +4261,9 @@ void peopleMoveByVector(u32 groupId, u32 index, GSvec* offset, u8 faceOffset) {
     }
 }
 
-/* peopleAmountFromMove -- find a people entry by (groupId, index) and compute an
+/* fn_801887D8 -- find a people entry by (groupId, index) and compute an
  * animation blend ratio against entry->field_34/field_38 (float time range)
- * for a caller-supplied time-source object (param3, fed to vecMag). */
+ * for a caller-supplied time-source object (param3, fed to fn_800E008C). */
 f32 peopleAmountFromMove(u32 groupId, u32 index, void* param3) {
     PeopleEntry* entry;
     f32 result;
@@ -4293,7 +4293,7 @@ f32 peopleAmountFromMove(u32 groupId, u32 index, void* param3) {
     return result;
 }
 
-/* std067_characterStopLookAt = std067_characterStopLookAt (see people.h) -- not recovered, gap in archive campaign */
+/* fn_80188AF4 = fn_80188AF4 (see people.h) -- not recovered, gap in archive campaign */
 void std067_characterStopLookAt(u32 groupId, u32 index) {
     PeopleEntry* entry;
     PeopleInfoBiosEntry* info;
@@ -4326,7 +4326,7 @@ void std067_characterStopLookAt(u32 groupId, u32 index) {
     entry->moveType = PEOPLE_MOVE_NONE;
 }
 
-/* std066_characterLookAtPosition = std066_characterLookAtPosition (see people.h) -- not recovered, gap in archive campaign */
+/* fn_80188CA0 = fn_80188CA0 (see people.h) -- not recovered, gap in archive campaign */
 extern void GSpartRegisterRotation(void*, void*, s32);
 void std066_characterLookAtPosition(u32 groupId, u32 index, u32 targetX, u32 targetY,
                  u32 targetZ) {
@@ -4359,7 +4359,7 @@ void std066_characterLookAtPosition(u32 groupId, u32 index, u32 targetX, u32 tar
     original->moveType = 2;
 }
 
-/* std065_characterLookAtPlayer -- not recovered, gap in archive campaign (size 0x28) */
+/* fn_80188F78 -- not recovered, gap in archive campaign (size 0x28) */
 void std065_characterLookAtPlayer(u32 groupId, u32 index) {
     std181_characterTurnHeadTowardsCharacter(groupId, index, 0, 100);
 }
@@ -4427,7 +4427,7 @@ BOOL fn_80189328(u32 groupId, u32 index, u8 enable) {
     return wasTalkable;
 }
 
-/* std055_characterEndSpeech -- not recovered, gap in archive campaign (size 0x500) */
+/* fn_80189490 -- not recovered, gap in archive campaign (size 0x500) */
 extern void winMsgClose(s32);
 extern s32 winMsgCheckField(void);
 
@@ -4448,7 +4448,7 @@ void std055_characterEndSpeech(u32 groupId, u32 index) {
             entry->field_94 = 0;
             if ((flags & 0x60) == 0x60) {
                 /* framescan: retail holds entry->field_98 in f31 across the
-                 * peopleGetRotation call, so it is read before the call rather than
+                 * fn_8018FC2C call, so it is read before the call rather than
                  * inline in the sum afterwards. */
                 f32 baseAngle = entry->field_98;
                 peopleGetRotation(entry, &rotation);
@@ -4477,7 +4477,7 @@ void std055_characterEndSpeech(u32 groupId, u32 index) {
     }
 }
 
-/* std054_characterTalk -- not recovered, gap in archive campaign (size 0x8F0) */
+/* fn_80189990 -- not recovered, gap in archive campaign (size 0x8F0) */
 extern void winMsgOpenFieldWithSE(s32, s32, s32, s32);
 
 void std054_characterTalk(u32 groupId, u32 index, s32 messageId) {
@@ -4770,7 +4770,7 @@ void fn_8018BA04(u32 groupId, u32 index, GSvec* out) {
     out->y = ((GSvec*)peopleGetPositionPtr(original))->y;
 }
 
-/* std172_characterGetPosition -- find a people entry by (groupId, index) and set its
+/* fn_8018BDF4 -- find a people entry by (groupId, index) and set its
  * position. No-op if pos is NULL (search is skipped entirely). */
 void std172_characterGetPosition(u32 groupId, u32 index, void* pos) {
     PeopleEntry* found;
@@ -4897,7 +4897,7 @@ void fn_8018C8F4(u32 groupId, u32 index, u32 flags) {
     }
 }
 
-/* std151_characterFaceDirection -- find a people entry by (groupId, index) and set its shadow
+/* fn_8018CA20 -- find a people entry by (groupId, index) and set its shadow
  * animation, forcing 0 unless the entry already has an animId set. */
 void std151_characterFaceDirection(u32 groupId, u32 index, u8 animId) {
     PeopleEntry* found;
@@ -4951,7 +4951,7 @@ void fn_8018CB5C(u32 groupId, u32 index) {
     }
 }
 
-/* peopleFindTalkTarget -- not recovered, gap in archive campaign (size 0x978) */
+/* fn_8018CD08 -- not recovered, gap in archive campaign (size 0x978) */
 void* peopleFindTalkTarget(u32 groupId, u32 index, f32 radius, f32 angle) {
     extern u8 heroMoveIsMember(s32 member);
     extern u32 heroMoveGetResID(u32* out_group, u32* out_index, s32 member);
@@ -5179,7 +5179,7 @@ void* peopleSearchID(u32 id) {
     return NULL;
 }
 
-/* peopleIsInGroup -- not recovered, gap in archive campaign (size 0xF0) */
+/* fn_8018D998 -- not recovered, gap in archive campaign (size 0xF0) */
 void* peopleIsInGroup(u32 groupId, u32 index) {
     s32 i;
     PeopleEntry* entry;
@@ -5606,35 +5606,35 @@ f32 fn_8018F5E4(const PeopleInfoBiosEntry* info) {
     return (info != NULL) ? info->field_18 : lbl_8047D8A8;
 }
 
-/* charModelGetHeadPitchMax -- not recovered, gap in archive campaign (size 0x20) */
+/* fn_8018F618 -- not recovered, gap in archive campaign (size 0x20) */
 f32 charModelGetHeadPitchMax(const PeopleInfoBiosEntry* info) {
     extern f32 lbl_8047D8A8;
     extern f32 lbl_8047D8AC;
     return (info != NULL) ? lbl_8047D8AC * info->field_20 : lbl_8047D8A8;
 }
 
-/* charModelGetHeadPitchMin -- not recovered, gap in archive campaign (size 0x20) */
+/* fn_8018F638 -- not recovered, gap in archive campaign (size 0x20) */
 f32 charModelGetHeadPitchMin(const PeopleInfoBiosEntry* info) {
     extern f32 lbl_8047D8A8;
     extern f32 lbl_8047D8AC;
     return (info != NULL) ? lbl_8047D8AC * info->field_1C : lbl_8047D8A8;
 }
 
-/* charModelGetHeadYawMax -- not recovered, gap in archive campaign (size 0x20) */
+/* fn_8018F658 -- not recovered, gap in archive campaign (size 0x20) */
 f32 charModelGetHeadYawMax(const PeopleInfoBiosEntry* info) {
     extern f32 lbl_8047D8A8;
     extern f32 lbl_8047D8AC;
     return (info != NULL) ? lbl_8047D8AC * info->field_20 : lbl_8047D8A8;
 }
 
-/* charModelGetHeadYawMin -- not recovered, gap in archive campaign (size 0x20) */
+/* fn_8018F678 -- not recovered, gap in archive campaign (size 0x20) */
 f32 charModelGetHeadYawMin(const PeopleInfoBiosEntry* info) {
     extern f32 lbl_8047D8A8;
     extern f32 lbl_8047D8AC;
     return (info != NULL) ? lbl_8047D8AC * info->field_1C : lbl_8047D8A8;
 }
 
-/* charModelGetHeadPart -- not recovered, gap in archive campaign (size 0x1C) */
+/* fn_8018F698 -- not recovered, gap in archive campaign (size 0x1C) */
 s32 charModelGetHeadPart(const PeopleInfoBiosEntry* info) {
     return (info != NULL) ? (s32)(s8)info->raw_09 : -1;
 }
@@ -5653,7 +5653,7 @@ void* peopleInfoBiosGetPtr(void* scriptObj) {
     return NULL;
 }
 
-/* peopleSetHumanCollision = peopleSetHumanCollision (see people.h) -- not recovered, gap in archive campaign */
+/* fn_8018FB2C = fn_8018FB2C (see people.h) -- not recovered, gap in archive campaign */
 void peopleSetHumanCollision(PeopleEntry* entry, u8 animId) {
     void GScolsys2HumanEnable();
     s32 f80;
@@ -5681,7 +5681,7 @@ void fn_8018FC08(PeopleEntry* entry, void* vec) {
     GSmodelSetRotation(entry->modelHandle, vec);
 }
 
-/* peopleGetRotation = peopleGetRotation (see people.h) -- not recovered, gap in archive campaign */
+/* fn_8018FC2C = fn_8018FC2C (see people.h) -- not recovered, gap in archive campaign */
 void peopleGetRotation(PeopleEntry* entry, void* rotation) {
     extern void GSmodelGetRotation(void*, void*);
     GSmodelGetRotation(entry->modelHandle, rotation);
@@ -5700,7 +5700,7 @@ void fn_8018FC98(PeopleEntry* entry, void* pos) {
     GSmodelGetPosition(entry->modelHandle, pos);
 }
 
-/* peopleGetPositionPtr = peopleGetPositionPtr (see people.h) -- not recovered, gap in archive campaign */
+/* fn_8018FCBC = fn_8018FCBC (see people.h) -- not recovered, gap in archive campaign */
 void* peopleGetPositionPtr(PeopleEntry* entry) {
     extern void* GSmodelGetPositionPtr(void*);
     return GSmodelGetPositionPtr(entry->modelHandle);

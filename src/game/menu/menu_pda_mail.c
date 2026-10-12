@@ -14,7 +14,7 @@
 #include "game/cursor_bios.h"
 
 /* Small PDA-mail state byte pair, shared with pda_range_80037158.c
- * (the sibling PDA-body TU) and initialized by std027_unkMenuSequence27. Only
+ * (the sibling PDA-body TU) and initialized by fn_8004B7EC. Only
  * bytes [0] and [1] are touched by this TU's accessors. */
 extern u8 lbl_803A6A60[];
 
@@ -808,7 +808,7 @@ void fn_8004D8BC(PdaMailWindowA* window)
 #pragma peephole reset
 #endif
 
-/* std098_mapWarpToMenuRoom (gs_floor_data.c): floor-transition trigger; floorSetFadeScript
+/* fn_800FF730 (gs_floor_data.c): floor-transition trigger; floorSetFadeScript
  * (gs_field_colquery.c, GSfield_IsTransitioning): floor resource-alloc
  * helper; _threadSwitch: cooperative thread yield. */
 extern void std098_mapWarpToMenuRoom(s32 floorId);
@@ -1584,7 +1584,7 @@ s32 fn_8004DCC0(void* unused, PdaMailOutC* window)
 #pragma peephole reset
 #endif
 
-/* soundStart (gs_event_exec.c/gs_title.c convention): plays an SE by
+/* fn_80166A50 (gs_event_exec.c/gs_title.c convention): plays an SE by
  * (id, a, b, c). fn_801D1B78/fn_801D1C20/fn_801D228C (battle_waza.c):
  * despite their current unverified shapes there (2.4%/2.4%/1.3% match
  * -- those bodies are still stubs), this call site's actual arg count

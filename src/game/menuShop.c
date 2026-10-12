@@ -2998,11 +2998,11 @@ _loop_top:
     while (frames < 0x1e) {
         _threadSwitch();
         msgGetCharsPerFrame();
-        frames += 1; /* msgGetCharsPerFrame returns frame delta in r3 per usage elsewhere;
-                      * here the asm does: bl msgGetCharsPerFrame; add r28,r28,r3 →
-                      * accumulate whatever msgGetCharsPerFrame returns (typically 1) */
-        /* FUNCTIONAL-TODO: original accumulates msgGetCharsPerFrame's return value.
-         * Since msgGetCharsPerFrame is a gfx tick that returns 1 per frame, this is
+        frames += 1; /* fn_800D3088 returns frame delta in r3 per usage elsewhere;
+                      * here the asm does: bl fn_800D3088; add r28,r28,r3 →
+                      * accumulate whatever fn_800D3088 returns (typically 1) */
+        /* FUNCTIONAL-TODO: original accumulates fn_800D3088's return value.
+         * Since fn_800D3088 is a gfx tick that returns 1 per frame, this is
          * functionally equivalent to counting frames. */
     }
 
@@ -3421,13 +3421,13 @@ close_and_return:
 }
 #endif
 
-/* std026_unkMenuSequence26 - 0x8002D5D4 | size: 0x348 */
+/* fn_8002D5D4 - 0x8002D5D4 | size: 0x348 */
 extern u32 lbl_8047A3FC;
 extern u32 lbl_80478E54;
 extern u32 lbl_8047A3DC;
 #if 0
-asm void std026_unkMenuSequence26(void) {
-#include "src/game/gs_worldmap_std026_unkMenuSequence26.inc"
+asm void fn_8002D5D4(void) {
+#include "src/game/gs_worldmap_fn_8002D5D4.inc"
 }
 #else
 typedef struct ShopLocationEntry {
@@ -3477,7 +3477,7 @@ static inline u32 shopMemoryAlloc(void)
 }
 
 /*
- * std026_unkMenuSequence26  GSmap_CancelTravel  0x8002D5D4 | size: 0x348
+ * fn_8002D5D4  GSmap_CancelTravel  0x8002D5D4 | size: 0x348
  *
  * Implements the "cancel travel" / travel-confirmation state machine for the
  * world map.  Dispatches on the NPC-state byte at lbl_80478E54[lbl_8047A3FC*4 + 1]:

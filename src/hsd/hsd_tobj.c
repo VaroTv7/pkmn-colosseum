@@ -130,16 +130,6 @@ extern HSD_TExp* HSD_TExpCnst(void* ptr, u32 comp, u32 type,
 #define HSD_TE_4_8 12
 #define HSD_TE_U8 0
 #define HSD_TE_F32 3
-#define HSD_TExpTev(list) HSD_TExpTev(list)
-#define HSD_TExpOrder(exp, tobj, chan) HSD_TExpOrder(exp, tobj, chan)
-#define HSD_TExpColorOp(exp, op, bias, scale, clamp) \
-    HSD_TExpColorOp(exp, op, bias, scale, clamp)
-#define HSD_TExpAlphaOp(exp, op, bias, scale, clamp) \
-    HSD_TExpAlphaOp(exp, op, bias, scale, clamp)
-#define HSD_TExpColorIn(exp, sa, a, sb, b, sc, c, sd, d) \
-    HSD_TExpColorIn(exp, sa, a, sb, b, sc, c, sd, d)
-#define HSD_TExpAlphaIn(exp, sa, a, sb, b, sc, c, sd, d) \
-    HSD_TExpAlphaIn(exp, sa, a, sb, b, sc, c, sd, d)
 
 /* .sdata2 strings */
 extern const char lbl_8047DEB0[7]; /* __FILE__ */

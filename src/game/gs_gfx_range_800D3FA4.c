@@ -769,7 +769,7 @@ extern void gfxSetTevStage(u32, u32, u32, u32, u32);
 #if !defined(GS_GFX_RANGE_SPLIT) || \
     defined(GS_GFX_RANGE_800D461C_800D55D0)
 /* ==================================================================
- * gfxPlayCommands -- GSlog_PrintFormatted
+ * fn_800D461C -- GSlog_PrintFormatted
  *
  * Varargs printf-like function for the GS debug logging system.
  * At 0x97C (2428) bytes, this is a substantial printf implementation.
@@ -983,7 +983,7 @@ u32* gfxPlayCommands(u32* command)
 #if !defined(GS_GFX_RANGE_SPLIT) || \
     defined(GS_GFX_RANGE_800D461C_800D55D0)
 /* ==================================================================
- * gfxRecordCommand -- GSlog_QueueCommand
+ * fn_800D4F98 -- GSlog_QueueCommand
  *
  * Queue a rendering command via the GSlog debug/command system.
  * Used by lighting, material, and draw functions to batch commands.
@@ -1164,7 +1164,7 @@ extern f32 lbl_8047CA30;
 extern f32 lbl_8047CA34;
 extern f32 lbl_8047CA38;
 /* fn_800D55D0/fn_800D5648 @ 93.33: the dropped-float vararg restored
- * (gfxRecordCommand(.., val) -> crset cr1eq). Residual is a single prologue
+ * (fn_800D4F98(.., val) -> crset cr1eq). Residual is a single prologue
  * scheduling diff: target issues `lfs f0, lbl_8047CA30@sda21` BEFORE the
  * `stw r0, 0x14(r1)` LR-save; CW always emits the LR store first.
  * scheduling 604 reschedules the whole fn (regress 80); not per-spot
@@ -1301,8 +1301,8 @@ void fn_800D592C(u32 idx, u16 a, u16 b) {
 #endif
 
 #if 0
-asm void gfxVtxTexCoord(void) {
-#include "src/game/gs_render_gfxVtxTexCoord.inc"
+asm void fn_800D59B8(void) {
+#include "src/game/gs_render_fn_800D59B8.inc"
 }
 #else
 void gfxVtxTexCoord(u32 idx, f32 x, f32 y) {
@@ -1377,8 +1377,8 @@ void fn_800D5BA0(u32 idx, u32 val) {
 #endif
 
 #if 0
-asm void gfxVtxColor(void) {
-#include "src/game/gs_render_gfxVtxColor.inc"
+asm void fn_800D5C18(void) {
+#include "src/game/gs_render_fn_800D5C18.inc"
 }
 #else
 void gfxVtxColor(u32 idx, u8 a, u8 b, u8 c) {
@@ -1735,8 +1735,8 @@ void fn_800D65CC(u16 a, u16 b, u16 c) {
 #endif
 
 #if 0
-asm void gfxVtxPos(void) {
-#include "src/game/gs_render_gfxVtxPos.inc"
+asm void fn_800D6680(void) {
+#include "src/game/gs_render_fn_800D6680.inc"
 }
 #else
 void gfxVtxPos(f32 a, f32 b, f32 c) {
@@ -1755,8 +1755,8 @@ void gfxVtxPos(f32 a, f32 b, f32 c) {
 #endif
 
 #if 0
-asm void gfxEnd(void) {
-#include "src/game/gs_render_gfxEnd.inc"
+asm void fn_800D6728(void) {
+#include "src/game/gs_render_fn_800D6728.inc"
 }
 #else
 void gfxEnd(void) {
@@ -1787,8 +1787,8 @@ void gfxEnd(void) {
 extern u8 lbl_80314350[];
 extern u8 lbl_804001F0[];
 #if 0
-asm void gfxBegin(void) {
-#include "src/game/gs_render_gfxBegin.inc"
+asm void fn_800D67BC(void) {
+#include "src/game/gs_render_fn_800D67BC.inc"
 }
 #else
 void gfxBegin(u16 vertCount) {
@@ -1847,8 +1847,8 @@ void gfxBegin(u16 vertCount) {
 #if !defined(GS_GFX_RANGE_SPLIT) || \
     defined(GS_GFX_RANGE_800D6A00_800D6B00)
 #if 0
-asm void gfxSetPrimitive(void) {
-#include "src/game/gs_render_gfxSetPrimitive.inc"
+asm void fn_800D6A00(void) {
+#include "src/game/gs_render_fn_800D6A00.inc"
 }
 #else
 void gfxSetPrimitive(u32 val) {

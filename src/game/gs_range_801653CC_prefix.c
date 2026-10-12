@@ -26,7 +26,7 @@ u32 soundPlayFanfare(u32 id, void* buffer, u32 size)
                 fn_80165EE0(wave, resource, 0x10000);
                 soundAttachWork(id, 0, 0x408);
                 soundStart(id, (u32)buffer, size, 0);
-                /* Retail emits soundGetStatus before _threadSwitch, i.e. the
+                /* Retail emits fn_801666BC before _threadSwitch, i.e. the
                  * bottom-test rotation. */
                 for (;;) {
                     if (soundGetStatus(id) != 2) {

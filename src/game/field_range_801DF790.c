@@ -6,7 +6,7 @@
  * static linkage, call chains) -- mixed-block split pass, 2026-07-01.
  * All functions asm-only until matched.
  *
- * std086_sequenceJump86 and std085_sequenceJump85 below previously lived, misattributed, in
+ * fn_801DF790 and fn_801DFC30 below previously lived, misattributed, in
  * game/battle/battle_waza.c (whose splits.txt range ends at 0x801DE698);
  * relocated here so this unit's real C source is scored where it belongs.
  * The remaining 2 functions in this TU's declared range are still asm-only.
@@ -35,7 +35,7 @@ extern s32 menuNameEntryOpen(s32 mode, s32 slot);
 extern void winMsgClose(s32 windowID);
 
 /**
- * std086_sequenceJump86 - Waza item effect handler.
+ * fn_801DF790 - Waza item effect handler.
  * Address: 0x801DF790 | Size: 0x4A0
  */
 void std086_sequenceJump86(s32 slot, s32 itemID) {
@@ -224,7 +224,7 @@ void std086_sequenceJump86(s32 slot, s32 itemID) {
 }
 
 /**
- * std085_sequenceJump85 - Waza/scene master controller.
+ * fn_801DFC30 - Waza/scene master controller.
  * Address: 0x801DFC30 | Size: 0x7A4
  * Very large function (~2KB) that serves as the master controller
  * coordinating all waza visual effects, scene state, and transitions.
@@ -478,7 +478,7 @@ void std085_sequenceJump85(void) {
 }
 
 /**
- * std084_sequenceJump84 - Party Pokemon nickname flow.
+ * fn_801E03D4 - Party Pokemon nickname flow.
  * Address: 0x801E03D4 | Size: 0x388
  */
 void std084_sequenceJump84(void) {

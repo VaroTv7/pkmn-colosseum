@@ -520,8 +520,8 @@ void fn_800E0060(void* a, void* b) { PSVECNormalize(b, a); }
 #endif
 
 #if 0
-asm void vecMag(void) {
-#include "src/game/gs_render_vecMag.inc"
+asm void fn_800E008C(void) {
+#include "src/game/gs_render_fn_800E008C.inc"
 }
 #else
 void vecMag(void) { PSVECMag(); }
@@ -529,8 +529,8 @@ void vecMag(void) { PSVECMag(); }
 
 extern const f32 lbl_8047CAD8;
 #if 0
-asm void vecNormalize(void) {
-#include "src/game/gs_render_vecNormalize.inc"
+asm void fn_800E00AC(void) {
+#include "src/game/gs_render_fn_800E00AC.inc"
 }
 #else
 void vecNormalize(void* a, void* b, f32 scale) {
@@ -559,16 +559,16 @@ void fn_800E0108(f32* dst, f32* a, f32* b) {
 #endif
 
 #if 0
-asm void vecScale(void* a, void* b, f32 c) {
-#include "src/game/gs_render_vecScale.inc"
+asm void fn_800E013C(void* a, void* b, f32 c) {
+#include "src/game/gs_render_fn_800E013C.inc"
 }
 #else
 void vecScale(void* a, void* b, f32 c) { PSVECScale(b, a, c); }
 #endif
 
 #if 0
-asm void GSvecSub(void) {
-#include "src/game/gs_render_GSvecSub.inc"
+asm void fn_800E0168(void) {
+#include "src/game/gs_render_fn_800E0168.inc"
 }
 #else
 void GSvecSub(void* a, void* b, void* c) { PSVECSubtract(b, c, a); }

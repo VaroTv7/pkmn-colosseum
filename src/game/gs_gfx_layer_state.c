@@ -450,7 +450,7 @@ void fn_800D7230(void) {
 #endif
 
 /* ==================================================================
- * gfxSetupChannelsTev -- GSgfx_ConfigurePipeline
+ * fn_800D892C -- GSgfx_ConfigurePipeline
  *
  * Configure the full GX rendering pipeline. At 2320 bytes, this is
  * a major setup function. Called once per render mode change.
@@ -1410,8 +1410,8 @@ void fn_800D76A8(u32 obj, u16 vertCount) {
 
 #if defined(GS_GFX_LAYER_800D7820_800D7894)
 #if 0
-asm void gfxSetVtxDesc(void) {
-#include "src/game/gs_render_gfxSetVtxDesc.inc"
+asm void fn_800D7820(void) {
+#include "src/game/gs_render_fn_800D7820.inc"
 }
 #else
 void gfxSetVtxDesc(u32 val) {
@@ -1556,8 +1556,8 @@ void fn_800D7940(u8* obj, u16 vertCount) {
 
 #if defined(GS_GFX_LAYER_800D7A70_800D7D90)
 #if 0
-asm void gfxLoadVtxDesc(u32) {
-#include "src/game/gs_render_gfxLoadVtxDesc.inc"
+asm void fn_800D7A70(u32) {
+#include "src/game/gs_render_fn_800D7A70.inc"
 }
 #else
 void gfxLoadVtxDesc(u32 obj) {
@@ -1620,8 +1620,8 @@ void fn_800D7B80(u32 count) {
 #endif
 
 #if 0
-asm void gfxGetCameraMatrix(void) {
-#include "src/game/gs_render_gfxGetCameraMatrix.inc"
+asm void fn_800D7BF8(void) {
+#include "src/game/gs_render_fn_800D7BF8.inc"
 }
 #else
 u32 gfxGetCameraMatrix(s32 mode) {
@@ -1981,8 +1981,8 @@ extern u32 lbl_8047CA48;
 extern u8 lbl_80314510[];
 extern u8 lbl_803144F0[];
 #if 0
-asm void gfxLoadTexture(void) {
-#include "src/game/gs_render_gfxLoadTexture.inc"
+asm void fn_800D85D4(void) {
+#include "src/game/gs_render_fn_800D85D4.inc"
 }
 #else
 void gfxLoadTexture(s32 slot, void* model) {
@@ -2066,8 +2066,8 @@ void fn_800D87AC(u32 mask) {
 #endif
 
 #if 0
-asm void gfxClearFlags(void) {
-#include "src/game/gs_render_gfxClearFlags.inc"
+asm void fn_800D888C(void) {
+#include "src/game/gs_render_fn_800D888C.inc"
 }
 #else
 void gfxClearFlags(u32 mask) {
@@ -2077,8 +2077,8 @@ void gfxClearFlags(u32 mask) {
 #endif
 
 #if 0
-asm void gfxSetFlags(void) {
-#include "src/game/gs_render_gfxSetFlags.inc"
+asm void fn_800D88DC(void) {
+#include "src/game/gs_render_fn_800D88DC.inc"
 }
 #else
 void gfxSetFlags(u32 mask) {
@@ -2189,8 +2189,8 @@ void fn_800D923C(void) {
 
 #if defined(GS_GFX_LAYER_800D892C_800D9AF0) || defined(GS_GFX_LAYER_800D963C_800D9AF0)
 #if 0
-asm void gfxSetTevOp(void) {
-#include "src/game/gs_render_gfxSetTevOp.inc"
+asm void fn_800D963C(void) {
+#include "src/game/gs_render_fn_800D963C.inc"
 }
 #else
 void gfxSetTevOp(u32 idx, s32 mode) {

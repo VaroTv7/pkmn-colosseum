@@ -329,8 +329,8 @@ extern f64 lbl_8047B7F8;
 extern f64 lbl_8047B7E8;
 extern f64 lbl_8047B800;
 #if 0
-asm void msgWinDrawBackground(void) {
-#include "src/game/gs_pcbox_msgWinDrawBackground.inc"
+asm void fn_8001EC08(void) {
+#include "src/game/gs_pcbox_fn_8001EC08.inc"
 }
 #else
 typedef struct PCBoxVertex {
@@ -1386,8 +1386,8 @@ extern f32 lbl_8047B810;
 extern f32 lbl_8047A344;
 extern f32 lbl_8047B818;
 #if 0
-asm void std021_newGameIntroSequence(void) {
-#include "src/game/gs_pcbox_std021_newGameIntroSequence.inc"
+asm void fn_8001FD48(void) {
+#include "src/game/gs_pcbox_fn_8001FD48.inc"
 }
 #else
 void std021_newGameIntroSequence(void) {

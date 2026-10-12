@@ -3494,11 +3494,11 @@ extern f32 lbl_8047D09C;
 extern f32 lbl_8047D0A0;
 extern f32 lbl_8047D0A4;
 #if 0
-asm void partnerApplyMove(void) {
-#include "src/game/gs_field_world_partnerApplyMove.inc"
+asm void fn_8012CA84(void) {
+#include "src/game/gs_field_world_fn_8012CA84.inc"
 }
 #else
-/* FUNCTIONAL decomp of partnerApplyMove
+/* FUNCTIONAL decomp of fn_8012CA84
  * Field movement/heading processor - computes turn amount from direction input. */
 void partnerApplyMove(s32 playerIdx, f32* dirVec, f32* fwdVec) {
     extern u8 lbl_80478AC0[4];       /* sdata constant 0.0f */
