@@ -15,7 +15,7 @@ jobs:
       - name: Git config
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Test quality allowlists
-        run: python3 .github/scripts/test_quality_scan.py
+        run: python3 -m unittest discover -s .github/scripts -p 'test_*.py'
       - name: Scan added lines for asm-wrappers / .inc includes
         run: |
           python3 .github/scripts/quality_scan.py '${{ github.event.pull_request.base.sha }}' '${{ github.sha }}'
