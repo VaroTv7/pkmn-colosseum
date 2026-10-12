@@ -290,6 +290,14 @@ if args.map:
 
 # Use for any additional files that should cause a re-configure when modified
 config.reconfig_deps = []
+# Retail callable exports must survive even without REL consumers.
+# Do not retain arbitrary source-only helpers or force unrelated data.
+export_manifest = Path("config") / config.version / "dol_exports.txt"
+config.reconfig_deps.append(export_manifest)
+config.force_active_symbols["main"].extend(
+    line.strip() for line in export_manifest.read_text(encoding="utf-8").splitlines()
+    if line.strip() and not line.lstrip().startswith("#")
+)
 
 # REL modules live inside FSYS archives (docs/REL_MODULES.md). dtk reads them
 # as loose files from orig/<version>/files, so the split step depends on an
@@ -329,23 +337,12 @@ config.custom_build_rules = [
         "description": "FSYS $in -> $members",
     },
 ]
+# Accept validated loose RELs as an alternative to retaining entire FSYS
+# archives. An available archive stays a Ninja dependency and is authoritative.
+from tools.fsys_inputs import extraction_steps
+
 config.custom_build_steps = {
-    "pre-split": [
-        {
-            "rule": "fsys_extract",
-            "inputs": str(Path("orig") / config.version / "files" / archive),
-            "implicit": [str(Path("tools") / "fsys_extract.py")],
-            "outputs": [
-                str(Path("orig") / config.version / "files" / f"{member}.rel")
-                for member in members
-            ],
-            "variables": {
-                "members": " ".join(members),
-                "out_dir": str(Path("orig") / config.version / "files"),
-            },
-        }
-        for archive, members in fsys_modules.items()
-    ],
+    "pre-split": extraction_steps(config.version, fsys_modules),
 }
 
 # Base CodeWarrior flags, common to most GC games. Per-object overrides live in
