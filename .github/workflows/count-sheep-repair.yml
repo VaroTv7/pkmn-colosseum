@@ -1,34 +1,28 @@
-name: DOL import validation and build repair
+name: Publish validated Count-Sheep build repair
 on:
   push:
     branches: [integrate/count-sheep-full-20261011]
     paths: [.github/workflows/count-sheep-repair.yml]
 permissions:
   contents: write
-  packages: read
-  actions: read
 jobs:
   repair:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
-    container: ghcr.io/dougchansan/pkmn-colosseum-build:main
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Integrate audited build repairs
-        shell: sh
+      - name: Require the exact source and configuration validated in run 38285680548
+        shell: bash
         run: |
-          set -eu
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          test "$(git rev-parse HEAD^)" = 49c6f94eb06db7fe6f989a06482eb6ffad9eaa88
+          git diff --exit-code 7c31c47386243804fd7c9dd1a3c089546d155213 HEAD -- src include config tools .github/scripts configure.py
           test "$(git rev-parse HEAD:configure.py)" = 1eaf206cd185bfdd4e4a3d16cf53841f7823258e
-          git diff --exit-code 596e8e7779fe688c2249fdc0d61e0d40962cdcc4 -- src include config/GC6E01/config.yml config/GC6E01/build.sha1 config/GC6E01/symbols.txt config/GC6E01/splits.txt
-          python - <<'PY'
+          python3 - <<'PY'
           from pathlib import Path
-          import re
           p=Path('configure.py');s=p.read_text()
           marker='config.reconfig_deps = []'
           assert s.count(marker)==1
@@ -52,92 +46,14 @@ jobs:
               "pre-split": extraction_steps(config.version, fsys_modules),
           }
           '''
-          s=s[:start]+replacement+s[end:]
-          p.write_text(s)
-          names=[line.strip() for line in Path('config/GC6E01/dol_exports.txt').read_text().splitlines() if line.strip() and not line.startswith('#')]
-          known=set(re.findall(r'^(\S+) = \.(?:init|text):0x[0-9a-fA-F]+;',Path('config/GC6E01/symbols.txt').read_text(),re.M))
-          assert len(names)==165 and len(set(names))==165 and set(names)<=known
-          p=Path('.github/workflows/quality-lint.yml');s=p.read_text()
-          old='python3 .github/scripts/test_quality_scan.py'
-          assert s.count(old)==1
-          p.write_text(s.replace(old,"python3 -m unittest discover -s .github/scripts -p 'test_*.py'"))
+          p.write_text(s[:start]+replacement+s[end:])
           PY
-          git add configure.py .github/workflows/quality-lint.yml
-          git rm .github/workflows/count-sheep-repair.yml .github/workflows/count-sheep-link-audit.yml .github/workflows/count-sheep-dol-diagnostic.yml
+          test "$(git hash-object configure.py)" = 6d681031cee1619a48f5de8dc3b754a138792e93
+          python3 -m unittest discover -s .github/scripts -p 'test_*.py'
+          git add configure.py
+          test "$(git diff --cached --name-only)" = configure.py
           git diff --cached --check
-          git commit -m 'Retain retail DOL exports and support validated loose REL inputs' -m 'Keep the retail code identities identified by the link audit without retaining arbitrary data or unused helpers. Preserve every canonical hash and original module configuration. Run all checker tests in Quality Lint and remove completed one-off integration workflows.'
-          mkdir -p /tmp/final-evidence
-          git diff --binary a57d34f2dd688d669bd5cfe12a4085ef1cbed857 HEAD > /tmp/final-evidence/integration.patch
-          git log -1 --format='%H%n%T%n%P' > /tmp/final-evidence/commit.txt
-          python -m unittest discover -s .github/scripts -p 'test_*.py'
-          python .github/scripts/quality_scan.py 5cfe5ca3d09f20c4adc3c9b2a4e8d3c29046f10f HEAD
-          python .github/scripts/check_asm_wrappers.py src
-      - uses: actions/download-artifact@v4
-        with:
-          name: dol-only-upstream
-          run-id: 38225705772
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path: /tmp/base-upstream
-      - uses: actions/download-artifact@v4
-        with:
-          name: dol-only-donor
-          run-id: 38225705772
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path: /tmp/base-donor
-      - name: Build DOL with native export retention and unchanged expected hash
-        shell: sh
-        run: |
-          set -eu
-          cp -a /orig .
-          python - <<'PY'
-          from pathlib import Path
-          root=Path('config/GC6E01')
-          (root/'config.dol-diagnostic.yml').write_text((root/'config.yml').read_text().split('\nmodules:',1)[0]+'\n')
-          lines=[s for s in (root/'build.sha1').read_text().splitlines() if s.rstrip().endswith('/main.dol')]
-          assert len(lines)==1
-          (root/'build.dol-diagnostic.sha1').write_text(lines[0]+'\n')
-          override='''# DOL-only validation profile; REL validation remains separate.
-          excluded=set(config.gnu_ld_modules)
-          config.libs=[lib for lib in config.libs if lib["lib"] not in excluded]
-          config.gnu_ld_modules=[]
-          config.custom_build_steps={}
-          config.config_path=Path("config/GC6E01/config.dol-diagnostic.yml")
-          config.check_sha_path=Path("config/GC6E01/build.dol-diagnostic.sha1")
-          '''
-          p=Path('configure.py');s=p.read_text();p.write_text(s.replace('if args.mode == "configure":',override+'\nif args.mode == "configure":'))
-          PY
-          python configure.py --map --version GC6E01 --binutils /binutils --compilers /compilers
-          if ! ninja -j2 all_source build/GC6E01/report.json > /tmp/source.log 2>&1; then tail -100 /tmp/source.log; exit 1; fi
-          if ! ninja -j2 > /tmp/link.log 2>&1; then tail -80 /tmp/link.log; exit 1; fi
-          sha1sum -c config/GC6E01/build.dol-diagnostic.sha1
-          cmp orig/GC6E01/sys/main.dol build/GC6E01/main.dol
-          cp build/GC6E01/report.json /tmp/final-evidence/report.json
-          python .github/scripts/check_metric_integrity.py build/GC6E01/report.json orig/GC6E01/sys/main.dol
-          python tools/audit_report_transition.py /tmp/base-upstream/report.json build/GC6E01/report.json --output /tmp/final-evidence/upstream-audit.json
-          python tools/audit_report_transition.py /tmp/base-donor/report.json build/GC6E01/report.json --output /tmp/final-evidence/donor-audit.json
-      - name: Publish validated repairs to integration branch only
-        shell: sh
-        run: |
-          set -eu
-          git restore configure.py
-          git diff --exit-code
-          git diff --exit-code 596e8e7779fe688c2249fdc0d61e0d40962cdcc4 -- src include config/GC6E01/config.yml config/GC6E01/build.sha1 config/GC6E01/symbols.txt config/GC6E01/splits.txt
+          git commit -m 'Retain retail DOL exports and support validated loose REL inputs' -m 'Publish exactly configure.py blob 6d681031cee1619a48f5de8dc3b754a138792e93 tested by run 38285680548/job/114933360995: all DOL sources, canonical SHA-1, direct byte comparison, metric integrity and both module/address regression audits passed. Full 25-REL validation remains blocked on original inputs. Workflow edits are handled separately.'
           test "$GITHUB_REF" = refs/heads/integrate/count-sheep-full-20261011
           git push origin HEAD:refs/heads/integrate/count-sheep-full-20261011
-          python - <<'PY'
-          from pathlib import Path
-          import hashlib,json,re,subprocess
-          config=Path('config/GC6E01/config.yml').read_text()
-          required=re.findall(r'^\s*- object: (files/\S+\.rel)\s*$',config,re.M)
-          missing=[p for p in required if not (Path('orig/GC6E01')/p).is_file()]
-          result={'source_revision':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'dol_source_compile':True,'dol_byte_identical':True,'dol_sha1':hashlib.sha1(Path('build/GC6E01/main.dol').read_bytes()).hexdigest(),'full_retail_validation':False,'missing_rel_inputs':missing,'checker_tests_passed':75,'upstream_report_audit':True,'donor_report_audit':True,'scope':'DOL and report-level validation only; original REL files are still required for the canonical full build.'}
-          assert len(required)==25 and len(missing)==25
-          Path('/tmp/final-evidence/result.json').write_text(json.dumps(result,indent=2)+'\n')
-          print(json.dumps(result,indent=2))
-          PY
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: count-sheep-final-dol-validation
-          path: /tmp/final-evidence/
-          retention-days: 14
+          git log -1 --format='Published commit: %H%nTree: %T'
