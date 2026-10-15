@@ -1078,7 +1078,7 @@
     },
     {
       "path": "src/game/gs_thread_exact_800F106C.c",
-      "function": "fn_800F106C",
+      "function": "cms_CallStdTrampoline",
       "tier": "first-party",
       "mnemonics": [
         "addi",

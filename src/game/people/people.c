@@ -608,7 +608,7 @@ static inline PeopleEntry* peopleFindBySelf(PeopleEntry* found)
 }
 
 /* fn_8018805C: start turning toward a yaw in the model's current revolution. */
-static inline void peopleStartTurn(u32 groupId, u32 index, f32 yaw, f32 speed)
+static inline void peopleStartTurnInline(u32 groupId, u32 index, f32 yaw, f32 speed)
 {
     PeopleEntry* entry;
     GSvec rotation;
@@ -987,7 +987,7 @@ static inline void peopleTurnToModel(u32 groupId, u32 index, u32 targetGroupId, 
     }
     GSvecCopy(&targetPosition, GSmodelGetPositionPtr(model));
     GSvecSub(&delta, &targetPosition, peopleGetPositionPtr(entry));
-    peopleStartTurn(groupId, index, atan2f(delta.x, delta.z), speed);
+    peopleStartTurnInline(groupId, index, atan2f(delta.x, delta.z), speed);
 }
 
 /*
@@ -2352,7 +2352,7 @@ void fn_8018AACC(u32 groupId, u32 index, u8 keepFacing, GSvec* target)
     GSvecSub(&delta, original->field_5C, peopleGetPositionPtr(original));
     angle = (f32)atan2(delta.x, delta.z);
     oldSpeed = original->moveSpeed;
-    peopleStartTurn(groupId, index, angle, oldSpeed);
+    peopleStartTurnInline(groupId, index, angle, oldSpeed);
     if (keepFacing == 0) {
         original->pad22 = 0;
     }
@@ -2406,7 +2406,7 @@ void std068_characterTurnToAngle(u32 groupId, u32 index, f32 amount) {
     oldSpeed = entry->moveSpeed;
     angle = 0.017453292f * amount;
 
-    peopleStartTurn(groupId, index, angle, oldSpeed);
+    peopleStartTurnInline(groupId, index, angle, oldSpeed);
 }
 
 /* Find an entry by (groupId, index), then report whether its current movement
@@ -2517,7 +2517,7 @@ void std055_characterEndSpeech(u32 groupId, u32 index)
             entry->field_94 = 0;
             if (flags & 0x20) {
                 if (flags & 0x40) {
-                    peopleStartTurn(groupId, index, entry->field_98, 1.0f);
+                    peopleStartTurnInline(groupId, index, entry->field_98, 1.0f);
                 }
             } else if (flags & 0x10) {
                 entry->threadHandle = entry->nextLink;
@@ -2804,7 +2804,7 @@ void peopleTurnToPoint(u32 groupId, u32 index, f32 x, f32 y, f32 z, f32 speed)
     }
     set__5GSvecFfff(&targetPosition, x, y, z);
     GSvecSub(&delta, &targetPosition, peopleGetPositionPtr(entry));
-    peopleStartTurn(groupId, index, atan2f(delta.x, delta.z), speed);
+    peopleStartTurnInline(groupId, index, atan2f(delta.x, delta.z), speed);
 }
 
 /* Turn a person toward the model of resource (targetGroupId, targetIndex). */
@@ -2825,7 +2825,7 @@ void std165_characterFaceCharacter(u32 groupId, u32 index, u32 targetGroupId, u3
     }
     GSvecCopy(&targetPosition, GSmodelGetPositionPtr(model));
     GSvecSub(&delta, &targetPosition, peopleGetPositionPtr(entry));
-    peopleStartTurn(groupId, index, atan2f(delta.x, delta.z), speed);
+    peopleStartTurnInline(groupId, index, atan2f(delta.x, delta.z), speed);
 }
 
 /* Stop a person turning, keeping its current model yaw as its facing. */
@@ -3439,7 +3439,7 @@ void fn_8018524C(PeopleEntry* entry, u8 loop)
     case 1:
         GSvecCopy(entry->field_5C, &entry->walkList[entry->walkListCount]);
         angle = peopleTurnTo(entry->field_5C, peopleGetPositionPtr(entry), 0.0f);
-        peopleStartTurn(entry->groupId, entry->index, angle, 1.0f);
+        peopleStartTurnInline(entry->groupId, entry->index, angle, 1.0f);
         entry->subState = 2;
         /* fallthrough */
     case 2:
@@ -3465,7 +3465,7 @@ void fn_8018524C(PeopleEntry* entry, u8 loop)
             }
             GSvecCopy(entry->field_5C, &entry->walkList[entry->walkListCount]);
             angle = peopleTurnTo(entry->field_5C, entry->transform, 0.0f);
-            peopleStartTurn(entry->groupId, entry->index, angle, 2.0f);
+            peopleStartTurnInline(entry->groupId, entry->index, angle, 2.0f);
             remaining -= distance;
         }
         GSvecSub(&delta, entry->field_5C, entry->transform);
@@ -3507,13 +3507,13 @@ void fn_80184D80(PeopleEntry* entry)
         offset.z = entry->field_80 * cos(angle);
         GSvecAdd(entry->field_5C, &entry->collisionX, &offset);
         angle = peopleTurnTo(entry->field_5C, peopleGetPositionPtr(entry), 0.0f);
-        peopleStartTurn(entry->groupId, entry->index, angle, 1.0f);
+        peopleStartTurnInline(entry->groupId, entry->index, angle, 1.0f);
         entry->subState = 2;
         /* fallthrough */
     case 2:
         result = fn_80185AAC(entry);
         if (result == 2) {
-            peopleStartTurn(entry->groupId, entry->index, 3.141592653589793 + entry->field_40, 1.0f);
+            peopleStartTurnInline(entry->groupId, entry->index, 3.141592653589793 + entry->field_40, 1.0f);
             entry->subState = 2;
         } else if (result == 1) {
             entry->animBlendFactor = entry->field_8C * fn_800E0BA0() + entry->field_88;
@@ -4035,7 +4035,7 @@ static inline void peopleMoveTypeRandomRot(PeopleEntry* entry)
         angle = 3.141592653589793 + entry->field_40 +
                 1.5707963267948966 * fn_800E0BA0();
         angle = fmod(angle, 6.2831855f);
-        peopleStartTurn(entry->groupId, entry->index, angle, 1.0f);
+        peopleStartTurnInline(entry->groupId, entry->index, angle, 1.0f);
         entry->subState = 2;
         /* fallthrough */
     case 2:

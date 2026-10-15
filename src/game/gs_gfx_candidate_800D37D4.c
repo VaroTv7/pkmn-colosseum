@@ -77,7 +77,7 @@ extern u16 _toolentryAlloc__FUl(u32);
 extern void* fn_800E27B0(u16);
 extern void GSlogWrite(const char*, ...);
 extern void fn_8019C3C4(s32, ...);
-extern void HSD_GXInit(void);
+extern void HSD_InitComponent(void);
 extern void fn_8019C690(u32, u32);
 extern void fn_801C021C(void*);
 extern void fn_801C01C8(void*);
@@ -334,7 +334,7 @@ void GSgfxInit__FP15_GSgfxInitParms(u32 heapSize, u32 matrixSize,
 
     fn_8019C3C4(1, 2);
     fn_8019C3C4(4, renderMode);
-    HSD_GXInit();
+    HSD_InitComponent();
     fn_800D37D4(videoMode, 2, 0, 2, 0, 0);
     fn_801BF4C4(1);
     fn_8019C690(0, 0);

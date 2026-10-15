@@ -44473,7 +44473,7 @@
 "seed": "range"
 },
 {
-"name": "HSD_GXInit",
+"name": "HSD_InitComponent",
 "addr": "0x8019CB70",
 "size": 736,
 "label": "hsd",

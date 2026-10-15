@@ -182,7 +182,7 @@ GXFifoObj* HSD_AllocateFifo(u32 size);
 void HSD_GXSetFifoObj(GXFifoObj* fifo);
 
 /* HAL: HSD_InitComponent */
-void HSD_GXInit(void)
+void HSD_InitComponent(void)
 {
     HSD_DVDInit();
     HSD_AllocateXFB(iparam_xfb_max_num, rmode);
