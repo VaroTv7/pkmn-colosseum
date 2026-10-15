@@ -37,16 +37,19 @@ uv run --with matplotlib tools/plot_progress.py -o /tmp/progress.png
 | Source-linked | 1,891 / 2,163 scoring units (90.48% of code) |
 
 These measurements cover the **DOL and all 25 configured REL modules**, from the
-full `build/GC6E01/report.json` generated on 2026-10-12. All 26 rebuilt binaries
-passed their unchanged canonical hashes and direct byte comparisons. This is a
+full `build/GC6E01/report.json` built by CI for the PR #638 merge (2026-10-15).
+All 26 rebuilt binaries passed their unchanged canonical hashes and direct byte
+comparisons against the originals in the private build image. This is a
 matching reconstruction with original fallback objects where required, not a
 claim of 100% decompilation or gameplay testing. See
 [`docs/COUNT_SHEEP_INTEGRATION.md`](docs/COUNT_SHEEP_INTEGRATION.md) for validation
-scope, provenance, and the separate CI input-provisioning limitation.
+scope and provenance.
 
 The DOL alone is 91.78% code-matched and 94.95% data-matched. The combined data
 percentage also includes the large, mostly unreconstructed `common_rel` data
-region, so it is not comparable to an older DOL-only data percentage.
+region, so it is not comparable to an older DOL-only data percentage. On the
+chart, points from the PR #638 merge onward use this DOL + REL scope; the drop
+in the data line there is that scope change, not a regression.
 
 **Scoring units are not translation units.** An original source region may be
 split into address-owned units with different compiler flags, compiled through
