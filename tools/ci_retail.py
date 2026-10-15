@@ -105,7 +105,8 @@ def prepare_inputs(manifest, orig, archive=None):
         elif relative not in pending:
             errors.append(f"Missing original: {relative}")
     if errors:
-        raise ValueError("\n".join(errors) + "\nInstall the verified input ZIP in the PRIVATE build repository and rebuild its image; do not skip this check.")
+        raise ValueError("\n".join(errors) + "\nProvide your own local originals: pass --orig/--zip here, or --dol/--rel-zip "
+                         "to tools/local_retail/validate.py. Never upload them anywhere; do not skip this check.")
     # Write nothing until the entire input set and all archive members validate.
     for relative, data in pending.items():
         path = checked_path(orig, relative)
@@ -136,7 +137,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--orig", type=Path, required=True)
-    parser.add_argument("--zip", type=Path, help="Optional local PRIVATE original-input ZIP")
+    parser.add_argument("--zip", type=Path, help="Optional local original-input ZIP (never uploaded)")
     parser.add_argument("--outputs", action="store_true", help="Also compare every rebuilt output")
     args = parser.parse_args()
     try:

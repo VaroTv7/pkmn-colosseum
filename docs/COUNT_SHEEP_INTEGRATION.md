@@ -3,10 +3,11 @@
 PR: https://github.com/dougchansan/pkmn-colosseum/pull/638
 
 **The complete DOL + 25 REL reconstruction passes all 26 unchanged canonical
-SHA-1 checks and all 26 direct original/rebuilt byte comparisons.** All source
-units compiled, 75 checker tests passed, and the address-based regression audits
-passed. Consult the PR for merge status; the ordinary CI image still has a
-separate original-input provisioning limitation described below.
+SHA-1 checks and all 26 direct original/rebuilt byte comparisons.** The
+2026-10-12 sections below record the original import. Since then master gained
+PR #637 (304 Ghidra names); its reconciliation and the 2026-10-14 local
+re-validation are recorded at the end. Public CI is now source-only; retail
+validation runs locally (`docs/github_actions.md`).
 
 ## Revisions and attribution
 
@@ -135,16 +136,59 @@ A byte-identical reconstruction still uses original fallback objects for
 unreconstructed regions. It does not mean all game source or data is decompiled,
 and no gameplay validation is claimed.
 
-## Separate CI infrastructure limitation
+## Reconciliation with master `fd207bc8` (PR #637) — 2026-10-14
 
-The complete originals are available and validated in this session. They were
-not uploaded into the ordinary private CI image, which still contains only
-`main.dol`. Consequently, ordinary Build/Regression Guard runs can still fail on
-missing original REL inputs. The full passing validation above is the distributed
-private-compiler / sandbox-link run, not a claim that those GitHub checks are green.
-Do not bypass branch protection or alter expected hashes to hide this distinction.
+PR #637 renamed 304 `fn_` placeholders from a map
+(`config/GC6E01/symbolmap/ghidra_names.txt`). Its 157 textual conflicts came
+from the donor's consolidation of the same files, so the merge keeps the
+integration side of `src/`, `include/`, `symbols.txt` and `subsystem_map.json`
+and reapplies the map by address. All 304 addresses were still placeholders
+here, so no donor or runtime-evidence name was overridden. The rename touches
+code tokens only (comments, strings and `#if 0` blocks keep `fn_` notes);
+replaying the same renamer on `5cfe5ca3` reproduces master's `src/` and
+`include/` exactly except for #637's manual edits, which were reproduced.
 
-For repeatable ordinary CI, provision the 25 original modules under
-`orig/GC6E01/files/` in the PRIVATE `pkmn-colosseum-build` input repository/image,
-then rerun the ordinary Build and Regression Guard jobs. Keep all original game
-files and compiler distributions out of the public source repository.
+The local retail build then exposed two collisions, repaired in `e2947f1d`:
+
+- `peopleStartTurn` (`fn_8018805C`) collided with the donor's static inline
+  copy of the same body. As with `peopleSetVisible`, only the inline helper and
+  its 11 original callers were renamed (`peopleStartTurnInline`).
+- #637 named `fn_8019CB70` `HSD_GXInit`, but the donor's HAL-derived
+  `initialize.c` already contains the real static `HSD_GXInit`, which
+  `fn_8019CB70` calls. That address uses HAL's `HSD_InitComponent` (the donor's
+  annotation and `hsd_initialize.h` prototype) instead: the only departure
+  from #637's map.
+
+The renamed first-party asm routine at `0x800F106C` (`cms_CallStdTrampoline`)
+keeps its registered evidence under the new name.
+
+## Local retail validation — 2026-10-14
+
+Base `fd207bc8` (master, DOL-only configuration) and the reconciled head were
+built in separate network-less containers with the pinned toolchain
+`gc-linux-x86_64-20261014` (binutils 2.42-1, compilers_20250812, dtk 1.8.3,
+objdiff-cli 3.6.1, sjiswrap 1.2.2, wibo 1.0.3) at `-j2`:
+
+- Every HEAD source unit compiled and all 26 outputs (DOL + 25 RELs) matched
+  the unchanged canonical SHA-1s and the originals byte for byte.
+- Metric integrity: 8,677 unique module/address identities; denominator
+  0.07% from the DOL text size.
+- Against master: 8,602 common identities, 0 score regressions, 0
+  unexplained removals, 0 shrinking boundaries, 42 renames, 1 exact interval
+  coalescence (`fn_800F9D64`), 75 new REL functions.
+- Reviewed DOL denominator change versus master: +4 code bytes, -43 data
+  bytes, -1 function (the coalescence above).
+- Object-map freeze, README/report consistency, checker tests, quality scan
+  and whole-tree asm-wrapper scan passed.
+
+| Scope | Matched code | Exact functions | Matched data |
+| --- | ---: | ---: | ---: |
+| Head, DOL only | 2,289,984 / 2,495,112 (91.78%) | 8,460 / 8,602 | 2,085,070 / 2,196,057 (94.95%) |
+| Head, DOL + 25 RELs | 2,299,812 / 2,504,940 (91.81%) | 8,535 / 8,677 | 2,098,410 / 3,566,037 (58.84%) |
+| Master `fd207bc8`, DOL only | 1,086,720 / 2,495,108 (43.55%) | 6,804 / 8,603 | 2,136,689 / 2,196,100 (97.29%) |
+
+The DOL-only data figure remains 51,619 bytes below master's, as disclosed
+above; the combined data percentage includes `common_rel` and is not
+comparable with the DOL-only one. The binding evidence for the exact PR head
+is its `local-retail/build (GC6E01)` and `local-retail/regression (GC6E01)`
+statuses; any new commit needs a new run.

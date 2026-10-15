@@ -106,7 +106,10 @@ works or that any branch is automatically merged. See the harness's
 `docs/LOCAL_LLM_CAMPAIGN.md` for historical setup details.
 
 A cloud checkout without `orig/` cannot independently validate matching bytes.
-Use authorized CI or a checkout with the maintainer's original game files.
+Public CI is source-only; retail validation runs on the maintainer's machine
+with `tools/local_retail/validate.py` and is reported as the `local-retail/*`
+commit statuses (see `docs/github_actions.md`). Never upload originals,
+original-derived objects or compilers to any repository, image, cache or artifact.
 Keep credentials and retail disassembly out of commits, logs and public
 artifacts. State clearly which results were reproduced and which were only
 reported by the donor.
