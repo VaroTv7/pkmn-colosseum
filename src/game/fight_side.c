@@ -359,6 +359,7 @@ void fightSideGetFightTrainerGridParam(u32 param_1, u16 param_2, u16 param_3, u8
     extern u32 fightSideDataBiosGetYrot(u32);
     u32 uVar1;
     u16 uVar2;
+    u16 kind;
 
     if (param_4 == NULL) return;
     if (param_5 == NULL) return;
@@ -370,13 +371,16 @@ void fightSideGetFightTrainerGridParam(u32 param_1, u16 param_2, u16 param_3, u8
     }
     *param_4 = (s8)uVar2;
     *param_5 = 0;
-    if ((u16)param_2 == 1) return;
-    if ((u16)param_2 != 2) return;
+    kind = param_2;
+    if (kind == 1) return;
+    if (kind != 2) return;
     if (*param_4 == 1) {
         if ((u16)param_3 == 0) {
             *param_5 = 1;
         } else if ((u16)param_3 == 1) {
             *param_5 = -1;
+        } else {
+            return;
         }
     } else {
         if ((u16)param_3 == 0) {
@@ -528,17 +532,12 @@ void fightSideInitAry(u32 param_1, u16 param_2) {
 void fightSideSetStatus(u8* ptr1, u32 param2, u32 slotType, u32 param4, u32 param5) {
     extern u8* fightSideDataBiosGetPtr(u32);
     extern void fightSideDataBiosSetYrot(u8*, u32);
-    extern void fightSideDataBiosSetFightTrainerStatusMenuDataId(u8*, u32, u32);
-    extern void fightSideDataBiosSetFightoutPokemonStatusMenuDataId(u8*, u32, u32);
+    extern void fightSideDataBiosSetFightTrainerStatusMenuDataId(u8*, u8, u32);
+    extern void fightSideDataBiosSetFightoutPokemonStatusMenuDataId(u8*, u8, u32);
     extern void fightSideBiosSetFightSideDataId(u8*, u32);
     extern void fightSideBiosSetMakibisiCheckFlag(u8*, u32);
 
-    if ((u16)slotType == 0) {
-        return;
-    }
-    if ((u16)slotType < 0xA) {
-        ;
-    } else {
+    if ((u16)slotType == 0 || (u16)slotType >= 0xA) {
         return;
     }
     if ((u16)slotType < 4) {
@@ -552,10 +551,10 @@ void fightSideSetStatus(u8* ptr1, u32 param2, u32 slotType, u32 param4, u32 para
         fightSideDataBiosSetYrot(ptr1, (u16)param5);
         break;
     case 2:
-        fightSideDataBiosSetFightTrainerStatusMenuDataId(ptr1, (0, (u8)param4), param5);
+        fightSideDataBiosSetFightTrainerStatusMenuDataId(ptr1, param4, param5);
         break;
     case 3:
-        fightSideDataBiosSetFightoutPokemonStatusMenuDataId(ptr1, (0, (u8)param4), param5);
+        fightSideDataBiosSetFightoutPokemonStatusMenuDataId(ptr1, param4, param5);
         break;
     case 5:
         fightSideBiosSetFightSideDataId(ptr1, (u16)param5);

@@ -4,7 +4,7 @@ extern s32 OSDisableInterrupts(void);
 extern void OSRestoreInterrupts(s32 enabled);
 extern void DBGRead(u32 type, void* buf, u32 len);
 extern void fn_800CECAC(void* resp);
-extern void fn_800CEF10(void* resp);
+extern void DBGReadMailbox(void* resp);
 
 extern u32 lbl_8047AA30;
 extern u32 lbl_8047AA34;
@@ -14,8 +14,6 @@ extern u8 lbl_8047AA3C;
  * DBRead - EXI2 read function.
  * 0x800CEA3C | size: 0x8C
  */
-#pragma push
-#pragma peephole on
 s32 DBRead(void* buf, s32 len) {
     s32 enabled;
     enabled = OSDisableInterrupts();
@@ -26,14 +24,11 @@ s32 DBRead(void* buf, s32 len) {
     OSRestoreInterrupts(enabled);
     return 0;
 }
-#pragma pop
 
 /*
  * DBQueryData - EXI2 peek/status check.
  * 0x800CEAC8 | size: 0x9C
  */
-#pragma push
-#pragma peephole on
 u32 DBQueryData(void) {
     s32 enabled;
     u32 resp;
@@ -42,7 +37,7 @@ u32 DBQueryData(void) {
         enabled = OSDisableInterrupts();
         fn_800CECAC(&resp);
         if (resp & 1) {
-            fn_800CEF10(&resp);
+            DBGReadMailbox(&resp);
             resp &= 0x1FFFFFFF;
             if ((resp & 0x1F000000) == 0x1F000000) {
                 lbl_8047AA30 = resp;
@@ -54,4 +49,3 @@ u32 DBQueryData(void) {
     }
     return lbl_8047AA34;
 }
-#pragma pop

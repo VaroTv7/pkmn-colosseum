@@ -168,6 +168,7 @@ extern void* gEncounterTable;   /* lbl_80478F00 : .sbss -- encounter difficulty 
  * Simple wrapper that calls GSscene_CameraSetPosition to reset the
  * camera, then returns 0. Called at the start of scene transitions.
  * ========================================================================= */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (push; scheduling off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma scheduling off
 s32 dbgMenuCameraResetFloor(void) {
@@ -186,6 +187,7 @@ s32 dbgMenuCameraResetFloor(void) {
  * Otherwise, dispatches a new archive load for the top menu FSYS with
  * default parameters and sets up the viewport at (0x14, 0x104).
  * ========================================================================= */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (push; scheduling off; peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma scheduling off
 #pragma peephole off
@@ -215,6 +217,7 @@ s32 dbgMenuCameraChangeDisp(void) {
  *   mode 2:        type 6 (cutscene)
  * Always returns 0.
  * ========================================================================= */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (push; scheduling off; peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma scheduling off
 #pragma peephole off
@@ -248,6 +251,7 @@ s32 dbgMenuCameraSetType(void* unused, s32 mode) {
  * Uses the current scene ID from lbl_8047A288 as a context parameter.
  * On success, activates the archive and returns 1; on failure returns -1.
  * ========================================================================= */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (push; scheduling off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma scheduling off
 s32 fn_80006724(void) {
@@ -345,6 +349,7 @@ typedef struct GsTaskCountTable {
 extern GsTaskCountTable* lbl_80478F20;
 
 #if !defined(GS_TASK_RANGE_SPLIT) || defined(GS_TASK_RANGE_EXACT_80006884)
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (push; peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma peephole off
 s32 fn_80006884(void) {
@@ -471,28 +476,50 @@ typedef struct GsTaskFlagDef {
     s16 next;
 } GsTaskFlagDef;
 
+static inline u16 gsTaskFlagGetId(s32 index) {
+    s16 id;
+    s32 i;
+
+    if (index < 0) {
+        return 0;
+    }
+    if ((u32)index >= ((GsTaskFlagConfig*)lbl_80478F98)->count) {
+        return 0;
+    }
+    id = ((GsTaskFlagConfig*)lbl_80478F98)->first;
+    if (index != 0) {
+        for (i = 0; i < index - 1; i++) {
+            id = ((GsTaskFlagDef*)lbl_80478F9C)[id].next;
+        }
+        id = ((GsTaskFlagDef*)lbl_80478F9C)[id].next;
+    }
+    return id;
+}
+
+/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
+#pragma push
+#pragma peephole off
 void fn_80008868(u8* window)
 {
-    s32 width;
-    s32 pageSize;
-    s32 visibleCount;
-    s32 rowHeight;
-    s32 row;
-    s32 rowY;
-    s32 color;
-    s32 flagIndex;
-    s32 linkIndex;
-    s32 flagCount;
-    s32 center;
-    s32 right;
-    s16 flagId;
     GsTaskFlagConfig* config;
-    GsTaskFlagDef* flags;
+    s32 flagCount;
+    u16 flagId;
+    s32 right;
+    volatile s32 width;
+    s32 pageSize;
+    s32 row;
+    s32 rowHeight;
+    s32 visibleCount;
     u32 menuId;
+    s32 rowY;
+    s32 center;
+    s32 flagIndex;
+    s32 color;
 
     menuId = *(u32*)(window + 4);
     rowY = 40;
     pageSize = (u8)menuDataBiosGetType(menuId);
+    width = 0;
     width = 480;
     config = (GsTaskFlagConfig*)lbl_80478F98;
     flagCount = config->count;
@@ -526,42 +553,14 @@ void fn_80008868(u8* window)
         }
 
         flagIndex = row + *(s16*)lbl_80478838;
-        if (flagIndex < 0) {
-            flagId = 0;
-        } else {
-            config = (GsTaskFlagConfig*)lbl_80478F98;
-            if ((u32)flagIndex >= config->count) {
-                flagId = 0;
-            } else {
-                flagId = config->first;
-                flags = (GsTaskFlagDef*)lbl_80478F9C;
-                linkIndex = 0;
-                for (; linkIndex < flagIndex; linkIndex++) {
-                    flagId = flags[flagId].next;
-                }
-            }
-        }
+        flagId = gsTaskFlagGetId(flagIndex);
 
         sprintf((char*)lbl_803A19C8, (const char*)lbl_80266688, flagIndex,
                 (u16)flagId);
         fn_800FAEF8(30, rowY, color, lbl_803A19C8);
 
         flagIndex = row + *(s16*)lbl_80478838;
-        if (flagIndex < 0) {
-            flagId = 0;
-        } else {
-            config = (GsTaskFlagConfig*)lbl_80478F98;
-            if ((u32)flagIndex >= config->count) {
-                flagId = 0;
-            } else {
-                flagId = config->first;
-                flags = (GsTaskFlagDef*)lbl_80478F9C;
-                linkIndex = 0;
-                for (; linkIndex < flagIndex; linkIndex++) {
-                    flagId = flags[flagId].next;
-                }
-            }
-        }
+        flagId = gsTaskFlagGetId(flagIndex);
 
         fn_800FAEF8(right + 30, rowY, color, lbl_8047B6C8,
                     std082_flagGetValue((u16)flagId));
@@ -569,6 +568,7 @@ void fn_80008868(u8* window)
         row++;
     }
 }
+#pragma pop
 
 /* 0x80008C40 | 0x538 */
 extern u8* windowGetKeyInfo(void);
@@ -576,90 +576,90 @@ extern void std078_flagSetFalse(u32);
 extern void std079_flagSetTrue(u32);
 extern u32 lbl_80478F98;
 extern u32 lbl_80478F9C;
-static u16 GStaskGetLinkedEntryId(s32 index) {
-    u8* list;
-    s16 node;
+typedef struct GsTaskFlagCursor {
+    s16 top;
+    s16 cursor;
+} GsTaskFlagCursor;
+
+static inline u16 gsTaskFlagGetLinkedId(s32 index) {
+    s16 id;
     s32 i;
 
     if (index < 0) {
         return 0;
     }
-    list = (u8*)lbl_80478F98;
-    if ((u32)index >= *(u32*)list) {
+    if ((u32)index >= ((GsTaskFlagConfig*)lbl_80478F98)->count) {
         return 0;
     }
-
-    node = *(s16*)(list + 4);
-    for (i = 0; i < index; i++) {
-        node = *(s16*)((u8*)lbl_80478F9C + node * 8 + 6);
-    }
+    id = ((GsTaskFlagConfig*)lbl_80478F98)->first;
     if (index != 0) {
-        node = *(s16*)((u8*)lbl_80478F9C + node * 8 + 6);
+        for (i = 0; i < index - 1; i++) {
+            id = ((GsTaskFlagDef*)lbl_80478F9C)[id].next;
+        }
+        id = *(s16*)(lbl_80478F9C + id * 8 + 6);
     }
-    return (u16)node;
+    return id;
 }
 
+/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
+#pragma push
+#pragma peephole off
 void fn_80008C40(u8* window) {
+    extern u8 menuDataBiosGetType(u32);
     u16 repeat;
     u16 trigger;
-    s16 top;
-    s16 cursor;
     s16 count;
     s16 page;
-    s32 value;
-    u32 state;
+    GsTaskFlagCursor pos;
 
-    repeat = *(u16*)(windowGetKeyInfo() + 6);
-    trigger = *(u16*)(windowGetKeyInfo() + 0);
-    count = (s16)*(u32*)((u8*)lbl_80478F98 + 0);
-    page = (u8)menuDataBiosGetType(*(u32*)(window + 4));
-    if (count < (s16)page) {
+    repeat = ((const u16*)windowGetKeyInfo())[3];
+    trigger = ((const u16*)windowGetKeyInfo())[0];
+    count = (s16)((GsTaskFlagConfig*)lbl_80478F98)->count;
+    page = menuDataBiosGetType(*(u32*)(window + 4));
+    if (count < page) {
         page = count;
     }
 
-    state = *(u32*)lbl_80478838;
-    top = (s16)(state >> 16);
-    cursor = (s16)state;
+    pos = *(GsTaskFlagCursor*)lbl_80478838;
 
     if (repeat & 1) {
-        cursor--;
+        pos.cursor--;
     } else if (repeat & 2) {
-        cursor++;
+        pos.cursor++;
     }
 
     if (repeat & 4) {
-        cursor = (s16)(cursor - ((u8)menuDataBiosGetType(*(u32*)(window + 4)) - 1));
+        pos.cursor = pos.cursor - (menuDataBiosGetType(*(u32*)(window + 4)) - 1);
     } else if (repeat & 8) {
-        cursor = (s16)(cursor + ((u8)menuDataBiosGetType(*(u32*)(window + 4)) - 1));
+        pos.cursor = pos.cursor + (menuDataBiosGetType(*(u32*)(window + 4)) - 1);
     }
 
-    if (cursor < 0) {
-        top = (s16)(top + cursor);
-        cursor = 0;
-        if (top < 0) {
-            cursor = (s16)(page - 1);
-            top = (s16)(count - page);
+    if (pos.cursor < 0) {
+        pos.top += pos.cursor;
+        pos.cursor = 0;
+        if (pos.top < 0) {
+            pos.cursor = page - 1;
+            pos.top = count - page;
         }
-    } else if (cursor >= page) {
-        value = page - 1;
-        top = (s16)(top + (cursor - value));
-        cursor = (s16)value;
-        if (top + cursor >= count) {
-            top = 0;
-            cursor = 0;
+    } else if (pos.cursor >= page) {
+        pos.top = pos.top + (pos.cursor - (page - 1));
+        pos.cursor = page - 1;
+        if (pos.top + pos.cursor >= count) {
+            pos.top = 0;
+            pos.cursor = 0;
         }
     }
 
-    value = top + cursor;
     if (trigger & 0x80) {
-        std078_flagSetFalse(GStaskGetLinkedEntryId(value));
+        std078_flagSetFalse(gsTaskFlagGetLinkedId(pos.top + pos.cursor));
     } else if (trigger & 0x40) {
-        std079_flagSetTrue(GStaskGetLinkedEntryId(value));
+        std079_flagSetTrue(gsTaskFlagGetLinkedId(pos.top + pos.cursor));
     }
 
-    *(u32*)lbl_80478838 = ((u16)top << 16) | (u16)cursor;
-    *(u32*)(window + 0x80) = GStaskGetLinkedEntryId(top + cursor);
+    *(GsTaskFlagCursor*)lbl_80478838 = pos;
+    *(u32*)(window + 0x80) = gsTaskFlagGetLinkedId(pos.top + pos.cursor);
 }
+#pragma pop
 #endif /* GS_TASK_RANGE_RESIDUAL_80008868 */
 
 #if !defined(GS_TASK_RANGE_SPLIT) || defined(GS_TASK_RANGE_RESIDUAL_80006908)
@@ -675,6 +675,7 @@ typedef struct GsTaskEncounterBackup {
     u32 words[14];
 } GsTaskEncounterBackup;
 
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (push; peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma peephole off
 s32 fn_80006908(u16 id)
@@ -919,7 +920,8 @@ s32 fn_80006908(u16 id)
 extern u32 fn_800F7AF0(s32 port);
 extern u32 fn_800F7BC4(s32 port);
 #if 1
-#pragma peephole off
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 void menuFightButtonNormal(u8* ctx) {
     u32 buttons;
     u32 held;
@@ -948,7 +950,8 @@ void menuFightButtonNormal(u8* ctx) {
         *(s32*)(ctx + 0x80) = -1;
     }
 }
-#pragma peephole on
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 #endif
 
 /* dbgMenuFightStopTimeOut - 0x80007088 | size: 0x44 */
@@ -956,8 +959,8 @@ extern u8   fightIsBattleActive(void);
 extern void fightFloorSetTimeOutAllFightResult(s32 mode);
 extern void dbgMenuClose(void);
 #if 1
-#pragma push
-#pragma peephole off
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 s32 dbgMenuFightStopTimeOut(void) {
     if (fightIsBattleActive() == 0) {
         return -1;
@@ -966,14 +969,15 @@ s32 dbgMenuFightStopTimeOut(void) {
     dbgMenuClose();
     return 0;
 }
-#pragma pop
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 #endif
 
 /* dbgMenuFightStopHostLose - 0x800070CC | size: 0x44 */
 extern void fn_801EF62C(s32 mode);
 #if 1
-#pragma push
-#pragma peephole off
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 s32 dbgMenuFightStopHostLose(void) {
     if (fightIsBattleActive() == 0) {
         return -1;
@@ -982,13 +986,14 @@ s32 dbgMenuFightStopHostLose(void) {
     dbgMenuClose();
     return 0;
 }
-#pragma pop
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 #endif
 
 /* dbgMenuFightStopHostWin - 0x80007110 | size: 0x44 */
 #if 1
-#pragma push
-#pragma peephole off
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 s32 dbgMenuFightStopHostWin(void) {
     if (fightIsBattleActive() == 0) {
         return -1;
@@ -997,7 +1002,8 @@ s32 dbgMenuFightStopHostWin(void) {
     dbgMenuClose();
     return 0;
 }
-#pragma pop
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 #endif
 
 /* dbgMenuFightFightPokemonSelect5 - 0x80007154 | size: 0x58 | SYMBOL-NAME WALL 95.45%: bl menuFightPokemonSelectSub vs bl menuFightPokemonSelectSub (same addr) */
@@ -1006,80 +1012,86 @@ extern u32  fightTrainerGetValidFightPokemonPtr(u32 ptr, s32 slot);
 extern u32  lbl_8047A278;
 extern u32  lbl_8047A27C;
 #if 1
-#pragma push
-#pragma peephole off
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 s32 dbgMenuFightFightPokemonSelect5(void) {
     if (fightIsBattleActive() == 0) return -1;
     lbl_8047A27C = fightTrainerGetValidFightPokemonPtr(lbl_8047A278, 5);
     if (lbl_8047A27C == 0) return -1;
     return menuFightPokemonSelectSub();
 }
-#pragma pop
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 #endif
 
 /* dbgMenuFightFightPokemonSelect4 - 0x800071AC | size: 0x58 | SYMBOL-NAME WALL 95.45%: bl menuFightPokemonSelectSub vs bl menuFightPokemonSelectSub (same addr) */
 #if 1
-#pragma push
-#pragma peephole off
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 s32 dbgMenuFightFightPokemonSelect4(void) {
     if (fightIsBattleActive() == 0) return -1;
     lbl_8047A27C = fightTrainerGetValidFightPokemonPtr(lbl_8047A278, 4);
     if (lbl_8047A27C == 0) return -1;
     return menuFightPokemonSelectSub();
 }
-#pragma pop
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 #endif
 
 /* dbgMenuFightFightPokemonSelect3 - 0x80007204 | size: 0x58 | SYMBOL-NAME WALL 95.45%: bl menuFightPokemonSelectSub vs bl menuFightPokemonSelectSub (same addr) */
 #if 1
-#pragma push
-#pragma peephole off
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 s32 dbgMenuFightFightPokemonSelect3(void) {
     if (fightIsBattleActive() == 0) return -1;
     lbl_8047A27C = fightTrainerGetValidFightPokemonPtr(lbl_8047A278, 3);
     if (lbl_8047A27C == 0) return -1;
     return menuFightPokemonSelectSub();
 }
-#pragma pop
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 #endif
 
 /* dbgMenuFightFightPokemonSelect2 - 0x8000725C | size: 0x58 | SYMBOL-NAME WALL 95.45%: bl menuFightPokemonSelectSub vs bl menuFightPokemonSelectSub (same addr) */
 #if 1
-#pragma push
-#pragma peephole off
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 s32 dbgMenuFightFightPokemonSelect2(void) {
     if (fightIsBattleActive() == 0) return -1;
     lbl_8047A27C = fightTrainerGetValidFightPokemonPtr(lbl_8047A278, 2);
     if (lbl_8047A27C == 0) return -1;
     return menuFightPokemonSelectSub();
 }
-#pragma pop
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 #endif
 
 /* dbgMenuFightFightPokemonSelect1 - 0x800072B4 | size: 0x58 | SYMBOL-NAME WALL 95.45%: bl menuFightPokemonSelectSub vs bl menuFightPokemonSelectSub (same addr) */
 #if 1
-#pragma push
-#pragma peephole off
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 s32 dbgMenuFightFightPokemonSelect1(void) {
     if (fightIsBattleActive() == 0) return -1;
     lbl_8047A27C = fightTrainerGetValidFightPokemonPtr(lbl_8047A278, 1);
     if (lbl_8047A27C == 0) return -1;
     return menuFightPokemonSelectSub();
 }
-#pragma pop
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 #endif
 
 /* dbgMenuFightFightPokemonSelect0 - 0x8000730C | size: 0x58 | SYMBOL-NAME WALL 95.45%: bl menuFightPokemonSelectSub vs bl menuFightPokemonSelectSub (same addr) */
 #if 1
-#pragma push
-#pragma peephole off
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 s32 dbgMenuFightFightPokemonSelect0(void) {
     if (fightIsBattleActive() == 0) return -1;
     lbl_8047A27C = fightTrainerGetValidFightPokemonPtr(lbl_8047A278, 0);
     if (lbl_8047A27C == 0) return -1;
     return menuFightPokemonSelectSub();
 }
-#pragma pop
+#if !defined(GS_TASK_RANGE_EXACT_80006FAC)
+#endif
 #endif
 #endif /* GS_TASK_RANGE_EXACT_80006FAC */
 
@@ -1113,6 +1125,8 @@ extern void fightOutPokemonSetTokuseiDataId(void* ptr, void* a);
 extern void fightOutPokemonSetZokuseiDataId(void* ptr, u8 a, u16 b);
 extern void fightMenuFightTrainerRenewStatusMenu(void* ptr, u16 a);
 #if !defined(GS_TASK_RANGE_SPLIT) || defined(GS_TASK_RANGE_RESIDUAL_80007364)
+#pragma push
+#pragma peephole off
 s32 menuFightPokemonSelectSub(u32 ctx) {
     s32 result;
     u8 prevLevel;
@@ -1212,6 +1226,7 @@ s32 menuFightPokemonSelectSub(u32 ctx) {
     fightMenuFightTrainerRenewStatusMenu(archive, savedId);
     return result;
 }
+#pragma pop
 #endif /* GS_TASK_RANGE_RESIDUAL_80007364 */
 
 #if !defined(GS_TASK_RANGE_SPLIT) || defined(GS_TASK_RANGE_EXACT_8000765C)
@@ -1221,7 +1236,6 @@ extern void fn_80051710(u16 id);
 extern u16 lbl_80478830;
 extern u32 lbl_80478F08;
 #if 1
-#pragma peephole off
 s32 dbgMenuFightFightTrainerPokemonPartDataEdit(void) {
     u32 result;
     s32 val;
@@ -1247,13 +1261,11 @@ s32 dbgMenuFightFightTrainerPokemonPartDataEdit(void) {
         fn_80051710((u16)val);
     }
 }
-#pragma peephole on
 #endif
 
 /* dbgMenuFightFightTrainerAiDataEdit - 0x80007708 | size: 0x70 */
 extern s32  fn_80051E38(u32 slot);
 #if 1
-#pragma peephole off
 s32 dbgMenuFightFightTrainerAiDataEdit(void) {
     u16 tmp;
     u16 slot;
@@ -1262,7 +1274,6 @@ s32 dbgMenuFightFightTrainerAiDataEdit(void) {
     if (fightIsBattleActive() == 0) return -1;
     return fn_80051E38(slot);
 }
-#pragma peephole on
 #endif
 
 /* fn_80007778 - 0x80007778 | size: 0x20 */
@@ -1325,7 +1336,6 @@ extern u16 lbl_8047A28A;
 extern u32 lbl_80478F28;
 extern void* _dbgMenuFightGetFightTrainerAiAddsubValueDataIdSub(u32 id);
 #if 1
-#pragma peephole off
 s32 fn_80007848(void) {
     u32 result;
     s32 val;
@@ -1347,73 +1357,57 @@ s32 fn_80007848(void) {
         dbgMenuFightTrainerDataStatusInputDigit((u16)val, 0x3e, 0, 0xc8, -0xc8);
     }
 }
-#pragma peephole on
 #endif
 
 /* dbgMenuFightFightTrainerSelect1 - 0x800078EC | size: 0x58 */
 extern u32  fightSideGetValidFightTrainerPtr(u32 ptr, s32 mode);
 extern u32  lbl_8047A274;
 #if 1
-#pragma push
-#pragma peephole off
 s32 dbgMenuFightFightTrainerSelect1(void) {
     if (fightIsBattleActive() == 0) return -1;
     lbl_8047A278 = fightSideGetValidFightTrainerPtr(lbl_8047A274, 1);
     if (lbl_8047A278 == 0) return -1;
     return 1;
 }
-#pragma pop
 #endif
 
 /* dbgMenuFightFightTrainerSelect0 - 0x80007944 | size: 0x58 */
 #if 1
-#pragma push
-#pragma peephole off
 s32 dbgMenuFightFightTrainerSelect0(void) {
     if (fightIsBattleActive() == 0) return -1;
     lbl_8047A278 = fightSideGetValidFightTrainerPtr(lbl_8047A274, 0);
     if (lbl_8047A278 == 0) return -1;
     return 1;
 }
-#pragma pop
 #endif
 
 /* dbgMenuFightFightSideSelectHostEnemy - 0x8000799C | size: 0x58 */
 extern u32  fightTargetGetPtrAsNowFightType(s32 a, s32 b);
 #if 1
-#pragma push
-#pragma peephole off
 s32 dbgMenuFightFightSideSelectHostEnemy(void) {
     if (fightIsBattleActive() == 0) return -1;
     lbl_8047A274 = fightTargetGetPtrAsNowFightType(5, 0);
     if (lbl_8047A274 == 0) return -1;
     return 1;
 }
-#pragma pop
 #endif
 
 /* dbgMenuFightFightSideSelectHost - 0x800079F4 | size: 0x58 */
 #if 1
-#pragma push
-#pragma peephole off
 s32 dbgMenuFightFightSideSelectHost(void) {
     if (fightIsBattleActive() == 0) return -1;
     lbl_8047A274 = fightTargetGetPtrAsNowFightType(4, 0);
     if (lbl_8047A274 == 0) return -1;
     return 1;
 }
-#pragma pop
 #endif
 
 /* dbgMenuFightFightFloorEditTenkou - 0x80007A4C | size: 0x38 */
 #if 1
-#pragma push
-#pragma peephole off
 s32 dbgMenuFightFightFloorEditTenkou(void) {
     if (fightIsBattleActive() == 0) return -1;
     return 1;
 }
-#pragma pop
 #endif
 
 /* dbgMenuFightWazaEdit - 0x80007A84 | size: 0xac | SYMBOL-NAME WALL 97.67%: bl dbgMenuFightWazaEditSub vs bl dbgMenuFightWazaEditSub (same addr) */
@@ -1421,7 +1415,6 @@ extern void dbgMenuFightWazaEditSub(u16 id);
 extern u16 lbl_8047882A;
 extern void* _dbgMenuFightGetWazaDataIdSub(u32 id);
 #if 1
-#pragma peephole off
 s32 dbgMenuFightWazaEdit(void) {
     u32 result;
     s32 val;
@@ -1447,7 +1440,6 @@ s32 dbgMenuFightWazaEdit(void) {
         dbgMenuFightWazaEditSub((u16)val);
     }
 }
-#pragma peephole on
 #endif
 
 /* fn_80007B30 - 0x80007B30 | size: 0x4ac */
@@ -1466,7 +1458,6 @@ extern u8 lbl_8047A280;
 extern u16 lbl_8047A282;
 extern u8 lbl_8047882E;
 #if 1
-#pragma peephole off
 s32 fn_80007B30(void) {
     u8 save_sfx;
     u8 save_speed;
@@ -1656,29 +1647,22 @@ s32 fn_80007B30(void) {
     menuCloseCustom(0xe, 0, 1);
     return 1;
 }
-#pragma peephole on
 #endif
 
 /* dbgMenuFightStop - 0x80007FDC | size: 0x38 */
 #if 1
-#pragma push
-#pragma peephole off
 s32 dbgMenuFightStop(void) {
     if (fightIsBattleActive() == 0) return -1;
     return 1;
 }
-#pragma pop
 #endif
 
 /* dbgMenuFightFightFloorEdit - 0x80008014 | size: 0x38 */
 #if 1
-#pragma push
-#pragma peephole off
 s32 dbgMenuFightFightFloorEdit(void) {
     if (fightIsBattleActive() == 0) return -1;
     return 1;
 }
-#pragma pop
 #endif
 
 /* fn_8000804C - 0x8000804C | size: 0xf8 */
@@ -1689,7 +1673,6 @@ extern void GSthreadSetArgs(void* task, s32 a, ...);
 extern u16 lbl_8047882C;
 extern u32 lbl_80478F50;
 #if 1
-#pragma peephole off
 s32 fn_8000804C(void) {
     u32 result;
     s32 val;
@@ -1730,7 +1713,6 @@ s32 fn_8000804C(void) {
     }
     return -1;
 }
-#pragma peephole on
 #endif
 
 /* Address: 0x80008144 | Size: 0x8 | Pattern: return_constant */
@@ -1775,7 +1757,6 @@ u8 fn_8000817C(void) {
 extern u8 winMsgCloseCheckFight(void);
 extern u8 lbl_80266678[];
 #if 1
-#pragma peephole off
 u32 dbgMenuFightGetMsgSpeedToFrame(u32 value) {
     u32 buttons;
     u32 held;
@@ -1804,14 +1785,12 @@ u32 dbgMenuFightGetMsgSpeedToFrame(u32 value) {
 
     return value;
 }
-#pragma peephole on
 #endif
 
 /* _dbgMenuFightGetFightTrainerAiAddsubValueDataIdSub - 0x80008244 | size: 0x14c */
 extern void msgctrlSetValue(s32 slot, void* ptr);
 extern u32 lbl_80478F28;
 #if 1
-#pragma peephole off
 void* _dbgMenuFightGetFightTrainerAiAddsubValueDataIdSub(u32 id) {
     void* r31;
     void* r30;
@@ -1837,38 +1816,29 @@ void* _dbgMenuFightGetFightTrainerAiAddsubValueDataIdSub(u32 id) {
     msgctrlSetValue(0x2f, r28);
     return GSmsgGetGSchar(0xF159);
 }
-#pragma peephole on
 #endif
 
 /* _dbgMenuFightGetFightTrainerPokemonPartDataIdSub - 0x80008390 | size: 0x6c */
 extern u32 lbl_80478F08;
-#pragma push
-#pragma peephole off
 void* _dbgMenuFightGetFightTrainerPokemonPartDataIdSub(u32 id) {
     if (id == 0) return GSmsgGetGSchar(0xEB63);
     if (id >= *(u32*)(void*)lbl_80478F08) return GSmsgGetGSchar(0xEB63);
     return GSmsgGetGSchar((u32)fightTrainerGetStatus(0, (u16)id, 0xb, 0));
 }
-#pragma pop
 
 /* _dbgMenuFightGetWazaDataIdSub - 0x800083FC | size: 0x64 */
 extern void* wazaGetStatus(s32 a, u16 b, s32 c, s32 d);
 #if 1
-#pragma push
-#pragma peephole off
 void* _dbgMenuFightGetWazaDataIdSub(u32 id) {
     if (id == 0) return GSmsgGetGSchar(0xEB63);
     if (id >= 0x163) return GSmsgGetGSchar(0xEB63);
     return GSmsgGetGSchar((u32)wazaGetStatus(0, (u16)id, 1, 0));
 }
-#pragma pop
 #endif
 
 /* dbgMenuFightGetWazaTypeId - 0x80008460 | size: 0x60 */
 extern void* _dbgMenuFightGetWazaTypeIdSub(u32 id);   /* forward decl for callback */
 #if 1
-#pragma push
-#pragma peephole off
 s32 dbgMenuFightGetWazaTypeId(s32 id) {
     u32 result;
     if (menuSubOpenNumberInputSub__FUlPUlUcssbPFUl_PUs((u8)id, &result, _dbgMenuFightGetWazaTypeIdSub) == 0) return -1;
@@ -1876,26 +1846,20 @@ s32 dbgMenuFightGetWazaTypeId(s32 id) {
     menuSubCloseNumberInput();
     return (s32)result;
 }
-#pragma pop
 #endif
 
 /* _dbgMenuFightGetWazaTypeIdSub - 0x800084C0 | size: 0x58 | SYMBOL-NAME WALL 95.45%: bl wazaGetWazaTypeIdName vs bl wazaGetWazaTypeIdName (same addr) */
 extern void* wazaGetWazaTypeIdName(u8 idx);
 #if 1
-#pragma push
-#pragma peephole off
 void* _dbgMenuFightGetWazaTypeIdSub(u32 id) {
     if (id == 0) return GSmsgGetGSchar(0xEB63);
     if (id > 0xb) return GSmsgGetGSchar(0xEB63);
     return GSmsgGetGSchar((u32)wazaGetWazaTypeIdName((u8)id));
 }
-#pragma pop
 #endif
 
 /* dbgMenuFightGetZokuseiDataId - 0x80008518 | size: 0x64 */
 #if 1
-#pragma push
-#pragma peephole off
 s32 dbgMenuFightGetZokuseiDataId(u32 id) {
     u32 result;
     if (menuSubOpenNumberInputSub__FUlPUlUcssbPFUl_PUs((u16)id, &result, _dbgMenuFightGetZokuseiDataIdSub) == 0) return -1;
@@ -1903,7 +1867,6 @@ s32 dbgMenuFightGetZokuseiDataId(u32 id) {
     menuSubCloseNumberInput();
     return (s32)result;
 }
-#pragma pop
 #endif
 
 /* =======================================================================
@@ -1915,8 +1878,6 @@ s32 dbgMenuFightGetZokuseiDataId(u32 id) {
  *
  * Address: 0x8000857C  Size: 0x5C (92 bytes)
  * ======================================================================= */
-#pragma push
-#pragma peephole off
 void* _dbgMenuFightGetZokuseiDataIdSub(u32 id)
 {
     if (id == 9) {
@@ -1931,12 +1892,9 @@ void* _dbgMenuFightGetZokuseiDataIdSub(u32 id)
         return GSmsgGetGSchar((u32)fn_8010C4D4(idx));
     }
 }
-#pragma pop
 
 /* fn_800085D8 - 0x800085D8 | size: 0xb4 */
 #if 1
-#pragma push
-#pragma scheduling off
 void* fn_800085D8(s32 difficulty) {
     u32 id;
     if (difficulty >= 5) {
@@ -1954,7 +1912,6 @@ void* fn_800085D8(s32 difficulty) {
     if (id == 0) id = 0xEB63;
     return GSmsgGetGSchar(id);
 }
-#pragma pop
 #endif
 
 /* fn_8000868C - 0x8000868C | size: 0x60 */
@@ -2026,8 +1983,6 @@ void* _dbgMenuFightGetFightFloorDataIdSub(u32 id) {
  *
  * Address: 0x800087FC  Size: 0x6C (108 bytes)
  * ======================================================================= */
-#pragma push
-#pragma scheduling off
 void* fn_800087FC(u32 id)
 {
     extern void* fightEncountDataBiosGetPtr(u16 id);
@@ -2047,5 +2002,4 @@ void* fn_800087FC(u32 id)
 
     return GSmsgGetGSchar(result);
 }
-#pragma pop
 #endif /* GS_TASK_RANGE_EXACT_8000765C */

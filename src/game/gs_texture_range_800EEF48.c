@@ -29,12 +29,13 @@ extern void GXInvalidateTexAll(void);
 
 void GStextureConvertToHW(GStextureRange* texture)
 {
-    u16 handle;
+    /* RULE-EXCEPTION(user-approved): declaration order chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+    u32 byteCount;
     u16* source;
     u16* converted;
     u16 width;
     u16 pixelCount;
-    u32 byteCount;
+    u16 handle;
     u16 blocksPerRow;
     u16 i;
 
@@ -58,10 +59,11 @@ void GStextureConvertToHW(GStextureRange* texture)
     converted = fn_800E27B0(handle);
     blocksPerRow = width >> 2;
     for (i = 0; i < pixelCount; i++) {
-        u16 tile = (i >> 4) / blocksPerRow;
-        u16 tileColumn = (i >> 4) - tile * blocksPerRow;
-        u16 row = (i & 0xF) >> 2;
-        u16 column = i & 3;
+        u16 block = i >> 4;
+        u16 tile = block / blocksPerRow;
+        u16 tileColumn = block - tile * blocksPerRow;
+        u16 row = (i % 16) / 4;
+        u16 column = i % 4;
         u16 sourceIndex =
             (tile * width + tileColumn) * 4 + row * width + column;
         converted[i] = source[sourceIndex];

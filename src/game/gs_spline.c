@@ -6,10 +6,10 @@
  * Split from the former game/gs_scene.c CodeCandidate bucket
  * (0x8017572C - 0x8017A5FC); see config/GC6E01/splits.txt for the exact
  * address ranges of the four resulting translation units:
- *   game/ps_generator_range_8017572C.c  0x8017572C - 0x80175F6C
+ *   game/generator.c                    0x80173624 - 0x80175F6C
  *   game/gs_xfb_capture.c               0x80175F6C - 0x80176068
  *   game/gs_spline.c                    0x80176068 - 0x801765F4 (this file)
- *   game/camera.c                       0x801765F4 - 0x8017A5FC
+ *   game/camera.c                       0x801765F4 - 0x80179F4C
  *
  * Corresponds to game/pxdvs/GSAPI/GSspline/GSspline.cpp in the XD-era
  * source tree. Shared externs/typedefs for the whole former gs_scene.c
@@ -39,19 +39,13 @@ typedef struct GSspline {
     u16 dataHandle;
 } GSspline;
 
-extern const char lbl_80273ADC[];
-extern const char lbl_80273B20[];
-extern const char lbl_80273B5C[];
+extern const char lbl_80273A10[];
 
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 #if 0
 asm void GSsplineFree(void) {
 #include "src/game/gs_scene_fn_80176068.inc"
 }
 #else
-#pragma optimization_level 4
 void GSsplineFree(u8* ptr) {
     u16 handle;
     if (ptr != NULL) {
@@ -64,12 +58,13 @@ void GSsplineFree(u8* ptr) {
     }
 }
 #endif
-#pragma pop
 
 void GSsplineAddControlVectorValue(GSspline* spline, void* vector, f32 value)
 {
+    const char* messages = lbl_80273A10;
     u8 index;
     u8 storesKey;
+    u8 key;
 
     if (spline == NULL) {
         return;
@@ -83,15 +78,16 @@ void GSsplineAddControlVectorValue(GSspline* spline, void* vector, f32 value)
             }
 
             GSvecCopy((u8*)spline->vectors + index * 12, vector);
-            spline->values[index] = value;
+            spline->values[spline->valueCount] = value;
             spline->valueCount++;
 
             if (storesKey) {
-                spline->values[spline->keyCount] = value;
-                if (spline->keyCount == 0) {
+                key = spline->keyCount;
+                spline->values[key] = value;
+                if (key == 0) {
                     spline->firstValue = value;
-                } else if (value < spline->values[spline->keyCount - 1]) {
-                    GSlogWrite(lbl_80273ADC);
+                } else if (value < spline->values[key - 1]) {
+                    GSlogWrite(messages + 0xCC);
                 }
                 if (spline->valueCount == spline->capacity) {
                     spline->lastValue = value;
@@ -99,10 +95,10 @@ void GSsplineAddControlVectorValue(GSspline* spline, void* vector, f32 value)
                 spline->keyCount++;
             }
         } else {
-            GSlogWrite(lbl_80273B20);
+            GSlogWrite(messages + 0x110);
         }
     } else {
-        GSlogWrite(lbl_80273B5C);
+        GSlogWrite(messages + 0x14C);
     }
 }
 
@@ -112,136 +108,149 @@ GSspline* GSsplineCreate(s32 kind, s32 state, u8 capacity)
     extern void* fn_800E27B0(u16 handle);
     extern void* fn_800E24B0(u16 handle);
     extern void fn_800E209C(u16 handle);
-    extern char lbl_80273A10[];
-    GSspline* spline;
-    u16 selfHandle;
-    u16 dataHandle;
+    const char* messages = lbl_80273A10;
+    GSspline* spline = NULL;
+    u16 handle;
     u8* data;
-    u8 count;
+    u8* secondary;
 
     if (capacity < 2) {
-        GSlogWrite(lbl_80273A10 + 0x260);
+        GSlogWrite(messages + 0x260);
         return NULL;
     }
 
-    count = capacity;
-    if (kind == 1 || kind == 2) {
-        if (((count - 1) % 3) != 0) {
-            if (count == 2) {
-                GSlogWrite(lbl_80273A10 + 0x298);
-                kind = 0;
-            } else {
-                GSlogWrite(lbl_80273A10 + 0x2E8);
-                kind = 3;
-            }
+    if ((kind == 1 || kind == 2) && ((capacity - 1) % 3) != 0) {
+        if (capacity == 2) {
+            GSlogWrite(messages + 0x298);
+            kind = 0;
+        } else {
+            GSlogWrite(messages + 0x2E8);
+            kind = 3;
         }
-    } else if (count == 2 && kind != 0) {
-        GSlogWrite(lbl_80273A10 + 0x33C);
+    } else if (capacity == 2 && kind != 0) {
         kind = 0;
+        GSlogWrite(messages + 0x33C);
     }
 
-    selfHandle = _toolentryAlloc__FUl(sizeof(GSspline));
-    if (selfHandle == 0) {
-        return NULL;
-    }
-    spline = fn_800E27B0(selfHandle);
-    spline->selfHandle = selfHandle;
-    spline->kind = kind;
-    spline->state = state;
-    spline->valueCount = 0;
-    spline->keyCount = 0;
-    spline->secondaryVectors = NULL;
-    spline->firstValue = 0.0f;
-    spline->lastValue = 0.0f;
+    handle = _toolentryAlloc__FUl(sizeof(GSspline));
+    if (handle != 0) {
+        spline = fn_800E27B0(handle);
+        spline->selfHandle = handle;
+        spline->kind = kind;
+        spline->state = state;
+        spline->valueCount = 0;
+        spline->keyCount = 0;
 
-    if (kind == 0) {
-        if (state == 1) {
-            dataHandle = _toolentryAlloc__FUl((u32)count * 16);
-            if (dataHandle == 0) {
-                fn_800E24B0(selfHandle);
-                fn_800E209C(selfHandle);
-                return NULL;
+        switch (kind) {
+        case 0:
+            if (state == 1) {
+                handle = _toolentryAlloc__FUl(capacity * (12 + sizeof(f32)));
+                if (handle != 0) {
+                    spline->dataHandle = handle;
+                    data = fn_800E27B0(handle);
+                    spline->vectors = data;
+                    spline->secondaryVectors = NULL;
+                    spline->values = (f32*)(data + capacity * 12);
+                    spline->capacity = capacity;
+                    spline->state = 1;
+                } else {
+                    handle = spline->selfHandle;
+                    fn_800E24B0(handle);
+                    fn_800E209C(handle);
+                    spline = NULL;
+                }
+            } else {
+                handle = _toolentryAlloc__FUl(capacity * (sizeof(f32) * 2));
+                if (handle != 0) {
+                    spline->dataHandle = handle;
+                    data = fn_800E27B0(handle);
+                    spline->vectors = data;
+                    spline->secondaryVectors = NULL;
+                    spline->values = (f32*)(data + capacity * 4);
+                    spline->capacity = capacity;
+                    spline->state = 0;
+                } else {
+                    handle = spline->selfHandle;
+                    fn_800E24B0(handle);
+                    fn_800E209C(handle);
+                    spline = NULL;
+                }
             }
-            spline->dataHandle = dataHandle;
-            data = fn_800E27B0(dataHandle);
-            spline->vectors = data;
-            spline->secondaryVectors = NULL;
-            spline->values = (f32*)(data + count * 12);
-            spline->capacity = count;
-            spline->state = 1;
-        } else {
-            dataHandle = _toolentryAlloc__FUl((u32)count * 8);
-            if (dataHandle == 0) {
-                fn_800E24B0(selfHandle);
-                fn_800E209C(selfHandle);
-                return NULL;
+            break;
+        case 1:
+        case 2:
+            if (state == 1) {
+                handle = _toolentryAlloc__FUl(capacity * 12 + ((capacity + 2) / 3) * sizeof(f32));
+                if (handle != 0) {
+                    spline->dataHandle = handle;
+                    data = fn_800E27B0(handle);
+                    spline->vectors = data;
+                    spline->secondaryVectors = NULL;
+                    spline->values = (f32*)(data + capacity * 12);
+                    spline->capacity = capacity;
+                    spline->state = 1;
+                } else {
+                    handle = spline->selfHandle;
+                    fn_800E24B0(handle);
+                    fn_800E209C(handle);
+                    spline = NULL;
+                }
+            } else {
+                handle = _toolentryAlloc__FUl((capacity + (capacity + 2) / 3) * sizeof(f32));
+                if (handle != 0) {
+                    spline->dataHandle = handle;
+                    data = fn_800E27B0(handle);
+                    spline->vectors = data;
+                    spline->secondaryVectors = NULL;
+                    spline->values = (f32*)(data + capacity * 4);
+                    spline->capacity = capacity;
+                    spline->state = 0;
+                } else {
+                    handle = spline->selfHandle;
+                    fn_800E24B0(handle);
+                    fn_800E209C(handle);
+                    spline = NULL;
+                }
             }
-            spline->dataHandle = dataHandle;
-            data = fn_800E27B0(dataHandle);
-            spline->vectors = data;
-            spline->secondaryVectors = NULL;
-            spline->values = (f32*)(data + count * 4);
-            spline->capacity = count;
-            spline->state = 0;
-        }
-    } else if (kind >= 0 && kind < 3) {
-        if (state == 1) {
-            dataHandle = _toolentryAlloc__FUl((u32)count * 12 + ((count + 2) / 3) * 4);
-            if (dataHandle == 0) {
-                fn_800E24B0(selfHandle);
-                fn_800E209C(selfHandle);
-                return NULL;
+            break;
+        default:
+            if (state == 1) {
+                handle = _toolentryAlloc__FUl(capacity * (12 + sizeof(f32) * 2));
+                if (handle != 0) {
+                    spline->dataHandle = handle;
+                    data = fn_800E27B0(handle);
+                    spline->vectors = data;
+                    secondary = data + capacity * 12;
+                    spline->secondaryVectors = secondary;
+                    spline->values = (f32*)(secondary + capacity * 4);
+                    spline->capacity = capacity;
+                    spline->state = 1;
+                } else {
+                    handle = spline->selfHandle;
+                    fn_800E24B0(handle);
+                    fn_800E209C(handle);
+                    spline = NULL;
+                }
+            } else {
+                handle = _toolentryAlloc__FUl(capacity * 3 * sizeof(f32));
+                if (handle != 0) {
+                    spline->dataHandle = handle;
+                    data = fn_800E27B0(handle);
+                    spline->vectors = data;
+                    secondary = data + capacity * 4;
+                    spline->secondaryVectors = secondary;
+                    spline->values = (f32*)(secondary + capacity * 4);
+                    spline->capacity = capacity;
+                    spline->state = 0;
+                } else {
+                    handle = spline->selfHandle;
+                    fn_800E24B0(handle);
+                    fn_800E209C(handle);
+                    spline = NULL;
+                }
             }
-            spline->dataHandle = dataHandle;
-            data = fn_800E27B0(dataHandle);
-            spline->vectors = data;
-            spline->secondaryVectors = NULL;
-            spline->values = (f32*)(data + count * 12);
-            spline->capacity = count;
-            spline->state = 1;
-        } else {
-            dataHandle = _toolentryAlloc__FUl((count + ((count + 2) / 3)) * 4);
-            if (dataHandle == 0) {
-                fn_800E24B0(selfHandle);
-                fn_800E209C(selfHandle);
-                return NULL;
-            }
-            spline->dataHandle = dataHandle;
-            data = fn_800E27B0(dataHandle);
-            spline->vectors = data;
-            spline->secondaryVectors = NULL;
-            spline->values = (f32*)(data + count * 4);
-            spline->capacity = count;
-            spline->state = 0;
+            break;
         }
-    } else if (state == 1) {
-        dataHandle = _toolentryAlloc__FUl((u32)count * 20);
-        if (dataHandle == 0) {
-            fn_800E24B0(selfHandle);
-            fn_800E209C(selfHandle);
-            return NULL;
-        }
-        spline->dataHandle = dataHandle;
-        data = fn_800E27B0(dataHandle);
-        spline->vectors = data;
-        spline->secondaryVectors = data + count * 12;
-        spline->values = (f32*)((u8*)spline->secondaryVectors + count * 4);
-        spline->capacity = count;
-        spline->state = 1;
-    } else {
-        dataHandle = _toolentryAlloc__FUl((u32)count * 12);
-        if (dataHandle == 0) {
-            fn_800E24B0(selfHandle);
-            fn_800E209C(selfHandle);
-            return NULL;
-        }
-        spline->dataHandle = dataHandle;
-        data = fn_800E27B0(dataHandle);
-        spline->vectors = data;
-        spline->secondaryVectors = data + count * 4;
-        spline->values = (f32*)((u8*)spline->secondaryVectors + count * 4);
-        spline->capacity = count;
-        spline->state = 0;
     }
 
     return spline;

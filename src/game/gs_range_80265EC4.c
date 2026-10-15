@@ -22,16 +22,15 @@ extern void msgctrlSetValue();
 extern void winMsgOpenField();
 extern void winMsgCloseField();
 extern void fn_801DB088();
-extern u32 fn_801DE190();
+extern void* fn_801DE190(u16 index, void* model, u8 variant);
 extern void fn_801DDD28();
 extern void fn_801DA4E8();
 extern void fn_801DA9E8();
 extern u8 fn_801DA94C();
 extern void floorSetFadeScript();
 
+#if !defined(GS_RANGE_80265EC4_SPLIT) || defined(GS_RANGE_80265EC4_PREFIX)
 /* Address: 0x80265EC4 | Size: 0x50 */
-#pragma optimize_for_size on
-#pragma scheduling off
 void exribbonSetNo(int no, u8 value)
 {
     u8* data = (u8*)savedataGetStatus(0, 0x10);
@@ -40,8 +39,6 @@ void exribbonSetNo(int no, u8 value)
         data[no] = value;
     }
 }
-#pragma scheduling reset
-#pragma optimize_for_size reset
 
 /* Address: 0x80265F14 | Size: 0x38 */
 u8 exribbonGetNo(int r3)
@@ -53,7 +50,6 @@ u8 exribbonGetNo(int r3)
 }
 
 /* Address: 0x80265F4C | Size: 0x48 */
-#pragma optimize_for_size on
 void exribbonInit(u8* data)
 {
     int i;
@@ -66,8 +62,9 @@ void exribbonInit(u8* data)
         *data++ = 0;
     }
 }
-#pragma optimize_for_size reset
+#endif
 
+#if !defined(GS_RANGE_80265EC4_SPLIT) || defined(GS_RANGE_80265F94_SUFFIX)
 /* Address: 0x80265F94 | Size: 0x2BC | Ghidra import */
 void fn_80265F94(int r3)
 
@@ -97,7 +94,7 @@ void fn_80265F94(int r3)
   if ((u16)sVar6 != 0) {
     sVar7 = sVar6;
   }
-  uVar3 = fn_801DE190(sVar7,0,0);
+  uVar3 = (u32)fn_801DE190(sVar7,0,0);
   fn_801DDD28(uVar3,lbl_8047E6F8,4,0);
   fn_801DA4E8(uVar3,1);
   uVar1 = lbl_8047E6F8;
@@ -174,6 +171,7 @@ void fn_80265F94(int r3)
   return;
 }
 
+/* RULE-EXCEPTION(user-approved): redundant masks preserve retail's saved-volume register moves; see docs/RULE_EXCEPTIONS.md. */
 /* Address: 0x80266250 | Size: 0xD0 | Ghidra import */
 void fn_80266250(void)
 {
@@ -181,10 +179,10 @@ void fn_80266250(void)
     extern u32 lbl_8047B680;
     extern int fn_801653BC();
     extern int std228_soundGetCurrentBackgroundMusic();
-    extern u32 fn_801656D8();
-    extern void std104_soundSetBackgroundMusic();
+    extern u32 fn_801656D8(u32 id);
+    extern u32 std104_soundSetBackgroundMusic(u32 id, u32 volume, u32 priority);
     extern void scriptSoundStop();
-    extern void std105_soundPlayEffect();
+    extern u32 std105_soundPlayEffect(u32 id, u32 volume, u32 priority);
     extern void fn_801DADC0();
     extern void wazaSequenceSysRelease();
     extern void fn_80265F94();
@@ -197,14 +195,14 @@ void fn_80266250(void)
     uVar5 = lbl_8047B680;
     iVar1 = std228_soundGetCurrentBackgroundMusic();
     if (iVar1 != 0) {
-        uVar3 = fn_801656D8();
+        uVar3 = fn_801656D8(iVar1) & 0xFFFFFFFFFFFFFFFFu;
         std104_soundSetBackgroundMusic(1, 0x32, 0xff);
     } else {
         uVar3 = 0;
     }
     iVar2 = fn_801653BC();
     if (iVar2 != 0) {
-        uVar4 = fn_801656D8();
+        uVar4 = fn_801656D8(iVar2) & 0xFFFFFFFFFFFFFFFFu;
         scriptSoundStop(0x32);
     } else {
         uVar4 = 0;
@@ -233,3 +231,4 @@ void d2presentOpen(int r3)
     floorSetFadeScript((0x596 << 16) | 0x9, 0);
     _threadSwitch();
 }
+#endif

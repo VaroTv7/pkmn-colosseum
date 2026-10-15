@@ -287,7 +287,6 @@ regular_x:
 }
 #endif
 
-#pragma peephole off
 #if !defined(SDK_PSMTXROTRAD_EXCLUDE)
 void PSMTXRotRad(Mtx m, char axis, f32 rad)
 {
@@ -302,60 +301,65 @@ void PSMTXRotRad(Mtx m, char axis, f32 rad)
     PSMTXRotTrig(m, axis, sinA, cosA);
 }
 #endif
-#pragma peephole reset
 
 #if !defined(SDK_PSMTXROTTRIG_EXCLUDE)
 void PSMTXRotTrig(register Mtx m, register char axis, register f32 sinA,
                   register f32 cosA)
 {
-    register f32 sin = sinA;
-    register f32 cos = cosA;
-    register f32 zero = lbl_8047C28C;
-    register f32 one = lbl_8047C288;
+    register f32 fc0, fc1, nsinA;
+    register f32 fw0, fw1, fw2, fw3;
 
     asm {
-    ori r0, axis, 32
-    ps_neg f2, sin
-    cmplwi r0, 120
+        frsp sinA, sinA
+        frsp cosA, cosA
+    }
+
+    fc0 = lbl_8047C28C;
+    fc1 = lbl_8047C288;
+
+    asm {
+    ori axis, axis, 0x20
+    ps_neg nsinA, sinA
+    cmplwi axis, 'x'
     beq rot_x
-    cmplwi r0, 121
+    cmplwi axis, 'y'
     beq rot_y
-    cmplwi r0, 122
+    cmplwi axis, 'z'
     beq rot_z
     b rot_done
 rot_x:
-    psq_st one, 0(m), 1, 0
-    psq_st zero, 4(m), 0, 0
-    ps_merge00 f3, sin, cos
-    psq_st zero, 12(m), 0, 0
-    ps_merge00 one, cos, f2
-    psq_st zero, 28(m), 0, 0
-    psq_st zero, 44(m), 1, 0
-    psq_st f3, 36(m), 0, 0
-    psq_st one, 20(m), 0, 0
+    psq_st fc1, 0(m), 1, 0
+    psq_st fc0, 4(m), 0, 0
+    ps_merge00 fw0, sinA, cosA
+    psq_st fc0, 12(m), 0, 0
+    ps_merge00 fw1, cosA, nsinA
+    psq_st fc0, 28(m), 0, 0
+    psq_st fc0, 44(m), 1, 0
+    psq_st fw0, 36(m), 0, 0
+    psq_st fw1, 20(m), 0, 0
     b rot_done
 rot_y:
-    ps_merge00 f3, cos, zero
-    ps_merge00 one, zero, one
-    psq_st zero, 24(m), 0, 0
-    psq_st f3, 0(m), 0, 0
-    ps_merge00 f2, f2, zero
-    ps_merge00 zero, sin, zero
-    psq_st f3, 40(m), 0, 0
-    psq_st one, 16(m), 0, 0
-    psq_st zero, 8(m), 0, 0
-    psq_st f2, 32(m), 0, 0
+    ps_merge00 fw0, cosA, fc0
+    ps_merge00 fw1, fc0, fc1
+    psq_st fc0, 24(m), 0, 0
+    psq_st fw0, 0(m), 0, 0
+    ps_merge00 fw2, nsinA, fc0
+    ps_merge00 fw3, sinA, fc0
+    psq_st fw0, 40(m), 0, 0
+    psq_st fw1, 16(m), 0, 0
+    psq_st fw3, 8(m), 0, 0
+    psq_st fw2, 32(m), 0, 0
     b rot_done
 rot_z:
-    psq_st zero, 8(m), 0, 0
-    ps_merge00 f3, sin, cos
-    ps_merge00 f2, cos, f2
-    psq_st zero, 24(m), 0, 0
-    psq_st zero, 32(m), 0, 0
-    ps_merge00 one, one, zero
-    psq_st f3, 16(m), 0, 0
-    psq_st f2, 0(m), 0, 0
-    psq_st one, 40(m), 0, 0
+    psq_st fc0, 8(m), 0, 0
+    ps_merge00 fw0, sinA, cosA
+    ps_merge00 fw2, cosA, nsinA
+    psq_st fc0, 24(m), 0, 0
+    psq_st fc0, 32(m), 0, 0
+    ps_merge00 fw1, fc1, fc0
+    psq_st fw0, 16(m), 0, 0
+    psq_st fw2, 0(m), 0, 0
+    psq_st fw1, 40(m), 0, 0
 rot_done:
     }
 }
@@ -535,7 +539,7 @@ asm void PSMTXScaleApply(const register Mtx src, register Mtx dst,
 void PSMTXQuat(register Mtx m, const register Quaternion* q)
 {
     register f32 zero;
-    register f32 one = 1.0f;
+    register f32 one = lbl_8047C288;
     register f32 two;
     register f32 scale;
     register f32 tmp0;
@@ -640,16 +644,19 @@ void C_MTXLightFrustum(Mtx m, f32 top, f32 bottom, f32 left, f32 right, f32 near
     extern const f32 lbl_8047C298;
     extern const f32 lbl_8047C29C;
     f32 tmp;
+    f32 factor;
 
     tmp = lbl_8047C288 / (right - left);
-    m[0][0] = (lbl_8047C298 * near) * tmp * scaleS;
+    factor = lbl_8047C298 * near;
+    m[0][0] = factor * tmp * scaleS;
     m[0][1] = lbl_8047C28C;
     m[0][2] = (right + left) * tmp * scaleS - transS;
     m[0][3] = lbl_8047C28C;
 
     tmp = lbl_8047C288 / (top - bottom);
     m[1][0] = lbl_8047C28C;
-    m[1][1] = (lbl_8047C298 * near) * tmp * scaleT;
+    factor = lbl_8047C298 * near;
+    m[1][1] = factor * tmp * scaleT;
     m[1][2] = (top + bottom) * tmp * scaleT - transT;
     m[1][3] = lbl_8047C28C;
 
@@ -1098,7 +1105,6 @@ asm void PSQUATMultiply(const register Quaternion* lhs,
 #endif
 
 #if !defined(SDK_CQUATROT_EXCLUDE)
-#pragma dont_inline on
 void C_QUATRotAxisRad(Quaternion* quat, const Vec* axis, f32 rad)
 {
     extern f32 sinf(f32 x);
@@ -1117,7 +1123,6 @@ void C_QUATRotAxisRad(Quaternion* quat, const Vec* axis, f32 rad)
     quat->z = sinHalf * normalized.z;
     quat->w = cosHalf;
 }
-#pragma dont_inline reset
 #endif
 #endif
 #endif
@@ -1125,41 +1130,36 @@ void C_QUATRotAxisRad(Quaternion* quat, const Vec* axis, f32 rad)
 
 #if !defined(SDK_POST_MTXVEC_EXCLUDE)
 #if !defined(SDK_CQUATSLERP_EXCLUDE)
-void C_QUATSlerp(const Quaternion* p, const Quaternion* q, Quaternion* r, f32 t)
-{
+void C_QUATSlerp(const Quaternion* p, const Quaternion* q, Quaternion* r, f32 t) {
     extern f32 acosf(f32 x);
     extern f32 sinf(f32 x);
-    extern const f32 lbl_8047C2C8;
-    extern const f32 lbl_8047C2CC;
-    extern const f32 lbl_8047C2D4;
-    f32 theta;
-    f32 sinTheta;
-    f32 cosTheta;
-    f32 pScale;
-    f32 qScale;
+    f32 theta, sin_th, cos_th;
+    f32 tp, tq;
 
-    cosTheta = p->x * q->x + p->y * q->y + p->z * q->z + p->w * q->w;
-    qScale = lbl_8047C2CC;
+    
+    cos_th = p->x * q->x + p->y * q->y + p->z * q->z + p->w * q->w;
+    tq = 1.0f;
 
-    if (cosTheta < lbl_8047C2C8) {
-        cosTheta = -cosTheta;
-        qScale = -qScale;
+    if (cos_th < 0.0f) {
+        cos_th = -cos_th;
+        tq = -tq;
     }
 
-    if (cosTheta <= lbl_8047C2D4) {
-        theta = acosf(cosTheta);
-        sinTheta = sinf(theta);
-        pScale = sinf((lbl_8047C2CC - t) * theta) / sinTheta;
-        qScale *= sinf(t * theta) / sinTheta;
+    if (cos_th <= 0.99999f) {
+        theta = acosf(cos_th);
+        sin_th = sinf(theta);
+
+        tp = sinf((1.0f - t) * theta) / sin_th;
+        tq *= sinf(t * theta) / sin_th;
     } else {
-        pScale = lbl_8047C2CC - t;
-        qScale *= t;
+        tp = 1.0f - t;
+        tq *= t;
     }
 
-    r->x = pScale * p->x + qScale * q->x;
-    r->y = pScale * p->y + qScale * q->y;
-    r->z = pScale * p->z + qScale * q->z;
-    r->w = pScale * p->w + qScale * q->w;
+    r->x = (tp * p->x) + (tq * q->x);
+    r->y = (tp * p->y) + (tq * q->y);
+    r->z = (tp * p->z) + (tq * q->z);
+    r->w = (tp * p->w) + (tq * q->w);
 }
 #endif
 #endif

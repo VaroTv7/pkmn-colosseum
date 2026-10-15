@@ -227,14 +227,6 @@ extern s32 fightTrainerAiWazaValueJibaku();
 extern s32 fightTrainerAiWazaValueNull();
 
 /* 0x8021A6CC size 0x98: fn_8021A6CC (owner line 1445) */
-#pragma optimization_level reset
-#pragma optimize_for_size reset
-#pragma scheduling reset
-#pragma dont_inline reset
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_801F4C14 fightFloorSetStatus
 void fn_8021A6CC(void) {
@@ -254,14 +246,6 @@ void fn_8021A6CC(void) {
 #undef fn_801F025C
 
 /* 0x8021A764 size 0xA8: fn_8021A764 (owner line 1654) */
-#pragma optimization_level reset
-#pragma optimize_for_size reset
-#pragma scheduling reset
-#pragma dont_inline reset
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_801F6E44 fightSideCheckWriteJoutaiDataId
 #define fn_801F4C14 fightFloorSetStatus
@@ -288,14 +272,6 @@ void fn_8021A764(void) {
 #undef fn_801F025C
 
 /* 0x8021A80C size 0x6C: fn_8021A80C (owner line 1360) */
-#pragma optimization_level reset
-#pragma optimize_for_size reset
-#pragma scheduling reset
-#pragma dont_inline reset
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 #define fn_801F54A4 fightFloorGetStatus
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_802653FC fightMenuFightOutPokemonRenewStatusMenu
@@ -316,14 +292,7 @@ void fn_8021A80C(void) {
 #undef fn_801F54A4
 
 /* 0x8021A878 size 0x10C: fn_8021A878 (owner line 4214) */
-#pragma optimization_level reset
 #pragma optimize_for_size on
-#pragma scheduling reset
-#pragma dont_inline reset
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_802016A4 fightOutPokemonGetSex
 #define fn_801F54A4 fightFloorGetStatus
@@ -376,14 +345,7 @@ doCall:
 #undef fn_801F025C
 
 /* 0x8021A984 size 0x194: fn_8021A984 (owner line 14563) */
-#pragma optimization_level reset
 #pragma optimize_for_size reset
-#pragma scheduling reset
-#pragma dont_inline on
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_8012640C pokemonGetStatus
 #define fn_801F453C fightFloorGetNowTenkouDataId
@@ -464,14 +426,6 @@ LAB_00217ae0:
 #undef fn_801F025C
 
 /* 0x8021AB18 size 0x84: WS_WEATHER_CHANGE (owner line 14636) */
-#pragma optimization_level reset
-#pragma optimize_for_size reset
-#pragma scheduling reset
-#pragma dont_inline on
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 #define fn_801F2988 fightFloorCheckWriteJoutaiDataId
 #define fn_801F4C14 fightFloorSetStatus
 #define fn_801F2934 fightFloorWriteJoutaiDataId
@@ -501,14 +455,6 @@ void WS_WEATHER_CHANGE(void)
 #undef fn_801F2988
 
 /* 0x8021AB9C size 0x80: fn_8021AB9C (owner line 1400) */
-#pragma optimization_level reset
-#pragma optimize_for_size reset
-#pragma scheduling reset
-#pragma dont_inline reset
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_8012640C pokemonGetStatus
 #define fn_80203ADC fightOutPokemonNowHpWaruValue
@@ -530,15 +476,9 @@ void fn_8021AB9C(void) {
 #undef fn_8012640C
 #undef fn_801F025C
 
-/* 0x8021AC1C size 0x390: fightCheckOneHitKO (owner line 14662) */
-#pragma optimization_level reset
+/* 0x8021AC1C size 0x390: fn_8021AC1C (owner line 14662) */
 #pragma optimize_for_size on
-#pragma scheduling reset
-#pragma dont_inline on
-#pragma opt_lifetimes reset
 #pragma opt_propagation off
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 void fightCheckOneHitKO(void)
 
 {
@@ -663,10 +603,8 @@ void fightCheckOneHitKO(void)
 }
 
 /* 0x8021AFAC size 0x104: fn_8021AFAC (owner line 4060) */
-#pragma optimization_level reset
 #pragma optimize_for_size on
 #pragma scheduling reset
-#pragma dont_inline reset
 #pragma opt_lifetimes reset
 #pragma opt_propagation reset
 #pragma opt_common_subs reset
@@ -714,14 +652,6 @@ void fn_8021AFAC(void) {
 #undef fn_801F025C
 
 /* 0x8021B0B0 size 0xF4: fn_8021B0B0 (owner line 4338) */
-#pragma optimization_level reset
-#pragma optimize_for_size on
-#pragma scheduling reset
-#pragma dont_inline reset
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 #define fn_801F54A4 fightFloorGetStatus
 #define fn_801F2A7C fightFloorGetGcHeroFightTrainerPtr
 #define fn_801FB1C0 fightTrainerGetStatus
@@ -769,14 +699,7 @@ skipB0B0:
 #undef fn_801F54A4
 
 /* 0x8021B1A4 size 0x1C0: fn_8021B1A4 (owner line 14787) */
-#pragma optimization_level reset
-#pragma optimize_for_size reset
-#pragma scheduling reset
-#pragma dont_inline on
 #pragma opt_lifetimes off
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 void fn_8021B1A4(void)
 
 {
@@ -867,14 +790,7 @@ done:
 }
 
 /* 0x8021B364 size 0x120: fn_8021B364 (owner line 14882) */
-#pragma optimization_level reset
-#pragma optimize_for_size on
-#pragma scheduling reset
-#pragma dont_inline on
 #pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 #define fn_80205B8C fightOutPokemonGetPokemonPtr
 #define fn_80123CD4 pokemonWazaCheckValid
 #define fn_8012640C pokemonGetStatus
@@ -933,14 +849,6 @@ u32 fn_8021B364(u32 r3, u32 r4)
 #undef fn_80205B8C
 
 /* 0x8021B484 size 0x18C: fn_8021B484 (owner line 14934) */
-#pragma optimization_level reset
-#pragma optimize_for_size reset
-#pragma scheduling reset
-#pragma dont_inline on
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 void fn_8021B484(void)
 {
     extern u32 GSrand();
@@ -1017,14 +925,6 @@ done:
 }
 
 /* 0x8021B610 size 0x18: fn_8021B610 (owner line 232) */
-#pragma optimization_level reset
-#pragma optimize_for_size reset
-#pragma scheduling reset
-#pragma dont_inline reset
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 u8* fn_8021B610(void) {
     u8* pc = lbl_8047B610;
     lbl_8047B626 = 0;
@@ -1033,14 +933,6 @@ u8* fn_8021B610(void) {
 }
 
 /* 0x8021B628 size 0xE4: fn_8021B628 (owner line 3937) */
-#pragma optimization_level reset
-#pragma optimize_for_size reset
-#pragma scheduling reset
-#pragma dont_inline reset
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_8012640C pokemonGetStatus
 #define fn_8011BBD8 wazaSetStatus
@@ -1074,14 +966,6 @@ void fn_8021B628(void) {
 #undef fn_801F025C
 
 /* 0x8021B70C size 0x54: WS_ABARERU (owner line 15009) */
-#pragma optimization_level reset
-#pragma optimize_for_size reset
-#pragma scheduling reset
-#pragma dont_inline on
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 void WS_ABARERU(void)
 
@@ -1103,14 +987,6 @@ void WS_ABARERU(void)
 #undef fn_801F025C
 
 /* 0x8021B760 size 0xD0: fn_8021B760 (owner line 3978) */
-#pragma optimization_level reset
-#pragma optimize_for_size on
-#pragma scheduling reset
-#pragma dont_inline reset
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_8012640C pokemonGetStatus
 #define fn_8020A2B8 fightWazaBiosCopy
@@ -1138,14 +1014,6 @@ void fn_8021B760(void) {
 #undef fn_801F025C
 
 /* 0x8021B830 size 0x40: WS_KUROIKIRI (owner line 15029) */
-#pragma optimization_level reset
-#pragma optimize_for_size reset
-#pragma scheduling reset
-#pragma dont_inline on
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 #define fn_801F37B0 fightFloorLoopValidFightOutPokemon
 #define fn_8021B870 _fightSeqWsKuroikiriSub__FPvUsPv
 void WS_KUROIKIRI(void)
@@ -1162,14 +1030,6 @@ void WS_KUROIKIRI(void)
 #undef fn_801F37B0
 
 /* 0x8021B870 size 0x48: _fightSeqWsKuroikiriSub__FPvUsPv (owner line 8952) */
-#pragma optimization_level reset
-#pragma optimize_for_size reset
-#pragma scheduling reset
-#pragma dont_inline reset
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 #define fn_802062FC fightOutPokemonCheckFightOut
 s32 _fightSeqWsKuroikiriSub__FPvUsPv(void* ctx, u16 param2, void* param3) {
     extern u8 fn_802062FC();
@@ -1181,14 +1041,6 @@ s32 _fightSeqWsKuroikiriSub__FPvUsPv(void* ctx, u16 param2, void* param3) {
 #undef fn_802062FC
 
 /* 0x8021B8B8 size 0x58: fn_8021B8B8 (owner line 1301) */
-#pragma optimization_level reset
-#pragma optimize_for_size reset
-#pragma scheduling reset
-#pragma dont_inline reset
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma opt_common_subs reset
-#pragma switch_tables reset
 void fn_8021B8B8(void) {
     u8 val = *(u8*)((u8*)lbl_80379F58 + (0x1 << 16) + 0x601e);
     if (fn_8021B910(val & 0xF0, val & 0x0F, lbl_8047B610[1],
@@ -1196,12 +1048,3 @@ void fn_8021B8B8(void) {
         lbl_8047B610 += 6;
     }
 }
-
-#pragma switch_tables reset
-#pragma opt_common_subs reset
-#pragma opt_propagation reset
-#pragma opt_lifetimes reset
-#pragma dont_inline reset
-#pragma scheduling reset
-#pragma optimize_for_size reset
-#pragma optimization_level reset

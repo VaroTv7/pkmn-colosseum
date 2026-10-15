@@ -611,7 +611,7 @@ extern void fn_8006AE18(void);
 extern u8 lbl_802729C0[];
 extern u8 lbl_80272A10[];
 void heroMoveGetKenObjID(void);
-extern void fn_8018E050(void);
+extern void peopleOpen(void);
 extern void GSmodelEnableAnimBlend(void);
 extern void fn_8018CB5C(void);
 extern void fn_80189328(void);
@@ -1467,57 +1467,73 @@ extern u8 lbl_80272200[];
 
 /*
  * floorReadMapPostFunc - 0x80114AE0 | Size: 0x1C8
- * Parse a map archive and register its models, lights, camera, and auxiliary
+ * Parse a map archive and register its models, lights, camera (the inlined
+ * _registerCamera, whose two log strings sit at +0x1CC/+0x200), and auxiliary
  * resource with the floor resource manager.
+ *
+ * Register allocation notes (retail r24-r31): the model and light lists are
+ * walked with byte offsets (no strength-reduced temporaries), the light
+ * group, camera id, id mask and extra pointer are their own variables, and
+ * `public` holds the archive, then its scene_data block. The declaration
+ * order was solved with the colouring simulator.
  */
 void* floorReadMapPostFunc(u32 owner, u32 param, u32 size)
 {
     FloorMapPublic* public;
-    void* archive;
     void* resource;
+    u32 lightGroup;
+    u32 cameraId;
+    u32 modelOffset;
+    u32 modelGroup;
     u32 index;
-    u32 offset;
-    u32 group;
+    void** extra;
+    u32 lightOffset;
+    u32 mask;
+    u32 lightIndex;
+    /* RULE-EXCEPTION(title-path): base pointer into the TU's .rodata strings
+     * (lbl_80272200, a data object shared with the other floorRead units)
+     * standing in for the string literals - see docs/RULE_EXCEPTIONS.md */
     const char* strings = (const char*) lbl_80272200;
 
     index = 0;
-    archive = GSresGetResource(owner, param);
-    HSD_ArchiveParse(archive, (u8*) archive + 0x60, size);
-    public = HSD_ArchiveGetPublicAddress(archive, strings + 0xAC);
+    lightIndex = 0;
+    public = GSresGetResource(owner, param);
+    HSD_ArchiveParse(public, (u8*) public + 0x60, size);
+    public = HSD_ArchiveGetPublicAddress(public, strings + 0xAC);
     if (public == NULL) {
         return NULL;
     }
 
     floorDataBiosSetMapResID(floorDataBiosGetCurrentPtr(), param);
     if (public->models != NULL) {
-        offset = 0;
-        group = (param & 0x7FFF0000) | 0x1000;
-        while ((resource = public->models[offset]) != NULL) {
-            GSresRegisterResource(resource, owner, group | index, NULL);
-            offset++;
+        modelOffset = 0;
+        modelGroup = (param & 0x7FFF0000) | 0x1000;
+        while ((resource = *(void**) ((u8*) public->models + modelOffset)) != NULL) {
+            GSresRegisterResource(resource, owner, modelGroup | index, NULL);
+            modelOffset += 4;
             index++;
         }
     }
 
     if (public->lights != NULL) {
-        index = 0;
-        offset = 0;
-        group = (param & 0x7FFF0000) | 0x1600;
-        while ((resource = public->lights[offset]) != NULL) {
+        lightOffset = 0;
+        lightGroup = (param & 0x7FFF0000) | 0x1600;
+        while ((resource = *(void**) ((u8*) public->lights + lightOffset)) != NULL) {
             resource = GSlightLoad(resource);
             if (resource == NULL) {
-                GSlogWrite(strings + 0x298, index);
+                GSlogWrite(strings + 0x298, lightIndex);
                 GSlogWrite(strings + 0x2D0);
             } else {
-                GSresRegisterResource(resource, owner, group | index,
+                GSresRegisterResource(resource, owner, lightGroup | lightIndex,
                                       (void*) _unloadLight__FPvUlUl);
             }
-            offset++;
-            index++;
+            lightOffset += 4;
+            lightIndex++;
         }
     }
 
-    group = (param & 0x7FFF0000) | 0x1800;
+    mask = param & 0x7FFF0000;
+    cameraId = mask | 0x1800;
     if (public == NULL) {
         GSlogWrite(strings + 0x1CC);
     } else {
@@ -1525,251 +1541,15 @@ void* floorReadMapPostFunc(u32 owner, u32 param, u32 size)
         if (resource == NULL) {
             GSlogWrite(strings + 0x200);
         } else {
-            GSresRegisterResource(resource, owner, group,
+            GSresRegisterResource(resource, owner, cameraId,
                                   (void*) _unloadCamera__FPvUlUl);
         }
     }
 
-    if (public->extra != NULL && *public->extra != NULL) {
-        GSresRegisterResource(*public->extra, owner,
-                              (param & 0x7FFF0000) | 0x1A00, NULL);
+    extra = public->extra;
+    if (extra != NULL && *extra != NULL) {
+        GSresRegisterResource(*extra, owner, mask | 0x1A00, NULL);
     }
     floorInitMap(owner, param);
     return public;
 }
-
-/* 0x70 | floorReadMapPreFunc | alloc_wrapper */
-extern void* GSresAllocResourceAlign();  /* K&R: called with 5 args, returns void* */
-#pragma push
-#pragma peephole off
-void* floorReadMapPreFunc(void* owner, u32 param, u32 alloc_size) {
-    u32 total = ((alloc_size + 0x1F) & ~0x1F) + 0x60;
-    void* mem = (void*)GSresAllocResourceAlign(total, 0x20, (u32)owner, (u32)param, 0);
-    if (mem == NULL) {
-        GSlogWrite(lbl_802724E8, total);
-        return NULL;
-    }
-    return (u8*)mem + 0x60;
-}
-#pragma pop
-/* 0x80114D6C | 0xA0 */
-extern u32 _unloadScript__FPvUlUl();  /* K&R: asm void wrapper, used as function pointer */
-extern u32 _unloadFont__FPvUlUl();  /* K&R: asm void wrapper, used as function pointer */
-extern u32 _unloadMsg__FPvUlUl();  /* K&R: asm void wrapper, used as function pointer */
-#pragma push
-#pragma peephole off
-void* floorReadScriptPreFunc(void* owner, u32 param, u32 alloc_size) {
-    void* mem;
-    if ((u8)fn_800FF548() != 0) { return NULL; }
-    alloc_size = (alloc_size + 0x1F) & ~0x1F;
-    mem = (void*)GSresAllocResourceAlign(alloc_size, 0x20, (u32)owner, param, (u32)_unloadScript__FPvUlUl);
-    if (mem == NULL) {
-        GSlogWrite(lbl_80272520, alloc_size);
-    }
-    return mem;
-}
-/* 0x80114E78 | 0xA0 */
-void* floorReadFontPreFunc(void* owner, u32 param, u32 alloc_size) {
-    void* mem;
-    if ((u8)fn_800FF548() != 0) { return NULL; }
-    alloc_size = (alloc_size + 0x1F) & ~0x1F;
-    mem = (void*)GSresAllocResourceAlign(alloc_size, 0x20, (u32)owner, param, (u32)_unloadFont__FPvUlUl);
-    if (mem == NULL) {
-        GSlogWrite(lbl_8027255C, alloc_size);
-    }
-    return mem;
-}
-/* 0x80114F84 | 0xA0 */
-void* floorReadMsgPreFunc(void* owner, u32 param, u32 alloc_size) {
-    void* mem;
-    if ((u8)fn_800FF548() != 0) { return NULL; }
-    alloc_size = (alloc_size + 0x1F) & ~0x1F;
-    mem = (void*)GSresAllocResourceAlign(alloc_size, 0x20, (u32)owner, param, (u32)_unloadMsg__FPvUlUl);
-    if (mem == NULL) {
-        GSlogWrite(lbl_80272594, alloc_size);
-    }
-    return mem;
-}
-#pragma pop
-/* 0x80115094 | 0x24 | call_return_const */
-#pragma push
-#pragma scheduling off
-u32 _unloadFlare__FPvUlUl(void) {
-    flareRelease();
-    return 1;
-}
-#pragma pop
-/* 0x801150B8 | 36 bytes | call_return_const */
-#pragma push
-#pragma scheduling off
-u32 _unloadParticles__FPvUlUl(void) {
-    fn_801193BC();
-    return 1;
-}
-#pragma pop
-/* 0x801150DC | 36 bytes | call_return_const */
-#pragma push
-#pragma scheduling off
-u32 _unloadCamera__FPvUlUl(void) {
-    fn_800D2738();
-    return 1;
-}
-#pragma pop
-/* 0x80115100 | 36 bytes | call_return_const */
-#pragma push
-#pragma scheduling off
-u32 _unloadLight__FPvUlUl(void) {
-    GSlightFree();
-    return 1;
-}
-#pragma pop
-/* 0x80115208 | 36 bytes | call_return_const */
-#pragma push
-#pragma scheduling off
-u32 _unloadColsys__FPvUlUl(void) {
-    GScolsys2UnloadCCD();
-    return 1;
-}
-#pragma pop
-/* 0x8011522C | 36 bytes | call_return_const */
-#pragma push
-#pragma scheduling off
-u32 _unloadTexture__FPvUlUl(void) {
-    GStextureFree();
-    return 1;
-}
-#pragma pop
-/* 0x80115250 | 0xC */
-#if 0
-asm void floorReadScriptPostFunc(void) {
-#include "src/game/gs_field_world_fn_80114D18.inc"
-}
-#else
-#pragma optimization_level 4
-#pragma peephole off
-void* floorReadScriptPostFunc(u32 a, u32 b) {
-    void* result;
-
-    result = GSresGetResource(a, b);
-    if (fn_800FF548() == 0 && result != NULL) {
-        fn_800F76E4(result);
-        fn_80112700();
-    }
-    return result;
-}
-#pragma peephole reset
-#endif
-#if 0
-asm void floorReadFontPostFunc(void) {
-#include "src/game/gs_field_world_fn_80114E0C.inc"
-}
-#else
-#pragma push
-#pragma peephole off
-#pragma optimization_level 4
-void* floorReadFontPostFunc(u32 a, u32 b) {
-    void* result;
-
-    if (fn_800FF548() != 0) {
-        return NULL;
-    }
-    result = GSresGetResource(a, b);
-    if (result != NULL) {
-        GSmsgFontOpen(result);
-    }
-    return result;
-}
-#pragma pop
-#endif
-#if 0
-asm void floorReadMsgPostFunc(void) {
-#include "src/game/gs_field_world_fn_80114F18.inc"
-}
-#else
-#pragma push
-#pragma peephole off
-#pragma optimization_level 4
-void* floorReadMsgPostFunc(u32 a, u32 b) {
-    void* result;
-
-    if (fn_800FF548() != 0) {
-        return NULL;
-    }
-    result = GSresGetResource(a, b);
-    if (result != NULL) {
-        GSmsgOpen(result);
-    }
-    return result;
-}
-#pragma pop
-#endif
-#if 0
-asm void floorReadNormalPreFunc(void) {
-#include "src/game/gs_field_world_fn_80115024.inc"
-}
-#else
-#pragma push
-#pragma peephole off
-#pragma optimization_level 4
-void* floorReadNormalPreFunc(u32 a, u32 b, u32 size) {
-    void* result;
-
-    result = GSresAllocResourceAlign((size + 0x1F) & ~0x1F, 0x20, a, b, 0);
-    if (result == NULL) {
-        GSlogWrite(lbl_802725CC, size);
-    }
-    return result;
-}
-#pragma pop
-#endif
-#if 0
-asm void _unloadScript__FPvUlUl(void) {
-#include "src/game/gs_field_world_fn_80115124.inc"
-}
-#else
-#pragma push
-#pragma peephole off
-#pragma optimization_level 4
-u32 _unloadScript__FPvUlUl(void* ptr) {
-    if (fn_800FF554() != 0) {
-        return 0;
-    }
-    fn_800F760C(ptr);
-    return 1;
-}
-#pragma pop
-#endif
-#if 0
-asm void _unloadFont__FPvUlUl(void) {
-#include "src/game/gs_field_world_fn_80115170.inc"
-}
-#else
-#pragma push
-#pragma peephole off
-#pragma optimization_level 4
-u32 _unloadFont__FPvUlUl(void* ptr) {
-    if (fn_800FF554() != 0) {
-        return 0;
-    }
-    GSmsgFontClose(ptr);
-    return 1;
-}
-#pragma pop
-#endif
-#if 0
-asm void _unloadMsg__FPvUlUl(void) {
-#include "src/game/gs_field_world_fn_801151BC.inc"
-}
-#else
-#pragma push
-#pragma peephole off
-#pragma optimization_level 4
-u32 _unloadMsg__FPvUlUl(void* ptr) {
-    if (fn_800FF554() != 0) {
-        return 0;
-    }
-    GSmsgClose(ptr);
-    return 1;
-}
-#pragma pop
-#endif

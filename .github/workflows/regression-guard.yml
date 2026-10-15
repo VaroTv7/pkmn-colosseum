@@ -1,14 +1,22 @@
 name: Regression Guard
-# Fails a PR if any function's objdiff match % drops vs the base branch.
-# DOL byte-exactness alone is a dtk invariant (asm fallback), NOT a match signal —
-# this checks per-function fuzzy_match_percent, which the build's report.json holds.
+# Byte-identical fallback reconstruction is not a source-matching measurement.
+# Compare source reports by module/address, including renames and removals.
 on:
   pull_request:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: regression-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   regression:
     container: ghcr.io/dougchansan/pkmn-colosseum-build:main
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     strategy:
       matrix:
         version: [GC6E01]
@@ -17,30 +25,59 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
+          persist-credentials: false
+
       - name: Git config
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-      - name: Prepare orig
-        run: cp -a /orig .
-      - name: Build BASE report
+
+      - name: Prepare and verify private original inputs
         run: |
-          git checkout -q ${{ github.event.pull_request.base.sha }}
+          mkdir -p orig
+          cp -a /orig/. orig/
+          python3 tools/ci_retail.py \
+              --manifest config/${{ matrix.version }}/build.sha1 \
+              --orig orig/${{ matrix.version }}
+
+      # A separate worktree prevents HEAD from inheriting BASE objects, generated
+      # split configuration, Ninja logs or stale reports. No build cache is used.
+      - name: Build BASE report in an isolated worktree
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          BASE_DIR="$RUNNER_TEMP/regression-base-${{ matrix.version }}"
+          git worktree add --detach "$BASE_DIR" "$BASE_SHA"
+          mkdir -p "$BASE_DIR/orig"
+          cp -a /orig/. "$BASE_DIR/orig/"
+          cd "$BASE_DIR"
           python configure.py --map --version ${{ matrix.version }} --binutils /binutils --compilers /compilers
-          ninja build/${{ matrix.version }}/report.json
-          cp build/${{ matrix.version }}/report.json /tmp/base_report.json
-      - name: Build HEAD report
+          ninja -j2 all_source build/${{ matrix.version }}/report.json
+          cp build/${{ matrix.version }}/report.json "$RUNNER_TEMP/base_report.json"
+
+      - name: Build HEAD report from all source
         run: |
-          git checkout -q ${{ github.sha }}
           python configure.py --map --version ${{ matrix.version }} --binutils /binutils --compilers /compilers
-          ninja build/${{ matrix.version }}/report.json
-          cp build/${{ matrix.version }}/report.json /tmp/head_report.json
-      - name: Fail on any per-function regression
+          ninja -j2 all_source build/${{ matrix.version }}/report.json
+          cp build/${{ matrix.version }}/report.json "$RUNNER_TEMP/head_report.json"
+
+      - name: Fail on regression or unexplained function removal
         run: |
-          python3 .github/scripts/check_regression.py \
-            /tmp/base_report.json /tmp/head_report.json \
-            --cleanup-manifest .github/regression_policy_cleanup.json \
-            --base-sha ${{ github.event.pull_request.base.sha }}
-      # src/ is ~41% one-line #include shims (the sanctioned split-by-address
-      # technique). That is exactly the shape that would hide double counting,
-      # so assert the metric still measures the game exactly once.
-      - name: Fail if the metric double-counts or drifts off the DOL
-        run: python3 .github/scripts/check_metric_integrity.py /tmp/head_report.json orig/${{ matrix.version }}/sys/main.dol
+          python3 tools/audit_report_transition.py \
+              "$RUNNER_TEMP/base_report.json" "$RUNNER_TEMP/head_report.json" \
+              --output "$RUNNER_TEMP/regression-audit.json"
+
+      - name: Fail if the metric double-counts or drifts
+        run: |
+          python3 .github/scripts/check_metric_integrity.py \
+              "$RUNNER_TEMP/head_report.json" orig/${{ matrix.version }}/sys/main.dol
+
+      - name: Upload report-only regression evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.version }}_regression_audit
+          path: |
+            ${{ runner.temp }}/base_report.json
+            ${{ runner.temp }}/head_report.json
+            ${{ runner.temp }}/regression-audit.json
+          if-no-files-found: ignore
+          retention-days: 7

@@ -43,6 +43,7 @@
 
 /* Pokemon data structure size is 0xE0 (224) bytes, indexed via mulli rN, rN, 0xE0 */
 struct BattlePokemon;
+struct WazaSequenceNode;
 
 /* =========================================================================
  * Constants
@@ -434,7 +435,7 @@ typedef struct GStexture GStexture;
 /* fn_801C9C9C */ s32  fn_801C9C9C(void);
 /* fn_801C9F5C */ void std182_tvNewsEvent(void);
 /* fn_801CA358 */ u8   std211_tvSetChannelByStory(void);
-/* fn_801CA5C4 */ void fn_801CA5C4(s32 effectID, f32 x, f32 y, f32 z);
+/* fn_801CA5C4 */ void fieldStartEncount(s32 effectID, f32 x, f32 y, f32 z);
 
 /* Scene transitions & mega-functions */
 /* fn_801CBF64 */ void fn_801CBF64(void);                        /* complex anim controller 0x41C */
@@ -476,7 +477,7 @@ typedef struct GStexture GStexture;
 /* fn_801D84F4 */ void fn_801D84F4(void);                        /* wazaSequenceEntryStart */
 /* _wazaSequenceEffectEntryStart */ u8 _wazaSequenceEffectEntryStart(void* entry);       /* wazaSequenceStartEntry */
 /* fn_801D8B38 */ void fn_801D8B38(void* entry);                 /* _wazaSequenceParticleEntryStart */
-/* _wazaSequenceModelEntryStart */ u8 _wazaSequenceModelEntryStart(void* entry);                 /* _wazaSequenceModelEntryStart */
+/* _wazaSequenceModelEntryStart */ u8 _wazaSequenceModelEntryStart(struct WazaSequenceNode* entry);                 /* _wazaSequenceModelEntryStart */
 /* fn_801D9950 */ void fn_801D9950(void* owner, f32* scale, s32 selector);    /* wazaSequencePokemonMotionStart */
 
 /* Waza system lifecycle */

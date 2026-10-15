@@ -1,6 +1,11 @@
 /**
  * @file gs_range_80033278.c
- * @brief gs-engine code, 0x80033278 - 0x80035E04 (20 fns).
+ * @brief gs-engine code, 0x80033278 - 0x80035C48 (16 fns).
+ *
+ * fn_80035C48, fn_80035D70 and fn_80035DA0 live in game/gs_exact_80035C48.c.
+ *
+ * fn_80035DD4 (formerly the last function here) is the opening-demo
+ * finish callback of the movie TU and now lives in game/movie.c.
  *
  * Range unit assigned from the propagated subsystem map
  * (tools/subsystem_propagation.py, >=80% single-label dominance;
@@ -120,6 +125,18 @@ static void sysvarsWaitForTransfer(void)
 
     progress = lbl_8047B9F8;
     while (progress < lbl_8047BA18) {
+        _threadSwitch();
+        progress += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
+    }
+}
+
+/* The same wait for two seconds (fn_80034280's GBA link retries). */
+static void sysvarsWaitTwoSeconds(void)
+{
+    f32 progress;
+
+    progress = lbl_8047B9F8;
+    while (progress < lbl_8047BA28) {
         _threadSwitch();
         progress += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
@@ -977,7 +994,7 @@ s32 fn_80034280(void)
         switch (state) {
         case 2:
             winMsgOpen(8, 0x3B88, 0, 0);
-            sysvarsWaitForTransfer();
+            sysvarsWaitTwoSeconds();
             /* fallthrough */
         case 19:
             soundStartSE(0x3C7);
@@ -989,7 +1006,7 @@ s32 fn_80034280(void)
 
         case 17:
             winMsgOpen(8, 0x3B88, 0, 0);
-            sysvarsWaitForTransfer();
+            sysvarsWaitTwoSeconds();
             state = 18;
             fn_8007AB10(state, &transferActive);
             break;
@@ -1210,16 +1227,20 @@ void fn_80034830(u8 enabled, s32 selection,
     extern u8 lbl_803A3334[];
     extern SysvarsSaveWork* lbl_8047A430;
     extern void GScharCpy(void*, const void*);
+    s32 region;
+    s32 variant;
     u8* destination;
     s32 moveIndex;
     s32 i;
     u8 isNew;
 
     isNew = 1;
+    region = *(s8*)(lbl_803A3334 + 0x24);
+    variant = *(s8*)(lbl_803A3334 + 0x26);
     for (i = 0; i < 10; i++) {
         if (lbl_8047A430->history[i].trainerType == lbl_803A3334[8] &&
-            lbl_8047A430->history[i].region == (s8)lbl_803A3334[0x24] &&
-            lbl_8047A430->history[i].variant == (s8)lbl_803A3334[0x26]) {
+            lbl_8047A430->history[i].region == region &&
+            lbl_8047A430->history[i].variant == variant) {
             isNew = 0;
             break;
         }
@@ -1260,6 +1281,31 @@ void fn_80034830(u8 enabled, s32 selection,
     }
 }
 #pragma pop
+
+/* The highest required level among a battle group's four members.
+ * RULE-EXCEPTION(user-approved): single-use inline helper; only inlining
+ * keeps retail's `li r5,0; mr r6,r5` start of the loop - see
+ * docs/RULE_EXCEPTIONS.md */
+static inline u8 sysvarsGroupMaxLevel(u8* group)
+{
+    extern u8 lbl_803A3334[];
+    u16 slot;
+    u8 maxRequired;
+    s32 index;
+    u8 required;
+
+    maxRequired = 0;
+    for (slot = 0; slot < 4; slot++) {
+        index = (s8)group[0x3B9 + slot];
+        if (index >= 0) {
+            required = lbl_803A3334[index * 0x2A + 0x517];
+            if (maxRequired < required) {
+                maxRequired = required;
+            }
+        }
+    }
+    return maxRequired;
+}
 
 #pragma push
 #pragma peephole off
@@ -1309,16 +1355,7 @@ void fn_80034B5C(u8* valid, s8* selectionOut, u8* valueOut)
         layer = fn_80082FE4(lbl_8047A434, candidate);
         if (layer[0x1C + (s8)region * 0xE] != 0) {
             group = lbl_803A3334 + (s8)lbl_803A3334[0x5E + candidate] * 0x28;
-            maxRequired = 0;
-            for (slot = 0; slot < 4; slot++) {
-                index = (s8)group[0x3B9 + slot];
-                if (index >= 0) {
-                    required = lbl_803A3334[index * 0x2A + 0x517];
-                    if (maxRequired < required) {
-                        maxRequired = required;
-                    }
-                }
-            }
+            maxRequired = sysvarsGroupMaxLevel(group);
             difference = maxLevel - maxRequired;
             sign = difference >> 31;
             score[candidate] = (sign ^ difference) - sign;
@@ -1405,7 +1442,7 @@ void fn_80034EF0(u8* arg0, u8* arg1) {
     extern void fn_800FB680(s32, s32, u32, u16);
     extern s32 heroGetStatus(s32, s32, s32);
     extern void msgctrlSetValue(s32, s32);
-    extern void fn_800FBB34(s32, s32, s32, s32, u32, u16);
+    extern void fn_800FBB34(s32, s32, s16, s16, u32, u16);
     s32 mask;
     u32 byte;
     s32 value;
@@ -1418,8 +1455,11 @@ void fn_80034EF0(u8* arg0, u8* arg1) {
     fn_800FB680(0, 0, value, 0x3CC6);
     status = heroGetStatus(0, 0xD, 0);
     msgctrlSetValue(0x34, status);
+    /* RULE-EXCEPTION(user-approved): dead store of the x position; at this
+     * function's optimization level it only orders the argument setup (li r8
+     * before the extsh) - see docs/RULE_EXCEPTIONS.md */
     position = *(s16*)(arg1 + 0x54) + 2;
-    fn_800FBB34(0, 0, position, *(s16*)(arg1 + 0x56), value, 0x3CD3);
+    fn_800FBB34(0, 0, *(s16*)(arg1 + 0x54) + 2, *(s16*)(arg1 + 0x56), value, 0x3CD3);
 }
 #pragma pop
 
@@ -1932,110 +1972,4 @@ void fn_80034FB4(void)
     }
     lbl_8047A438 = 0;
 }
-#pragma pop
-
-/* fn_80035C48 - 0x80035C48 | size: 0x128 */
-#pragma push
-#pragma peephole off
-void fn_80035C48(void) {
-    extern u8 lbl_803A3288[];
-    extern u32 lbl_8047A430;
-    extern u8 lbl_8047A438;
-    extern u8 lbl_8047A439;
-    extern u8 lbl_8047A440;
-    extern u32 lbl_8047A444;
-    extern u8 lbl_8047A449;
-    extern u32 lbl_8047A44C;
-    extern u8 lbl_8047A454;
-    extern u32 lbl_8047A458;
-    extern void* fn_80083AF4(s32, s32);
-    extern s32 fn_80083BF8(s32);
-    extern u32 GSmsgGetGSchar(u32);
-    extern u32 std093_getCurrentGroupID(void);
-    extern u8* savedataGetStatus(s32, s32);
-    extern u32 std228_soundGetCurrentBackgroundMusic(void);
-    extern void std104_soundSetBackgroundMusic(u32, s32, s32);
-    extern void cameraPlayAnime(u32, u32, s32, s32);
-    extern void GScharLenCpy(void*, u32, s32);
-    u8* work;
-    u32 soundId;
-    u8 resetFlag;
-
-    if (lbl_8047A438 == 0) {
-        if (lbl_8047A439 != 0) {
-            lbl_8047A458 = 2;
-        } else {
-            lbl_8047A458 = 1;
-        }
-        cameraPlayAnime(std093_getCurrentGroupID(), 0x11171800, 0, 0);
-        if (lbl_8047A439 != 0) {
-            soundId = 0x446;
-        } else {
-            soundId = 0x4CD;
-        }
-        if (soundId != std228_soundGetCurrentBackgroundMusic()) {
-            std104_soundSetBackgroundMusic(soundId, 0, 0x7F);
-        }
-        lbl_8047A454 = 0;
-        lbl_8047A449 = 0;
-        lbl_8047A444 = 0x21;
-        GScharLenCpy(lbl_803A3288, GSmsgGetGSchar(0x3CD1), 0x50);
-        *(u16*)(lbl_803A3288 + 0x9E) = 0;
-        work = savedataGetStatus(0, 0xD);
-        lbl_8047A430 = (u32)work;
-        resetFlag = lbl_8047A440;
-        lbl_8047A44C = *(u32*)(work + 0x49C8);
-        if (resetFlag != 0) {
-            if (fn_80083BF8(0) > 0) {
-                *(u16*)fn_80083AF4(0, 0) = 0;
-            }
-            lbl_8047A440 = 0;
-        }
-    }
-}
-#pragma pop
-
-/* fn_80035D70 - 0x80035D70 | size: 0x30 */
-#pragma push
-#pragma peephole off
-void std202_warpToMenuRoom393(void) {
-    extern void std098_mapWarpToMenuRoom(u32);
-    extern void _threadSwitch(void);
-    extern u8 lbl_8047A439;
-    u32 flag;
-
-    flag = 1;
-    lbl_8047A439 = flag;
-    std098_mapWarpToMenuRoom(0x393);
-    _threadSwitch();
-}
-#pragma pop
-
-/* fn_80035DA0 - 0x80035DA0 | size: 0x34 */
-#pragma push
-#pragma peephole off
-void fn_80035DA0(void) {
-    extern void floorLink(u32, s32);
-    extern void _threadSwitch(void);
-    extern u8 lbl_8047A439;
-
-    lbl_8047A439 = 0;
-    floorLink(0x393, 0);
-    _threadSwitch();
-}
-#pragma pop
-
-/* fn_80035DD4 - 0x80035DD4 | size: 0x30 */
-#pragma push
-#pragma scheduling off
-#pragma optimize_for_size on
-void fn_80035DD4(void) {
-    extern void fadeSet(f32, u32);
-    extern void fadeCheck(u32);
-    extern f32 lbl_8047BA30;
-
-    fadeSet(lbl_8047BA30, 3);
-    fadeCheck(1);
-}
-#pragma optimize_for_size reset
 #pragma pop

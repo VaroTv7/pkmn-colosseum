@@ -364,11 +364,7 @@ extern void gfxLoadTexture(u32 a, void* b);
 extern f32 fn_800E0BA0(void);
 extern void gfxVtxTexCoord(u32 a, f32 b, f32 c);
 extern void fn_800D7E5C(void);
-extern u32 lbl_8047D148;
-extern u32 lbl_8047D14C;
-extern u32 lbl_8047D150;
-extern u32 lbl_8047D158;
-extern u32 lbl_8047D154;
+extern void set__5GSvecFfff(void* dst, f32 x, f32 y, f32 z);
 /* Forward declarations for self-referencing asm blocks */
 extern u32 _lightningRenderMain(void* ptr);
 extern u32 fn_80138630(void* ptr);
@@ -380,15 +376,16 @@ extern u32 fn_80138B74(void* ptr);
 extern u32 fn_80138BBC(void* ptr);
 extern u32 fn_80138CCC(void* ptr);
 extern u32 fn_80138DE4(void* ptr, u32 delta);
-extern void fn_80139074(void* entry, void* parent);
+extern void fn_80139074(void* entry, u8* leaf);
 extern u8 _leaffxGenerateLeafData(void* ptr, void* entry);
 extern u32 fn_80139898(void* ptr);
 extern u32 fn_801398E0(void* ptr);
 extern u32 fn_80139934(void* ptr);
 extern BOOL fn_80139AC4(void* ptr, u32 tick);
 extern u32 fn_80139D10(void* ptr);
-extern void fn_80139E80(void* entry, void* parent, void* cameraPos, void* modelPos);
-extern void fn_8013A1D4(void* arg0, void* arg1, void* arg2, u32 arg3, f32 arg4);
+extern void fn_80139E80(u8* e, u8* p, void* cameraPos, void* modelPos);
+struct ElectronPoint;
+extern void fn_8013A1D4(u8* entry, u8* parent, struct ElectronPoint* origin, u32 depth, f32 weight);
 extern u32 fn_8013A49C(void* ptr);
 extern u32 fn_8013A520(void* ptr);
 extern u32 fn_8013AA8C(void* ptr, u16 delta);
@@ -463,16 +460,41 @@ u32 fn_801380D4(void* callbacks) {
 }
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013814C)
 #if 0
 asm void _lightningRenderMain(void) {
 #include "src/game/effect/effect_visual__lightningRenderMain.inc"
 }
 #else
+/*
+ * RULE-EXCEPTION(user-approved): _lightningRenderMain's .sdata2 pool
+ * (0x8047D148-0x8047D160) as named stand-ins, defined after the function so
+ * MWCC still loads them; fn_80138838's 1.0f, 0.0f and 2*pi literals are
+ * redirected to these names (constant_import) — see docs/RULE_EXCEPTIONS.md
+ */
+extern u32 lbl_8047D148;
+extern u32 lbl_8047D14C;
+extern u32 lbl_8047D150;
+extern u32 lbl_8047D154;
+extern u32 lbl_8047D158;
+
+/*
+ * RULE-EXCEPTION(user-approved): local pragma; with named pool loads the
+ * front end would otherwise merge the two reads of 1.0f into an early
+ * temporary and colour the clamp differently — see docs/RULE_EXCEPTIONS.md
+ */
+#pragma push
+#pragma opt_common_subs off
 u32 _lightningRenderMain(void* ptr) {
-    u8* p;
+    u8* point;
+    u32 j;
+    u32 segments;
+    u16 i;
+    u16 count;
     u8* entry;
     void* model;
+    u8* p;
     void* camera;
     f32 modelPos[3];
     f32 cameraPos[3];
@@ -480,114 +502,128 @@ u32 _lightningRenderMain(void* ptr) {
     f32 unused;
     f32 distance;
     f32 scale;
+    f32 width;
+    f32 outer;
+    f32 grow;
     f32 matrix[12];
-    u16 count;
-    u16 i;
-    u32 segments;
-    u32 j;
 
-    if (ptr == NULL) {
-        return 0;
-    }
+    if (ptr != NULL) {
+        p = ptr;
+        count = *(u16*)(p + 0x8);
+        model = GSresGetResource(*(u16*)(p + 0xA), *(u16*)(p + 0xC));
+        if (model == NULL) {
+            return 0;
+        }
 
-    p = ptr;
-    count = *(u16*)(p + 0x8);
-    model = GSresGetResource(*(u16*)(p + 0xA), *(u16*)(p + 0xC));
-    if (model == NULL) {
-        return 0;
-    }
+        GSmodelGetPosition(model, modelPos);
+        _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
+        camera = GScameraGetActiveCamera();
+        GScameraGetPosition(camera, cameraPos);
+        GScameraGetPerspective(camera, &perspective, &unused, &unused, &unused);
+        distance = GSvecDistance(cameraPos, modelPos);
+        gfxSetBlendMode(1, 6, 1);
+        gfxSetUpdates(1, 1, 1);
+        gfxSetZMode(1, 1, 1);
+        gfxSetCullMode(0);
+        scale = *(f32*)&lbl_8047D148 * vecMag(p + 0x28) / (distance * perspective);
+        if (scale > *(f32*)&lbl_8047D14C) {
+            scale = *(f32*)&lbl_8047D14C;
+        }
+        fn_800B9404((s32)(*(f32*)&lbl_8047D150 * scale), 5);
+        gfxSetFlags(1);
+        gfxClearFlags(6);
+        gfxSetVtxDesc(*(void**)(p + 0x14));
+        fn_800E05C0(matrix, modelPos[0], modelPos[1], modelPos[2]);
+        fn_800D7F14(matrix);
+        fn_800E048C(matrix, *(f32*)(p + 0x28), *(f32*)(p + 0x2C), *(f32*)(p + 0x30));
+        fn_800D7F14(matrix);
+        gfxSetPrimitive(2);
 
-    GSmodelGetPosition(model, modelPos);
-    _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
-    camera = GScameraGetActiveCamera();
-    GScameraGetPosition(camera, cameraPos);
-    GScameraGetPerspective(camera, &perspective, &unused, &unused, &unused);
-    distance = GSvecDistance(cameraPos, modelPos);
-    gfxSetBlendMode(1, 6, 1);
-    gfxSetUpdates(1, 1, 1);
-    gfxSetZMode(1, 1, 1);
-    gfxSetCullMode(0);
-    scale = *(f32*)&lbl_8047D148 * vecMag(p + 0x28);
-    scale /= distance * perspective;
-    if (scale > *(f32*)&lbl_8047D14C) {
-        scale = *(f32*)&lbl_8047D14C;
-    }
-    fn_800B9404((s32)(*(f32*)&lbl_8047D150 * scale), 5);
-    gfxSetFlags(1);
-    gfxClearFlags(6);
-    gfxSetVtxDesc(*(void**)(p + 0x14));
-    fn_800E05C0(matrix, modelPos[0], modelPos[1], modelPos[2]);
-    fn_800D7F14(matrix);
-    fn_800E048C(matrix, *(f32*)(p + 0x28), *(f32*)(p + 0x2C), *(f32*)(p + 0x30));
-    fn_800D7F14(matrix);
-    gfxSetPrimitive(2);
-
-    entry = *(u8**)(p + 0x4);
-    for (i = 0; i < count; i++, entry += 0x97C) {
-        segments = *(u32*)(entry + 0x978);
-        if (segments != 0) {
-            gfxBegin((u16)(segments + 1));
-            gfxVtxPos(*(f32*)(entry + 0x960), *(f32*)(entry + 0x964), *(f32*)(entry + 0x968));
-            fn_800D5CB8(0, p[0x20], p[0x21], p[0x22], p[0x23]);
-            for (j = 0; j < segments; j++) {
-                gfxVtxPos(*(f32*)(entry + j * 0x18), *(f32*)(entry + j * 0x18 + 4), *(f32*)(entry + j * 0x18 + 8));
+        entry = *(u8**)(p + 0x4);
+        for (i = 0; i < count; i++, entry += 0x97C) {
+            if (*(u32*)(entry + 0x978) != 0) {
+                gfxBegin((u16)(*(u32*)(entry + 0x978) + 1));
+                gfxVtxPos(*(f32*)(entry + 0x960), *(f32*)(entry + 0x964), *(f32*)(entry + 0x968));
                 fn_800D5CB8(0, p[0x20], p[0x21], p[0x22], p[0x23]);
+                segments = *(u32*)(entry + 0x978);
+                point = entry;
+                for (j = 0; j < segments; j++, point += 0x18) {
+                    gfxVtxPos(*(f32*)(point + 0), *(f32*)(point + 4), *(f32*)(point + 8));
+                    fn_800D5CB8(0, p[0x20], p[0x21], p[0x22], p[0x23]);
+                }
+                gfxEnd();
+            }
+        }
+
+        if (*(void**)(p + 0x1C) != NULL) {
+            gfxSetZMode(1, 2, 1);
+            gfxSetUpdates(1, 1, 0);
+            gfxSetFlags(3);
+            gfxClearFlags(4);
+            gfxSetVtxDesc(*(void**)(p + 0x18));
+            gfxLoadTexture(0, *(void**)(p + 0x1C));
+            gfxSetPrimitive(6);
+            gfxBegin((u16)(count << 3));
+            entry = *(u8**)(p + 4);
+            grow = *(f32*)&lbl_8047D158;
+            for (i = 0; i < count; i++, entry += 0x97C) {
+                width = *(f32*)(p + 0x6C) * fn_800E0BA0() + *(f32*)(p + 0x68);
+            gfxVtxPos(*(f32*)(entry + 0x960) - width, *(f32*)(entry + 0x964),
+                        *(f32*)(entry + 0x968) - width);
+            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D154);
+            gfxVtxPos(*(f32*)(entry + 0x960) + width, *(f32*)(entry + 0x964),
+                        *(f32*)(entry + 0x968) - width);
+            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D158);
+            gfxVtxPos(*(f32*)(entry + 0x960) + width, *(f32*)(entry + 0x964),
+                        *(f32*)(entry + 0x968) + width);
+            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D158);
+            gfxVtxPos(*(f32*)(entry + 0x960) - width, *(f32*)(entry + 0x964),
+                        *(f32*)(entry + 0x968) + width);
+            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D154);
+
+                outer = width * grow;
+            gfxVtxPos(*(f32*)(entry + 0x96C) - outer, *(f32*)(entry + 0x970),
+                        *(f32*)(entry + 0x974) - outer);
+            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D154);
+            gfxVtxPos(*(f32*)(entry + 0x96C) + outer, *(f32*)(entry + 0x970),
+                        *(f32*)(entry + 0x974) - outer);
+            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D158);
+            gfxVtxPos(*(f32*)(entry + 0x96C) + outer, *(f32*)(entry + 0x970),
+                        *(f32*)(entry + 0x974) + outer);
+            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D158);
+            gfxVtxPos(*(f32*)(entry + 0x96C) - outer, *(f32*)(entry + 0x970),
+                        *(f32*)(entry + 0x974) + outer);
+            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D154);
             }
             gfxEnd();
         }
+        fn_800D7E5C();
+        fn_800D7E5C();
+        return 1;
     }
-
-    fn_800D7E5C();
-    if (*(void**)(p + 0x1C) != NULL) {
-        gfxSetZMode(1, 2, 1);
-        gfxSetUpdates(1, 1, 0);
-        gfxSetFlags(3);
-        gfxClearFlags(4);
-        gfxSetVtxDesc(*(void**)(p + 0x18));
-        gfxLoadTexture(0, *(void**)(p + 0x1C));
-        gfxSetPrimitive(6);
-        gfxBegin((u16)(count << 3));
-        entry = *(u8**)(p + 4);
-        for (i = 0; i < count; i++, entry += 0x97C) {
-            f32 width = *(f32*)(p + 0x68) + *(f32*)(p + 0x6C) * fn_800E0BA0();
-            f32 x = *(f32*)(entry + 0x960);
-            f32 y = *(f32*)(entry + 0x964);
-            f32 z = *(f32*)(entry + 0x968);
-            gfxVtxPos(x - width, y, z - width);
-            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            gfxVtxTexCoord(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D154);
-            gfxVtxPos(x + width, y, z - width);
-            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            gfxVtxTexCoord(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D154);
-            gfxVtxPos(x + width, y, z + width);
-            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            gfxVtxTexCoord(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D158);
-            gfxVtxPos(x - width, y, z + width);
-            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            gfxVtxTexCoord(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D158);
-
-            width *= *(f32*)&lbl_8047D158;
-            x = *(f32*)(entry + 0x96C);
-            y = *(f32*)(entry + 0x970);
-            z = *(f32*)(entry + 0x974);
-            gfxVtxPos(x - width, y, z - width);
-            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            gfxVtxTexCoord(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D154);
-            gfxVtxPos(x + width, y, z - width);
-            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            gfxVtxTexCoord(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D154);
-            gfxVtxPos(x + width, y, z + width);
-            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            gfxVtxTexCoord(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D158);
-            gfxVtxPos(x - width, y, z + width);
-            fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            gfxVtxTexCoord(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D158);
-        }
-        gfxEnd();
-    }
-    fn_800D7E5C();
-    return 1;
+    return 0;
 }
+#pragma pop
+
+__declspec(section ".sdata2") u32 lbl_8047D148 = 0x42800000; /* 64.0f */
+__declspec(section ".sdata2") u32 lbl_8047D14C = 0x3F800000; /* 1.0f */
+__declspec(section ".sdata2") u32 lbl_8047D150 = 0x437F0000; /* 255.0f */
+#pragma push
+#pragma explicit_zero_data on
+__declspec(section ".sdata2") u32 lbl_8047D154 = 0x00000000; /* 0.0f */
+#pragma pop
+__declspec(section ".sdata2") u32 lbl_8047D158 = 0x40000000; /* 2.0f */
+/* fn_80138838's 2*pi: an .sdata2 object always starts 8-aligned, so the
+   0x8047D15C word has to come from this object. */
+__declspec(section ".sdata2") u32 lbl_8047D15C = 0x40C90FDB; /* 6.2831855f */
 #endif
 #endif
 
@@ -637,7 +673,8 @@ u32 fn_80138680(void* ptr) {
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_801386DC)
 extern u8 lbl_80272B40[];
 #if 0
 asm u32 fn_801386DC(void* ptr) {
@@ -645,21 +682,21 @@ asm u32 fn_801386DC(void* ptr) {
 }
 #else
 u32 fn_801386DC(void* ptr) {
-    const char* messages = (const char*)lbl_80272B40;
     u8* p;
     u16 handle;
 
     if (ptr != NULL) {
         p = ptr;
         if (GSresGetResource(*(u16*)(p + 0xA), *(u16*)(p + 0xC)) == NULL) {
-            GSlogWrite(messages, *(u16*)(p + 0xA), *(u16*)(p + 0xC));
+            GSlogWrite("lightningStartEffect: Could not start lightning effect - invalid model: group %d, model %d.\n",
+                       *(u16*)(p + 0xA), *(u16*)(p + 0xC));
             return 0;
         }
 
         handle = _toolentryAlloc__FUl(*(u16*)(p + 0x8) * 0x97C);
         *(u16*)p = handle;
         if (handle == 0) {
-            GSlogWrite(messages + 0x60);
+            GSlogWrite("lightningStartEffect: Could not start lightning effect - not enough memory!\n");
             return 0;
         }
 
@@ -670,7 +707,7 @@ u32 fn_801386DC(void* ptr) {
         return 1;
     }
 
-    GSlogWrite(messages + 0xB0);
+    GSlogWrite("lightningStartEffect: Could not start lightning effect!\n");
     return 0;
 }
 #endif
@@ -705,7 +742,7 @@ fail:
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || defined(EFFECT_VISUAL_EXACT_80138838)
 extern f32 fn_800E0BE4(void);
 extern void fn_800CDBE0(void);
 extern void fn_800CE148(void);
@@ -713,14 +750,11 @@ extern void set__5GSvecFfff(void* dst, f32 x, f32 y, f32 z);
 extern void GSvecCopy(void* dst, const void* src);
 extern void fn_800DFFCC(void* dst, void* src, const void* value);
 extern void fn_800E0718(void*, void*, f32);
-extern void GSvecTransformQuat(void);
-extern void GSmtxMakeYRotation(void);
+extern void GSvecTransformQuat(void* dst, void* quat, void* src);
+extern void GSmtxMakeYRotation(void* mtx, f32 angle);
 extern void GSvecTransform(void* dst, void* matrix, void* vec);
 extern void vecScale(void* dst, void* src, f32 scale);
 extern void GSvecAdd(void* dst, void* srcA, void* srcB);
-extern u32 lbl_8047D154;
-extern u32 lbl_8047D15C;
-extern u32 lbl_8047D14C;
 #if 0
 asm void fn_80138838(void* ptr, u32 b) {
 #include "src/game/effect/effect_visual_fn_80138838.inc"
@@ -728,86 +762,80 @@ asm void fn_80138838(void* ptr, u32 b) {
 #else
 void fn_80138838(void* ptr, u32 b) {
     u8* p;
-    u8* entry;
     u8* current;
-    void* previous;
-    u16 count;
+    u8* entry;
     u16 i;
     u16 j;
-    f32 base[3];
-    f32 direction[3];
-    f32 tangent[3];
-    f32 step[3];
-    f32 noise[3];
+    u16 count;
+    void* previous;
     f32 rotation[12];
-    f32 radius;
-    f32 angle;
-    f32 valueA;
-    f32 valueB;
+    f32 direction[3];
+    f32 noise[3];
+    f32 base[3];
+    f32 tangent[3];
+    f32 step[4];
 
     p = ptr;
     entry = *(u8**)(p + 0x4);
     count = *(u16*)(p + 0x8);
     for (i = 0; i < count; i++, entry += 0x97C) {
         if (b != 0) {
+            f32 angle;
+            f32 radius;
+
             radius = *(f32*)(p + 0x58) * fn_800E0BA0() + *(f32*)(p + 0x54);
-            angle = *(f32*)&lbl_8047D15C * fn_800E0BE4();
+            angle = 6.2831855f * fn_800E0BE4();
             *(f32*)(entry + 0x960) = radius * (f32)cos(angle);
-            *(f32*)(entry + 0x964) = *(f32*)&lbl_8047D154;
+            *(f32*)(entry + 0x964) = 0.0f;
             *(f32*)(entry + 0x968) = radius * (f32)sin(angle);
         }
 
         fn_800E0060(base, entry + 0x960);
-        set__5GSvecFfff(direction, base[0], *(f32*)&lbl_8047D14C, base[2]);
+        set__5GSvecFfff(direction, base[0], 1.0f, base[2]);
         fn_800E0060(direction, direction);
         *(u32*)(entry + 0x978) = 0;
         current = entry;
         previous = entry + 0x960;
 
-        for (j = 0; j < 100; j++) {
+        for (j = 0; j < 100; j++, current += 0x18) {
             GSvecCopy(tangent, direction);
-            tangent[1] = *(f32*)&lbl_8047D154;
+            tangent[1] = 0.0f;
             fn_800E0060(tangent, tangent);
             fn_800DFFCC(tangent, direction, tangent);
             fn_800E0060(tangent, tangent);
 
             fn_800E0718(step, tangent, *(f32*)(p + 0x4C) * fn_800E0BA0());
-            ((void (*)(void*, void*, void*))GSvecTransformQuat)(
-                direction, step, direction);
-            ((void (*)(void*, f32))GSmtxMakeYRotation)(
-                rotation, *(f32*)(p + 0x50) * fn_800E0BA0());
-            ((void (*)(void*, void*, void*))GSvecTransform)(
-                direction, rotation, direction);
+            GSvecTransformQuat(direction, step, direction);
+            GSmtxMakeYRotation(rotation, *(f32*)(p + 0x50) * fn_800E0BA0());
+            GSvecTransform(direction, rotation, direction);
 
             if (b != 0) {
                 GSvecCopy(current + 0xC, direction);
             } else {
                 vecScale(current + 0xC, current + 0xC,
-                            *(f32*)&lbl_8047D14C - *(f32*)(p + 0x64));
+                            1.0f - *(f32*)(p + 0x64));
                 vecScale(direction, direction, *(f32*)(p + 0x64));
-                GSvecAdd(current + 0xC, current + 0xC, direction);
+                GSvecAdd(current + 0xC, direction, current + 0xC);
                 fn_800E0060(current + 0xC, current + 0xC);
             }
 
             vecScale(direction, current + 0xC,
                         *(f32*)(p + 0x60) * fn_800E0BA0() + *(f32*)(p + 0x5C));
-            valueA = *(f32*)(p + 0x48) * fn_800E0BA0();
-            valueB = *(f32*)(p + 0x44) * fn_800E0BA0();
             set__5GSvecFfff(noise, *(f32*)(p + 0x40) * fn_800E0BA0(),
-                            valueB, valueA);
+                            *(f32*)(p + 0x44) * fn_800E0BA0(),
+                            *(f32*)(p + 0x48) * fn_800E0BA0());
             GSvecAdd(noise, noise, p + 0x34);
             GSvecAdd(direction, direction, noise);
             GSvecAdd(current, previous, direction);
-            GSvecCopy(current + 0xC, direction);
+            GSvecCopy(direction, current + 0xC);
             *(u32*)(entry + 0x978) += 1;
 
-            if (*(f32*)(current + 0x4) < *(f32*)&lbl_8047D154) {
+            if (*(f32*)(current + 0x4) < 0.0f) {
                 GSvecCopy(entry + 0x96C, previous);
                 break;
             }
 
             previous = current;
-            current += 0x18;
         }
     }
 }
@@ -853,7 +881,8 @@ u32 fn_80138B74(void* ptr) {
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_80138BBC_80138DE4)
 extern void GSmodelSetVisibility(void* a, u32 b);
 extern void GSmodelFree(void* entry);
 extern u32 fn_800EE0E8(void* entry);
@@ -868,17 +897,18 @@ asm u32 fn_80138BBC(void* ptr) {
 }
 #else
 u32 fn_80138BBC(void* ptr) {
-    u8* p;
-    u8* entry;
-    void* model;
-    void* part;
-    void* obj;
-    u32 modelCount;
-    u32 partCount;
-    u32 i;
     u32 j;
+    u32 k;
+    void* obj;
+    u8* entry;
+    void* part;
+    u32 modelCount;
     u32 entryCount;
+    void* model;
+    u8* p;
     u16 handle;
+    u32 i;
+    u32 partCount;
 
     if (ptr != NULL) {
         p = ptr;
@@ -895,8 +925,8 @@ u32 fn_80138BBC(void* ptr) {
 
         model = *(void**)(p + 0x8);
         modelCount = fn_800EE0E8(model);
-        for (i = 0; i < modelCount; i++) {
-            part = GSmodelGetPart(model, i);
+        for (k = 0; k < modelCount; k++) {
+            part = GSmodelGetPart(model, k);
             if (part != NULL) {
                 partCount = GSpartGetMaterialCount(part);
                 for (j = 0; j < partCount; j++) {
@@ -926,12 +956,12 @@ asm u32 fn_80138CCC(void* ptr) {
 }
 #else
 u32 fn_80138CCC(void* ptr) {
-    u8* p;
     u8* entry;
-    u32 count;
+    u8* p;
     u16 handle;
     u32 size;
     u32 i;
+    u32 count;
 
     if (ptr == NULL) {
         goto allocation_error;
@@ -956,8 +986,7 @@ u32 fn_80138CCC(void* ptr) {
         goto allocation_error;
     }
 
-    *(void**)p = fn_800E27B0(handle);
-    entry = *(u8**)p;
+    entry = *(u8**)p = fn_800E27B0(handle);
     memset(*(void**)p, 0, size);
     *(u16*)(p + 0x3C) = 0;
     for (i = 0; i < count; i++, entry += 0x5C) {
@@ -974,6 +1003,10 @@ allocation_error:
     return 0;
 }
 #endif
+#endif
+
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_80138DE4)
 extern void fn_800E06B8();
 extern void fn_800E040C();
 extern void fn_800E02C4(void* matrix, f32 x, f32 y, f32 z);
@@ -983,7 +1016,7 @@ extern u32 lbl_8047D170;
 extern u32 lbl_8047D164;
 extern u32 lbl_8047D178;
 extern u32 lbl_8047D160;
-extern u32 lbl_8047D168;
+extern const f32 lbl_8047D168;
 #if 0
 asm void fn_80138DE4(void) {
 #include "src/game/effect/effect_visual_fn_80138DE4.inc"
@@ -991,20 +1024,20 @@ asm void fn_80138DE4(void) {
 #else
 u32 fn_80138DE4(void* ptr, u32 delta) {
     u8* p;
-    u8* entry;
-    void* model;
-    void* part;
-    void* obj;
-    u16 cur;
-    u16 next;
-    u16 fadeStart;
-    u16 fadeEnd;
-    u16 entryCount;
-    u16 tickDelta;
-    u32 i;
     u32 j;
+    u32 i;
     u32 modelCount;
-    s32 partCount;
+    u16 fadeStart;
+    void* obj;
+    u32 partCount;
+    u16 entryCount;
+    void* part;
+    u16 fadeEnd;
+    u16 next;
+    void* model;
+    u8* entry;
+    void* leafModel;
+    u32 k;
     f32 deltaScale;
     f32 alpha;
     f32 scale;
@@ -1012,81 +1045,82 @@ u32 fn_80138DE4(void* ptr, u32 delta) {
     f32 rotation[4];
     f32 matrix[12];
 
-    if (ptr == NULL) {
-        return 0;
-    }
+    if (ptr != NULL) {
+        p = ptr;
+        fadeEnd = *(u16*)(p + 0x3E);
+        if (*(u16*)(p + 0x3C) < fadeEnd) {
+            deltaScale = *(f32*)(p + 0x2C) * (f32)delta;
+            next = *(u16*)(p + 0x3C) + delta;
+            fadeStart = *(u16*)(p + 0x3A);
+            entryCount = *(u16*)(p + 0x38);
+            entry = *(u8**)p;
+            *(u16*)(p + 0x3C) = next;
 
-    p = ptr;
-    cur = *(u16*)(p + 0x3C);
-    fadeEnd = *(u16*)(p + 0x3E);
-    if (cur >= fadeEnd) {
-        return 0;
-    }
-
-    next = cur + delta;
-    tickDelta = delta;
-    fadeStart = *(u16*)(p + 0x3A);
-    deltaScale = *(f32*)(p + 0x2C) * (f32)tickDelta;
-    *(u16*)(p + 0x3C) = next;
-    entryCount = *(u16*)(p + 0x38);
-    entry = *(u8**)p;
-
-    if (next < fadeStart) {
-        deltaScale *= *(f32*)&lbl_8047D164 - ((f32)next / (f32)fadeStart);
-    } else {
-        model = GSresGetResource(*(u16*)(p + 0x40), *(u16*)(p + 0x44));
-        alpha = *(f32*)&lbl_8047D160 -
-                ((f32)(next - fadeStart) / (f32)(fadeEnd - fadeStart));
-        modelCount = fn_800EE0E8(model);
-        for (i = 0; i < modelCount; i++) {
-            part = GSmodelGetPart(model, i);
-            if (part != NULL) {
-                partCount = GSpartGetMaterialCount(part);
-                for (j = 0; j < (u32)partCount; j++) {
-                    obj = GSpartGetMaterial(part, j);
-                    if (obj != NULL) {
-                        GSmaterialSetAlpha(obj, alpha);
-                        fn_800DF608(obj);
+            if (next < fadeStart) {
+                deltaScale *= 2.0f - ((f32)next / (f32)fadeStart);
+            } else {
+                model = GSresGetResource(*(u16*)(p + 0x40), *(u16*)(p + 0x44));
+                alpha = 1.0f - ((f32)(next - fadeStart) / (f32)(fadeEnd - fadeStart));
+                modelCount = fn_800EE0E8(model);
+                for (i = 0; i < modelCount; i++) {
+                    part = GSmodelGetPart(model, i);
+                    if (part != NULL) {
+                        partCount = GSpartGetMaterialCount(part);
+                        for (j = 0; j < partCount; j++) {
+                            obj = GSpartGetMaterial(part, j);
+                            if (obj != NULL) {
+                                GSmaterialSetAlpha(obj, alpha);
+                                fn_800DF608(obj);
+                            }
+                        }
+                        GSpartFree(part);
                     }
                 }
-                GSpartFree(part);
             }
+
+            for (k = 0; k < entryCount; k++, entry += 0x5C) {
+                if (*(void**)(entry + 0x58) != NULL) {
+                    *(f32*)(entry + 0x54) += deltaScale;
+                    if (*(f32*)(entry + 0x54) >= 1.0f) {
+                        fn_80139074(p, entry);
+                    }
+
+                    GSbezierCalculateVector(position, entry, *(f32*)(entry + 0x54));
+                    if (position[1] < 0.0f) {
+                        GSmodelSetVisibility(*(void**)(entry + 0x58), 0);
+                        GSmodelFree(*(void**)(entry + 0x58));
+                        *(void**)(entry + 0x58) = NULL;
+                    } else {
+                        leafModel = *(void**)(entry + 0x58);
+                        scale = *(f32*)(entry + 0x50);
+                        fn_800E06B8(rotation, entry + 0x30, entry + 0x40, *(f32*)(entry + 0x54));
+                        fn_800E040C(matrix, rotation);
+                        fn_800E02C4(matrix, scale, scale, scale);
+                        fn_800E03B4(matrix, position);
+                        GSmodelSetMatrix(leafModel, matrix);
+                    }
+                }
+            }
+            return 1;
         }
     }
-
-    for (i = 0; i < entryCount; i++, entry += 0x5C) {
-        if (*(void**)(entry + 0x58) != NULL) {
-            *(f32*)(entry + 0x54) += deltaScale;
-            if (*(f32*)(entry + 0x54) >= *(f32*)&lbl_8047D160) {
-                fn_80139074(p, entry);
-            }
-
-            ((void (*)(f32*, void*, f32))GSbezierCalculateVector)(
-                position, entry, *(f32*)(entry + 0x54));
-            if (position[1] < *(f32*)&lbl_8047D168) {
-                GSmodelSetVisibility(*(void**)(entry + 0x58), 0);
-                GSmodelFree(*(void**)(entry + 0x58));
-                *(void**)(entry + 0x58) = NULL;
-            } else {
-                model = *(void**)(entry + 0x58);
-                scale = *(f32*)(entry + 0x50);
-                ((void (*)(f32*, void*, void*, f32))fn_800E06B8)(
-                    rotation, entry + 0x30, entry + 0x40,
-                    *(f32*)(entry + 0x54));
-                ((void (*)(f32*, f32*))fn_800E040C)(matrix, rotation);
-                ((void (*)(f32*, f32, f32, f32))fn_800E02C4)(
-                    matrix, scale, scale, scale);
-                ((void (*)(f32*, f32*))fn_800E03B4)(matrix, position);
-                ((void (*)(void*, f32*))GSmodelSetMatrix)(model, matrix);
-            }
-        }
-    }
-
-    return 1;
+    return 0;
 }
 #endif
-extern void fn_800E076C(void*, void*, f32);
-extern u32 lbl_8047D160;
+#endif
+
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_80139074_80139820)
+extern f32 fn_800E0BE4(void);
+extern void GSvecCopy(void* dst, const void* src);
+extern void fn_800E0718(void*, void*, f32);
+extern void GSvecAdd(void* dst, void* srcA, void* srcB);
+extern void fn_800E040C();
+extern void fn_800E02C4(void* matrix, f32 x, f32 y, f32 z);
+extern void fn_800E03B4();
+extern void GSmodelSetMatrix();
+/* Quaternion copy, dst = src (src/game/gs_math_quat.c). */
+extern void fn_800E076C(void* dst, void* src);
 extern u32 lbl_8047D180;
 extern u32 lbl_8047D184;
 #if 0
@@ -1094,64 +1128,103 @@ asm void fn_80139074(void) {
 #include "src/game/effect/effect_visual_fn_80139074.inc"
 }
 #else
-void fn_80139074(void* entry, void* parent) {
+void fn_80139074(void* entry, u8* leaf) {
     u8* config = entry;
-    u8* leaf = parent;
+    f32* vec;
     f32 direction[3];
-    f32 yaw;
-    f32 pitch;
-    f32 distance;
+    f32 farBase;
+    f32 nearBase;
+    f32 farRange;
+    f32 nearRange;
+    /* One set of locals per generated vector (0: the leaf + 0x40 axis and
+       the leaf + 0x18 distance, 1: the leaf + 0x0C point, 2: the leaf + 0x24
+       point); this declaration order gives retail's float register
+       allocation. */
+    f32 pitch0;
+    f32 yaw0;
+    f32 sinPitch0;
+    f32 sinYaw0;
+    f32 cosPitch0;
+    f32 sinPitch2;
+    f32 sinYaw2;
+    f32 pitch2;
+    f32 cosPitch2;
+    f32 distance2;
+    f32 yaw2;
+    f32 sinPitch1;
+    f32 sinYaw1;
+    f32 pitch1;
+    f32 cosPitch1;
+    f32 distance1;
+    f32 yaw1;
+    f32 cosYaw0;
+    f32 cosYaw1;
+    f32 cosYaw2;
+    f32 distance0;
 
-    *(f32*)(leaf + 0x54) -= *(f32*)&lbl_8047D160;
-    fn_800E076C(leaf + 0x30, leaf + 0x40,
-                *(f32*)(leaf + 0x54) + *(f32*)&lbl_8047D160);
+    farBase = *(f32*)(config + 0x20);
+    nearBase = *(f32*)(config + 0x18);
+    farRange = *(f32*)(config + 0x24);
+    nearRange = *(f32*)(config + 0x1C);
 
-    yaw = *(f32*)&lbl_8047D180 * fn_800E0BE4();
-    pitch = *(f32*)&lbl_8047D184 * fn_800E0BE4();
-    fn_800E01F4(direction,
-                (f32)sin(pitch) * (f32)cos(yaw),
-                (f32)cos(pitch),
-                (f32)sin(pitch) * (f32)sin(yaw));
+    *(f32*)(leaf + 0x54) -= 1.0f;
+    fn_800E076C(leaf + 0x30, leaf + 0x40);
+
+    yaw0 = *(f32*)&lbl_8047D180 * fn_800E0BE4();
+    pitch0 = *(f32*)&lbl_8047D184 * fn_800E0BE4();
+    sinPitch0 = sin(pitch0);
+    sinYaw0 = sin(yaw0);
+    cosPitch0 = cos(pitch0);
+    cosYaw0 = cos(yaw0);
+    set__5GSvecFfff(direction, sinPitch0 * cosYaw0, cosPitch0, sinPitch0 * sinYaw0);
     fn_800E0718(leaf + 0x40, direction,
                 *(f32*)&lbl_8047D180 * fn_800E0BE4());
 
-    fn_800E01D0(leaf, leaf + 0xC);
-    fn_800E01D0(leaf + 0x18, leaf + 0x24);
-    GSvecSub(leaf + 0x18, leaf + 0x18, leaf + 0xC);
-    fn_800E0060(leaf + 0x18, leaf + 0x18);
-    distance = (*(f32*)(config + 0x24) * fn_800E0BA0() +
-                *(f32*)(config + 0x20)) * *(f32*)(leaf + 0x50);
-    vecScale(leaf + 0x18, leaf + 0x18, -distance);
-    fn_800E019C(leaf + 0x18, leaf + 0x18, leaf);
+    GSvecCopy(leaf, leaf + 0xC);
+    vec = (f32*)(leaf + 0x18);
+    GSvecCopy(vec, leaf + 0x24);
+    GSvecSub(vec, vec, leaf + 0xC);
+    fn_800E0060(vec, vec);
+    distance0 = farRange * fn_800E0BA0() + farBase;
+    distance0 *= *(f32*)(leaf + 0x50);
+    vecScale(vec, vec, -distance0);
+    GSvecAdd(vec, vec, leaf);
 
-    yaw = *(f32*)&lbl_8047D180 * fn_800E0BE4();
-    pitch = *(f32*)&lbl_8047D184 * fn_800E0BE4();
-    distance = (*(f32*)(config + 0x1C) * fn_800E0BA0() +
-                *(f32*)(config + 0x18)) * *(f32*)(leaf + 0x50);
-    fn_800E01F4(leaf + 0xC,
-                (f32)sin(pitch) * (f32)cos(yaw),
-                (f32)cos(pitch),
-                (f32)sin(pitch) * (f32)sin(yaw));
-    vecScale(leaf + 0xC, leaf + 0xC, distance);
-    *(f32*)(leaf + 0x10) += *(f32*)(config + 0x28);
-    fn_800E019C(leaf + 0xC, leaf + 0xC, leaf);
+    vec = (f32*)(leaf + 0xC);
+    yaw1 = *(f32*)&lbl_8047D180 * fn_800E0BE4();
+    pitch1 = *(f32*)&lbl_8047D184 * fn_800E0BE4();
+    sinPitch1 = sin(pitch1);
+    distance1 = nearRange * fn_800E0BA0() + nearBase;
+    distance1 *= *(f32*)(leaf + 0x50);
+    sinYaw1 = sin(yaw1);
+    cosPitch1 = cos(pitch1);
+    cosYaw1 = cos(yaw1);
+    set__5GSvecFfff(vec, sinPitch1 * cosYaw1, cosPitch1, sinPitch1 * sinYaw1);
+    vecScale(vec, vec, distance1);
+    vec[1] += *(f32*)(config + 0x28);
+    GSvecAdd(vec, vec, leaf);
 
-    yaw = *(f32*)&lbl_8047D180 * fn_800E0BE4();
-    pitch = *(f32*)&lbl_8047D184 * fn_800E0BE4();
-    distance = (*(f32*)(config + 0x24) * fn_800E0BA0() +
-                *(f32*)(config + 0x20)) * *(f32*)(leaf + 0x50);
-    fn_800E01F4(leaf + 0x24,
-                (f32)sin(pitch) * (f32)cos(yaw),
-                (f32)cos(pitch),
-                (f32)sin(pitch) * (f32)sin(yaw));
-    vecScale(leaf + 0x24, leaf + 0x24, distance);
-    fn_800E019C(leaf + 0x24, leaf + 0x24, leaf + 0xC);
+    vec = (f32*)(leaf + 0x24);
+    yaw2 = *(f32*)&lbl_8047D180 * fn_800E0BE4();
+    pitch2 = *(f32*)&lbl_8047D184 * fn_800E0BE4();
+    sinPitch2 = sin(pitch2);
+    distance2 = farRange * fn_800E0BA0() + farBase;
+    distance2 *= *(f32*)(leaf + 0x50);
+    sinYaw2 = sin(yaw2);
+    cosPitch2 = cos(pitch2);
+    cosYaw2 = cos(yaw2);
+    set__5GSvecFfff(vec, sinPitch2 * cosYaw2, cosPitch2, sinPitch2 * sinYaw2);
+    vecScale(vec, vec, distance2);
+    GSvecAdd(vec, vec, leaf + 0xC);
 }
 #endif
 extern void* GSmodelClone(void* model);
 extern void GSpartGetTransform(void* obj, void* a, void* b, void* c);
 extern u8 lbl_80272CC4[];
-extern u32 lbl_8047D168;
+/* RULE-EXCEPTION(user-approved): extern-named stand-in for the 0.0f shared
+   with fn_80138DE4 (0x8047D168, in effect_visual_sdata2_8047D160) — see
+   docs/RULE_EXCEPTIONS.md */
+extern const f32 lbl_8047D168;
 extern u32 lbl_8047D180;
 extern u32 lbl_8047D184;
 extern u32 lbl_8047D188;
@@ -1161,29 +1234,55 @@ asm void _leaffxGenerateLeafData(void* ptr, void* entry) {
 }
 #else
 u8 _leaffxGenerateLeafData(void* ptr, void* entry) {
+    void* source;
+    f32* vec;
+    void* part;
     u8* p;
     u8* e;
-    void* source;
-    void* clone;
-    void* part;
     f32 position[3];
     f32 vecA[3];
     f32 vecB[3];
     f32 matrix[12];
-    f32 scale;
-    f32 yaw;
-    f32 pitch;
-    f32 radius;
-    f32 factor;
-    f32 f0;
     f32 radiusBase;
     f32 heightBase;
     f32 radiusRange;
     f32 heightRange;
-    f32 sinPitch;
-    f32 sinYaw;
-    f32 cosPitch;
-    f32 cosYaw;
+    /* One set of angle locals per generated vector (0: e+0x30 axis, 1: e+0x40
+       axis, 2-4: the e+0x18, e+0x0C and e+0x24 points); this declaration
+       order gives retail's float register allocation. */
+    f32 pitch0;
+    f32 yaw0;
+    f32 sinPitch0;
+    f32 sinYaw0;
+    f32 cosPitch0;
+    f32 sinPitch1;
+    f32 sinYaw1;
+    f32 pitch1;
+    f32 yaw1;
+    f32 cosPitch1;
+    f32 sinPitch2;
+    f32 sinYaw2;
+    f32 pitch2;
+    f32 cosPitch2;
+    f32 radius2;
+    f32 sinPitch3;
+    f32 sinYaw3;
+    f32 pitch3;
+    f32 cosPitch3;
+    f32 radius3;
+    f32 sinPitch4;
+    f32 sinYaw4;
+    f32 cosPitch4;
+    f32 yaw2;
+    f32 yaw3;
+    f32 pitch4;
+    f32 radius4;
+    f32 yaw4;
+    f32 cosYaw0;
+    f32 cosYaw1;
+    f32 cosYaw2;
+    f32 cosYaw3;
+    f32 cosYaw4;
 
     p = ptr;
     e = entry;
@@ -1192,22 +1291,20 @@ u8 _leaffxGenerateLeafData(void* ptr, void* entry) {
     radiusRange = *(f32*)(p + 0x24);
     heightRange = *(f32*)(p + 0x1C);
     source = GSresGetResource(*(u16*)(p + 0x46), *(u16*)(p + 0x48));
+    part = NULL;
     if (source == NULL) {
         return 0;
     }
 
-    clone = GSmodelClone(*(void**)(p + 0x08));
-    *(void**)(e + 0x58) = clone;
-    if (clone == NULL) {
+    *(void**)(e + 0x58) = GSmodelClone(*(void**)(p + 0x08));
+    if (*(void**)(e + 0x58) == NULL) {
         GSlogWrite((const char*)lbl_80272CC4);
         return 0;
     }
 
-    GSmodelSetVisibility(clone, 1);
-    if ((s16)*(u16*)(p + 0x4A) >= 0) {
+    GSmodelSetVisibility(*(void**)(e + 0x58), 1);
+    if (*(s16*)(p + 0x4A) >= 0) {
         part = GSmodelGetPart(source, *(s16*)(p + 0x4A));
-    } else {
-        part = NULL;
     }
 
     if (part != NULL) {
@@ -1217,72 +1314,75 @@ u8 _leaffxGenerateLeafData(void* ptr, void* entry) {
         GSmodelGetPosition(source, position);
     }
 
-    *(f32*)(e + 0x50) =
-        (*(f32*)(p + 0x14) * fn_800E0BA0() + *(f32*)(p + 0x10)) * *(f32*)(p + 0x0C);
-    *(f32*)(e + 0x54) = *(f32*)&lbl_8047D168;
+    *(f32*)(e + 0x50) = *(f32*)(p + 0x14) * fn_800E0BA0() + *(f32*)(p + 0x10);
+    *(f32*)(e + 0x50) *= *(f32*)(p + 0x0C);
+    *(f32*)(e + 0x54) = lbl_8047D168;
 
-    yaw = *(f32*)&lbl_8047D180 * fn_800E0BE4();
-    pitch = *(f32*)&lbl_8047D184 * fn_800E0BE4();
-    sinPitch = (f32)sin(pitch);
-    sinYaw = (f32)sin(yaw);
-    cosPitch = (f32)cos(pitch);
-    cosYaw = (f32)cos(yaw);
-    set__5GSvecFfff(vecA,
-                    sinPitch * cosYaw,
-                    cosPitch,
-                    sinPitch * sinYaw);
-    fn_800E0718((u8*)e + 0x30, vecA, *(f32*)&lbl_8047D180 * fn_800E0BE4());
+    yaw0 = *(f32*)&lbl_8047D180 * fn_800E0BE4();
+    pitch0 = *(f32*)&lbl_8047D184 * fn_800E0BE4();
+    sinPitch0 = sin(pitch0);
+    sinYaw0 = sin(yaw0);
+    cosPitch0 = cos(pitch0);
+    cosYaw0 = cos(yaw0);
+    set__5GSvecFfff(vecA, sinPitch0 * cosYaw0, cosPitch0, sinPitch0 * sinYaw0);
+    /* RULE-EXCEPTION(user-approved): codegen-only cast; it keeps this e + 0x30
+       from being merged with the one in the final fn_800E040C call — see
+       docs/RULE_EXCEPTIONS.md */
+    fn_800E0718((f32*)(e + 0x30), vecA, *(f32*)&lbl_8047D180 * fn_800E0BE4());
 
-    yaw = *(f32*)&lbl_8047D180 * fn_800E0BE4();
-    pitch = *(f32*)&lbl_8047D184 * fn_800E0BE4();
-    sinPitch = (f32)sin(pitch);
-    sinYaw = (f32)sin(yaw);
-    cosPitch = (f32)cos(pitch);
-    cosYaw = (f32)cos(yaw);
-    set__5GSvecFfff(vecB,
-                    sinPitch * cosYaw,
-                    cosPitch,
-                    sinPitch * sinYaw);
+    yaw1 = *(f32*)&lbl_8047D180 * fn_800E0BE4();
+    pitch1 = *(f32*)&lbl_8047D184 * fn_800E0BE4();
+    sinPitch1 = sin(pitch1);
+    sinYaw1 = sin(yaw1);
+    cosPitch1 = cos(pitch1);
+    cosYaw1 = cos(yaw1);
+    set__5GSvecFfff(vecB, sinPitch1 * cosYaw1, cosPitch1, sinPitch1 * sinYaw1);
     fn_800E0718((u8*)e + 0x40, vecB, *(f32*)&lbl_8047D180 * fn_800E0BE4());
 
     GSvecCopy(e, position);
 
-    radius = (radiusRange * fn_800E0BA0() + radiusBase) * *(f32*)(e + 0x50);
-    yaw = *(f32*)&lbl_8047D180 * fn_800E0BE4();
-    pitch = *(f32*)&lbl_8047D184 * fn_800E0BE4();
-    set__5GSvecFfff((u8*)e + 0x18,
-                    (f32)sin(pitch) * (f32)cos(yaw),
-                    (f32)cos(pitch),
-                    (f32)sin(pitch) * (f32)sin(yaw));
-    vecScale((u8*)e + 0x18, (u8*)e + 0x18, radius);
-    GSvecAdd((u8*)e + 0x18, (u8*)e + 0x18, position);
+    vec = (f32*)(e + 0x18);
+    radius2 = radiusRange * fn_800E0BA0() + radiusBase;
+    radius2 *= *(f32*)(e + 0x50);
+    yaw2 = *(f32*)&lbl_8047D180 * fn_800E0BE4();
+    pitch2 = *(f32*)&lbl_8047D184 * fn_800E0BE4();
+    sinPitch2 = sin(pitch2);
+    sinYaw2 = sin(yaw2);
+    cosPitch2 = cos(pitch2);
+    cosYaw2 = cos(yaw2);
+    set__5GSvecFfff(vec, sinPitch2 * cosYaw2, cosPitch2, sinPitch2 * sinYaw2);
+    vecScale(vec, vec, radius2);
+    GSvecAdd(vec, vec, position);
 
-    yaw = *(f32*)&lbl_8047D180 * fn_800E0BE4();
-    pitch = *(f32*)&lbl_8047D188 * fn_800E0BE4();
-    f0 = (f32)sin(pitch);
-    factor = heightRange * fn_800E0BA0() + heightBase;
-    radius = (*(f32*)(p + 0x34) * fn_800E0BA0() + *(f32*)(p + 0x30)) *
-             factor * *(f32*)(e + 0x50);
-    set__5GSvecFfff((u8*)e + 0x0C,
-                    f0 * (f32)cos(yaw),
-                    (f32)cos(pitch),
-                    f0 * (f32)sin(yaw));
-    vecScale((u8*)e + 0x0C, (u8*)e + 0x0C, radius);
-    GSvecAdd((u8*)e + 0x0C, (u8*)e + 0x0C, position);
+    vec = (f32*)(e + 0x0C);
+    yaw3 = *(f32*)&lbl_8047D180 * fn_800E0BE4();
+    pitch3 = *(f32*)&lbl_8047D188 * fn_800E0BE4();
+    sinPitch3 = sin(pitch3);
+    radius3 = heightRange * fn_800E0BA0() + heightBase;
+    radius3 *= *(f32*)(p + 0x34) * fn_800E0BA0() + *(f32*)(p + 0x30);
+    radius3 *= *(f32*)(e + 0x50);
+    sinYaw3 = sin(yaw3);
+    cosPitch3 = cos(pitch3);
+    cosYaw3 = cos(yaw3);
+    set__5GSvecFfff(vec, sinPitch3 * cosYaw3, cosPitch3, sinPitch3 * sinYaw3);
+    vecScale(vec, vec, radius3);
+    GSvecAdd(vec, vec, position);
 
-    yaw = *(f32*)&lbl_8047D180 * fn_800E0BE4();
-    pitch = *(f32*)&lbl_8047D184 * fn_800E0BE4();
-    radius = (radiusRange * fn_800E0BA0() + radiusBase) * *(f32*)(e + 0x50);
-    set__5GSvecFfff((u8*)e + 0x24,
-                    (f32)sin(pitch) * (f32)cos(yaw),
-                    (f32)cos(pitch),
-                    (f32)sin(pitch) * (f32)sin(yaw));
-    vecScale((u8*)e + 0x24, (u8*)e + 0x24, radius);
-    GSvecAdd((u8*)e + 0x24, (u8*)e + 0x24, (u8*)e + 0x0C);
+    vec = (f32*)(e + 0x24);
+    yaw4 = *(f32*)&lbl_8047D180 * fn_800E0BE4();
+    pitch4 = *(f32*)&lbl_8047D184 * fn_800E0BE4();
+    sinPitch4 = sin(pitch4);
+    radius4 = radiusRange * fn_800E0BA0() + radiusBase;
+    radius4 *= *(f32*)(e + 0x50);
+    sinYaw4 = sin(yaw4);
+    cosPitch4 = cos(pitch4);
+    cosYaw4 = cos(yaw4);
+    set__5GSvecFfff(vec, sinPitch4 * cosYaw4, cosPitch4, sinPitch4 * sinYaw4);
+    vecScale(vec, vec, radius4);
+    GSvecAdd(vec, vec, e + 0x0C);
 
     fn_800E040C(matrix, (u8*)e + 0x30);
-    scale = *(f32*)(e + 0x50);
-    fn_800E02C4(matrix, scale, scale, scale);
+    fn_800E02C4(matrix, *(f32*)(e + 0x50), *(f32*)(e + 0x50), *(f32*)(e + 0x50));
     fn_800E03B4(matrix, position);
     GSmodelSetMatrix(*(void**)(e + 0x58), matrix);
     return 1;
@@ -1349,7 +1449,7 @@ u32 fn_801398E0(void* ptr) {
 }
 #endif
 extern u32 fn_800EE7E0(void* obj);
-extern u32 lbl_8047D190;
+extern const f32 lbl_8047D190;
 #if 1
 u32 fn_80139934(void* ptr) {
     f32 cameraPos[3];
@@ -1413,16 +1513,18 @@ u32 fn_80139934(void* ptr) { /* TODO */ }
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_80139AC4_80139D10)
 extern u32 lbl_8047D198;
 extern u32 lbl_8047D1A0;
+
 BOOL fn_80139AC4(void* ptr, u32 tick) {
     u8* p;
-    u8* entry;
     u32 frame;
     u16 endFrame;
     u16 i;
     u32 count;
+    u8* entry;
 
     if (ptr != NULL) {
         p = ptr;
@@ -1481,7 +1583,7 @@ BOOL fn_80139AC4(void* ptr, u32 tick) {
     return 0;
 }
 extern u8 lbl_80272D08[];
-extern u32 lbl_8047D190;
+extern const f32 lbl_8047D190;
 extern u8 lbl_80272D54[];
 #if 0
 asm u32 fn_80139D10(void* ptr) {
@@ -1489,115 +1591,114 @@ asm u32 fn_80139D10(void* ptr) {
 }
 #else
 u32 fn_80139D10(void* ptr) {
-    u8* p;
-    u8* entry;
     u16 handle;
-    u16 count;
-    u16 span;
-    u16 gap;
-    u16 i;
     u32 size;
+    u8* entry;
+    u8* p;
+    u16 span;
+    u16 step;
+    u16 count;
+    u16 i;
 
-    if (ptr == NULL) {
-        GSlogWrite((const char*)lbl_80272D54);
-        return 0;
+    if (ptr != NULL) {
+        p = ptr;
+        count = *(u16*)(p + 0x44);
+        if (*(void**)(p + 0x58) == NULL) {
+            return 0;
+        }
+
+        if (count > 1) {
+            span = *(u16*)(p + 0x4A) / (count - 1);
+            step = (*(u16*)(p + 0x4A) - span) / count;
+        } else {
+            step = 0;
+            span = *(u16*)(p + 0x4A);
+        }
+
+        size = count * 0x12E4;
+        handle = _toolentryAlloc__FUl(size);
+        if (handle == 0) {
+            GSlogWrite((const char*)lbl_80272D08);
+            return 0;
+        }
+
+        *(u16*)(p + 0x4) = handle;
+        entry = *(u8**)p = fn_800E27B0(handle);
+        memset(entry, 0, size);
+        for (i = 0; i < count; i++, entry += 0x12E4) {
+            *(u16*)(entry + 0x12E2) = 0;
+            set__5GSvecFfff(entry + 0x12C0, 0.0f, *(f32*)(p + 0x38), 0.0f);
+            fn_8013A1D4(entry, p, (struct ElectronPoint*)(entry + 0x12C0), 0, *(f32*)(p + 0x3C));
+            entry[0x12D8] = p[0x5C];
+            entry[0x12D9] = p[0x5D];
+            entry[0x12DA] = p[0x5E];
+            entry[0x12DB] = p[0x5F];
+            *(u16*)(entry + 0x12DC) = i * step;
+            *(u16*)(entry + 0x12DE) = *(u16*)(entry + 0x12DC) + span;
+        }
+        *(u16*)(p + 0x48) = 0;
+        return 1;
     }
 
-    p = ptr;
-    if (*(void**)(p + 0x58) == NULL) {
-        return 0;
-    }
-
-    count = *(u16*)(p + 0x44);
-    if (count == 0) {
-        return 0;
-    }
-
-    if (count > 1) {
-        span = *(u16*)(p + 0x4A) / (count - 1);
-        gap = (*(u16*)(p + 0x4A) - span) / count;
-    } else {
-        span = *(u16*)(p + 0x4A);
-        gap = 0;
-    }
-
-    size = count * 0x12E4;
-    handle = _toolentryAlloc__FUl(size);
-    if (handle == 0) {
-        GSlogWrite((const char*)lbl_80272D08);
-        return 0;
-    }
-
-    *(u16*)(p + 0x4) = handle;
-    entry = fn_800E27B0(handle);
-    *(void**)p = entry;
-    memset(entry, 0, size);
-    *(u16*)(p + 0x48) = 0;
-    for (i = 0; i < count; i++, entry += 0x12E4) {
-        *(u16*)(entry + 0x12DC) = i * span;
-        *(u16*)(entry + 0x12DE) = i * span + gap;
-        *(u16*)(entry + 0x12E2) = i;
-        set__5GSvecFfff(entry + 0xC4, *(f32*)(p + 0x20), *(f32*)(p + 0x24), *(f32*)(p + 0x28));
-        set__5GSvecFfff(entry + 0x12CC, *(f32*)(p + 0x20), *(f32*)(p + 0x24), *(f32*)(p + 0x28));
-        fn_8013A1D4(entry, p, entry + 0xC4, i, *(f32*)&lbl_8047D190);
-    }
-    return 1;
+    GSlogWrite((const char*)lbl_80272D54);
+    return 0;
 }
 #endif
+#endif
+
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || defined(EFFECT_VISUAL_EXACT_80139E80)
 extern void fn_800E0108(void);
 extern void fn_800E0560(void);
 extern void fn_800E042C(void);
 extern void vecNormalize(void);
 extern u32 lbl_8047D1A0;
-extern u32 lbl_8047D1A8;
-extern u32 lbl_8047D190;
-extern u32 lbl_8047D1AC;
-extern u32 lbl_8047D1B0;
+extern const f32 lbl_8047D1A8;
+extern const f32 lbl_8047D190;
+extern const f32 lbl_8047D1AC;
+extern const f32 lbl_8047D1B0;
 #if 0
 asm void fn_80139E80(void* entry, void* parent, void* cameraPos, void* modelPos) {
 #include "src/game/effect/effect_visual_fn_80139E80.inc"
 }
 #else
-void fn_80139E80(void* entry, void* parent, void* cameraPos, void* modelPos) {
+void fn_80139E80(u8* e, u8* p, void* cameraPos, void* modelPos) {
     extern void fn_800D7E5C(void);
     extern void fn_800D7F14(void*);
     extern void fn_800DFFCC(void*, void*, void*);
     extern void fn_800E0060(f32*, f32*);
     extern f32 vecMag(f32*);
-    extern void fn_800E0108(f32*, f32*, f32*, u16, u16);
+    extern void fn_800E0108(f32*, f32*, f32*, u32, u32);
     extern void fn_800E0560(f32 (*)[4], f32*);
     extern void fn_800E042C(f32 (*)[4], f32*);
     extern void vecNormalize(f32*, f32*);
-    u8* e = entry;
-    u8* p = parent;
+    /* RULE-EXCEPTION(user-approved): store-only carrier for register allocation — see docs/RULE_EXCEPTIONS.md */
+    short spanEnd;
+    u16 i;
+    u16 count;
     u8* pointEntry;
-    f32 interpolated[3];
-    f32 tangent[3];
-    f32 cameraVector[3];
-    f32 normal[3];
-    f32 offset[3];
     f32 vertex[3];
+    f32 normal[3];
+    f32 direction[3];
+    f32 cameraVector[3];
+    f32 interpolated[3];
     f32 matrix[3][4];
     f32 threshold;
     u16 current;
     u16 start;
     u16 halfSpan;
-    u16 count;
     u16 visible;
-    u16 i;
 
     start = *(u16*)(e + 0x12DC);
     current = *(u16*)(p + 0x48) - start;
-    halfSpan = (*(u16*)(e + 0x12DE) - start) >> 1;
-    fn_800E0108(interpolated, (f32*)(e + 0x12CC), (f32*)(p + 0x20), current,
+    halfSpan = (u16)(spanEnd = *(u16*)(e + 0x12DE) - start) >> 1;
+    fn_800E0108(interpolated, (f32*)(e + 0x12CC), (f32*)(p + 0x20), *(u16*)(p + 0x48) - start,
                 start);
     GSvecSub(interpolated, modelPos, interpolated);
     if (current < halfSpan) {
-        threshold = *(f32*)(p + 0x38) *
-                    (*(f32*)&lbl_8047D1A0 -
-                     (f32)current / (f32)halfSpan);
+        threshold = *(f32*)(p + 0x38);
+        threshold *= 1.0f - (f32)current / (f32)halfSpan;
     } else {
-        threshold = *(f32*)&lbl_8047D190;
+        threshold = 0.0f;
     }
 
     count = *(u16*)(e + 0x12E2);
@@ -1615,90 +1716,98 @@ void fn_80139E80(void* entry, void* parent, void* cameraPos, void* modelPos) {
     fn_800D7F14(matrix);
     gfxBegin((visible * 4) & 0xFFFC);
 
+    count = *(u16*)(e + 0x12E2);
     pointEntry = e;
     for (i = 0; i < count; i++, pointEntry += 0x18) {
-        if (*(f32*)(*(u8**)(pointEntry + 0xC) + 4) <= threshold) {
-            continue;
-        }
-        GSvecSub(tangent, pointEntry, *(u8**)(pointEntry + 0xC));
-        fn_800E0060(tangent, tangent);
+        if (*(f32*)(*(u8**)(pointEntry + 0xC) + 4) > threshold) {
+        GSvecSub(direction, pointEntry, *(u8**)(pointEntry + 0xC));
+        fn_800E0060(direction, direction);
         GSvecAdd(cameraVector, pointEntry, *(u8**)(pointEntry + 0xC));
-        vecScale(cameraVector, cameraVector, *(f32*)&lbl_8047D1A8);
+        vecScale(cameraVector, cameraVector, 0.5f);
         GSvecSub(cameraVector, cameraPos, cameraVector);
         fn_800E0060(cameraVector, cameraVector);
-        fn_800DFFCC(normal, cameraVector, tangent);
-        if (vecMag(normal) > *(f32*)&lbl_8047D1AC) {
+        fn_800DFFCC(normal, cameraVector, direction);
+        if (vecMag(normal) > 0.001f) {
             vecNormalize(normal, normal);
         }
 
-        vecScale(offset, normal,
-                    *(f32*)&lbl_8047D1A8 * *(f32*)(pointEntry + 0x10));
-        GSvecAdd(vertex, *(u8**)(pointEntry + 0xC), offset);
+        vecScale(direction, normal,
+                    0.5f * *(f32*)(pointEntry + 0x10));
+        GSvecAdd(vertex, *(u8**)(pointEntry + 0xC), direction);
         gfxVtxPos(vertex[0], vertex[1], vertex[2]);
         fn_800D5CB8(0, e[0x12D8], e[0x12D9], e[0x12DA], e[0x12DB]);
-        gfxVtxTexCoord(0, *(f32*)&lbl_8047D190, *(f32*)&lbl_8047D190);
-        GSvecSub(vertex, *(u8**)(pointEntry + 0xC), offset);
+        gfxVtxTexCoord(0, 0.0f, 0.0f);
+        GSvecSub(vertex, *(u8**)(pointEntry + 0xC), direction);
         gfxVtxPos(vertex[0], vertex[1], vertex[2]);
         fn_800D5CB8(0, e[0x12D8], e[0x12D9], e[0x12DA], e[0x12DB]);
-        gfxVtxTexCoord(0, *(f32*)&lbl_8047D1A0, *(f32*)&lbl_8047D190);
+        gfxVtxTexCoord(0, 1.0f, 0.0f);
 
-        vecScale(offset, normal,
-                    *(f32*)&lbl_8047D1A8 * *(f32*)(pointEntry + 0x14));
-        GSvecSub(vertex, pointEntry, offset);
+        vecScale(direction, normal,
+                    0.5f * *(f32*)(pointEntry + 0x14));
+        GSvecSub(vertex, pointEntry, direction);
         gfxVtxPos(vertex[0], vertex[1], vertex[2]);
         fn_800D5CB8(0, e[0x12D8], e[0x12D9], e[0x12DA], e[0x12DB]);
-        gfxVtxTexCoord(0, *(f32*)&lbl_8047D1A0, *(f32*)&lbl_8047D1A0);
-        GSvecAdd(vertex, pointEntry, offset);
+        gfxVtxTexCoord(0, 1.0f, 1.0f);
+        GSvecAdd(vertex, pointEntry, direction);
         gfxVtxPos(vertex[0], vertex[1], vertex[2]);
         fn_800D5CB8(0, e[0x12D8], e[0x12D9], e[0x12DA], e[0x12DB]);
-        gfxVtxTexCoord(0, *(f32*)&lbl_8047D190, *(f32*)&lbl_8047D1A0);
+        gfxVtxTexCoord(0, 0.0f, 1.0f);
+        }
     }
     gfxEnd();
     fn_800D7E5C();
     fn_800D7E5C();
 }
 #endif
-extern u32 lbl_8047D1B4;
-extern u32 lbl_8047D190;
+#endif
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || defined(EFFECT_VISUAL_EXACT_8013A1D4)
+#if defined(EFFECT_VISUAL_EXACT_8013A1D4)
+extern f32 fn_800E0BE4(void);
+extern void GSvecCopy(void* dst, const void* src);
+extern void GSvecAdd(void* dst, void* srcA, void* srcB);
+#endif
+extern const f32 lbl_8047D1B4;
+extern const f32 lbl_8047D190;
 extern u32 lbl_8047D1A0;
-extern u32 lbl_8047D1A8;
-extern u32 lbl_8047D1AC;
-void fn_8013A1D4(void* arg0, void* arg1, void* arg2, u32 arg3, f32 arg4) {
-    typedef struct ElectronPoint {
-        f32 x;
-        f32 y;
-        f32 z;
-        struct ElectronPoint* prev;
-        f32 startWeight;
-        f32 endWeight;
-    } ElectronPoint;
-    u8* entry = arg0;
-    u8* parent = arg1;
-    ElectronPoint* point = arg2;
+extern const f32 lbl_8047D1A8;
+extern const f32 lbl_8047D1AC;
+typedef struct ElectronPoint {
+    f32 x;
+    f32 y;
+    f32 z;
+    struct ElectronPoint* prev;
+    f32 startWeight;
+    f32 endWeight;
+} ElectronPoint;
+
+void fn_8013A1D4(u8* entry, u8* parent, ElectronPoint* origin, u32 depth, f32 weight) {
+    ElectronPoint* first;
+    u32 i;
+    u32 j;
+    u32 startCount;
+    ElectronPoint* point;
     ElectronPoint* previous;
     ElectronPoint* current;
-    f32 spread[3];
-    f32 stopHeight;
+    u32 count;
     f32 spawnChance;
+    f32 branchChance;
+    f32 stopHeight;
     f32 branchDecay;
-    u16 startCount;
-    u16 count;
-    u16 i;
+    f32 spread[3];
 
+    previous = origin;
     GSvecCopy(spread, parent + 0x14);
     startCount = *(u16*)(entry + 0x12E2);
-    if (arg3 != 0) {
-        stopHeight = *(f32*)&lbl_8047D1B4 * point->y;
+    if (depth != 0) {
+        stopHeight = 0.25f * origin->y;
     } else {
-        stopHeight = *(f32*)&lbl_8047D190;
+        stopHeight = 0.0f;
     }
 
-    spawnChance = *(f32*)&lbl_8047D1A8 / (f32)(arg3 + 1);
-    count = startCount;
-    current = (ElectronPoint*)(entry + count * sizeof(ElectronPoint));
-    previous = point;
-
-    while (count < 0xC8) {
+    spawnChance = 1.0f / (f32)(depth + 1);
+    first = (ElectronPoint*)(entry + startCount * sizeof(ElectronPoint));
+    current = first;
+    for (i = startCount; i < 0xC8; i++, current++) {
         current->prev = previous;
         point = previous;
         previous = current;
@@ -1710,44 +1819,40 @@ void fn_8013A1D4(void* arg0, void* arg1, void* arg2, u32 arg3, f32 arg4) {
             spread[2] * fn_800E0BA0() + *(f32*)(parent + 0x34));
         GSvecAdd(current, current, point);
 
-        count++;
-        *(u16*)(entry + 0x12E2) = count;
-        if (current->y < stopHeight || fn_800E0BA0() > spawnChance) {
-            if (arg3 == 0) {
+        (*(u16*)(entry + 0x12E2))++;
+        if (current->y < stopHeight || spawnChance < fn_800E0BE4()) {
+            if (depth == 0) {
                 GSvecCopy(entry + 0x12CC, current);
             }
             break;
         }
-
-        current = (ElectronPoint*)((u8*)current + sizeof(ElectronPoint));
     }
 
-    if (arg3 >= *(u16*)(parent + 0x46)) {
+    if (depth >= *(u16*)(parent + 0x46)) {
         return;
     }
 
-    spawnChance = *(f32*)(parent + 0x40) *
-                  (f32)(*(u16*)(parent + 0x46) - arg3) /
+    branchChance = *(f32*)(parent + 0x40) *
+                  (f32)(*(u16*)(parent + 0x46) - depth) /
                   (f32)*(u16*)(parent + 0x46);
     count = *(u16*)(entry + 0x12E2);
-    if (arg3 != 0) {
-        branchDecay = arg4 / (f32)(count - startCount);
+    if (depth != 0) {
+        branchDecay = weight / (f32)(count - startCount);
     } else {
-        branchDecay = *(f32*)&lbl_8047D190;
+        branchDecay = 0.0f;
     }
 
-    current = (ElectronPoint*)(entry + startCount * sizeof(ElectronPoint));
-    for (i = startCount; i < count; i++) {
-        current->startWeight = arg4;
-        arg4 -= branchDecay;
-        current->endWeight = arg4;
-        if (fn_800E0BA0() >= spawnChance) {
-            fn_8013A1D4(entry, parent, current->prev, arg3 + 1,
-                        *(f32*)&lbl_8047D1AC * arg4);
+    for (j = startCount; j < count; j++, first++) {
+        first->startWeight = weight;
+        weight = first->endWeight = weight - branchDecay;
+        if (branchChance > fn_800E0BE4()) {
+            fn_8013A1D4(entry, parent, first->prev, depth + 1,
+                        0.5f * weight);
         }
-        current = (ElectronPoint*)((u8*)current + sizeof(ElectronPoint));
     }
 }
+#endif /* 8013A1D4 */
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
 #endif
 
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
@@ -1797,15 +1902,21 @@ u32 fn_8013A49C(void* ptr) {
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || defined(EFFECT_VISUAL_EXACT_8013A520)
+#if defined(EFFECT_VISUAL_EXACT_8013A520)
+extern f32 fn_800E0BE4(void);
+extern void GSvecCopy(void* dst, const void* src);
+extern void GSvecAdd(void* dst, void* srcA, void* srcB);
+extern u32 fn_800EE7E0(void* obj);
+#endif
 extern void __cvt_fp2unsigned(void);
-extern u32 lbl_8047D1B8;
-extern u32 lbl_8047D1BC;
-extern u32 lbl_8047D1C0;
-extern u32 lbl_8047D1C4;
-extern u32 lbl_8047D1C8;
-extern u32 lbl_8047D1CC;
-extern u32 lbl_8047D1D0;
+extern const f32 lbl_8047D1B8;
+extern const f32 lbl_8047D1BC;
+extern const f32 lbl_8047D1C0;
+extern const f32 lbl_8047D1C4;
+extern const f32 lbl_8047D1C8;
+extern const f32 lbl_8047D1CC;
+extern const f32 lbl_8047D1D0;
 extern u32 lbl_8047D1D8;
 #if 0
 asm void fn_8013A520(void) {
@@ -1814,46 +1925,61 @@ asm void fn_8013A520(void) {
 #else
 u32 fn_8013A520(void* ptr) {
     extern u32 fn_800EE0E8(void*);
-    extern void* fn_800EE150(void*, u32);
-    extern void fn_800E3D98(void*, f32*);
-    extern f32 fn_800E0040(f32*, f32*);
-    extern void fn_800EE3BC(void*, f32*, s32, s32);
-    extern void fn_800EE828(void*);
-    extern u32 fn_800C46B0(f32, f32, f32);
     extern f64 sin(f64);
     extern f64 cos(f64);
+    u32 segment;
+    u32 firstIndex;
+    u32 secondIndex;
     u8* p = ptr;
-    void* resource;
-    void* first;
-    void* second;
-    void* camera;
+    f32 ctrl[4][3];
     f32 center[3];
     f32 cameraPos[3];
     f32 firstPos[3];
     f32 secondPos[3];
-    f32 firstBase[3];
-    f32 secondBase[3];
     f32 offset[3];
     f32 point[3];
+    f32 jitter[3];
     f32 perspective;
     f32 unused;
-    f32 distance;
-    f32 scale;
-    f32 t;
-    f32 step;
-    f32 yaw;
-    f32 pitch;
-    f32 radius;
+    void* resource;
+    void* first;
+    void* camera;
     u32 count;
-    u32 firstIndex;
-    u32 secondIndex;
+    void* second;
     u32 segments;
-    u32 segment;
+    /* Float locals of the function and of its three random-offset blocks
+       (B1: ctrl[2] offset, B2: ctrl[3] offset, B3: per-segment jitter); this
+       declaration order gives retail's float register allocation. */
+    f32 cosYawB2;
+    f32 step;
+    f32 t;
+    f32 yawB1;
+    f32 pitchB1;
+    f32 chance;
+    f32 cosYawB1;
+    f32 lengthB3;
+    f32 scale;
+    f32 cosPitchB1;
+    f32 distance;
+    f32 lengthB1;
+    f32 cosPitchB2;
+    f32 pitchB3;
+    f32 yawB3;
+    f32 sinPitchB1;
+    f32 sinYawB1;
+    f32 sinPitchB2;
+    f32 sinYawB2;
+    f32 sinPitchB3;
+    f32 sinYawB3;
+    f32 cosYawB3;
+    f32 yawB2;
+    f32 pitchB2;
+    f32 radius;
+    f32 lengthB2;
+    f32 cosPitchB3;
 
-    if (ptr == NULL) {
-        return 0;
-    }
-
+    if (ptr != NULL) {
+    chance = *(f32*)(p + 0x20);
     resource = GSresGetResource(*(u16*)(p + 0xC), *(u16*)(p + 0xE));
     if (resource == NULL) {
         return 0;
@@ -1870,12 +1996,12 @@ u32 fn_8013A520(void* ptr) {
     gfxSetUpdates(1, 1, 0);
     gfxSetZMode(1, 1, 1);
     gfxSetCullMode(0);
-    scale = (*(f32*)&lbl_8047D1B8 * *(f32*)(p + 0x10)) /
+    scale = (64.0f * *(f32*)(p + 0x10)) /
             (distance * perspective);
-    if (scale > *(f32*)&lbl_8047D1BC) {
-        scale = *(f32*)&lbl_8047D1BC;
+    if (scale > 1.0f) {
+        scale = 1.0f;
     }
-    fn_800B9404((u32)(*(f32*)&lbl_8047D1C0 * scale), 5);
+    fn_800B9404((s32)(255.0f * scale), 5);
     gfxSetFlags(1);
     gfxClearFlags(6);
     gfxSetVtxDesc(*(void**)(p + 4));
@@ -1886,88 +2012,93 @@ u32 fn_8013A520(void* ptr) {
         if (first == NULL) {
             continue;
         }
-        if (((u8 (*)(void*))fn_800EE7E0)(first) == 0) {
-            fn_800EE828(first);
-            continue;
-        }
-        fn_800EE3BC(first, firstPos, 0, 0);
-        if (GSvecDistance(firstPos, center) <= *(f32*)&lbl_8047D1C4) {
-            fn_800EE828(first);
-            continue;
-        }
-
-        for (secondIndex = firstIndex + 1; secondIndex < count;
-             secondIndex++) {
-            second = GSmodelGetPart(resource, secondIndex);
-            if (second == NULL) {
-                continue;
-            }
-            if (((u8 (*)(void*))fn_800EE7E0)(second) != 0 &&
-                *(f32*)(p + 0x20) > fn_800E0BE4()) {
-                fn_800EE3BC(second, secondPos, 0, 0);
-                if (GSvecDistance(firstPos, center) > *(f32*)&lbl_8047D1C4) {
-                    GSvecCopy(firstBase, firstPos);
-                    GSvecCopy(secondBase, secondPos);
-                    radius = *(f32*)&lbl_8047D1C8 *
-                             GSvecDistance(firstPos, secondPos);
-                    yaw = *(f32*)&lbl_8047D1CC * fn_800E0BE4();
-                    pitch = *(f32*)&lbl_8047D1D0 * fn_800E0BE4();
-                    set__5GSvecFfff(
-                        offset,
-                        (f32)sin(pitch) *
-                            (radius * fn_800E0BE4() * (f32)cos(yaw)),
-                        radius * fn_800E0BE4() * (f32)cos(pitch),
-                        (f32)sin(pitch) *
-                            (radius * fn_800E0BE4() * (f32)sin(yaw)));
-                    GSvecAdd(firstBase, firstPos, offset);
-                    yaw = *(f32*)&lbl_8047D1CC * fn_800E0BE4();
-                    pitch = *(f32*)&lbl_8047D1D0 * fn_800E0BE4();
-                    set__5GSvecFfff(
-                        offset,
-                        (f32)sin(pitch) *
-                            (radius * fn_800E0BE4() * (f32)cos(yaw)),
-                        radius * fn_800E0BE4() * (f32)cos(pitch),
-                        (f32)sin(pitch) *
-                            (radius * fn_800E0BE4() * (f32)sin(yaw)));
-                    GSvecAdd(secondBase, secondPos, offset);
-                    segments = fn_800C46B0(
-                        *(f32*)(p + 0x10) *
-                            (*(f32*)(p + 0x1C) *
-                                 ((f32 (*)(void))fn_800E0BA0)() +
-                             *(f32*)(p + 0x18)),
-                        *(f32*)(p + 0x18), *(f32*)(p + 0x1C));
-                    step = *(f32*)&lbl_8047D1BC / (f32)segments;
-                    gfxBegin((u16)(segments + 1));
-                    gfxVtxPos(firstBase[0], firstBase[1], firstBase[2]);
-                    fn_800D5CB8(0, p[0], p[1], p[2], p[3]);
-                    t = step;
-                    for (segment = 1; segment < segments; segment++) {
-                        ((void (*)(f32*, f32*, f32))GSbezierCalculateVector)(
-                            point, firstBase, t);
-                        yaw = *(f32*)&lbl_8047D1CC * fn_800E0BE4();
-                        pitch = *(f32*)&lbl_8047D1D0 * fn_800E0BE4();
-                        radius = *(f32*)(p + 0x14) * *(f32*)(p + 0x10) *
-                                 ((f32 (*)(void))fn_800E0BA0)();
-                        set__5GSvecFfff(
-                            offset,
-                            (f32)sin(pitch) * (radius * (f32)cos(yaw)),
-                            radius * (f32)cos(pitch),
-                            (f32)sin(pitch) * (radius * (f32)sin(yaw)));
-                        GSvecAdd(point, point, offset);
-                        gfxVtxPos(point[0], point[1], point[2]);
-                        fn_800D5CB8(0, p[0], p[1], p[2], p[3]);
-                        t += step;
+        if ((u8)fn_800EE7E0(first) != 0) {
+            GSpartGetTransform(first, firstPos, 0, 0);
+            if (GSvecDistance(firstPos, center) > 0.1f) {
+                for (secondIndex = firstIndex + 1; secondIndex < count;
+                     secondIndex++) {
+                    second = GSmodelGetPart(resource, secondIndex);
+                    if (second == NULL) {
+                        continue;
                     }
-                    gfxVtxPos(secondBase[0], secondBase[1], secondBase[2]);
-                    fn_800D5CB8(0, p[0], p[1], p[2], p[3]);
-                    gfxEnd();
+                    if ((u8)fn_800EE7E0(second) != 0 && chance > fn_800E0BE4()) {
+                        GSpartGetTransform(second, secondPos, 0, 0);
+                        if (GSvecDistance(firstPos, center) > 0.1f) {
+                            GSvecCopy(ctrl[0], firstPos);
+                            GSvecCopy(ctrl[1], secondPos);
+                            radius = 0.5f *
+                                     GSvecDistance(firstPos, secondPos);
+
+                            {
+                                yawB1 = 6.2831855f * fn_800E0BE4();
+                                pitchB1 = 3.1415927f * fn_800E0BE4();
+                                sinPitchB1 = sin(pitchB1);
+                                lengthB1 = radius * fn_800E0BE4();
+                                sinYawB1 = sin(yawB1);
+                                cosPitchB1 = cos(pitchB1);
+                                cosYawB1 = cos(yawB1);
+                                set__5GSvecFfff(offset, sinPitchB1 * (lengthB1 * cosYawB1),
+                                                lengthB1 * cosPitchB1,
+                                                sinPitchB1 * (lengthB1 * sinYawB1));
+                            }
+                            GSvecAdd(ctrl[2], firstPos, offset);
+
+                            {
+                                yawB2 = 6.2831855f * fn_800E0BE4();
+                                pitchB2 = 3.1415927f * fn_800E0BE4();
+                                sinPitchB2 = sin(pitchB2);
+                                lengthB2 = radius * fn_800E0BE4();
+                                sinYawB2 = sin(yawB2);
+                                cosPitchB2 = cos(pitchB2);
+                                cosYawB2 = cos(yawB2);
+                                set__5GSvecFfff(offset, sinPitchB2 * (lengthB2 * cosYawB2),
+                                                lengthB2 * cosPitchB2,
+                                                sinPitchB2 * (lengthB2 * sinYawB2));
+                            }
+                            GSvecAdd(ctrl[3], secondPos, offset);
+
+                            segments = *(f32*)(p + 0x10) *
+                                       (*(f32*)(p + 0x1C) * fn_800E0BA0() +
+                                        *(f32*)(p + 0x18));
+                            step = 1.0f / (f32)segments;
+                            gfxBegin((u16)(segments + 1));
+                            gfxVtxPos(ctrl[0][0], ctrl[0][1], ctrl[0][2]);
+                            fn_800D5CB8(0, p[0], p[1], p[2], p[3]);
+                            t = step;
+                            for (segment = 1; segment < segments; segment++) {
+                                GSbezierCalculateVector(point, ctrl, t);
+                                {
+                                    yawB3 = 6.2831855f * fn_800E0BE4();
+                                    pitchB3 = 3.1415927f * fn_800E0BE4();
+                                    sinPitchB3 = sin(pitchB3);
+                                    lengthB3 = *(f32*)(p + 0x14) * *(f32*)(p + 0x10) *
+                                             fn_800E0BA0();
+                                    sinYawB3 = sin(yawB3);
+                                    cosPitchB3 = cos(pitchB3);
+                                    cosYawB3 = cos(yawB3);
+                                    set__5GSvecFfff(jitter, sinPitchB3 * (lengthB3 * cosYawB3),
+                                                    lengthB3 * cosPitchB3,
+                                                    sinPitchB3 * (lengthB3 * sinYawB3));
+                                }
+                                GSvecAdd(point, point, jitter);
+                                gfxVtxPos(point[0], point[1], point[2]);
+                                fn_800D5CB8(0, p[0], p[1], p[2], p[3]);
+                                t += step;
+                            }
+                            gfxVtxPos(ctrl[1][0], ctrl[1][1], ctrl[1][2]);
+                            fn_800D5CB8(0, p[0], p[1], p[2], p[3]);
+                            gfxEnd();
+                        }
+                    }
+                    GSpartFree(second);
                 }
             }
-            fn_800EE828(second);
         }
-        fn_800EE828(first);
+        GSpartFree(first);
     }
     return 1;
+    }
+    return 0;
 }
 #endif
 #endif
@@ -2034,9 +2165,10 @@ u32 fn_8013AB34(void* ptr) {
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013AB60)
 extern u32 lbl_8047D1E8;
-extern u32 lbl_8047D1E0;
+extern const f32 lbl_8047D1E0;
 #if 0
 asm u32 fn_8013AB60(void* ptr, u8* src, u8* dst, u32 alpha) {
 #include "src/game/effect/effect_visual_fn_8013AB60.inc"
@@ -2121,19 +2253,18 @@ u32 fn_8013AD68(void* ptr) {
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013AD9C)
 extern void fn_80168408(void* filter, u8* color);
 extern u32 lbl_8047D1E8;
-extern u32 lbl_8047D1F0;
-extern u32 lbl_8047D1F4;
+extern const f32 lbl_8047D1F0;
+extern const f32 lbl_8047D1F4;
 u32 fn_8013AD9C(void* ptr, u32 delta) {
     u8* p;
     u8* node;
     u8* previous;
     u8 color[4];
     void* filter;
-    u32 elapsed;
-    u32 duration;
     f32 ratio;
     f32 start;
     f32 end;
@@ -2148,12 +2279,11 @@ u32 fn_8013AD9C(void* ptr, u32 delta) {
         goto done;
     }
 
-    duration = *(u32*)(node + 0x8);
-    if (duration == 0xFFFFFFFF) {
+    if (*(u32*)(node + 0x8) == 0xFFFFFFFF) {
         *(u32*)(p + 0x58) = 0;
     }
-    while (*(u32*)(p + 0x58) >= duration) {
-        *(u32*)(p + 0x58) -= duration;
+    while (*(u32*)(p + 0x58) >= *(u32*)(node + 0x8)) {
+        *(u32*)(p + 0x58) -= *(u32*)(node + 0x8);
         previous = node;
         node = *(u8**)(node + 0x10);
         *(void**)(p + 0x54) = node;
@@ -2168,20 +2298,18 @@ u32 fn_8013AD9C(void* ptr, u32 delta) {
             }
             return 0;
         }
-        duration = *(u32*)(node + 0x8);
-        if (duration == 0xFFFFFFFF) {
+        if (*(u32*)(node + 0x8) == 0xFFFFFFFF) {
             *(u32*)(p + 0x58) = 0;
             break;
         }
     }
 
-    elapsed = *(u32*)(p + 0x58);
-    ratio = (f32)elapsed / (f32)duration;
-    if (ratio < *(f32*)&lbl_8047D1F0) {
-        ratio = *(f32*)&lbl_8047D1F0;
+    ratio = (f32)*(u32*)(p + 0x58) / (f32)*(u32*)(node + 0x8);
+    if (ratio < 0.0f) {
+        ratio = 0.0f;
     }
-    if (ratio > *(f32*)&lbl_8047D1F4) {
-        ratio = *(f32*)&lbl_8047D1F4;
+    if (ratio > 1.0f) {
+        ratio = 1.0f;
     }
 
     start = node[0];
@@ -2201,10 +2329,11 @@ u32 fn_8013AD9C(void* ptr, u32 delta) {
         fn_8013B268(p, color);
     } else {
         filter = *(void**)p;
-        if (filter == NULL) {
+        if (filter != NULL) {
+            fn_80168408(filter, color);
+        } else {
             return 0;
         }
-        fn_80168408(filter, color);
     }
     *(u32*)(p + 0x58) += delta;
     return 1;
@@ -2351,26 +2480,27 @@ report_null:
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013B268)
 extern void GSmodelSetModulationColor(void* obj, void* param);
 extern u32 lbl_8047D1E8;
-extern u32 lbl_8047D1F8;
-extern u32 lbl_8047D1F0;
-extern u32 lbl_8047D1FC;
+extern const f32 lbl_8047D1F8;
+extern const f32 lbl_8047D1F0;
+extern const f32 lbl_8047D1FC;
 
 static inline u8 effectColorAdd(u8 base, u8 color) {
-    f32 result = (f32)base + (f32)color - *(f32*)&lbl_8047D1F8;
+    f32 result = (f32)base + (f32)color - 128.0f;
 
-    if (result < *(f32*)&lbl_8047D1F0) {
-        result = *(f32*)&lbl_8047D1F0;
-    } else if (result > *(f32*)&lbl_8047D1FC) {
-        result = *(f32*)&lbl_8047D1FC;
+    if (result < 0.0f) {
+        result = 0.0f;
+    } else if (result > 255.0f) {
+        result = 255.0f;
     }
     return result;
 }
 
 static inline u8 effectColorMultiply(u8 base, u8 color) {
-    return ((f32)base * (f32)color) / *(f32*)&lbl_8047D1FC;
+    return ((f32)base * (f32)color) / 255.0f;
 }
 
 #if 0
@@ -2380,12 +2510,12 @@ asm void fn_8013B268(void* ptr, u8* color) {
 #else
 void fn_8013B268(void* ptr, u8* color) {
     u8* p;
-    u8* baseColor;
-    u8 adjusted[4];
+    void** textures;
     u16 count;
     u16 i;
-    void** textures;
     u8 useBaseColor;
+    u8* baseColor;
+    u8 adjusted[4];
 
     p = ptr;
     count = (u16)*(u32*)(p + 0x48);
@@ -2478,7 +2608,20 @@ u32 fn_8013B558(void* ptr) {
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013B5E4)
+#if defined(EFFECT_VISUAL_BANK_ACTIVE)
+extern f32 fn_800E0BE4(void);
+extern void set__5GSvecFfff(void* dst, f32 x, f32 y, f32 z);
+extern void GSvecCopy(void* dst, const void* src);
+extern void fn_800DFFCC(void* dst, void* src, const void* value);
+extern void fn_800E0718(void*, void*, f32);
+extern void GSvecTransformQuat(void* dst, void* quat, void* src);
+extern void GSmtxMakeYRotation(void* mtx, f32 angle);
+extern void GSvecTransform(void* dst, void* matrix, void* vec);
+extern void vecScale(void* dst, void* src, f32 scale);
+extern void GSvecAdd(void* dst, void* srcA, void* srcB);
+#endif
 extern u16 fn_800E2C04(u32 size, u32 alignment);
 extern u8 fn_800E0E14();
 extern void GSmodelSetRotation(void* model, void* rotation);
@@ -2488,20 +2631,71 @@ extern void GSmodelSetTexAnimRate(void* model, f32 value);
 extern void GSmodelSetTexAnimFrame(void* model, f32 value);
 extern void GSmodelSetTexAnimType(void* model, u32 value);
 extern void GSmodelStartTexAnimation(void* model);
-extern u32 lbl_8047D200;
-extern u32 lbl_8047D204;
+extern const f32 lbl_8047D200;
+extern const f32 lbl_8047D204;
 extern u8 lbl_80272EA0[];
+/* RULE-EXCEPTION(user-approved): single-function inline helper — see docs/RULE_EXCEPTIONS.md */
+static inline u8 surfAllocMesh(u8* p, void* model) {
+    u16 columns;
+    u16 rows;
+    u32 totalSize;
+    u8* cursor;
+    u8* data;
+    u16 handle;
+    u32 pointCount;
+    u32 vectorSize;
+    u32 texcoordSize;
+    u32 colorSize;
+
+    columns = *(u16*)(p + 0x4E);
+    rows = *(u16*)(p + 0x4C);
+    *(void**)p = model;
+    *(u16*)(p + 0x1C) = rows + 1;
+    *(u16*)(p + 0x1E) = columns + 1;
+    pointCount = *(u16*)(p + 0x1C) * *(u16*)(p + 0x1E);
+    vectorSize = (pointCount * 0xC + 0x1F) & ~0x1F;
+    colorSize = (pointCount * 4 + 0x1F) & ~0x1F;
+    texcoordSize = (pointCount * 8 + 0x1F) & ~0x1F;
+    *(u32*)(p + 0x18) = (columns * (*(u16*)(p + 0x1C) * 0x10 + 3) + 0x1F) & ~0x1F;
+    totalSize = vectorSize + vectorSize + colorSize + texcoordSize + *(u32*)(p + 0x18);
+
+    handle = fn_800E2C04(totalSize, 0x20);
+    if (handle != 0) {
+        data = fn_800E27B0(handle);
+        *(u16*)(p + 0x20) = handle;
+        memset(data, 0, totalSize);
+        *(u8**)(p + 0x14) = data;
+        cursor = data + *(u32*)(p + 0x18);
+        *(u8**)(p + 0x4) = cursor;
+        cursor += vectorSize;
+        *(u8**)(p + 0x8) = cursor;
+        cursor += vectorSize;
+        *(u8**)(p + 0x10) = cursor;
+        cursor += colorSize;
+        *(u8**)(p + 0xC) = cursor;
+        fn_800E0E14(0, 0);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+/* RULE-EXCEPTION(user-approved): single-function inline helper — see docs/RULE_EXCEPTIONS.md */
+static inline u8 surfAllocColumn(u8* p) {
+    u16 handle;
+
+    handle = _toolentryAlloc__FUl((*(u16*)(p + 0x4E) + 1) * 0xC);
+    if (handle != 0) {
+        *(u16*)(p + 0xC0) = handle;
+        *(void**)(p + 0xBC) = fn_800E27B0(handle);
+        return TRUE;
+    }
+    return FALSE;
+}
+
 u16 surfEffectStart(void* ptr) {
     u8* p;
     void* model;
     u16 handle;
-    u32 pointCount;
-    u32 surfaceSize;
-    u32 vectorSize;
-    u32 colorSize;
-    u32 texcoordSize;
-    u32 totalSize;
-    u8* data;
 
     if (ptr == NULL) {
         goto fail;
@@ -2510,7 +2704,7 @@ u16 surfEffectStart(void* ptr) {
     p = ptr;
     *(u16*)(p + 0xCC) = 0;
     memset(p, 0, 0x24);
-    if (*(u32*)(p + 0x54) == 0) {
+    if (*(s32*)(p + 0x54) == 0) {
         goto fail;
     }
 
@@ -2520,51 +2714,25 @@ u16 surfEffectStart(void* ptr) {
     }
 
     fn_800B856C();
-    *(void**)p = model;
-    *(u16*)(p + 0x1C) = *(u16*)(p + 0x4C) + 1;
-    *(u16*)(p + 0x1E) = *(u16*)(p + 0x4E) + 1;
-    pointCount = *(u16*)(p + 0x1C) * *(u16*)(p + 0x1E);
-    surfaceSize = (*(u16*)(p + 0x4E) * (*(u16*)(p + 0x1C) * 0x10 + 3) + 0x1F) & ~0x1F;
-    colorSize = (pointCount * 4 + 0x1F) & ~0x1F;
-    texcoordSize = (pointCount * 8 + 0x1F) & ~0x1F;
-    vectorSize = (pointCount * 0xC + 0x1F) & ~0x1F;
-    *(u32*)(p + 0x18) = surfaceSize;
-    totalSize = surfaceSize + vectorSize * 2 + colorSize + texcoordSize;
-
-    handle = fn_800E2C04(totalSize, 0x20);
-    if (handle == 0) {
+    if (!surfAllocMesh(p, model)) {
         goto fail;
     }
 
-    *(u16*)(p + 0x20) = handle;
-    data = fn_800E27B0(handle);
-    memset(data, 0, totalSize);
-    *(u8**)(p + 0x14) = data;
-    *(u8**)(p + 0x4) = data + surfaceSize;
-    *(u8**)(p + 0x8) = *(u8**)(p + 0x4) + vectorSize;
-    *(u8**)(p + 0x10) = *(u8**)(p + 0x8) + vectorSize;
-    *(u8**)(p + 0xC) = *(u8**)(p + 0x10) + colorSize;
-    fn_800E0E14(0, 0);
-
     fn_8013BE04(p, p + 0x24, p + 0x3C, *(f32*)(p + 0x40), *(f32*)(p + 0x44),
                 *(f32*)(p + 0x48));
-    if (!fn_8013C074(model, p)) {
+    if (!(u8)fn_8013C074(model, p)) {
         goto cleanup;
     }
-
-    handle = _toolentryAlloc__FUl((*(u16*)(p + 0x4E) + 1) * 0xC);
-    if (handle == 0) {
+    if (!surfAllocColumn(p)) {
         goto cleanup;
     }
-    *(u16*)(p + 0xC0) = handle;
-    *(void**)(p + 0xBC) = fn_800E27B0(handle);
 
     GSmodelSetVisibility(model, 0);
     GSmodelSetRotation(model, p + 0x30);
     if (GSmodelCanTexAnimate(model)) {
         GSmodelSetTexAnimIndex(model, 0);
-        GSmodelSetTexAnimRate(model, *(f32*)&lbl_8047D200);
-        GSmodelSetTexAnimFrame(model, *(f32*)&lbl_8047D204);
+        GSmodelSetTexAnimRate(model, 0.5f);
+        GSmodelSetTexAnimFrame(model, 0.0f);
         GSmodelSetTexAnimType(model, 1);
         GSmodelStartTexAnimation(model);
     }
@@ -2594,68 +2762,77 @@ asm u32 fn_8013B85C(void* ptr, u32 delta) {
 #else
 u32 fn_8013B85C(void* ptr, u32 delta) {
     u8* p;
-    u8* source;
-    u8* points;
+    s32 half;
+    s32 column;
     f32 t;
     s32 row;
-    s32 column;
+    u8* source;
+    u8* points;
     s32 firstCount;
-    s32 half;
-    s32 rows;
+    s32 count;
     s32 columns;
+    s32 evenHalf;
 
-    if (ptr == NULL) {
-        return 0;
-    }
+    if (ptr != NULL) {
+        p = ptr;
+        t = (f32)*(u16*)(p + 0xCC) / (f32)*(u16*)(p + 0xCE);
+        GSmodelSetVisibility(*(void**)p, 1);
+        fn_8013BC10(p, t);
 
-    p = ptr;
-    t = (f32)*(u16*)(p + 0xCC) / (f32)*(u16*)(p + 0xCE);
-    GSmodelSetVisibility(*(void**)p, 1);
-    fn_8013BC10(p, t);
-
-    columns = *(u16*)(p + 0x1E);
-    if (columns % 2 != 0) {
-        half = columns / 2;
-        firstCount = half + 1;
-        fn_800E09E8(*(void**)(p + 0xBC), p + 0x5C, firstCount);
-        fn_800E09E8(*(u8**)(p + 0xBC) + firstCount * 0xC, p + 0x8C, half);
-    } else {
-        firstCount = columns / 2;
-        fn_800E09E8(*(void**)(p + 0xBC), p + 0x5C, firstCount);
-        fn_800E09E8(*(u8**)(p + 0xBC) + firstCount * 0xC, p + 0x8C, firstCount);
-    }
-
-    rows = *(u16*)(p + 0x1C);
-    columns = *(u16*)(p + 0x1E);
-    points = *(u8**)(p + 0x4);
-    for (row = 0; row < rows; row++) {
-        source = *(u8**)(p + 0xBC);
-        for (column = 0; column < columns; column++, source += 0xC, points += 0xC) {
-            *(f32*)(points + 0x4) = *(f32*)(source + 0x4);
-            *(f32*)(points + 0x8) = *(f32*)(source + 0x8);
+        count = *(u16*)(p + 0x1E);
+        if (count % 2 != 0) {
+            half = count >> 1;
+            firstCount = half + 1;
+            fn_800E09E8(*(void**)(p + 0xBC), p + 0x5C, firstCount);
+            fn_800E09E8(*(u8**)(p + 0xBC) + firstCount * 0xC, p + 0x8C, half);
+        } else {
+            evenHalf = count >> 1;
+            fn_800E09E8(*(void**)(p + 0xBC), p + 0x5C, evenHalf);
+            fn_800E09E8(*(u8**)(p + 0xBC) + evenHalf * 0xC, p + 0x8C, evenHalf);
         }
-    }
 
-    fn_8013BA98(p);
-    *(u16*)(p + 0xCC) = *(u16*)(p + 0xCC) + delta;
-    return (*(u16*)(p + 0xCC) < *(u16*)(p + 0xCE));
+        count = *(u16*)(p + 0x1C);
+        columns = *(u16*)(p + 0x1E);
+        points = *(u8**)(p + 0x4);
+        for (row = 0; row < count; row++) {
+            source = *(u8**)(p + 0xBC);
+            for (column = 0; column < columns; column++, source += 0xC, points += 0xC) {
+                *(f32*)(points + 0x4) = *(f32*)(source + 0x4);
+                *(f32*)(points + 0x8) = *(f32*)(source + 0x8);
+            }
+        }
+
+        fn_8013BA98(p);
+        *(u16*)(p + 0xCC) = *(u16*)(p + 0xCC) + delta;
+        return (*(u16*)(p + 0xCC) < *(u16*)(p + 0xCE));
+    }
+    return 0;
 }
 #endif
 extern u8 lbl_8031554C[];
 extern u8 lbl_80315540[];
-extern u32 lbl_8047D200;
-void fn_8013BA98(void* ptr) {
-    u8* p;
-    u8* points;
-    u8* point;
-    u8* vectors;
-    f32 previousDelta[3];
-    f32 nextDelta[3];
+extern const f32 lbl_8047D200;
+/* RULE-EXCEPTION(user-approved): single-function inline helper — see docs/RULE_EXCEPTIONS.md */
+static inline void surfCopyColumn(u8* column, s32 depth, s32 width) {
     s32 row;
-    s32 column;
-    s32 index;
+
+    for (row = 0; row < depth; row++) {
+        GSvecCopy(column + row * width * 0xC, column);
+    }
+}
+
+void fn_8013BA98(void* ptr) {
     s32 width;
     s32 depth;
+    u8* p;
+    u8* previous;
+    s32 column;
+    u8* point;
+    u8* points;
+    u8* vectors;
+    s32 row;
+    f32 previousDelta[3];
+    f32 nextDelta[3];
 
     p = ptr;
     points = *(u8**)(p + 0x4);
@@ -2665,41 +2842,36 @@ void fn_8013BA98(void* ptr) {
     point = points + 0xC;
 
     GSvecCopy(vectors, lbl_8031554C);
-    index = 0;
-    for (row = 0; row < depth; row++, index += width) {
-        GSvecCopy(vectors + index * 0xC, vectors);
+    for (row = 0; row < depth; row++) {
+        GSvecCopy(vectors + row * width * 0xC, vectors);
     }
 
     for (column = 1; column < width - 1; column++) {
-        GSvecSub(previousDelta, point, points);
+        previous = points;
         points = point;
-        point += 0xC;
         vectors += 0xC;
+        point += 0xC;
+        GSvecSub(previousDelta, points, previous);
         GSvecSub(nextDelta, point, points);
         fn_800DFFCC(previousDelta, previousDelta, lbl_80315540);
         fn_800DFFCC(nextDelta, nextDelta, lbl_80315540);
         GSvecAdd(vectors, nextDelta, previousDelta);
-        vecScale(vectors, vectors, *(f32*)&lbl_8047D200);
+        vecScale(vectors, vectors, 0.5f);
         fn_800E0060(vectors, vectors);
-
-        index = 0;
-        for (row = 0; row < depth; row++, index += width) {
-            GSvecCopy(vectors + index * 0xC, vectors);
+        for (row = 0; row < depth; row++) {
+            GSvecCopy(vectors + row * width * 0xC, vectors);
         }
     }
 
     GSvecCopy(vectors + 0xC, lbl_8031554C);
-    index = 0;
-    for (row = 0; row < depth; row++, index += width) {
-        GSvecCopy(vectors + (index + 1) * 0xC, vectors + 0xC);
-    }
+    surfCopyColumn(vectors + 0xC, depth, width);
 }
 extern void clear__5GSvecFv(void* vec);
-extern u32 lbl_8047D200;
-extern u32 lbl_8047D210;
-extern u32 lbl_8047D214;
-extern u32 lbl_8047D218;
-extern u32 lbl_8047D21C;
+extern const f32 lbl_8047D200;
+extern const f32 lbl_8047D210;
+extern const f32 lbl_8047D214;
+extern const f32 lbl_8047D218;
+extern const f32 lbl_8047D21C;
 void fn_8013BC10(void* ptr, f32 t) {
     u8* p;
     f32 upperLeft[3];
@@ -2709,10 +2881,9 @@ void fn_8013BC10(void* ptr, f32 t) {
     f32 lowerLeft[3];
     f32 lowerFar[3];
     f32 halfWidth;
-    f32 factor;
 
     p = ptr;
-    halfWidth = *(f32*)&lbl_8047D200 * *(f32*)(p + 0x44);
+    halfWidth = 0.5f * *(f32*)(p + 0x44);
     clear__5GSvecFv(upperLeft);
     clear__5GSvecFv(upperRight);
     clear__5GSvecFv(lowerRight);
@@ -2720,28 +2891,30 @@ void fn_8013BC10(void* ptr, f32 t) {
     clear__5GSvecFv(lowerLeft);
     clear__5GSvecFv(lowerFar);
 
+    lowerLeft[2] = *(f32*)(p + 0xC4);
+    lowerFar[2] = *(f32*)(p + 0xC4);
     upperLeft[2] = -halfWidth;
     lowerRight[2] = halfWidth;
     upperRight[1] = *(f32*)(p + 0xC8);
-    lowerLeft[2] = *(f32*)(p + 0xC4);
-    lowerFar[2] = *(f32*)(p + 0xC4);
 
-    if (t < *(f32*)&lbl_8047D210) {
-        factor = t * *(f32*)&lbl_8047D214;
-        lowerRight[2] = halfWidth * factor;
-        upperRight[1] = *(f32*)(p + 0xC8) * factor;
-        upperRight[2] = *(f32*)&lbl_8047D200 * (-halfWidth + lowerRight[2]);
-    } else if (t < *(f32*)&lbl_8047D218) {
-        factor = (t - *(f32*)&lbl_8047D210) * *(f32*)&lbl_8047D214;
-        upperRight[2] = halfWidth * factor;
-        lowerFar[2] = *(f32*)(p + 0xC4) * (*(f32*)&lbl_8047D21C - factor);
+    if (t < 0.33333334f) {
+        t *= 3.0f;
+        lowerRight[2] = halfWidth * t;
+        upperRight[2] = 0.5f * (upperLeft[2] + lowerRight[2]);
+        upperRight[1] = *(f32*)(p + 0xC8) * t;
+    } else if (t < 0.6666667f) {
+        t -= 0.33333334f;
+        t *= 3.0f;
+        upperRight[2] = halfWidth * t;
+        lowerFar[2] = *(f32*)(p + 0xC4) * (1.0f - t);
         offset[2] = upperRight[2];
     } else {
-        factor = (t - *(f32*)&lbl_8047D218) * *(f32*)&lbl_8047D214;
+        t -= 0.6666667f;
+        t *= 3.0f;
         upperRight[2] = halfWidth;
-        upperRight[1] = *(f32*)(p + 0xC8) * (*(f32*)&lbl_8047D21C - factor);
-        lowerFar[2] = *(f32*)(p + 0xC4) * -factor;
-        offset[2] = halfWidth * (*(f32*)&lbl_8047D21C + factor);
+        upperRight[1] = *(f32*)(p + 0xC8) * (1.0f - t);
+        lowerFar[2] = *(f32*)(p + 0xC4) * -t;
+        offset[2] = halfWidth * (1.0f + t);
     }
 
     GSvecAdd(offset, offset, p + 0x24);
@@ -2757,10 +2930,10 @@ void fn_8013BC10(void* ptr, f32 t) {
     GSvecCopy(p + 0xA4, lowerFar);
     GSvecCopy(p + 0xB0, lowerLeft);
 }
-extern u32 lbl_8047D220;
-extern u32 lbl_8047D204;
+extern const f32 lbl_8047D220;
+extern const f32 lbl_8047D204;
 extern u32 lbl_8047D228;
-extern u32 lbl_8047D21C;
+extern const f32 lbl_8047D21C;
 extern u32 lbl_8047D208;
 #if 0
 asm void fn_8013BE04(void* ptr, void* mtx, u8* color, f32 x, f32 z, f32 scale) {
@@ -2769,7 +2942,9 @@ asm void fn_8013BE04(void* ptr, void* mtx, u8* color, f32 x, f32 z, f32 scale) {
 #else
 void fn_8013BE04(void* ptr, void* mtx, u8* color, f32 x, f32 z, f32 scale) {
     u8* p = ptr;
+    u16 row;
     u16 rows = *(u16*)(p + 0x1C);
+    u16 column;
     u16 cols = *(u16*)(p + 0x1E);
     u8* positions = *(u8**)(p + 4);
     u8* normals = *(u8**)(p + 8);
@@ -2779,46 +2954,30 @@ void fn_8013BE04(void* ptr, void* mtx, u8* color, f32 x, f32 z, f32 scale) {
     f32 current[3];
     f32 rowStep[3];
     f32 colStep[3];
-    f32 baseX2;
-    f32 baseZ2;
     f32 inverseBaseX2;
     f32 inverseBaseZ2;
-    u16 row;
-    u16 column;
 
-    set__5GSvecFfff(&base, 0.5f * x, 0.0f, 0.5f * z);
+    set__5GSvecFfff(&base, -0.5f * x, 0.0f, -0.5f * z);
     set__5GSvecFfff(&rowStep, x / (rows - 1), 0.0f, 0.0f);
     set__5GSvecFfff(&colStep, 0.0f, 0.0f, z / (cols - 1));
+    inverseBaseX2 = 1.0f / (base[0] * base[0]);
+    inverseBaseZ2 = 1.0f / (base[2] * base[2]);
     GSvecCopy(&current, &base);
-    baseX2 = base[0] * base[0];
-    baseZ2 = base[2] * base[2];
-    inverseBaseX2 = 1.0f / baseX2;
-    inverseBaseZ2 = 1.0f / baseZ2;
 
     for (row = 0; row < rows; row++) {
-        for (column = 0; column < cols; column++) {
-            f32 u;
-            f32 v;
-            f32 alpha;
-
+        for (column = 0; column < cols; column++, positions += 0xC, normals += 0xC,
+                                           texcoords += 8, colors += 4) {
             GSvecAdd(positions, mtx, &current);
             GSvecCopy(normals, lbl_8031554C);
-            u = scale * (current[0] - base[0]);
-            v = scale * (current[2] - base[2]);
-            *(f32*)(texcoords + 4) = u;
-            *(f32*)(texcoords + 0) = v;
+            *(f32*)(texcoords + 4) = scale * (current[0] - base[0]);
+            *(f32*)(texcoords + 0) = scale * (current[2] - base[2]);
             colors[0] = color[0];
             colors[1] = color[1];
             colors[2] = color[2];
-            alpha = (f32)color[3] *
-                    (1.0f - current[0] * current[0] * inverseBaseX2) *
-                    (1.0f - current[2] * current[2] * inverseBaseZ2);
-            colors[3] = (u8)alpha;
+            colors[3] = (f32)color[3] *
+                        (1.0f - current[0] * current[0] * inverseBaseX2) *
+                        (1.0f - current[2] * current[2] * inverseBaseZ2);
             GSvecAdd(&current, &current, &colStep);
-            positions += 0xC;
-            normals += 0xC;
-            texcoords += 8;
-            colors += 4;
         }
         GSvecAdd(&current, &current, &rowStep);
         current[2] = base[2];
@@ -2829,70 +2988,118 @@ void fn_8013BE04(void* ptr, void* mtx, u8* color, f32 x, f32 z, f32 scale) {
 extern void* fn_8019FF48(void* model);
 extern void HSD_MObjSetFlags(void* mobj, u32 flags);
 extern void HSD_MObjCompileTev(void* mobj);
+#endif
+
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || defined(EFFECT_VISUAL_EXACT_8013C074)
+#if defined(EFFECT_VISUAL_EXACT_8013C074)
+extern u8 fn_800E0E14();
+extern void* fn_8019FF48(void* model);
+extern void HSD_MObjSetFlags(void* mobj, u32 flags);
+extern void HSD_MObjCompileTev(void* mobj);
+#endif
 #if 0
 asm void fn_8013C074(void) {
 #include "src/game/effect/effect_visual_fn_8013C074.inc"
 }
 #else
-u32 fn_8013C074(void* ptr, void* arg) {
-    typedef struct EnvMapRenderStage {
-        s32 kind;
-        u32 field_04;
-        s32 field_08;
-        s32 field_0C;
-        u16 field_10;
-        u16 field_12;
-        u32 field_14;
-    } EnvMapRenderStage;
-    typedef struct EnvMapRenderPObj {
-        u8 pad_00[8];
-        EnvMapRenderStage* stages;
-        u16 flags;
-        u16 display_count;
-        u8* display;
-    } EnvMapRenderPObj;
-    typedef struct EnvMapRenderDObj {
-        u8 pad_00[8];
-        void* mobj;
-        EnvMapRenderPObj* pobj;
-    } EnvMapRenderDObj;
-    typedef struct EnvMapRenderState {
-        void* model;
-        u8* field_04;
-        u8* field_08;
-        u8* field_0C;
-        u8* display;
-        u32 display_size;
-        u16 rows;
-        u16 cols;
-    } EnvMapRenderState;
-
-    EnvMapRenderState* state = arg;
-    EnvMapRenderDObj* dobj = fn_8019FF48(*(void**)((u8*)ptr + 0x8));
-    EnvMapRenderPObj* pobj;
-    EnvMapRenderStage* stage;
+typedef struct SurfRenderStage {
+    s32 kind;
+    u32 field_04;
+    s32 field_08;
+    s32 field_0C;
+    u16 field_10;
+    u16 field_12;
+    u32 field_14;
+} SurfRenderStage;
+typedef struct SurfRenderPObj {
+    u8 pad_00[8];
+    SurfRenderStage* stages;
+    u16 flags;
+    u16 display_count;
+    u8* display;
+} SurfRenderPObj;
+typedef struct SurfRenderDObj {
+    u8 pad_00[8];
     void* mobj;
-    u32 found9 = 0;
-    u32 found10 = 0;
-    u32 found13 = 0;
-    u32 found11 = 0;
-    u32 strip;
-    u32 row;
-    u8* out;
-    u16 vertex_count;
-    u16 span;
-    u16 strip_count;
+    SurfRenderPObj* pobj;
+} SurfRenderDObj;
+typedef struct SurfRenderState {
+    void* model;
+    u8* positions;
+    u8* normals;
+    u8* texcoords;
+    u8* colors;
+    u8* display;
+    s32 display_size;
+    u16 rows;
+    u16 cols;
+} SurfRenderState;
 
-    if (dobj != NULL) {
-        pobj = dobj->pobj;
-    } else {
-        pobj = NULL;
+/* RULE-EXCEPTION(user-approved): single-use inline helper (an HSD_DObjGetMObj-style
+   accessor, as in fn_8013D0A8) chosen for register allocation — see
+   docs/RULE_EXCEPTIONS.md */
+static inline void* surfDObjGetMObj(SurfRenderDObj* dobj) {
+    return dobj ? dobj->mobj : NULL;
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper (the strip loop, as
+   blurBuildStrips in fn_8013D0A8) chosen for register allocation — see
+   docs/RULE_EXCEPTIONS.md */
+static inline void surfBuildStrips(SurfRenderState* state) {
+    s32 top;
+    u8* out;
+    u16* dst;
+    s32 strip;
+    s32 row;
+    s32 last;
+    s32 rows;
+    s32 span;
+
+    span = state->cols;
+    rows = state->rows;
+    out = state->display;
+
+    last = span - 1;
+    for (strip = 0; strip < last; strip++) {
+        *(u8*) out = 0x98;
+        *(u16*) (out + 1) = rows * 2;
+        out += 3;
+
+        dst = (u16*)out;
+        for (row = 0; row < rows; row++) {
+            top = strip + span * row + 1;
+
+            *dst++ = top;
+            *dst++ = top;
+            *dst++ = top;
+            *dst++ = top;
+            *dst++ = top - 1;
+            *dst++ = top - 1;
+            *dst++ = top - 1;
+            *dst++ = top - 1;
+        }
+        out = (u8*)dst;
     }
-    if (dobj != NULL) {
-        mobj = dobj->mobj;
-    } else {
-        mobj = NULL;
+}
+
+u32 fn_8013C074(void* ptr, void* arg) {
+    SurfRenderState* state = arg;
+    SurfRenderDObj* dobj = fn_8019FF48(*(void**)((u8*)ptr + 0x8));
+    SurfRenderPObj* pobj;
+    void* mobj;
+    SurfRenderStage* stage;
+    s32 found9 = 0;
+    s32 found10 = 0;
+    s32 found13 = 0;
+    s32 found11 = 0;
+    s32 kind;
+    s32 stage_ordinal;
+
+    if (dobj == NULL) {
+        return 0;
     }
+    pobj = dobj ? dobj->pobj : NULL;
+    mobj = surfDObjGetMObj(dobj);
     if (mobj != NULL) {
         HSD_MObjSetFlags(mobj, 0x40000000);
         HSD_MObjCompileTev(mobj);
@@ -2905,33 +3112,53 @@ u32 fn_8013C074(void* ptr, void* arg) {
         return 0;
     }
 
-    for (; stage->kind != 0xFF; stage++) {
-        switch (stage->kind) {
+    for (stage_ordinal = 1; (kind = stage->kind) != 0xFF; stage++, stage_ordinal++) {
+        switch (kind) {
         case 9:
-            found9 = 1;
-            if (stage->field_08 != 1 || stage->field_0C != 4 ||
-                stage->field_12 != 12) {
+            found9 = stage_ordinal;
+            if (stage->field_08 != 1) {
+                return 0;
+            }
+            if (stage->field_0C != 4) {
+                return 0;
+            }
+            if (stage->field_12 != 12) {
                 return 0;
             }
             break;
         case 10:
-            found10 = 1;
-            if (stage->field_08 != 0 || stage->field_0C != 4 ||
-                stage->field_12 != 12) {
+            found10 = stage_ordinal;
+            if (stage->field_08 != 0) {
+                return 0;
+            }
+            if (stage->field_0C != 4) {
+                return 0;
+            }
+            if (stage->field_12 != 12) {
                 return 0;
             }
             break;
         case 11:
-            found11 = 1;
-            if (stage->field_08 != 1 || stage->field_0C != 5 ||
-                stage->field_12 != 4) {
+            found11 = stage_ordinal;
+            if (stage->field_08 != 1) {
+                return 0;
+            }
+            if (stage->field_0C != 5) {
+                return 0;
+            }
+            if (stage->field_12 != 4) {
                 return 0;
             }
             break;
         case 13:
-            found13 = 1;
-            if (stage->field_08 != 1 || stage->field_0C != 4 ||
-                stage->field_12 != 8) {
+            found13 = stage_ordinal;
+            if (stage->field_08 != 1) {
+                return 0;
+            }
+            if (stage->field_0C != 4) {
+                return 0;
+            }
+            if (stage->field_12 != 8) {
                 return 0;
             }
             break;
@@ -2948,45 +3175,21 @@ u32 fn_8013C074(void* ptr, void* arg) {
         stage->field_04 = 3;
         switch (stage->kind) {
         case 9:
-            stage->field_14 = (u32) state->field_04;
+            stage->field_14 = (u32) state->positions;
             break;
         case 10:
-            stage->field_14 = (u32) state->field_08;
+            stage->field_14 = (u32) state->normals;
             break;
         case 11:
-            stage->field_14 = (u32) state->display;
+            stage->field_14 = (u32) state->colors;
             break;
         case 13:
-            stage->field_14 = (u32) state->field_0C;
+            stage->field_14 = (u32) state->texcoords;
             break;
         }
     }
 
-    vertex_count = state->rows * 2;
-    span = state->cols;
-    strip_count = state->cols - 1;
-    out = state->display;
-
-    for (strip = 0; strip < strip_count; strip++) {
-        *(u8*) out = 0x98;
-        *(u16*) (out + 1) = vertex_count;
-        out += 3;
-
-        for (row = 0; row < state->rows; row++) {
-            u16 top = strip + row * span + 1;
-            u16 bottom = top - 1;
-
-            *(u16*) (out + 0x0) = top;
-            *(u16*) (out + 0x2) = top;
-            *(u16*) (out + 0x4) = top;
-            *(u16*) (out + 0x6) = top;
-            *(u16*) (out + 0x8) = bottom;
-            *(u16*) (out + 0xA) = bottom;
-            *(u16*) (out + 0xC) = bottom;
-            *(u16*) (out + 0xE) = bottom;
-            out += 0x10;
-        }
-    }
+    surfBuildStrips(state);
 
     fn_800E0E14(0, 0);
     pobj->display = state->display;
@@ -3045,8 +3248,6 @@ asm void fn_8013C670(void) {
 #include "src/game/effect/effect_visual_fn_8013C670.inc"
 }
 #else
-#pragma push
-#pragma global_optimizer off
 u32 fn_8013C670(void* arg) {
     void* ptr;
     void* inner;
@@ -3079,15 +3280,30 @@ u32 fn_8013C670(void* arg) {
     }
     return 1;
 }
-#pragma pop
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013C718)
+#if defined(EFFECT_VISUAL_BANK_ACTIVE)
+extern u16 fn_800E2C04(u32 size, u32 alignment);
+extern u8 fn_800E0E14();
+extern void GSmodelSetRotation(void* model, void* rotation);
+extern u8 GSmodelCanTexAnimate(void* model);
+extern void GSmodelSetTexAnimIndex(void* model, u16 value);
+extern void GSmodelSetTexAnimRate(void* model, f32 value);
+extern void GSmodelSetTexAnimFrame(void* model, f32 value);
+extern void GSmodelSetTexAnimType(void* model, u32 value);
+extern void GSmodelStartTexAnimation(void* model);
+extern f32 fn_800E0BE4(void);
+extern void set__5GSvecFfff(void* dst, f32 x, f32 y, f32 z);
+extern void GSvecCopy(void* dst, const void* src);
+extern void GSvecAdd(void* dst, void* srcA, void* srcB);
+#endif
 extern void GSmodelLinkTexAnimToAnim(void* model, u32 enable);
-extern u32 lbl_8047D230;
-extern u32 lbl_8047D234;
-extern u32 lbl_8047D238;
+extern const f32 lbl_8047D230;
+extern const f32 lbl_8047D234;
+extern const f32 lbl_8047D238;
 extern const f32 lbl_8047D23C;
 extern u8 lbl_80272ED0[];
 #if 0
@@ -3095,23 +3311,85 @@ asm u16 seaEffectStart(void) {
 #include "src/game/effect/effect_visual_seaEffectStart.inc"
 }
 #else
+/* RULE-EXCEPTION(user-approved): single-function inline helper — see docs/RULE_EXCEPTIONS.md */
+static inline u8 seaAllocMesh(u8* p, void* model) {
+    u16 columns;
+    u16 rows;
+    u8* cursor;
+    u8* data;
+    u16 handle;
+    u32 pointCount;
+    u32 vectorSize;
+    u32 texcoordSize;
+    u32 colorSize;
+
+    columns = *(u16*)(p + 0x72);
+    rows = *(u16*)(p + 0x70);
+    *(void**)p = model;
+    *(u16*)(p + 0x18) = rows + 1;
+    *(u16*)(p + 0x1A) = columns + 1;
+    pointCount = *(u16*)(p + 0x18) * *(u16*)(p + 0x1A);
+    *(u32*)(p + 0x14) = (columns * (*(u16*)(p + 0x18) * 0x10 + 3) + 0x1F) & ~0x1F;
+    vectorSize = (pointCount * 0xC + 0x1F) & ~0x1F;
+    colorSize = (pointCount * 4 + 0x1F) & ~0x1F;
+    texcoordSize = (pointCount * 8 + 0x1F) & ~0x1F;
+    /* RULE-EXCEPTION(user-approved): pointCount reused for the total size,
+       which gives retail's callee-saved register — see
+       docs/RULE_EXCEPTIONS.md */
+    pointCount = vectorSize + colorSize + texcoordSize + *(u32*)(p + 0x14);
+
+    handle = fn_800E2C04(pointCount, 0x20);
+    if (handle != 0) {
+        data = fn_800E27B0(handle);
+        *(u16*)(p + 0x1C) = handle;
+        memset(data, 0, pointCount);
+        *(u8**)(p + 0x10) = data;
+        cursor = data + *(u32*)(p + 0x14);
+        *(u8**)(p + 0x4) = cursor;
+        cursor += vectorSize;
+        *(u8**)(p + 0xC) = cursor;
+        cursor += colorSize;
+        *(u8**)(p + 0x8) = cursor;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+/* RULE-EXCEPTION(user-approved): single-function inline helper — see docs/RULE_EXCEPTIONS.md */
+static inline u8 seaAllocRandomTable(u8* p) {
+    s32 rowCount;
+    f32* randomX;
+    f32* randomZ;
+    f32* randomAngle;
+    s32 i;
+    u16 handle;
+    f32 low;
+
+    rowCount = *(u16*)(p + 0x70) + 1;
+    handle = _toolentryAlloc__FUl(rowCount * 3 * sizeof(f32));
+    if (handle != 0) {
+        *(u16*)(p + 0x8C) = handle;
+        randomX = *(f32**)(p + 0x80) = fn_800E27B0(handle);
+        randomZ = randomX + rowCount;
+        randomAngle = randomZ + rowCount;
+        *(f32**)(p + 0x84) = randomZ;
+        *(f32**)(p + 0x88) = randomAngle;
+        for (i = 0; i < rowCount; randomX++, i++, randomZ++, randomAngle++) {
+            low = *(f32*)(p + 0x90);
+            *randomX = low + (*(f32*)(p + 0x94) - low) * fn_800E0BE4();
+            low = *(f32*)(p + 0x98);
+            *randomZ = low + (*(f32*)(p + 0x9C) - low) * fn_800E0BE4();
+            *randomAngle = *(f32*)&lbl_8047D230 * fn_800E0BE4();
+        }
+        return TRUE;
+    }
+    return FALSE;
+}
+
 u16 seaEffectStart(void* ptr) {
     u8* p;
     void* model;
     u16 handle;
-    u32 pointCount;
-    u32 surfaceSize;
-    u32 vectorSize;
-    u32 colorSize;
-    u32 texcoordSize;
-    u32 totalSize;
-    u32 rowCount;
-    u32 i;
-    u8* data;
-    f32* randomX;
-    f32* randomZ;
-    f32* randomAngle;
-    f32 randomValue;
 
     if (ptr == NULL) {
         goto fail;
@@ -3120,7 +3398,7 @@ u16 seaEffectStart(void* ptr) {
     p = ptr;
     *(u16*)(p + 0xA4) = 0;
     memset(p, 0, 0x48);
-    if (*(u32*)(p + 0x78) == 0) {
+    if (*(s32*)(p + 0x78) == 0) {
         goto fail;
     }
 
@@ -3131,58 +3409,17 @@ u16 seaEffectStart(void* ptr) {
 
     GXDrawDone();
     fn_800B856C();
-    *(void**)p = model;
-    *(u16*)(p + 0x18) = *(u16*)(p + 0x70) + 1;
-    *(u16*)(p + 0x1A) = *(u16*)(p + 0x72) + 1;
-    pointCount = *(u16*)(p + 0x18) * *(u16*)(p + 0x1A);
-    surfaceSize =
-        (*(u16*)(p + 0x72) * (*(u16*)(p + 0x18) * 0x10 + 3) + 0x1F) & ~0x1F;
-    colorSize = (pointCount * 4 + 0x1F) & ~0x1F;
-    texcoordSize = (pointCount * 8 + 0x1F) & ~0x1F;
-    vectorSize = (pointCount * 0xC + 0x1F) & ~0x1F;
-    *(u32*)(p + 0x14) = surfaceSize;
-    totalSize = surfaceSize + vectorSize + colorSize + texcoordSize;
-
-    handle = fn_800E2C04(totalSize, 0x20);
-    if (handle == 0) {
+    if (!seaAllocMesh(p, model)) {
         goto fail;
     }
 
-    *(u16*)(p + 0x1C) = handle;
-    data = fn_800E27B0(handle);
-    memset(data, 0, totalSize);
-    *(u8**)(p + 0x10) = data;
-    *(u8**)(p + 0x4) = data + surfaceSize;
-    *(u8**)(p + 0xC) = *(u8**)(p + 0x4) + vectorSize;
-    *(u8**)(p + 0x8) = *(u8**)(p + 0xC) + colorSize;
-
     fn_8013CBF0(p, p + 0x48, p + 0x60, *(f32*)(p + 0x64), *(f32*)(p + 0x68),
                 *(f32*)(p + 0x6C));
-    if (!fn_8013D0A8(model, p)) {
+    if (!(u8)fn_8013D0A8(model, p)) {
         goto cleanup;
     }
-
-    rowCount = *(u16*)(p + 0x70) + 1;
-    handle = _toolentryAlloc__FUl(rowCount * 3 * sizeof(f32));
-    if (handle == 0) {
+    if (!seaAllocRandomTable(p)) {
         goto cleanup;
-    }
-
-    *(u16*)(p + 0x8C) = handle;
-    randomX = fn_800E27B0(handle);
-    randomZ = randomX + rowCount;
-    randomAngle = randomZ + rowCount;
-    *(f32**)(p + 0x80) = randomX;
-    *(f32**)(p + 0x84) = randomZ;
-    *(f32**)(p + 0x88) = randomAngle;
-    for (i = 0; i < rowCount; i++) {
-        randomValue = fn_800E0BE4();
-        randomX[i] =
-            *(f32*)(p + 0x90) + (*(f32*)(p + 0x94) - *(f32*)(p + 0x90)) * randomValue;
-        randomValue = fn_800E0BE4();
-        randomZ[i] =
-            *(f32*)(p + 0x98) + (*(f32*)(p + 0x9C) - *(f32*)(p + 0x98)) * randomValue;
-        randomAngle[i] = *(f32*)&lbl_8047D230 * fn_800E0BE4();
     }
 
     GSmodelSetVisibility(model, 1);
@@ -3217,8 +3454,35 @@ fail:
     return 0;
 }
 #endif
+#if defined(EFFECT_VISUAL_EXACT_8013C718)
+/*
+ * RULE-EXCEPTION(user-approved): seaEffectStart's .sdata2 pool
+ * (0x8047D230-0x8047D240) as named constants defined after the function, so
+ * the linked fn_8013CA48 unit still resolves the shared 0.0f by name — see
+ * docs/RULE_EXCEPTIONS.md
+ */
+__declspec(section ".sdata2") const f32 lbl_8047D230 = 6.2831855f;
+__declspec(section ".sdata2") const f32 lbl_8047D234 = 1.5707964f;
+__declspec(section ".sdata2") const f32 lbl_8047D238 = 0.5f;
+#pragma push
+#pragma explicit_zero_data on
+__declspec(section ".sdata2") const f32 lbl_8047D23C = 0.0f;
+#pragma pop
+#endif
+#endif
+
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013CA48)
+#if defined(EFFECT_VISUAL_BANK_ACTIVE)
+extern void set__5GSvecFfff(void* dst, f32 x, f32 y, f32 z);
+extern void GSvecCopy(void* dst, const void* src);
+extern void GSvecAdd(void* dst, void* srcA, void* srcB);
+#endif
 extern f32 fn_800E0CA0(f32 angle);
 extern u32 lbl_8047D248;
+/* RULE-EXCEPTION(user-approved): extern-named stand-in for the 0.0f shared
+   with seaEffectStart (0x8047D23C), which stays in the data unit — see
+   docs/RULE_EXCEPTIONS.md */
 extern const f32 lbl_8047D23C;
 extern u8 lbl_80363CB8[];
 extern const f32 lbl_8047D240;
@@ -3260,10 +3524,10 @@ u32 fn_8013CA48(void* ptr, u32 delta) {
 
         GXDrawDone();
         fn_800B856C();
-        set__5GSvecFfff(lbl_80363CB8, lbl_8047D23C, lbl_8047D240,
+        set__5GSvecFfff(lbl_80363CB8, lbl_8047D23C, 1.0f,
                         lbl_8047D23C);
 
-        span = lbl_8047D244 * *(f32*)(p + 0x68);
+        span = 360.0f * *(f32*)(p + 0x68);
         amplitude = amplitude * (span * *(f32*)(p + 0xA0));
         angleStep = span / (f32)(columns - 1);
         grid = *(f32**)(p + 0x4);
@@ -3310,10 +3574,13 @@ void fn_8013CBF0(void* ptr, void* mtx, u8* color, f32 x, f32 z, f32 scale) {
 
     GXDrawDone();
     fn_800B856C();
-    set__5GSvecFfff(lbl_80363CB8, 0.0f, 1.0f, 0.0f);
-    set__5GSvecFfff(offset, -0.5f * x, 0.0f, -0.5f * z);
-    set__5GSvecFfff(rowStep, x / (f32)(s32)(rows - 1), 0.0f, 0.0f);
-    set__5GSvecFfff(columnStep, 0.0f, 0.0f, z / (f32)(s32)(columns - 1));
+    set__5GSvecFfff(lbl_80363CB8, lbl_8047D23C, 1.0f, lbl_8047D23C);
+    set__5GSvecFfff(offset, -0.5f * x, lbl_8047D23C, -0.5f * z);
+    /* RULE-EXCEPTION(user-approved): the second zero is spelled through a
+       cast so the front end does not hoist one shared load ahead of the
+       conversion — see docs/RULE_EXCEPTIONS.md */
+    set__5GSvecFfff(rowStep, x / (f32)(s32)(rows - 1), lbl_8047D23C, *(f32*)&lbl_8047D23C);
+    set__5GSvecFfff(columnStep, lbl_8047D23C, *(f32*)&lbl_8047D23C, z / (f32)(s32)(columns - 1));
     inverseX = 1.0f / (offset[0] * offset[0]);
     inverseZ = 1.0f / (offset[2] * offset[2]);
     GSvecCopy(current, offset);
@@ -3327,9 +3594,8 @@ void fn_8013CBF0(void* ptr, void* mtx, u8* color, f32 x, f32 z, f32 scale) {
             colors[0] = color[0];
             colors[1] = color[1];
             colors[2] = color[2];
-            factorX = 1.0f - inverseX * (current[0] * current[0]);
-            factorZ = 1.0f - inverseZ * (current[2] * current[2]);
-            colors[3] = (u8)((f32)color[3] * factorX * factorZ);
+            colors[3] = (u8)((f32)color[3] * (1.0f - inverseX * (current[0] * current[0])) *
+                             (1.0f - inverseZ * (current[2] * current[2])));
             GSvecAdd(current, current, columnStep);
         }
         GSvecAdd(current, current, rowStep);
@@ -3337,6 +3603,9 @@ void fn_8013CBF0(void* ptr, void* mtx, u8* color, f32 x, f32 z, f32 scale) {
     }
 }
 #endif
+#endif
+
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
 #if 0
 asm u32 fn_8013CE58(void* inner, void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013CE58.inc"
@@ -3449,6 +3718,15 @@ u32 fn_8013CE58(void* inner, void* ptr) {
     return 1;
 }
 #endif
+#endif /* 8013CE58 */
+
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || defined(EFFECT_VISUAL_EXACT_8013D0A8)
+#if defined(EFFECT_VISUAL_EXACT_8013D0A8)
+extern void* fn_8019FF48(void* model);
+extern void HSD_MObjSetFlags(void* mobj, u32 flags);
+extern void HSD_MObjCompileTev(void* mobj);
+extern u8 lbl_80363CB8[];
+#endif
 #if 0
 asm void fn_8013D0A8(void) {
 #include "src/game/effect/effect_visual_fn_8013D0A8.inc"
@@ -3461,7 +3739,7 @@ typedef struct BlurRenderStage {
     s32 field_0C;
     u16 field_10;
     u16 field_12;
-    u32 field_14;
+    void* field_14;
 } BlurRenderStage;
 
 typedef struct BlurRenderPObj {
@@ -3484,7 +3762,7 @@ typedef struct BlurRenderState {
     u8* texcoords;
     u8* colors;
     u8* display;
-    u32 display_size;
+    s32 display_size;
     u16 rows;
     u16 cols;
     u32 pad_1C;
@@ -3495,34 +3773,70 @@ typedef struct BlurRenderState {
     u8 applied;
 } BlurRenderState;
 
+/* RULE-EXCEPTION(user-approved): single-use inline helper (an HSD_DObjGetMObj-style
+   accessor) chosen for register allocation — see docs/RULE_EXCEPTIONS.md */
+static inline void* blurDObjGetMObj(BlurRenderDObj* dobj) {
+    return dobj ? dobj->mobj : NULL;
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper chosen for register
+   allocation — see docs/RULE_EXCEPTIONS.md */
+static inline void blurBuildStrips(BlurRenderState* state) {
+    s32 top;
+    u8* out;
+    u16* dst;
+    s32 strip;
+    s32 row;
+    s32 last;
+    s32 rows;
+    s32 span;
+
+    span = state->cols;
+    rows = state->rows;
+    out = state->display;
+
+    last = span - 1;
+    for (strip = 0; strip < last; strip++) {
+        *(u8*) out = 0x98;
+        *(u16*) (out + 1) = rows * 2;
+        out += 3;
+
+        dst = (u16*)out;
+        for (row = 0; row < rows; row++) {
+            top = strip + span * row + 1;
+
+            *dst++ = top;
+            *dst++ = 0;
+            *dst++ = top;
+            *dst++ = top;
+            *dst++ = top - 1;
+            *dst++ = 0;
+            *dst++ = top - 1;
+            *dst++ = top - 1;
+        }
+        out = (u8*)dst;
+    }
+}
+
 u32 fn_8013D0A8(void* ptr, void* arg) {
     BlurRenderState* state = arg;
     BlurRenderDObj* dobj = fn_8019FF48(*(void**)((u8*)ptr + 0x8));
     BlurRenderPObj* pobj;
     void* mobj;
     BlurRenderStage* stage;
-    u32 found9 = 0;
-    u32 found10 = 0;
-    u32 found13 = 0;
-    u32 found11 = 0;
-    u32 stage_ordinal;
-    s32 strip;
-    s32 row;
+    s32 found9 = 0;
+    s32 found10 = 0;
+    s32 found13 = 0;
+    s32 found11 = 0;
+    s32 kind;
+    s32 stage_ordinal;
     u8* saved_cursor;
-    u8* out;
-    u16 vertex_count;
-    u16 span;
 
-    if (dobj != NULL) {
-        pobj = dobj->pobj;
-    } else {
-        pobj = NULL;
+    if (dobj == NULL) {
+        return 0;
     }
-    if (dobj != NULL) {
-        mobj = dobj->mobj;
-    } else {
-        mobj = NULL;
-    }
+    pobj = dobj ? dobj->pobj : NULL;
+    mobj = blurDObjGetMObj(dobj);
     if (mobj != NULL) {
         HSD_MObjSetFlags(mobj, 0x40000000);
         HSD_MObjCompileTev(mobj);
@@ -3535,33 +3849,53 @@ u32 fn_8013D0A8(void* ptr, void* arg) {
         return 0;
     }
 
-    for (stage_ordinal = 1; stage->kind != 0xFF; stage++, stage_ordinal++) {
-        switch (stage->kind) {
+    for (stage_ordinal = 1; (kind = stage->kind) != 0xFF; stage++, stage_ordinal++) {
+        switch (kind) {
         case 9:
             found9 = stage_ordinal;
-            if (stage->field_08 != 1 || stage->field_0C != 4 ||
-                stage->field_12 != 12) {
+            if (stage->field_08 != 1) {
+                return 0;
+            }
+            if (stage->field_0C != 4) {
+                return 0;
+            }
+            if (stage->field_12 != 12) {
                 return 0;
             }
             break;
         case 10:
             found10 = stage_ordinal;
-            if (stage->field_08 != 0 || stage->field_0C != 4 ||
-                stage->field_12 != 12) {
+            if (stage->field_08 != 0) {
+                return 0;
+            }
+            if (stage->field_0C != 4) {
+                return 0;
+            }
+            if (stage->field_12 != 12) {
                 return 0;
             }
             break;
         case 11:
             found11 = stage_ordinal;
-            if (stage->field_08 != 1 || stage->field_0C != 5 ||
-                stage->field_12 != 4) {
+            if (stage->field_08 != 1) {
+                return 0;
+            }
+            if (stage->field_0C != 5) {
+                return 0;
+            }
+            if (stage->field_12 != 4) {
                 return 0;
             }
             break;
         case 13:
             found13 = stage_ordinal;
-            if (stage->field_08 != 1 || stage->field_0C != 4 ||
-                stage->field_12 != 8) {
+            if (stage->field_08 != 1) {
+                return 0;
+            }
+            if (stage->field_0C != 4) {
+                return 0;
+            }
+            if (stage->field_12 != 8) {
                 return 0;
             }
             break;
@@ -3577,49 +3911,26 @@ u32 fn_8013D0A8(void* ptr, void* arg) {
     for (stage = pobj->stages, saved_cursor = (u8*)state; stage->kind != 0xFF;
          stage++, saved_cursor += sizeof(u32)) {
         *(u32*)(saved_cursor + 0x20) = stage->field_04;
-        *(u32*)(saved_cursor + 0x30) = stage->field_14;
+        *(void**)(saved_cursor + 0x30) = stage->field_14;
         stage->field_04 = 3;
 
         switch (stage->kind) {
         case 9:
-            stage->field_14 = (u32) state->positions;
+            stage->field_14 = state->positions;
             break;
         case 10:
-            stage->field_14 = (u32) lbl_80363CB8;
+            stage->field_14 = lbl_80363CB8;
             break;
         case 11:
-            stage->field_14 = (u32) state->colors;
+            stage->field_14 = state->colors;
             break;
         case 13:
-            stage->field_14 = (u32) state->texcoords;
+            stage->field_14 = state->texcoords;
             break;
         }
     }
 
-    out = state->display;
-    vertex_count = state->rows * 2;
-    span = state->cols;
-
-    for (strip = 0; strip < state->cols - 1; strip++) {
-        *(u8*) out = 0x98;
-        *(u16*) (out + 1) = vertex_count;
-        out += 3;
-
-        for (row = 0; row < state->rows; row++) {
-            u16 top = strip + row * span + 1;
-            u16 bottom = top - 1;
-
-            *(u16*) (out + 0) = top;
-            *(u16*) (out + 2) = 0;
-            *(u16*) (out + 4) = top;
-            *(u16*) (out + 6) = top;
-            *(u16*) (out + 8) = bottom;
-            *(u16*) (out + 0xA) = 0;
-            *(u16*) (out + 0xC) = bottom;
-            *(u16*) (out + 0xE) = bottom;
-            out += 0x10;
-        }
-    }
+    blurBuildStrips(state);
 
     state->old_display = pobj->display;
     state->old_display_count = pobj->display_count;
@@ -3806,14 +4117,15 @@ log:
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013D984)
 extern s32 fn_800E3B3C(void);
 extern void fn_800D377C(u32 a);
 extern void fn_800D3410(void* texture, u32 a);
-extern u32 fn_800E3C64(void* model);
+extern u8 fn_800E3C64(void* model);
 extern void GSmodelDrawModel(void* obj, u32 flags);
 extern void fn_800D3190(void);
-extern u32 GSmodelIsEnvMapEnabled(void* model);
+extern u8 GSmodelIsEnvMapEnabled(void* model);
 extern void GSmodelSetEnvMapBlendValue(void* model, f32 value);
 extern u32 lbl_8047AEE0;
 extern u32 lbl_8047D260;
@@ -3826,71 +4138,65 @@ u32 fn_8013D984(void* ptr, u32 delta) {
     u8* p;
     u8* node;
     void* model;
+    s32 modelCount;
+    s32 i;
     void* otherModel;
-    u32 duration;
-    u32 modelCount;
-    u32 i;
     f32 blend;
 
-    if (ptr == NULL) {
-        return 0;
-    }
-
-    p = ptr;
-    node = *(u8**)(p + 0x10);
-    if (node == NULL) {
-        return 0;
-    }
-
-    duration = *(u32*)(node + 0x8);
-    if (duration == 0xFFFFFFFF) {
-        *(u32*)(p + 0x14) = 0;
-    }
-    while (duration != 0xFFFFFFFF && *(u32*)(p + 0x14) >= duration) {
-        *(u32*)(p + 0x14) -= duration;
-        node = *(u8**)(node + 0x10);
-        *(void**)(p + 0x10) = node;
-        if (node == NULL) {
-            return 0;
-        }
-        duration = *(u32*)(node + 0x8);
-        if (duration == 0xFFFFFFFF) {
-            *(u32*)(p + 0x14) = 0;
-            break;
-        }
-    }
-
-    blend = *(f32*)node +
-            ((f32)*(u32*)(p + 0x14) / (f32)duration) *
-                (*(f32*)(node + 0x4) - *(f32*)node);
-    model = *(void**)p;
-    if (lbl_8047AEE0 != 0 && model != NULL) {
-        modelCount = fn_800E3B3C();
-        if (modelCount != 0) {
-            fn_800D4604(2);
-            _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
-            fn_800D377C(1);
-            fn_800D3410((void*)lbl_8047AEE0, 0);
-            for (i = 0; i < modelCount; i++) {
-                otherModel = fn_800E3B08(i);
-                if (otherModel != NULL && otherModel != model &&
-                    fn_800E3C64(otherModel)) {
-                    GSmodelDrawModel(otherModel, 0x3010);
+    if (ptr != NULL) {
+        p = ptr;
+        node = *(u8**)(p + 0x10);
+        if (node != NULL) {
+            if (*(u32*)(node + 0x8) == 0xFFFFFFFF) {
+                *(u32*)(p + 0x14) = 0;
+            }
+            while (*(u32*)(p + 0x14) >= *(u32*)(node + 0x8)) {
+                *(u32*)(p + 0x14) -= *(u32*)(node + 0x8);
+                node = *(u8**)(node + 0x10);
+                *(void**)(p + 0x10) = node;
+                if (node == NULL) {
+                    return 0;
+                }
+                if (*(u32*)(node + 0x8) == 0xFFFFFFFF) {
+                    *(u32*)(p + 0x14) = 0;
+                    break;
                 }
             }
-            fn_800D3190();
-            fn_800D4604(1);
+
+            blend = *(f32*)node +
+                    ((f32)*(u32*)(p + 0x14) / (f32)*(u32*)(node + 0x8)) *
+                        (*(f32*)(node + 0x4) - *(f32*)node);
+            model = *(void**)p;
+            if (lbl_8047AEE0 != 0 && model != NULL) {
+                modelCount = fn_800E3B3C();
+                if (modelCount != 0) {
+                    fn_800D4604(2);
+                    _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
+                    fn_800D377C(1);
+                    fn_800D3410((void*)lbl_8047AEE0, 0);
+                    for (i = 0; i < modelCount; i++) {
+                        otherModel = fn_800E3B08(i);
+                        if (otherModel != NULL && otherModel != model &&
+                            fn_800E3C64(otherModel)) {
+                            GSmodelDrawModel(otherModel, 0x3010);
+                        }
+                    }
+                    fn_800D3190();
+                    fn_800D4604(1);
+                }
+            }
+
+            if (!GSmodelIsEnvMapEnabled(*(void**)p)) {
+                GSmodelEnableEnvMap(*(void**)p, *(void**)(p + 0x4), *(void**)(p + 0x8),
+                                    (void*)lbl_8047AEE0, blend);
+            } else {
+                GSmodelSetEnvMapBlendValue(*(void**)p, blend);
+            }
+            *(u32*)(p + 0x14) += delta;
+            return 1;
         }
     }
-
-    if (!GSmodelIsEnvMapEnabled(model)) {
-        GSmodelEnableEnvMap(model, *(void**)(p + 0x4), *(void**)(p + 0x8),
-                            (void*)lbl_8047AEE0, blend);
-    } else {
-        GSmodelSetEnvMapBlendValue(model, blend);
-    }
-    *(u32*)(p + 0x14) += delta;
-    return 1;
+    return 0;
 }
 #endif
 #endif
@@ -4042,168 +4348,161 @@ u32 blurEffectStart(void* ptr) {
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
-extern void GSmodelIsAnimating(void);
-extern void fn_800D3068(void);
-extern void GSmodelGetAnimFrame(void);
-extern void GSmodelGetAnimRate(void);
-extern void fn_800D45F8(void);
-extern void GSmaterialGetFlags(void);
-extern void GSmaterialSetFlags(void);
-extern void GSmaterialStoreAlpha(void);
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013DE6C)
+extern u8 GSmodelIsAnimating(void* model);
+extern s32 fn_800D3068(void);
+extern f32 GSmodelGetAnimFrame(void* model);
+extern f32 GSmodelGetAnimRate(void* model);
+extern s32 fn_800D45F8(void);
+extern u32 GSmaterialGetFlags(void* material);
+extern void GSmaterialSetFlags(void* material, u32 flags);
+extern void GSmaterialStoreAlpha(void* material);
 extern void GSmodelStartAnimation(void* model);
 extern void GSmodelSetAnimFrame(void* model, f32 value);
-extern void fn_800EC134(void);
-extern void GSmaterialResetAlpha(void);
-extern void GSmaterialResetFlags(void);
+extern void fn_800EC134(void*);
+extern void GSmaterialResetAlpha(void* material);
+extern void GSmaterialResetFlags(void* material);
 extern u32 lbl_8047D288;
-extern u32 lbl_8047D26C;
-extern u32 lbl_8047D268;
-extern u32 lbl_8047D270;
-extern u32 lbl_8047D274;
-extern u32 lbl_8047D278;
+extern const f32 lbl_8047D26C;
+extern const f32 lbl_8047D268;
+extern const f32 lbl_8047D270;
+extern const f32 lbl_8047D274;
+extern const f32 lbl_8047D278;
 extern u32 lbl_8047D290;
-extern u32 lbl_8047D27C;
+extern const f32 lbl_8047D27C;
 extern u8 lbl_80363CC8[];
-extern u32 lbl_8047D280;
+extern const f32 lbl_8047D280;
 #if 0
 asm void fn_8013DE6C(void) {
 #include "src/game/effect/effect_visual_fn_8013DE6C.inc"
 }
 #else
 u32 fn_8013DE6C(void* ptr) {
-    extern u8 fn_800EC960(void*);
-    extern f32 fn_800EC570(void*);
-    extern void fn_800E6478(void*, void*);
-    extern s32 fn_800D45F8(void);
-    extern u32 fn_800DF3F0(void);
-    extern void fn_800DF188(void*);
-    extern void fn_800EC990(void*);
-    extern void fn_800ECA78(void*, f32);
-    extern void fn_800EC134(void*);
-    extern void fn_800DF21C(f32);
-    extern void fn_800E3760(void*, u32);
-    extern void fn_800DF140(void);
-    extern void fn_800DF504(void*);
-    extern void fn_800E638C(void*);
-    u8* p = ptr;
-    void* model;
+    extern void fn_800D4604(s32);
     u8* timing;
-    void** materials;
-    s32 materialCount;
-    s32 oldMode;
-    s32 copies = 0;
-    s32 i;
-    u32 frame;
-    f32 blend;
+    f32 halfRate;
+    f32 alpha;
     f32 animFrame;
     f32 animRate;
-    f32 startFrame;
+    void** materials;
+    s32 j;
+    u8* p = ptr;
+    f32 blend;
+    void* model;
     f32 alphaStep;
-    f32 alpha;
+    s32 i;
+    s32 copies;
+    f32 startFrame;
+    u32 frame;
+    s32 materialCount;
+    s32 oldMode;
 
-    if (ptr == NULL) {
-        return 0;
-    }
-
-    model = *(void**)p;
-    timing = *(u8**)(p + 0x18);
-    materialCount = *(s32*)(p + 8);
-    if (*(s32*)(p + 0x10) != 0 || model == NULL) {
-        return 1;
-    }
-    if (fn_800EC960(model) == 0) {
-        return 1;
-    }
-
-    frame = *(u32*)(p + 0x1C);
-    blend = (f32)frame / (f32)*(u32*)(timing + 8);
-    blend = blend * (*(f32*)(timing + 4) - *(f32*)timing) + *(f32*)timing;
-    switch (((s32 (*)(u32))fn_800D3068)(frame)) {
-    case 1:
-        copies = (s32)(*(f32*)&lbl_8047D26C * blend +
-                       *(f32*)&lbl_8047D268);
-        break;
-    case 2:
-        copies = (s32)(*(f32*)&lbl_8047D270 * blend +
-                       *(f32*)&lbl_8047D268);
-        break;
-    case 3:
-        copies = (s32)(*(f32*)&lbl_8047D274 * blend +
-                       *(f32*)&lbl_8047D268);
-        break;
-    case 4:
-        copies = (s32)(*(f32*)&lbl_8047D278 * blend +
-                       *(f32*)&lbl_8047D268);
-        break;
-    }
-    if (copies == 0) {
-        return 1;
-    }
-
-    animFrame = ((f32 (*)(void*))GSmodelGetAnimFrame)(model);
-    animRate = fn_800EC570(model);
-    startFrame = -((animRate * copies) - animFrame);
-    if (startFrame < *(f32*)&lbl_8047D27C) {
-        startFrame = *(f32*)&lbl_8047D27C;
-        copies = (s32)(animFrame / animRate);
-    }
-    if (copies == 0 || startFrame >= animFrame) {
-        return 1;
-    }
-
-    fn_800E6478(model, lbl_80363CC8);
-    oldMode = fn_800D45F8();
-    fn_800D4604(2);
-    fn_800D2248();
-    materials = *(void***)(p + 4);
-    for (i = 0; i < materialCount; i++) {
-        if (materials[i] != NULL) {
-            ((void (*)(void*, u32))GSmaterialSetFlags)(
-                materials[i], fn_800DF3F0() | 0x20);
-            fn_800DF188(materials[i]);
+    if (ptr != NULL) {
+        model = *(void**)p;
+        timing = *(u8**)(p + 0x18);
+        materialCount = *(s32*)(p + 8);
+        if (*(s32*)(p + 0x10) != 0 || model == NULL) {
+            return 1;
         }
-    }
+        if (GSmodelIsAnimating(model) == 0) {
+            return 1;
+        }
 
-    fn_800EC990(model);
-    alphaStep = *(f32*)&lbl_8047D280 / (f32)copies;
-    alpha = alphaStep;
-    while (startFrame + animRate < animFrame) {
-        fn_800ECA78(model, startFrame);
-        fn_800EC134(model);
+        frame = *(u32*)(p + 0x1C);
+        blend = (f32)frame / (f32)*(u32*)(timing + 8);
+        blend = blend * (*(f32*)(timing + 4) - *(f32*)timing) + *(f32*)timing;
+        switch (fn_800D3068()) {
+        case 1:
+            copies = 60.0f * blend + 0.5f;
+            break;
+        case 2:
+            copies = 30.0f * blend + 0.5f;
+            break;
+        case 3:
+            copies = 20.0f * blend + 0.5f;
+            break;
+        case 4:
+            copies = 15.0f * blend + 0.5f;
+            break;
+        }
+        if (copies == 0) {
+            return 1;
+        }
+
+        animFrame = GSmodelGetAnimFrame(model);
+        animRate = GSmodelGetAnimRate(model);
+        startFrame = animFrame - animRate * copies;
+        if (startFrame < 0.0f) {
+            copies = animFrame / animRate;
+            startFrame = 0.0f;
+        }
+        if (copies == 0) {
+            return 1;
+        }
+        if (startFrame >= animFrame) {
+            return 1;
+        }
+
+        GSmodelSetPEdescr(model, lbl_80363CC8);
+        oldMode = fn_800D45F8();
+        fn_800D4604(2);
+        _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
         materials = *(void***)(p + 4);
-        for (i = 0; i < materialCount; i++) {
-            if (materials[i] != NULL) {
-                fn_800DF21C(*(f32*)&lbl_8047D268 * (alpha * alpha));
+        for (i = 0; i < materialCount; i++, materials++) {
+            if (*materials != NULL) {
+                GSmaterialSetFlags(*materials, GSmaterialGetFlags(*materials) | 0x20);
+                GSmaterialStoreAlpha(*materials);
             }
         }
-        fn_800E3760(model, 0x3010);
-        startFrame += animRate;
-        alpha += alphaStep;
-    }
 
-    materials = *(void***)(p + 4);
-    for (i = 0; i < materialCount; i++) {
-        if (materials[i] != NULL) {
-            fn_800DF140();
-            fn_800DF504(materials[i]);
+        GSmodelStartAnimation(model);
+        alphaStep = 1.0f / copies;
+        halfRate = 0.5f * animRate;
+        j = 1;
+        while (startFrame + halfRate < animFrame) {
+            alpha = j++ * alphaStep;
+            GSmodelSetAnimFrame(model, startFrame);
+            fn_800EC134(model);
+            startFrame += animRate;
+            alpha = 0.5f * (alpha * alpha);
+            materials = *(void***)(p + 4);
+            for (i = 0; i < materialCount; i++, materials++) {
+                if (*materials != NULL) {
+                    GSmaterialSetAlpha(*materials, alpha);
+                }
+            }
+            GSmodelDrawModel(model, 0x3010);
         }
+
+        materials = *(void***)(p + 4);
+        for (i = 0; i < materialCount; i++, materials++) {
+            if (*materials != NULL) {
+                GSmaterialResetAlpha(*materials);
+                GSmaterialResetFlags(*materials);
+            }
+        }
+        GSmodelResetPEdescr(model);
+        GSmodelSetAnimFrame(model, animFrame);
+        fn_800EC134(model);
+        GSmodelDrawModel(model, 0x3010);
+        fn_800D4604(oldMode);
+        return 1;
     }
-    fn_800E638C(model);
-    fn_800ECA78(model, animFrame);
-    fn_800EC134(model);
-    fn_800E3760(model, 0x3010);
-    fn_800D4604(oldMode);
-    return 1;
+    return 0;
 }
 #endif
-extern u32 lbl_8047D27C;
+#endif
+
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013E258_ONLY)
+extern const f32 lbl_8047D27C;
 extern u32 lbl_8047D288;
-extern u32 lbl_8047D298;
-extern u32 lbl_8047D29C;
-extern u32 lbl_8047D2A0;
+extern const f32 lbl_8047D298;
+extern const f32 lbl_8047D29C;
+extern const f32 lbl_8047D2A0;
 extern u8 lbl_80314AE8[];
-extern u32 lbl_8047D280;
+extern const f32 lbl_8047D280;
 #if 0
 asm u32 fn_8013E258(void* model, void* unused, void* state) {
 #include "src/game/effect/effect_visual_fn_8013E258.inc"
@@ -4228,8 +4527,8 @@ u32 fn_8013E258(void* model, void* unused, void* state) {
         ((f32)*(u32*)((u8*)state + 0x1C) / (f32)visual->duration) *
         (visual->end - visual->start);
     alpha = (s32)(*(f32*)&lbl_8047D298 * amount);
-    gfxSetOrtho(*(f32*)&lbl_8047D27C, *(f32*)&lbl_8047D27C,
-                *(f32*)&lbl_8047D29C, *(f32*)&lbl_8047D298);
+    gfxSetOrtho(0.0f, 0.0f,
+                *(f32*)&lbl_8047D29C, *(f32*)&lbl_8047D2A0);
     gfxSetBlendMode(1, 6, 7);
     gfxSetZMode(0, 7, 0);
     fn_800D9ED8(1);
@@ -4241,21 +4540,21 @@ u32 fn_8013E258(void* model, void* unused, void* state) {
     gfxLoadTexture(0, model);
     gfxSetPrimitive(4);
     gfxBegin(4);
-    gfxVtxPos(*(f32*)&lbl_8047D27C, *(f32*)&lbl_8047D27C, *(f32*)&lbl_8047D27C);
+    gfxVtxPos(0.0f, 0.0f, 0.0f);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-    gfxVtxTexCoord(0, *(f32*)&lbl_8047D27C, *(f32*)&lbl_8047D27C);
-    gfxVtxPos(*(f32*)&lbl_8047D27C, *(f32*)&lbl_8047D29C,
-                *(f32*)&lbl_8047D27C);
+    gfxVtxTexCoord(0, 0.0f, 0.0f);
+    gfxVtxPos(*(f32*)&lbl_8047D29C, 0.0f,
+                0.0f);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-    gfxVtxTexCoord(0, *(f32*)&lbl_8047D280, *(f32*)&lbl_8047D27C);
-    gfxVtxPos(*(f32*)&lbl_8047D27C, *(f32*)&lbl_8047D2A0,
-                *(f32*)&lbl_8047D27C);
+    gfxVtxTexCoord(0, 1.0f, 0.0f);
+    gfxVtxPos(0.0f, *(f32*)&lbl_8047D2A0,
+                0.0f);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-    gfxVtxTexCoord(0, *(f32*)&lbl_8047D27C, *(f32*)&lbl_8047D280);
+    gfxVtxTexCoord(0, 0.0f, 1.0f);
     gfxVtxPos(*(f32*)&lbl_8047D29C, *(f32*)&lbl_8047D2A0,
-                *(f32*)&lbl_8047D27C);
+                0.0f);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-    gfxVtxTexCoord(0, *(f32*)&lbl_8047D280, *(f32*)&lbl_8047D280);
+    gfxVtxTexCoord(0, 1.0f, 1.0f);
     gfxEnd();
     fn_800D9ED8(0);
     return 1;
@@ -4325,8 +4624,6 @@ asm void fn_8013E54C(void) {
 #include "src/game/effect/effect_visual_fn_8013E54C.inc"
 }
 #else
-#pragma push
-#pragma global_optimizer off
 u32 fn_8013E54C(void* arg) {
     void* ptr;
     if (arg != 0) {
@@ -4340,7 +4637,6 @@ u32 fn_8013E54C(void* arg) {
     }
     return 1;
 }
-#pragma pop
 #endif
 #endif
 
@@ -4392,10 +4688,10 @@ log:
     return 0;
 }
 #endif
-extern u32 lbl_8047D2AC;
-extern u32 lbl_8047D2B0;
-extern u32 lbl_8047D2B4;
-extern u32 lbl_8047D2A8;
+extern const f32 lbl_8047D2AC;
+extern const f32 lbl_8047D2B0;
+extern const f32 lbl_8047D2B4;
+extern const f32 lbl_8047D2A8;
 #if 1
 u32 fn_8013E6C4(u8* ptr)
 {
@@ -4449,16 +4745,20 @@ void fn_8013E6C4(void) { /* TODO */ }
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013E8A4)
 extern double fmod(double value, double modulus);
-extern u32 lbl_8047D2B8;
-extern u32 lbl_8047D2A8;
-extern u32 lbl_8047D2BC;
+extern const f32 lbl_8047D2B8;
+/* RULE-EXCEPTION(user-approved): extern-named stand-in for the 1.0f this
+   function shares with the linked fn_8013E6C4 (0x8047D2A8) — see
+   docs/RULE_EXCEPTIONS.md */
+extern const f32 lbl_8047D2A8;
+extern const f32 lbl_8047D2BC;
 extern u32 lbl_8047D2D8;
-extern u32 lbl_8047D2C0;
+extern const f32 lbl_8047D2C0;
 extern u32 lbl_8047D2C8;
-extern u32 lbl_8047D2D0;
-extern u32 lbl_8047D2D4;
+extern const f32 lbl_8047D2D0;
+extern const f32 lbl_8047D2D4;
 #if 0
 asm u32 fn_8013E8A4(void* ptr, u32 delta) {
 #include "src/game/effect/effect_visual_fn_8013E8A4.inc"
@@ -4466,91 +4766,133 @@ asm u32 fn_8013E8A4(void* ptr, u32 delta) {
 #else
 u32 fn_8013E8A4(void* ptr, u32 delta) {
     u8* p;
-    u16 frame;
-    u16 end;
     u8 flags;
     f32 period;
-    f32 base;
     f32 range;
+    f32 base;
     f32 phase;
     f32 wave;
+    f32 frame;
 
-    if (ptr == NULL) {
-        return 0;
-    }
+    if (ptr != NULL) {
+        p = ptr;
+        flags = p[0x19];
+        period = 60.0f / *(f32*)(p + 0x24);
+        base = *(f32*)(p + 0x1C);
+        range = *(f32*)(p + 0x20);
 
-    p = ptr;
-    frame = *(u16*)(p + 0x30);
-    flags = p[0x19];
-    period = *(f32*)&lbl_8047D2B8 / *(f32*)(p + 0x24);
-    base = *(f32*)(p + 0x1C);
-    range = *(f32*)(p + 0x20);
-
-    if (flags & 1) {
-        *(f32*)(p + 0x2C) = *(f32*)&lbl_8047D2A8;
-        *(f32*)(p + 0x28) = *(f32*)&lbl_8047D2A8 + base + range;
-    } else {
-        if (flags & 2) {
-            phase = (f32)fmod((double)frame, (double)(*(f32*)&lbl_8047D2BC * period));
-            phase = (f32)fmod((double)(*(f32*)&lbl_8047D2C0 * phase / period),
-                              *(f64*)&lbl_8047D2C8);
+        if (flags & 1) {
+            *(f32*)(p + 0x2C) = lbl_8047D2A8;
+            /* RULE-EXCEPTION(user-approved): phase reused as the 1 + base
+               temporary for retail's operand order — see
+               docs/RULE_EXCEPTIONS.md */
+            phase = lbl_8047D2A8 + base;
+            *(f32*)(p + 0x28) = phase + range;
         } else {
-            phase = (f32)fmod((double)frame, (double)period);
-            phase = *(f32*)&lbl_8047D2D0 * phase / period;
+            if (flags & 2) {
+                frame = *(u16*)(p + 0x30);
+                phase = fmod(frame, 2.0f * period);
+                phase = fmod(3.1415927f * phase / period, 3.1415927410125732);
+            } else {
+                frame = *(u16*)(p + 0x30);
+                phase = fmod(frame, period);
+                phase = 6.2831855f * phase / period;
+            }
+            wave = cos(phase);
+            if (flags & 8) {
+                *(f32*)(p + 0x2C) = lbl_8047D2A8;
+            } else {
+                *(f32*)(p + 0x2C) = 0.5f * (lbl_8047D2A8 + wave);
+            }
+            *(f32*)(p + 0x28) = lbl_8047D2A8 + (base - range * wave);
         }
-        wave = (f32)cos((double)phase);
-        if (flags & 8) {
-            *(f32*)(p + 0x2C) = *(f32*)&lbl_8047D2A8;
-        } else {
-            *(f32*)(p + 0x2C) =
-                *(f32*)&lbl_8047D2D4 * (*(f32*)&lbl_8047D2A8 + wave);
-        }
-        *(f32*)(p + 0x28) =
-            *(f32*)&lbl_8047D2A8 + (base - range * wave);
-    }
 
-    frame += delta;
-    *(u16*)(p + 0x30) = frame;
-    end = *(u16*)(p + 0x32);
-    if (end != -1 && frame >= end) {
-        return 0;
+        *(u16*)(p + 0x30) += delta;
+        return *(u16*)(p + 0x32) == -1 || *(u16*)(p + 0x30) < *(u16*)(p + 0x32);
     }
-    return 1;
+    return 0;
 }
 #endif
+#endif
+
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013EA44)
 extern void __assert();
 extern void* GSmodelGetBound(void* model);
-extern void GSmodelGetMatrixPtr(void);
-extern void GSmodelSetRenderFlags(void);
-extern void GSmodelInitMaterialAlpha(void);
+extern void* GSmodelGetMatrixPtr(void* model);
+extern void GSmodelSetRenderFlags(void* model, u32 flags);
+extern void GSmodelInitMaterialAlpha(void* model);
 extern void fn_8019D620(void* jobj);
-extern void GSmodelSetMaterialAlpha(void);
-extern void GSmodelResetMaterialAlpha(void);
-extern void GSmodelResetRenderFlags(void);
-extern void fn_800DFF98(void* dst, void* mtx, void* src);
-extern void* fn_800E3C5C(void* model);
-extern void fn_800E3760(void* model, u32 flags);
-extern void* fn_800E4514(void* model);
-extern void fn_800E638C(void* model);
-extern void fn_800E6478(void* model, void* peDescr);
-extern void fn_800E65CC(void* model);
-extern void fn_800E66B8(void* model);
-extern void fn_800E6804(void* model, f32 alpha);
-extern void fn_800E68D8(void* model);
-extern void fn_800E69C4(void* model, u32 flags);
+extern void GSmodelSetMaterialAlpha(void* model, f32 alpha);
+extern void GSmodelResetMaterialAlpha(void* model);
+extern void GSmodelResetRenderFlags(void* model);
+extern void GSmodelDrawModel(void* model, u32 flags);
+extern void GSmodelSetPEdescr(void* model, void* peDescr);
 extern u8 lbl_80363CD8[];
-extern u8 lbl_8047D2E0[];
-extern u8 lbl_8047D2E8[];
-extern u8 lbl_80272FD0[];
-extern u8 lbl_8047D2F0[];
-extern u32 lbl_8047D2D4;
-extern u32 lbl_8047D2F8;
-extern u32 lbl_8047D2A8;
+/* RULE-EXCEPTION(user-approved): the jobj.h assert strings as named .sdata2
+   arrays, placed between fn_8013E8A4's pool and fn_8013EA44's conversion
+   constant as in retail — see docs/RULE_EXCEPTIONS.md */
+const char lbl_8047D2E0[7] = "jobj.h";
+const char lbl_8047D2E8[5] = "jobj";
+extern char lbl_80272FD0[10];
+const char lbl_8047D2F0[6] = "scale";
+extern const f32 lbl_8047D2A8;
 #if 0
 asm void fn_8013EA44(void) {
 #include "src/game/effect/effect_visual_fn_8013EA44.inc"
 }
 #else
+typedef struct LayerVec {
+    f32 x;
+    f32 y;
+    f32 z;
+} LayerVec;
+
+#define LAYER_JOBJ_FLUSH(jobj)                                                  \
+    do {                                                                        \
+        if (!(*(u32*)((jobj) + 0x14) & 0x02000000)) {                           \
+            if ((jobj) != NULL) {                                               \
+                s32 dirty_;                                                     \
+                u32 flags_;                                                     \
+                if ((jobj) == NULL) {                                           \
+                    __assert(lbl_8047D2E0, 0x25D, lbl_8047D2E8);                \
+                }                                                               \
+                flags_ = *(u32*)((jobj) + 0x14);                                \
+                dirty_ = 0;                                                     \
+                if (!(flags_ & 0x00800000) && (flags_ & 0x40)) {                \
+                    dirty_ = 1;                                                 \
+                }                                                               \
+                if (dirty_ == 0) {                                              \
+                    fn_8019D620(jobj);                                          \
+                }                                                               \
+            }                                                                   \
+        }                                                                       \
+    } while (0)
+
+#define LAYER_JOBJ_SET_SCALE(jobj, value)                                       \
+    do {                                                                        \
+        if ((jobj) == NULL) {                                                   \
+            __assert(lbl_8047D2E0, 0x316, lbl_8047D2E8);                        \
+        }                                                                       \
+        if ((value) == NULL) {                                                  \
+            __assert(lbl_8047D2E0, 0x317, lbl_8047D2F0);                        \
+        }                                                                       \
+        *(LayerVec*)((jobj) + 0x2C) = *(value);                                 \
+        LAYER_JOBJ_FLUSH(jobj);                                                 \
+    } while (0)
+
+#define LAYER_JOBJ_SET_TRANSLATE(jobj, value)                                   \
+    do {                                                                        \
+        if ((jobj) == NULL) {                                                   \
+            __assert(lbl_8047D2E0, 0x3A9, lbl_8047D2E8);                        \
+        }                                                                       \
+        if ((value) == NULL) {                                                  \
+            __assert(lbl_8047D2E0, 0x3AA, lbl_80272FD0);                        \
+        }                                                                       \
+        *(LayerVec*)((jobj) + 0x38) = *(value);                                 \
+        LAYER_JOBJ_FLUSH(jobj);                                                 \
+    } while (0)
+
 void fn_8013EA44(void* ptr) {
     extern void fn_800EC134(void*);
     u8* p;
@@ -4558,27 +4900,25 @@ void fn_8013EA44(void* ptr) {
     void* texture;
     u8* part;
     void* bound;
-    f32 minVec[3];
-    f32 scaledMin[3];
-    f32 maxVec[3];
-    f32 mid[3];
-    f32 scaledMax[3];
-    f32 alpha;
-    f32 alphaStep;
+    void* mtx;
+    LayerVec baseScale;
+    LayerVec scale;
+    LayerVec baseTranslate;
+    LayerVec translate;
+    LayerVec mid;
+    LayerVec offset;
     f32 layerAlpha;
     f32 layerAlphaStep;
-    u32 flags;
-    s32 count;
+    f32 alpha;
+    f32 alphaStep;
     s32 i;
+    s32 count;
 
     p = ptr;
-    count = p[0x18];
     texture = *(void**)(p + 4);
     model = *(void**)p;
-    if (texture == NULL) {
-        return;
-    }
-    if (model == NULL) {
+    count = p[0x18];
+    if (texture == NULL || model == NULL) {
         return;
     }
 
@@ -4588,46 +4928,43 @@ void fn_8013EA44(void* ptr) {
     }
 
     fn_800EC134(model);
-    fn_800E6478(model, lbl_80363CD8);
+    GSmodelSetPEdescr(model, lbl_80363CD8);
 
     if (part == NULL) {
         __assert(lbl_8047D2E0, 0x3E4, lbl_8047D2E8);
     }
-    if (maxVec == NULL) {
+    if (&baseTranslate == NULL) {
         __assert(lbl_8047D2E0, 0x3E5, lbl_80272FD0);
     }
-    maxVec[0] = *(f32*)(part + 0x38);
-    maxVec[1] = *(f32*)(part + 0x3C);
-    maxVec[2] = *(f32*)(part + 0x40);
-    minVec[0] = *(f32*)(part + 0x2C);
-    minVec[1] = *(f32*)(part + 0x30);
-    minVec[2] = *(f32*)(part + 0x34);
+    baseTranslate = *(LayerVec*)(part + 0x38);
 
     if (part == NULL) {
         __assert(lbl_8047D2E0, 0x351, lbl_8047D2E8);
     }
-    if (minVec == NULL) {
+    if (&baseScale == NULL) {
         __assert(lbl_8047D2E0, 0x352, lbl_8047D2F0);
     }
+    baseScale = *(LayerVec*)(part + 0x2C);
 
-    bound = fn_800E3C5C(model);
-    GSvecAdd(mid, (u8*)bound + 0x1C, (u8*)bound + 0x10);
-    vecScale(mid, mid, *(f32*)&lbl_8047D2D4);
-    fn_800DFF98(mid, fn_800E4514(model), mid);
-    GSvecSub(mid, mid, maxVec);
+    bound = GSmodelGetBound(model);
+    GSvecAdd(&mid, (u8*)bound + 0x1C, (u8*)bound + 0x10);
+    vecScale(&mid, &mid, 0.5f);
+    mtx = GSmodelGetMatrixPtr(model);
+    GSvecTransform(&mid, mtx, &mid);
+    GSvecSub(&mid, &mid, &baseTranslate);
 
     fn_800D377C(2);
     fn_800D4604(2);
-    fn_800D2248();
+    _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
     fn_800D3410(texture, 0);
 
     alpha = *(f32*)(p + 0x28);
-    layerAlphaStep = *(f32*)&lbl_8047D2A8 / (f32)count;
-    alphaStep = (alpha - *(f32*)&lbl_8047D2A8) / (f32)count;
-    layerAlpha = *(f32*)&lbl_8047D2A8 - (f32)count * layerAlphaStep;
+    layerAlphaStep = lbl_8047D2A8 / (f32)count;
+    alphaStep = (alpha - lbl_8047D2A8) / (f32)count;
+    layerAlpha = lbl_8047D2A8 - (f32)count * layerAlphaStep;
 
-    fn_800E69C4(model, 0x20);
-    fn_800E66B8(model);
+    GSmodelSetRenderFlags(model, 0x20);
+    GSmodelInitMaterialAlpha(model);
     lbl_80363CD8[4] = 1;
     lbl_80363CD8[5] = 4;
     lbl_80363CD8[6] = 5;
@@ -4636,60 +4973,34 @@ void fn_8013EA44(void* ptr) {
         alpha -= alphaStep;
         layerAlpha += layerAlphaStep;
 
-        vecScale(scaledMin, minVec, alpha);
-        scaledMax[0] = mid[0] * (scaledMin[0] - minVec[0]);
-        scaledMax[1] = mid[1] * (scaledMin[1] - minVec[1]);
-        scaledMax[2] = mid[2] * (scaledMin[2] - minVec[2]);
-        GSvecSub(scaledMax, maxVec, scaledMax);
+        vecScale(&scale, &baseScale, alpha);
+        offset.x = mid.x * (scale.x - baseScale.x);
+        offset.y = mid.y * (scale.y - baseScale.y);
+        offset.z = mid.z * (scale.z - baseScale.z);
+        GSvecSub(&translate, &baseTranslate, &offset);
 
-        *(f32*)(part + 0x2C) = scaledMin[0];
-        *(f32*)(part + 0x30) = scaledMin[1];
-        *(f32*)(part + 0x34) = scaledMin[2];
-        flags = *(u32*)(part + 0x14);
-        if (!(flags & 0x02000000) && ((flags & 0x00800000) != 0 || !(flags & 0x40))) {
-            fn_8019D620(part);
-        }
+        LAYER_JOBJ_SET_SCALE(part, &scale);
+        LAYER_JOBJ_SET_TRANSLATE(part, &translate);
 
-        *(f32*)(part + 0x38) = scaledMax[0];
-        *(f32*)(part + 0x3C) = scaledMax[1];
-        *(f32*)(part + 0x40) = scaledMax[2];
-        flags = *(u32*)(part + 0x14);
-        if (!(flags & 0x02000000) && ((flags & 0x00800000) != 0 || !(flags & 0x40))) {
-            fn_8019D620(part);
-        }
-
-        fn_800E6804(model, layerAlpha);
-        fn_800E3760(model, 0x3010);
+        GSmodelSetMaterialAlpha(model, layerAlpha);
+        GSmodelDrawModel(model, 0x3010);
     }
 
-    *(f32*)(part + 0x38) = maxVec[0];
-    *(f32*)(part + 0x3C) = maxVec[1];
-    *(f32*)(part + 0x40) = maxVec[2];
-    flags = *(u32*)(part + 0x14);
-    if (!(flags & 0x02000000) && ((flags & 0x00800000) != 0 || !(flags & 0x40))) {
-        fn_8019D620(part);
-    }
-
-    *(f32*)(part + 0x2C) = minVec[0];
-    *(f32*)(part + 0x30) = minVec[1];
-    *(f32*)(part + 0x34) = minVec[2];
-    flags = *(u32*)(part + 0x14);
-    if (!(flags & 0x02000000) && ((flags & 0x00800000) != 0 || !(flags & 0x40))) {
-        fn_8019D620(part);
-    }
+    LAYER_JOBJ_SET_TRANSLATE(part, &baseTranslate);
+    LAYER_JOBJ_SET_SCALE(part, &baseScale);
 
     lbl_80363CD8[4] = 2;
     lbl_80363CD8[5] = 5;
     lbl_80363CD8[6] = 0;
-    fn_800E6804(model, *(f32*)&lbl_8047D2F8);
-    fn_800E3760(model, 0x3010);
-    fn_800E65CC(model);
-    fn_800E68D8(model);
-    fn_800E65CC(model);
+    GSmodelSetMaterialAlpha(model, lbl_8047D2A8);
+    GSmodelDrawModel(model, 0x3010);
+    GSmodelResetMaterialAlpha(model);
+    GSmodelResetRenderFlags(model);
+    GSmodelResetMaterialAlpha(model);
     fn_800D3190();
     fn_800D4604(1);
     fn_800D377C(1);
-    fn_800E638C(model);
+    GSmodelResetPEdescr(model);
 }
 #endif
 #endif
@@ -4827,9 +5138,11 @@ u32 fn_8013F114(void* ptr) { /* TODO */ }
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013F344_8013F410)
 extern u32 lbl_8047AEE8;
-extern u32 lbl_8047D300;
+/* RULE-EXCEPTION(user-approved): extern-named stand-ins for constants shared with linked code — see docs/RULE_EXCEPTIONS.md */
+extern const f32 lbl_8047D300;
 extern u8 lbl_80272FE0[];
 #if 0
 asm u16 distortionEffectStart(void) {
@@ -4907,9 +5220,10 @@ extern void gfxVtxColor(u32 a, u32 r, u32 g, u32 b);
 extern void fn_800DBE5C(u32 a);
 extern u32 lbl_8047AEE8;
 extern u32 lbl_8047AEF0;
-extern u32 lbl_8047D304;
-extern u32 lbl_8047D300;
-extern u32 lbl_8047D308;
+/* RULE-EXCEPTION(user-approved): extern-named stand-ins for constants shared with linked code — see docs/RULE_EXCEPTIONS.md */
+extern const f32 lbl_8047D304;
+extern const f32 lbl_8047D300;
+extern const f32 lbl_8047D308;
 #if 1
 u32 fn_8013F410(void* ptr) {
     f32 mtx[12];
@@ -5009,11 +5323,36 @@ u32 fn_8013F410(void* ptr) { /* TODO */ }
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+/* fn_8013F80C's own object does not see distortionEffectStart's block. */
+#if defined(EFFECT_VISUAL_EXACT_8013F80C) && \
+    !defined(EFFECT_VISUAL_EXACT_8013F344_8013F410)
+typedef struct DistortionState {
+    void* unk_00;
+    void* texture;   /* 0x04 */
+    void* model;     /* 0x08 */
+    u32   partIdx;   /* 0x0C */
+    f32   unk_10;    /* 0x10 */
+    f32   unk_14;    /* 0x14 */
+    u8    pad_18[4];
+    f32   unk_1C;    /* 0x1C */
+    f32   unk_20;    /* 0x20 */
+    f32   unk_24;    /* 0x24 */
+    u8    pad_28[2];
+    u16   unk_2A;
+    f32   pos[3];    /* 0x2C */
+    u8    pad_38[0x78];
+    u16   frame;     /* 0xB0 */
+    u16   duration;  /* 0xB2 */
+} DistortionState;
+#endif
+
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013F80C)
 extern u32 lbl_8047AEE8;
 extern u32 lbl_8047D310;
-extern u32 lbl_8047D300;
-extern u32 lbl_8047D308;
+/* RULE-EXCEPTION(user-approved): extern-named stand-ins for constants shared with linked code — see docs/RULE_EXCEPTIONS.md */
+extern const f32 lbl_8047D300;
+extern const f32 lbl_8047D308;
 #if 0
 asm u32 fn_8013F80C(void* ptr, u32 delta) {
 #include "src/game/effect/effect_visual_fn_8013F80C.inc"
@@ -5021,44 +5360,36 @@ asm u32 fn_8013F80C(void* ptr, u32 delta) {
 #else
 u32 fn_8013F80C(void* ptr, u32 delta) {
     DistortionState* s = ptr;
-    u32 remaining;
     void* part;
-    f32 progress;
     f32 threshold;
-    f32 zero;
-    f32 one;
+    f32 progress;
 
-    if (s == NULL) {
-        return 0;
-    }
-
-    if (s->texture == NULL || lbl_8047AEE8 == 0) {
-        return 0;
-    }
-
-    if (s->unk_2A != 0) {
-        part = GSmodelGetPart(s->model, s->partIdx);
-        if (part != NULL) {
-            GSpartGetTransform(part, s->pos, NULL, NULL);
-            GSpartFree(part);
+    if (s != NULL) {
+        if (s->texture == NULL || lbl_8047AEE8 == 0) {
+            return 0;
         }
-    }
 
-    zero = *(f32*)&lbl_8047D300;
-    one = *(f32*)&lbl_8047D308;
-    s->unk_10 = s->unk_14 * s->duration;
-    progress = (f32)s->frame / (f32)s->duration;
-    threshold = s->unk_1C;
-    if (threshold != zero && progress <= threshold) {
-        s->unk_10 *= progress / threshold;
-    } else {
-        s->unk_10 *= (one - progress) / (one - threshold);
+        if (s->unk_2A != 0) {
+            part = GSmodelGetPart(s->model, s->partIdx);
+            if (part != NULL) {
+                GSpartGetTransform(part, s->pos, NULL, NULL);
+                GSpartFree(part);
+            }
+        }
+
+        s->unk_10 = s->unk_14 * s->duration;
+        progress = (f32)s->frame / (f32)s->duration;
+        threshold = s->unk_1C;
+        if (threshold != *(f32*)&lbl_8047D300 && progress <= threshold) {
+            s->unk_10 *= progress / threshold;
+        } else {
+            s->unk_10 *= (*(f32*)&lbl_8047D308 - progress) / (*(f32*)&lbl_8047D308 - threshold);
+        }
+        s->unk_20 = s->unk_24 * (*(f32*)&lbl_8047D308 - progress);
+        s->frame += delta;
+        return s->frame < s->duration;
     }
-    s->unk_20 = s->unk_24 * (one - progress);
-    s->frame += delta;
-    remaining = s->frame;
-    remaining -= s->duration;
-    return remaining >> 31;
+    return 0;
 }
 #endif
 extern void* gfxGetCameraMatrix(u32 index);
@@ -5071,16 +5402,17 @@ extern void GSlogWrite(const char* fmt, ...);
 extern u16 GStextureGetXsize(void* texture);
 extern u16 GStextureGetYsize(void* texture);
 extern void fn_800E03E8(void* matrix, f32 x, f32 y, f32 z);
-extern u32 lbl_8047D300;
-extern u32 lbl_8047D304;
-extern u32 lbl_8047D308;
+/* RULE-EXCEPTION(user-approved): extern-named stand-ins for constants shared with linked code — see docs/RULE_EXCEPTIONS.md */
+extern const f32 lbl_8047D300;
+extern const f32 lbl_8047D304;
+extern const f32 lbl_8047D308;
 extern u8 lbl_8027301C[];
-extern u32 lbl_8047D318;
-extern u32 lbl_8047D31C;
-extern u32 lbl_8047D320;
+extern const f32 lbl_8047D318;
+extern const f32 lbl_8047D31C;
+extern const f32 lbl_8047D320;
 extern u32 lbl_8047AEE8;
 extern u32 lbl_8047D310;
-extern u32 lbl_8047D324;
+extern const f32 lbl_8047D324;
 #if 0
 asm void _distortionEffectUpdateMatrices(void) {
 #include "src/game/effect/effect_visual__distortionEffectUpdateMatrices.inc"
@@ -5088,66 +5420,66 @@ asm void _distortionEffectUpdateMatrices(void) {
 #else
 void _distortionEffectUpdateMatrices(void* ptr) {
     void* camera;
-    void* matrix;
+    f32* matrix;
     void* cameraMatrix;
     f32 viewMatrix[12];
-    f32 cornerB[3];
-    f32 cornerA[3];
-    f32 projected[6];
+    f32 corners[2][3];
+    f32 projected[2][3];
     f32 eye[3];
     f32 lookAt[3];
     f32 xScale;
     f32 yScale;
 
     camera = GScameraGetActiveCamera();
-    matrix = (u8*)ptr + 0x38;
+    matrix = (f32*)((u8*)ptr + 0x38);
     _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
     cameraMatrix = gfxGetCameraMatrix(0);
     fn_800E064C(matrix);
     if (camera != NULL) {
         GScameraGetLookAt(camera, lookAt, eye);
         fn_800E0628(viewMatrix, cameraMatrix);
-        viewMatrix[3] = 0.0f;
-        viewMatrix[7] = 0.0f;
-        viewMatrix[11] = 0.0f;
+        viewMatrix[11] = lbl_8047D300;
+        viewMatrix[7] = lbl_8047D300;
+        viewMatrix[3] = lbl_8047D300;
         fn_800E0238(matrix, viewMatrix);
     }
     fn_800E02C4(matrix, *(f32*)((u8*)ptr + 0x10),
                 *(f32*)((u8*)ptr + 0x10), *(f32*)((u8*)ptr + 0x10));
-    *(f32*)((u8*)ptr + 0x44) = *(f32*)((u8*)ptr + 0x2C);
-    *(f32*)((u8*)ptr + 0x54) = *(f32*)((u8*)ptr + 0x30);
-    *(f32*)((u8*)ptr + 0x64) = *(f32*)((u8*)ptr + 0x34);
-    set__5GSvecFfff(cornerA, *(f32*)&lbl_8047D304, *(f32*)&lbl_8047D304,
-                    *(f32*)&lbl_8047D300);
-    GSvecTransform(cornerA, matrix, cornerA);
-    set__5GSvecFfff(cornerB, *(f32*)&lbl_8047D308, *(f32*)&lbl_8047D308,
-                    *(f32*)&lbl_8047D300);
-    GSvecTransform(cornerB, matrix, cornerB);
-    if (fn_800D2DE8(cornerA, projected, 2) != 2) {
+    matrix[3] = *(f32*)((u8*)ptr + 0x2C);
+    matrix[7] = *(f32*)((u8*)ptr + 0x30);
+    matrix[11] = *(f32*)((u8*)ptr + 0x34);
+    set__5GSvecFfff(corners[0], lbl_8047D304, lbl_8047D304,
+                    lbl_8047D300);
+    GSvecTransform(corners[0], matrix, corners[0]);
+    set__5GSvecFfff(corners[1], lbl_8047D308, lbl_8047D308,
+                    lbl_8047D300);
+    GSvecTransform(corners[1], matrix, corners[1]);
+    if (fn_800D2DE8(corners, projected, 2) != 2) {
         GSlogWrite((const char*)lbl_8027301C);
         return;
     }
-    projected[0] /= *(f32*)&lbl_8047D318;
-    projected[1] /= *(f32*)&lbl_8047D31C;
-    projected[2] /= *(f32*)&lbl_8047D318;
-    projected[3] /= *(f32*)&lbl_8047D31C;
-    *(f32*)((u8*)ptr + 0x98) = *(f32*)&lbl_8047D320;
-    *(f32*)((u8*)ptr + 0x9C) = *(f32*)&lbl_8047D300;
-    *(f32*)((u8*)ptr + 0xA0) = *(f32*)&lbl_8047D320 *
-                               (*(f32*)((u8*)ptr + 0x20) - *(f32*)&lbl_8047D308);
-    *(f32*)((u8*)ptr + 0xA4) = *(f32*)&lbl_8047D300;
-    *(f32*)((u8*)ptr + 0xA8) = *(f32*)&lbl_8047D320;
-    *(f32*)((u8*)ptr + 0xAC) = *(f32*)((u8*)ptr + 0xA0);
-    fn_800E048C((u8*)ptr + 0x68, projected[2] - projected[0],
-                 projected[3] - projected[1], *(f32*)&lbl_8047D300);
-    xScale = *(f32*)&lbl_8047D324 /
+    projected[0][0] /= 6.4e+02f;
+    projected[0][1] /= 4.8e+02f;
+    projected[1][0] /= 6.4e+02f;
+    projected[1][1] /= 4.8e+02f;
+    xScale = 0.5f * (*(f32*)((u8*)ptr + 0x20) - lbl_8047D308);
+    *(f32*)((u8*)ptr + 0x98) = 0.5f;
+    *(f32*)((u8*)ptr + 0x9C) = lbl_8047D300;
+    *(f32*)((u8*)ptr + 0xA0) = xScale;
+    *(f32*)((u8*)ptr + 0xA4) = lbl_8047D300;
+    *(f32*)((u8*)ptr + 0xA8) = 0.5f;
+    *(f32*)((u8*)ptr + 0xAC) = xScale;
+    fn_800E048C((u8*)ptr + 0x68, projected[1][0] - projected[0][0],
+                 projected[1][1] - projected[0][1], lbl_8047D300);
+    xScale = 128.0f /
              (f32)GStextureGetXsize((void*)lbl_8047AEE8);
-    xScale *= *(f32*)((u8*)ptr + 0x20);
-    yScale = *(f32*)&lbl_8047D324 /
+    yScale = 128.0f /
              (f32)GStextureGetYsize((void*)lbl_8047AEE8);
-    fn_800E03E8((u8*)ptr + 0x68, xScale + projected[0],
-                yScale * *(f32*)((u8*)ptr + 0x20) + projected[1],
-                *(f32*)&lbl_8047D300);
+    xScale *= *(f32*)((u8*)ptr + 0x20);
+    yScale *= *(f32*)((u8*)ptr + 0x20);
+    /* RULE-EXCEPTION(user-approved): integer-cast address stops MWCC sharing it with the earlier call — see docs/RULE_EXCEPTIONS.md */
+    fn_800E03E8((void*)((u32)ptr + 0x68), xScale + projected[0][0],
+                yScale + projected[0][1], lbl_8047D300);
 }
 #endif
 #endif
@@ -5251,8 +5583,8 @@ extern u8 GSmodelCanAnimate(void* model);
 extern void GSmodelSetAnimIndex(void* model, u16 value);
 extern void GSmodelSetAnimType(void* model, u32 value);
 extern void GSmodelSetAnimRate(void* model, f32 value);
-extern u32 lbl_8047D328;
-extern u32 lbl_8047D32C;
+extern const f32 lbl_8047D328;
+extern const f32 lbl_8047D32C;
 extern u8 lbl_80273078[];
 #if 0
 asm u16 billboardEffectStart(void) {
@@ -5302,8 +5634,13 @@ report_null:
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
+    defined(EFFECT_VISUAL_EXACT_8013FF0C_80140138)
 extern f64 tan(f64 x);
+extern u8 GSmodelCanAnimate(void* model);
+extern void* GSmodelGetBound(void* model);
+extern void GScameraGetLookAt(void* mtx, void* lookAt, void* eye);
+extern void GSvecAdd(void* dst, void* srcA, void* srcB);
 extern u32 fn_80118DA8(void* ptr);
 extern void fn_80118F04(void* arg1, void* arg2);
 extern u8 GSmodelHasAnimationEnded(void* model);
@@ -5312,76 +5649,75 @@ extern void GSmodelSetPosition(void* entry, void* param);
 extern void GSmodelSetScale(void* entry, void* param);
 extern u8 lbl_80273060[];
 extern u8 lbl_8027306C[];
-extern u32 lbl_8047D334;
-extern u32 lbl_8047D328;
-extern u32 lbl_8047D330;
-extern u32 lbl_8047D338;
-extern u32 lbl_8047D32C;
+extern const f32 lbl_8047D334;
+extern const f32 lbl_8047D328;
+extern const f32 lbl_8047D330;
+extern const f32 lbl_8047D338;
+extern const f32 lbl_8047D32C;
+typedef struct BillboardVec {
+    f32 x;
+    f32 y;
+    f32 z;
+} BillboardVec;
+
 u32 fn_8013FF0C(void* ptr) {
     u8* p;
     void* camera;
     void* model;
     void* material;
-    f32 position[3];
-    f32 billboardScale[3];
-    f32 up[3];
+    u32 updated;
+    BillboardVec position;
+    BillboardVec billboardScale;
     f32 interest[3];
+    f32 up[3];
     f32 fov;
-    f32 aspect;
     f32 nearPlane;
+    f32 aspect;
     f32 farPlane;
 
-    if (ptr == NULL) {
-        return 0;
-    }
-
-    p = ptr;
-    model = *(void**)(p + 0x10);
-    camera = cameraGetActive();
-    position[0] = *(f32*)(lbl_80273060 + 0);
-    position[1] = *(f32*)(lbl_80273060 + 4);
-    position[2] = *(f32*)(lbl_80273060 + 8);
-    billboardScale[0] = *(f32*)(lbl_8027306C + 0);
-    billboardScale[1] = *(f32*)(lbl_8027306C + 4);
-    billboardScale[2] = *(f32*)(lbl_8027306C + 8);
-    if (camera != NULL) {
-        _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
-        GScameraGetPosition(camera, position);
-        GScameraGetLookAt(camera, up, interest);
-        GSvecSub(up, interest, position);
-        fn_800E0060(up, up);
-        GScameraGetPerspective(camera, &fov, &aspect, &nearPlane, &farPlane);
-        fov *= *(f32*)&lbl_8047D334 * *(f32*)&lbl_8047D328;
-        nearPlane *= *(f32*)&lbl_8047D330;
-        billboardScale[0] = *(f32*)&lbl_8047D32C;
-        billboardScale[1] = *(f32*)&lbl_8047D338 * nearPlane *
-                            (f32)tan(fov) * aspect;
-        billboardScale[2] = billboardScale[1] * farPlane;
-        vecScale(up, up, nearPlane);
-        GSvecAdd(position, position, up);
-    }
-
-    {
-        u32 updated = 0;
+    if (ptr != NULL) {
+        p = ptr;
+        model = *(void**)(p + 0x10);
+        camera = cameraGetActive();
+        position = *(BillboardVec*)lbl_80273060;
+        billboardScale = *(BillboardVec*)lbl_8027306C;
+        updated = 0;
+        if (camera != NULL) {
+            _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
+            GScameraGetPosition(camera, &position);
+            GScameraGetLookAt(camera, up, interest);
+            GSvecSub(up, interest, &position);
+            fn_800E0060(up, up);
+            GScameraGetPerspective(camera, &fov, &aspect, &nearPlane, &farPlane);
+            nearPlane *= *(f32*)&lbl_8047D330;
+            fov = *(f32*)&lbl_8047D334 * fov;
+            fov = fov * *(f32*)&lbl_8047D328;
+            billboardScale.y = *(f32*)&lbl_8047D338 * nearPlane * (f32)tan(fov);
+            billboardScale.x = billboardScale.y * aspect;
+            billboardScale.z = *(f32*)&lbl_8047D32C;
+            vecScale(up, up, nearPlane);
+            GSvecAdd(&position, &position, up);
+        }
 
         if (*(void**)(p + 0x20) != NULL &&
             fn_80118DA8(*(void**)(p + 0x20)) != 0) {
-            fn_80118F04(*(void**)(p + 0x20), position);
+            fn_80118F04(*(void**)(p + 0x20), &position);
             updated = 1;
         }
 
-        if (model != NULL &&
+        if (*(void**)(p + 0x10) != NULL &&
             ((GSmodelCanAnimate(model) && !GSmodelHasAnimationEnded(model)) ||
              (GSmodelCanTexAnimate(model) && !GSmodelHasTexAnimationEnded(model)))) {
             material = GSmodelGetBound(model);
-            billboardScale[0] /= *(f32*)((u8*)material + 0x28);
-            billboardScale[1] /= *(f32*)((u8*)material + 0x2C);
-            GSmodelSetPosition(model, position);
-            GSmodelSetScale(model, billboardScale);
+            billboardScale.x /= *(f32*)((u8*)material + 0x28);
+            billboardScale.y /= *(f32*)((u8*)material + 0x2C);
+            GSmodelSetPosition(model, &position);
+            GSmodelSetScale(model, &billboardScale);
             updated = 1;
         }
         return updated;
     }
+    return 0;
 }
 #endif
 
@@ -5537,7 +5873,7 @@ void* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl(void* baseTexture,
         goto fail;
     }
 
-    lastOutputPixel = (u16*)image + pixelCount - 1;
+    lastOutputPixel = (u16*)image + (pixelCount - 1);
     placement = lbl_80478BA8;
     for (spot = 0; (s16)spot < 4;) {
         yOffset = (s16)((s16)((pattern >> 4) & 0xF) - 8);
@@ -5616,20 +5952,12 @@ asm void itemParamGetPPMaxFullFlag(void) {
 #pragma peephole off
 #pragma peephole off
 #pragma peephole off
-#pragma peephole off
-#pragma peephole off
-#pragma peephole off
-#pragma peephole off
 u32 itemParamGetPPMaxFullFlag(void* ptr) {
     s32 v;
     if (ptr == NULL) return 0;
     v = !!((((u8*)ptr)[0x4] >> 3) & 1);
     return v;
 }
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
 #pragma peephole on
 #pragma peephole on
 #pragma peephole on

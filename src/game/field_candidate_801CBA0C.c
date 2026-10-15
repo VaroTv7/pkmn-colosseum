@@ -3,7 +3,7 @@
 
 extern u8 lbl_8047B3C8;
 extern u32 std093_getCurrentGroupID(void);
-extern void* fn_8018E050(u32 group, s32 people_id, void* param);
+extern void* peopleOpen(u32 group, s32 people_id, void* param);
 extern void* peopleSearchID(void* people);
 extern void GSmodelSetBoundCheck(void* model, u8 enable);
 
@@ -17,7 +17,7 @@ s32 std112_modelGetResourceID(void* param)
     lbl_8047B3C8 = raw_id + 1;
     people_id = (s8)raw_id | 0x7FFE0000;
 
-    people = fn_8018E050(std093_getCurrentGroupID(), people_id, param);
+    people = peopleOpen(std093_getCurrentGroupID(), people_id, param);
     if (people == NULL) {
         return 0;
     }

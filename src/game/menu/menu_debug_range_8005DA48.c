@@ -10,6 +10,8 @@
  */
 #include "dolphin/types.h"
 
+#if !defined(MENU_DEBUG_RANGE_SPLIT) || defined(MENU_DEBUG_LOG_CHANGE_DISP)
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma peephole off
 s32 dbgMenuLogChangeDisp(void)
 {
@@ -26,6 +28,7 @@ s32 dbgMenuLogChangeDisp(void)
     return 0;
 }
 #pragma peephole reset
+#endif
 
 typedef struct DebugMenuKeyInfo {
     u8 _0[4];
@@ -33,6 +36,10 @@ typedef struct DebugMenuKeyInfo {
     u16 repeat;
 } DebugMenuKeyInfo;
 
+#if !defined(MENU_DEBUG_RANGE_SPLIT) || defined(MENU_DEBUG_LOG_DRAW)
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (push; peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
+#pragma push
+#pragma peephole off
 s32 dbgMenuLogDraw(void* window)
 {
     extern DebugMenuKeyInfo* windowGetKeyInfo(void);
@@ -44,43 +51,48 @@ s32 dbgMenuLogDraw(void* window)
     extern char* GSlogGetLine(s32);
     extern void fn_800FAEF8(s32, s32, u32, char*, ...);
     extern u32 lbl_8047BF48;
-    u32 color;
-    s32 lines;
-    s32 width;
+    u32 color[2];
     s32 y;
     s32 i;
+    s32 lines;
     s32 line;
 
-    color = lbl_8047BF48;
+    color[1] = lbl_8047BF48;
     if (windowGetKeyInfo()->trigger & 0x100) {
         windowSetParam(window, 0, (windowGetParam(window, 0) + 1) % 4);
     }
 
-    switch (windowGetParam(window, 0)) {
-    case 1:
-        lines = 10;
-        width = 0x82;
-        y = 0x27;
-        break;
-    case 2:
-        lines = 0x20;
-        width = 0x1A0;
-        y = 0x27;
-        break;
-    case 3:
-        lines = 1;
-        width = 0xD;
-        y = 0x1BA;
-        break;
-    default:
-        lines = 10;
-        width = 0x82;
-        y = 0x145;
-        break;
-    }
+    {
+        s32 width;
 
-    gfxSetZMode(0, 7, 2);
-    fn_8001E58C(0xF, y - 5, 0x25D, width + 0x12, &color);
+        switch (windowGetParam(window, 0)) {
+        case 0:
+        default:
+            lines = 10;
+            width = 0x82;
+            y = 0x145;
+            break;
+        case 1:
+            lines = 10;
+            width = 0x82;
+            y = 0x27;
+            break;
+        case 2:
+            lines = 0x20;
+            width = 0x1A0;
+            y = 0x27;
+            break;
+        case 3:
+            lines = 1;
+            width = 0xD;
+            y = 0x1BA;
+            break;
+        }
+
+        gfxSetZMode(0, 7, 2);
+        color[0] = color[1];
+        fn_8001E58C(0xF, y - 5, 0x25D, width + 0x12, &color[0]);
+    }
     for (i = 0; i < lines; i++) {
         line = i + GSlogGetLineCount() - lines;
         if (line >= 0) {
@@ -90,7 +102,13 @@ s32 dbgMenuLogDraw(void* window)
     }
     return 0;
 }
+#pragma pop
+#endif
 
+#if !defined(MENU_DEBUG_RANGE_SPLIT) || defined(MENU_DEBUG_ITEM_CURSOR)
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (push; peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
+#pragma push
+#pragma peephole off
 s32 menuDbgItemCreateCursor(u8* window)
 {
     extern DebugMenuKeyInfo* windowGetKeyInfo(void);
@@ -98,31 +116,29 @@ s32 menuDbgItemCreateCursor(u8* window)
     extern s32 lbl_8047A5C8;
     extern s32 lbl_80478BD8;
     DebugMenuKeyInfo* keys;
-    s32 maximum;
 
     keys = windowGetKeyInfo();
     if (keys->repeat & 1) {
-        window[0x95]--;
-        if ((s8)window[0x95] < 0) {
+        if ((s8)--window[0x95] < 0) {
             window[0x95] = 0;
         }
     }
     if (keys->repeat & 2) {
-        window[0x95]++;
-        if ((s8)window[0x95] > 1) {
+        if ((s8)++window[0x95] > 1) {
             window[0x95] = 1;
         }
     }
 
-    if ((s8)window[0x95] == 0) {
-        maximum = lbl_80478BD8 - 1;
+    switch ((s8)window[0x95]) {
+    case 0:
+        keys = windowGetKeyInfo();
         if (keys->repeat & 8) {
             lbl_8047A5C8++;
-            if (lbl_8047A5C8 > maximum) lbl_8047A5C8 = maximum;
+            if (lbl_8047A5C8 >= lbl_80478BD8) lbl_8047A5C8 = lbl_80478BD8 - 1;
         }
         if (keys->repeat & 0x400) {
             lbl_8047A5C8 += 10;
-            if (lbl_8047A5C8 > maximum) lbl_8047A5C8 = maximum;
+            if (lbl_8047A5C8 >= lbl_80478BD8) lbl_8047A5C8 = lbl_80478BD8 - 1;
         }
         if (keys->repeat & 4) {
             lbl_8047A5C8--;
@@ -132,7 +148,9 @@ s32 menuDbgItemCreateCursor(u8* window)
             lbl_8047A5C8 -= 10;
             if (lbl_8047A5C8 < 0) lbl_8047A5C8 = 0;
         }
-    } else if ((s8)window[0x95] == 1) {
+        break;
+    case 1:
+        keys = windowGetKeyInfo();
         if (keys->repeat & 8) {
             lbl_8047A5C4++;
             if (lbl_8047A5C4 > 999) lbl_8047A5C4 = 999;
@@ -149,10 +167,15 @@ s32 menuDbgItemCreateCursor(u8* window)
             lbl_8047A5C4 -= 10;
             if (lbl_8047A5C4 < 0) lbl_8047A5C4 = 0;
         }
+        break;
     }
     return 0;
 }
+#pragma pop
+#endif
 
+#if !defined(MENU_DEBUG_RANGE_SPLIT) || defined(MENU_DEBUG_FIELD_CAMERA)
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma peephole off
 s32 dbgMenuFieldCameraChangeDisp(void)
 {
@@ -185,7 +208,10 @@ s32 dbgMenuFieldCameraChangeDisp(void)
     return 0;
 }
 #pragma peephole reset
+#endif
 
+#if !defined(MENU_DEBUG_RANGE_SPLIT) || defined(MENU_DEBUG_ITEM_CREATE)
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma peephole off
 void menuDbgItemCreate(void)
 {
@@ -231,3 +257,4 @@ void menuDbgItemCreate(void)
     menuCloseSync(0xCB, 1);
 }
 #pragma peephole reset
+#endif

@@ -13,23 +13,22 @@
 #include "dolphin/os/OSAlarm.h"
 #include "dolphin/vi/VI.h"
 
+/* The bus clock is the SDK's address-bound __OSBusClock, which MWCC
+ * reloads at each use. */
+extern u32 __OSBusClock : 0x800000F8;
+#undef OS_BUS_CLOCK
+#define OS_BUS_CLOCK __OSBusClock
+
 /* SI.h's approximation loses the SDK's divide-by-8 rounding step. */
 #undef OSMicrosecondsToTicks
 #define OSMicrosecondsToTicks(usec) (((usec) * (OS_TIMER_CLOCK / 125000)) / 8)
 
-#pragma push
-#pragma optimization_level 0
-#pragma peephole off
-#pragma scheduling off
 typedef struct {
     u32 reg;
     u32 unk4;
     u32 unk8;
 } SICommandQueueEntry;
 volatile SICommandQueueEntry __SIChannelRegs[4] : 0xCC006400;
-#pragma scheduling reset
-#pragma peephole reset
-#pragma pop
 
 volatile u32 __SIRegs[15] : 0xCC006400;
 #define SI_COMCSR_IDX (0x34 / 4)
@@ -75,16 +74,34 @@ typedef struct SIControl {
     SICallback callback;
 } SIControl;
 
-extern SIControl Si_80313F8C;
-extern u32 Type_80313FA0[4];
+const char* __SIVersion =
+    "<< Dolphin SDK - SI\trelease build: Sep  5 2002 05:33:08 (0x2301) >>";
 
-extern const char* __SIVersion;
-extern u32 lbl_8047AA58;
+static SIControl Si_80313F8C = {-1, 0, 0, NULL, NULL};
+static u32 Type_80313FA0[4] = {8, 8, 8, 8};
+
+u32 lbl_8047AA58; /* __PADFixBits */
 
 int __SITransfer(s32 chan, void* output, u32 outputBytes, void* input,
                  u32 inputBytes, SICallback callback);
 BOOL SIGetResponseRaw(s32 chan);
 static void GetTypeCallback(s32 chan, u32 error, OSContext* context);
+
+BOOL fn_800CF708(void) {
+    if (Si_80313F8C.chan != -1) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+BOOL SIIsChanBusy(s32 channel) {
+    BOOL available = TRUE;
+
+    if (Packet_803FFFB0[channel].chan == -1 && Si_80313F8C.chan != channel) {
+        available = FALSE;
+    }
+    return available;
+}
 
 static inline BOOL SIIsChanBusyLocal(s32 chan) {
     return Packet_803FFFB0[chan].chan != -1 || Si_80313F8C.chan == chan;
@@ -593,7 +610,7 @@ BOOL SITransfer(s32 chan, void* output, u32 outputBytes, void* input,
     return TRUE;
 }
 
-static void CallTypeAndStatusCallback(s32 chan, u32 type) {
+static inline void CallTypeAndStatusCallback(s32 chan, u32 type) {
     SITypeAndStatusCallback callback;
     int i;
 

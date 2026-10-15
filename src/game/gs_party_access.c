@@ -41,6 +41,7 @@ extern u32 lbl_802666E0[];
 extern f32 lbl_8047B6E8;
 
 /* Retail retains this otherwise-unreferenced debug-menu entry-point group. */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (force_active on; peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma force_active on
 #pragma peephole off
 
@@ -77,8 +78,6 @@ typedef struct {
 } BattleAnimState;
 #endif
 
-#pragma push
-#pragma peephole off
 
 /* 0x8000CAA4 */
 s32 fn_8000CAA4(void) {
@@ -123,7 +122,6 @@ s32 fn_8000CB28(void) {
 #endif
     return 0;
 }
-#pragma pop
 
 /* 0x8000CB54 */
 void fn_8000CB54(void) {
@@ -230,6 +228,7 @@ s32 dbgMenuMenuTestEvolution(void) {
 }
 
 /* 0x8000CE5C */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma peephole off
 u32 dbgMenuMenuTestWazaMenu(void) {
     u32 val;
@@ -240,13 +239,9 @@ u32 dbgMenuMenuTestWazaMenu(void) {
     fn_80097A38(val, 0x25);
     return 0;
 }
-#pragma peephole on
 
 /* 0x8000CED0 */
-#pragma peephole off
-#pragma peephole off
-#pragma peephole off
-#pragma peephole off
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (peephole off; peephole off; peephole off; peephole off; peephole off; peephole off; peephole off; peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma peephole off
 #pragma peephole off
 #pragma peephole off
@@ -268,11 +263,9 @@ s32 fn_8000CED0(void) {
 #pragma peephole on
 #pragma peephole on
 #pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
 
 /* 0x8000CEF8 */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma peephole off
 u32 dbgMenuMenuTestPokemonMenu(s32 arg) {
     switch (arg) {
@@ -288,11 +281,9 @@ u32 dbgMenuMenuTestPokemonMenu(s32 arg) {
     }
     return 0;
 }
-#pragma peephole on
 
 /* 0x8000CF68 */
 u32 fn_8000CF68(u32 arg) {
-#pragma peephole off
     typedef struct {
         u32 key;
         u32 value;
@@ -346,37 +337,8 @@ u32 dbgMenuMenuTestNameEntryMenu(u32 arg) {
     menuNameEntryOpen(val, 0);
     return 0;
 }
-#pragma peephole reset
 
 /* 0x8000D11C */
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
 s32 dbgMenuWazaDebugStop(void) {
     s32 v = ((BattleAnimState*)lbl_804673F8)->activeFlag;
     if (v != 0) {
@@ -384,50 +346,8 @@ s32 dbgMenuWazaDebugStop(void) {
     }
     return 0;
 }
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
 
 /* 0x8000D154 */
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
 s32 fn_8000D154(void) {
     u32 r;
     r = menuIsCheck(0xCF);
@@ -439,50 +359,8 @@ s32 fn_8000D154(void) {
     }
     return 0;
 }
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
 
 /* 0x8000D1C4 */
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
 s32 fn_8000D1C4(void) {
     u32 r;
     r = menuIsCheck(0x78);
@@ -494,50 +372,8 @@ s32 fn_8000D1C4(void) {
     }
     return 0;
 }
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
 
 /* 0x8000D234 */
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
-#pragma push
-#pragma peephole off
 s32 dbgMenuWazaDebugStart(void) {
     u32 r;
     r = menuIsCheck(0x13);
@@ -550,17 +386,3 @@ s32 dbgMenuWazaDebugStart(void) {
     }
     return 0;
 }
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop
-#pragma pop

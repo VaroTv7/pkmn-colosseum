@@ -17,6 +17,7 @@
  */
 
 #include "dolphin/types.h"
+#include "game/msgctrl_obj.h"
 
 typedef struct EffectUtilByteEntry {
     u8 value;
@@ -138,37 +139,6 @@ typedef struct EffectParamBlock {
     u8 field_22;
 } EffectParamBlock;
 
-typedef struct EffectUtilCommandObj {
-    /* 0x00 */ u8 field_00;
-    /* 0x01 */ u8 activeFlag;
-    /* 0x02 */ u8 field_02;
-    /* 0x03 */ u8 field_03;
-    /* 0x04 */ f32 field_04;
-    /* 0x08 */ f32 field_08;
-    /* 0x0C */ f32 field_0C;
-    /* 0x10 */ f32 field_10;
-    /* 0x14 */ u8 pad_14[0x0C];
-    /* 0x20 */ u16 commandValue;
-    /* 0x22 */ u8 pad_22;
-    /* 0x23 */ u8 field_23;
-    /* 0x24 */ u32 colorRgba;
-    /* 0x28 */ u8 pad_28[4];
-    /* 0x2C */ u8* savedStream;
-    /* 0x30 */ u8* stream;
-    /* 0x34 */ u8 pad_34[0x0D];
-    /* 0x41 */ u8 field_41;
-    /* 0x42 */ u8 field_42;
-    /* 0x43 */ u8 field_43;
-    /* 0x44 */ u8 flags;
-    /* 0x45 */ u8 pendingFlag;
-    /* 0x46 */ u8 doneFlag;
-    /* 0x47 */ u8 pad_47;
-    /* 0x48 */ s16 waitCounter;
-    /* 0x4A */ u8 alignMode;
-    /* 0x4B */ u8 field_4B;
-    /* 0x4C */ u8 pad_4C[0x18];
-    /* 0x64 */ f32 field_64;
-} EffectUtilCommandObj;
 
 /* lbl_803635C0 (GSEffectGlobals) is only used by fn_8013151C, which was
  * merged into game/effect/gs_effect.c (where it is already declared as
@@ -253,13 +223,14 @@ extern u32 koukaDataBiosGetStatusKind(u32 index);
 
 extern u32 koukaDataBiosGetVar(u32 index);
 
-extern s32 koukaDataBiosGetValue(u32 index, u32 subIndex);
+extern s16 koukaDataBiosGetValue(u32 index, u32 subIndex);
 
-extern u32 koukaDataBiosGetStatus(u32 index);
+extern u16 koukaDataBiosGetStatus(u32 index);
 
 extern s32 menuOpenCustom(u32, ...);
 
-extern void* _msgctrlMakeDigit__FPUslUll(void* table, u32 stride, u32 count, u32 type);
+extern u16* _msgctrlMakeDigit__FPUslUll(void* output, s32 length, u32 value,
+                                      s32 type);
 
 extern void msgctrlSetValue(u32 id, u32 value);
 
@@ -319,7 +290,7 @@ extern void gamedatasaveBiosSetPtr(void* dst, void* src);
 
 extern void gamedatasaveInit(void*);
 
-extern void _koukaOneExec__FUlPvPvPl(u32 index, void* arg1, void* arg2, s32* out);
+extern s32 _koukaOneExec__FUlPvPvPl(u32 index, void* arg1, void* arg2, s32* out);
 
 typedef s32 (*EffectUtilCountFunc)(void);
 
@@ -682,17 +653,17 @@ extern void GSmsgInitRuby(void);
 
 extern f64 lbl_8047D0E0;
 
-extern void fn_801E1810(void);
+extern void GSmovieClose(void);
 
 extern void _threadSwitch(void);
 
-extern u8 fn_801E1874(void);
+extern u8 GSmovieIsActive(void);
 
 extern s32 menuOpen(u32, u32);
 
 extern void sprintf(u8*, u8*, ...);
 
-extern void fn_801E189C(u8*, u32);
+extern void GSmovieOpen(u8*, u32);
 
 extern u8 lbl_80272AA8[];
 

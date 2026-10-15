@@ -246,7 +246,6 @@ extern void windowDrawSprite2(void* x, void* y, s16 width, s16 height,
 extern u8* windowGetCursorToItem(u8* arg);
 extern s32 windowGetValue(s32 param);
 extern s32 fn_801044D0(s32 param, u16* val);
-extern u32 windowGetCursor(s32 param);
 extern s32 windowCheckCursor(s32 id, u8 wait);
 extern u32 windowGetActiveID(void);
 extern void windowCloseMain(void* obj);
@@ -312,91 +311,8 @@ extern void menuModelRender(void);
 extern s32 menuModelCheck(void* obj, u8 wait);
 extern s32 menuModelFree(void* p);
 
-#if defined(WINDOW_RANGE_801040F0)
-/* 0x801040F0 | 0x70 */
-/* menuSpriteBiosGetPtr already declared above */
-void windowDrawSprite(void* p, void* a, void* b, u32 key, u32 data) {
-    if ((u16)key != 0) {
-        u8* sprite = menuSpriteBiosGetPtr((u16)key);
 
-        windowDrawSprite2(p, a, *(s16*)(sprite + 0x0C),
-                          *(s16*)(sprite + 0x0E), -1, (s32)b,
-                          key, data);
-    }
-}
-
-/* 0x80104160 | 0x1B8 */
-void windowDrawSprite2(void* x, void* y, s16 width, s16 height, s32 color,
-                       s32 contextValue, s32 spriteValue, s32 flags) {
-    u8 sprite[0x78];
-    u8 localContext[0xB4];
-    void* context = (void*)contextValue;
-    u8* info = menuSpriteBiosGetPtr((u16)spriteValue);
-    s16 unusedX;
-    s16 unusedY;
-    u32 type;
-
-    memset(sprite, 0, sizeof(sprite));
-    sprite[4] = 7;
-    *(u32*)(sprite + 0x64) = color;
-    *(f32*)(sprite + 0x68) = 1.0f;
-    *(f32*)(sprite + 0x6C) = 1.0f;
-    type = (info[0] >> 4) & 3;
-    if (type == 1) {
-        sprite[5] |= 1;
-        *(u32*)(sprite + 0x58) = *(u32*)(info + 0x10);
-    } else if (type == 2) {
-        sprite[5] |= 2;
-        *(u32*)(sprite + 0x08) = *(u32*)(info + 0x10);
-    }
-    *(s16*)(sprite + 0x50) = (s16)((s32)x + (s8)info[5]);
-    *(s16*)(sprite + 0x52) = (s16)((s32)y + (s8)info[6]);
-    *(s16*)(sprite + 0x54) = width;
-    *(s16*)(sprite + 0x56) = height;
-    *(s16*)(sprite + 0x5C) = *(s16*)(info + 0x08);
-    *(s16*)(sprite + 0x5E) = *(s16*)(info + 0x0A);
-    *(s16*)(sprite + 0x60) = *(s16*)(info + 0x0C);
-    *(s16*)(sprite + 0x62) = *(s16*)(info + 0x0E);
-    sprite[0x67] = (u8)((info[7] * sprite[0x67]) / 255);
-    if ((flags & 1) != 0) *(s16*)(sprite + 0x54) = -(s16)width;
-    if ((flags & 2) != 0) *(s16*)(sprite + 0x56) = -(s16)height;
-    if (context == NULL) {
-        context = localContext;
-        memset(context, 0, sizeof(localContext));
-        fn_800FE6AC(&unusedX, &unusedY);
-        *(s32*)(localContext + 0x88) = -1;
-    }
-    winSpriteDraw(context, sprite);
-}
-
-/* 0x80104318 | 0x8C */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
-u8* windowGetCursorToItem(u8* arg) {
-#pragma optimization_level 4
-#pragma peephole off
-    void* node;
-    s32 idx;
-    { extern void* menuDataBiosGetPtr(void*); node = menuDataBiosGetPtr(*(void**)(arg + 0x4)); }
-    node = menuItemBiosGetPtr(*(s16*)((u8*)node + 0x4));
-    idx = 0;
-    while (1) {
-        if (((u32)*(volatile u8*)node >> 7) & 1) {
-            if ((s8)*(s8*)(arg + 0x95) == idx) {
-                return (u8*)node;
-            }
-            idx = idx + 1;
-        }
-        if (((u32)*(volatile u8*)node >> 6) & 1) {
-            break;
-        }
-        node = menuItemBiosGetPtr(*(s16*)((u8*)node + 0x18));
-    }
-    return (u8*)0;
-}
-#pragma pop
-
+#if defined(WINDOW_RANGE_80104530)
 /* shared model-table lookup, inlined by the find-and-act helpers below */
 static inline void* mdl_find(s32 param) {
     void* r;
@@ -409,678 +325,65 @@ static inline void* mdl_find(s32 param) {
     return (void*)0;
 }
 
-/* 0x801043A4 | 0x12C */
-s32 windowGetValue(s32 param) {
-    u8* window = mdl_find(param);
-    u8* menuData;
-    u32 type;
-    s32 result;
+/* 0x80104530 | 0x78 */
+typedef struct WindowCursorValue {
+    u16 cursor;
+} WindowCursorValue;
 
-    if (window == NULL) {
-        return -1;
-    }
-    if (window[0x99] != 0) {
-        return -1;
-    }
-    menuData = menuDataBiosGetPtr(*(void**)(window + 0x04));
-    if (menuData == NULL) {
-        result = (s8)window[0x94] + (s8)window[0x95];
+/* Returns the 2-byte cursor record by value; MWCC passes it back in r3,
+ * left-justified, which is why callers see the cursor in the high half. */
+WindowCursorValue windowGetCursor(s32 param) {
+    WindowCursorValue result;
+    /* RULE-EXCEPTION(user-approved): the .sbss2 default cursor is read as the 2-byte struct through a cast of the u16 extern - see docs/RULE_EXCEPTIONS.md */
+    WindowCursorValue none = *(WindowCursorValue*)&lbl_8047E718;
+    u8* window = mdl_find(param);
+
+    if (window != NULL) {
+        result = *(WindowCursorValue*)(window + 0x94);
     } else {
-        type = (menuData[0] >> 6) & 3;
-        switch (type) {
-        case 0:
-            result = 0;
-            break;
-        case 1:
-            result = (s8)window[0x94] + (s8)window[0x95];
-            break;
-        case 2:
-            result = *(s32*)(window + 0x80);
-            break;
-        case 3:
-            result = menuGetCursorItemID(param);
-            break;
-        }
+        result = none;
     }
     return result;
 }
 
-/* 0x801044D0 | 0x60 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
-s32 fn_801044D0(s32 param, u16* val) {
-#pragma optimization_level 2
-    void* node = mdl_find(param);
-    if (node != (void*)0) {
-        *(u16*)((u8*)node + 0x94) = *val;
-        return 1;
-    }
-    return 0;
-}
-#pragma pop
-
-/* 0x80104530 | 0x78 */
-u32 windowGetCursor(s32 param) {
-    u8* window = mdl_find(param);
-    u16 cursor;
-
-    if (window != NULL) {
-        cursor = *(u16*)(window + 0x94);
-    } else {
-        cursor = lbl_8047E718;
-    }
-    return (u32)cursor << 16;
-}
-
-/* 0x801045A8 | 0x110 */
-s32 windowCheckCursor(s32 id, u8 wait) {
-    u8* window;
-
-    do {
-        window = mdl_find(id);
-        if (window == NULL) {
-            GSlogWrite((const char*)lbl_80271E40, (const char*)lbl_8035B070, id);
-            return 0;
-        }
-        if (window[0x98] != 0 || window[0x99] != 0) {
-            return 0;
-        }
-        if (wait == 0) {
-            break;
-        }
-        if (GSthreadGetCurrentThread() == 0) {
-            GSlogWrite((const char*)lbl_80271E64, (const char*)lbl_8035B070, id);
-            break;
-        }
-        _threadSwitch();
-    } while (1);
-    return 1;
-}
+/* windowCheckCursor (0x801045A8 - 0x801046B8) lives in
+ * window_exact_801045A8.c. */
 #endif
 
-#if defined(WINDOW_RANGE_8010474C_PREFIX)
-static inline void* windowSearchID_local(s32 param)
-{
-    if (param <= 0) {
-        return NULL;
-    }
-    {
-        void* r4 = *(void**)((u8*)lbl_80404ACC + 0x0C);
+/* windowCloseMain (0x8010474C) lives in window_exact_8010474C.c and
+ * windowClose (0x80104828) in window_candidate_80104828.c. */
 
-        while (r4 != NULL) {
-            s32 r0 = *(s32*)((u8*)r4 + 0x04);
+/* _windowCreateItemSprite (0x80104A94 - 0x80104CA0) lives in
+ * window_r50_80104A94_o2.c. */
 
-            if (r0 == param) {
-                return r4;
-            }
-            r4 = *(void**)((u8*)r4 + 0x10);
-        }
-        return NULL;
-    }
-}
+/* windowCreateCursorSprite, windowOpen and _winCalcWindowSize
+ * (0x80104CA0 - 0x80105410) live in window_r50_80104CA0_suffix.c. */
 
-/* 0x8010474C | 0xDC */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
-void windowCloseMain(void* obj) {
-#pragma optimization_level 4
-#pragma peephole off
-    void* h;
-    void* nx;
-    { extern void* menuDataBiosGetPtr(void*); h = menuDataBiosGetPtr(*(void**)((u8*)obj + 0x4)); }
-    if (*(u32*)((u8*)h + 0x14) != 0) {
-        *(u8*)((u8*)obj + 0x1) = 5;
-        (*(void (*)(void*))*(u32*)((u8*)h + 0x14))(obj);
-    }
-    if (obj != (void*)0) {
-        if (*(void**)((u8*)obj + 0x14) == (void*)0) {
-            *(void**)((u8*)lbl_80404ACC + 0xc) = *(void**)((u8*)obj + 0x10);
-        } else {
-            *(void**)((u8*)*(void**)((u8*)obj + 0x14) + 0x10) = *(void**)((u8*)obj + 0x10);
-        }
-        nx = *(void**)((u8*)obj + 0x10);
-        if (nx != (void*)0) {
-            *(void**)((u8*)nx + 0x14) = *(void**)((u8*)obj + 0x14);
-        }
-        { extern void winSpriteRelease(void* head); winSpriteRelease((u8*)obj + 0x1c); }
-        { extern void winSpriteRelease(void* head); winSpriteRelease((u8*)obj + 0x20); }
-        if (*(u16*)((u8*)obj + 0xac) != 0) {
-            fn_800E24B0(*(u16*)((u8*)obj + 0xac));
-            fn_800E209C(*(u16*)((u8*)obj + 0xac));
-            *(u32*)((u8*)obj + 0xb0) = 0;
-            *(u16*)((u8*)obj + 0xac) = 0;
-        }
-        *(u8*)((u8*)obj + 0x0) = 0;
-        *(u32*)((u8*)obj + 0x4) = 0;
-    }
-}
-#pragma pop
-
-/* 0x80104828 | 0x26C */
-s32 windowClose(void* ptr, u32 flags) {
-    u8* window = ptr;
-    u8* current;
-    u8* active;
-    u8 found;
-
-    if ((flags & 2) == 0) {
-        for (current = *(u8**)(lbl_80404ACC + 0x0C);
-             current != NULL; current = *(u8**)(current + 0x10)) {
-            u8* link = current;
-
-            found = 0;
-            if (current != window) {
-                do {
-                    link = *(u8**)(link + 0x0C);
-                    if (link == window) {
-                        found = 1;
-                        break;
-                    }
-                } while (link != NULL);
-            }
-            if (found && (flags & 4) != 0) {
-                u8* data = menuDataBiosGetPtr(*(void**)(current + 0x04));
-                if ((data[0] & 8) == 0) {
-                    current[0x0A] = 1;
-                }
-            }
-        }
-    }
-    if ((flags & 1) == 0 && window != NULL) {
-        if ((flags & 4) != 0) {
-            u8* data = menuDataBiosGetPtr(*(void**)(window + 0x04));
-            if ((data[0] & 8) == 0) {
-                window[0x0A] = 1;
-            }
-        }
-        if ((flags & 2) != 0) {
-            for (current = *(u8**)(lbl_80404ACC + 0x0C);
-                 current != NULL; current = *(u8**)(current + 0x10)) {
-                if (*(u8**)(current + 0x0C) == window) {
-                    *(u8**)(current + 0x0C) = *(u8**)(window + 0x0C);
-                }
-            }
-        }
-    }
-
-    active = windowSearchID_local(*(s32*)(lbl_80404ACC + 0x04));
-    found = 0;
-    for (window = active; window != NULL; window = *(u8**)(window + 0x0C)) {
-        if (window[0x0A] == 0 && window[0x18] != 0) {
-            for (current = *(u8**)(lbl_80404ACC + 0x0C);
-                 current != NULL; current = *(u8**)(current + 0x10)) {
-                u8* link;
-
-                if (current[0x0A] != 0 || current[0x18] != 0) continue;
-                link = current;
-                if (current != *(u8**)(window + 0x0C)) {
-                    do {
-                        link = *(u8**)(link + 0x0C);
-                        if (link == *(u8**)(window + 0x0C)) {
-                            *(s32*)(lbl_80404ACC + 0x04) =
-                                *(s32*)(current + 0x04);
-                            found = 1;
-                            break;
-                        }
-                    } while (link != NULL);
-                }
-            }
-            if (found) break;
-        } else if (window[0x0A] == 0) {
-            *(s32*)(lbl_80404ACC + 0x04) = *(s32*)(window + 0x04);
-            break;
-        }
-    }
-    if (window == NULL) {
-        *(s32*)(lbl_80404ACC + 0x04) = 0;
-    }
-    return 0;
-}
-#endif
-
-#if defined(WINDOW_RANGE_80104A94_O2)
-/* 0x80104A94 | 0x20C */
-s32 _windowCreateItemSprite__FP14tagWINDOW_WORK(u8* window) {
-    u8* menuData = menuDataBiosGetPtr(*(void**)(window + 0x04));
-    s16 itemId = *(s16*)(menuData + 0x04);
-    u8* item = menuItemBiosGetPtr(itemId);
-    s16 width;
-    s16 height;
-
-    winSpriteRelease(window + 0x1C);
-    _winCalcWindowSize__FlPC13MENU_ITEM_dd_PsPs(item, &width, &height);
-    for (;;) {
-        u8* sprite;
-        u8* spriteData;
-        u32 type;
-        u16 sequence;
-
-        item = menuItemBiosGetPtr(itemId);
-        sprite = winSpriteAdd(window + 0x1C);
-        if (sprite == NULL) {
-            winSpriteRelease(window + 0x1C);
-            return 1;
-        }
-        *(s16*)(sprite + 0x06) = itemId;
-        *(s16*)(sprite + 0x50) = *(s16*)(item + 0x02);
-        *(s16*)(sprite + 0x52) = *(s16*)(item + 0x04);
-        *(s16*)(sprite + 0x54) = *(s16*)(item + 0x06);
-        *(s16*)(sprite + 0x56) = *(s16*)(item + 0x08);
-        sprite[0x67] = item[0x01];
-        sprite[0x74] = (item[0] >> 4) & 3;
-
-        if (*(s16*)(item + 0x0A) != 0) {
-            spriteData = menuSpriteBiosGetPtr(*(s16*)(item + 0x0A));
-            type = (spriteData[0] >> 4) & 3;
-            if (type == 1) {
-                sprite[5] |= 1;
-                *(u32*)(sprite + 0x58) = *(u32*)(spriteData + 0x10);
-            } else if (type == 2) {
-                sprite[5] |= 2;
-                *(u32*)(sprite + 0x08) = *(u32*)(spriteData + 0x10);
-            }
-            *(s16*)(sprite + 0x5C) = *(s16*)(spriteData + 0x08);
-            *(s16*)(sprite + 0x5E) = *(s16*)(spriteData + 0x0A);
-            *(s16*)(sprite + 0x60) = *(s16*)(spriteData + 0x0C);
-            *(s16*)(sprite + 0x62) = *(s16*)(spriteData + 0x0E);
-            sprite[0x67] = (u8)(((u32)sprite[0x67] * spriteData[7]) / 255);
-            if ((spriteData[0] & 0x40) != 0) {
-                *(s16*)(sprite + 0x54) = width;
-                *(s16*)(sprite + 0x56) = height;
-            }
-            sequence = *(u16*)spriteData & 0x0FFF;
-            if (sequence != 0) {
-                winSetSequence(sprite + 0x0C, sequence);
-            }
-        }
-        *(u32*)(sprite + 0x4C) = *(u32*)(item + 0x10);
-        if (*(u32*)(item + 0x14) != 0) {
-            sprite[5] |= 8;
-            *(u32*)(sprite + 0x48) = *(u32*)(item + 0x14);
-        }
-        if ((item[0] & 0x40) != 0) break;
-        itemId = *(s16*)(item + 0x18);
-    }
-    return 0;
-}
-#endif
-
-#if defined(WINDOW_RANGE_80104CA0_SUFFIX)
-/* 0x80104CA0 | 0x1E0 */
-void windowCreateCursorSprite(u8* window) {
-    u8* menuData = menuDataBiosGetPtr(*(void**)(window + 0x04));
-    u8* item = menuItemBiosGetPtr(
-        *(s16*)((u8*)menuDataBiosGetPtr(*(void**)(window + 0x04)) + 0x04));
-    u8* selected = NULL;
-    s32 index = 0;
-    s32 spriteId;
-
-    while (item != NULL) {
-        if ((item[0] & 0x80) != 0) {
-            if ((s8)window[0x95] == index) {
-                selected = item;
-                break;
-            }
-            index++;
-        }
-        if ((item[0] & 0x40) != 0) break;
-        item = menuItemBiosGetPtr(*(s16*)(item + 0x18));
-    }
-    if (selected == NULL) return;
-
-    winSpriteRelease(window + 0x20);
-    spriteId = *(s16*)(selected + 0x0C);
-    if (spriteId == 0) return;
-    for (item = menuSpriteBiosGetPtr(spriteId);
-         item != NULL;) {
-        u8* sprite = winSpriteAdd(window + 0x20);
-        u32 type;
-        u16 sequence;
-
-        if (sprite == NULL) {
-            winSpriteRelease(window + 0x20);
-            return;
-        }
-        type = (item[0] >> 4) & 3;
-        if (type == 1) {
-            sprite[5] |= 1;
-            *(u32*)(sprite + 0x58) = *(u32*)(item + 0x10);
-        } else if (type == 2) {
-            sprite[5] |= 2;
-            *(u32*)(sprite + 0x08) = *(u32*)(item + 0x10);
-        }
-        *(s16*)(sprite + 0x06) = *(s16*)(menuData + 0x04);
-        *(s16*)(sprite + 0x50) = *(s16*)(selected + 0x02) + (s8)item[5];
-        *(s16*)(sprite + 0x52) = *(s16*)(selected + 0x04) + (s8)item[6];
-        *(s16*)(sprite + 0x54) = *(s16*)(item + 0x0C);
-        *(s16*)(sprite + 0x56) = *(s16*)(item + 0x0E);
-        *(s16*)(sprite + 0x5C) = *(s16*)(item + 0x08);
-        *(s16*)(sprite + 0x5E) = *(s16*)(item + 0x0A);
-        *(s16*)(sprite + 0x60) = *(s16*)(item + 0x0C);
-        *(s16*)(sprite + 0x62) = *(s16*)(item + 0x0E);
-        sprite[0x67] = item[7];
-        sequence = *(u16*)item & 0x0FFF;
-        if (sequence != 0) {
-            winSetSequence(sprite + 0x0C, sequence);
-        }
-        if ((item[0] & 0x80) != 0) break;
-        item = menuSpriteBiosGetPtr(*(s16*)(item + 0x14));
-    }
-}
-
-/* 0x80104E80 | 0x474 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
-void* windowOpen(cursor_out, menu_id, parent_id, close_flags, open_param, args)
-s32* cursor_out;
-void* menu_id;
-u32 parent_id;
-s32 close_flags;
-s32 open_param;
-WindowVaList* args;
-{
-    extern void* __va_arg(void* ap, u32 type);
-    extern f32 lbl_8047CDEC;
-    extern u8 lbl_80271E94[];
-    u8* menuData;
-    u8* rootWindow;
-    u8* window;
-    u8* item;
-    u8 priority;
-    u16 count;
-    s32 maxArgs;
-
-    if ((s32)parent_id > 0) {
-        window = *(u8**)(lbl_80404ACC + 0x0C);
-        while (window != NULL) {
-            if (*(s32*)(window + 0x04) == (s32)parent_id) {
-                break;
-            }
-            window = *(u8**)(window + 0x10);
-        }
-    }
-
-    menuData = menuDataBiosGetPtr(menu_id);
-
-    if ((s32)menu_id > 0) {
-        window = *(u8**)(lbl_80404ACC + 0x0C);
-        while (window != NULL) {
-            if (*(s32*)(window + 0x04) == (s32)menu_id) {
-                break;
-            }
-            window = *(u8**)(window + 0x10);
-        }
-    } else {
-        window = NULL;
-    }
-
-    if (window == NULL) {
-        if ((((u8)menuData[0] >> 4) & 1) != 0 || (close_flags & 2) != 0) {
-            priority = 0x64;
-        } else {
-            if (parent_id == 0) {
-                parent_id = *(u32*)(lbl_80404ACC + 0x04);
-            }
-
-            if ((s32)parent_id > 0) {
-                rootWindow = *(u8**)(lbl_80404ACC + 0x0C);
-                while (rootWindow != NULL) {
-                    if (*(s32*)(rootWindow + 0x04) == (s32)parent_id) {
-                        break;
-                    }
-                    rootWindow = *(u8**)(rootWindow + 0x10);
-                }
-            } else {
-                rootWindow = NULL;
-            }
-
-            if (rootWindow != NULL) {
-                priority = (u8)(rootWindow[0x09] + 1);
-            } else {
-                priority = 0;
-            }
-            if ((s8)priority > 0x64) {
-                priority = 0x64;
-            }
-        }
-
-        window = *(u8**)(lbl_80404ACC + 0x08);
-        count = *(u16*)(lbl_80404ACC + 0x00);
-        while (count > 0) {
-            if ((s8)window[0x00] == 0) {
-                memset(window, 0, 0xB4);
-                window[0x00] = 7;
-                *(f32*)(window + 0x8C) = lbl_8047CDEC;
-                *(f32*)(window + 0x90) = lbl_8047CDEC;
-                *(s32*)(window + 0x88) = -1;
-                break;
-            }
-            window += 0xB4;
-            count--;
-        }
-        if (count == 0) {
-            GSlogWrite((const char*)lbl_80271E94);
-            window = NULL;
-        }
-        if (window == NULL) {
-            return NULL;
-        }
-
-        window[0x01] = 0;
-        *(s32*)(window + 0x04) = (s32)menu_id;
-        window[0x09] = priority;
-        window[0x1A] = (((u8)menuData[1] >> 5) & 7);
-
-        if ((s32)parent_id > 0) {
-            rootWindow = *(u8**)(lbl_80404ACC + 0x0C);
-            while (rootWindow != NULL) {
-                if (*(s32*)(rootWindow + 0x04) == (s32)parent_id) {
-                    break;
-                }
-                rootWindow = *(u8**)(rootWindow + 0x10);
-            }
-        } else {
-            rootWindow = NULL;
-        }
-        *(u8**)(window + 0x0C) = rootWindow;
-        *(s16*)(window + 0x84) = *(s16*)(menuData + 0x06);
-        *(s16*)(window + 0x86) = *(s16*)(menuData + 0x08);
-
-        item = menuItemBiosGetPtr(*(s16*)(menuData + 0x04));
-        while ((((u8)item[0] >> 7) & 1) != 0) {
-            window[0x19] = (u8)(window[0x19] + 1);
-            if ((((u8)item[0] >> 6) & 1) != 0) {
-                break;
-            }
-            item = menuItemBiosGetPtr(*(s16*)(item + 0x18));
-        }
-
-        _windowCreateItemSprite__FP14tagWINDOW_WORK(window);
-
-        rootWindow = *(u8**)(lbl_80404ACC + 0x0C);
-        if (rootWindow == NULL) {
-            *(u8**)(lbl_80404ACC + 0x0C) = window;
-        } else {
-            while (TRUE) {
-                if ((s8)rootWindow[0x09] > (s8)priority) {
-                    *(u8**)(window + 0x14) = *(u8**)(rootWindow + 0x14);
-                    *(u8**)(window + 0x10) = rootWindow;
-                    item = *(u8**)(rootWindow + 0x14);
-                    if (item == NULL) {
-                        *(u8**)(lbl_80404ACC + 0x0C) = window;
-                    } else {
-                        *(u8**)(item + 0x10) = window;
-                    }
-                    *(u8**)(rootWindow + 0x14) = window;
-                    break;
-                }
-
-                item = *(u8**)(rootWindow + 0x10);
-                if (item == NULL) {
-                    *(u8**)(rootWindow + 0x10) = window;
-                    *(u8**)(window + 0x14) = rootWindow;
-                    *(u8**)(window + 0x10) = NULL;
-                    break;
-                }
-                rootWindow = item;
-            }
-        }
-
-        ((void (*)(s32, s32))menuPlaySe)((s32)menu_id, 4);
-    } else {
-        window[0x98] = 0;
-        window[0x99] = 0;
-        window[0x01] = 0;
-        window[0x02] = 1;
-    }
-
-    if (cursor_out == NULL) {
-        if (menuData[3] != 0) {
-            *(s16*)(window + 0x94) = (u16)(cursorBiosGetPos((u16)menuData[3]) >> 16);
-        }
-    } else {
-        window[0x94] = 0;
-        window[0x95] = (s8)(*cursor_out);
-    }
-
-    windowCreateCursorSprite(window);
-    window[0x0B] = menuGetEnablePort();
-    window[0x1B] = (u8)close_flags;
-
-    maxArgs = open_param;
-    if (open_param > 8) {
-        open_param = 8;
-    }
-    item = window;
-    for (maxArgs = 0; maxArgs < open_param; maxArgs++) {
-        *(u32*)(item + 0x60) = *(u32*)__va_arg(args, 1);
-        item += 4;
-    }
-
-    if ((((u8)menuData[1] >> 2) & 7) == 0) {
-        window[0x98] = 1;
-    } else if ((close_flags & 4) == 0) {
-        *(u32*)(lbl_80404ACC + 0x04) = (u32)menu_id;
-    }
-
-    if (*(u32*)(lbl_80404ACC + 0x04) != (u32)menu_id) {
-        window[0x18] = 1;
-    }
-
-    if (*(u32*)(menuData + 0x14) != 0) {
-        ((void (*)(u8*))(*(u32*)(menuData + 0x14)))(window);
-    }
-
-    if ((s8)window[0x02] != 0) {
-        window[0x0A] = 0;
-        window[0x01] = 2;
-        window[0x02] = 0;
-    }
-
-    return window;
-}
-#pragma pop
-
-/* 0x801052F4 | 0x11C */
-void _winCalcWindowSize__FlPC13MENU_ITEM_dd_PsPs(u8* item, s16* width, s16* height) {
-    s32 minX = 0x280;
-    s32 minY = 0x1E0;
-    s32 maxX = 0;
-    s32 maxY = 0;
-
-    *width = 0;
-    *height = 0;
-    for (;;) {
-        u32 rect;
-        s16 textWidth;
-        s16 textHeight;
-        s16 x = *(s16*)(item + 0x02);
-        s16 y = *(s16*)(item + 0x04);
-
-        menuSpriteBiosGetPtr(*(s16*)(item + 0x0A));
-        rect = *(void**)(item + 0x10) != NULL
-            ? GSmsgGetRect(*(void**)(item + 0x10)) : 0;
-        textWidth = (s16)(rect >> 16);
-        textHeight = (s16)rect;
-        if (x < minX) minX = x;
-        if (x + *(s16*)(item + 0x06) > maxX) maxX = x + *(s16*)(item + 0x06);
-        if (x + textWidth > maxX) maxX = x + textWidth;
-        if (y < minY) minY = y;
-        if (y + *(s16*)(item + 0x08) > maxY) maxY = y + *(s16*)(item + 0x08);
-        if (y + textHeight > maxY) maxY = y + textHeight;
-        if ((item[0] & 0x40) != 0) break;
-        item = menuItemBiosGetPtr(*(s16*)(item + 0x18));
-    }
-    *width = (s16)(maxX - minX);
-    *height = (s16)(maxY - minY);
-}
-
-/* 0x80105410 | 0xA8 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
-void windowInit(u16 count) {
-#pragma optimization_level 4
-#pragma peephole off
-    extern u8 lbl_80271EC4[];
-    extern void winSpriteInit(void);
-    u32 size;
-    u16 handle;
-    void* ptr;
-
-    memset(lbl_80404ACC, 0, 0x9c);
-    size = (u16)count * 0xb4;
-    handle = _toolentryAlloc__FUl(size);
-    GS_MODEL_STATE->entryHandle = handle;
-    if ((u16)handle == 0) {
-        GSlogWrite((const char*)lbl_80271EC4);
-    } else {
-        ptr = fn_800E27B0((u16)handle);
-        GS_MODEL_STATE->entries = ptr;
-        GS_MODEL_STATE->count = count;
-        memset(ptr, 0, size);
-        winSpriteInit();
-    }
-}
-#pragma pop
-
-/* 0x801054B8 | 0x16C */
-void* windowGetPortKeyInfo(u8 ports) {
-    u8 masks[4];
-    u16* output = (u16*)lbl_80404AB0;
-    u8* state = lbl_80404ACC;
-    u32 i;
-
-    *(u32*)masks = lbl_8047CDE8;
-    memset(output, 0, 0x1A);
-    for (i = 0; i < 4; i++) {
-        u16* keys = (u16*)(state + 0x2A);
-
-        if ((ports & masks[i]) != 0) {
-            output[0] |= keys[0];
-            output[1] |= keys[1];
-            output[2] |= keys[2];
-            output[3] |= keys[3];
-            output[4] |= keys[4];
-        }
-        state += 0x1A;
-    }
-    return output;
-}
-#endif
 
 #if defined(WINDOW_RANGE_80105634)
-/* 0x80105634 | 0x298 */
+/* 0x80105634 | 0x298
+ *
+ * The two pool colours are read before the alpha and the sprite id are
+ * computed: that is the order retail colours the scratch registers in
+ * (colours in r8/r6, the id in r3, the alpha's operands in r6/r5). With the
+ * alpha first, every register in the entry block shifts by one.
+ *
+ * Instruction-exact. The unit stays a candidate because the relocations that
+ * remain point at data this carve cannot own: the window TU's shared .sdata2
+ * literal pool (0x8047CDE0-0x8047CE20, which also holds the int-to-float bias
+ * doubles MWCC emits for the conversions here) and the switch's jump table
+ * (jumptable_8035B088). They belong to the whole window TU
+ * (0x80103FE4-0x801058CC), which is carved across some twenty files.
+ */
 s32 fn_80105634(u8* window, u8* sprite) {
     u32 colors[2];
-    f32 alpha = (f32)((window[0x8B] * sprite[0x67]) / 65025);
-    s16 id = *(s16*)(sprite + 0x06);
+    f32 alpha;
+    s16 id;
 
     colors[0] = lbl_8047CDF0;
     colors[1] = lbl_8047CDF4;
+    alpha = (f32)((window[0x8B] * sprite[0x67]) / 65025);
+    id = *(s16*)(sprite + 0x06);
     switch (id) {
     case 0x68:
     case 0x75:
@@ -1114,7 +417,10 @@ s32 fn_80105634(u8* window, u8* sprite) {
         fn_800D5648(lbl_8047CDF8);
         gfxSetPrimitive(1);
         gfxSetVtxDesc((s32)lbl_80314E08);
-        colors[0] = 0xFFFFFF00 | (u8)(lbl_8047CDFC * alpha);
+        ((u8*)colors)[0] = 0xFF;
+        ((u8*)colors)[1] = 0xFF;
+        ((u8*)colors)[2] = 0xFF;
+        ((u8*)colors)[3] = (u8)(lbl_8047CDFC * alpha);
         for (y = 0; y < *(s16*)(sprite + 0x56); y += 4) {
             gfxBegin(2);
             fn_800D61E4(0, y);
@@ -1130,9 +436,17 @@ s32 fn_80105634(u8* window, u8* sprite) {
     case 0x6A:
     case 0x76:
     case 0x77:
+    {
+        /* The period is read into its own local, as retail does: its load is
+         * scheduled ahead of the addition, not with the call's arguments. The
+         * field is written and read back rather than kept in a register, so
+         * the rotation is rounded to f32 before fmod sees it. */
+        f64 period = lbl_8047CE08;
+
+        *(f32*)(sprite + 0x70) += lbl_8047CE00;
         *(f32*)(sprite + 0x70) =
-            (f32)fmod(*(f32*)(sprite + 0x70) + lbl_8047CE00,
-                      lbl_8047CE08);
+            (f32)fmod(*(f32*)(sprite + 0x70), period);
+    }
         break;
     }
     return 0;

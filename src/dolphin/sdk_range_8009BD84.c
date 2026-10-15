@@ -18,345 +18,11 @@
 
 #define OS_FPUCONTEXT (*(OSContext* volatile*)0x800000D8)
 
-#if !defined(SDK_8009BD84_BANK_ACTIVE) || \
-    defined(SDK_CANDIDATE_8009BD84_8009C2E0)
-void OSInitContext(OSContext* context, u32 pc, u32 newsp) {
-    extern u8 _SDA_BASE_[];
-    extern u8 _SDA2_BASE_[];
+/* OSContext.c (0x8009B914 - 0x8009C2E0) links as its own file:
+ * src/dolphin/os/OSContext.c. */
 
-    context->srr0 = pc;
-    context->gpr[1] = newsp;
-    context->srr1 = 0x9032;
-    context->cr = 0;
-    context->xer = 0;
-    context->gpr[2] = (u32)_SDA2_BASE_;
-    context->gpr[13] = (u32)_SDA_BASE_;
-    context->gpr[3] = 0;
-    context->gpr[4] = 0;
-    context->gpr[5] = 0;
-    context->gpr[6] = 0;
-    context->gpr[7] = 0;
-    context->gpr[8] = 0;
-    context->gpr[9] = 0;
-    context->gpr[10] = 0;
-    context->gpr[11] = 0;
-    context->gpr[12] = 0;
-    context->gpr[14] = 0;
-    context->gpr[15] = 0;
-    context->gpr[16] = 0;
-    context->gpr[17] = 0;
-    context->gpr[18] = 0;
-    context->gpr[19] = 0;
-    context->gpr[20] = 0;
-    context->gpr[21] = 0;
-    context->gpr[22] = 0;
-    context->gpr[23] = 0;
-    context->gpr[24] = 0;
-    context->gpr[25] = 0;
-    context->gpr[26] = 0;
-    context->gpr[27] = 0;
-    context->gpr[28] = 0;
-    context->gpr[29] = 0;
-    context->gpr[30] = 0;
-    context->gpr[31] = 0;
-    context->gqr[0] = 0;
-    context->gqr[1] = 0;
-    context->gqr[2] = 0;
-    context->gqr[3] = 0;
-    context->gqr[4] = 0;
-    context->gqr[5] = 0;
-    context->gqr[6] = 0;
-    context->gqr[7] = 0;
-    OSClearContext(context);
-}
-
-#define OS_CURRENTCONTEXT (*(OSContext**)0x800000D4)
-
-/*
- * Retail's OSClearContext lives at 0x8009BD60, in the split just ahead of
- * this one but in the same TU, so it inlines into OSDumpContext below.
- */
-static void ClearContext(OSContext* context) {
-    context->mode = 0;
-    context->state = 0;
-    if (OS_FPUCONTEXT == context) {
-        OS_FPUCONTEXT = NULL;
-    }
-}
-
-void OSDumpContext(OSContext* context) {
-    extern void OSReport(const char* format, ...);
-    extern void OSSetCurrentContext(OSContext* context);
-    extern BOOL OSDisableInterrupts(void);
-    extern BOOL OSRestoreInterrupts(BOOL level);
-    extern u8 lbl_803107E0[];
-    u32 i;
-    u32* p;
-
-    OSReport((const char*)&lbl_803107E0[0x0], context);
-
-    for (i = 0; i < 16; ++i) {
-        OSReport((const char*)&lbl_803107E0[0x44], i, context->gpr[i],
-                 context->gpr[i], i + 16, context->gpr[i + 16],
-                 context->gpr[i + 16]);
-    }
-
-    OSReport((const char*)&lbl_803107E0[0x74], context->lr, context->cr);
-    OSReport((const char*)&lbl_803107E0[0xA4], context->srr0, context->srr1);
-
-    OSReport((const char*)&lbl_803107E0[0xD4]);
-    for (i = 0; i < 4; ++i) {
-        OSReport((const char*)&lbl_803107E0[0xE8], i, context->gqr[i], i + 4,
-                 context->gqr[i + 4]);
-    }
-
-    if (context->state & OS_CONTEXT_STATE_FPSAVED) {
-        OSContext* currentContext;
-        OSContext fpuContext;
-        BOOL enabled;
-
-        enabled = OSDisableInterrupts();
-        currentContext = OS_CURRENTCONTEXT;
-        ClearContext(&fpuContext);
-        OSSetCurrentContext(&fpuContext);
-
-        OSReport((const char*)&lbl_803107E0[0x10C]);
-        for (i = 0; i < 32; i += 2) {
-            OSReport((const char*)&lbl_803107E0[0x120], i, (u32)context->fpr[i],
-                     i + 1, (u32)context->fpr[i + 1]);
-        }
-        OSReport((const char*)&lbl_803107E0[0x13C]);
-        for (i = 0; i < 32; i += 2) {
-            OSReport((const char*)&lbl_803107E0[0x150], i, (u32)context->psf[i],
-                     i + 1, (u32)context->psf[i + 1]);
-        }
-
-        ClearContext(&fpuContext);
-        OSSetCurrentContext(currentContext);
-        OSRestoreInterrupts(enabled);
-    }
-
-    OSReport((const char*)&lbl_803107E0[0x170]);
-    for (i = 0, p = (u32*)context->gpr[1];
-         p && (u32)p != 0xFFFFFFFF && i++ < 16; p = (u32*)*p) {
-        OSReport((const char*)&lbl_803107E0[0x198], p, p[0], p[1]);
-    }
-}
-
-#pragma scheduling off
-void OSSwitchFPUContext(u8 exception, OSContext* context) {
-    OSContext** fpuContext = (OSContext**)0x800000D8;
-    OSContext* previous = *fpuContext;
-
-    context->srr1 |= 0x2000;
-    *fpuContext = context;
-    if ((s32)previous != (s32)context) {
-        if (previous != 0) {
-            __OSSaveFPUContext(exception, 0, previous);
-        }
-        __OSLoadFPUContext(exception, context);
-    }
-    context->state &= ~OS_CONTEXT_STATE_EXC;
-}
-#pragma scheduling reset
-#pragma peephole off
-void __OSContextInit(void) {
-    __OSSetExceptionHandler(OS_EXCEPTION_FLOATING_POINT,
-                            (__OSExceptionHandler)OSSwitchFPUContext);
-    OS_FPUCONTEXT = NULL;
-    DBPrintf("FPU-unavailable handler installed\n");
-}
-#pragma peephole reset
-#endif
-
-/* FPSCR bits left standing when an FP exception is cleared. */
-#define FPSCR_KEEP 0x6005F8FF
-/* FPSCR VE|OE|UE|ZE|XE, and MSR FE0|FE1. */
-#define FPSCR_ENABLE 0xF8
-#define MSR_FE 0x900
-
-#if !defined(SDK_8009BD84_BANK_ACTIVE) || \
-    defined(SDK_EXACT_8009C2E0_8009C578)
-void OSReport(const char* format, ...) {
-    typedef struct {
-        u8 gpr;
-        u8 fpr;
-        u16 reserved;
-        u32* overflow_arg_area;
-        u32* reg_save_area;
-    } VaList[1];
-    extern s32 vprintf(const char* format, VaList args);
-    VaList args;
-
-    __builtin_va_info(&args);
-    vprintf(format, args);
-}
-
-OSErrorHandler OSSetErrorHandler(u16 error, OSErrorHandler handler) {
-    extern OSErrorHandler __OSErrorTable[17];
-    extern u32 lbl_80478990; /* OSDefaultFPSCR */
-    extern BOOL OSDisableInterrupts(void);
-    extern BOOL OSRestoreInterrupts(BOOL level);
-    extern u32 PPCMfmsr(void);
-    extern void PPCMtmsr(u32 msr);
-    extern u32 PPCMffpscr(void);
-    extern void PPCMtfpscr(u32 fpscr);
-    OSErrorHandler oldHandler;
-    OSThread* thread;
-    BOOL enabled;
-    u32 msr;
-    u32 fpscr;
-    u32 i;
-
-    enabled = OSDisableInterrupts();
-    oldHandler = __OSErrorTable[error];
-    __OSErrorTable[error] = handler;
-
-    if (error == 16) {
-        msr = PPCMfmsr();
-        PPCMtmsr(msr | 0x2000);
-        fpscr = PPCMffpscr();
-
-        if (handler != 0) {
-            for (thread = *(OSThread**)0x800000DC; thread != NULL;
-                 thread = thread->linkActive.next) {
-                thread->context.srr1 |= MSR_FE;
-                if (!(thread->context.state & OS_CONTEXT_STATE_FPSAVED)) {
-                    thread->context.state |= OS_CONTEXT_STATE_FPSAVED;
-                    for (i = 0; i < 32; i++) {
-                        *(u64*)&thread->context.fpr[i] = -1;
-                        *(u64*)&thread->context.psf[i] = -1;
-                    }
-                    thread->context.fpscr = 4;
-                }
-                thread->context.fpscr |= (lbl_80478990 & FPSCR_ENABLE);
-                thread->context.fpscr &= FPSCR_KEEP;
-            }
-            msr |= MSR_FE;
-            fpscr |= (lbl_80478990 & FPSCR_ENABLE);
-        } else {
-            for (thread = *(OSThread**)0x800000DC; thread != NULL;
-                 thread = thread->linkActive.next) {
-                thread->context.srr1 &= ~MSR_FE;
-                thread->context.fpscr &= ~FPSCR_ENABLE;
-                thread->context.fpscr &= FPSCR_KEEP;
-            }
-            fpscr &= ~FPSCR_ENABLE;
-            msr &= ~MSR_FE;
-        }
-
-        fpscr &= FPSCR_KEEP;
-        PPCMtfpscr(fpscr);
-        PPCMtmsr(msr);
-    }
-
-    OSRestoreInterrupts(enabled);
-    return oldHandler;
-}
-#endif
-
-#if !defined(SDK_8009BD84_BANK_ACTIVE) || \
-    defined(SDK_CANDIDATE_8009C578_8009C860)
-void __OSUnhandledException(u8 exception, OSContext* context, u32 dsisr,
-                            u32 dar) {
-    extern OSErrorHandler __OSErrorTable[17];
-    extern u8 lbl_803109B8[];
-    extern char lbl_80478994[];
-    extern s16 __OSLastInterrupt;
-    extern u32 __OSLastInterruptSrr0;
-    extern s64 __OSLastInterruptTime;
-    extern void OSReport(const char* format, ...);
-    extern s64 OSGetTime(void);
-    extern void OSDisableScheduler(void);
-    extern void OSEnableScheduler(void);
-    extern void __OSReschedule(void);
-    extern void OSLoadContext(OSContext* context);
-    extern void OSSaveFPUContext(OSContext* context);
-    extern u32 PPCMfmsr(void);
-    extern void PPCMtmsr(u32 msr);
-    extern u32 PPCMffpscr(void);
-    extern void PPCMtfpscr(u32 fpscr);
-    extern void PPCHalt(void);
-    s64 now = OSGetTime();
-    u32 msr;
-
-    if (!(context->srr1 & 0x2)) {
-        OSReport((const char*)&lbl_803109B8[0x5C], exception);
-    } else {
-        if (exception == 6 && (context->srr1 & 0x00100000) &&
-            __OSErrorTable[16]) {
-            exception = 16;
-            msr = PPCMfmsr();
-            PPCMtmsr(msr | 0x2000);
-            if (OS_FPUCONTEXT != NULL) {
-                OSSaveFPUContext(OS_FPUCONTEXT);
-            }
-            PPCMtfpscr(PPCMffpscr() & FPSCR_KEEP);
-            PPCMtmsr(msr);
-            if (OS_FPUCONTEXT == context) {
-                OSDisableScheduler();
-                __OSErrorTable[16](16, context, dsisr, dar);
-                context->srr1 &= ~0x2000;
-                OS_FPUCONTEXT = NULL;
-                context->fpscr &= FPSCR_KEEP;
-                OSEnableScheduler();
-                __OSReschedule();
-            } else {
-                context->srr1 &= ~0x2000;
-                OS_FPUCONTEXT = NULL;
-            }
-            OSLoadContext(context);
-        }
-
-        if (__OSErrorTable[exception]) {
-            OSDisableScheduler();
-            __OSErrorTable[exception](exception, context, dsisr, dar);
-            OSEnableScheduler();
-            __OSReschedule();
-            OSLoadContext(context);
-        }
-
-        if (exception == 8) {
-            OSLoadContext(context);
-        }
-
-        OSReport((const char*)&lbl_803109B8[0x7C], exception);
-    }
-
-    OSReport(lbl_80478994);
-    OSDumpContext(context);
-    OSReport((const char*)&lbl_803109B8[0x94], dsisr, dar);
-    OSReport((const char*)&lbl_803109B8[0xC8], now);
-
-    switch (exception) {
-    case 2:
-        OSReport((const char*)&lbl_803109B8[0xD8], context->srr0, dar);
-        break;
-    case 3:
-        OSReport((const char*)&lbl_803109B8[0x138], context->srr0);
-        break;
-    case 5:
-        OSReport((const char*)&lbl_803109B8[0x184], context->srr0, dar);
-        break;
-    case 6:
-        OSReport((const char*)&lbl_803109B8[0x1E8], context->srr0, dar);
-        break;
-    case 15:
-        OSReport(lbl_80478994);
-        OSReport((const char*)&lbl_803109B8[0x248],
-                 *(volatile u16*)0xCC005030, *(volatile u16*)0xCC005032);
-        OSReport((const char*)&lbl_803109B8[0x268],
-                 *(volatile u16*)0xCC005020, *(volatile u16*)0xCC005022);
-        OSReport((const char*)&lbl_803109B8[0x288],
-                 *(volatile u32*)0xCC006014);
-        break;
-    }
-
-    OSReport((const char*)&lbl_803109B8[0x2A4], __OSLastInterrupt,
-             __OSLastInterruptSrr0, __OSLastInterruptTime);
-    PPCHalt();
-}
-#endif
+/* OSError.c (OSReport .. __OSUnhandledException, 0x8009C2E0 - 0x8009C860)
+ * links as its own file: src/dolphin/os/OSError.c. */
 
 typedef struct OSFontHeader {
     u16 fontType;
@@ -533,6 +199,17 @@ static GXColor RGB2YUV(GXColor rgb) {
 }
 #endif
 
+/*
+ * The bus clock as the SDK declares it for MWCC: an address-bound variable
+ * (TeamOrre/xd-decomp 4989794e include/dolphin/os.h, `u32 __OSBusClock
+ * AT_ADDRESS(OS_BASE_CACHED | 0x00F8)`), not SI.h's pointer macro. OSFatal's
+ * one-second timeout is written in the loop condition as in XD's matching
+ * OSFatal.c (src/dolphin/os/OSFatal.c there); MWCC hoists the address-bound
+ * read out of the loop, which the pointer macro does not allow, and the
+ * hoisted timeout then takes retail's registers (r25/r26, after t).
+ */
+extern u32 __OSBusClock : 0x800000F8;
+
 /**
  * OSFatal. Halts the machine, then hands off to fn_8009CE8C (Halt) on a fresh
  * fiber stack at the top of the arena to draw the message to the screen.
@@ -558,7 +235,6 @@ void fn_8009CD38(GXColor fg, GXColor bg, const char* msg) {
     OSFatalParam* fp = (OSFatalParam*)lbl_803FB538;
     OSBootInfo* bootInfo = (OSBootInfo*)0x80000000;
     u32 count;
-    u32 timeout;
     OSTime t;
 
     OSDisableInterrupts();
@@ -578,8 +254,8 @@ void fn_8009CD38(GXColor fg, GXColor bg, const char* msg) {
     } while ((s32)(fn_800AA280() - count) < 1);
 
     t = OSGetTime();
-    timeout = OSMillisecondsToTicks(1000);
-    while (!fn_8009FEBC(FALSE) && OSGetTime() - t < timeout) {
+    while (!fn_8009FEBC(FALSE) &&
+           OSGetTime() - t < 1000 * (__OSBusClock / 4 / 1000)) {
     }
 
     OSDisableInterrupts();

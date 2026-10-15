@@ -4,9 +4,11 @@
 Rules:
 - Any added `#include "*.inc"` in src/ fails (raw-asm shim).
 - Any new or changed asm block fails unless its enclosing function fits one of
-  two authentic SDK classes:
-  - hardware-register/privileged primitives (PPCMfmsr etc.); or
-  - the explicitly named Dolphin SDK paired-single math routines.
+  three authentic classes:
+  - hardware-register/privileged primitives (PPCMfmsr etc.);
+  - the explicitly named Dolphin SDK paired-single math routines; or
+  - authentic hand-written library assembly, registered per function in
+    docs/asm_evidence/registry.json with documented evidence (see below).
 
 MWCC cannot emit the required privileged or paired-single instructions from C.
 The paired-single exception is restricted to one source unit, known SDK
@@ -14,9 +16,11 @@ symbols, and the target's verified mnemonic set. Calls and general GPR memory
 access remain forbidden, so game logic cannot hide behind the exception.
 """
 
+import json
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 
 HARDWARE_ALLOWED = {
@@ -81,13 +85,128 @@ DOLPHIN_PAIRED_SINGLE_ALLOWED = {
     "stfd", "stfs", "stwu",
 }
 
+# Authentic hand-written library assembly (user decision, 2026-09-28): functions
+# the original developers wrote in assembly (e.g. MusyX's reverb DSP routines)
+# cannot be expressed in C, so a unit that contains one can only link with its
+# asm body in the source. Each such function must be registered individually
+# in docs/asm_evidence/registry.json with its exact mnemonic set and an evidence
+# document; nothing is assumed. The evidence document must, under a
+# "## <function>" heading, give all three of:
+#   - "Why it cannot be C:" instructions or conventions MWCC never emits;
+#   - "Other decompilations:" at least one other project that also keeps it as
+#     assembly, as a GitHub URL with a commit hash;
+#   - "Origin:" where the routine comes from (library, vendor, version).
+# The source must name the evidence document within 40 lines above the asm
+# function. Missing or incomplete evidence fails the scan.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+AUTHENTIC_ASM_REGISTRY = REPO_ROOT / "docs" / "asm_evidence" / "registry.json"
+EVIDENCE_FIELDS = ("Why it cannot be C:", "Other decompilations:", "Origin:")
+BRANCH_TARGET_FIELD = "External branch targets:"
+# Only vendor library code may declare branches to other functions.
+LIBRARY_ASM_PREFIXES = ("src/dolphin/", "src/trk/", "src/crt/", "src/hsd/")
+# First-party (game) asm: no other decompilation exists to cite, so the
+# evidence is a compiler probe instead (asm_compiler_probe.py): every GC MWCC
+# version compiled a C candidate and none reproduced the retail words.
+FIRST_PARTY_PREFIXES = ("src/game/",)
+FIRST_PARTY_FIELDS = ("Why it cannot be C:", "Compiler probe:", "Origin:")
+PROBE_REPORT = re.compile(r"docs/asm_evidence/probes/[\w.-]+\.txt")
+PROBE_VERDICT = re.compile(r"(?m)^verdict: no-match \((\d+) compilers compared\)$")
+SYMBOLS_FILE = REPO_ROOT / "config" / "GC6E01" / "symbols.txt"
+GITHUB_COMMIT = re.compile(r"github\.com/[\w.-]+/[\w.-]+\S*\b[0-9a-f]{7,40}\b|\b[0-9a-f]{7,40}\b\S*github\.com/[\w.-]+/[\w.-]+")
+
+
+def load_authentic_asm(registry: Path = AUTHENTIC_ASM_REGISTRY) -> dict[tuple[str, str], dict]:
+    try:
+        data = json.loads(registry.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return {(entry["path"], entry["function"]): entry for entry in data.get("entries", [])
+            if entry.get("path") and entry.get("function")}
+
+
+def evidence_problems(entry: dict, root: Path = REPO_ROOT) -> list[str]:
+    """Why an authentic-asm registry entry's evidence is insufficient (empty if it is sufficient)."""
+    problems = []
+    func = entry.get("function", "")
+    if not entry.get("mnemonics"):
+        problems.append(f"{func}: registry entry lists no mnemonics")
+    document = root / entry.get("evidence", "")
+    if not entry.get("evidence") or not document.is_file():
+        return problems + [f"{func}: evidence document {entry.get('evidence')!r} is missing"]
+    text = document.read_text(encoding="utf-8", errors="replace")
+    section = re.search(rf"(?ms)^##\s+{re.escape(func)}\b(.*?)(?=^##\s|\Z)", text)
+    if not section:
+        return problems + [f"{func}: {entry['evidence']} has no '## {func}' section"]
+    body = section.group(1)
+    first_party = entry.get("tier") == "first-party"
+    path = str(entry.get("path", ""))
+    if first_party and not path.startswith(FIRST_PARTY_PREFIXES):
+        problems.append(f"{func}: tier first-party is only for {', '.join(FIRST_PARTY_PREFIXES)}")
+    if not first_party and path.startswith(FIRST_PARTY_PREFIXES):
+        problems.append(f"{func}: game-code asm needs \"tier\": \"first-party\" and a compiler probe")
+    fields = FIRST_PARTY_FIELDS if first_party else EVIDENCE_FIELDS
+    for field in fields:
+        match = re.search(rf"(?ms)^\s*[-*]?\s*\**{re.escape(field)}\**(.*?)(?=^\s*[-*]?\s*\**(?:{'|'.join(map(re.escape, fields))})|\Z)", body)
+        if not match or len(match.group(1).strip()) < 20:
+            problems.append(f"{func}: evidence field '{field}' is missing or empty in {entry['evidence']}")
+        elif field == "Other decompilations:" and not GITHUB_COMMIT.search(match.group(1)):
+            problems.append(f"{func}: 'Other decompilations:' needs a GitHub URL with a commit hash")
+        elif field == "Compiler probe:":
+            problems.extend(probe_problems(func, match.group(1), root))
+    targets = entry.get("branch_targets") or []
+    if targets:
+        if not str(entry.get("path", "")).startswith(LIBRARY_ASM_PREFIXES) and not first_party:
+            problems.append(f"{func}: branch_targets are only allowed for library code "
+                            f"({', '.join(LIBRARY_ASM_PREFIXES)})")
+        match = re.search(rf"(?ms)^\s*[-*]?\s*\**{re.escape(BRANCH_TARGET_FIELD)}\**(.*?)(?=^\s*[-*]?\s*\**[A-Z][^\n:]*:\**|\Z)", body)
+        if not match or len(match.group(1).strip()) < 20:
+            problems.append(f"{func}: branch_targets need an '{BRANCH_TARGET_FIELD}' field in {entry['evidence']}")
+        else:
+            for target in targets:
+                if target not in match.group(1):
+                    problems.append(f"{func}: '{BRANCH_TARGET_FIELD}' does not name {target}")
+        known = function_symbols(root / SYMBOLS_FILE.relative_to(REPO_ROOT))
+        for target in targets:
+            if target not in known:
+                problems.append(f"{func}: branch target {target} is not a function in symbols.txt")
+    return problems
+
+
+def probe_problems(func: str, field_text: str, root: Path) -> list[str]:
+    """A first-party routine's compiler probe must exist and show no C match."""
+    ref = PROBE_REPORT.search(field_text)
+    if not ref:
+        return [f"{func}: 'Compiler probe:' must name a docs/asm_evidence/probes/*.txt report"]
+    report = root / ref.group(0)
+    if not report.is_file():
+        return [f"{func}: compiler probe {ref.group(0)} is missing"]
+    text = report.read_text(encoding="utf-8", errors="replace")
+    if not re.search(rf"(?m)^# Compiler probe: {re.escape(func)}$", text):
+        return [f"{func}: {ref.group(0)} is not a probe of {func}"]
+    verdict = PROBE_VERDICT.search(text)
+    if not verdict or int(verdict.group(1)) < 5:
+        return [f"{func}: {ref.group(0)} does not show 'no-match' across at least 5 compilers"]
+    return []
+
+
+def function_symbols(path: Path = SYMBOLS_FILE) -> set[str]:
+    """Names of functions declared in symbols.txt (empty if it cannot be read)."""
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return set()
+    return {m.group(1) for m in re.finditer(r"(?m)^([A-Za-z_][\w$@.]*)\s*=\s*\.text:0x[0-9A-Fa-f]+;[^\n]*type:function", text)}
+
+
+AUTHENTIC_ASM = load_authentic_asm()
+
 HUNK = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@")
 ASM_FUNCTION = re.compile(
-    r"(?m)^[ \t]*asm[ \t\r\n]+(?:[A-Za-z_]\w*[ \t\r\n*]+)+"
+    r"(?m)^[ \t]*(?:static[ \t]+)?asm[ \t\r\n]+(?:[A-Za-z_]\w*[ \t\r\n*]+)+"
     r"(?P<name>[A-Za-z_]\w*)[ \t\r\n]*\([^;{}]*\)[ \t\r\n]*\{"
 )
 FUNCTION = re.compile(
-    r"(?m)^[ \t]*(?!asm\b)(?:[A-Za-z_]\w*[ \t\r\n*]+)+"
+    r"(?m)^[ \t]*(?!(?:static[ \t]+)?asm\b)(?:[A-Za-z_]\w*[ \t\r\n*]+)+"
     r"(?P<name>[A-Za-z_]\w*)[ \t\r\n]*\([^;{}]*\)[ \t\r\n]*\{"
 )
 INLINE_ASM = re.compile(r"\basm\s*(?:volatile\s*)?\{")
@@ -107,6 +226,8 @@ ASM_PROTECTED_MACROS = (
     | DOLPHIN_PAIRED_SINGLE_ALLOWED
     | DOLPHIN_PAIRED_SINGLE_FUNCTIONS
     | {"asm", "nofralloc", "fralloc", "entry"}
+    | {mnemonic for entry in AUTHENTIC_ASM.values() for mnemonic in entry.get("mnemonics", [])}
+    | {func for _, func in AUTHENTIC_ASM}
     | {f"r{i}" for i in range(32)}
     | {f"f{i}" for i in range(32)}
     | {f"qr{i}" for i in range(8)}
@@ -252,6 +373,14 @@ def find_asm_regions(source: str) -> list[dict]:
 def allowlist_for(path: str, func: str) -> tuple[set[str], str, bool]:
     if path == DOLPHIN_PAIRED_SINGLE_PATH and func in DOLPHIN_PAIRED_SINGLE_FUNCTIONS:
         return DOLPHIN_PAIRED_SINGLE_ALLOWED, "Dolphin paired-single SDK", True
+    entry = AUTHENTIC_ASM.get((path, func))
+    if entry is not None:
+        problems = evidence_problems(entry)
+        if problems:
+            for problem in problems:
+                print(f"::error::authentic-asm evidence: {problem}")
+            return set(), "authentic library asm (evidence incomplete)", False
+        return {m.lower() for m in entry["mnemonics"]}, "authentic library asm", False
     return HARDWARE_ALLOWED, "hardware-primitive", False
 
 
@@ -280,6 +409,19 @@ def _asm_statements(body: str) -> tuple[list[str], set[str]]:
     return statements, labels
 
 
+def declared_branch_target(path: str, func: str, target: str) -> bool:
+    """A registered library routine may branch to a function it declares (or to itself)."""
+    entry = AUTHENTIC_ASM.get((path, func))
+    if entry is None or evidence_problems(entry):
+        return False
+    first_party = entry.get("tier") == "first-party" and path.startswith(FIRST_PARTY_PREFIXES)
+    if not path.startswith(LIBRARY_ASM_PREFIXES) and not first_party:
+        return False
+    if target == func:
+        return True
+    return target in (entry.get("branch_targets") or []) and target in function_symbols()
+
+
 def asm_body_ok(body: str, path: str = "", func: str = "") -> bool:
     allowed, allowlist_name, require_paired_single = allowlist_for(path, func)
     saw_paired_single = False
@@ -298,8 +440,12 @@ def asm_body_ok(body: str, path: str = "", func: str = "") -> bool:
             return False
         if mnemonic in LOCAL_BRANCHES:
             parts = line.split(None, 1)
-            target = parts[1].strip() if len(parts) == 2 else ""
-            if target not in labels:
+            operands = parts[1].strip() if len(parts) == 2 else ""
+            # Conditional PPC branches may select a condition-register field
+            # (for example, `bne+ cr1, local_label`). The final operand is
+            # still required to be a label in this exact asm body.
+            target = operands.rsplit(",", 1)[-1].strip()
+            if target not in labels and not declared_branch_target(path, func, target):
                 print(
                     f"::error::asm branch target '{target}' is not a label "
                     f"defined inside {path}:{func}"
@@ -386,6 +532,17 @@ def scan_source(path: str, source: str, added_lines: list[tuple[int, str]]) -> b
             print(f"::error::cannot safely map asm block to a closed function in {path}")
             fail = True
             continue
+        entry = AUTHENTIC_ASM.get((path, func))
+        if entry is not None:
+            first = min(region["start_line"] for region in func_regions)
+            above = "\n".join(source_lines[max(0, first - 41):first - 1])
+            if entry.get("evidence", "\0") not in above:
+                print(
+                    f"::error::authentic asm {path}:{func} must cite its evidence document "
+                    f"({entry.get('evidence')}) in a comment within 40 lines above it"
+                )
+                fail = True
+                continue
         combined_body = "\n".join(region["body"] for region in func_regions)
         asm_identifiers = set(IDENTIFIER.findall(combined_body)) | {func}
         shadowed = sorted({name for name, _ in macro_definitions} & asm_identifiers)

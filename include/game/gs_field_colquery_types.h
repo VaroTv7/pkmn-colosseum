@@ -47,9 +47,6 @@ typedef struct GSfieldEdgeMasks {
     u16 values[3];
 } GSfieldEdgeMasks;
 
-extern const GSfieldEdgeMasks lbl_8047CF48;
-extern const GSfieldEdgeMasks lbl_8047CF50;
-
 /* ===== String constants (rodata) ===== */
 extern const char lbl_802720B0[]; /* "scene_data" */
 
@@ -150,6 +147,7 @@ f32   GScolsys2UtilGetCpLinePoint(void* out, void* start, void* end, void* point
 s32   GScolsy2UtilChkInTri(void* point, void* verts, void* normal);
 
 /* ===== Cross-TU forward declarations (this split) ===== */
-s32 fn_80111864(void* a, void* b, void* c); /* GScolsys2Thru, called from GScolsys2Check */
+s32 fn_80111864(GScolsys2Vec3* start, GScolsys2Vec3* end,
+                GSfieldQueryTriangle* out); /* GScolsys2Thru, called from GScolsys2Check */
 
 #endif /* GAME_GS_FIELD_COLQUERY_TYPES_H */

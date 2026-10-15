@@ -15,9 +15,7 @@ extern u32 lbl_8047B618;
 extern u8 lbl_8047B642;
 extern u16 lbl_8047B61C;
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
 void fn_8021D9C0(void) {
     extern u32 fightTargetGetPtrAsNowFightType();
@@ -63,9 +61,8 @@ void fn_8021D9C0(void) {
     lbl_8047B610 = lbl_8047B610 + 2;
 }
 
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size reset; optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 #pragma optimize_for_size on
 void fn_8021DB78(void) {
     extern u32 fightTargetGetPtrAsNowFightType();
@@ -110,26 +107,16 @@ void fn_8021DB78(void) {
 }
 
 #pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 u8* fn_8021DD24(void) {
     u8* pc = lbl_8047B610;
     lbl_8047B610 = pc + 5;
     return pc;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
-#pragma optimize_for_size on
 void fn_8021DD34(void) {
     lbl_8047B610++;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
-#pragma optimize_for_size on
 void fn_8021DD44(void) {
     extern void* fightTargetGetPtrAsNowFightType();
     extern void fightOutPokemonSetVisibility();
@@ -146,26 +133,14 @@ void fn_8021DD44(void) {
     lbl_8047B610 += 2;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
-#pragma optimize_for_size on
 void fn_8021DDB8(void) {
     lbl_8047B610++;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
-#pragma optimize_for_size on
 void fn_8021DDC8(void) {
     lbl_8047B610++;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
-#pragma optimize_for_size on
 void fn_8021DDD8(void) {
     extern void fightPokemonToMenuLvupStatus();
     extern void fightMenuCloseLevelUpStatusMenu();
@@ -179,18 +154,10 @@ void fn_8021DDD8(void) {
     lbl_8047B610 += 1;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
-#pragma optimize_for_size on
 void fn_8021DE3C(void) {
     lbl_8047B610++;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
-#pragma optimize_for_size on
 void fn_8021DE4C(void) {
     extern int fightTargetGetPtrAsNowFightType();
     extern int fightOutPokemonDoItemSoubi();
@@ -205,18 +172,11 @@ void fn_8021DE4C(void) {
     lbl_8047B610 += 2;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 void WS_KORAERU_CHECK(void) {
     fightApplyDamageVariance(1, 0);
     lbl_8047B610 = lbl_8047B610 + 1;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
-#pragma dont_inline on
 void WS_SCA_END_SET(void) {
     extern void fightFloorLoopValidFightOutPokemon();
     extern u32 fn_8021DF3C();
@@ -225,25 +185,17 @@ void WS_SCA_END_SET(void) {
     return;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 s32 fn_8021DF3C(void* arg) {
     extern u32 pokemonSetStatus();
     pokemonSetStatus(arg, 0, 0x112, 0, 1);
     return 1;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 void fn_8021DF70(void) {
     lbl_8047B610++;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
 void fn_8021DF80(void) {
     extern u32 fightTargetGetPtrAsNowFightType();
@@ -274,11 +226,9 @@ skip:
     lbl_8047B610 = lbl_8047B610 + 7;
 }
 
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size reset; optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 #pragma optimize_for_size on
-#pragma dont_inline on
 void fn_8021E04C(void) {
     extern void fn_801DA9E8();
     extern s8 fn_801DDD28();
@@ -335,9 +285,8 @@ void fn_8021E04C(void) {
     return;
 }
 
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size reset; optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 #pragma optimize_for_size on
 void fn_8021E288(void) {
     extern u32 fightTargetGetPtrAsNowFightType();
@@ -417,11 +366,9 @@ void fn_8021E288(void) {
     lbl_8047B610 += 2;
 }
 
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size reset; optimize_for_size on; opt_propagation off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 #pragma optimize_for_size on
-#pragma dont_inline on
 #pragma opt_propagation off
 void fn_8021E600(void) {
     extern void wazaSetStatus();
@@ -456,7 +403,6 @@ done:
 }
 
 #pragma optimize_for_size reset
-#pragma dont_inline reset
 #pragma opt_propagation reset
 u8* fn_8021E6CC(void) {
     u8* pc = lbl_8047B610;
@@ -464,28 +410,18 @@ u8* fn_8021E6CC(void) {
     return pc;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 u8* fn_8021E6DC(void) {
     u8* pc = lbl_8047B610;
     lbl_8047B610 = pc + 2;
     return pc;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 u8* fn_8021E6EC(void) {
     u8* pc = lbl_8047B610;
     lbl_8047B610 = pc + 2;
     return pc;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
-#pragma dont_inline on
 void WS_SWITCH_A_D(void) {
     extern void fightFloorReplaceFightOutPokemonAttackToDefense();
     extern u32 lbl_8047B618;
@@ -502,18 +438,12 @@ void WS_SWITCH_A_D(void) {
     return;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 u8* fn_8021E744(void) {
     u8* pc = lbl_8047B610;
     lbl_8047B610 = pc + 2;
     return pc;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 void fn_8021E754(void) {
     extern u32 fightFloorGetStatus();
     extern u32 fightFloorGetGcHeroFightTrainerPtr();
@@ -601,9 +531,6 @@ void fn_8021E754(void) {
     lbl_8047B610 = lbl_8047B610 + 5;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 void fn_8021E9F4(void) {
     extern u32 fightTargetGetPtrAsNowFightType();
     extern u32 pokemonGetStatus();
@@ -622,9 +549,6 @@ void fn_8021E9F4(void) {
     lbl_8047B610 = lbl_8047B610 + 2;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 void fn_8021EA94(void) {
     extern u32 fightMenuYesNo();
     if ((u8)fightMenuYesNo() == 1) {
@@ -635,11 +559,8 @@ void fn_8021EA94(void) {
     }
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
-#pragma dont_inline on
 void fn_8021EAE8(void) {
     extern u32 GSmsgGetGSchar();
     extern u8 wazaGetStatus(u32, u16, u32, u32);
@@ -687,11 +608,9 @@ void fn_8021EAE8(void) {
     return;
 }
 
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size reset; optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 #pragma optimize_for_size on
-#pragma dont_inline on
 void WS_WAZAOBOE_CHECK(void) {
     extern u32 pokemonGetOboeWazaDataBanme();
     extern s8 pokemonOboeWaza();
@@ -744,8 +663,6 @@ void WS_WAZAOBOE_CHECK(void) {
 }
 
 #pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 void fn_8021ECF8(void) {
     extern s32 wazaGetStatus();
     extern u32 GSmsgGetGSchar();
@@ -759,9 +676,7 @@ void fn_8021ECF8(void) {
     lbl_8047B610 = lbl_8047B610 + 1;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
 void fn_8021ED70(void) {
     extern u8 fightOutPokemonCheckFightOut();
@@ -784,15 +699,10 @@ void fn_8021ED70(void) {
 }
 
 #pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 void fn_8021EE38(void) {
     lbl_8047B610 = lbl_8047B610 + 1;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 void fn_8021EE48(void) {
     extern u32 fightTargetGetPtrAsNowFightType();
     extern int fightOutPokemonGetVoiceSndId();
@@ -801,34 +711,22 @@ void fn_8021EE48(void) {
     lbl_8047B610 = lbl_8047B610 + 2;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 void fn_8021EE98(void) {
     std130_soundUnk_801653cc(*(u16*)(lbl_8047B610 + 1), 0, 0xff);
     lbl_8047B610 = lbl_8047B610 + 3;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 void fn_8021EED4(void) {
     soundStart(*(u16*)(lbl_8047B610 + 1), 0, 0xff, 0);
     lbl_8047B610 = lbl_8047B610 + 3;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 void fn_8021EF14(void) {
     lbl_8047B610 = lbl_8047B610 + 2;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
-#pragma dont_inline on
 void fn_8021EF24(void) {
     extern void wazaSetStatus();
     extern u32 fightTargetGetPtrAsNowFightType();
@@ -914,8 +812,6 @@ void fn_8021EF24(void) {
 }
 
 #pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 void fn_8021F1CC(void) {
     extern u32 fightTargetGetPtrAsNowFightType();
     extern u32 fightOutPokemonGetNicknamePtr();
@@ -938,11 +834,8 @@ void fn_8021F1CC(void) {
     lbl_8047B610 += 3;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
-#pragma dont_inline on
 void fn_8021F24C(void) {
     extern u32 fightTargetGetPtrAsNowFightType();
     extern void fightFloorSetTuusinErrorFightResult();
@@ -991,9 +884,8 @@ void fn_8021F24C(void) {
     return;
 }
 
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size reset; optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 #pragma optimize_for_size on
 void fn_8021F39C(void) {
     extern u32 fightTargetGetPtrAsNowFightType();
@@ -1016,8 +908,6 @@ void fn_8021F39C(void) {
 }
 
 #pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 void fn_8021F458(void) {
     extern u32 fightFloorGetStatus();
     extern u32 fightTargetGetPtrAsNowFightType();
@@ -1076,10 +966,7 @@ void fn_8021F458(void) {
     lbl_8047B610 = lbl_8047B610 + 3;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
-#pragma dont_inline on
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
 void fn_8021F664(void) {
     extern void fn_8010AE2C();
@@ -1203,8 +1090,6 @@ void fn_8021F664(void) {
 }
 
 #pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
 void fn_8021F92C(void) {
     extern u32 fightTargetGetPtrAsNowFightType();
     extern u32 fightFloorGetFightOutPokemonPtrToFightTrainerPtr();
@@ -1216,9 +1101,7 @@ void fn_8021F92C(void) {
     lbl_8047B610 = lbl_8047B610 + 2;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
 void fn_8021F998(void) {
     extern u32 fightTargetGetPtrAsNowFightType();
@@ -1252,5 +1135,3 @@ void fn_8021F998(void) {
 }
 
 #pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma opt_propagation reset

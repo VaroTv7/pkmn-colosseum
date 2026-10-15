@@ -206,73 +206,70 @@ void fn_8025DE54(u32 *r3,u16 *r4,int r5,int r6,int r7,
 }
 
 /* Address: 0x8025DF38 | Size: 0x178 | Ghidra import */
-u32 fn_8025DF38(int *r3,u32 r4,u16 *r5,int r6)
-
+u32 fn_8025DF38(u32* r3, u32 r4, u16* r5, int r6)
 {
-    extern u32 _fadeEffectGetRandom__FUl();
-    extern int GSmodelSetBoundCheck();
-    extern int GSmodelSetShadowLight();
-    extern int GSmodelSetShadowSurface();
-    extern int GSmodelClearShadowFlags();
-    extern int GSmodelSetShadowFlags();
-    extern u32 std092_getCurrentRoomID();
-    extern int floorGetResource();
-    extern int floorDataBiosGetShadowReciveNum();
-    extern u32 floorDataBiosGetShadowReciveID();
-    extern int floorDataBiosGetCurrentPtr();
-    extern u32 fn_8018F470();
-    extern u8 fn_801DDD28();
-    extern int fn_801DE190();
-  u32 uVar2;
-  int iVar3;
-  u8 cVar8;
-  int iVar4;
-  u32 iVar5;
-  u32 uVar6;
-	  u32 uVar7;
-	  int iVar9;
-	  int local_68 [13];
-  
-	  uVar2 = _fadeEffectGetRandom__FUl(0xffffffff);
-	  iVar3 = fn_801DE190(r4,uVar2,0);
-  *r3 = iVar3;
-  if ((u32)iVar3 == 0) {
-    uVar2 = 0;
-  }
-  else {
-    for (iVar3 = 0; iVar3 < r6; iVar3 = iVar3 + 1) {
-      cVar8 = fn_801DDD28(*r3,*r5,r5[1],0);
-      if (cVar8 == '\0') {
+    extern u32 _fadeEffectGetRandom__FUl(u32);
+    extern void GSmodelSetBoundCheck(void* model, s32 on);
+    extern void GSmodelSetShadowLight(void* model, u32 light);
+    extern void GSmodelSetShadowSurface(void* model, s32 count, u32* surfaces);
+    extern void GSmodelClearShadowFlags(void* model, s32 flags);
+    extern void GSmodelSetShadowFlags(void* model, s32 flags);
+    extern u32 std092_getCurrentRoomID(void);
+    extern u32 floorGetResource(u32 floor, u32 id);
+    extern u32 floorDataBiosGetShadowReciveNum(void* floor);
+    extern u32 floorDataBiosGetShadowReciveID(void* floor, u32 index);
+    extern void* floorDataBiosGetCurrentPtr(void);
+    extern u32 fn_8018F470(u32 index);
+    extern u8 fn_801DDD28(u32 handle, u16 a, u16 b, s32 c);
+    extern u32 fn_801DE190(u32 id, u32 random, s32 flags);
+    extern void* fn_801DAC3C(u32 handle);
+    s32 n;
+    void* floor;
+    u32 i;
+    void* model;
+    int k;
+    u32 light;
+    u32 surface;
+    u32 surfaces[13];
+    u32 count;
+    u32 handle;
+    u16* pair;
+
+    handle = fn_801DE190(r4, _fadeEffectGetRandom__FUl(0xFFFFFFFF), 0);
+    *r3 = handle;
+    if (handle == 0) {
         return 0;
-      }
-      r5 = r5 + 2;
     }
-    if (((r3 != (int *)0x0) && (*(u32 *)r3 != 0)) && (iVar3 = fn_801DAC3C(), iVar3 != 0)) {
-      GSmodelClearShadowFlags(iVar3,1);
-      iVar4 = floorDataBiosGetCurrentPtr();
-      if (iVar4 != 0) {
-        uVar2 = fn_8018F470(1);
-        iVar5 = floorDataBiosGetShadowReciveNum(iVar4);
-	        iVar9 = 0;
-	        if (iVar5 == 1) {
-	          for (uVar7 = 0; uVar7 < iVar5; uVar7 = uVar7 + 1) {
-	            uVar6 = floorDataBiosGetShadowReciveID(iVar4,uVar7);
-	            uVar6 = floorGetResource(std092_getCurrentRoomID(),uVar6);
-	            if (uVar6 != 0) {
-	              local_68[iVar9] = uVar6;
-              iVar9 = iVar9 + 1;
-            }
-          }
-          GSmodelSetShadowFlags(iVar3,1);
-          GSmodelSetShadowLight(iVar3,uVar2);
-          GSmodelSetShadowSurface(iVar3,iVar9,local_68);
-          GSmodelSetBoundCheck(iVar3,1);
+    pair = r5;
+    for (k = 0; k < r6; k++) {
+        if (fn_801DDD28(*r3, pair[0], pair[1], 0) == 0) {
+            return 0;
         }
-      }
+        pair += 2;
     }
-    uVar2 = 1;
-  }
-  return uVar2;
+    if (r3 != NULL && *r3 != 0 && (model = fn_801DAC3C(*r3)) != NULL) {
+        GSmodelClearShadowFlags(model, 1);
+        floor = floorDataBiosGetCurrentPtr();
+        if (floor != NULL) {
+            light = fn_8018F470(1);
+            count = floorDataBiosGetShadowReciveNum(floor);
+            n = 0;
+            if (count == 1) {
+                for (i = 0; i < count; i++) {
+                    surface = floorGetResource(std092_getCurrentRoomID(), floorDataBiosGetShadowReciveID(floor, i));
+                    if (surface != 0) {
+                        surfaces[n] = surface;
+                        n++;
+                    }
+                }
+                GSmodelSetShadowFlags(model, 1);
+                GSmodelSetShadowLight(model, light);
+                GSmodelSetShadowSurface(model, n, surfaces);
+                GSmodelSetBoundCheck(model, 1);
+            }
+        }
+    }
+    return 1;
 }
 
 /* Address: 0x8025E0B0 | Size: 0x10C | Ghidra import */
@@ -322,15 +319,11 @@ u32 loadSequence(int *r3,u32 r4,u16 *r5,int r6)
   return uVar1;
 }
 
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 #if 0
 asm void fn_8025E1BC(void) {
 #include "src/game/colosseum_battle_fn_8025E1BC.inc"
 }
 #endif
-#pragma pop
 static inline u32 *validptr_8025E1BC(u32 *p) {
 
   u32 *q = p;
@@ -453,261 +446,278 @@ void preReliveDisplayHokoraParticle(void)
 }
 
 /* Address: 0x8025E640 | Size: 0x37C | Ghidra import */
-u32 _expRecover__FP7PokemonUl(u32 r3,u32 r4)
+typedef struct ReliveLevelUpStatus {
+    u8 mode;
+    u8 pad;
+    s16 hp;
+    s16 attack;
+    s16 defense;
+    s16 speed;
+    s16 spAttack;
+    s16 spDefense;
+} ReliveLevelUpStatus;
 
+int _cbWazaForget__FP7PokemonUsl(u32 r3, u32 r4);
+
+u32 _expRecover__FP7PokemonUl(u32 r3,u32 r4)
 {
-    extern int winMsgCloseLevelUpStatus();
-    extern int winMsgOpenLevelUpStatus();
-    extern int winMsgOpenField();
-    extern int pokemonBiosSetExp();
-    extern u32 pokemonBiosGetLevel();
-    extern int pokemonGetFriendFormPokemonFriendFilterId();
-    extern u32 pokemonGetLevelToExp();
-    extern u32 pokemonGetSoubiItemSoubiDataId();
-    extern u32 pokemonGetOboeWazaDataId();
-    extern s8 pokemonSearchWazaDataId();
-    extern int pokemonWazaCreate();
-    extern int pokemonResetBasisStatus();
-    extern int msgctrlSetValue();
-    extern int std130_soundUnk_801653cc();
-    /* evolutionWazaLearn forward-declared at file scope */
-  u32 bVar11;
-  int iVar1;
-  u32 uVar2;
-  u32 uVar3;
-  s8 cVar12;
-  u32 uVar4;
-  u32 uVar13;
-  u8 local_57[3];
-  u8 local_54[4];
-  u8 local_44[4];
-  u8 local_58[4];
-  
-  uVar13 = 0;
-  local_58[0] = '\0';
-  pokemonGetStatus(r3,0,0x7a,0);
-  while (1) {
-    if (r4 == 0) {
-      pokemonSetStatus(r3,0,0xc6,0,0);
-      return uVar13;
-    }
-    bVar11 = (u8)pokemonGetStatus(r3,0,0x7a,0);
-    if (bVar11 > 99) break;
-    iVar1 = (int)pokemonGetStatus(r3,0,0x79,0);
-    uVar2 = pokemonGetLevelToExp(r3,bVar11 + 1);
-    pokemonGetStatus(r3,0,0x87,0);
-    pokemonGetStatus(r3,0,0x88,0);
-    pokemonGetStatus(r3,0,0x89,0);
-    pokemonGetStatus(r3,0,0x8a,0);
-    pokemonGetStatus(r3,0,0x8b,0);
-    pokemonGetStatus(r3,0,0x8c,0);
-    if ((u32)(iVar1 + r4) >= uVar2) {
-      r4 = (iVar1 + r4) - uVar2;
-      uVar13 = 1;
-      pokemonBiosSetExp(r3,uVar2);
-      pokemonResetBasisStatus(r3);
-      uVar3 = pokemonGetSoubiItemSoubiDataId(r3);
-      pokemonGetFriendFormPokemonFriendFilterId(r3,uVar3,0);
-      uVar2 = pokemonBiosGetLevel(r3);
-      std130_soundUnk_801653cc(0x4ca,0,0xff);
-      msgctrlSetValue(0x2f,uVar2 & 0xff);
-      winMsgOpenField(0x44ce,1,0);
-      pokemonGetStatus(r3,0,0x87,0);
-      pokemonGetStatus(r3,0,0x88,0);
-      pokemonGetStatus(r3,0,0x89,0);
-      pokemonGetStatus(r3,0,0x8a,0);
-      pokemonGetStatus(r3,0,0x8b,0);
-      pokemonGetStatus(r3,0,0x8c,0);
-      local_44[0] = 1;
-      winMsgOpenLevelUpStatus(local_44,1);
-      local_54[0] = 0;
-      winMsgOpenLevelUpStatus(local_54,1);
-      winMsgCloseLevelUpStatus(1);
-      local_58[0] = '\0';
-      while (uVar4 = pokemonGetOboeWazaDataId(r3,uVar2,local_58), (uVar4 & 0xffff) != 0) {
-        cVar12 = pokemonSearchWazaDataId(r3,uVar4);
-        if ((cVar12 == -1) &&
-           (iVar1 = evolutionWazaLearn(r3,uVar4,local_57,0,0x8025e3b0,0), iVar1 != 0)) {
-          pokemonWazaCreate(r3,local_57[0],uVar4);
+    extern void winMsgCloseLevelUpStatus(s32);
+    extern void winMsgOpenLevelUpStatus(ReliveLevelUpStatus*, s32);
+    extern void winMsgOpenField(s32, s32, s32);
+    extern void pokemonBiosSetExp(u32, u32);
+    extern u32 pokemonBiosGetLevel(u32);
+    extern void pokemonGetFriendFormPokemonFriendFilterId(u32, u32, s32);
+    extern u32 pokemonGetLevelToExp(u32, u8);
+    extern u32 pokemonGetSoubiItemSoubiDataId(u32);
+    extern u32 pokemonGetOboeWazaDataId(u32, u32, u8*);
+    extern s8 pokemonSearchWazaDataId(u32, u32);
+    extern void pokemonWazaCreate(u32, u8, u32);
+    extern void pokemonResetBasisStatus(u32);
+    extern void msgctrlSetValue(s32, u32);
+    extern void std130_soundUnk_801653cc(s32, s32, s32);
+    u8 slot;
+    u32 next;
+    ReliveLevelUpStatus gain;
+    s16 hp;
+    s16 attack;
+    s16 defense;
+    u8 level;
+    s16 spAttack;
+    s16 spDefense;
+    s16 speed;
+    ReliveLevelUpStatus status;
+    u32 newLevel;
+    u32 levelUp;
+    u32 exp;
+    u8 wazaIndex;
+    u32 waza;
+    u32 item;
+
+    levelUp = 0;
+    wazaIndex = 0;
+    pokemonGetStatus(r3, 0, 0x7A, 0);
+    for (;;) {
+        if (r4 == 0) {
+            pokemonSetStatus(r3, 0, 0xC6, 0, r4);
+            break;
         }
-        local_58[0] = local_58[0] + 1;
-      }
+        level = (u8)pokemonGetStatus(r3, 0, 0x7A, 0);
+        if (level >= 100) {
+            break;
+        }
+        exp = (u32)pokemonGetStatus(r3, 0, 0x79, 0);
+        next = pokemonGetLevelToExp(r3, level + 1);
+        hp = (s16)pokemonGetStatus(r3, 0, 0x87, 0);
+        attack = (s16)pokemonGetStatus(r3, 0, 0x88, 0);
+        defense = (s16)pokemonGetStatus(r3, 0, 0x89, 0);
+        spAttack = (s16)pokemonGetStatus(r3, 0, 0x8A, 0);
+        spDefense = (s16)pokemonGetStatus(r3, 0, 0x8B, 0);
+        speed = (s16)pokemonGetStatus(r3, 0, 0x8C, 0);
+        exp += r4;
+        if (exp >= next) {
+        r4 = exp - next;
+        levelUp = 1;
+        pokemonBiosSetExp(r3, next);
+        pokemonResetBasisStatus(r3);
+        item = pokemonGetSoubiItemSoubiDataId(r3);
+        pokemonGetFriendFormPokemonFriendFilterId(r3, item, 0);
+        newLevel = pokemonBiosGetLevel(r3);
+        std130_soundUnk_801653cc(0x4CA, 0, 0xFF);
+        msgctrlSetValue(0x2F, (u8)newLevel);
+        winMsgOpenField(0x44CE, 1, 0);
+        status.hp = (s16)pokemonGetStatus(r3, 0, 0x87, 0);
+        status.attack = (s16)pokemonGetStatus(r3, 0, 0x88, 0);
+        status.defense = (s16)pokemonGetStatus(r3, 0, 0x89, 0);
+        status.spAttack = (s16)pokemonGetStatus(r3, 0, 0x8A, 0);
+        status.spDefense = (s16)pokemonGetStatus(r3, 0, 0x8B, 0);
+        status.speed = (s16)pokemonGetStatus(r3, 0, 0x8C, 0);
+        gain.hp = status.hp - hp;
+        gain.attack = status.attack - attack;
+        gain.defense = status.defense - defense;
+        gain.spAttack = status.spAttack - spAttack;
+        gain.spDefense = status.spDefense - spDefense;
+        gain.speed = status.speed - speed;
+        gain.mode = 1;
+        winMsgOpenLevelUpStatus(&gain, 1);
+        status.mode = 0;
+        winMsgOpenLevelUpStatus(&status, 1);
+        winMsgCloseLevelUpStatus(1);
+        wazaIndex = 0;
+        while ((u16)(waza = pokemonGetOboeWazaDataId(r3, newLevel, &wazaIndex)) != 0) {
+            if (pokemonSearchWazaDataId(r3, waza) == -1 &&
+                (s32)evolutionWazaLearn(r3, waza, &slot, 0, _cbWazaForget__FP7PokemonUsl, 0) != 0) {
+                pokemonWazaCreate(r3, slot, waza);
+            }
+            wazaIndex++;
+        }
+        } else {
+            r4 = 0;
+            pokemonSetStatus(r3, 0, 0x79, 0, exp);
+        }
     }
-    else {
-      r4 = 0;
-      pokemonSetStatus(r3,0,0x79,0);
-    }
-  }
-  return uVar13;
+    return levelUp;
 }
 
 #pragma push
 #pragma optimize_for_size off
 /* Address: 0x8025EF58 | Size: 0x354 | Ghidra import */
 
-void preReliveMain(void)
+typedef struct ReliveSelection {
+    s32 mode;
+    u32 index;
+} ReliveSelection;
 
+typedef struct ReliveTarget {
+    s32 mode;
+    s16 species;
+    s16 pad;
+    u32 index;
+} ReliveTarget;
+
+void preReliveMain(void)
 {
-    extern void fn_8025DCBC(int *param);
-    extern u32 _DAT_804782bc;
-    extern u32 _DAT_804782c0;
-    extern u32 _DAT_804782c4;
-    extern u32 menuPokemonOpen();
-    extern int std098_mapWarpToMenuRoom();
-    extern int winMsgCloseField();
-    extern int floorSetFadeScript();
-    extern int pokemonBiosGetDarkpokemonDataId();
-    extern u32 heroItemCheckHaveItemDataId();
-    extern u32 heroGetStatus();
-    extern int fadeCheck();
-    extern u8 fn_801EEC74();
+    extern void fn_8025DCBC(int* param);
+    extern s32 menuPokemonOpen(s32, s32, s32);
+    extern void std098_mapWarpToMenuRoom(s32);
+    extern void winMsgCloseField(s32);
+    extern void winMsgOpenField(s32, s32, s32);
+    extern void floorSetFadeScript(s32, s32);
+    extern u16 pokemonBiosGetDarkpokemonDataId(void*);
+    extern int heroItemCheckHaveItemDataId(s32, s32);
+    extern void* heroGetStatus(s32, s32, u16);
+    extern u8 fn_801EEC74(u16);
+    extern void* heroBiosGetPokemonPtr(void*, u16);
+    extern u8 pokemonCheckValid(void*);
+    extern int pokemonIsDarkPokemon(void*);
+    extern u32 scriptGetDarkPointZeroPokemonNum(void);
+    extern void fn_80118A68(u32, s32);
+    extern void std130_soundUnk_801653cc(s32, s32, s32);
+    extern void _threadSwitch(void);
     extern u32 lbl_8047B660;
     extern u32 lbl_8047B664;
-    extern u32 lbl_8047B668;
-    extern u32 lbl_8047B66C;
     extern f32 lbl_8047E680;
     extern f32 lbl_8047E68C;
-  int iVar1;
+    s16 species;
+    u16 zeroNum;
+    void* party;
+    void* pokemon;
+    u16 remaining;
+    s32 i;
+    ReliveSelection* selection;
+    u16 mode;
+    s32 selMode;
+    u16 action;
+    s32 picked;
+    u8 work[24];
 
-  u32 uVar2;
-  u32 uVar3;
-  short sVar5;
-  u8 cVar7;
-  short sVar6;
-  u32 uVar4;
+    if (((ReliveSelection*)&lbl_8047B668)->mode == -1) {
+        return;
+    }
+    remaining = 0;
+    savedataGetStatus(0, 0);
+    party = (void*)savedataGetStatus(0, 2);
+    for (i = 0; (u16)i < 6; i++) {
+        pokemon = heroBiosGetPokemonPtr(party, (u16)i);
+        if (pokemonCheckValid(pokemon) && (s32)(u8)pokemonIsDarkPokemon(pokemon) == 1 &&
+            fn_801EEC74(pokemonBiosGetDarkpokemonDataId(pokemon)) == 0) {
+            remaining++;
+        }
+    }
+    zeroNum = scriptGetDarkPointZeroPokemonNum();
+    savedataGetStatus(0, 0);
+    savedataGetStatus(0, 2);
+    if ((s32)(u8)heroItemCheckHaveItemDataId(0, 0x219) == 1) {
+        if (remaining != 0) {
+            if (zeroNum != 0) {
+                mode = 2;
+            } else {
+                mode = 1;
+            }
+        } else {
+            mode = 3;
+        }
+    } else if (zeroNum != 0) {
+        mode = 4;
+    } else {
+        mode = 5;
+    }
+    selMode = ((ReliveSelection*)&lbl_8047B668)->mode;
+    action = mode;
+    if (selMode == 0) {
+        if (mode == 1) {
+            action = 5;
+        } else if (mode == 2) {
+            action = 4;
+        } else if (mode == 3) {
+            action = 5;
+        }
+    } else if (selMode == 1) {
+        action = 2;
+    }
 
-  u16 uVar8;
-  u8 auStack_28 [24];
-  
-  if ((int)lbl_8047B668 != -1) {
-    sVar6 = 0;
-    savedataGetStatus(0,0);
-    uVar2 = savedataGetStatus(0,2);
-    uVar8 = 0;
-    while (1) {
-      if (5 < uVar8) break;
-      uVar3 = heroBiosGetPokemonPtr(uVar2,uVar8);
-      cVar7 = pokemonCheckValid();
-      if (cVar7 != '\0') {
-        cVar7 = pokemonIsDarkPokemon(uVar3);
-        if (cVar7 == '\x01') {
-          pokemonBiosGetDarkpokemonDataId(uVar3);
-          cVar7 = fn_801EEC74();
-          if (cVar7 == '\0') {
-            sVar6 = sVar6 + 1;
-          }
+    if (action == 2) {
+        fn_8025DD14((int*)work);
+        std130_soundUnk_801653cc(0x3C8, 0, 0xFF);
+        selection = (ReliveSelection*)&lbl_8047B668;
+        species = (s16)pokemonGetStatus(heroGetStatus(0, 3, selection->index), 0, 0x6E, 0);
+        ((ReliveTarget*)lbl_804782BC)->mode = 1;
+        ((ReliveTarget*)lbl_804782BC)->species = species;
+        ((ReliveTarget*)lbl_804782BC)->index = selection->index;
+        fadeSet(3, lbl_8047E680);
+        fadeCheck(1);
+        std098_mapWarpToMenuRoom(0x385);
+        floorSetFadeScript(0, 0);
+        _threadSwitch();
+        fadeSet(2, lbl_8047E68C);
+        fadeCheck(1);
+        fn_8025DCBC((int*)work);
+    } else if (action == 4) {
+        if ((s32)lbl_8047B664 == 1) {
+            fn_80118A68(lbl_8047B660, 1);
+            lbl_8047B660 = 0;
+            lbl_8047B664 = 0;
         }
-      }
-      uVar8 = uVar8 + 1;
-    }
-    sVar5 = scriptGetDarkPointZeroPokemonNum();
-    savedataGetStatus(0,0);
-    savedataGetStatus(0,2);
-    cVar7 = heroItemCheckHaveItemDataId(0,0x219);
-    if (cVar7 == '\x01') {
-      if (sVar6 == 0) {
-        iVar1 = 3;
-      }
-      else if (sVar5 == 0) {
-        iVar1 = 1;
-      }
-      else {
-        iVar1 = 2;
-      }
-    }
-    else if (sVar5 == 0) {
-      iVar1 = 5;
-    }
-    else {
-      iVar1 = 4;
-    }
-    if (lbl_8047B668 == 0) {
-      if (iVar1 == 1) {
-        iVar1 = 5;
-      }
-      else if (iVar1 == 2) {
-        iVar1 = 4;
-      }
-      else if (iVar1 == 3) {
-        iVar1 = 5;
-      }
-    }
-    else if (lbl_8047B668 == 1) {
-      iVar1 = 2;
-    }
-    if (iVar1 == 2) {
-      fn_8025DD14((int*)auStack_28);
-      std130_soundUnk_801653cc(0x3c8,0,0xff);
-      uVar2 = heroGetStatus(0,3,lbl_8047B66C & 0xffff);
-      _DAT_804782c0 = (int)pokemonGetStatus(uVar2,0,0x6e,0);
-      _DAT_804782bc = 1;
-      _DAT_804782c4 = lbl_8047B66C;
-      fadeSet((double)lbl_8047E680,3);
-      fadeCheck(1);
-      std098_mapWarpToMenuRoom(0x385);
-      floorSetFadeScript(0,0);
-      _threadSwitch();
-      fadeSet((double)lbl_8047E68C,2);
-      fadeCheck(1);
-      fn_8025DCBC((int*)auStack_28);
-    }
-    else if (iVar1 == 4) {
-      if (lbl_8047B664 == 1) {
-        fn_80118A68(lbl_8047B660,1);
-        lbl_8047B660 = 0;
-        lbl_8047B664 = 0;
-      }
-      sVar6 = scriptGetDarkPointZeroPokemonNum();
-      if (sVar6 == 0) {
-        lbl_8047B668 = 0xffffffff;
-        ((u32*)&lbl_8047B668)[1] = 0xffffffff;
-      }
-      else {
-        winMsgOpenField(0x3b0f,1,0);
-        winMsgCloseField(1);
-        uVar4 = menuPokemonOpen(7,0,0);
-        if (uVar4 != 0xffffffff) {
-          uVar2 = heroGetStatus(0,3,uVar4 & 0xffff);
-          _DAT_804782c0 = (int)pokemonGetStatus(uVar2,0,0x6e,0);
-          _DAT_804782bc = 0;
-          _DAT_804782c4 = uVar4;
-          fadeSet((double)lbl_8047E680,3);
-          fadeCheck(1);
-          fn_8025DD14((int*)auStack_28);
-          std098_mapWarpToMenuRoom(0x385);
-          floorSetFadeScript(0,0);
-          _threadSwitch();
-          fadeSet((double)lbl_8047E68C,2);
-          fadeCheck(1);
-          fn_8025DCBC((int*)auStack_28);
+        if ((u16)scriptGetDarkPointZeroPokemonNum() == 0) {
+            lbl_8047B668 = 0xFFFFFFFF;
+            ((u32*)&lbl_8047B668)[1] = 0xFFFFFFFF;
+        } else {
+            winMsgOpenField(0x3B0F, 1, 0);
+            winMsgCloseField(1);
+            picked = menuPokemonOpen(7, 0, 0);
+            if (picked != -1) {
+                species = (s16)pokemonGetStatus(heroGetStatus(0, 3, picked), 0, 0x6E, 0);
+                ((ReliveTarget*)lbl_804782BC)->mode = 0;
+                ((ReliveTarget*)lbl_804782BC)->species = species;
+                ((ReliveTarget*)lbl_804782BC)->index = picked;
+                fadeSet(3, lbl_8047E680);
+                fadeCheck(1);
+                fn_8025DD14((int*)work);
+                std098_mapWarpToMenuRoom(0x385);
+                floorSetFadeScript(0, 0);
+                _threadSwitch();
+                fadeSet(2, lbl_8047E68C);
+                fadeCheck(1);
+                fn_8025DCBC((int*)work);
+            }
         }
-      }
+    } else {
+        lbl_8047B668 = 0xFFFFFFFF;
+        ((u32*)&lbl_8047B668)[1] = 0xFFFFFFFF;
     }
-    else {
-      lbl_8047B668 = 0xffffffff;
-      ((u32*)&lbl_8047B668)[1] = 0xffffffff;
-    }
-  }
-  return;
 }
 #pragma pop
 
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 #if 0
 asm void preReliveInit(void) {
 #include "src/game/colosseum_battle_fn_8025F2AC.inc"
 }
 #else
-#pragma optimization_level 4
 void preReliveInit(void) {
   u32 *p = &lbl_8047B668;
   p[0] = 0xFFFFFFFF;
   p[1] = 0xFFFFFFFF;
 }
 #endif
-#pragma pop
 
 /* Address: 0x8025F2C0 | Size: 0x3C | Ghidra import */
 void preReliveSetParameter(int r3,u32 r4)
@@ -731,7 +741,7 @@ int _cbWazaForget__FP7PokemonUsl(u32 r3,u32 r4)
 {
     extern u8 lbl_80478288[];
     extern u32 lbl_80478DB0;
-    extern f32 lbl_8047E680;
+    extern const f32 lbl_8047E680;
 
   u32 uVar1;
   int iVar2;
@@ -820,6 +830,8 @@ void reliveCeremonyAll(u32 r3)
   u16 sVar7;
   int iVar3;
   u32 uVar4;
+  u32 evo;
+  u32 nick;
 
   u8 auStack_18 [8];
   u8 auStack_1c [4];
@@ -842,8 +854,8 @@ void reliveCeremonyAll(u32 r3)
     std130_soundUnk_801653cc(0x3f7,0,0xff);
     sVar5 = pokemonBiosGetPokemonWazaDataId(uVar1,0);
     if (sVar5 != 0) {
-      uVar2 = pokemonBiosGetNicknamePtr(uVar1);
-      msgctrlSetValue(0x32,uVar2);
+      nick = pokemonBiosGetNicknamePtr(uVar1);
+      msgctrlSetValue(0x32,nick);
       msgctrlSetValue(0x39,sVar5);
       winMsgOpenField(0x3b10,1,0);
     }
@@ -853,17 +865,16 @@ void reliveCeremonyAll(u32 r3)
     winMsgOpenField(0x3b0b,1,0);
     winMsgCloseField(1);
     sVar7 = pokemonBiosGetFriend(uVar1);
-    sVar6 = pokemonBiosGetPoolFriend(uVar1);
-    pokemonBiosSetFriend(uVar1,(u16)((sVar6 + sVar7) + 0x46));
+    pokemonBiosSetFriend(uVar1,(u16)(sVar7 + pokemonBiosGetPoolFriend(uVar1) + 0x46));
     pokemonBiosSetPoolFriend(uVar1,0);
     iVar3 = _expRecover__FP7PokemonUl(uVar1,uVar2);
     if (iVar3 == 1) {
-      uVar4 = pokemonEvolutionCheck(uVar1,0,0,local_28,auStack_18);
-      if (((uVar4 & 0xffff) != 0) && ((uVar4 & 0xffff) != 0xffff)) {
+      evo = pokemonEvolutionCheck(uVar1,0,0,local_28,auStack_18);
+      if (((evo & 0xffff) != 0) && ((evo & 0xffff) != 0xffff)) {
         fadeSet((double)lbl_8047E680,3);
         fadeCheck(1);
         wazaSequenceSysRelease();
-        iVar3 = pokemonEvolutionAll(uVar1,uVar4,local_28[0],auStack_18,0,1,1,0);
+        iVar3 = pokemonEvolutionAll(uVar1,evo,local_28[0],auStack_18,0,1,1,0);
         if (iVar3 == 0) {
           fn_801DADC0(1);
           iVar3 = loadSequence((int*)auStack_1c,uVar1,(u16*)&lbl_80478DB0,1);

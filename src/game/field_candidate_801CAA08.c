@@ -1,4 +1,0 @@
-#define FIELD_801CA7EC_PREFIX_ACTIVE
-#define PR424_FIELD_PREFIX_SPLIT
-#define PR424_FIELD_801CAA08_801CADA0
-#include "src/game/field_range_801CA7EC.c"

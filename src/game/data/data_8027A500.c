@@ -8,11 +8,9 @@ extern void* lbl_802C0CB0[];
 extern u8 lbl_802CF810[];
 extern void* lbl_802E1CF0[];
 extern void* lbl_802E2888[];
-extern void* jumptable_802E28D0[];
 
 extern u8 GSresGetResource[];
 extern u8 GSscene_SetMode[];
-extern u8 Packet_803FFFB0[];
 extern u8 SIInterruptHandler_800CFA60[];
 extern u8 TRKDoStep[];
 extern u8 TRKDoWriteMemory[];
@@ -174,7 +172,7 @@ extern u8 peopleClearFlagsByIndex[];
 extern u8 peopleSetFlagsByIndex[];
 extern u8 std151_characterFaceDirection[];
 extern u8 fn_8018DB68[];
-extern u8 fn_8018E050[];
+extern u8 peopleOpen[];
 extern u8 std081_flagCheckTrue[];
 extern u8 std079_flagSetTrue[];
 extern u8 std078_flagSetFalse[];
@@ -85120,7 +85118,7 @@ void* lbl_802C0CB0[15064] = {
     (void*)0x09FFFF80,
     (void*)0x1DFFFFA0,
     (void*)0x0009FFFF,
-    (void*)((u8*)Packet_803FFFB0 + 0x4F),
+    (void*)0x803FFFFF,
     (void*)0xF0003EFF,
     (void*)0xFFE25FF0,
     (void*)0x3FFCD03F,
@@ -93964,7 +93962,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)std055_characterEndSpeech),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_8018E050),
+    (void*)((u8*)peopleOpen),
     (void*)0x01010000,
     (void*)0x00000000,
     (void*)((u8*)fn_8018DB68),
@@ -94561,13 +94559,6 @@ void* lbl_802E2888[18] = {
     (void*)0x00000000,
 };
 
-void* jumptable_802E28D0[7] = {
-    (void*)((u8*)fn_80006908 + 0x1D8),
-    (void*)((u8*)fn_80006908 + 0x244),
-    (void*)((u8*)fn_80006908 + 0x2B0),
-    (void*)((u8*)fn_80006908 + 0x31C),
-    (void*)((u8*)fn_80006908 + 0x3F4),
-    (void*)((u8*)fn_80006908 + 0x4CC),
-    (void*)((u8*)fn_80006908 + 0x5A4),
-};
+/* 0x802E28D0 - 0x802E28EC (jumptable_802E28D0) belongs to the linked
+ * game/gs_task_residual_80006908.c: it is fn_80006908's own switch table. */
 

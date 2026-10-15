@@ -3,6 +3,11 @@
 #pragma section ".sdata2"
 #define SDATA2 __declspec(section ".sdata2")
 
+#if !defined(BATTLE_WAZA_SDATA2_MIDDLE_8047E350_TO_380) && \
+    !defined(BATTLE_WAZA_SDATA2_SUFFIX_8047E388)
+/* 0x8047E290-0x8047E2E0 is the waza camera file's pool
+ * (game/wazaSequenceCamera_file_801D2D28.c). */
+#ifndef BATTLE_WAZA_SDATA2_FROM_8047E2E0
 SDATA2 const f32 lbl_8047E290 = 1.29999995f;
 SDATA2 const f32 lbl_8047E294 = 1.5f;
 SDATA2 const f32 lbl_8047E298 = 1.20000005f;
@@ -22,6 +27,7 @@ SDATA2 const f32 lbl_8047E2CC = 0.577350259f;
 SDATA2 const f32 lbl_8047E2D0 = 0.800000012f;
 SDATA2 const f32 lbl_8047E2D4 = 40.0f;
 SDATA2 const f32 lbl_8047E2D8[2] = { 48.0f, 0.0f };
+#endif
 SDATA2 const u16 lbl_8047E2E0 = 0x7F7F;
 SDATA2 const u8 lbl_8047E2E2 = 0x7F;
 SDATA2 const f32 lbl_8047E2E4 = 0.0f;
@@ -44,8 +50,17 @@ SDATA2 const f32 lbl_8047E338 = 2.0f;
 SDATA2 const f32 lbl_8047E33C = 4.0f;
 SDATA2 const f32 lbl_8047E340 = 256.0f;
 SDATA2 const f32 lbl_8047E344 = 255.0f;
+#endif
+
+#if !defined(BATTLE_WAZA_SDATA2_PREFIX_8047E290_TO_348) && \
+    !defined(BATTLE_WAZA_SDATA2_MIDDLE_8047E350_TO_380) && \
+    !defined(BATTLE_WAZA_SDATA2_SUFFIX_8047E388)
 SDATA2 const f32 lbl_8047E348 = 0.5f;
 SDATA2 const f32 lbl_8047E34C = 1.0f;
+#endif
+
+#if !defined(BATTLE_WAZA_SDATA2_PREFIX_8047E290_TO_348) && \
+    !defined(BATTLE_WAZA_SDATA2_SUFFIX_8047E388)
 SDATA2 const f32 lbl_8047E350 = 0.0f;
 SDATA2 const f32 lbl_8047E354 = 0.75f;
 SDATA2 const f32 lbl_8047E358 = 1.33329999f;
@@ -58,6 +73,16 @@ SDATA2 const f32 lbl_8047E370 = 0.61500001f;
 SDATA2 const f32 lbl_8047E374 = 0.666999996f;
 SDATA2 const f32 lbl_8047E378 = 0.555000007f;
 SDATA2 const f32 lbl_8047E37C = 0.713999987f;
+#endif
+
+#if !defined(BATTLE_WAZA_SDATA2_PREFIX_8047E290_TO_348) && \
+    !defined(BATTLE_WAZA_SDATA2_MIDDLE_8047E350_TO_380) && \
+    !defined(BATTLE_WAZA_SDATA2_SUFFIX_8047E388)
 SDATA2 const f64 lbl_8047E380 = 4.503601774854144e+15;
+#endif
+
+#if !defined(BATTLE_WAZA_SDATA2_PREFIX_8047E290_TO_348) && \
+    !defined(BATTLE_WAZA_SDATA2_MIDDLE_8047E350_TO_380)
 SDATA2 const f32 lbl_8047E388 = 0.5f;
 SDATA2 const f32 lbl_8047E38C = 0.75f;
+#endif

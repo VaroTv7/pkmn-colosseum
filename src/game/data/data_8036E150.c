@@ -10,9 +10,6 @@ extern u8 lbl_803721C0[];
 extern u8 lbl_803725A0[];
 extern u8 lbl_803725B0[];
 extern u8 lbl_803725BC[];
-extern void* jumptable_803725C8[];
-extern void* jumptable_803725E4[];
-extern void* jumptable_8037260C[];
 extern void* jumptable_80372628[];
 extern void* jumptable_80372660[];
 extern void* jumptable_80372680[];
@@ -31,7 +28,6 @@ extern u8 lbl_80373210[];
 extern u8 lbl_80373750[];
 extern u8 lbl_80374E40[];
 extern u8 lbl_80374F20[];
-extern u8 lbl_803750C8[];
 extern void* jumptable_80375100[];
 extern void* jumptable_80375120[];
 extern void* jumptable_80375160[];
@@ -47,11 +43,11 @@ extern u8 std087_sequenceUnk87[];
 extern u8 std086_sequenceJump86[];
 extern u8 std085_sequenceJump85[];
 extern u8 std084_sequenceJump84[];
-extern u8 wazaSequenceEntryStart[];
-extern u8 wazaSequenceEntryUpdate[];
 
-/* Auto-carved .data unit 0x8036E150..0x803751EC (34 objects). Non-relocated data as byte-exact u8[]; pointer/jump tables as void*[] for R_PPC_ADDR32 relocations. */
+/* Shared data before/after the entry unit's generated tables at
+ * 0x803725C8..0x80372628; the suffix wrapper selects the later objects. */
 
+#if !defined(WAZA_DATA_SUFFIX_80372628)
 u8 lbl_8036E150[9968] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -1539,39 +1535,10 @@ u8 lbl_803725BC[12] = {
     0x3F, 0x80, 0x00, 0x00, 0x3F, 0x80, 0x00, 0x00, 0x3F, 0x80, 0x00, 0x00,
 };
 
-void* jumptable_803725C8[7] = {
-    (void*)((u8*)wazaSequenceEntryUpdate + 0x2E0),
-    (void*)((u8*)wazaSequenceEntryUpdate + 0x260),
-    (void*)((u8*)wazaSequenceEntryUpdate + 0x48),
-    (void*)((u8*)wazaSequenceEntryUpdate + 0x228),
-    (void*)((u8*)wazaSequenceEntryUpdate + 0x1D0),
-    (void*)((u8*)wazaSequenceEntryUpdate + 0x170),
-    (void*)((u8*)wazaSequenceEntryUpdate + 0x2D8),
-};
+#endif
 
-void* jumptable_803725E4[10] = {
-    (void*)((u8*)wazaSequenceEntryStart + 0x1C8),
-    (void*)((u8*)wazaSequenceEntryStart + 0x1D0),
-    (void*)((u8*)wazaSequenceEntryStart + 0x1D8),
-    (void*)((u8*)wazaSequenceEntryStart + 0x1E4),
-    (void*)((u8*)wazaSequenceEntryStart + 0x1F0),
-    (void*)((u8*)wazaSequenceEntryStart + 0x1FC),
-    (void*)((u8*)wazaSequenceEntryStart + 0x204),
-    (void*)((u8*)wazaSequenceEntryStart + 0x20C),
-    (void*)((u8*)wazaSequenceEntryStart + 0x21C),
-    (void*)((u8*)wazaSequenceEntryStart + 0x214),
-};
-
-void* jumptable_8037260C[7] = {
-    (void*)((u8*)wazaSequenceEntryStart + 0x270),
-    (void*)((u8*)wazaSequenceEntryStart + 0x98),
-    (void*)((u8*)wazaSequenceEntryStart + 0xC4),
-    (void*)((u8*)wazaSequenceEntryStart + 0xD8),
-    (void*)((u8*)wazaSequenceEntryStart + 0xEC),
-    (void*)((u8*)wazaSequenceEntryStart + 0x100),
-    (void*)((u8*)wazaSequenceEntryStart + 0x1A0),
-};
-
+#if defined(WAZA_DATA_SUFFIX_80372628)
+#if !defined(WAZA_DATA_SKIP_JUMPTABLE_80372628)
 void* jumptable_80372628[14] = {
     (void*)((u8*)_wazaSequenceEffectEntryStart + 0x32C),
     (void*)((u8*)_wazaSequenceEffectEntryStart + 0xA4),
@@ -1588,7 +1555,9 @@ void* jumptable_80372628[14] = {
     (void*)((u8*)_wazaSequenceEffectEntryStart + 0x348),
     (void*)((u8*)_wazaSequenceEffectEntryStart + 0x304),
 };
+#endif
 
+#if !defined(WAZA_DATA_SKIP_PARTICLE_TABLES)
 void* jumptable_80372660[8] = {
     (void*)((u8*)_wazaSequenceParticleEntryStart + 0x5F0),
     (void*)((u8*)_wazaSequenceParticleEntryStart + 0x3E4),
@@ -1610,7 +1579,9 @@ void* jumptable_80372680[8] = {
     (void*)((u8*)_wazaSequenceParticleEntryStart + 0x6C),
     (void*)((u8*)_wazaSequenceParticleEntryStart + 0x74),
 };
+#endif
 
+#if !defined(WAZA_DATA_SKIP_MODEL_TABLES)
 void* jumptable_803726A0[8] = {
     (void*)((u8*)_wazaSequenceModelEntryStart + 0x428),
     (void*)((u8*)_wazaSequenceModelEntryStart + 0x3B4),
@@ -1643,7 +1614,10 @@ void* jumptable_803726E0[8] = {
     (void*)((u8*)_wazaSequenceModelEntryStart + 0x6C),
     (void*)((u8*)_wazaSequenceModelEntryStart + 0x74),
 };
+#endif
 
+#if !defined(WAZA_DATA_STOP_BEFORE_80372700)
+#if !defined(WAZA_DATA_SKIP_TIME_TABLES)
 void* jumptable_80372700[8] = {
     (void*)((u8*)wazaSequenceSysGetWazaTime + 0x3E4),
     (void*)((u8*)wazaSequenceSysGetWazaTime + 0x3FC),
@@ -1676,7 +1650,10 @@ void* jumptable_80372740[8] = {
     (void*)((u8*)wazaSequenceSysGetWazaTime + 0x16C),
     (void*)((u8*)wazaSequenceSysGetWazaTime + 0x138),
 };
+#endif
 
+/* wazaSequence_r52_801DC014_prefix emits both tables itself. */
+#if !defined(WAZA_DATA_SKIP_JUMPTABLE_80372760)
 void* jumptable_80372760[7] = {
     (void*)((u8*)wazaSequenceLoadData + 0x234),
     (void*)((u8*)wazaSequenceLoadData + 0xD0),
@@ -1702,6 +1679,7 @@ void* jumptable_8037277C[13] = {
     (void*)((u8*)_wazaSequenceEffectEntryLoad + 0x220),
     (void*)((u8*)_wazaSequenceEffectEntryLoad + 0x234),
 };
+#endif
 
 u8 lbl_803727B0[12] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -2603,82 +2581,9 @@ u8 lbl_80374F20[424] = {
     0x00, 0x00, 0x00, 0x00,
 };
 
-u8 lbl_803750C8[56] = {
-    0xC1, 0xA0, 0x00, 0x00, 0x41, 0x20, 0x00, 0x00, 0x41, 0x08, 0x00, 0x00,
-    0xC1, 0x70, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC1, 0x41, 0x99, 0x9A,
-    0xC1, 0x70, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC2, 0x04, 0x66, 0x66,
-    0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00, 0x04, 0x00, 0x05,
-    0x00, 0x06, 0x00, 0x07, 0x00, 0x08, 0x00, 0x00,
-};
 
-void* jumptable_80375100[8] = {
-    (void*)((u8*)std087_sequenceUnk87 + 0x140),
-    (void*)((u8*)std087_sequenceUnk87 + 0x240),
-    (void*)((u8*)std087_sequenceUnk87 + 0x25C),
-    (void*)((u8*)std087_sequenceUnk87 + 0x2C4),
-    (void*)((u8*)std087_sequenceUnk87 + 0x2E0),
-    (void*)((u8*)std087_sequenceUnk87 + 0x300),
-    (void*)((u8*)std087_sequenceUnk87 + 0x300),
-    (void*)((u8*)std087_sequenceUnk87 + 0x2FC),
-};
+/* 0x803750C8..0x803751EC (lbl_803750C8 and four switch tables) is
+ * game/etctool.c's own .data. */
+#endif
 
-void* jumptable_80375120[16] = {
-    (void*)((u8*)std086_sequenceJump86 + 0x40),
-    (void*)((u8*)std086_sequenceJump86 + 0x5C),
-    (void*)((u8*)std086_sequenceJump86 + 0x78),
-    (void*)((u8*)std086_sequenceJump86 + 0x94),
-    (void*)((u8*)std086_sequenceJump86 + 0xBC),
-    (void*)((u8*)std086_sequenceJump86 + 0x130),
-    (void*)((u8*)std086_sequenceJump86 + 0x1A0),
-    (void*)((u8*)std086_sequenceJump86 + 0x1BC),
-    (void*)((u8*)std086_sequenceJump86 + 0x244),
-    (void*)((u8*)std086_sequenceJump86 + 0x2B0),
-    (void*)((u8*)std086_sequenceJump86 + 0x2CC),
-    (void*)((u8*)std086_sequenceJump86 + 0x2E4),
-    (void*)((u8*)std086_sequenceJump86 + 0x3E0),
-    (void*)((u8*)std086_sequenceJump86 + 0x3FC),
-    (void*)((u8*)std086_sequenceJump86 + 0x42C),
-    (void*)((u8*)std086_sequenceJump86 + 0x480),
-};
-
-void* jumptable_80375160[22] = {
-    (void*)((u8*)std085_sequenceJump85 + 0x60),
-    (void*)((u8*)std085_sequenceJump85 + 0x80),
-    (void*)((u8*)std085_sequenceJump85 + 0xB0),
-    (void*)((u8*)std085_sequenceJump85 + 0x120),
-    (void*)((u8*)std085_sequenceJump85 + 0x13C),
-    (void*)((u8*)std085_sequenceJump85 + 0x158),
-    (void*)((u8*)std085_sequenceJump85 + 0x174),
-    (void*)((u8*)std085_sequenceJump85 + 0x19C),
-    (void*)((u8*)std085_sequenceJump85 + 0x2E4),
-    (void*)((u8*)std085_sequenceJump85 + 0x300),
-    (void*)((u8*)std085_sequenceJump85 + 0x31C),
-    (void*)((u8*)std085_sequenceJump85 + 0x358),
-    (void*)((u8*)std085_sequenceJump85 + 0x3B8),
-    (void*)((u8*)std085_sequenceJump85 + 0x3E8),
-    (void*)((u8*)std085_sequenceJump85 + 0x438),
-    (void*)((u8*)std085_sequenceJump85 + 0x454),
-    (void*)((u8*)std085_sequenceJump85 + 0x518),
-    (void*)((u8*)std085_sequenceJump85 + 0x630),
-    (void*)((u8*)std085_sequenceJump85 + 0x648),
-    (void*)((u8*)std085_sequenceJump85 + 0x664),
-    (void*)((u8*)std085_sequenceJump85 + 0x680),
-    (void*)((u8*)std085_sequenceJump85 + 0x754),
-};
-
-void* jumptable_803751B8[13] = {
-    (void*)((u8*)std084_sequenceJump84 + 0x40),
-    (void*)((u8*)std084_sequenceJump84 + 0x70),
-    (void*)((u8*)std084_sequenceJump84 + 0x8C),
-    (void*)((u8*)std084_sequenceJump84 + 0xC8),
-    (void*)((u8*)std084_sequenceJump84 + 0x104),
-    (void*)((u8*)std084_sequenceJump84 + 0x178),
-    (void*)((u8*)std084_sequenceJump84 + 0x1B8),
-    (void*)((u8*)std084_sequenceJump84 + 0x20C),
-    (void*)((u8*)std084_sequenceJump84 + 0x244),
-    (void*)((u8*)std084_sequenceJump84 + 0x284),
-    (void*)((u8*)std084_sequenceJump84 + 0x2D8),
-    (void*)((u8*)std084_sequenceJump84 + 0x318),
-    (void*)((u8*)std084_sequenceJump84 + 0x358),
-};
-
+#endif

@@ -1,0 +1,21 @@
+#include "dolphin/types.h"
+
+#pragma section ".data"
+
+extern u8 lbl_80313608[];
+
+/* .data 0x80313608..0x80313628: GXPixel's pixel-format table.
+ * The preceding TEV presets and GXSetTevOrder's c2r table are owned by
+ * dolphin/gx/GXTev.c. */
+
+u8 lbl_80313608[32] = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02,
+    0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04,
+    0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x05,
+};
+
+/* 0x80313628 - 0x80313770 (GXPerf.c's switch tables) is owned by
+ * dolphin/sdk_r52_800BD7A0_prefix.c. */
+
+/* 0x80313770 - 0x803137DC (jumptable_80313770) is TRKDispatchMessage's own
+ * switch table, owned by the linked dolphin/sdk_range_800BF33C.c. */

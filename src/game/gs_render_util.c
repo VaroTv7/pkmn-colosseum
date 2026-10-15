@@ -64,7 +64,7 @@ extern void HSD_CObjSetProjectionType(void* jobj, u32 flag, f32 a, f32 b, f32 c,
 extern void HSD_CObjSetPerspective(void* jobj, f32 x, f32 y);
 extern void HSD_CObjSetNear(void* jobj, f32 z);
 extern void HSD_CObjSetFar(void* jobj, f32 w);
-extern void HSD_CObjSetScissorx4(void* jobj, u32 x0, u32 x1, u32 y0, u32 y1);
+extern void HSD_CObjSetScissorx4(void* cobj, u16 left, u16 right, u16 top, u16 bottom);
 extern void HSD_CObjSetViewport(void* jobj, void* rect);
 extern void HSD_CObjGetPerspective(void* jobj, void* outA, void* outB);
 extern f32  HSD_CObjGetNear(void* jobj);
@@ -112,7 +112,13 @@ extern f32 lbl_8047CA00;   /* SDA2 float constant */
 extern f32 lbl_8047CA04;   /* SDA2 float constant */
 extern f32 lbl_8047CA08;   /* SDA2 float constant */
 extern f32 lbl_8047CA0C;   /* SDA2 float constant */
-extern u32 lbl_80270350[4]; /* .rodata array */
+typedef struct GSRenderColor {
+    f32 r;
+    f32 g;
+    f32 b;
+    f32 a;
+} GSRenderColor;
+extern GSRenderColor lbl_80270350; /* .rodata zero-color value */
 extern void* gfxGetCameraMatrix(u32 idx);
 extern void GSvecTransform(void* out, void* sphere, void* ray);
 extern void GXProject(void* sphere, void* center, void* radii, f32 x, f32 y, f32 z, void* outA, void* outB, void* outC);
@@ -253,8 +259,6 @@ void fn_800D13C4(void) {
  * Address: 0x800D13C8, Size: 0x2AC
  * Copies state from src (saved snapshot) into dst (render object).
  * ================================================================== */
-#pragma push
-#pragma scheduling on
 void fn_800D13C8(void* dst, void* src) {
     GSRenderCamera* c = (GSRenderCamera*)dst;
     GSRenderCameraSnapshot* s = (GSRenderCameraSnapshot*)src;
@@ -323,7 +327,6 @@ done:
         ;
     }
 }
-#pragma pop
 
 /* ==================================================================
  * fn_800D1674 - GS render: copy object data to dest struct
@@ -379,8 +382,6 @@ void GScameraStopAnimation(GSRenderCamera* camera) {
  * GScameraStartAnimation - GS render: advance object animation by speed
  * Address: 0x800D1798, Size: 0xC0
  * ================================================================== */
-#pragma push
-#pragma scheduling on
 void GScameraStartAnimation(GSRenderCamera* camera) {
     if (camera->hasAnimation != 0) {
         f32 speed;
@@ -397,7 +398,6 @@ void GScameraStartAnimation(GSRenderCamera* camera) {
         }
     }
 }
-#pragma pop
 
 /* ==================================================================
  * fn_800D1858 - GS render: set object fields 0x10c and 0x114
@@ -440,8 +440,6 @@ void GScameraSetAnimRate(GSRenderCamera* camera, f32 rate) {
  * GScameraSetAnimIndex - GS render: set object animation frame index
  * Address: 0x800D1984, Size: 0xB4
  * ================================================================== */
-#pragma push
-#pragma scheduling on
 void GScameraSetAnimIndex(GSRenderCamera* camera, u32 animIndex) {
     if (camera->hasAnimation != 0) {
         HSD_CObjRemoveAnim(camera->cobj);
@@ -455,7 +453,6 @@ void GScameraSetAnimIndex(GSRenderCamera* camera, u32 animIndex) {
         }
     }
 }
-#pragma pop
 
 /* ==================================================================
  * GScameraIsAnimating - GS render: get object active flag (field_0x4)
@@ -479,8 +476,6 @@ void GScameraGetDistanceVector(GSRenderCamera* camera, GSRenderVec3* dest) {
  * Sets up light/camera data from a JObj, writes to lbl_804001B0.
  * Returns pointer to lbl_804001B0.
  * ================================================================== */
-#pragma push
-#pragma scheduling on
 void* GScameraGetProjMatrixPtr(GSRenderCamera* camera) {
     f32 x, z;
     f32 out3, out2, out1, out0;
@@ -497,7 +492,6 @@ void* GScameraGetProjMatrixPtr(GSRenderCamera* camera) {
     }
     return lbl_804001B0;
 }
-#pragma pop
 #endif
 
 #if defined(GS_RENDER_UTIL_SUFFIX_800D1B3C)
@@ -691,12 +685,12 @@ void GScameraSetPerspective(GSRenderCamera* camera, f32 x, f32 y, f32 z, f32 w) 
  * fn_800D2150 - GS render: set scissor rect (clamped)
  * Address: 0x800D2150, Size: 0x78
  * ================================================================== */
-void fn_800D2150(GSRenderCamera* camera, u32 x0, u32 y0, u32 x1, u32 y1) {
-    if ((u16)x0 > 0x27e) x0 = 0x27e;
-    if ((u16)y0 > 0x1de) y0 = 0x1de;
-    if ((u16)x1 > 0x27f) x1 = 0x27f;
-    if ((u16)y1 > 0x1df) y1 = 0x1df;
-    HSD_CObjSetScissorx4(camera->cobj, (u16)x0, (u16)(x1 + 1), (u16)y0, (u16)(y1 + 1));
+void fn_800D2150(GSRenderCamera* camera, u16 x0, u16 y0, u16 x1, u16 y1) {
+    if (x0 > 0x27e) x0 = 0x27e;
+    if (y0 > 0x1de) y0 = 0x1de;
+    if (x1 > 0x27f) x1 = 0x27f;
+    if (y1 > 0x1df) y1 = 0x1df;
+    HSD_CObjSetScissorx4(camera->cobj, x0, x1 + 1, y0, y1 + 1);
 }
 
 /* ==================================================================
@@ -840,13 +834,13 @@ void fn_800D258C(void* obj) {
         GSvecSub(tmp, &c->eye, &c->interest);
         {
             f32 ax = tmp[0];
-            ax = ax > lbl_8047C998 ? ax : -ax;
+            ax = lbl_8047C998 < ax ? ax : -ax;
             if (ax < lbl_80478ACC[0]) {
                 f32 ay = tmp[1];
-                ay = ay > lbl_8047C998 ? ay : -ay;
+                ay = lbl_8047C998 < ay ? ay : -ay;
                 if (ay < lbl_80478ACC[0]) {
                     f32 az = tmp[2];
-                    az = az > lbl_8047C998 ? az : -az;
+                    az = lbl_8047C998 < az ? az : -az;
                     if (az < lbl_80478ACC[0]) {
                         f32 v = c->interest.x;
                         c->interest.x = (f32)(v + lbl_8047C9A0);
@@ -1044,10 +1038,6 @@ found:
  * Allocates and zero-initializes an array of count render objects
  * (each 0x128 bytes). Stores array ptr to lbl_8047AA6C.
  * ================================================================== */
-#pragma push
-#pragma scheduling on
-#pragma push
-#pragma optimization_level 1
 void fn_800D2AD4(u32 count) {
     u32 raw;
     u32 masked;
@@ -1070,8 +1060,6 @@ void fn_800D2AD4(u32 count) {
         }
     }
 }
-#pragma pop
-#pragma pop
 
 /* ==================================================================
  * fn_800D2B44 - GS render: animation step callback
@@ -1086,184 +1074,9 @@ void fn_800D2B44(void* obj) {
     lbl_8047AA78 = lbl_8047C990 + *(f32*)((u8*)obj + 0xc);
 }
 
-/* ==================================================================
- * fn_800D2B90 - GS render: set current lighting context
- * Address: 0x800D2B90, Size: 0x258
- * ================================================================== */
-#pragma push
-#pragma optimization_level 2
-void gfxSetFog(void* arg1) {
-    u32 savedColors[4];
-    void* prevLight;
-    savedColors[0] = lbl_80270350[0];
-    savedColors[1] = lbl_80270350[1];
-    savedColors[2] = lbl_80270350[2];
-    savedColors[3] = lbl_80270350[3];
-    prevLight = (void*)lbl_8047AA8C;
-    if (prevLight != 0) {
-        u16 ref = *(u16*)((u8*)prevLight + 0x4);
-        if (ref != 0xffff) {
-            *(u16*)((u8*)prevLight + 0x4) = ref - 1;
-            if (ref != 0) {
-                if (prevLight != 0) {
-                    void** vtable = *(void***)prevLight;
-                    ((void(*)(void*))vtable[0xc])(prevLight);
-                    vtable = *(void***)prevLight;
-                    ((void(*)(void*))vtable[0xd])(prevLight);
-                }
-            }
-        }
-        lbl_8047AA8C = 0;
-    }
-    if (arg1 == 0) {
-        HSD_FogSet(0);
-        fn_8016EA88();
-        return;
-    }
-    {
-        void* state = HSD_FogLoadDesc(arg1);
-        lbl_8047AA8C = (u32)state;
-    }
-    fn_8016EB30();
-    {
-        u8 r = *(u8*)((u8*)arg1 + 0x10);
-        u8 g = *(u8*)((u8*)arg1 + 0x11);
-        u8 b2 = *(u8*)((u8*)arg1 + 0x12);
-        u8 a = *(u8*)((u8*)arg1 + 0x13);
-        f32 scale = lbl_8047C9F0;
-        f32 fr, fg, fb2, fa;
-        GSRenderState* rs = (GSRenderState*)lbl_8047AA80;
-        fr = (f32)r;
-        fg = (f32)g;
-        fb2 = (f32)b2;
-        fa = (f32)a;
-        fr = fr / scale;
-        fg = fg / scale;
-        fb2 = fb2 / scale;
-        fa = fa / scale;
-        rs->fogEnabled = 1;
-        rs->fogColorR = (u8)(s32)(fr * scale);
-        rs->fogColorG = (u8)(s32)(fg * scale);
-        rs->fogColorB = (u8)(s32)(fb2 * scale);
-        rs->fogColorA = (u8)(s32)(fa * scale);
-        if (rs->fogColorR == 0 &&
-            rs->fogColorG == 0 &&
-            rs->fogColorB == 0 &&
-            rs->fogColorA == 0) {
-            rs->fogEnabled = 0;
-        }
-    }
-}
-#pragma pop
-
-/* ==================================================================
- * fn_800D2DE8 - GS render: sphere/ray intersection loop
- * Address: 0x800D2DE8, Size: 0x14C
- * ================================================================== */
-s32 fn_800D2DE8(void* arg1, void* arg2, u32 count) {
-    u32 n = count;
-    void* sphere;
-    u32 i;
-    void* rays = arg1;
-    void* out = arg2;
-    s32 result;
-    void* model;
-    sphere = gfxGetCameraMatrix(0);
-    model = gfxGetCameraMatrix(2);
-    if (sphere == 0 || model == 0) {
-        return 0;
-    }
-    {
-        f32 center[7];
-        f32 radii[6];
-        center[0] = lbl_8047CA00;
-        center[1] = *(f32*)((u8*)model + 0x0);
-        center[2] = *(f32*)((u8*)model + 0x8);
-        center[3] = *(f32*)((u8*)model + 0x14);
-        center[4] = *(f32*)((u8*)model + 0x18);
-        center[5] = *(f32*)((u8*)model + 0x28);
-        center[6] = *(f32*)((u8*)model + 0x2c);
-        radii[0] = lbl_8047CA00;
-        radii[1] = lbl_8047CA00;
-        radii[2] = lbl_8047CA04;
-        radii[3] = lbl_8047CA08;
-        radii[4] = lbl_8047CA00;
-        radii[5] = lbl_8047CA0C;
-        result = 2;
-        i = 0;
-        while (i < n) {
-            f32 test[3];
-            GSvecTransform(test, sphere, rays);
-            if (test[2] >= *(f32*)((u8*)model + 0x2c)) {
-                f32 val = lbl_8047CA0C;
-                result = 3;
-                *(f32*)((u8*)out + 0x8) = val;
-                *(f32*)((u8*)out + 0x4) = val;
-                *(f32*)((u8*)out + 0x0) = val;
-            } else {
-                GXProject(sphere,
-                    center,
-                    radii,
-                    *(f32*)((u8*)rays + 0x0),
-                    *(f32*)((u8*)rays + 0x4),
-                    *(f32*)((u8*)rays + 0x8),
-                    out,
-                    (u8*)out + 0x4,
-                    (u8*)out + 0x8);
-            }
-            i++;
-            rays = (u8*)rays + 0xc;
-            out = (u8*)out + 0xc;
-        }
-        return result;
-    }
-}
-
-/* ==================================================================
- * fn_800D2F34 - GS render: single sphere/ray intersection
- * Address: 0x800D2F34, Size: 0x128
- * ================================================================== */
-s32 gfxWorldToScreen(void* arg1, void* arg2) {
-    f32 center[7];
-    f32 radii[6];
-    f32 testOut[3];
-    void* sphere = gfxGetCameraMatrix(0);
-    void* model = gfxGetCameraMatrix(2);
-    if (sphere == 0 || model == 0) {
-        return 0;
-    }
-    GSvecTransform(testOut, sphere, arg1);
-    {
-        f32 t = *(volatile f32*)&testOut[2];
-        f32 model2c = *(f32*)((u8*)model + 0x2c);
-        if (t >= model2c) {
-            return 1;
-        }
-        center[0] = lbl_8047CA00;
-        center[1] = *(f32*)((u8*)model + 0x0);
-        center[2] = *(f32*)((u8*)model + 0x8);
-        center[3] = *(f32*)((u8*)model + 0x14);
-        center[4] = *(f32*)((u8*)model + 0x18);
-        center[5] = *(f32*)((u8*)model + 0x28);
-        center[6] = model2c;
-    }
-    radii[0] = lbl_8047CA00;
-    radii[1] = lbl_8047CA00;
-    radii[2] = lbl_8047CA04;
-    radii[3] = lbl_8047CA08;
-    radii[4] = lbl_8047CA00;
-    radii[5] = lbl_8047CA0C;
-    GXProject(sphere,
-        center,
-        radii,
-        *(f32*)((u8*)arg1 + 0x0),
-        *(f32*)((u8*)arg1 + 0x4),
-        *(f32*)((u8*)arg1 + 0x8),
-        arg2,
-        (u8*)arg2 + 0x4,
-        (u8*)arg2 + 0x8);
-    return 2;
-}
+/* fn_800D2B90 (fog setter) through fn_800D3068, 0x800D2B90 - 0x800D3074, are
+ * linked from gs_gfx_range_800D2B90.c together with the GSgfx functions up
+ * to fn_800D36B4 and their .sdata2 literal pool. */
 
 /* ==================================================================
  * fn_800D305C - GS render: get frame counter

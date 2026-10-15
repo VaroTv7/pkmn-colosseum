@@ -138,6 +138,7 @@ extern void  fn_800FB680(s32, s32, u32, u16);
  * Stubs for remaining GSnpcEvt functions (0x80031188-0x800330B8)
  * ========================================================================= */
 
+#if !defined(GS_NPC_EVENT_ONLY_800324A0) && !defined(GS_NPC_EVENT_ONLY_800301B0) && !defined(GS_NPC_EVENT_ONLY_80032ED8)
 /* 0x80031188 | 0xA0 */
 extern u8 lbl_803A2688[];
 #if 0
@@ -145,7 +146,6 @@ asm void fn_80031188(void) {
 #include "src/game/gs_npc_event_fn_80031188.inc"
 }
 #else
-#pragma peephole off
 void fn_80031188(u8* r3, u8* r4) {
     u32 flags = *(u32*)(r4 + 0x64);
     s32 evtype = *(s16*)(r4 + 0x6);
@@ -163,7 +163,6 @@ void fn_80031188(u8* r3, u8* r4) {
         break;
     }
 }
-#pragma peephole on
 #endif
 
 /* 0x80031228 | 0x1DC */
@@ -178,8 +177,6 @@ asm void fn_80031228(void) {
 #include "src/game/gs_npc_event_fn_80031228.inc"
 }
 #else
-#pragma push
-#pragma peephole off
 void fn_80031228(u8* arg0, u8* arg1) {
     u8* table;
     s32 kind;
@@ -215,7 +212,6 @@ void fn_80031228(u8* arg0, u8* arg1) {
         winSpriteSetDisp(arg1, 0);
     }
 }
-#pragma pop
 #endif
 
 /* 0x80031404 | 0x244 */
@@ -227,8 +223,6 @@ asm void fn_80031404(void) {
 #include "src/game/gs_npc_event_fn_80031404.inc"
 }
 #else
-#pragma push
-#pragma peephole off
 void fn_80031404(u8* arg0, u8* arg1) {
     u8* table;
     u32 combined;
@@ -288,7 +282,6 @@ void fn_80031404(u8* arg0, u8* arg1) {
         winSpriteSetDisp(arg1, 0);
     }
 }
-#pragma pop
 #endif
 
 /* 0x80031648 | 0x290 */
@@ -299,8 +292,6 @@ asm void fn_80031648(void) {
 #include "src/game/gs_npc_event_fn_80031648.inc"
 }
 #else
-#pragma push
-#pragma peephole off
 void fn_80031648(u8* arg0, u8* arg1) {
     u8* table;
     s32 group;
@@ -353,7 +344,6 @@ grp_done:
     fn_800FB680((s16)x, 0, -1, 0xE7);
     winSpriteSetDisp(arg1, 1);
 }
-#pragma pop
 #endif
 
 /* 0x800318D8 | 0x144 -- scan 12-entry table for matching species, dispatch to winSpriteSetDisp */
@@ -401,7 +391,6 @@ asm void fn_80031A1C(void) {
 #include "src/game/gs_npc_event_fn_80031A1C.inc"
 }
 #else
-#pragma peephole off
 void fn_80031A1C(void* r3, void* r4) {
     s32 val = (s32)lbl_8047A42C;
     switch (val) {
@@ -414,7 +403,6 @@ void fn_80031A1C(void* r3, void* r4) {
         break;
     }
 }
-#pragma peephole on
 #endif
 
 /* 0x50 | fn_80031A70 | generic */
@@ -425,7 +413,6 @@ asm void fn_80031A70(void) {
 #include "src/game/gs_npc_event_fn_80031A70.inc"
 }
 #else
-#pragma peephole off
 void fn_80031A70(void* r3, void* r4) {
     s32 val = (s32)lbl_8047A42C;
     switch (val) {
@@ -441,7 +428,6 @@ void fn_80031A70(void* r3, void* r4) {
         break;
     }
 }
-#pragma peephole on
 #endif
 
 /* 0x50 | fn_80031AC0 | generic */
@@ -452,7 +438,6 @@ asm void fn_80031AC0(void) {
 #include "src/game/gs_npc_event_fn_80031AC0.inc"
 }
 #else
-#pragma peephole off
 void fn_80031AC0(void* r3, void* r4) {
     s32 val = (s32)lbl_8047A42C;
     switch (val) {
@@ -468,7 +453,6 @@ void fn_80031AC0(void* r3, void* r4) {
         break;
     }
 }
-#pragma peephole on
 #endif
 
 /* 0x80031B10 | 0x3C */
@@ -481,14 +465,12 @@ asm void fn_80031B10(void) {
 #include "src/game/gs_npc_event_fn_80031B10.inc"
 }
 #else
-#pragma peephole off
 void fn_80031B10(void) {
     while ((u8)fn_8010B560() != 0) {
         _threadSwitch();
     }
     std113_mapObjectUnk_8018db68(lbl_8047A418);
 }
-#pragma peephole on
 #endif
 
 /* 0x80031B4C | 0x954 */
@@ -555,613 +537,360 @@ asm void fn_80031B4C(void) {
 #include "src/game/gs_npc_event_fn_80031B4C.inc"
 }
 #else
+typedef struct NpcEventLinkRequest {
+    u32 words[4];
+} NpcEventLinkRequest;
+
+static inline void NpcEventShowMenuSprite(s32 menu, s32 id, s32 sprite)
+{
+    extern u8* windowSearchItemID(u32, s32);
+    extern u32 windowSearchID(s32);
+    extern void winSpriteSetDisp(void*, s32);
+    u32 window = windowSearchID(menu);
+    u8* item = windowSearchItemID(window, id);
+
+    if (window != 0 && item != NULL) {
+        winSpriteSetDisp(item, 1);
+        *(u32*)(item + 0x4C) = sprite;
+    }
+}
+
+static inline void NpcEventHideMenuSprite(s32 menu, s32 id)
+{
+    extern u8* windowSearchItemID(u32, s32);
+    extern u32 windowSearchID(s32);
+    extern void winSpriteSetDisp(void*, s32);
+    u32 window = windowSearchID(menu);
+    u8* item = windowSearchItemID(window, id);
+
+    if (window != 0 && item != NULL) {
+        *(u32*)(item + 0x4C) = 0;
+        winSpriteSetDisp(item, 0);
+    }
+}
+
+static inline s32 NpcEventRunChoiceMenu(s32 yes_sprite, s32 no_sprite)
+{
+    extern s32 menuOpenCustom(s32, u32, void*, s32, s32, s32, ...);
+    extern u32 windowGetActiveID();
+    extern void windowCheckCursor(s32, s32);
+    extern s32 windowGetValue(s32);
+    extern s32 menuGetCursor(s32);
+    extern void menuClose();
+    s32 open_arg;
+    s32 value;
+    s32 cursor;
+
+    open_arg = 1;
+    menuOpenCustom(0xE3, windowGetActiveID(), &open_arg, 0, 0, 0);
+    NpcEventShowMenuSprite(0xE3, 0x102A, yes_sprite);
+    NpcEventShowMenuSprite(0xE3, 0x1029, no_sprite);
+    windowCheckCursor(0xE3, 1);
+    value = windowGetValue(0xE3);
+    cursor = menuGetCursor(0xE3);
+    menuClose(0xE3);
+    if (value == -1) {
+        cursor = -1;
+    }
+    return cursor;
+}
+
 #pragma push
-#pragma optimization_level 2
+#pragma peephole off
 void fn_80031B4C(void) {
-    extern u8 lbl_80266F90[];
-    extern u8 lbl_803A2518[];
-    extern u8 lbl_804788B0;
-    extern u8 lbl_8047A409;
-    extern u8 lbl_8047A40A;
-    extern u8 lbl_8047A410;
-    extern u32 lbl_8047A414;
-    extern u32 lbl_8047A420;
-    extern u32 lbl_8047A424;
-    extern u32 lbl_8047A428;
-    extern u32 lbl_8047A42C;
-    extern f32 lbl_8047B9D0;
-    extern f32 lbl_8047B9D4;
     extern void fn_8001E074();
-    extern void stateFunctionSaveReport();
-    extern void stateFunctionEvolution();
-    extern void stateFunctionExChangeMain();
-    extern void fn_8002E460();
-    extern void fn_8002EA5C();
-    extern void fn_8002EE74();
-    extern void fn_8002F284();
-    extern void fn_8002F79C();
-    extern void fn_8002FC58();
+    extern void stateFunctionSaveReport(s32);
+    extern void stateFunctionEvolution(void);
+    extern void stateFunctionExChangeMain(void);
+    extern void fn_8002E460(s32);
+    extern void fn_8002EA5C(void);
+    extern void fn_8002EE74(void);
+    extern void fn_8002F284(void);
+    extern void fn_8002F79C(void);
+    extern void fn_8002FC58(void);
     extern s32 fn_800849B4(s32 mode, s32 command, void* input, void* output);
-    extern void fn_80097CD0();
-    extern void GSmodelSetVisibility();
-    extern void fn_800FF52C();
+    extern void fn_80097CD0(s32, s32, s32);
+    extern void GSmodelSetVisibility(u32, s32);
+    extern u8 fn_800FF52C();
     extern void fn_800FF660();
     extern s32 menuGetLastError();
-    extern void fn_801021F8();
-    extern void menuSetDisp();
-    extern u32 menuGetCursor();
+    extern void fn_801021F8(s32, s32);
+    extern void menuSetDisp(s32, s32);
+    extern s32 menuGetCursor(s32);
     extern void fn_801024E8();
     extern void menuClose();
     extern void menuOpen();
-    extern void menuOpenCustom();
-    extern void menuSetEnablePort();
-    extern u32 windowGetValue();
-    extern void windowCheckCursor();
+    extern s32 menuOpenCustom(s32, u32, void*, s32, s32, s32, ...);
+    extern void menuSetEnablePort(s32);
+    extern s32 windowGetValue(s32);
+    extern void windowCheckCursor(s32, s32);
     extern u32 windowGetActiveID();
-    extern u32 windowSearchItemID();
-    extern u32 windowSearchID();
+    extern u8* windowSearchItemID(u32, s32);
+    extern u32 windowSearchID(s32);
     extern void winMsgClose();
     extern void winMsgOpen();
-    extern void winSpriteSetDisp();
-    extern void fn_80109C88();
-    extern void fn_8010A420();
-    extern void menuModelInit();
+    extern void winSpriteSetDisp(void*, s32);
+    extern void fn_80109C88(void*, s32);
+    extern void fn_8010A420(void*);
+    extern void menuModelInit(void*, s32, s32);
     extern void floorLink();
-    extern void floorGetPrevFloorID();
-    extern void pokemonBiosSetFriend();
-    extern void* pokemonBiosGetNicknamePtr(void* pokemon);
-    extern void fadeCheck();
-    extern void fadeSet();
-    extern void fn_801D0314();
-    extern void fn_801D036C();
-    extern void fn_8025FF9C();
-    u8 sp[0x40];
-    u32 tmp = 0;
-    u32 r3 = 0;
-    u32 r4 = 0;
-    u32 r5 = 0;
-    u32 r6 = 0;
-    u32 r7 = 0;
-    u32 r8 = 0;
-    u32 r9 = 0;
-    u32 r10 = 0;
-    u32 r26 = 0;
-    u32 r27 = 0;
-    u32 r28 = 0;
-    u32 r29 = 0;
-    u32 r30 = 0;
-    u32 r31 = 0;
-    f32 f1 = 0.0f;
-    void (*ctr_fn)(void) = 0;
+    extern s32 floorGetPrevFloorID();
+    extern void pokemonBiosSetFriend(s32, s32);
+    extern s32 pokemonBiosGetNicknamePtr(s32 pokemon);
+    extern void memoDataSet(s32, s32);
+    extern s8 menuSubOpenYesNo(s32, s32, s32, s32);
+    extern void fadeCheck(s32);
+    extern void fadeSet(s32, f32);
+    extern void fn_801D0314(s32);
+    extern s32 fn_801D036C(void);
+    u8* base;
+    s32 handle;
+    s32 work0;
+    s32 work1;
+    s32 work2;
+    s32 work3;
 
-    tmp = lbl_8047A409;
-    r3 = 0x1;
-    r4 = (u32)lbl_803A2518;
-    lbl_804788B0 = r3;
-    r31 = (u32)lbl_803A2518;
-    if (tmp != 1) {
-        fn_801D036C();
-        r30 = r3;
-        goto L_800323E4;
-    do {
-            if (tmp <= 0x13) {
-                switch (tmp) {
+    base = lbl_803A2518;
+    lbl_804788B0 = 1;
+    if (lbl_8047A409 != 1) {
+        handle = fn_801D036C();
+        while ((s32)lbl_8047A42C > 0) {
+            switch ((s32)lbl_8047A42C) {
+            case 1: {
+                NpcEventLinkRequest request;
+
+                request = *(const NpcEventLinkRequest*)lbl_80266F90;
+                if (fn_800849B4(0, 1, &request, 0) < 0) {
+                    lbl_8047A40A = 0;
+                    lbl_8047A42C = 0;
+                } else {
+                    lbl_8047A42C = 2;
+                }
+                break;
+            }
+            case 2:
+                fn_8002FC58();
+                break;
+            case 3:
+                fn_801021F8(0xD9, 0);
+                work0 = NpcEventRunChoiceMenu(0x43E4, 0x43E5);
+                switch (work0) {
                 case 1:
-                    fn_8002FC58();
-                    goto L_800323E4;
-                case 2:
-                    fn_801021F8(0xd9, 0);
-                    *(u32*)(sp + 0xC) = 1;
-                    r28 = windowGetActiveID();
-                    menuOpenCustom(0xe3, r28, sp + 0xC, 0, 0, 0);
-
-                    r28 = windowSearchID(0xe3);
-                    r29 = windowSearchItemID(r28, 0x102a);
-                    if ((r28 != 0) && (r29 != 0)) {
-                        winSpriteSetDisp(r29, 1);
-                        *(u32*)((u8*)r29 + 0x4C) = 0x43e4;
-                    }
-
-                    r28 = windowSearchID(0xe3);
-                    r29 = windowSearchItemID(r28, 0x1029);
-                    if ((r28 != 0) && (r29 != 0)) {
-                        winSpriteSetDisp(r29, 1);
-                        *(u32*)((u8*)r29 + 0x4C) = 0x43e5;
-                    }
-
-                    windowCheckCursor(0xe3, 1);
-                    r29 = windowGetValue(0xe3);
-                    r26 = menuGetCursor(0xe3);
-                    menuClose(0xe3);
-                    if ((s32)r29 == -1) {
-                        r26 = -1;
-                    }
-                    if ((s32)r26 == 0) {
-                        lbl_8047A42C = 6;
-                    } else if ((s32)r26 < 0) {
-                        if ((s32)r26 >= -1) {
-                            lbl_8047A42C = 2;
-                        }
-                    } else if ((s32)r26 < 2) {
-                        lbl_8047A42C = 5;
-                    }
-                    goto L_800323E4;
-                case 3:
-                    fn_801021F8(0xd9, 0);
-                    r28 = windowSearchID(0xd9);
-                    r29 = windowSearchItemID(r28, 0x10b2);
-                    if ((r28 != 0) && (r29 != 0)) {
-                        *(u32*)((u8*)r29 + 0x4C) = 0;
-                        winSpriteSetDisp(r29, 0);
-                    }
-
-                    *(u32*)(sp + 8) = 1;
-                    r28 = windowGetActiveID();
-                    menuOpenCustom(0xe3, r28, sp + 8, 0, 0, 0);
-
-                    r28 = windowSearchID(0xe3);
-                    r29 = windowSearchItemID(r28, 0x102a);
-                    if ((r28 != 0) && (r29 != 0)) {
-                        winSpriteSetDisp(r29, 1);
-                        *(u32*)((u8*)r29 + 0x4C) = 0x43d4;
-                    }
-
-                    r28 = windowSearchID(0xe3);
-                    r29 = windowSearchItemID(r28, 0x1029);
-                    if ((r28 != 0) && (r29 != 0)) {
-                        winSpriteSetDisp(r29, 1);
-                        *(u32*)((u8*)r29 + 0x4C) = 0x43d5;
-                    }
-
-                    windowCheckCursor(0xe3, 1);
-                    r29 = windowGetValue(0xe3);
-                    r26 = menuGetCursor(0xe3);
-                    menuClose(0xe3);
-                    if ((s32)r29 == -1) {
-                        r26 = -1;
-                    }
-
-                    r28 = windowSearchID(0xd9);
-                    r29 = windowSearchItemID(r28, 0x10b2);
-                    if ((r28 != 0) && (r29 != 0)) {
-                        *(u32*)((u8*)r29 + 0x4C) = 0;
-                        winSpriteSetDisp(r29, 0);
-                    }
-
-                    if ((s32)r26 == 0) {
-                        lbl_8047A42C = 2;
-                    } else if ((s32)r26 < 0) {
-                        if ((s32)r26 >= -1) {
-                            lbl_8047A42C = 2;
-                        }
-                    } else if ((s32)r26 < 2) {
-                        lbl_8047A42C = 0;
-                    }
-                    goto L_800323E4;
-                case 4:
-                    fadeSet(3, lbl_8047B9D0);
-                    fadeCheck(1);
-                    GSmodelSetVisibility(lbl_8047A414, 0);
-                    menuSetDisp(0xd9, 0);
-                    fadeSet(2, lbl_8047B9D4);
-                    fadeCheck(1);
-                    r29 = heroGetStatus(0, 3, (u16)lbl_8047A428);
-                    fn_80097CD0(r29, 0, 0);
-                    fadeSet(3, lbl_8047B9D4);
-                    fadeCheck(1);
-                    GSmodelSetVisibility(lbl_8047A414, 1);
-                    menuSetDisp(0xd9, 1);
-                    fadeSet(2, lbl_8047B9D0);
-                    fadeCheck(1);
+                    lbl_8047A42C = 5;
+                    break;
+                case 0:
+                    lbl_8047A42C = 6;
+                    break;
+                case -1:
                     lbl_8047A42C = 2;
-                    goto L_800323E4;
-                case 5:
-                    fn_8002EA5C();
-                    goto L_800323E4;
-                case 6:
-                    fn_8002F79C();
-                    goto L_800323E4;
-                case 7:
-                    fn_8002F284();
-                    goto L_800323E4;
-                case 8:
-                    fn_8002EE74();
-                    goto L_800323E4;
-                case 9:
-                    lbl_8047A410 = 1;
-                    lbl_8047A424 = -1;
-                    lbl_8047A42C = 2;
-                    goto L_800323E4;
-                case 10:
-                    fadeSet(3, lbl_8047B9D0);
-                    fadeCheck(1);
-                    GSmodelSetVisibility(lbl_8047A414, 0);
-                    menuSetDisp(0xdc, 0);
-                    menuSetDisp(0xd9, 0);
-                    fadeSet(2, lbl_8047B9D4);
-                    fadeCheck(1);
-                    r29 = heroGetStatus(lbl_803A2518 + 0x170, 3,
-                                        (u16)lbl_8047A428);
-                    menuSetEnablePort(2);
-                    fn_80097CD0(r29, 0, 0);
-                    menuSetEnablePort(1);
-                    fadeSet(3, lbl_8047B9D4);
-                    fadeCheck(1);
-                    GSmodelSetVisibility(lbl_8047A414, 1);
-                    menuSetDisp(0xd9, 1);
-                    fadeSet(2, lbl_8047B9D0);
-                    fadeCheck(1);
-                    if (menuGetLastError() == 1) {
-                        winMsgOpen(2, 0x4448, 1, 0);
-                        menuClose(0xd9);
-                        lbl_8047A42C = 0;
-                    } else {
-                        lbl_8047A42C = 7;
-                    }
-                    goto L_800323E4;
-                case 11:
-                    fn_8002EA5C();
-                    goto L_800323E4;
-                case 12:
-                    fn_8002E460(r30);
-                    goto L_800323E4;
-                case 13:
-                    r26 = heroGetStatus(lbl_803A2518 + 0x170, 1, 0);
-                    r28 = heroGetStatus(NULL, 3, (u16)lbl_8047A424);
-                    r29 = heroGetStatus(lbl_803A2518 + 0x170, 3,
-                                        (u16)lbl_8047A420);
-                    menuOpen(0xde, 0);
-                    menuModelInit(lbl_803A2518 + 0xd18, 0xe8, 0x11c);
-                    menuModelInit(lbl_803A2518 + 0xcd0, 0xe8, 0x11c);
-                    fn_80109C88(lbl_803A2518 + 0xd18, r28);
-                    fn_80109C88(lbl_803A2518 + 0xcd0, r29);
-                    r27 = (u32)pokemonBiosGetNicknamePtr((void*)r28);
-                    r28 = (u32)pokemonBiosGetNicknamePtr((void*)r29);
-                    msgctrlSetValue(0x4d, r26);
-                    msgctrlSetValue(0x32, r27);
-                    msgctrlSetValue(0x33, r28);
-                    fadeSet(2, lbl_8047B9D0);
-                    fadeCheck(1);
-                    winMsgOpen(2, 0x43d6, 1, 0);
-                    msgctrlSetValue(0x32, r27);
-                    msgctrlSetValue(0x33, r28);
-                    winMsgOpen(2, 0x43d8, 1, 0);
-                    winMsgClose(1);
-                    lbl_8047A42C = 14;
-                    goto L_800323E4;
-                case 14:
-                    stateFunctionExChangeMain();
-                    goto L_800323E4;
-                default:
                     break;
                 }
-                r3 = (u32)jumptable_802E4F90;
-                tmp = tmp << 2;
-                r3 = (u32)jumptable_802E4F90;
-                tmp = *(u32*)(r3 + tmp);
-                ctr_fn = (void(*)(void))tmp;
-                r3 = (u32)lbl_80266F90;
-                r5 = (u32)sp + 0x10;
-                r10 = (u32)lbl_80266F90;
-                r3 = 0x0;
-                r9 = *(u32*)((u8*)r10 + 0x0);
-                r4 = 0x1;
-                r8 = *(u32*)((u8*)r10 + 0x4);
-                r6 = 0x0;
-                r7 = *(u32*)((u8*)r10 + 0x8);
-                tmp = *(u32*)((u8*)r10 + 0xC);
-                *(u32*)(sp + 0x1C) = tmp;
-                r3 = fn_800849B4(0, 1, sp + 0x10, 0);
-                if ((s32)r3 < 0) {
-                    tmp = 0x0;
-                    lbl_8047A40A = tmp;
-                    lbl_8047A42C = tmp;
-                    goto L_800323E4;
+                break;
+            case 4:
+                fn_801021F8(0xD9, 0);
+                NpcEventShowMenuSprite(0xD9, 0x10B2, 0x43DB);
+                work3 = NpcEventRunChoiceMenu(0x43D4, 0x43D5);
+                NpcEventHideMenuSprite(0xD9, 0x10B2);
+                switch (work3) {
+                case 0:
+                    lbl_8047A42C = 2;
+                    break;
+                case 1:
+                    lbl_8047A42C = 0;
+                    break;
+                case -1:
+                    lbl_8047A42C = 2;
+                    break;
                 }
-                tmp = 0x2;
-                lbl_8047A42C = tmp;
-                goto L_800323E4;
+                break;
+            case 5:
+                fadeSet(3, lbl_8047B9D0);
+                fadeCheck(1);
+                GSmodelSetVisibility(lbl_8047A414, 0);
+                menuSetDisp(0xD9, 0);
+                fadeSet(2, lbl_8047B9D4);
+                fadeCheck(1);
+                fn_80097CD0(heroGetStatus(NULL, 3, (u16)lbl_8047A428), 0, 0);
+                fadeSet(3, lbl_8047B9D4);
+                fadeCheck(1);
+                GSmodelSetVisibility(lbl_8047A414, 1);
+                menuSetDisp(0xD9, 1);
+                fadeSet(2, lbl_8047B9D0);
+                fadeCheck(1);
+                lbl_8047A42C = 2;
+                break;
+            case 6:
+                fn_8002F79C();
+                break;
+            case 7:
+                fn_8002F284();
+                break;
+            case 8:
+                fn_8002EE74();
+                break;
+            case 9:
+                lbl_8047A410 = 1;
+                lbl_8047A424 = -1;
+                lbl_8047A42C = 2;
+                break;
+            case 10: {
 
-
-                *(u32*)(sp + 0xC) = tmp;
-                windowGetActiveID();
-                r4 = r3;
-                r5 = (u32)sp + 0xc;
-                r3 = 0xe3;
-                r6 = 0x0;
-                r7 = 0x0;
-                r8 = 0x0;
-                menuOpenCustom();
-                r3 = 0xe3;
-                windowSearchID();
-                r29 = r3;
-                r4 = 0x102a;
-                windowSearchItemID();
-                r29 = r3;
-                if ((r29 != 0) && (r29 != 0)) {
-
-                    r4 = 0x1;
-                    winSpriteSetDisp();
-                    tmp = 0x43e4;
-                    *(u32*)((u8*)r29 + 0x4C) = tmp;
+                fadeSet(3, lbl_8047B9D0);
+                fadeCheck(1);
+                GSmodelSetVisibility(lbl_8047A414, 0);
+                menuSetDisp(0xDC, 0);
+                menuSetDisp(0xD9, 0);
+                fadeSet(2, lbl_8047B9D4);
+                fadeCheck(1);
+                work3 = heroGetStatus(base + 0x170, 3, (u16)lbl_8047A428);
+                menuSetEnablePort(2);
+                fn_80097CD0(work3, 0, 0);
+                menuSetEnablePort(1);
+                fadeSet(3, lbl_8047B9D4);
+                fadeCheck(1);
+                GSmodelSetVisibility(lbl_8047A414, 1);
+                menuSetDisp(0xD9, 1);
+                fadeSet(2, lbl_8047B9D0);
+                fadeCheck(1);
+                if (menuGetLastError() == 1) {
+                    winMsgOpen(2, 0x4448, 1, 0);
+                    menuClose(0xD9);
+                    lbl_8047A42C = 0;
+                } else {
+                    lbl_8047A42C = 7;
                 }
-                r3 = 0xe3;
-                windowSearchID();
-                r29 = r3;
-                r4 = 0x1029;
-                windowSearchItemID();
-                r29 = r3;
-                if ((r29 != 0) && (r29 != 0)) {
-
-                    r4 = 0x1;
-                    winSpriteSetDisp();
-                    tmp = 0x43e5;
-                    *(u32*)((u8*)r29 + 0x4C) = tmp;
-                }
-                r3 = 0xe3;
-                r4 = 0x1;
-                windowCheckCursor();
-                r3 = 0xe3;
-                windowGetValue();
-                r29 = r3;
-                r3 = 0xe3;
-                menuGetCursor();
-                r26 = r3;
-                r3 = 0xe3;
-                menuClose();
-                if ((s32)r29 == (s32)-0x1) {
-                    r26 = -0x1;
-                }
-                if ((s32)r26 != 0) {
-                    if ((s32)r26 < 0) {
-                        if ((s32)r26 < (s32)-0x1) {
-                            goto L_800323E4;
-                        }
-                        if ((s32)r26 < 2) {
-                            tmp = 0x5;
-                            lbl_8047A42C = tmp;
-                        }
-                        goto L_800323E4;
-                    }
-                    tmp = 0x6;
-                    lbl_8047A42C = tmp;
-                    goto L_800323E4;
-                        }
-                tmp = 0x2;
-                lbl_8047A42C = tmp;
-                goto L_800323E4;
-
-
-                if ((r29 != 0) && (r29 != 0)) {
-
-                    r4 = 0x1;
-                    winSpriteSetDisp();
-                    tmp = 0x43db;
-                    *(u32*)((u8*)r29 + 0x4C) = tmp;
-                }
-                tmp = 0x1;
-                *(u32*)(sp + 0x8) = tmp;
-                windowGetActiveID();
-                r4 = r3;
-                r5 = (u32)sp + 0x8;
-                r3 = 0xe3;
-                r6 = 0x0;
-                r7 = 0x0;
-                r8 = 0x0;
-                menuOpenCustom();
-                r3 = 0xe3;
-                windowSearchID();
-                r29 = r3;
-                r4 = 0x102a;
-                windowSearchItemID();
-                r29 = r3;
-                if ((r29 != 0) && (r29 != 0)) {
-
-                    r4 = 0x1;
-                    winSpriteSetDisp();
-                    tmp = 0x43d4;
-                    *(u32*)((u8*)r29 + 0x4C) = tmp;
-                }
-                r3 = 0xe3;
-                windowSearchID();
-                r29 = r3;
-                r4 = 0x1029;
-                windowSearchItemID();
-                r29 = r3;
-                if ((r29 != 0) && (r29 != 0)) {
-
-                    r4 = 0x1;
-                    winSpriteSetDisp();
-                    tmp = 0x43d5;
-                    *(u32*)((u8*)r29 + 0x4C) = tmp;
-                }
-                r3 = 0xe3;
-                r4 = 0x1;
-                windowCheckCursor();
-                r3 = 0xe3;
-                windowGetValue();
-                r29 = r3;
-                r3 = 0xe3;
-                menuGetCursor();
-                r26 = r3;
-                r3 = 0xe3;
-                menuClose();
-                if ((s32)r29 == (s32)-0x1) {
-                    r26 = -0x1;
-                }
-                r3 = 0xd9;
-                windowSearchID();
-                r29 = r3;
-                r4 = 0x10b2;
-                windowSearchItemID();
-                if ((r29 != 0) && (r3 != 0)) {
-
-                    tmp = 0x0;
-                    r4 = 0x0;
-                    *(u32*)((u8*)r3 + 0x4C) = tmp;
-                    winSpriteSetDisp();
-                }
-                if ((s32)r26 != 0) {
-                    if ((s32)r26 < 0) {
-                        if ((s32)r26 < (s32)-0x1) {
-                            goto L_800323E4;
-                        }
-                        if ((s32)r26 < 2) {
-
-                        } else {
-                            tmp = 0x2;
-                            lbl_8047A42C = tmp;
-                        }
-                        goto L_800323E4;
-                    }
-                    tmp = 0x0;
-                    lbl_8047A42C = tmp;
-                    goto L_800323E4;
-                        }
-                tmp = 0x2;
-                lbl_8047A42C = tmp;
-                goto L_800323E4;
-
-
-                lbl_8047A42C = tmp;
-                goto L_800323E4;
-
-
-                lbl_8047A410 = r4;
-                lbl_8047A424 = r3;
-                lbl_8047A42C = tmp;
-                goto L_800323E4;
-
-
-                if ((s32)r3 == 1) {
-                    r3 = 0x2;
-                    r4 = 0x4448;
-                    r5 = 0x1;
-                    r6 = 0x0;
-                    winMsgOpen();
-                    r3 = 0xd9;
-                    menuClose();
-                    tmp = 0x0;
-                    lbl_8047A42C = tmp;
-                    goto L_800323E4;
-                }
-                tmp = 0x7;
-                lbl_8047A42C = tmp;
-                goto L_800323E4;
-
-
-                lbl_8047A42C = tmp;
-                goto L_800323E4;
-
-
-                lbl_8047A42C = tmp;
-                goto L_800323E4;
-
-
-                lbl_8047A42C = tmp;
-                goto L_800323E4;
-
-
-                if ((s32)tmp != 0) {
-                    if ((s32)tmp < 0) {
-                        if ((s32)tmp < (s32)-0x1) {
-                            goto L_800323E4;
-                        }
-                        if ((s32)tmp < 2) {
-
-                        } else {
-                            r3 = 0xde;
-                            menuClose();
-                            tmp = -0x1;
-                            r3 = r31 + 0xd18;
-                            lbl_8047A428 = tmp;
-                            lbl_8047A424 = tmp;
-                            lbl_8047A420 = tmp;
-                            fn_8010A420();
-                            r3 = r31 + 0xcd0;
-                            fn_8010A420();
-                            r3 = 0x1;
-                            tmp = 0x2;
-                            lbl_8047A410 = r3;
-                            lbl_8047A42C = tmp;
-                        }
-                        goto L_800323E4;
-                    }
-                    r3 = 0xde;
-                    menuClose();
-                    r3 = r31 + 0xd18;
-                    fn_8010A420();
-                    r3 = r31 + 0xcd0;
-                    fn_8010A420();
-                    tmp = 0x0;
-                    lbl_8047A42C = tmp;
-                    goto L_800323E4;
-                        }
-                r3 = 0xde;
-                menuClose();
-                r3 = r31 + 0xd18;
-                fn_8010A420();
-                r3 = r31 + 0xcd0;
-                fn_8010A420();
-                tmp = 0x0;
-                lbl_8047A42C = tmp;
+                break;
             }
-        L_800323E4:
-            tmp = lbl_8047A42C;
-    } while ((s32)tmp > 0);
-        r3 = r30;
-        fn_801D0314();
-        tmp = lbl_8047A40A;
-        if (tmp != 0) {
-            tmp = lbl_804788B0;
-            if (tmp != 0) {
-                r3 = 0x2;
-                r4 = 0x44d0;
-                r5 = 0x1;
-                r6 = 0x0;
-                winMsgOpen();
-                r3 = 0x1;
-                winMsgClose();
-                goto L_80032458;
-            }
-            r3 = 0x2;
-            r4 = 0x44f1;
-            r5 = 0x1;
-            r6 = 0x0;
-            winMsgOpen();
-            r3 = 0x1;
-            winMsgClose();
+            case 11:
+                fn_8002EA5C();
+                break;
+            case 12:
+                fn_8002E460(handle);
+                break;
+            case 13: {
 
+                work0 = heroGetStatus(base + 0x170, 1, 0);
+                work2 = heroGetStatus(NULL, 3, (u16)lbl_8047A424);
+                work3 = heroGetStatus(base + 0x170, 3, (u16)lbl_8047A420);
+                menuOpen(0xDE, 0);
+                menuModelInit(base + 0xD18, 0xE8, 0x11C);
+                menuModelInit(base + 0xCD0, 0xE8, 0x11C);
+                fn_80109C88(base + 0xD18, work2);
+                fn_80109C88(base + 0xCD0, work3);
+                work2 = pokemonBiosGetNicknamePtr(work2);
+                work3 = pokemonBiosGetNicknamePtr(work3);
+                msgctrlSetValue(0x4D, work0);
+                msgctrlSetValue(0x32, work2);
+                msgctrlSetValue(0x33, work3);
+                fadeSet(2, lbl_8047B9D0);
+                fadeCheck(1);
+                winMsgOpen(2, 0x43D6, 1, 0);
+                msgctrlSetValue(0x32, work2);
+                msgctrlSetValue(0x33, work3);
+                winMsgOpen(2, 0x43D8, 1, 0);
+                winMsgClose(1);
+                lbl_8047A42C = 14;
+                break;
+            }
+            case 14:
+                stateFunctionExChangeMain();
+                break;
+            case 15:
+                winMsgOpen(2, 0x43DC, 1, 0);
+                menuClose(0xDE);
+                fn_8010A420(base + 0xD18);
+                fn_8010A420(base + 0xCD0);
+                lbl_8047A42C = 0;
+                break;
+            case 16: {
+
+                work3 = heroGetStatus(base + 0x170, 1, 0);
+                work1 = heroGetStatus(NULL, 3, (u16)lbl_8047A424);
+                work0 = heroGetStatus(base + 0x170, 3, (u16)lbl_8047A420);
+                pokemonBiosSetFriend(work1, 0x46);
+                pokemonBiosSetFriend(work0, 0x46);
+                memoDataSet(0, work1);
+                work2 = pokemonBiosGetNicknamePtr(work1);
+                work0 = pokemonBiosGetNicknamePtr(work0);
+                msgctrlSetValue(0x4D, work3);
+                msgctrlSetValue(0x32, work2);
+                msgctrlSetValue(0x33, work0);
+                winMsgOpen(2, 0x43DA, 1, 0);
+                winMsgClose(1);
+                lbl_8047A42C = 17;
+                break;
+            }
+            case 17:
+                stateFunctionEvolution();
+                break;
+            case 18:
+                stateFunctionSaveReport(handle);
+                break;
+            case 19: {
+                s8 answer;
+
+                winMsgOpen(2, 0x43DE, 0, 0);
+                answer = menuSubOpenYesNo(0, -1, -1, 0);
+                winMsgClose(1);
+                switch (answer) {
+                case 0:
+                    menuClose(0xDE);
+                    lbl_8047A428 = -1;
+                    lbl_8047A424 = -1;
+                    lbl_8047A420 = -1;
+                    fn_8010A420(base + 0xD18);
+                    fn_8010A420(base + 0xCD0);
+                    lbl_8047A410 = 1;
+                    lbl_8047A42C = 2;
+                    break;
+                case 1:
+                    menuClose(0xDE);
+                    fn_8010A420(base + 0xD18);
+                    fn_8010A420(base + 0xCD0);
+                    lbl_8047A42C = 0;
+                    break;
+                case -1:
+                    menuClose(0xDE);
+                    fn_8010A420(base + 0xD18);
+                    fn_8010A420(base + 0xCD0);
+                    lbl_8047A42C = 0;
+                    break;
+                }
+                break;
+            }
+            }
+        }
+        fn_801D0314(handle);
+        if (lbl_8047A40A != 0) {
+            if (lbl_804788B0 != 0) {
+                winMsgOpen(2, 0x44D0, 1, 0);
+                winMsgClose(1);
+            } else {
+                winMsgOpen(2, 0x44F1, 1, 0);
+                winMsgClose(1);
+            }
         } else {
-            tmp = 0x1;
-            lbl_8047A40A = tmp;
+            lbl_8047A40A = 1;
         }
-    L_80032458:
-        r3 = 0x1;
-        fn_801024E8();
-        fn_800FF52C();
-        tmp = r3 & 0xFF;
-        if (tmp != 0) {
+        fn_801024E8(1);
+        if (fn_800FF52C()) {
             fn_800FF660();
-            goto L_80032484;
+        } else {
+            floorLink(floorGetPrevFloorID(), 0);
         }
-        floorGetPrevFloorID();
-        r4 = 0x0;
-        floorLink();
     }
-L_80032484:
-    tmp = 0x1;
-    lbl_8047A409 = tmp;
-    return;
+    lbl_8047A409 = 1;
 }
 #pragma pop
 #endif
+#endif
+#if !defined(GS_NPC_EVENT_ONLY_800301B0) && !defined(GS_NPC_EVENT_ONLY_80032ED8)
 
-/* 0x800324A0 | 0xC4 */
+/* 0x800324A0 | 0xC4; linked (with the next two) from gs_npc_event_candidate_800324A0.c */
 extern void floorSetMapVisibility(s32);
 extern u32  std093_getCurrentGroupID(void);
 extern u32  std112_modelGetResourceID(u32);
-extern u32  GSresGetResource(u32);
+extern u32  GSresGetResource(u32, u32);
 extern void cameraPlayAnime(s32, u32, s32, s32);
 extern void GSscene_SetMode(s32);
 extern void std116_mapObjectStopAnimation(u32);
@@ -1181,10 +910,11 @@ asm void fn_800324A0(void) {
 #include "src/game/gs_npc_event_fn_800324A0.inc"
 }
 #else
-#pragma push
-#pragma peephole off
+#if !defined(GS_NPC_EVENT_ONLY_800324A0)
+#endif
+#if !defined(GS_NPC_EVENT_ONLY_800324A0)
+#endif
 void fn_800324A0(void) {
-    u32 value;
     u32 handle;
     s32 minus_one;
 
@@ -1202,15 +932,15 @@ void fn_800324A0(void) {
         lbl_8047A41C = 1;
         lbl_8047A40A = 1;
         handle = std093_getCurrentGroupID();
-        value = std112_modelGetResourceID(0x0FFE1000);
-        lbl_8047A418 = value;
-        lbl_8047A414 = GSresGetResource(handle);
+        lbl_8047A418 = std112_modelGetResourceID(0x0FFE1000);
+        lbl_8047A414 = GSresGetResource(handle, lbl_8047A418);
         cameraPlayAnime(0x37C, 0x0FFF1800, 0, 1);
         GSscene_SetMode(4);
         std116_mapObjectStopAnimation(0x10B11000);
     }
 }
-#pragma pop
+#if !defined(GS_NPC_EVENT_ONLY_800324A0)
+#endif
 #endif
 
 /* 0x80032564 | 0x28 */
@@ -1220,12 +950,14 @@ asm void fn_80032564(void) {
 #include "src/game/gs_npc_event_fn_80032564.inc"
 }
 #else
-#pragma peephole off
+#if !defined(GS_NPC_EVENT_ONLY_800324A0)
+#endif
 void std198_menuEnterTradingMenu(void) {
     std098_mapWarpToMenuRoom(0x394);
     _threadSwitch();
 }
-#pragma peephole on
+#if !defined(GS_NPC_EVENT_ONLY_800324A0)
+#endif
 #endif
 
 /* 0x8003258C | 0x270 */
@@ -1242,13 +974,15 @@ asm void fn_8003258C(void) {
 #include "src/game/gs_npc_event_fn_8003258C.inc"
 }
 #else
-#pragma push
-#pragma peephole off
+#if !defined(GS_NPC_EVENT_ONLY_800324A0)
+#endif
+#if !defined(GS_NPC_EVENT_ONLY_800324A0)
+#endif
 void fn_8003258C(void) {
     s32 ctr;
     s32 r31;
 
-    if ((s32)lbl_8047A450 != -1) {
+    if (lbl_8047A450 < 0xFFFFFFFF) {
         lbl_8047A450 = lbl_8047A450 + 1;
     }
     ctr = (s32)lbl_8047A450;
@@ -1259,14 +993,17 @@ void fn_8003258C(void) {
     if (lbl_8047A44A != 0) {
         lbl_8047A44A = 0;
         if ((u32)ctr < 0x1e) {
-            switch (ctr - 6) {
-            case 3:
-                r31 = 0x4b0;
+            switch (ctr) {
+            case 6:
+                r31 = 0x258;
                 break;
             case 12:
-                r31 = 0x960;
+                r31 = 0x4b0;
                 break;
             case 18:
+                r31 = 0x960;
+                break;
+            case 24:
                 r31 = 0x12c0;
                 break;
             default:
@@ -1324,14 +1061,17 @@ void fn_8003258C(void) {
     }
     lbl_8047A458 = 5;
 }
-#pragma pop
+#if !defined(GS_NPC_EVENT_ONLY_800324A0)
+#endif
 #endif
 
+#endif /* !GS_NPC_EVENT_ONLY_800301B0 */
+#if !defined(GS_NPC_EVENT_ONLY_800324A0) && !defined(GS_NPC_EVENT_ONLY_800301B0) && !defined(GS_NPC_EVENT_ONLY_80032ED8)
 /* 0x800327FC | 0x6DC */
 extern u32 _fadeEffectGetRandom__FUl(u32 range);
 extern void GScharCpy(void* dst, const void* src);
 extern u32 pokemonGetStatus(void*, u32, u32, u32);
-extern void fn_80082EA4(u32, s32, u8, u8);
+extern void fn_80082EA4(u32, s8, u8, u8);
 extern u32 menuIsCheck(u32);
 extern s32 fn_800D37CC(void);
 extern u32 msgGetCharsPerFrame(void);
@@ -1340,7 +1080,7 @@ extern u32 lbl_8047A430;
 extern u32 lbl_8047A43C;
 extern u8 lbl_803A3334[];
 extern u32 lbl_8047A434;
-extern u8 lbl_8047A448;
+extern s8 lbl_8047A448;
 extern f32 lbl_8047BA00;
 extern f32 lbl_8047B9F8;
 extern u8 lbl_8047A449;
@@ -1365,6 +1105,10 @@ typedef struct NpcEventDisplayData {
     u8 data[0xD0];
 } NpcEventDisplayData;
 
+typedef struct NpcEventSetupData {
+    u32 words[10];
+} NpcEventSetupData;
+
 typedef struct NpcEventEncounterData {
     u8 pad_000[0x24];
     u8 group;
@@ -1376,27 +1120,125 @@ typedef struct NpcEventEncounterData {
     s8 candidate_slots[6];
 } NpcEventEncounterData;
 
+#define NPC_EVENT_ENCOUNTER ((NpcEventEncounterData*)lbl_803A3334)
+typedef struct NpcEventSave {
+    u8 pad_0000[0x41E4];
+    NpcEventRosterEntry roster[10];
+} NpcEventSave;
+
+static inline NpcEventRosterEntry* NpcEventGetRoster(u32 index)
+{
+    return &((NpcEventSave*)lbl_8047A430)->roster[index];
+}
+
+#define NPC_EVENT_ROSTER(index) NpcEventGetRoster(index)
+
+static inline u8 NpcEventGetPartyLevel(void)
+{
+    extern u8 pokemonCheckValid(void*);
+    extern void* heroGetStatus(void*, s32, u16);
+    u16 slot;
+    u8 best = 1;
+
+    for (slot = 0; slot < 6; slot++) {
+        void* pokemon = heroGetStatus(NULL, 3, slot);
+
+        if (pokemonCheckValid(pokemon) == 1) {
+            u8 level = pokemonGetStatus(pokemon, 0, 0x7A, 0);
+
+            if (best < level) {
+                best = level;
+            }
+        }
+    }
+    return best;
+}
+
+static inline u8 NpcEventGetTeamLevel(s8 slot)
+{
+    u8* team;
+    u16 member;
+    u8 best = 0;
+
+    team = lbl_803A3334 + slot * 0x28;
+    for (member = 0; member < 4; member++) {
+        s8 index = team[0x3B9 + member];
+
+        if (index >= 0) {
+            u8 level = lbl_803A3334[index * 0x2A + 0x517];
+
+            if (best < level) {
+                best = level;
+            }
+        }
+    }
+    return best;
+}
+
+static inline s8 NpcEventSelectCandidate(void)
+{
+    s32 scores[3];
+    u8 group;
+    u8 variant;
+    u8 dark_level;
+    int candidate;
+    s8 selected;
+    u32 ties;
+
+    selected = 0;
+    ties = 1;
+    group = NPC_EVENT_ENCOUNTER->group;
+    variant = NPC_EVENT_ENCOUNTER->variant;
+    dark_level = NpcEventGetPartyLevel();
+
+    for (candidate = 0; candidate < NPC_EVENT_ENCOUNTER->candidate_count;
+         candidate++) {
+        u8 enemy_level;
+
+        fn_80082EA4(lbl_8047A434, candidate, group, variant);
+        enemy_level = NpcEventGetTeamLevel(
+            NPC_EVENT_ENCOUNTER->candidate_slots[candidate]);
+
+        scores[candidate] = __abs(dark_level - enemy_level);
+        if (scores[candidate] < scores[selected]) {
+            selected = candidate;
+            ties = 1;
+        } else if (scores[candidate] == scores[selected]) {
+            ties++;
+            if (_fadeEffectGetRandom__FUl(ties) == 0) {
+                selected = candidate;
+            }
+        }
+    }
+    return selected;
+}
+
+/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
+#pragma push
+#pragma peephole off
 void fn_800327FC(void)
 {
+    extern u8 pokemonCheckValid(void*);
+    extern void* heroGetStatus(void*, s32, u16);
+    extern void fn_80082EA4(u32, s8, u8, u8);
+    extern u8 menuIsCheck(s32);
+    extern void menuClose(s32);
+    extern void fadeSet(s32, f32);
+    extern void menuOpen(s32, s32);
+    extern void fadeCheck(s32);
+    NpcEventRosterEntry selected_record;
     NpcEventDisplayData display;
     s32 result;
-    u32 i;
 
     if (lbl_8047A44A != 0) {
-        NpcEventRosterEntry selected_record;
-        NpcEventRosterEntry* roster;
         NpcEventRosterEntry* selected;
-        u32 selected_index;
+        u32 i;
 
-        roster = (NpcEventRosterEntry*)(lbl_8047A430 + 0x41E4);
-        selected = &roster[9];
-        for (selected_index = 0; selected_index < 10; selected_index++) {
-            NpcEventRosterEntry* candidate = &roster[selected_index];
-            u16* status = (u16*)&candidate->data[6];
-
-            if (status[0] != 0 || status[1] != 0) {
-                selected_index += _fadeEffectGetRandom__FUl(10 - selected_index);
-                selected = &roster[selected_index];
+        for (i = 0; i < 10; i++) {
+            selected = NPC_EVENT_ROSTER(i);
+            if (selected != NULL && (*(u16*)&selected->data[6] != 0 ||
+                                     *(u16*)&selected->data[8] != 0)) {
+                selected = NPC_EVENT_ROSTER(i + _fadeEffectGetRandom__FUl(10 - i));
                 break;
             }
         }
@@ -1417,49 +1259,14 @@ void fn_800327FC(void)
         *(u16*)&display.data[0x20] = *(u16*)&selected_record.data[0x1E];
         *(u16*)&display.data[0x22] = 0;
         display.data[0x24] = selected_record.data[0x20];
-
-        *(u32*)&display.data[0x28] = *(u32*)&selected_record.data[0x22];
-        *(u32*)&display.data[0x2C] = *(u32*)&selected_record.data[0x26];
-        *(u32*)&display.data[0x30] = *(u32*)&selected_record.data[0x2A];
-        *(u32*)&display.data[0x34] = *(u32*)&selected_record.data[0x2E];
-        *(u32*)&display.data[0x38] = *(u32*)&selected_record.data[0x32];
-        *(u32*)&display.data[0x3C] = *(u32*)&selected_record.data[0x36];
-        *(u32*)&display.data[0x40] = *(u32*)&selected_record.data[0x3A];
-        *(u32*)&display.data[0x44] = *(u32*)&selected_record.data[0x3E];
-        *(u32*)&display.data[0x48] = *(u32*)&selected_record.data[0x42];
-        *(u32*)&display.data[0x4C] = *(u32*)&selected_record.data[0x46];
-        *(u32*)&display.data[0x50] = *(u32*)&selected_record.data[0x4A];
-        *(u32*)&display.data[0x54] = *(u32*)&selected_record.data[0x4E];
-        *(u32*)&display.data[0x58] = *(u32*)&selected_record.data[0x52];
-        *(u32*)&display.data[0x5C] = *(u32*)&selected_record.data[0x56];
-        *(u32*)&display.data[0x60] = *(u32*)&selected_record.data[0x5A];
-        *(u32*)&display.data[0x64] = *(u32*)&selected_record.data[0x5E];
-        *(u32*)&display.data[0x6A] = *(u32*)&selected_record.data[0x64];
-        *(u32*)&display.data[0x6E] = *(u32*)&selected_record.data[0x68];
-        *(u32*)&display.data[0x72] = *(u32*)&selected_record.data[0x6C];
-        *(u32*)&display.data[0x76] = *(u32*)&selected_record.data[0x70];
-        *(u32*)&display.data[0x7A] = *(u32*)&selected_record.data[0x74];
-        *(u32*)&display.data[0x7E] = *(u32*)&selected_record.data[0x78];
-        *(u32*)&display.data[0x82] = *(u32*)&selected_record.data[0x7C];
-        *(u32*)&display.data[0x86] = *(u32*)&selected_record.data[0x80];
-        *(u32*)&display.data[0x8A] = *(u32*)&selected_record.data[0x84];
-        *(u32*)&display.data[0x8E] = *(u32*)&selected_record.data[0x88];
-        *(u32*)&display.data[0x92] = *(u32*)&selected_record.data[0x8C];
-        *(u32*)&display.data[0x96] = *(u32*)&selected_record.data[0x90];
-        *(u32*)&display.data[0x9A] = *(u32*)&selected_record.data[0x94];
-        *(u32*)&display.data[0x9E] = *(u32*)&selected_record.data[0x98];
-        *(u32*)&display.data[0xA2] = *(u32*)&selected_record.data[0x9C];
-        *(u32*)&display.data[0xA6] = *(u32*)&selected_record.data[0xA0];
-        *(u32*)&display.data[0xAA] = *(u32*)&selected_record.data[0xA4];
-        *(u32*)&display.data[0xAE] = *(u32*)&selected_record.data[0xA8];
-        *(u32*)&display.data[0xB2] = *(u32*)&selected_record.data[0xAC];
-        *(u32*)&display.data[0xB6] = *(u32*)&selected_record.data[0xB0];
-        *(u32*)&display.data[0xBA] = *(u32*)&selected_record.data[0xB4];
-        *(u32*)&display.data[0xBE] = *(u32*)&selected_record.data[0xB8];
-        *(u32*)&display.data[0xC2] = *(u32*)&selected_record.data[0xBC];
-        *(u32*)&display.data[0xC6] = *(u32*)&selected_record.data[0xC0];
-        *(u32*)&display.data[0xCA] = *(u32*)&selected_record.data[0xC4];
+        *(NpcEventSetupData*)&display.data[0x28] = *(NpcEventSetupData*)&selected_record.data[0x22];
+        *(u16*)&display.data[0x50] = *(u16*)&selected_record.data[0x4A];
+        *(NpcEventSetupData*)&display.data[0x52] = *(NpcEventSetupData*)&selected_record.data[0x4C];
+        *(u16*)&display.data[0x7A] = *(u16*)&selected_record.data[0x74];
+        *(NpcEventSetupData*)&display.data[0x7C] = *(NpcEventSetupData*)&selected_record.data[0x76];
+        *(u16*)&display.data[0xA4] = *(u16*)&selected_record.data[0x9E];
         *(u16*)&display.data[0xCE] = *(u16*)&selected_record.data[0xC8];
+        *(NpcEventSetupData*)&display.data[0xA6] = *(NpcEventSetupData*)&selected_record.data[0xA0];
 
         lbl_8047A43C = 0;
         lbl_803A3278[0] = 0;
@@ -1477,104 +1284,54 @@ void fn_800327FC(void)
         lbl_803A3278[12] = 0;
         lbl_803A3278[13] = 0;
         lbl_803A3278[14] = 0;
-        result = (s32)fn_80032ED8((s32)&display, 0x209,
-                                  &display.data[0x28]);
+        result = (s32)fn_80032ED8((s32)&display, 0x209, (u8*)&display + 0x28);
     } else {
-        NpcEventEncounterData* encounter;
-        u32 scores[6];
-        u32 highest_dark_level;
-        s8 selected_index;
-        u32 tie_count;
-        s32 candidate_index;
+        s8 selected = NpcEventSelectCandidate();
 
-        encounter = (NpcEventEncounterData*)lbl_803A3334;
-        highest_dark_level = 1;
-        for (i = 0; i < 6; i++) {
-            void* pokemon = (void*)heroGetStatus(0, 3, i);
-
-            if (((u32 (*)(void*))pokemonCheckValid)(pokemon) == 1) {
-                u32 dark_level = pokemonGetStatus(pokemon, 0, 0x7A, 0) & 0xFF;
-                if (highest_dark_level < dark_level) {
-                    highest_dark_level = dark_level;
-                }
-            }
-        }
-
-        selected_index = 0;
-        tie_count = 1;
-        for (candidate_index = 0;
-             candidate_index < encounter->candidate_count;
-             candidate_index++) {
-            s8 roster_slot;
-            u8* roster_data;
-            u32 highest_enemy_level;
-            u32 member;
-
-            fn_80082EA4(lbl_8047A434, candidate_index, encounter->group,
-                        encounter->variant);
-            roster_slot = encounter->candidate_slots[candidate_index];
-            roster_data = lbl_803A3334 + roster_slot * 0x28;
-            highest_enemy_level = 0;
-            for (member = 0; member < 4; member++) {
-                s8 pokemon_index = *(s8*)&roster_data[0x3B9 + member];
-                if (pokemon_index >= 0) {
-                    u8 level = lbl_803A3334[pokemon_index * 0x2A + 0x517];
-                    if (highest_enemy_level < level) {
-                        highest_enemy_level = level;
-                    }
-                }
-            }
-
-            if (highest_dark_level < highest_enemy_level) {
-                scores[candidate_index] = highest_enemy_level - highest_dark_level;
-            } else {
-                scores[candidate_index] = highest_dark_level - highest_enemy_level;
-            }
-            if (scores[candidate_index] < scores[selected_index]) {
-                selected_index = candidate_index;
-                tie_count = 1;
-            } else if (scores[candidate_index] == scores[selected_index]) {
-                tie_count++;
-                if (_fadeEffectGetRandom__FUl(tie_count) == 0) {
-                    selected_index = candidate_index;
-                }
-            }
-        }
-
-        lbl_8047A448 = selected_index;
-        {
-            s8 roster_slot = encounter->candidate_slots[selected_index];
-            u32* source = (u32*)(lbl_803A3334 + roster_slot * 0x28 + 0x3AC);
-            typedef struct NpcEventSetupData {
-                u32 words[10];
-            } NpcEventSetupData;
-
-            *(NpcEventSetupData*)&display = *(const NpcEventSetupData*)source;
-        }
-        result = (s32)fn_80032ED8((s32)&display, 0x209, 0);
+        lbl_8047A448 = selected;
+        *(NpcEventSetupData*)&display = *(NpcEventSetupData*)(lbl_803A3334 +
+            NPC_EVENT_ENCOUNTER->candidate_slots[selected] * 0x28 + 0x3AC);
+        result = (s32)fn_80032ED8((s32)&display, 0x209, NULL);
     }
 
-    if ((menuIsCheck(0xA5) & 0xFF) != 0) {
-        ((void (*)(u32))menuClose)(0xA5);
+    if (menuIsCheck(0xA5)) {
+        menuClose(0xA5);
     }
-    ((void (*)(u32, f32))fadeSet)(2, lbl_8047BA00);
-    ((s32 (*)(u32, u32))menuOpen)(0xA5, 1);
-    ((void (*)(u32))fadeCheck)(1);
+    fadeSet(2, 0.3f);
+    menuOpen(0xA5, 1);
+    fadeCheck(1);
     lbl_8047A449 = 1;
 
     {
-        f32 elapsed = lbl_8047B9F8;
-        while (elapsed < lbl_8047BA18) {
+        f32 elapsed = 0.0f;
+
+        while (elapsed < 1.0f) {
             _threadSwitch();
             elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         }
     }
 
-    lbl_8047A458 = result == 2 ? 0xD : 0xC;
+    switch (result) {
+    case 2:
+        lbl_8047A458 = 0xD;
+        break;
+    case 3:
+        lbl_8047A458 = 0xC;
+        break;
+    default:
+        lbl_8047A458 = 0xC;
+        break;
+    }
 }
+#pragma pop
 
 
 
+#endif
+
+/* fn_80032ED8 and fn_800330B8 also build alone for the linked
+ * gs_npc_event_candidate_80032ED8 unit. */
+#if !defined(GS_NPC_EVENT_ONLY_800324A0) && !defined(GS_NPC_EVENT_ONLY_800301B0)
 /* 0x80032ED8 | 0x1E0 */
 extern u8*  fightEncountDataBiosGetPtr(s32);
 extern void fightEncountDataBiosSetTrainer(u8*, s32);
@@ -1602,21 +1359,21 @@ asm void fn_80032ED8(void) {
 #include "src/game/gs_npc_event_fn_80032ED8.inc"
 }
 #else
+/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
+#pragma push
+#pragma peephole off
 u8* fn_80032ED8(s32 arg0, s32 arg1, u8* arg2) {
     extern u8 lbl_803A3334[];
-    s32 ctx;
-    u8* node;
-    u8* base;
-    u8* slot;
-    u8* tbl;
     u8* result;
-    u32 sfx_id;
     s32 i;
-    u8* walk;
-    u8* arg2_iter;
+    int sfx_id;
+    u8* node;
+    s32 ctx;
+    u8* base;
+    s32 j;
 
     node = fightEncountDataBiosGetPtr(arg1);
-    if (*(u32*)(arg0 + 0x1C) == 0) {
+    if (*(s32*)(arg0 + 0x1C) == 0) {
         fightEncountDataBiosSetTrainer(node, 0);
     } else {
         fightEncountDataBiosSetTrainer(node, 1);
@@ -1633,43 +1390,33 @@ u8* fn_80032ED8(s32 arg0, s32 arg1, u8* arg2) {
     fn_800896D8(0);
     fn_800896D0(9);
 
-    walk = (u8*)arg0;
     for (i = 0; i < 4; i++) {
-        fn_801FCB40(ctx, (u8)i, *(u16*)(walk + 0x12));
-        walk += 2;
+        fn_801FCB40(ctx, (u8)i, *(u16*)(arg0 + i * 2 + 0x12));
     }
     fn_801FCC3C(ctx);
 
     base = fightTrainerPokemonDataBiosGetPtr();
-    arg2_iter = arg2;
-    slot = base;
-    tbl = lbl_803A3334;
-    for (i = 0; i < 4; i++) {
+    for (j = 0; j < 4; j++) {
         if (arg2 != 0) {
-            fn_800330B8((s32)slot, arg2_iter);
+            fn_800330B8((s32)(base + j * 0x50), arg2 + j * 0x2A);
         } else {
-            fn_800330B8((s32)slot, tbl + ((s8)*(u8*)(arg0 + i + 0xD) * 0x2A + 0x514));
+            fn_800330B8((s32)(base + j * 0x50), lbl_803A3334 + 0x514 + (s8)*(u8*)(arg0 + j + 0xD) * 0x2A);
         }
-        arg2_iter += 0x2A;
-        slot += 0x50;
     }
-    for (; i < 6; i++) {
-        fightTrainerPokemonDataBiosSetPokemonDataId((s32)(base + i * 0x50), 0);
+    for (; j < 6; j++) {
+        fightTrainerPokemonDataBiosSetPokemonDataId((s32)(base + j * 0x50), 0);
     }
 
     result = fieldStartEncount(arg1, 1, 0);
     cameraPlayAnime((s32)std093_getCurrentGroupID(), 0x11171800, 0, 0);
 
-    if (lbl_8047A439 != 0) {
-        sfx_id = 0x446;
-    } else {
-        sfx_id = 0x4CD;
-    }
+    sfx_id = (lbl_8047A439 != 0) ? 0x446 : 0x4CD;
     if (sfx_id != std228_soundGetCurrentBackgroundMusic()) {
         std104_soundSetBackgroundMusic(sfx_id, 0, 0x7F);
     }
     return result;
 }
+#pragma pop
 #endif
 
 #if 0
@@ -1781,7 +1528,7 @@ void fn_80032ED8_legacy_disabled(void) {
     r3 = r30;
     r4 = 0x1;
     r5 = 0x0;
-    fn_801CA5C4();
+    fieldStartEncount();
     r26 = r3;
     fn_80113F48();
     r4 = 0x11170000;
@@ -1828,6 +1575,7 @@ asm void fn_800330B8(void) {
 #include "src/game/gs_npc_event_fn_800330B8.inc"
 }
 #else
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (push; optimization_level 4; peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma optimization_level 4
 #pragma peephole off
@@ -1870,6 +1618,9 @@ void fn_800330B8(s32 arg0, u8* arg1) {
 }
 #endif
 
+#endif
+#if !defined(GS_NPC_EVENT_ONLY_800324A0) && !defined(GS_NPC_EVENT_ONLY_800301B0) && !defined(GS_NPC_EVENT_ONLY_80032ED8)
+
 /* ===== Phase 2 recovery stubs ===== */
 
 /* fn_80030170 - 0x80030170 | size: 0x38 */
@@ -1909,26 +1660,6 @@ asm void fn_800301AC(void) {
 void fn_800301AC(void) { }
 #endif
 
-/* fn_800302D0 - 0x800302D0 | size: 0xa0 */
-#pragma peephole off
-void fn_800302D0(u8* r3, u8* r4) {
-    u32 flags = *(u32*)(r4 + 0x64);
-    s32 evtype = *(s16*)(r4 + 0x6);
-    u32 combined = (flags & 0xa1400000) | *(u8*)(r3 + 0x8b);
-    switch (evtype) {
-    case 0xFBD:
-        fn_800FB680(0, 0, combined, 0x4412);
-        break;
-    case 0xFBC:
-        {
-            s32 val = heroGetStatus((void*)lbl_803A2688, 1, 0);
-            msgctrlSetValue(0x4D, val);
-            fn_800FB680(0, 0, combined, 0x4413);
-        }
-        break;
-    }
-}
-#pragma peephole on
 
 /* fn_80030370 - 0x80030370 | size: 0xc */
 #if 0
@@ -2000,8 +1731,6 @@ asm void fn_8003042C(void) {
 #include "src/game/gs_npc_event_fn_8003042C.inc"
 }
 #else
-#pragma push
-#pragma peephole off
 void fn_8003042C(u8* arg0, u8* arg1) {
     u32 combined;
     s32 kind;
@@ -2038,7 +1767,6 @@ void fn_8003042C(u8* arg0, u8* arg1) {
         winSpriteSetDisp(arg1, 0);
     }
 }
-#pragma pop
 #endif
 
 /* fn_80030574 - 0x80030574 | size: 0x234 */
@@ -2052,8 +1780,6 @@ asm void fn_80030574(void) {
 #include "src/game/gs_npc_event_fn_80030574.inc"
 }
 #else
-#pragma push
-#pragma peephole off
 void fn_80030574(u8* arg0, u8* arg1) {
     u8* table;
     u32 combined;
@@ -2144,7 +1870,6 @@ grp_done:
 no_object:
     winSpriteSetDisp(arg1, 0);
 }
-#pragma pop
 #endif
 
 /* fn_800307A8 - 0x800307A8 | size: 0x12c */
@@ -2155,8 +1880,6 @@ asm void fn_800307A8(void) {
 #include "src/game/gs_npc_event_fn_800307A8.inc"
 }
 #else
-#pragma push
-#pragma peephole off
 void fn_800307A8(u8* arg0, u8* arg1) {
     u32 combined;
     s32 kind;
@@ -2186,7 +1909,6 @@ void fn_800307A8(u8* arg0, u8* arg1) {
         winSpriteSetDisp(arg1, 0);
     }
 }
-#pragma pop
 #endif
 
 /* fn_800308D4 - 0x800308D4 | size: 0x170 */
@@ -2199,8 +1921,6 @@ asm void fn_800308D4(void) {
 #include "src/game/gs_npc_event_fn_800308D4.inc"
 }
 #else
-#pragma push
-#pragma peephole off
 void fn_800308D4(u8* arg0, u8* arg1) {
     extern u16 pokemonGetStatus(void* obj, s32 a, s32 b, s32 c);
     extern s32 pokemonDataBiosGetPtr(s32 v);
@@ -2245,7 +1965,6 @@ void fn_800308D4(u8* arg0, u8* arg1) {
         winSpriteSetDisp(arg1, 0);
     }
 }
-#pragma pop
 #endif
 
 /* fn_80030A44 - 0x80030A44 | size: 0x1d0 */
@@ -2256,8 +1975,6 @@ asm void fn_80030A44(void) {
 #include "src/game/gs_npc_event_fn_80030A44.inc"
 }
 #else
-#pragma push
-#pragma peephole off
 void fn_80030A44(u8* arg0, u8* arg1) {
     u8* table;
     u32 combined;
@@ -2325,7 +2042,6 @@ grp_done:
 no_object_30A44:
     winSpriteSetDisp(arg1, 0);
 }
-#pragma pop
 #endif
 
 /* fn_80030C14 - 0x80030C14 | size: 0x120 */
@@ -2377,8 +2093,6 @@ asm void fn_80030D34(void) {
 #include "src/game/gs_npc_event_fn_80030D34.inc"
 }
 #else
-#pragma push
-#pragma peephole off
 void fn_80030D34(u8* arg0, u8* arg1) {
     u8* table;
     s32 kind;
@@ -2424,7 +2138,6 @@ void fn_80030D34(u8* arg0, u8* arg1) {
         winSpriteSetDisp(arg1, 0);
     }
 }
-#pragma pop
 #endif
 
 /* fn_80030F0C - 0x80030F0C | size: 0x27c */
@@ -2434,8 +2147,6 @@ asm void fn_80030F0C(void) {
 #include "src/game/gs_npc_event_fn_80030F0C.inc"
 }
 #else
-#pragma push
-#pragma peephole off
 void fn_80030F0C(u8* arg0, u8* arg1) {
     u8* table;
     s32 group;
@@ -2485,7 +2196,6 @@ void fn_80030F0C(u8* arg0, u8* arg1) {
         winSpriteSetDisp(arg1, 0);
     }
 }
-#pragma pop
 #endif
 
 /* fn_800347B8 - 0x800347B8 | size: 0xc */
@@ -2507,12 +2217,9 @@ asm void fn_800347C4(void) {
 #include "src/game/gs_npc_event_fn_800347C4.inc"
 }
 #else
-#pragma push
-#pragma scheduling off
 void fn_800347C4(void) {
     soundStartSE(0x26);
 }
-#pragma pop
 #endif
 
 /* fn_800347E8 - 0x800347E8 | size: 0x24 */
@@ -2521,12 +2228,9 @@ asm void fn_800347E8(void) {
 #include "src/game/gs_npc_event_fn_800347E8.inc"
 }
 #else
-#pragma push
-#pragma scheduling off
 void fn_800347E8(void) {
     soundStartSE(0x26);
 }
-#pragma pop
 #endif
 
 /* fn_8003480C - 0x8003480C | size: 0x24 */
@@ -2535,12 +2239,9 @@ asm void fn_8003480C(void) {
 #include "src/game/gs_npc_event_fn_8003480C.inc"
 }
 #else
-#pragma push
-#pragma scheduling off
 void fn_8003480C(void) {
     soundStartSE(0x26);
 }
-#pragma pop
 #endif
 
 /* fn_80034DC0 - 0x80034DC0 | size: 0x78 | WALL 80%: oris+ori constant build pattern */
@@ -2550,8 +2251,6 @@ asm void fn_80034DC0(void) {
 #include "src/game/gs_npc_event_fn_80034DC0.inc"
 }
 #else
-#pragma push
-#pragma peephole off
 void fn_80034DC0(u8* arg0, u8* arg1) {
     u32 byte;
     s32 mask;
@@ -2564,10 +2263,24 @@ void fn_80034DC0(u8* arg0, u8* arg1) {
     msgctrlSetValue(0x34, lbl_8047A44C);
     fn_800FBB34(0, 0, *(s16*)(arg1 + 0x54), *(s16*)(arg1 + 0x56), combined, 0x3CC9);
 }
-#pragma pop
 #endif
 
+#endif
+
+/* fn_800301B0 and fn_800302D0 also build alone for the linked
+ * gs_npc_event_candidate_800301B0 unit. */
+#if !defined(GS_NPC_EVENT_ONLY_800324A0) && !defined(GS_NPC_EVENT_ONLY_80032ED8)
+extern u8 lbl_803A3230[];
+extern u8 lbl_803A31E8[];
+extern u8 lbl_80314F98[];
+extern u8 lbl_803A2688[];
+extern f32 lbl_8047B9D4;
+extern f32 lbl_8047B9F0;
+
 /* fn_800301B0 - 0x800301B0 | size: 0x120 */
+/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
+#pragma push
+#pragma peephole off
 void fn_800301B0(void* r3, u8* r4) {
     void* model = NULL;
     s32 evtype = *(s16*)(r4 + 0x6);
@@ -2595,3 +2308,27 @@ void fn_800301B0(void* r3, u8* r4) {
         gfxEnd();
     }
 }
+#pragma pop
+
+/* fn_800302D0 - 0x800302D0 | size: 0xa0 */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
+#pragma peephole off
+void fn_800302D0(u8* r3, u8* r4) {
+    u32 flags = *(u32*)(r4 + 0x64);
+    s32 evtype = *(s16*)(r4 + 0x6);
+    u32 combined = (flags & 0xa1400000) | *(u8*)(r3 + 0x8b);
+    switch (evtype) {
+    case 0xFBD:
+        fn_800FB680(0, 0, combined, 0x4412);
+        break;
+    case 0xFBC:
+        {
+            s32 val = heroGetStatus((void*)lbl_803A2688, 1, 0);
+            msgctrlSetValue(0x4D, val);
+            fn_800FB680(0, 0, combined, 0x4413);
+        }
+        break;
+    }
+}
+#pragma peephole on
+#endif

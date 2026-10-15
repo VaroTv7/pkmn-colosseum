@@ -12,13 +12,16 @@
 #include "dolphin/types.h"
 #include "game/effect/effect_util_types.h"
 
-#if 0
-asm void msgctrlSndWait(void) {
-#include "src/game/effect/effect_util_fn_80131588.inc"
-}
-#else
-#pragma peephole off
-#pragma scheduling on
+/*
+ * 0x80131588 - 0x80131690: the unit game/msgctrl.c links these four
+ * functions. The TU was built at -O4,p with the peephole pass off (one
+ * unit-wide flag in configure.py; see msgctrl_exact_80132A38.c). The rest of
+ * the TU is linked through its carves (msgctrl_exact_*.c,
+ * msgctrl_candidate_80131714.c, msgctrl_r49_80131A34_suffix.c); the
+ * candidate chunks still compile it whole by defining MSGCTRL_WHOLE_TU.
+ */
+
+/* 0x80131588 | 0x64 */
 u32 msgctrlSndWait(EffectUtilCommandObj* obj) {
     if (obj->activeFlag == 0) {
         u16 handle = lbl_8047AEA4;
@@ -31,16 +34,8 @@ u32 msgctrlSndWait(EffectUtilCommandObj* obj) {
     }
     return 1;
 }
-#pragma scheduling off
-#pragma peephole on
-#endif
 
-#if 0
-asm void msgctrlSndPlay(void) {
-#include "src/game/effect/effect_util_fn_801315EC.inc"
-}
-#else
-#pragma peephole off
+/* 0x801315EC | 0x44 */
 u32 msgctrlSndPlay(EffectUtilCommandObj* obj) {
     if (obj->activeFlag == 0) {
         u16 handle = lbl_8047AEA4;
@@ -50,42 +45,32 @@ u32 msgctrlSndPlay(EffectUtilCommandObj* obj) {
     }
     return 0;
 }
-#pragma peephole on
-#endif
 
-
-/* 0x80131630 | 0x30 -- read byte from stream, store extsb to obj+0x43 if flag set */
-#pragma push
-#pragma optimization_level 2
+/* 0x80131630 | 0x30 -- read a signed byte from the stream into the baseline bias if flag set */
 u32 msgctrlBaseLineBias(EffectUtilCommandObj* obj) {
     u8* stream;
     if (obj->activeFlag != 0) {
         stream = obj->stream;
-        obj->field_43 = (u8)(s8)*stream;
+        obj->field_43 = (s8)*stream;
     }
     stream = obj->stream;
     obj->stream = stream + 1;
     return 0;
 }
-#pragma pop
 
-
-/* 0x80131660 | 0x30 -- read byte from stream, store extsb to obj+0x42 if flag set */
-#pragma push
-#pragma optimization_level 2
+/* 0x80131660 | 0x30 -- read a signed byte from the stream into the line spacing if flag set */
 u32 msgctrlLineSpace(EffectUtilCommandObj* obj) {
     u8* stream;
     if (obj->activeFlag != 0) {
         stream = obj->stream;
-        obj->field_42 = (u8)(s8)*stream;
+        obj->field_42 = (s8)*stream;
     }
     stream = obj->stream;
     obj->stream = stream + 1;
     return 0;
 }
-#pragma pop
 
-
+#if defined(MSGCTRL_WHOLE_TU)
 /* 0x80131690 | 16 bytes | set_field_return */
 u32 msgctrlIndentOff(EffectUtilCommandObj* obj) {
     obj->field_41 = 1;
@@ -147,10 +132,6 @@ asm void msgctrlAlign(void) {
 #include "src/game/effect/effect_util_fn_80131714.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
-#pragma scheduling on
 s32 msgctrlAlign(EffectUtilCommandObj* obj) {
     extern void GSmsgAdjustAlign(void*);
     u8* stream;
@@ -163,8 +144,6 @@ s32 msgctrlAlign(EffectUtilCommandObj* obj) {
     obj->stream = stream + 1;
     return 0;
 }
-#pragma scheduling off
-#pragma pop
 #endif
 
 
@@ -187,13 +166,9 @@ asm void msgctrlMenuMoney(void) {
 #include "src/game/effect/effect_util_fn_80131794.inc"
 }
 #else
-#pragma peephole off
-#pragma scheduling on
 void msgctrlMenuMoney(void) {
     _msgctrlMakeDigit__FPUslUll(lbl_80426FF0, 0x10, lbl_8047AE94, 4);
 }
-#pragma scheduling off
-#pragma peephole on
 #endif
 
 
@@ -203,13 +178,9 @@ asm void msgctrlMenuFullDigit(void) {
 #include "src/game/effect/effect_util_fn_801317C8.inc"
 }
 #else
-#pragma peephole off
-#pragma scheduling on
 void msgctrlMenuFullDigit(void) {
     _msgctrlMakeDigit__FPUslUll(lbl_80427010, 0x10, lbl_8047AE68, 5);
 }
-#pragma scheduling off
-#pragma peephole on
 #endif
 
 
@@ -277,13 +248,9 @@ asm void msgctrlMoney(void) {
 #include "src/game/effect/effect_util_fn_80131A34.inc"
 }
 #else
-#pragma peephole off
-#pragma scheduling on
 void msgctrlMoney(void) {
     _msgctrlMakeDigit__FPUslUll(lbl_80427070, 0x10, lbl_8047AE80, 4);
 }
-#pragma scheduling off
-#pragma peephole on
 #endif
 
 
@@ -293,13 +260,9 @@ asm void msgctrlMenuZDigit2(void) {
 #include "src/game/effect/effect_util_fn_80131A68.inc"
 }
 #else
-#pragma peephole off
-#pragma scheduling on
 void msgctrlMenuZDigit2(void) {
     _msgctrlMakeDigit__FPUslUll(lbl_80427090, 0x10, lbl_8047AE6C, 2);
 }
-#pragma scheduling off
-#pragma peephole on
 #endif
 
 
@@ -309,13 +272,9 @@ asm void msgctrlMenuZDigit(void) {
 #include "src/game/effect/effect_util_fn_80131A9C.inc"
 }
 #else
-#pragma peephole off
-#pragma scheduling on
 void msgctrlMenuZDigit(void) {
     _msgctrlMakeDigit__FPUslUll(lbl_804270B0, 0x10, lbl_8047AE68, 2);
 }
-#pragma scheduling off
-#pragma peephole on
 #endif
 
 
@@ -325,13 +284,9 @@ asm void msgctrlMenuHex2(void) {
 #include "src/game/effect/effect_util_fn_80131AD0.inc"
 }
 #else
-#pragma peephole off
-#pragma scheduling on
 void msgctrlMenuHex2(void) {
     _msgctrlMakeDigit__FPUslUll(lbl_804270D0, 0x10, lbl_8047AE68, 3);
 }
-#pragma scheduling off
-#pragma peephole on
 #endif
 
 
@@ -341,13 +296,9 @@ asm void msgctrlMenuHex(void) {
 #include "src/game/effect/effect_util_fn_80131B04.inc"
 }
 #else
-#pragma peephole off
-#pragma scheduling on
 void msgctrlMenuHex(void) {
     _msgctrlMakeDigit__FPUslUll(lbl_804270F0, 0x10, lbl_8047AE68, 3);
 }
-#pragma scheduling off
-#pragma peephole on
 #endif
 
 
@@ -357,13 +308,9 @@ asm void msgctrlMenuUDigit2(void) {
 #include "src/game/effect/effect_util_fn_80131B38.inc"
 }
 #else
-#pragma peephole off
-#pragma scheduling on
 void msgctrlMenuUDigit2(void) {
     _msgctrlMakeDigit__FPUslUll(lbl_80427110, 0x10, lbl_8047AE6C, 1);
 }
-#pragma scheduling off
-#pragma peephole on
 #endif
 
 
@@ -373,13 +320,9 @@ asm void msgctrlMenuUDigit(void) {
 #include "src/game/effect/effect_util_fn_80131B6C.inc"
 }
 #else
-#pragma peephole off
-#pragma scheduling on
 void msgctrlMenuUDigit(void) {
     _msgctrlMakeDigit__FPUslUll(lbl_80427130, 0x10, lbl_8047AE68, 1);
 }
-#pragma scheduling off
-#pragma peephole on
 #endif
 
 
@@ -433,11 +376,9 @@ asm void msgctrlSideDefenceNameno(void) {
 #include "src/game/effect/effect_util_fn_80131BF8.inc"
 }
 #else
-#pragma peephole off
 void msgctrlSideDefenceNameno(void) {
     _msgctrlSideName__FP15FightOutPokemonUc(lbl_8047AE4C, 2);
 }
-#pragma peephole on
 #endif
 
 
@@ -447,11 +388,9 @@ asm void msgctrlSideDefenceNamewo(void) {
 #include "src/game/effect/effect_util_fn_80131C20.inc"
 }
 #else
-#pragma peephole off
 void msgctrlSideDefenceNamewo(void) {
     _msgctrlSideName__FP15FightOutPokemonUc(lbl_8047AE48, 1);
 }
-#pragma peephole on
 #endif
 
 
@@ -461,11 +400,9 @@ asm void msgctrlSideDefenceNameha(void) {
 #include "src/game/effect/effect_util_fn_80131C48.inc"
 }
 #else
-#pragma peephole off
 void msgctrlSideDefenceNameha(void) {
     _msgctrlSideName__FP15FightOutPokemonUc(lbl_8047AE44, 0);
 }
-#pragma peephole on
 #endif
 
 
@@ -475,11 +412,9 @@ asm void msgctrlSideAttackNameno(void) {
 #include "src/game/effect/effect_util_fn_80131C70.inc"
 }
 #else
-#pragma peephole off
 void msgctrlSideAttackNameno(void) {
     _msgctrlSideName__FP15FightOutPokemonUc(lbl_8047AE1C, 2);
 }
-#pragma peephole on
 #endif
 
 
@@ -489,11 +424,9 @@ asm void msgctrlSideAttackNamewo(void) {
 #include "src/game/effect/effect_util_fn_80131C98.inc"
 }
 #else
-#pragma peephole off
 void msgctrlSideAttackNamewo(void) {
     _msgctrlSideName__FP15FightOutPokemonUc(lbl_8047AE18, 1);
 }
-#pragma peephole on
 #endif
 
 
@@ -503,175 +436,99 @@ asm void msgctrlSideAttackNameha(void) {
 #include "src/game/effect/effect_util_fn_80131CC0.inc"
 }
 #else
-#pragma peephole off
 void msgctrlSideAttackNameha(void) {
     _msgctrlSideName__FP15FightOutPokemonUc(lbl_8047AE14, 0);
 }
-#pragma peephole on
 #endif
 
 
-/* 0x80131CE8 | 0x21C */
-#pragma push
-#pragma optimization_level 1
-void _msgctrlSideName__FP15FightOutPokemonUc(u32 arg1, u32 arg2) {
-    extern void GSmsgGetGSchar();
-    extern void msgctrlSetValue();
-    extern void fightTargetIsHostSide();
-    extern void fightTargetGetPtrAsNowFightType();
-    extern void fn_801F18DC();
-    extern void fightFloorGetFightOutPokemonPtrToFightTrainerPtr();
-    extern void fightFloorGetStatus();
-    extern void fightSideGetValidFightTrainerPtr();
-    extern void fightTrainerGetNamePtr();
-    extern void fightTrainerCheckDoFight();
-    u8 sp[0x30];
-    u32 r0 = 0;
-    u32 r1 = (u32)sp;
-    u32 r3 = 0;
-    u32 r4 = 0;
-    u32 r5 = 0;
-    u32 r6 = 0;
-    u32 r24 = 0;
-    u32 r25 = 0;
-    u32 r26 = 0;
-    u32 r27 = 0;
-    u32 r28 = 0;
-    u32 r29 = 0;
-    u32 r30 = 0;
-    u32 r31 = 0;
+/* 0x80131CE8 | 0x21C
+ * Put the side's trainer name(s) into message values 0x4D/0x57, then fetch
+ * the side-name string for this message kind (0, 1, other).
+ */
+void _msgctrlSideName__FP15FightOutPokemonUc(u32 pokemon, u32 kind) {
+    extern void* GSmsgGetGSchar(u32 id);
+    extern void msgctrlSetValue(u32 id, u32 value);
+    extern u8 fightTargetIsHostSide(u32 pokemon, u16 status);
+    extern void* fightTargetGetPtrAsNowFightType(u32 target, u32 pokemon);
+    extern u8 fn_801F18DC(u32 arg);
+    extern void* fightFloorGetFightOutPokemonPtrToFightTrainerPtr(u32 arg, u32 pokemon);
+    extern u32 fightFloorGetStatus(u32 a, u32 b, u32 id, u32 d);
+    extern void* fightSideGetValidFightTrainerPtr(void* side, u16 index);
+    extern u32 fightTrainerGetNamePtr(void* trainer);
+    extern u8 fightTrainerCheckDoFight(void* trainer);
+    u16 status;
+    void* side;
+    void* ownTrainer;
+    void* trainer;
+    u16 count;
+    u16 i;
 
-    r24 = r3;
-    r31 = r4;
-    r3 = 0x0;
-    r4 = 0x0;
-    r5 = 0x14;
-    r6 = 0x0;
-    fightFloorGetStatus();
-    r30 = r3 & 0xFFFF;
-    r4 = r24;
-    r3 = 0x2;
-    fightTargetGetPtrAsNowFightType();
-    r29 = r3;
-    r4 = r24;
-    r3 = 0x0;
-    fightFloorGetFightOutPokemonPtrToFightTrainerPtr();
-    r26 = 0x0;
-    r28 = r3;
-    r25 = 0x0;
-    while (1) {
-        r0 = r25 & 0xFFFF;
-        if (r0 >= (u32)0x2) break;
-        r3 = r29;
-        r4 = r25;
-        fightSideGetValidFightTrainerPtr();
-        r27 = r3;
-        do {
-            if (r27 == (u32)0x0) break;
-            fightTrainerCheckDoFight();
-            r0 = r3 & 0xFF;
-            if (r0 == (u32)0x0) break;
-            r0 = r26 & 0xFFFF;
-            if (r0 == (u32)0x0) {
-                r3 = r27;
-                fightTrainerGetNamePtr();
-                r4 = r3;
-                r3 = 0x4d;
-                msgctrlSetValue();
+    status = fightFloorGetStatus(0, 0, 0x14, 0);
+    side = fightTargetGetPtrAsNowFightType(2, pokemon);
+    ownTrainer = fightFloorGetFightOutPokemonPtrToFightTrainerPtr(0, pokemon);
+    count = 0;
+    for (i = 0; i < 2; i++) {
+        trainer = fightSideGetValidFightTrainerPtr(side, i);
+        if (trainer != NULL && fightTrainerCheckDoFight(trainer) != 0) {
+            if (count == 0) {
+                msgctrlSetValue(0x4D, fightTrainerGetNamePtr(trainer));
+            } else if (count == 1) {
+                msgctrlSetValue(0x57, fightTrainerGetNamePtr(trainer));
+            }
+            count++;
+        }
+    }
 
+    if (fn_801F18DC(0) == 1 && ownTrainer != NULL) {
+        if (count <= 1) {
+            msgctrlSetValue(0x4D, fightTrainerGetNamePtr(ownTrainer));
+            if ((u8)kind == 0) {
+                GSmsgGetGSchar(0x7722);
+                return;
+            } else if ((u8)kind == 1) {
+                GSmsgGetGSchar(0x7725);
+                return;
             } else {
-                if (r0 == (u32)0x1) {
-                    r3 = r27;
-                    fightTrainerGetNamePtr();
-                    r4 = r3;
-                    r3 = 0x57;
-                    msgctrlSetValue();
-                }
-            }
-            r26 = r26 + 0x1;
-        } while (0);
-        r25 = r25 + 0x1;
-
-    }
-    r3 = 0x0;
-    fn_801F18DC();
-    r0 = r3 & 0xFF;
-    if ((r0 == (u32)0x1) && (r28 != (u32)0x0)) {
-
-        r0 = r26 & 0xFFFF;
-        if (r0 <= (u32)0x1) {
-            r3 = r28;
-            fightTrainerGetNamePtr();
-            r4 = r3;
-            r3 = 0x4d;
-            msgctrlSetValue();
-            r0 = r31 & 0xFF;
-            if (r0 == (u32)0x0) {
-                r3 = 0x7722;
-                GSmsgGetGSchar();
+                GSmsgGetGSchar(0x7727);
                 return;
             }
-            if (r0 == (u32)0x1) {
-                r3 = 0x7725;
-                GSmsgGetGSchar();
-                return;
-            }
-            r3 = 0x7727;
-            GSmsgGetGSchar();
+        }
+        if ((u8)kind == 0) {
+            GSmsgGetGSchar(0x7724);
+            return;
+        } else if ((u8)kind == 1) {
+            GSmsgGetGSchar(0x7726);
+            return;
+        } else {
+            GSmsgGetGSchar(0x7728);
             return;
         }
-        r0 = r31 & 0xFF;
-        if (r0 == (u32)0x0) {
-            r3 = 0x7724;
-            GSmsgGetGSchar();
-            return;
-        }
-        if (r0 == (u32)0x1) {
-            r3 = 0x7726;
-            GSmsgGetGSchar();
-            return;
-        }
-        r3 = 0x7728;
-        GSmsgGetGSchar();
-        return;
     }
-    r3 = r24;
-    r4 = r30;
-    fightTargetIsHostSide();
-    r0 = r3 & 0xFF;
-    if (r0 == (u32)0x1) {
-        r0 = r31 & 0xFF;
-        if (r0 == (u32)0x0) {
-            r3 = 0x768a;
-            GSmsgGetGSchar();
-            return;
-        }
-        if (r0 == (u32)0x1) {
-            r3 = 0x768c;
-            GSmsgGetGSchar();
-            return;
-        }
-        r3 = 0x7688;
-        GSmsgGetGSchar();
-        return;
-    }
-    r0 = r31 & 0xFF;
-    if (r0 == (u32)0x0) {
-        r3 = 0x7689;
-        GSmsgGetGSchar();
-        return;
-    }
-    if (r0 == (u32)0x1) {
-        r3 = 0x768b;
-        GSmsgGetGSchar();
-        return;
-    }
-    r3 = 0x7687;
-    GSmsgGetGSchar();
 
-    return;
+    if (fightTargetIsHostSide(pokemon, status) == 1) {
+        if ((u8)kind == 0) {
+            GSmsgGetGSchar(0x768A);
+            return;
+        } else if ((u8)kind == 1) {
+            GSmsgGetGSchar(0x768C);
+            return;
+        } else {
+            GSmsgGetGSchar(0x7688);
+            return;
+        }
+    }
+    if ((u8)kind == 0) {
+        GSmsgGetGSchar(0x7689);
+        return;
+    } else if ((u8)kind == 1) {
+        GSmsgGetGSchar(0x768B);
+        return;
+    } else {
+        GSmsgGetGSchar(0x7687);
+        return;
+    }
 }
-#pragma pop
 
 
 /* 0x80131F04 | 0x98 */
@@ -680,11 +537,6 @@ asm void msgctrlClientnowork(void) {
 #include "src/game/effect/effect_util_fn_80131F04.inc"
 }
 #else
-#pragma push
-#pragma peephole off
-#pragma scheduling on
-#pragma push
-#pragma optimization_level 1
 void msgctrlClientnowork(void) {
     extern u32 lbl_8047AE10;
     extern u32 fightFloorGetFightOutPokemonPtrToFightTrainerPtr(u32, u32);
@@ -706,9 +558,6 @@ void msgctrlClientnowork(void) {
         fightOutPokemonGetNicknamePtr(val);
     }
 }
-#pragma pop
-#pragma scheduling off
-#pragma pop
 #endif
 
 
@@ -762,11 +611,6 @@ asm void msgctrlTsuikaMons(void) {
 #include "src/game/effect/effect_util_fn_80131FF4.inc"
 }
 #else
-#pragma push
-#pragma peephole off
-#pragma scheduling on
-#pragma push
-#pragma optimization_level 1
 void msgctrlTsuikaMons(void) {
     extern u32 lbl_8047ADE0;
     extern u32 fightFloorGetFightOutPokemonPtrToFightTrainerPtr(u32, u32);
@@ -788,9 +632,6 @@ void msgctrlTsuikaMons(void) {
         fightOutPokemonGetNicknamePtr(val);
     }
 }
-#pragma pop
-#pragma scheduling off
-#pragma pop
 #endif
 
 
@@ -800,11 +641,6 @@ asm void msgctrlClientMos(void) {
 #include "src/game/effect/effect_util_fn_8013208C.inc"
 }
 #else
-#pragma push
-#pragma peephole off
-#pragma scheduling on
-#pragma push
-#pragma optimization_level 1
 void msgctrlClientMos(void) {
     extern u32 lbl_8047ADDC;
     extern u32 fightFloorGetFightOutPokemonPtrToFightTrainerPtr(u32, u32);
@@ -826,9 +662,6 @@ void msgctrlClientMos(void) {
         fightOutPokemonGetNicknamePtr(val);
     }
 }
-#pragma pop
-#pragma scheduling off
-#pragma pop
 #endif
 
 
@@ -838,11 +671,6 @@ asm void msgctrlDeffenceMons(void) {
 #include "src/game/effect/effect_util_fn_80132124.inc"
 }
 #else
-#pragma push
-#pragma peephole off
-#pragma scheduling on
-#pragma push
-#pragma optimization_level 1
 void msgctrlDeffenceMons(void) {
     extern u32 lbl_8047ADD8;
     extern u32 fightFloorGetFightOutPokemonPtrToFightTrainerPtr(u32, u32);
@@ -864,9 +692,6 @@ void msgctrlDeffenceMons(void) {
         fightOutPokemonGetNicknamePtr(val);
     }
 }
-#pragma pop
-#pragma scheduling off
-#pragma pop
 #endif
 
 
@@ -876,11 +701,6 @@ asm void msgctrlAttackMons(void) {
 #include "src/game/effect/effect_util_fn_801321BC.inc"
 }
 #else
-#pragma push
-#pragma peephole off
-#pragma scheduling on
-#pragma push
-#pragma optimization_level 1
 void msgctrlAttackMons(void) {
     extern u32 lbl_8047ADD4;
     extern u32 fightFloorGetFightOutPokemonPtrToFightTrainerPtr(u32, u32);
@@ -902,9 +722,6 @@ void msgctrlAttackMons(void) {
         fightOutPokemonGetNicknamePtr(new_var);
     }
 }
-#pragma pop
-#pragma scheduling off
-#pragma pop
 #endif
 
 
@@ -926,12 +743,10 @@ asm void msgctrlWaza(void) {
 #include "src/game/effect/effect_util_fn_8013226C.inc"
 }
 #else
-#pragma peephole off
 void msgctrlWaza(void) {
     wazaDataBiosGetPtr(lbl_8047AE7C);
     wazaDataBiosGetName();
 }
-#pragma peephole on
 #endif
 
 
@@ -953,13 +768,9 @@ asm void msgctrlMenuDigit2(void) {
 #include "src/game/effect/effect_util_fn_801322AC.inc"
 }
 #else
-#pragma peephole off
-#pragma scheduling on
 void msgctrlMenuDigit2(void) {
     _msgctrlMakeDigit__FPUslUll(lbl_80427150, 0x10, lbl_8047AE6C, 0);
 }
-#pragma scheduling off
-#pragma peephole on
 #endif
 
 
@@ -969,13 +780,9 @@ asm void msgctrlMenuDigit(void) {
 #include "src/game/effect/effect_util_fn_801322E0.inc"
 }
 #else
-#pragma peephole off
-#pragma scheduling on
 void msgctrlMenuDigit(void) {
     _msgctrlMakeDigit__FPUslUll(lbl_80427170, 0x10, lbl_8047AE68, 0);
 }
-#pragma scheduling off
-#pragma peephole on
 #endif
 
 
@@ -997,13 +804,9 @@ asm void msgctrlDigit2(void) {
 #include "src/game/effect/effect_util_fn_8013232C.inc"
 }
 #else
-#pragma peephole off
-#pragma scheduling on
 void msgctrlDigit2(void) {
     _msgctrlMakeDigit__FPUslUll(lbl_80427190, 0x10, lbl_8047AE58, 0);
 }
-#pragma scheduling off
-#pragma peephole on
 #endif
 
 
@@ -1013,13 +816,9 @@ asm void msgctrlDigit(void) {
 #include "src/game/effect/effect_util_fn_80132360.inc"
 }
 #else
-#pragma peephole off
-#pragma scheduling on
 void msgctrlDigit(void) {
     _msgctrlMakeDigit__FPUslUll(lbl_804271B0, 0x10, lbl_8047AE54, 0);
 }
-#pragma scheduling off
-#pragma peephole on
 #endif
 
 
@@ -1044,16 +843,13 @@ u32 msgctrlItem(void) {
 
 
 /* 0x801323FC | 0x2C -- savedataGetStatus(0, 2) then heroBiosGetHizukiNamePtr */
-#pragma peephole off
 u32 msgctrlHizuki(void) {
     savedataGetStatus(0, 2);
     return heroBiosGetHizukiNamePtr();
 }
-#pragma peephole on
 
 
 /* 0x80132428 | 0x2C -- savedataGetStatus(0, 2) then heroBiosGetNamePtr */
-#pragma peephole off
 u32 msgctrlHero(void) {
     savedataGetStatus(0, 2);
     return heroBiosGetNamePtr();
@@ -1064,8 +860,6 @@ asm void msgctrlWait(void) {
 #include "src/game/effect/effect_util_fn_80132454.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma peephole off
 s32 msgctrlWait(EffectUtilCommandObj* obj) {
     u8* stream;
     s32 counter;
@@ -1089,7 +883,6 @@ doneIncrement:
     obj->stream = stream + 1;
     return 0;
 }
-#pragma peephole on
 #endif
 
 
@@ -1128,10 +921,6 @@ asm void msgctrlColor(void) {
 #include "src/game/effect/effect_util_fn_80132570.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
-#pragma scheduling on
 s32 msgctrlColor(EffectUtilCommandObj* obj) {
     extern void GSmsgSetColor(void*);
     u8* stream;
@@ -1144,16 +933,10 @@ s32 msgctrlColor(EffectUtilCommandObj* obj) {
     obj->stream = stream + 4;
     return 0;
 }
-#pragma scheduling off
-#pragma pop
 #endif
 
 
 /* 0x801325C4 | 0x68 -- read byte command into u16 field and apply */
-#pragma push
-#pragma optimization_level 4
-#pragma peephole off
-#pragma scheduling on
 s32 msgctrlFont(EffectUtilCommandObj* obj) {
     u8* stream;
 
@@ -1170,8 +953,6 @@ s32 msgctrlFont(EffectUtilCommandObj* obj) {
     obj->stream = stream + 1;
     return 0;
 }
-#pragma scheduling off
-#pragma pop
 
 
 /* 0x8013262C | 16 bytes | set_field_return */
@@ -1192,10 +973,6 @@ asm void msgctrlRubyStart(void) {
 #include "src/game/effect/effect_util_fn_8013264C.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
-#pragma scheduling on
 s32 msgctrlRubyStart(EffectUtilCommandObj* obj) {
     extern void GSmsgInitRuby(void*);
     if (obj->activeFlag != 0) {
@@ -1204,15 +981,10 @@ s32 msgctrlRubyStart(EffectUtilCommandObj* obj) {
     obj->field_4B = 1;
     return 0;
 }
-#pragma scheduling off
-#pragma pop
 #endif
 
 
 /* 0x80132690 | 0xCC -- effect tick with flag-based logic */
-#pragma push
-#pragma peephole off
-#pragma scheduling on
 u32 msgctrlKeyWait(EffectUtilCommandObj* obj) {
     extern void soundStartSE(u32);
     u8* stream;
@@ -1244,8 +1016,6 @@ u32 msgctrlKeyWait(EffectUtilCommandObj* obj) {
     }
     return 1;
 }
-#pragma scheduling off
-#pragma pop
 
 
 /* 0x8013275C | 0x84 */
@@ -1254,8 +1024,6 @@ asm void msgctrlKeyEnd(void) {
 #include "src/game/effect/effect_util_fn_8013275C.inc"
 }
 #else
-#pragma peephole off
-#pragma scheduling on
 u32 msgctrlKeyEnd(EffectUtilCommandObj* obj) {
     if (obj->flags & 0x02) {
         obj->pendingFlag = 1;
@@ -1270,8 +1038,6 @@ u32 msgctrlKeyEnd(EffectUtilCommandObj* obj) {
     }
     return 1;
 }
-#pragma scheduling off
-#pragma peephole on
 #endif
 
 #if 0
@@ -1279,7 +1045,6 @@ asm void msgctrlCR(void) {
 #include "src/game/effect/effect_util_fn_801327E0.inc"
 }
 #else
-#pragma scheduling on
 u32 msgctrlCR(void* obj) {
     u8* p = (u8*)obj;
     f32 diff;
@@ -1288,240 +1053,13 @@ u32 msgctrlCR(void* obj) {
     *(f32*)(p + 0x10) += *(f32*)(p + 0x64) * diff;
     return 0;
 }
-#pragma scheduling off
 #endif
 
 
-/* 0x80132834 | 0x204 */
-#pragma push
-#pragma optimization_level 1
-void* _msgctrlMakeDigit__FPUslUll(void* table, u32 stride, u32 count, u32 type) {
-    extern u8 lbl_803635F0[];
-    extern u8 lbl_80363610[];
-    u8 sp[0x20];
-    u32 r0 = 0;
-    u32 r1 = (u32)sp;
-    u32 r3 = (u32)table;
-    u32 r4 = stride;
-    u32 r5 = count;
-    u32 r6 = type;
-    u32 r7 = 0;
-    u32 r8 = 0;
-    u32 r9 = 0;
-    u32 r10 = 0;
-    u32 r11 = 0;
-    u32 r12 = 0;
-    u32 r31 = 0;
-    void (*ctr_fn)(void) = 0;
-    u32 ctr = 0;
-
-    *(u32*)(sp + 0x8) = r5;
-    r9 = r4 - 1;
-    r0 = r9 << 1;
-    r4 = 0x0;
-    *(u16*)(r3 + r0) = r4;
-    r0 = 0x0;
-    r4 = 0xa;
-    r5 = 0x0;
-    r7 = 0x1;
-    if ((s32)r6 != (s32)0x3) {
-        if ((s32)r6 < (s32)0x3) {
-            if ((s32)r6 == (s32)0x1) goto L_801328BC;
-            if ((s32)r6 < (s32)0x1) {
-                if ((s32)r6 < (s32)0x0) {
-                    goto L_801328BC;
-                }
-                if ((s32)r6 != (s32)0x5) {
-                    goto L_801328BC;
-                }
-                }
-            r8 = *(u32*)(sp + 0x8);
-            if ((s32)r8 < (s32)0x0) {
-                r8 = -r8;
-                r0 = 0x1;
-            }
-            goto L_801328BC;
-            }
-        r7 = 0xa;
-
-    } else {
-        r4 = 0x10;
-        r7 = 0x8;
-    }
-L_801328BC: ;
-    if ((s32)r6 == (s32)0x5) {
-        r8 = (u32)lbl_80363610;
-        r8 = (u32)lbl_80363610;
-    } else {
-        r8 = (u32)lbl_803635F0;
-        r8 = (u32)lbl_803635F0;
-    }
-    r10 = r9 << 1;
-    while (1) {
-        r11 = *(u32*)(sp + 0x8);
-        if (r11 == (u32)0x0) break;
-        if ((s32)r6 == (s32)0x4) {
-            if ((s32)r5 != (s32)0x0) {
-                r11 = (0x5555 << 16);
-                r11 = r11 + 0x5556;
-                r12 = (s32)((s64)r11 * (s64)r5 >> 32);
-                r11 = (u32)r12 >> 31;
-                r11 = r12 + r11;
-                r11 = r11 * 0x3;
-                r11 = r5 - r11;
-                if ((s32)r11 == (s32)0x0) {
-                    r11 = 0x2c;
-                    *(u16*)(r3 + r10) = r11;
-        }
-        }
-        }
-        r31 = *(u32*)(sp + 0x8);
-        r5 = r5 + 0x1;
-        r12 = (u32)r31 / (u32)r4;
-        r11 = r12 * r4;
-        r11 = r31 - r11;
-        r11 = r11 << 1;
-        r11 = *(u16*)(r8 + r11);
-        *(u16*)(r3 + r10) = r11;
-
-    }
-    r6 = r9 << 1;
-    r5 = r7 - r5;
-    do {
-        if ((s32)r5 >= (s32)r7) break;
-        r4 = (u32)r5 >> 3;
-        ctr_fn = (void(*)(void))r4;
-        if (r4 != (u32)0x0) {
-            do {
-                r4 = *(u16*)((u8*)r8 + 0x0);
-                *(u16*)(r3 + r6) = r4;
-                r4 = *(u16*)((u8*)r8 + 0x0);
-                *(u16*)(r3 + r6) = r4;
-                r4 = *(u16*)((u8*)r8 + 0x0);
-                *(u16*)(r3 + r6) = r4;
-                r4 = *(u16*)((u8*)r8 + 0x0);
-                *(u16*)(r3 + r6) = r4;
-                r4 = *(u16*)((u8*)r8 + 0x0);
-                *(u16*)(r3 + r6) = r4;
-                r4 = *(u16*)((u8*)r8 + 0x0);
-                *(u16*)(r3 + r6) = r4;
-                r4 = *(u16*)((u8*)r8 + 0x0);
-                *(u16*)(r3 + r6) = r4;
-                r4 = *(u16*)((u8*)r8 + 0x0);
-                *(u16*)(r3 + r6) = r4;
-            } while (--ctr != 0);
-            r5 = r5 & 0x7;
-            if (r4 == (u32)0x0) break;
-        }
-        ctr_fn = (void(*)(void))r5;
-        do {
-            r4 = *(u16*)((u8*)r8 + 0x0);
-            *(u16*)(r3 + r6) = r4;
-        } while (--ctr != 0);
-    } while (0);
-    r0 = r0 & 0xFF;
-    if (r0 != (u32)0x0) {
-        r4 = 0x2d;
-        r0 = r9 << 1;
-        *(u16*)(r3 + r0) = r4;
-    }
-    r0 = r9 << 1;
-    r3 = r3 + r0;
-    r31 = *(u32*)(sp + 0x1C);
-    return (void*)r3;
-}
-#pragma pop
+/* 0x80132834 - 0x80132A38: shared with the standalone matching owner. */
+#include "src/game/msgctrl_candidate_80132834.c"
 
 
-/* 0x80132A38 | 0x210 */
-#if 0
-asm void msgctrlSetValue(void) {
-#include "src/game/effect/effect_util_fn_80132A38.inc"
-}
-#else
-#pragma push
-#pragma peephole off
-#pragma scheduling on
-void msgctrlSetValue(u32 id, u32 value) {
-    switch (id) {
-    case 0x0D: lbl_8047AE50 = (u16)value; return;
-    case 0x0E: lbl_8047AE52 = (u16)value; return;
-    case 0x0F: lbl_8047AE54 = value; return;
-    case 0x10: lbl_8047AE58 = value; return;
-    case 0x11: lbl_8047AE5C = value; return;
-    case 0x12: lbl_8047AE60 = value; return;
-    case 0x13: lbl_8047AE64 = value; return;
-    case 0x14: lbl_8047AE68 = value; return;
-    case 0x15: lbl_8047AE6C = value; return;
-    case 0x16: lbl_8047AE70 = value; return;
-    case 0x17: lbl_8047AE74 = value; return;
-    case 0x18: lbl_8047AE78 = value; return;
-    case 0x19: lbl_8047AE7C = (u16)value; return;
-    case 0x1A: lbl_8047AE88 = value; return;
-    case 0x1B: lbl_8047AE8C = value; return;
-    case 0x1C: lbl_8047AE90 = (u16)value; return;
-    case 0x1D: lbl_8047AE80 = value; return;
-    case 0x1E: lbl_8047AE84 = value; return;
-    case 0x1F: lbl_8047AE94 = value; return;
-    case 0x20: lbl_8047AE98 = value; return;
-    case 0x21: lbl_8047AE9C = value; return;
-    case 0x22: lbl_8047AEA0 = (u16)value; return;
-    case 0x23: lbl_8047AEA2 = (u16)value; return;
-    case 0x24: lbl_8047AEA4 = (u16)value; return;
-    case 0x3C: lbl_8047ADC8 = value; return;
-    case 0x3D: lbl_8047ADCC = value; return;
-    case 0x3E: lbl_8047ADD0 = value; return;
-    case 0x3F: lbl_8047ADD4 = value; return;
-    case 0x40: lbl_8047ADD8 = value; return;
-    case 0x41: lbl_8047ADDC = value; return;
-    case 0x42: lbl_8047ADE0 = value; return;
-    case 0x43: lbl_8047ADE4 = value; return;
-    case 0x44: lbl_8047ADE8 = value; return;
-    case 0x45: lbl_8047ADEC = value; return;
-    case 0x46: lbl_8047ADF0 = value; return;
-    case 0x47: lbl_8047ADF4 = value; return;
-    case 0x48: lbl_8047ADF8 = value; return;
-    case 0x49: lbl_8047ADFC = value; return;
-    case 0x4A: lbl_8047AE00 = value; return;
-    case 0x4B: lbl_8047AE04 = value; return;
-    case 0x4C: lbl_8047AE08 = value; return;
-    case 0x4D: lbl_8047AE0C = value; return;
-    case 0x4E: lbl_8047AE10 = value; return;
-    case 0x4F: lbl_8047AE14 = value; return;
-    case 0x50: lbl_8047AE18 = value; return;
-    case 0x51: lbl_8047AE1C = value; return;
-    case 0x52: lbl_8047AE20 = value; return;
-    case 0x53: lbl_8047AE24 = value; return;
-    case 0x54: lbl_8047AE28 = value; return;
-    case 0x55: lbl_8047AE2C = value; return;
-    case 0x56: lbl_8047AE30 = value; return;
-    case 0x57: lbl_8047AE34 = value; return;
-    case 0x58: lbl_8047AE38 = value; return;
-    case 0x59: lbl_8047AE3C = value; return;
-    case 0x5A: lbl_8047AE40 = value; return;
-    case 0x5B: lbl_8047AE44 = value; return;
-    case 0x5C: lbl_8047AE48 = value; return;
-    case 0x5D: lbl_8047AE4C = value; return;
-    }
-}
-#pragma scheduling off
-#pragma pop
-#endif
-
-
-/* 0x80132C48 | 36 bytes | multi_sda_store */
-#if 0
-asm void msgctrlInitValue(void) {
-#include "src/game/effect/effect_util_fn_80132C48.inc"
-}
-#else
-void msgctrlInitValue(void) {
-    lbl_8047AE70 = 0;
-    lbl_8047AE74 = 0;
-    lbl_8047AE78 = 0;
-    lbl_8047AE60 = 0;
-    lbl_8047AE64 = 0;
-    lbl_8047AE88 = 0;
-    lbl_8047AE8C = 0;
-}
-#endif
+/* 0x80132A38 - 0x80132C6C: msgctrlSetValue and msgctrlInitValue are in
+ * msgctrl_exact_80132A38.c. */
+#endif /* MSGCTRL_WHOLE_TU */

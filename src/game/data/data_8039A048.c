@@ -22,7 +22,6 @@ extern void* jumptable_8039A388[];
 extern void* jumptable_8039A3A8[];
 extern void* jumptable_8039A3C8[];
 extern void* jumptable_8039A478[];
-extern void* jumptable_8039A538[];
 extern void* jumptable_8039A578[];
 extern void* jumptable_8039A598[];
 extern void* jumptable_8039A5B8[];
@@ -159,6 +158,9 @@ void* jumptable_8039A200[8] = {
 };
 #endif
 
+#if !defined(DATA_8039A538_ONLY)
+/* 0x8039A220 - 0x8039A388 is owned by fight_range_8022B2CC.c. */
+#if !defined(DATA_8039A388_ONLY)
 void* jumptable_8039A220[53] = {
     (void*)((u8*)fn_802249B8 + 0xBC8),
     (void*)((u8*)fn_802249B8 + 0xC50),
@@ -258,75 +260,16 @@ void* jumptable_8039A314[29] = {
     (void*)((u8*)fn_8022B5C8 + 0x29C),
 };
 
-void* jumptable_8039A388[8] = {
-    (void*)((u8*)fn_8022BE2C + 0xCE4),
-    (void*)((u8*)fn_8022BE2C + 0xCAC),
-    (void*)((u8*)fn_8022BE2C + 0xCB4),
-    (void*)((u8*)fn_8022BE2C + 0xCBC),
-    (void*)((u8*)fn_8022BE2C + 0xCC4),
-    (void*)((u8*)fn_8022BE2C + 0xCCC),
-    (void*)((u8*)fn_8022BE2C + 0xCD4),
-    (void*)((u8*)fn_8022BE2C + 0xCDC),
-};
+#endif
 
-void* jumptable_8039A3A8[8] = {
-    (void*)((u8*)fn_8022BE2C + 0xBF4),
-    (void*)((u8*)fn_8022BE2C + 0xBBC),
-    (void*)((u8*)fn_8022BE2C + 0xBC4),
-    (void*)((u8*)fn_8022BE2C + 0xBCC),
-    (void*)((u8*)fn_8022BE2C + 0xBD4),
-    (void*)((u8*)fn_8022BE2C + 0xBDC),
-    (void*)((u8*)fn_8022BE2C + 0xBE4),
-    (void*)((u8*)fn_8022BE2C + 0xBEC),
-};
+/* 0x8039A388 - 0x8039A478 (fn_8022BE2C's three switch tables) is owned by
+ * fight_range_8022BE2C.c. */
 
-void* jumptable_8039A3C8[44] = {
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x134),
-    (void*)((u8*)fn_8022BE2C + 0xD54),
-    (void*)((u8*)fn_8022BE2C + 0xEC0),
-    (void*)((u8*)fn_8022BE2C + 0xD98),
-    (void*)((u8*)fn_8022BE2C + 0xE38),
-    (void*)((u8*)fn_8022BE2C + 0xE7C),
-    (void*)((u8*)fn_8022BE2C + 0x1AC),
-    (void*)((u8*)fn_8022BE2C + 0xF10),
-    (void*)((u8*)fn_8022BE2C + 0xF54),
-    (void*)((u8*)fn_8022BE2C + 0x420),
-    (void*)((u8*)fn_8022BE2C + 0x4F0),
-    (void*)((u8*)fn_8022BE2C + 0x5C0),
-    (void*)((u8*)fn_8022BE2C + 0x690),
-    (void*)((u8*)fn_8022BE2C + 0x760),
-    (void*)((u8*)fn_8022BE2C + 0x830),
-    (void*)((u8*)fn_8022BE2C + 0x8B8),
-    (void*)((u8*)fn_8022BE2C + 0x940),
-    (void*)((u8*)fn_8022BE2C + 0x9C8),
-    (void*)((u8*)fn_8022BE2C + 0xA50),
-    (void*)((u8*)fn_8022BE2C + 0xAD8),
-    (void*)((u8*)fn_8022BE2C + 0xB38),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x32C),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x112C),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x1190),
-    (void*)((u8*)fn_8022BE2C + 0x3A0),
-};
+#endif
 
+/* 0x8039A478 - 0x8039A538 is fn_8022D6BC's switch table, owned by
+ * fight_range_8022D6BC.c. */
+#if !defined(DATA_8039A220_ONLY)
 void* jumptable_8039A478[48] = {
     (void*)((u8*)fn_8022D6BC + 0x3E0),
     (void*)((u8*)fn_8022D6BC + 0x5E4),
@@ -378,89 +321,22 @@ void* jumptable_8039A478[48] = {
     (void*)((u8*)fn_8022D6BC + 0x500),
 };
 
-void* jumptable_8039A538[16] = {
-    (void*)((u8*)fn_8022F2F8 + 0xDC),
-    (void*)((u8*)fn_8022F2F8 + 0x104),
-    (void*)((u8*)fn_8022F2F8 + 0x270),
-    (void*)((u8*)fn_8022F2F8 + 0x314),
-    (void*)((u8*)fn_8022F2F8 + 0x3A0),
-    (void*)((u8*)fn_8022F2F8 + 0x3F8),
-    (void*)((u8*)fn_8022F2F8 + 0x468),
-    (void*)((u8*)fn_8022F2F8 + 0x504),
-    (void*)((u8*)fn_8022F2F8 + 0x57C),
-    (void*)((u8*)fn_8022F2F8 + 0x5F0),
-    (void*)((u8*)fn_8022F2F8 + 0x734),
-    (void*)((u8*)fn_8022F2F8 + 0x7B8),
-    (void*)((u8*)fn_8022F2F8 + 0x884),
-    (void*)((u8*)fn_8022F2F8 + 0x9FC),
-    (void*)((u8*)fn_8022F2F8 + 0xA58),
-    (void*)((u8*)fn_8022F2F8 + 0xAC8),
-};
+#endif
 
-void* jumptable_8039A578[8] = {
-    (void*)((u8*)fn_8023B498 + 0x784),
-    (void*)((u8*)fn_8023B498 + 0x7E8),
-    (void*)((u8*)fn_8023B498 + 0x7A8),
-    (void*)((u8*)fn_8023B498 + 0x784),
-    (void*)((u8*)fn_8023B498 + 0x7A8),
-    (void*)((u8*)fn_8023B498 + 0x7E8),
-    (void*)((u8*)fn_8023B498 + 0x7A8),
-    (void*)((u8*)fn_8023B498 + 0x7E8),
-};
+#if !defined(DATA_8039A220_PREFIX_ONLY)
+#if !defined(DATA_8039A648_ONLY)
+/* 0x8039A538 - 0x8039A578 (fn_8022F2F8's switch table) is owned by
+ * fight_range_8022F2F8.c. */
 
-void* jumptable_8039A598[8] = {
-    (void*)((u8*)fn_8023C370 + 0x100),
-    (void*)((u8*)fn_8023C370 + 0x164),
-    (void*)((u8*)fn_8023C370 + 0x124),
-    (void*)((u8*)fn_8023C370 + 0x100),
-    (void*)((u8*)fn_8023C370 + 0x124),
-    (void*)((u8*)fn_8023C370 + 0x164),
-    (void*)((u8*)fn_8023C370 + 0x124),
-    (void*)((u8*)fn_8023C370 + 0x164),
-};
+/* 0x8039A578 - 0x8039A5D8 (the switch tables of fn_8023B498, fn_8023C370 and
+ * fn_8023C530) is owned by fight_range_8023B498.c. */
 
-void* jumptable_8039A5B8[8] = {
-    (void*)((u8*)fn_8023C530 + 0xF0),
-    (void*)((u8*)fn_8023C530 + 0x3F4),
-    (void*)((u8*)fn_8023C530 + 0x258),
-    (void*)((u8*)fn_8023C530 + 0xF0),
-    (void*)((u8*)fn_8023C530 + 0x258),
-    (void*)((u8*)fn_8023C530 + 0x3F4),
-    (void*)((u8*)fn_8023C530 + 0x258),
-    (void*)((u8*)fn_8023C530 + 0x3F4),
-};
+#endif
 
-void* jumptable_8039A5D8[28] = {
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x1FC),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x64),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0xED8),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0xCB0),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0xEBC),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x86C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x64C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0xA30),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x106C),
-    (void*)((u8*)fightTrainerAiWazaValueHimitunotikara + 0x410),
-};
+/* 0x8039A5D8 - 0x8039A648 is fightTrainerAiWazaValueHimitunotikara's switch
+ * table, owned by fight_trainer_ai_waza_value_candidate_80245FC4.c. */
 
+#if defined(DATA_8039A648_ONLY)
 u8 lbl_8039A648[28] = {
     0x43, 0xFA, 0x00, 0x00, 0x44, 0x7A, 0x00, 0x00, 0x44, 0xBB, 0x80, 0x00,
     0x44, 0xFA, 0x00, 0x00, 0x45, 0x3B, 0x80, 0x00, 0x45, 0x9C, 0x40, 0x00,
@@ -473,4 +349,6 @@ u8 lbl_8039A664[44] = {
     0x44, 0xC8, 0x00, 0x00, 0x44, 0xE1, 0x00, 0x00, 0x44, 0xFA, 0x00, 0x00,
     0x45, 0x3B, 0x80, 0x00, 0x45, 0x9C, 0x40, 0x00,
 };
+#endif
+#endif
 #endif

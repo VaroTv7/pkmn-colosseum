@@ -149,9 +149,7 @@ typedef struct PeopleEntry {
     u8   pad01[3];          /* 0x01 */
     void* selfPtr;          /* 0x04 */
     void* modelHandle;      /* 0x08 */
-    u32  field_0C;          /* 0x0C */
-    void* updateCallback;   /* 0x10 */
-    u32  field_14;          /* 0x14 */
+    f32  headRotation[3];   /* 0x0C: rotation registered with the head part */
     void* threadHandle;     /* 0x18 */
     void* nextLink;         /* 0x1C */
     u8   visible;           /* 0x20 */
@@ -189,7 +187,7 @@ typedef struct PeopleEntry {
     f32  animBlendFactor;   /* 0x84 */
     f32  field_88;          /* 0x88 */
     f32  field_8C;          /* 0x8C */
-    u32  motionIndex;       /* 0x90 */
+    s32  motionIndex;       /* 0x90 */
     u8   field_94;          /* 0x94 */
     u8   isTalkable;        /* 0x95 (stored from talk check) */
     u8   moveType;          /* 0x96 */
@@ -199,9 +197,7 @@ typedef struct PeopleEntry {
     f32  targetX;           /* 0xA8 */
     f32  targetY;           /* 0xAC */
     f32  targetZ;           /* 0xB0 */
-    u32  field_B4;          /* 0xB4 */
-    u32  field_B8;          /* 0xB8 */
-    u32  field_BC;          /* 0xBC */
+    f32  headTarget[3];     /* 0xB4: rotation the head turns toward */
     u32  walkPathId;        /* 0xC0 */
     u32  walkPathParam;     /* 0xC4 */
     s32  walkNodeA;         /* 0xC8 */
@@ -305,7 +301,7 @@ void peopleCloseCallback(void);
 void* peopleGetModel(PeopleEntry* entry);
 
 /** Test whether flags are set on a people entry. fn_8018FB94 */
-BOOL peopleTestFlags(PeopleEntry* entry, u32 mask);
+u8 peopleTestFlags(PeopleEntry* entry, u32 mask);
 
 /** Set flag bits on a people entry. fn_8018FBBC */
 void peopleSetFlags(PeopleEntry* entry, u32 mask);
@@ -328,12 +324,12 @@ u32 characterModelGetTalkSE(const PeopleInfoBiosEntry* info);
 f32 fn_8018F5B4(const PeopleInfoBiosEntry* info);
 f32 fn_8018F5CC(const PeopleInfoBiosEntry* info);
 f32 fn_8018F5E4(const PeopleInfoBiosEntry* info);
-u32 fn_8018F5FC(const PeopleInfoBiosEntry* info);
+u8 fn_8018F5FC(const PeopleInfoBiosEntry* info);
 f32 charModelGetHeadPitchMax(const PeopleInfoBiosEntry* info);
 f32 charModelGetHeadPitchMin(const PeopleInfoBiosEntry* info);
 f32 charModelGetHeadYawMax(const PeopleInfoBiosEntry* info);
 f32 charModelGetHeadYawMin(const PeopleInfoBiosEntry* info);
-s32 charModelGetHeadPart(const PeopleInfoBiosEntry* info);
+s8 charModelGetHeadPart(const PeopleInfoBiosEntry* info);
 void* fn_8018F6B4(const PeopleInfoBiosEntry* info);
 PeopleInfoBiosEntry* peopleInfoBiosGetPtrFromIndex(u32 index);
 
@@ -379,7 +375,7 @@ s32 peopleFindAndInteract(u32 groupId, u32 index, u8 doInteract);
 s32 peopleFindAndSetupMotion(u32 groupId, u32 index, u8 doSetup);
 
 /** Open an NPC and configure its model, motion, and initial state.
- *  fn_8018E1C4 -- called during peopleOpen to set up a spawned NPC.
+ *  peopleOpenSub -- called during peopleOpen to set up a spawned NPC.
  *  Parameters come from the floor spawn data. */
 void peopleOpenSetup(PeopleEntry* entry, void* spawnData, u32 motionId, u32 param);
 

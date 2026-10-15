@@ -25,6 +25,10 @@ extern u32   pokemonSetStatus();
 
 /* Battle system functions */
 extern void fn_801EF8F4();
+extern u32 fn_801DE190(u16 index, u32 rnd, u32 variant);
+extern void fn_801DA9E8(u32 sequence, u16 moveID, s32 variant);
+extern u8 fn_801DA94C(u32 sequence, u16 moveID, s32 variant);
+extern void fn_801DA8C4(u32 sequence, u16 moveID, s32 variant);
 
 /* Sound functions */
 extern void soundStop();     /* Stop sound */
@@ -64,7 +68,7 @@ extern u32  pokemonBiosGetRnd();
 extern u16  pokemonBiosGetPokemonDataId();
 extern u32  savedataGetStatus();
 extern int  fadeCheck();
-extern int  fadeSet();
+extern void fadeSet(f32 duration, u32 mode);
 extern int  wazaSequenceSysRelease();
 extern int  fn_801DADC0();
 extern void OSRegisterResetFunction();
@@ -73,18 +77,69 @@ extern void OSInitThreadQueue();
 extern void* memcpy();
 
 /* Forward declarations for converted functions */
-u32 evolutionWazaLearn();
+int evolutionWazaLearn(u8 *r3, u32 r4, u8 *r5, int r6, void *r7, u32 r8);
 int fightTrainerAiWazaValueKuroikiri(void* ctx, u32 param1, u32 param2, u32 param3);
 void fightTrainerAiWazaValueHimitunotikara(void* ctx, u32 param1, u32 param2, u32 param3);
 s32 fightTrainerAiSelectIrekaeDasuFightPokemon(void* ctx, u32 param1, u32 param2, u32 param3);
 u32 fightTrainerAiWazaHit045(void* trainerCtx, u32 trainerSlot, u32 resultSlot, u32 resultType);
 u32 fightMenuFightTrainerGcHeroOpenMenu(void* ctx, u32 param1, u32 param2);
 
+typedef struct EvoWazaSeq {
+    u16 id;
+    int kind;
+} EvoWazaSeq;
+
+extern EvoWazaSeq lbl_8027A488[];
+extern u8 fn_801DDD28();
+
+static inline u32 evolutionCreateModel(u32 pkm, int kind)
+{
+  u16 no;
+  u32 shiny;
+  EvoWazaSeq *seq;
+  u32 rnd;
+  int i;
+  u32 model;
+
+  no = (int)pokemonGetStatus(pkm,0,0x6e,0);
+  if (no == 0) {
+    no = 0xffff;
+  }
+  else {
+    no = (int)pokemonGetStatus(0,no,0x66,0);
+    if (no == 0) {
+      no = 0xffff;
+    }
+  }
+  if (no == 0xffff) {
+    return 0;
+  }
+  rnd = pokemonBiosGetRnd(pkm);
+  shiny = (int)pokemonGetStatus(pkm,0,0xc1,0);
+  shiny = (-shiny | shiny) >> 0x1f;
+  model = fn_801DE190(no,rnd,shiny);
+  if (model == 0) {
+    return 0;
+  }
+  i = 0;
+  seq = lbl_8027A488;
+  do {
+    if (seq->kind == kind && fn_801DDD28(model,seq->id,4,0) == 0) {
+      break;
+    }
+    i++;
+    seq++;
+  } while (i < 5);
+  if (i < 5) {
+    return 0;
+  }
+  return model;
+}
+
 /* Address: 0x8026045C | Size: 0x27C | Ghidra import */
 int cbWazaForget(u32 r3,u32 r4,int r5)
 
 {
-    extern u8 lbl_8027A488[];
     extern int fn_80097A38();
     extern int GScameraGetPerspective();
     extern u32 GScameraGetActiveCamera();
@@ -101,19 +156,14 @@ int cbWazaForget(u32 r3,u32 r4,int r5)
     extern int GSscene_SetMode();
     extern int wazaSequenceSysRelease();
     extern int fn_801DADC0();
-    extern f32 lbl_8047E6C0;
+    extern const f32 lbl_8047E6C0;
 
   u32 uVar1;
   u32 *savedRotationPtr;
   u32 *savedPositionPtr;
   u32 *savedViewPtr;
   int iVar2;
-  u16 sVar4;
-  u32 uVar3;
-  u8 cVar5;
-  u16 *puVar6;
   u32 iVar7;
-  int iVar8;
   u32 savedView[4];
   u32 savedPosition[3];
   u32 savedRotation[3];
@@ -127,7 +177,7 @@ int cbWazaForget(u32 r3,u32 r4,int r5)
   u8 auStack_94 [4];
   float local_98;
   
-  fadeSet((double)lbl_8047E6C0,3);
+  fadeSet(lbl_8047E6C0,3);
   fadeCheck(1);
   GSscene_GetCameraDirectionVector(direction);
   GSscene_GetCameraRotationVector(rotation);
@@ -157,41 +207,7 @@ int cbWazaForget(u32 r3,u32 r4,int r5)
     iVar2 = -1;
   }
   fn_801DADC0(2);
-  sVar4 = (int)pokemonGetStatus(r3,0,0x6e,0);
-  if (sVar4 == 0) {
-    sVar4 = 0xffff;
-  }
-  else {
-    sVar4 = (int)pokemonGetStatus(0,sVar4,0x66,0);
-    if (sVar4 == 0) {
-      sVar4 = 0xffff;
-    }
-  }
-  if (sVar4 == 0xffff) {
-    iVar7 = 0;
-  }
-  else {
-    uVar1 = pokemonBiosGetRnd(r3);
-    uVar3 = (int)pokemonGetStatus(r3,0,0xc1,0);
-    uVar3 = (-uVar3 | uVar3) >> 0x1f;
-    iVar7 = fn_801DE190(sVar4,uVar1,uVar3);
-    if (iVar7 == 0) {
-      iVar7 = 0;
-    }
-    else {
-      iVar8 = 0;
-      puVar6 = (u16 *)lbl_8027A488;
-      do {
-        if ((*(int *)(puVar6 + 2) == 1) && (cVar5 = fn_801DDD28(iVar7,*puVar6,4,0), cVar5 == '\0'))
-        break;
-        iVar8 = iVar8 + 1;
-        puVar6 = puVar6 + 4;
-      } while (iVar8 < 5);
-      if (iVar8 < 5) {
-        iVar7 = 0;
-      }
-    }
-  }
+  iVar7 = evolutionCreateModel(r3,1);
   if (iVar7 != 0) {
     *(int *)(r5 + 4) = iVar7;
   }
@@ -204,7 +220,7 @@ int cbWazaForget(u32 r3,u32 r4,int r5)
   GSscene_SetCameraPositionVector(savedPositionPtr);
   GSscene_SetCameraViewVector(savedViewPtr);
   cameraSetFov((double)((volatile float *)savedView)[3]);
-  fadeSet((double)lbl_8047E6C0,2);
+  fadeSet(lbl_8047E6C0,2);
   fadeCheck(1);
   return (int)(signed char)iVar2;
 }
@@ -213,24 +229,22 @@ int cbWazaForget(u32 r3,u32 r4,int r5)
 int doWazaSequence(u32 *r3,int r4,int r5,u32 r6)
 
 {
-    extern u8 lbl_8027A488[];
     extern int msgGetCharsPerFrame();
     extern u32 fn_800F7AF0();
     extern u32 fn_800F7BC4();
-    extern f32 lbl_8047E6C0;
+    extern const f32 lbl_8047E6C0;
+  u32 *savedRotationPtr;
+  u32 *savedPositionPtr;
+  u32 *savedViewPtr;
   u16 uVar1;
+  u32 uVar9;
+  int iVar8;
   BOOL bVar2;
-
   u8 cVar7;
   int iVar3;
   u32 uVar4;
   u32 uVar5;
   u32 uVar6;
-  int iVar8;
-  u32 uVar9;
-  u32 *savedRotationPtr;
-  u32 *savedPositionPtr;
-  u32 *savedViewPtr;
   u32 savedView[4];
   u32 savedPosition[3];
   u32 savedRotation[3];
@@ -250,8 +264,8 @@ int doWazaSequence(u32 *r3,int r4,int r5,u32 r6)
     iVar8 = 0;
   }
   else {
-    uVar1 = *(u16 *)(lbl_8027A488 + r4 * 8);
-    if (*(int *)(lbl_8027A488 + r4 * 8 + 4) != 0) {
+    uVar1 = lbl_8027A488[r4].id;
+    if (lbl_8027A488[r4].kind != 0) {
       uVar9 = r3[1];
     }
     else {
@@ -268,7 +282,7 @@ int doWazaSequence(u32 *r3,int r4,int r5,u32 r6)
         if ((r6 & 2) != 0) {
           uVar6 = 2;
         }
-        fadeSet((double)lbl_8047E6C0,uVar6);
+        fadeSet(lbl_8047E6C0,uVar6);
         r6 = r6 & 0xfffffff5;
       }
       cVar7 = fn_801DA94C(uVar9,uVar1,4);
@@ -314,7 +328,7 @@ int doWazaSequence(u32 *r3,int r4,int r5,u32 r6)
       if ((r6 & 4) != 0) {
         uVar6 = 3;
       }
-      fadeSet((double)lbl_8047E6C0,uVar6);
+      fadeSet(lbl_8047E6C0,uVar6);
       fadeCheck(1);
     }
     fn_801DA8C4(uVar9,uVar1,4);
@@ -326,199 +340,124 @@ int doWazaSequence(u32 *r3,int r4,int r5,u32 r6)
   return iVar8;
 }
 
+typedef struct EvoWork {
+    u32 model[2];
+    u32 seq;
+    u32 bgm;
+    u32 se;
+    u32 bgmVolume;
+    u32 seVolume;
+} EvoWork;
+
+static inline u8 evolutionSetModel(u32 pkm, int kind, u32 *out)
+{
+  u32 model;
+
+  model = evolutionCreateModel(pkm,kind);
+  if (model == 0) {
+    return 0;
+  }
+  *out = model;
+  return 1;
+}
+
+static inline BOOL evolutionSetModels(u32 *models, u32 before, u32 after)
+{
+  if (evolutionSetModel(before,0,&models[0]) && evolutionSetModel(after,1,&models[1])) {
+    return 1;
+  }
+  wazaSequenceSysRelease();
+  return 0;
+}
+
+static inline BOOL evolutionRun(EvoWork *work, u32 r5, u32 before, u32 after,
+                                u16 *wazaList, int wazaNum, u8 *slotList)
+{
+    extern int pokemonBiosCopy();
+    extern int scriptSoundStop();
+    extern int evolutionDemo();
+    extern const f32 lbl_8047E6C0;
+  u32 bgmVolume;
+  u32 seVolume;
+  u32 bgm;
+  u32 se;
+  int i;
+  u16 waza;
+  int result;
+  u8 slot;
+  u8 pokemon[320];
+  u16 *wp = wazaList;
+  u8 *sp = slotList;
+
+  bgm = std228_soundGetCurrentBackgroundMusic();
+  if (bgm != 0) {
+    bgmVolume = fn_801656D8();
+    std104_soundSetBackgroundMusic(1,0x32,0xff);
+  }
+  else {
+    bgmVolume = 0;
+  }
+  se = fn_801653BC();
+  if (se != 0) {
+    seVolume = fn_801656D8();
+    scriptSoundStop(0x32);
+  }
+  else {
+    seVolume = 0;
+  }
+  work->bgm = bgm;
+  work->se = se;
+  work->bgmVolume = bgmVolume;
+  work->seVolume = seVolume;
+  result = evolutionDemo(work,r5,before,after);
+  if (work->bgm != 0) {
+    std104_soundSetBackgroundMusic(work->bgm,0x32,(u8)work->bgmVolume);
+  }
+  if (work->se != 0) {
+    std105_soundPlayEffect(work->se,0x32,(u8)work->seVolume);
+  }
+  if (result == 0) {
+    return FALSE;
+  }
+  pokemonBiosCopy(pokemon,after);
+  for (i = 0; i < wazaNum; i++) {
+    waza = *wp;
+    if (evolutionWazaLearn(pokemon,waza,&slot,0,cbWazaForget,(u32)work) != 0) {
+      pokemonWazaCreate(pokemon,slot,waza);
+    }
+    else {
+      slot = 0xff;
+    }
+    wp++;
+    *sp = slot;
+    sp++;
+  }
+  fadeSet(lbl_8047E6C0,3);
+  fadeCheck(1);
+  return TRUE;
+}
+
 /* Address: 0x80260EBC | Size: 0x414 | Ghidra import */
 u32
 evolutionStart(u32 r3,u32 r4,u32 r5,u16 *r6,
             int r7,u8 *r8)
 
 {
-    extern u8 lbl_8027A488[];
-    extern int pokemonBiosCopy();
-    extern int scriptSoundStop();
-    extern int evolutionDemo();
-    extern f32 lbl_8047E6C0;
-  u16 uVar1;
-  BOOL bVar2;
-  u8 candidateValid;
+  BOOL ok;
+  EvoWork work;
 
-  u32 sVar7;
-  u8 cVar8;
-  u32 uVar3;
-  u32 uVar4;
-  u32 uVar5;
-  u32 evolutionResult;
-  int iVar6;
-  int iVar9;
-  int *resultPtr;
-  u16 *puVar10;
-  u8 local_188 [4];
-  int local_184;
-  int local_180;
-  volatile int local_178;
-  volatile int local_174;
-  volatile u32 local_170;
-  volatile u32 local_16c;
-  u8 auStack_168 [320];
-  
   fn_801DADC0(2);
-  local_184 = 0;
-  local_180 = 0;
-  sVar7 = (int)pokemonGetStatus(r3,0,0x6e,0);
-  if ((sVar7 & 0xffff) == 0) {
-    sVar7 = 0xffff;
+  work.model[0] = 0;
+  work.model[1] = 0;
+  if (!evolutionSetModels(work.model,r3,r4)) {
+    return 2;
   }
-  else {
-    sVar7 = (int)pokemonGetStatus(0,sVar7,0x66,0);
-    if ((sVar7 & 0xffff) == 0) {
-      sVar7 = 0xffff;
-    }
+  ok = evolutionRun(&work,r5,r3,r4,r6,r7,r8);
+  wazaSequenceSysRelease();
+  if (ok) {
+    return 0;
   }
-  if ((sVar7 & 0xffff) == 0xffff) {
-    evolutionResult = 0;
-  }
-  else {
-    uVar3 = pokemonBiosGetRnd(r3);
-    uVar4 = (int)pokemonGetStatus(r3,0,0xc1,0);
-    uVar4 = (-uVar4 | uVar4) >> 0x1f;
-    evolutionResult = fn_801DE190(sVar7,uVar3,uVar4);
-    if (evolutionResult == 0) {
-      evolutionResult = 0;
-    }
-    else {
-      iVar6 = 0;
-      puVar10 = (u16 *)lbl_8027A488;
-      do {
-        if ((*(int *)(puVar10 + 2) == 0) &&
-           (cVar8 = fn_801DDD28(evolutionResult,*puVar10,4,0), cVar8 == '\0')) break;
-        iVar6 = iVar6 + 1;
-        puVar10 = puVar10 + 4;
-      } while (iVar6 < 5);
-      if (iVar6 < 5) {
-        evolutionResult = 0;
-      }
-    }
-  }
-  if (evolutionResult == 0) {
-    candidateValid = 0;
-  }
-  else {
-    local_184 = evolutionResult;
-    candidateValid = 1;
-  }
-  if (candidateValid) {
-    sVar7 = (int)pokemonGetStatus(r4,0,0x6e,0);
-    if ((sVar7 & 0xffff) == 0) {
-      sVar7 = 0xffff;
-    }
-    else {
-      sVar7 = (int)pokemonGetStatus(0,sVar7,0x66,0);
-      if ((sVar7 & 0xffff) == 0) {
-        sVar7 = 0xffff;
-      }
-    }
-    if ((sVar7 & 0xffff) == 0xffff) {
-      evolutionResult = 0;
-    }
-    else {
-      uVar3 = pokemonBiosGetRnd(r4);
-      uVar4 = (int)pokemonGetStatus(r4,0,0xc1,0);
-      uVar4 = (-uVar4 | uVar4) >> 0x1f;
-      evolutionResult = fn_801DE190(sVar7,uVar3,uVar4);
-      if (evolutionResult == 0) {
-        evolutionResult = 0;
-      }
-      else {
-        iVar6 = 0;
-        puVar10 = (u16 *)lbl_8027A488;
-        do {
-          if ((*(int *)(puVar10 + 2) == 1) &&
-             (cVar8 = fn_801DDD28(evolutionResult,*puVar10,4,0), cVar8 == '\0')) break;
-          iVar6 = iVar6 + 1;
-          puVar10 = puVar10 + 4;
-        } while (iVar6 < 5);
-        if (iVar6 < 5) {
-          evolutionResult = 0;
-        }
-      }
-    }
-    if (evolutionResult == 0) {
-      candidateValid = 0;
-    }
-    else {
-      local_180 = evolutionResult;
-      candidateValid = 1;
-    }
-  }
-  if (candidateValid) {
-    bVar2 = 1;
-  }
-  else {
-    wazaSequenceSysRelease();
-    bVar2 = 0;
-  }
-  if (bVar2) {
-    iVar9 = std228_soundGetCurrentBackgroundMusic();
-    if (iVar9 != 0) {
-      uVar4 = fn_801656D8();
-      std104_soundSetBackgroundMusic(1,0x32,0xff);
-    }
-    else {
-      uVar4 = 0;
-    }
-    iVar6 = fn_801653BC();
-    if (iVar6 != 0) {
-      uVar5 = fn_801656D8();
-      scriptSoundStop(0x32);
-    }
-    else {
-      uVar5 = 0;
-    }
-    local_178 = iVar9;
-    local_174 = iVar6;
-    local_170 = uVar4;
-    local_16c = uVar5;
-    iVar9 = evolutionDemo(&local_184,r5,r3,r4);
-    if (local_178 != 0) {
-      std104_soundSetBackgroundMusic(local_178,0x32,local_170 & 0xff);
-    }
-    if (local_174 != 0) {
-      std105_soundPlayEffect(local_174,0x32,local_16c & 0xff);
-    }
-    if (iVar9 == 0) {
-      bVar2 = 0;
-    }
-    else {
-      pokemonBiosCopy((int*)auStack_168,r4);
-      resultPtr = &local_184;
-      for (iVar9 = 0; iVar9 < r7; iVar9 = iVar9 + 1) {
-        uVar1 = *r6;
-        iVar6 = evolutionWazaLearn((int*)auStack_168,uVar1,local_188,0,cbWazaForget,resultPtr);
-        if (iVar6 != 0) {
-          pokemonWazaCreate((int*)auStack_168,local_188[0],uVar1);
-        }
-        else {
-          local_188[0] = 0xff;
-        }
-        r6 = r6 + 1;
-        *r8 = local_188[0];
-        r8 = r8 + 1;
-      }
-      fadeSet((double)lbl_8047E6C0,3);
-      fadeCheck(1);
-      bVar2 = 1;
-    }
-    wazaSequenceSysRelease();
-    if (bVar2) {
-      uVar3 = 0;
-    }
-    else {
-      uVar3 = 1;
-    }
-  }
-  else {
-    uVar3 = 2;
-  }
-  return uVar3;
+  return 1;
 }
 
 /* Address: 0x8026132C | Size: 0x5C | Ghidra import */
@@ -558,110 +497,78 @@ void evolution(void)
 }
 
 /* Address: 0x802600E4 | Size: 0x378 | Ghidra import */
-u32
-evolutionWazaLearn(u32 r3,u32 r4,u8 *r5,int r6,void *r7,
+extern s8 menuSubOpenYesNo();
+extern int winMsgClose();
+extern int winMsgOpen();
+
+static inline int evolutionAskYesNo(int r6, u32 msg)
+{
+  int sel;
+
+  if (r6 == 0) {
+    winMsgOpenField(msg,1,0);
+  }
+  else {
+    winMsgOpen(2,msg,1,0);
+  }
+  if (r6 == 0) {
+    sel = (s8)std011_dialogDisplayYesNoMenu();
+  }
+  else {
+    sel = menuSubOpenYesNo(0,0xffffffff,0xffffffff,0);
+  }
+  if (r6 == 0) {
+    winMsgCloseField(1);
+  }
+  else {
+    winMsgClose(1);
+  }
+  switch (sel) {
+  case 0:
+    return 0;
+  case 1:
+    return 1;
+  default:
+    return 2;
+  }
+}
+
+int
+evolutionWazaLearn(u8 *r3,u32 r4,u8 *r5,int r6,void *r7,
             u32 r8)
 
 {
-    extern int fn_8001E074();
-    extern int winMsgClose();
-    extern int winMsgOpen();
-  int iVar1;
-  u16 sVar3;
+  int slot;
   u32 uVar2;
-  s8 cVar5;
+  u32 waza;
+  u16 sVar3;
   u16 uVar4;
-  u32 uVar6;
 
-  uVar6 = 0;
+  slot = 0;
   do {
-    sVar3 = pokemonBiosGetPokemonWazaDataId(r3,uVar6 & 0xffff);
+    sVar3 = pokemonBiosGetPokemonWazaDataId(r3,slot & 0xffff);
     if (sVar3 == 0) break;
-    uVar6 = uVar6 + 1;
-  } while ((int)uVar6 < 4);
-  if ((int)uVar6 < 4) goto LAB_0025d3c4;
+    slot = slot + 1;
+  } while (slot < 4);
+  if (slot < 4) goto LAB_0025d3c4;
 
   uVar2 = pokemonBiosGetNicknamePtr(r3);
   msgctrlSetValue(0x32,uVar2);
-  msgctrlSetValue(0x39,r4 & 0xffff);
+  waza = r4 & 0xffff;
+  msgctrlSetValue(0x39,waza);
   do {
-    if (r6 == 0) {
-      winMsgOpenField(0x4243,1,0);
-    }
-    else {
-      winMsgOpen(2,0x4243,1,0);
-    }
-    if (r6 == 0) {
-      cVar5 = std011_dialogDisplayYesNoMenu();
-    }
-    else {
-      cVar5 = fn_8001E074(0,0xffffffff,0xffffffff,0);
-    }
-    if (r6 == 0) {
-      winMsgCloseField(1);
-    }
-    else {
-      winMsgClose(1);
-    }
-    if (cVar5 == 1) goto one_1;
-    if (cVar5 >= 1) goto two_1;
-    if (-1 < cVar5) goto zero_1;
-    goto two_1;
-zero_1:
-    iVar1 = 0;
-    goto done_1;
-one_1:
-    iVar1 = 1;
-    goto done_1;
-two_1:
-    iVar1 = 2;
-done_1:
-    ;
-    if (iVar1 == 0) {
+    if (evolutionAskYesNo(r6,0x4243) == 0) {
       if (r7 != (void *)0x0) {
-        cVar5 = ((s8 (*)())r7)(r3,r4,r8);
-        uVar6 = (u32)cVar5;
+        slot = ((s8 (*)())r7)(r3,r4,r8);
       }
       else {
-        uVar6 = 0;
+        slot = 0;
       }
-      if (0 <= (int)uVar6) goto LAB_waza_set;
+      if (0 <= slot) goto LAB_waza_set;
     }
     msgctrlSetValue(0x32,uVar2);
-    msgctrlSetValue(0x39,r4 & 0xffff);
-    if (r6 == 0) {
-      winMsgOpenField(0x4242,1,0);
-    }
-    else {
-      winMsgOpen(2,0x4242,1,0);
-    }
-    if (r6 == 0) {
-      cVar5 = std011_dialogDisplayYesNoMenu();
-    }
-    else {
-      cVar5 = fn_8001E074(0,0xffffffff,0xffffffff,0);
-    }
-    if (r6 == 0) {
-      winMsgCloseField(1);
-    }
-    else {
-      winMsgClose(1);
-    }
-    if (cVar5 == 1) goto one_2;
-    if (cVar5 >= 1) goto two_2;
-    if (-1 < cVar5) goto zero_2;
-    goto two_2;
-zero_2:
-    iVar1 = 0;
-    goto done_2;
-one_2:
-    iVar1 = 1;
-    goto done_2;
-two_2:
-    iVar1 = 2;
-done_2:
-    ;
-  } while (iVar1 != 0);
+    msgctrlSetValue(0x39,waza);
+  } while (evolutionAskYesNo(r6,0x4242) != 0);
   if (r6 == 0) {
     winMsgOpenField(0x4241,1,0);
   }
@@ -680,7 +587,7 @@ LAB_waza_set:
   uVar2 = pokemonBiosGetNicknamePtr(r3);
   msgctrlSetValue(0x32,uVar2);
   msgctrlSetValue(0x5d,0x468);
-  uVar4 = pokemonBiosGetPokemonWazaDataId(r3,uVar6 & 0xffff);
+  uVar4 = pokemonBiosGetPokemonWazaDataId(r3,slot & 0xffff);
   msgctrlSetValue(0x39,uVar4);
   if (r6 == 0) {
     winMsgOpenField(0x4248,1,0);
@@ -705,261 +612,202 @@ LAB_0025d3c4:
   else {
     winMsgClose(1);
   }
-  *r5 = (char)uVar6;
+  *r5 = (char)slot;
   return 1;
 }
 
-/* Address: 0x80260910 | Size: 0x5AC | Ghidra import (PSQ removed) */
+extern u8 pokemonCheckValid();
+extern u32 pokemonDataBiosGetPtr(u16 id);
+extern u16 pokemonDataBiosGetVoice();
 
-
-u32 evolutionDemo(u32 *r3,int r4,u32 r5,u32 r6)
-
+static inline u32 evolutionGetPokemonData(u32 pkm)
 {
-    extern u8 lbl_8027A488[];
-    extern u8 lbl_8027A4B0[];
-    extern f32 lbl_8047E6B0;
-    extern f32 lbl_8047E6B4;
-    extern f64 lbl_8047E6B8;
-    extern f32 lbl_8047E6C0;
-    extern f32 lbl_8047E6C4;
-    int saved_r29;
-  float fVar1;
-  u16 uVar2;
-  BOOL bVar3;
-  BOOL bVar4;
-  BOOL bVar5;
+  if (pkm == 0) {
+    return 0;
+  }
+  if (!pokemonCheckValid(pkm)) {
+    return 0;
+  }
+  return pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(pkm));
+}
 
-  u32 uVar5;
-  u32 dataPtr;
-  int iVar6;
-  u32 uVar7;
-  u32 uVar8;
-  u8 cVar10;
-  s8 cVar13;
-  u32 uVar9;
-  int uVar11;
-  u32 uVar12;
-  u8 *evolutionTable;
-  u32 *selectorTable;
+static inline u32 evolutionPlayVoice(u32 pkm)
+{
+  u32 data;
+  u32 voice;
 
-  double dVar13;
-  double dVar14;
-  double dVar15;
-  volatile u32 local_8;
-  volatile u32 local_c;
-
-  fn_801DA4E8(*r3,1);
-  uVar5 = pokemonBiosGetNicknamePtr(r5);
-  msgctrlSetValue(0x32,uVar5);
-  winMsgOpenField(0x4401,1,0);
-  if (r5 == 0) {
-    dataPtr = 0;
+  data = evolutionGetPokemonData(pkm);
+  if (data == 0) {
+    voice = 0;
   }
   else {
-    cVar10 = pokemonCheckValid(r5);
-    if (cVar10 == '\0') {
-      dataPtr = 0;
-    }
-    else {
-      pokemonBiosGetPokemonDataId(r5);
-      dataPtr = pokemonDataBiosGetPtr();
-    }
+    voice = pokemonDataBiosGetVoice(data);
+    soundStartSE(voice);
   }
-  if (dataPtr == 0) {
-    uVar9 = 0;
+  return voice;
+}
+
+static inline u32 evolutionGetSeqModel(EvoWork *work, int seq)
+{
+  if (lbl_8027A488[seq].kind != 0) {
+    return work->model[1];
   }
-  else {
-    uVar9 = pokemonDataBiosGetVoice() & 0xffff;
-    soundStartSE(uVar9);
-  }
-  selectorTable = (u32 *)(lbl_8027A488 + 4);
-  uVar2 = *(u16 *)lbl_8027A488;
-  if (*selectorTable != 0) {
-    uVar5 = r3[1];
-  }
-  else {
-    uVar5 = *r3;
-  }
-  fn_801DA9E8(uVar5,uVar2,4);
+  return work->model[0];
+}
+
+typedef struct EvoSkipSeq {
+    u32 time;
+    int seq;
+} EvoSkipSeq;
+
+static inline void evolutionSeqStart(EvoWork *work, int seq)
+{
+  u16 id;
+
+  id = lbl_8027A488[seq].id;
+  fn_801DA9E8(evolutionGetSeqModel(work,seq),id,4);
   fn_801DB088();
-  r3[2] = 0;
-  evolutionTable = lbl_8027A488;
-  bVar3 = 1;
-  bVar4 = 0;
-  uVar11 = 0;
-  uVar12 = 0;
-  goto LAB_0025db58;
-  while (1) {
-    if (((r4 != 0) && (uVar12 >= 0x78)) && (uVar11 >= 2)) {
-      uVar7 = fn_800F7AF0(1);
-      uVar8 = fn_800F7BC4(1);
-      if ((uVar8 & uVar7 & 0x200) != 0) {
-        bVar4 = 1;
-        goto LAB_0025db60;
+  work->seq = seq;
+}
+
+static inline BOOL evolutionSeqUpdate(EvoWork *work)
+{
+  u32 model;
+  u16 id;
+  u32 playing;
+
+  model = evolutionGetSeqModel(work,work->seq);
+  id = lbl_8027A488[work->seq].id;
+  fn_801DB088();
+  playing = fn_801DA94C(model,id,4);
+  return (-playing | playing) >> 31;
+}
+
+/* Address: 0x80260910 | Size: 0x5AC */
+u32 evolutionDemo(EvoWork *work,int canSkip,u32 before,u32 after)
+{
+    extern EvoSkipSeq lbl_8027A4B0[];
+    extern const f32 lbl_8047E6B0;
+    extern const f32 lbl_8047E6B4;
+    extern const f32 lbl_8047E6C0;
+    extern const f32 lbl_8047E6C4;
+    extern int msgGetCharsPerFrame();
+    extern u32 fn_800F7AF0();
+    extern u32 fn_800F7BC4();
+  u32 voice;
+  u32 nickname;
+  u16 dataId;
+  u32 trigger;
+  u32 held;
+  BOOL playing;
+  BOOL first;
+  int state;
+  u32 time;
+  BOOL skipped;
+  int wait;
+  int level;
+  f32 t;
+
+  fn_801DA4E8(work->model[0],1);
+  nickname = pokemonBiosGetNicknamePtr(before);
+  msgctrlSetValue(0x32,nickname);
+  winMsgOpenField(0x4401,1,0);
+  voice = evolutionPlayVoice(before);
+  evolutionSeqStart(work,0);
+  first = TRUE;
+  skipped = FALSE;
+  state = 0;
+  time = 0;
+  while (time < 0x23a) {
+    if (canSkip != 0 && time >= 0x78 && state >= 2) {
+      trigger = fn_800F7AF0(1);
+      held = fn_800F7BC4(1);
+      if ((held & trigger & 0x200) != 0) {
+        skipped = TRUE;
+        break;
       }
     }
-    if (*(int *)(evolutionTable + r3[2] * 8 + 4) != 0) {
-      uVar5 = r3[1];
+    playing = evolutionSeqUpdate(work);
+    if (!playing) {
+      break;
     }
-    else {
-      uVar5 = *r3;
-    }
-    uVar2 = *(u16 *)(evolutionTable + r3[2] * 8);
-    fn_801DB088();
-    uVar7 = fn_801DA94C(uVar5,uVar2,4);
-    bVar5 = (uVar7 & 0xff) != 0;
-    if (!bVar5) goto LAB_0025db60;
-    switch (uVar11) {
+    switch (state) {
     case 0:
-      iVar6 = soundGetStatus(uVar9);
-      if (iVar6 != 2) {
+      if (soundGetStatus(voice) != 2) {
         std104_soundSetBackgroundMusic(0x3d3,0,0xff);
-        saved_r29 = 0;
-        uVar11 = 1;
+        wait = 0;
+        state = 1;
       }
       break;
     case 1:
-      iVar6 = soundGetStatus(0x3d3);
-      if (iVar6 != 2) {
-        iVar6 = msgGetCharsPerFrame();
-        saved_r29 = saved_r29 + iVar6;
-        if (saved_r29 >= 0x1e) {
+      if (soundGetStatus(0x3d3) != 2) {
+        wait += msgGetCharsPerFrame();
+        if (wait >= 0x1e) {
           std104_soundSetBackgroundMusic(0x3d4,0,0xff);
-          uVar11 = 2;
+          state = 2;
         }
       }
       break;
     }
-    if (bVar3) {
-      fadeSet((double)lbl_8047E6C0,2);
-      bVar3 = 0;
+    if (first) {
+      fadeSet(lbl_8047E6C0,2);
+      first = FALSE;
     }
     _threadSwitch();
-    iVar6 = msgGetCharsPerFrame();
-    uVar12 = uVar12 + iVar6;
-LAB_0025db58:
-    if (uVar12 >= 0x23a) break;
+    time += msgGetCharsPerFrame();
   }
-
-LAB_0025db60:
-  fadeSet((double)lbl_8047E6C0,5);
-  evolutionTable = lbl_8027A488;
-  while (cVar13 = fadeCheck(0), cVar13 != '\0') {
-    if (selectorTable[r3[2] * 2] != 0) {
-      uVar5 = r3[1];
-    }
-    else {
-      uVar5 = *r3;
-    }
-    uVar9 = *(u16 *)(evolutionTable + r3[2] * 8);
-    fn_801DB088();
-    fn_801DA94C(uVar5,uVar9,4);
+  fadeSet(lbl_8047E6C0,5);
+  while ((s8)fadeCheck(0) != 0) {
+    evolutionSeqUpdate(work);
     _threadSwitch();
   }
-  if (selectorTable[r3[2] * 2] != 0) {
-    uVar5 = r3[1];
-  }
-  else {
-    uVar5 = *r3;
-  }
-  fn_801DA8C4(uVar5,*(u16 *)(evolutionTable + r3[2] * 8),4);
-  dVar15 = lbl_8047E6B8;
-  dVar14 = (double)lbl_8047E6B4;
-  fVar1 = lbl_8047E6B0;
-  while (dVar13 = (double)fVar1, dVar13 < dVar14) {
+  fn_801DA8C4(evolutionGetSeqModel(work,work->seq),lbl_8027A488[work->seq].id,4);
+  t = lbl_8047E6B0;
+  while (t < lbl_8047E6B4) {
     _threadSwitch();
-    uVar5 = msgGetCharsPerFrame();
-    local_8 = 0x43300000;
-    local_c = uVar5;
-    fVar1 = (float)(dVar13 + (double)(float)(*(double *)&local_8 - dVar15));
+    t += (u32)msgGetCharsPerFrame();
   }
-  if (bVar4) {
+  if (skipped) {
     winMsgCloseField(1);
     soundStop(0x3d4,0x32);
-      iVar6 = 0;
-    if ((*(u32 *)lbl_8027A4B0 < uVar12) && (iVar6 = 1, *(u32 *)(lbl_8027A4B0 + 8) < uVar12)) {
-      iVar6 = 2;
-    }
-    doWazaSequence(r3,*(u32 *)(lbl_8027A4B0 + iVar6 * 8 + 4),0,8);
-    if (r5 == 0) {
-      dataPtr = 0;
-    }
-    else {
-      cVar10 = pokemonCheckValid(r5);
-      if (cVar10 == '\0') {
-        dataPtr = 0;
-      }
-      else {
-        pokemonBiosGetPokemonDataId(r5);
-        dataPtr = pokemonDataBiosGetPtr();
+    level = 0;
+    if (lbl_8027A4B0[0].time < time) {
+      level = 1;
+      if (lbl_8027A4B0[1].time < time) {
+        level = 2;
       }
     }
-    if (dataPtr == 0) {
-      uVar9 = 0;
-    }
-    else {
-      uVar9 = pokemonDataBiosGetVoice() & 0xffff;
-      soundStartSE(uVar9);
-    }
-    while (iVar6 = soundGetStatus(uVar9), iVar6 == 2) {
+    doWazaSequence((u32 *)work,lbl_8027A4B0[level].seq,0,8);
+    voice = evolutionPlayVoice(before);
+    while (soundGetStatus(voice) == 2) {
       _threadSwitch();
     }
-    uVar5 = pokemonBiosGetNicknamePtr(r5);
-    msgctrlSetValue(0x32,uVar5);
+    msgctrlSetValue(0x32,pokemonBiosGetNicknamePtr(before));
     winMsgOpenField(0x43ff,1,0);
     winMsgCloseField(1);
-    fadeSet((double)lbl_8047E6C0,3);
+    fadeSet(lbl_8047E6C0,3);
     fadeCheck(1);
-    uVar5 = 0;
+    return 0;
   }
-  else {
-    fn_801DA4E8(*r3,0);
-    fn_801DA4E8(r3[1],1);
-    doWazaSequence(r3,1,0,8);
-    winMsgCloseField(1);
-    soundStop(0x3d4,0x32);
-    if (r6 == 0) {
-      dataPtr = 0;
-    }
-    else {
-      cVar10 = pokemonCheckValid(r6);
-      if (cVar10 == '\0') {
-        dataPtr = 0;
-      }
-      else {
-        pokemonBiosGetPokemonDataId(r6);
-        dataPtr = pokemonDataBiosGetPtr();
-      }
-    }
-    if (dataPtr == 0) {
-      uVar9 = 0;
-    }
-    else {
-      uVar9 = pokemonDataBiosGetVoice() & 0xffff;
-      soundStartSE(uVar9);
-    }
-    while (iVar6 = soundGetStatus(uVar9), iVar6 == 2) {
-      _threadSwitch();
-    }
-    uVar5 = pokemonBiosGetNicknamePtr(r5);
-    msgctrlSetValue(0x32,uVar5);
-    uVar9 = pokemonBiosGetPokemonDataId(r6);
-    msgctrlSetValue(0x4e,uVar9);
-    msgctrlSetValue(0x5d,0x3d2);
-    winMsgOpenField(0x4400,1,0);
-    winMsgCloseField(1);
-    dVar14 = lbl_8047E6B8;
-    dVar15 = (double)lbl_8047E6C4;
-    fVar1 = lbl_8047E6B0;
-    while (dVar13 = (double)fVar1, dVar13 < dVar15) {
-      _threadSwitch();
-      uVar5 = msgGetCharsPerFrame();
-      local_8 = 0x43300000;
-      local_c = uVar5;
-      fVar1 = (float)(dVar13 + (double)(float)(*(double *)&local_8 - dVar14));
-    }
-    uVar5 = 1;
+  fn_801DA4E8(work->model[0],0);
+  fn_801DA4E8(work->model[1],1);
+  doWazaSequence((u32 *)work,1,0,8);
+  winMsgCloseField(1);
+  soundStop(0x3d4,0x32);
+  voice = evolutionPlayVoice(after);
+  while (soundGetStatus(voice) == 2) {
+    _threadSwitch();
   }
-
-  return uVar5;
+  msgctrlSetValue(0x32,pokemonBiosGetNicknamePtr(before));
+  dataId = pokemonBiosGetPokemonDataId(after);
+  msgctrlSetValue(0x4e,dataId);
+  msgctrlSetValue(0x5d,0x3d2);
+  winMsgOpenField(0x4400,1,0);
+  winMsgCloseField(1);
+  t = lbl_8047E6B0;
+  while (t < lbl_8047E6C4) {
+    _threadSwitch();
+    t += (u32)msgGetCharsPerFrame();
+  }
+  return 1;
 }

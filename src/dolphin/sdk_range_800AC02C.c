@@ -11,6 +11,7 @@
 #include "dolphin/dvd/dvd.h"
 #include "dolphin/exi/EXI.h"
 #include "dolphin/os/OSAlarm.h"
+#include "dolphin/os/OSClock.h"
 #include "dolphin/os/OSInterrupt.h"
 #include "dolphin/os/OSThread.h"
 #include "dolphin/os/PPCArch.h"
@@ -406,13 +407,11 @@ extern void DoneCallback(void* task);
 extern void __AIDHandler(__OSInterrupt interrupt, OSContext* context);
 extern void __AISHandler(__OSInterrupt interrupt, OSContext* context);
 
-#define OS_BUS_CLOCK_800AC02C   (*(u32*)0x800000F8)
-#define OS_TIMER_CLOCK_800AC02C (OS_BUS_CLOCK_800AC02C / 4)
-#define OSNanosecondsToTicks_800AC02C(nsec) \
-    (((nsec) * (OS_TIMER_CLOCK_800AC02C / 125000)) / 8000)
+#define OSNanosecondsToTicks(nsec) (((nsec) * (OS_TIMER_CLOCK / 125000)) / 8000)
 
 #if defined(SDK_AC02C_EXACT_AI_800AC02C_800AC440) || \
     defined(SDK_AC02C_EXACT_AI_800AC5AC_800AC6D4) || \
+    defined(SDK_AC02C_EXACT_AI_800AC6D4_800AC910) || \
     defined(SDK_AC02C_EXACT_AR_800AC910_800AC954) || \
     defined(SDK_AC02C_EXACT_AR_800AC954_800ACB44) || \
     defined(SDK_AC02C_EXACT_AR_800ACB44_800ACBFC)
@@ -574,34 +573,50 @@ u32 AIGetStreamVolRight(void) {
 
 #if !defined(SDK_AC02C_EXACT_ACTIVE) || \
     defined(SDK_AC02C_CANDIDATE_AIINIT_ONLY)
+#if defined(SDK_AC02C_CANDIDATE_AIINIT_ONLY)
+/* ai.c's register setters, which AIInit expands; their out-of-line copies
+ * are in ai_exact_800AC02C.c. */
+static inline void AISetStreamVolLeft(u32 volume) {
+    __AIRegs[1] = (__AIRegs[1] & ~0xff) | (volume & 0xff);
+}
+
+static inline void AISetStreamVolRight(u32 volume) {
+    __AIRegs[1] = (__AIRegs[1] & ~0xff00) | ((volume & 0xff) << 8);
+}
+#endif
+
+static inline void AIResetStreamSampleCount_800AC440(void) {
+    __AIRegs[0] = (__AIRegs[0] & ~0x20) | 0x20;
+}
+
+static inline void AISetStreamTrigger_800AC440(u32 trigger) {
+    __AIRegs[3] = trigger;
+}
+
 void AIInit(u8* stack) {
-    u32 ticksPer125us;
-
-    if (lbl_8047A8D8 != TRUE) {
-        OSRegisterVersion(lbl_80478A28);
-
-        ticksPer125us = OS_TIMER_CLOCK_800AC02C / 125000;
-        lbl_8047A8E0 = (31524 * ticksPer125us) / 8000;
-        lbl_8047A8E8 = (42024 * ticksPer125us) / 8000;
-        lbl_8047A8F0 = (42000 * ticksPer125us) / 8000;
-        lbl_8047A8F8 = (63000 * ticksPer125us) / 8000;
-        lbl_8047A900 = (3000 * ticksPer125us) / 8000;
-        __AIRegs[1] =
-            (__AIRegs[1] & ~0xff00) | ((0 & 0xff) << 8);
-        __AIRegs[1] = (__AIRegs[1] & ~0xff) | (0 & 0xff);
-        __AIRegs[0] = (__AIRegs[0] & ~0x20) | 0x20;
-        __AIRegs[3] = 0;
-        __AI_set_stream_sample_rate(1);
-        AISetDSPSampleRate(0);
-        lbl_8047A8C8 = NULL;
-        lbl_8047A8CC = NULL;
-        lbl_8047A8D0 = stack;
-        __OSSetInterruptHandler(5, __AIDHandler);
-        __OSUnmaskInterrupts(0x04000000);
-        __OSSetInterruptHandler(8, __AISHandler);
-        __OSUnmaskInterrupts(0x00800000);
-        lbl_8047A8D8 = TRUE;
+    if (lbl_8047A8D8 == TRUE) {
+        return;
     }
+    OSRegisterVersion(lbl_80478A28);
+    lbl_8047A8E0 = OSNanosecondsToTicks(31524);
+    lbl_8047A8E8 = OSNanosecondsToTicks(42024);
+    lbl_8047A8F0 = OSNanosecondsToTicks(42000);
+    lbl_8047A8F8 = OSNanosecondsToTicks(63000);
+    lbl_8047A900 = OSNanosecondsToTicks(3000);
+    AISetStreamVolRight(0);
+    AISetStreamVolLeft(0);
+    AISetStreamTrigger_800AC440(0);
+    AIResetStreamSampleCount_800AC440();
+    __AI_set_stream_sample_rate(1);
+    AISetDSPSampleRate(0);
+    lbl_8047A8C8 = NULL;
+    lbl_8047A8CC = NULL;
+    lbl_8047A8D0 = stack;
+    __OSSetInterruptHandler(5, __AIDHandler);
+    __OSUnmaskInterrupts(0x04000000);
+    __OSSetInterruptHandler(8, __AISHandler);
+    __OSUnmaskInterrupts(0x00800000);
+    lbl_8047A8D8 = TRUE;
 }
 #endif
 
@@ -644,49 +659,92 @@ void __AIDHandler(__OSInterrupt interrupt, OSContext* context) {
 }
 #endif
 
-#if !defined(SDK_AC02C_EXACT_ACTIVE)
-void __AICallbackStackSwitch(AIDCallback callback) {
-    *(void**)0x8047A8D4 = (void*)OSGetStackPointer();
-    OSSwitchFiber((u32)callback, *(u32*)0x8047A8D0);
+#if !defined(SDK_AC02C_EXACT_ACTIVE) || \
+    defined(SDK_AC02C_EXACT_AI_800AC6D4_800AC910)
+/* AI.c. Hand-written Dolphin SDK asm (runs the DMA callback on the
+   callback stack); evidence: docs/asm_evidence/os_primitives.md */
+asm void __AICallbackStackSwitch(register AIDCallback callback) {
+    nofralloc
+    mflr    r0
+    stw     r0, 0x4(r1)
+    stwu    r1, -0x18(r1)
+    stw     r31, 0x14(r1)
+    mr      r31, r3
+    lis     r5, lbl_8047A8D4@ha
+    addi    r5, r5, lbl_8047A8D4@l
+    stw     r1, 0x0(r5)
+    lis     r5, lbl_8047A8D0@ha
+    addi    r5, r5, lbl_8047A8D0@l
+    lwz     r1, 0x0(r5)
+    subi    r1, r1, 0x8
+    mtlr    r31
+    blrl
+    lis     r5, lbl_8047A8D4@ha
+    addi    r5, r5, lbl_8047A8D4@l
+    lwz     r1, 0x0(r5)
+    lwz     r0, 0x1C(r1)
+    lwz     r31, 0x14(r1)
+    addi    r1, r1, 0x18
+    mtlr    r0
+    blr
 }
 
 void __AI_SRC_INIT(void) {
-    s64 rising32 = 0;
-    s64 rising48 = 0;
-    s64 diff = 0;
-    s64 wait = 0;
-    u32 sample;
+    OSTime rising_32khz = 0;
+    OSTime rising_48khz = 0;
+    OSTime diff = 0;
+    OSTime t1 = 0;
+    OSTime temp = 0;
+    u32 temp0 = 0;
+    u32 temp1 = 0;
     u32 done = 0;
+    u32 volume = 0;
+    u32 Init_Cnt = 0;
+    u32 walking = 0;
+
+    walking = 0;
+    Init_Cnt = 0;
+    temp = 0;
 
     while (!done) {
         __AIRegs[0] = (__AIRegs[0] & ~0x20) | 0x20;
-        __AIRegs[0] &= ~2U;
-        __AIRegs[0] = (__AIRegs[0] & ~1U) | 1;
-        sample = __AIRegs[2];
-        while (sample == __AIRegs[2]) {
-        }
-        rising32 = OSGetTime();
+        __AIRegs[0] &= ~2;
+        __AIRegs[0] = (__AIRegs[0] & ~1) | 1;
 
-        __AIRegs[0] = (__AIRegs[0] & ~2U) | 2;
-        __AIRegs[0] = (__AIRegs[0] & ~1U) | 1;
-        sample = __AIRegs[2];
-        while (sample == __AIRegs[2]) {
+        temp0 = __AIRegs[2];
+        while (temp0 == __AIRegs[2]) {
         }
-        rising48 = OSGetTime();
-        diff = rising48 - rising32;
+        rising_32khz = OSGetTime();
 
-        __AIRegs[0] &= ~2U;
-        __AIRegs[0] &= ~1U;
-        if (diff < lbl_8047A8E0 - lbl_8047A900) {
-            wait = lbl_8047A8F0;
+        __AIRegs[0] = (__AIRegs[0] & ~2) | 2;
+        __AIRegs[0] = (__AIRegs[0] & ~1) | 1;
+
+        temp1 = __AIRegs[2];
+        while (temp1 == __AIRegs[2]) {
+        }
+        rising_48khz = OSGetTime();
+
+        diff = rising_48khz - rising_32khz;
+        __AIRegs[0] &= ~2;
+        __AIRegs[0] &= ~1;
+
+        if (diff < (lbl_8047A8E0 - lbl_8047A900)) {
+            temp = lbl_8047A8F0;
             done = 1;
-        } else if (diff >= lbl_8047A8E0 + lbl_8047A900 &&
-                   diff < lbl_8047A8E8 - lbl_8047A900) {
-            wait = lbl_8047A8F8;
+            ++Init_Cnt;
+        } else if (diff >= (lbl_8047A8E0 + lbl_8047A900) &&
+                   diff < (lbl_8047A8E8 - lbl_8047A900)) {
+            temp = lbl_8047A8F8;
             done = 1;
+            ++Init_Cnt;
+        } else {
+            done = 0;
+            walking = 1;
+            ++Init_Cnt;
         }
     }
-    while (rising48 + wait > OSGetTime()) {
+
+    while ((rising_48khz + temp) > OSGetTime()) {
     }
 }
 #endif
@@ -787,7 +845,6 @@ u32 ARGetDMAStatus(void) {
     return status;
 }
 
-#pragma dont_inline on
 void ARStartDMA(u32 type, u32 mainMemoryAddress, u32 aramAddress, u32 length) {
     BOOL enabled;
 
@@ -801,7 +858,6 @@ void ARStartDMA(u32 type, u32 mainMemoryAddress, u32 aramAddress, u32 length) {
     __DSPRegs[21] = (__DSPRegs[21] & ~0xffe0) | (u16)length;
     OSRestoreInterrupts(enabled);
 }
-#pragma dont_inline off
 
 u32 ARInit(u32* stack, u32 stackSize) {
     BOOL enabled;
@@ -825,21 +881,13 @@ u32 ARInit(u32* stack, u32 stackSize) {
 }
 #endif
 
-#pragma dont_inline on
 
-#pragma dont_inline off
 
-#pragma optimize_for_size on
 
-#pragma optimize_for_size reset
 
-#pragma dont_inline on
 
-#pragma dont_inline off
 
-#pragma dont_inline on
 
-#pragma dont_inline off
 
 /*
  * This range combines multiple CARD objects. Keep the file-lookup helpers
@@ -849,27 +897,16 @@ u32 ARInit(u32* stack, u32 stackSize) {
 
 void* __CARDGetDirBlock(CARDControl* card);
 
-#pragma dont_inline on
 
-#pragma dont_inline off
 
-#pragma push
-#pragma inline_depth(0)
 
-#pragma pop
 
-#pragma dont_inline on
 void UpdateIconOffsets(CARDDirEntry* entry, CARDStat* stat);
 
-#pragma dont_inline off
 
-#pragma peephole off
 
-#pragma peephole reset
 
-#pragma peephole off
 
-#pragma peephole reset
 
 extern GXData* const gx;
 

@@ -25,9 +25,7 @@
  * 0x6-0x7 is unobserved.
  */
 typedef struct GbaConvChannelState {
-    /* 0x00 */ u16 unk00;
-    /* 0x02 */ u16 unk02;
-    /* 0x04 */ u16 unk04;
+    /* 0x00 */ u16 ids[3];    /* species ids checked by fn_800884BC */
     /* 0x06 */ u8  _pad06[2];
     /* 0x08 */ u32 result;   /* written by fn_80088428 from fn_80087C64()'s return value */
 } GbaConvChannelState;
@@ -53,5 +51,14 @@ typedef struct GbaConvPlayerMemo {
     /* 0x2C */ u32 flagB11;      /* fn_801906A0(0xb11) */
     /* 0x30 */ u32 flagDe1;      /* fn_801906A0(0xde1) */
 } GbaConvPlayerMemo; /* size 0x34 */
+
+/**
+ * 0x1C-byte header block at the start of the live save status, copied
+ * whole to status + 0xC98C by fn_800889E4. Only the first word is read.
+ */
+typedef struct GbaConvSaveHeader {
+    /* 0x00 */ s32 kind;
+    /* 0x04 */ u32 unk04[6];
+} GbaConvSaveHeader; /* size 0x1C */
 
 #endif /* GAME_GBA_GBA_CONV_H */

@@ -5,11 +5,16 @@
  * Split out of the former game/pokemon.c CodeCandidate bucket
  * (0x801F000C-0x801F7F80), which was mislabeled "pokemon" but is
  * entirely the XD-era fight-engine cluster. Address range covered by
- * this translation unit: 0x801F0898-0x801F150C (6 functions), per
- * config/GC6E01/splits.txt.
+ * this translation unit: 0x801F0898-0x801F108C (5 functions), per
+ * config/GC6E01/splits.txt. fightActionFifoInit (0x801F108C) is carved
+ * into fight_action_exact_801F108C.c, and
+ * fight_action_range_candidate_801F1170.c defines
+ * FIGHT_ACTION_RANGE_801F1170_ONLY to compile the 0x801F1170 tail.
  */
 
 #include "game/pokemon_fight_types.h"
+
+#ifndef FIGHT_ACTION_RANGE_801F1170_ONLY
 
 /* 0x801F0898 | size: 0x90 | medium */
 u32 fightActionGetKindDataId(u32 param) {
@@ -70,78 +75,25 @@ s32 fightActionGetPri(u32 param) {
     return fightActionKindDataBiosGetPri();
 }
 
-/* 0x801F09D0 | size: 0x130 */
-void fightActionDispFifoAll(void)
-{
-    typedef struct FightActionFifoEntry {
-        u32 word[12];
-    } FightActionFifoEntry;
-    typedef u8 (*FightActionDispFunc)(FightActionFifoEntry*);
+#endif /* FIGHT_ACTION_RANGE_801F1170_ONLY */
 
-    extern FightActionFifoEntry lbl_8046D790[];
-    extern u32 lbl_8047B5E8;
-    extern u32 lbl_8047B5EC;
-    extern u16 fightActionBiosGetKind(FightActionFifoEntry*);
-    extern void* fightActionBiosGetFightActionDataPtr(FightActionFifoEntry*);
-    extern void* fightActionDataBiosGetKind(void*);
-    extern void* fightActionKindDataBiosGetPtr(void*);
-    extern FightActionDispFunc fightActionKindDataBiosGetDispFuncPtr(void*);
-    FightActionFifoEntry action;
-    FightActionDispFunc display;
-    u8 result;
+extern void fightActionBiosSetFifoBanme(void*, s32);
+extern s32 fightActionDataBiosGetBuff(void*);
+extern u32 fightActionDataBiosGetKind(void*);
+extern void fightActionBiosSetDispBuff(void*, u32, u32);
+extern void fightActionBiosSetMotoFightActionDataPtr(void*, void*);
+extern void fightActionBiosSetBuffDataId(void*, u32);
+extern void fightActionBiosSetBuffDataPtr(void*, u32);
+extern void fightActionBiosSetActorFightTargetPtr(void*, void*);
+extern void fightActionBiosSetFightActionDataPtr(void*, void*);
+extern void fightActionBiosSetBuff(void*, u32);
+extern void fightActionBiosSetKind(void*, u32);
+extern void* fightActionBiosGetFightActionDataPtr(void*);
+extern s32 fightActionBiosGetBuff(void*);
+extern u32 fightActionBiosGetKind(void*);
 
-    do {
-        if (lbl_8047B5E8 == lbl_8047B5EC) {
-            result = 3;
-        } else {
-            action = lbl_8046D790[lbl_8047B5EC];
-            lbl_8047B5EC = (lbl_8047B5EC + 1) & 0x1F;
-
-            if (fightActionBiosGetKind(&action) == 0 ||
-                fightActionBiosGetFightActionDataPtr(&action) == NULL) {
-                result = 0;
-            } else {
-                display = fightActionKindDataBiosGetDispFuncPtr(
-                    fightActionKindDataBiosGetPtr(
-                        fightActionDataBiosGetKind(
-                            fightActionBiosGetFightActionDataPtr(&action))));
-                result = display != NULL ? display(&action) : 1;
-            }
-        }
-    } while (result == 1);
-}
-
-/* 0x801F0B00 | size: 0x404 */
-u32 fightActionCreateAndFlowFifo(void* action, void* motoAction, void* actorTarget,
-                                 u32 kind, void* buff, void* actionData)
-{
-    extern u8 lbl_8046D790[];
-    extern u32 lbl_8047B5E8;
-    extern u32 lbl_8047B5EC;
-    extern void fightActionBiosSetKind(void*, u32);
-    extern void fightActionBiosSetBuff(void*, void*);
-    extern void fightActionBiosSetFightActionDataPtr(void*, void*);
-    extern void fightActionBiosSetDispBuff(void*, u32, u32);
-    extern void fightActionBiosSetBuffDataPtr(void*, u32);
-    extern void fightActionBiosSetBuffDataId(void*, void*);
-    extern void fightActionBiosSetActorFightTargetPtr(void*, void*);
-    extern void fightActionBiosSetMotoFightActionDataPtr(void*, void*);
-    extern void fightActionBiosSetFifoBanme(void*, s32);
-    extern u16 fightActionBiosGetKind(void*);
-    extern void* fightActionBiosGetBuff(void*);
-    extern void* fightActionBiosGetFightActionDataPtr(void*);
-    extern u32 fightActionDataBiosGetKind(void*);
-    extern void* fightActionDataBiosGetBuff(void*);
-    extern void* fightActionKindDataBiosGetPtr(u32);
-    extern void* fightActionKindDataBiosGetFlowFuncPtr(void*);
-    extern void fn_8020D968(void*, void*);
-
-    struct Entry { u32 word[12]; };
-    void* found;
+static inline void fightActionClear(void* action) {
     u32 i;
-    u32 result;
-    u32 fifoIndex;
-    struct Entry* fifoEntry;
 
     fightActionBiosSetKind(action, 0);
     fightActionBiosSetBuff(action, 0);
@@ -154,200 +106,233 @@ u32 fightActionCreateAndFlowFifo(void* action, void* motoAction, void* actorTarg
     fightActionBiosSetActorFightTargetPtr(action, 0);
     fightActionBiosSetMotoFightActionDataPtr(action, 0);
     fightActionBiosSetFifoBanme(action, -1);
+}
 
+static inline u8 fightActionIsValid(void* action) {
+    if (action == 0) {
+        return 0;
+    }
+    if ((u16)fightActionBiosGetKind(action) == 0) {
+        return 0;
+    }
+    if (fightActionBiosGetFightActionDataPtr(action) == 0) {
+        return 0;
+    }
+    return 1;
+}
+
+static inline void* fightActionDataSearch(void* data, u32 kind, s32 buff) {
+    u16 i;
+    void* entry;
+    u32 entryKind;
+    s32 entryBuff;
+
+    if (data == 0) {
+        return 0;
+    }
+    for (i = 0;; i++) {
+        entry = (u8*)data + i * 8;
+        entryKind = fightActionDataBiosGetKind(entry);
+        if ((u16)entryKind == 0) {
+            break;
+        }
+        entryBuff = fightActionDataBiosGetBuff(entry);
+        if ((u16)kind == (u16)entryKind && buff == entryBuff) {
+            return entry;
+        }
+    }
+    return 0;
+}
+
+static inline void* fightActionSetData(void* action) {
+    void* data;
+    u32 kind;
+    s32 buff;
+
+    if (fightActionIsValid(action) == 0) {
+        return 0;
+    }
+    kind = fightActionBiosGetKind(action);
+    buff = fightActionBiosGetBuff(action);
+    data = fightActionDataSearch(fightActionBiosGetFightActionDataPtr(action), kind, buff);
+    if (data == 0) {
+        return 0;
+    }
+    fightActionBiosSetFightActionDataPtr(action, data);
+    return data;
+}
+
+
+typedef struct FightActionFifoEntry {
+    u32 word[12];
+} FightActionFifoEntry;
+typedef u32 (*FightActionFunc)(void*);
+
+extern FightActionFifoEntry lbl_8046D790[];
+extern u32 lbl_8047B5E8;
+extern u32 lbl_8047B5EC;
+extern void* fightActionKindDataBiosGetPtr(u32);
+extern FightActionFunc fightActionKindDataBiosGetFlowFuncPtr(void*);
+extern FightActionFunc fightActionKindDataBiosGetDispFuncPtr(void*);
+extern void fn_8020D968(void*, void*);
+
+
+static inline u8 fightActionFifoPop(void* action) {
+    if (lbl_8047B5E8 != lbl_8047B5EC) {
+        *(FightActionFifoEntry*)action = lbl_8046D790[lbl_8047B5EC];
+        lbl_8047B5EC++;
+        lbl_8047B5EC = lbl_8047B5EC % 32;
+    } else {
+        return 0;
+    }
+    return 1;
+}
+
+static inline void fightActionFifoDrop(void) {
+    if (lbl_8047B5E8 != lbl_8047B5EC) {
+        lbl_8047B5EC++;
+        lbl_8047B5EC = lbl_8047B5EC % 32;
+    }
+}
+
+static inline u32 fightActionFlow(void* action) {
+    FightActionFunc func;
+
+    if (fightActionIsValid(action) == 0) {
+        return 0;
+    }
+    func = fightActionKindDataBiosGetFlowFuncPtr(fightActionKindDataBiosGetPtr(
+        fightActionDataBiosGetKind(fightActionBiosGetFightActionDataPtr(action))));
+    if (func != 0) {
+        return func(action);
+    }
+    return 1;
+}
+
+static inline u32 fightActionDisp(void* action) {
+    FightActionFunc func;
+
+    if (fightActionIsValid(action) == 0) {
+        return 0;
+    }
+    func = fightActionKindDataBiosGetDispFuncPtr(fightActionKindDataBiosGetPtr(
+        fightActionDataBiosGetKind(fightActionBiosGetFightActionDataPtr(action))));
+    if (func != 0) {
+        return func(action);
+    }
+    return 1;
+}
+
+static inline s32 fightActionCreateInline(void* action, void* motoAction, void* actorTarget,
+                                          u32 kind, u32 buff, void* data) {
+    fightActionClear(action);
     fightActionBiosSetKind(action, kind);
     fightActionBiosSetBuff(action, buff);
-    fightActionBiosSetFightActionDataPtr(action, actionData);
+    fightActionBiosSetFightActionDataPtr(action, data);
     fightActionBiosSetActorFightTargetPtr(action, actorTarget);
-
-    found = 0;
-    if (action != 0 && (fightActionBiosGetKind(action) & 0xFFFF) != 0 &&
-        fightActionBiosGetFightActionDataPtr(action) != 0) {
-        u32 actionKind = fightActionBiosGetKind(action) & 0xFFFF;
-        void* actionBuff = fightActionBiosGetBuff(action);
-        u8* data = fightActionBiosGetFightActionDataPtr(action);
-        u32 index = 0;
-
-        while (1) {
-            void* entry = data + ((index & 0xFFFF) * 8);
-            u32 entryKind = fightActionDataBiosGetKind(entry);
-
-            if ((entryKind & 0xFFFF) == 0) {
-                break;
-            }
-            if (actionKind == (entryKind & 0xFFFF) &&
-                actionBuff == fightActionDataBiosGetBuff(entry)) {
-                found = entry;
-                break;
-            }
-            index++;
-        }
-        if (found != 0) {
-            fightActionBiosSetFightActionDataPtr(action, found);
-        }
+    if (fightActionSetData(action) == 0) {
+        fightActionClear(action);
+        return 4;
     }
+    fightActionBiosSetBuffDataId(action, buff);
+    fightActionBiosSetMotoFightActionDataPtr(action, motoAction);
+    return 1;
+}
 
-    if (found == 0) {
-        fightActionBiosSetKind(action, 0);
-        fightActionBiosSetBuff(action, 0);
-        fightActionBiosSetFightActionDataPtr(action, 0);
-        for (i = 0; (u16)i < 4; i++) {
-            fightActionBiosSetDispBuff(action, i, 0);
+#ifndef FIGHT_ACTION_RANGE_801F1170_ONLY
+
+/* 0x801F09D0 | size: 0x130 */
+void fightActionDispFifoAll(void)
+{
+    FightActionFifoEntry action;
+    u32 result;
+
+    do {
+        if (fightActionFifoPop(&action) == 0) {
+            result = 3;
+        } else {
+            result = fightActionDisp(&action);
         }
-        fightActionBiosSetBuffDataPtr(action, 0);
-        fightActionBiosSetBuffDataId(action, 0);
-        fightActionBiosSetActorFightTargetPtr(action, 0);
-        fightActionBiosSetMotoFightActionDataPtr(action, 0);
-        fightActionBiosSetFifoBanme(action, -1);
-        result = 4;
-    } else {
-        fightActionBiosSetBuffDataId(action, buff);
-        fightActionBiosSetMotoFightActionDataPtr(action, motoAction);
-        result = 1;
-    }
+    } while ((u8)result != 3 && (u8)result == 1);
+}
 
-    if ((u8)result != 1) {
-        return result;
-    }
+static inline u32 fightActionFlowEntry(void* action, FightActionFifoEntry* entry) {
+    u32 result;
 
-    fifoIndex = lbl_8047B5E8;
-    if (((fifoIndex + 1) & 0x1F) == lbl_8047B5EC) {
+    if (entry == 0) {
         return 2;
     }
-
-    fifoEntry = (struct Entry*)(lbl_8046D790 + fifoIndex * 0x30);
-    *fifoEntry = *(struct Entry*)action;
-    lbl_8047B5E8 = (fifoIndex + 1) & 0x1F;
-    fightActionBiosSetFifoBanme(action, fifoIndex);
-    fightActionBiosSetFifoBanme(fifoEntry, fifoIndex);
-
-    if (action != 0 && (fightActionBiosGetKind(action) & 0xFFFF) != 0 &&
-        fightActionBiosGetFightActionDataPtr(action) != 0) {
-        void* flow = fightActionKindDataBiosGetFlowFuncPtr(
-            fightActionKindDataBiosGetPtr(
-                fightActionDataBiosGetKind(fightActionBiosGetFightActionDataPtr(action))));
-        if (flow != 0) {
-            result = ((u32 (*)(void*))flow)(action);
-        } else {
-            result = 1;
-        }
-    } else {
-        result = 0;
-    }
-
+    result = fightActionFlow(action);
     if ((u8)result != 1) {
-        if (lbl_8047B5E8 != lbl_8047B5EC) {
-            lbl_8047B5EC = (lbl_8047B5EC + 1) & 0x1F;
-        }
+        fightActionFifoDrop();
     } else {
-        fn_8020D968(fifoEntry, action);
+        fn_8020D968(entry, action);
     }
-
     return result;
 }
 
-
-/* 0x801F0F04 | size: 0x188 | medium */
-u32 fightActionFlowFifo(void* param) {
-    extern u8 lbl_8046D790[];
-    extern u32 lbl_8047B5E8;
-    extern u32 lbl_8047B5EC;
-    extern void fightActionBiosSetFifoBanme(void*, u32);
-    extern u16 fightActionBiosGetKind(void*);
-    extern void* fightActionBiosGetFightActionDataPtr(void*);
-    extern void fightActionDataBiosGetKind(void*);
-    extern void fightActionKindDataBiosGetPtr(void*);
-    extern void fightActionKindDataBiosGetFlowFuncPtr(void*);
-    extern void fn_8020D968(void*, void*);
-    struct Entry { u32 data[12]; };
-    void* src;
-    u32 idx;
-    struct Entry* slot;
+/* 0x801F0B00 | size: 0x404 */
+u32 fightActionCreateAndFlowFifo(void* action, void* motoAction, void* actorTarget,
+                                 u32 kind, u32 buff, void* data)
+{
     u32 result;
-    void* fn;
+    int index;
+    FightActionFifoEntry* entry;
 
-    src = param;
-    idx = lbl_8047B5E8;
-    if (((idx + 1) & 0x1F) != lbl_8047B5EC) {
-        slot = (struct Entry*)((u8*)lbl_8046D790 + idx * 0x30);
-        *(struct Entry*)slot = *(struct Entry*)src;
-        lbl_8047B5E8 = (idx + 1) & 0x1F;
-        fightActionBiosSetFifoBanme(src, idx);
-        fightActionBiosSetFifoBanme(slot, idx);
-    } else {
-        slot = 0;
-    }
-    if (slot == 0) {
-        return 0x2;
-    }
-    {
-        u32 active = 0;
-        if (src != 0) {
-            if ((fightActionBiosGetKind(src) & 0xFFFF) != 0) {
-                if (fightActionBiosGetFightActionDataPtr(src) != 0) {
-                    active = 1;
-                }
-            }
-        }
-        if ((active & 0xFF) == 0) {
-            result = 0;
-        } else {
-            fn = fightActionBiosGetFightActionDataPtr(src);
-            fightActionDataBiosGetKind(src);
-            fightActionKindDataBiosGetPtr(src);
-            fightActionKindDataBiosGetFlowFuncPtr(src);
-            if (fn != 0) {
-                result = ((u32(*)(void*))fn)(src);
-            } else {
-                result = 1;
-            }
-        }
-    }
-    if ((result & 0xFF) != 1) {
-        if (lbl_8047B5E8 != lbl_8047B5EC) {
-            lbl_8047B5EC = (lbl_8047B5EC + 1) & 0x1F;
-        }
+    result = fightActionCreateInline(action, motoAction, actorTarget, kind, buff, data);
+    if ((u8)result != 1) {
         return result;
     }
-    fn_8020D968(slot, src);
+    index = lbl_8047B5E8;
+    if (((index + 1) & 0x1F) != lbl_8047B5EC) {
+        entry = &lbl_8046D790[index];
+        *entry = *(FightActionFifoEntry*)action;
+        lbl_8047B5E8++;
+        lbl_8047B5E8 = lbl_8047B5E8 % 32;
+    } else {
+        entry = 0;
+        goto check;
+    }
+    fightActionBiosSetFifoBanme(action, index);
+    fightActionBiosSetFifoBanme(entry, index);
+check:
+    return fightActionFlowEntry(action, entry);
+}
+
+/* 0x801F0F04 | size: 0x188 | medium */
+u32 fightActionFlowFifo(void* action) {
+    int index;
+    FightActionFifoEntry* entry;
+    u32 result;
+
+    index = lbl_8047B5E8;
+    if (((index + 1) & 0x1F) != lbl_8047B5EC) {
+        entry = &lbl_8046D790[index];
+        *entry = *(FightActionFifoEntry*)action;
+        lbl_8047B5E8++;
+        lbl_8047B5E8 = lbl_8047B5E8 % 32;
+    } else {
+        entry = 0;
+        goto check;
+    }
+    fightActionBiosSetFifoBanme(action, index);
+    fightActionBiosSetFifoBanme(entry, index);
+check:
+    if (entry == 0) {
+        return 2;
+    }
+    result = fightActionFlow(action);
+    if ((u8)result != 1) {
+        fightActionFifoDrop();
+    } else {
+        fn_8020D968(entry, action);
+    }
     return result;
 }
 
-/* 0x801F108C | size: 0xE4 */
-void fightActionFifoInit(void) {
-    extern u8 lbl_8046D790[];
-    extern u32 lbl_8047B5E8;
-    extern u32 lbl_8047B5EC;
-    extern void fightActionBiosSetKind(void*, u32);
-    extern void fightActionBiosSetBuff(void*, u32);
-    extern void fightActionBiosSetFightActionDataPtr(void*, u32);
-    extern void fightActionBiosSetDispBuff(void*, u32, u32);
-    extern void fightActionBiosSetBuffDataPtr(void*, u32);
-    extern void fightActionBiosSetBuffDataId(void*, u32);
-    extern void fightActionBiosSetActorFightTargetPtr(void*, u32);
-    extern void fightActionBiosSetMotoFightActionDataPtr(void*, u32);
-    extern void fightActionBiosSetFifoBanme(void*, s32);
-    u32 j;
-    void* action;
-    u32 i;
+/* 0x801F108C fightActionFifoInit lives in fight_action_exact_801F108C.c. */
 
-    lbl_8047B5EC = 0;
-    lbl_8047B5E8 = 0;
-    for (i = 0; (u16)i < 32; i++) {
-        action = &lbl_8046D790[(u16)i * 0x30];
-        fightActionBiosSetKind(action, 0);
-        fightActionBiosSetBuff(action, 0);
-        fightActionBiosSetFightActionDataPtr(action, 0);
-        for (j = 0; (u16)j < 4; j++) {
-            fightActionBiosSetDispBuff(action, j, 0);
-        }
-        fightActionBiosSetBuffDataPtr(action, 0);
-        fightActionBiosSetBuffDataId(action, 0);
-        fightActionBiosSetActorFightTargetPtr(action, 0);
-        fightActionBiosSetMotoFightActionDataPtr(action, 0);
-        fightActionBiosSetFifoBanme(action, -1);
-    }
-}
+#else /* FIGHT_ACTION_RANGE_801F1170_ONLY */
 
 /* 0x801F1170 | size: 0x5C | small */
 u32 fightActionCheckValid(void* param) {
@@ -366,119 +351,9 @@ u32 fightActionCheckValid(void* param) {
 }
 
 /* 0x801F11CC | size: 0x294 | large */
-s32 fightActionCreate(void* p1, void* p2, void* p3, void* p4, void* p5, void* p6) {
-    extern void fightActionBiosSetFifoBanme(void*, s32);
-    extern void* fightActionDataBiosGetBuff(void*);
-    extern u32 fightActionDataBiosGetKind(void*);
-    extern void fightActionBiosSetDispBuff(void*, u32, u32);
-    extern void fightActionBiosSetMotoFightActionDataPtr(void*, void*);
-    extern void fightActionBiosSetBuffDataId(void*, void*);
-    extern void fightActionBiosSetBuffDataPtr(void*, u32);
-    extern void fightActionBiosSetActorFightTargetPtr(void*, void*);
-    extern void fightActionBiosSetFightActionDataPtr(void*, void*);
-    extern void fightActionBiosSetBuff(void*, void*);
-    extern void fightActionBiosSetKind(void*, void*);
-    extern void* fightActionBiosGetFightActionDataPtr(void*);
-    extern void* fightActionBiosGetBuff(void*);
-    extern u32 fightActionBiosGetKind(void*);
-    void* param2;
-    void* obj;
-    void* param3;
-    void* param4;
-    void* param5;
-    void* param6;
-    u32 r25;
-    u32 r27;
-    u32 r28;
-    void* r26;
-    void* r24;
-
-    param2 = p2;
-    obj = p1;
-    param3 = p3;
-    param4 = p4;
-    param5 = p5;
-    param6 = p6;
-
-    fightActionBiosSetKind(obj, 0);
-    fightActionBiosSetBuff(obj, 0);
-    fightActionBiosSetFightActionDataPtr(obj, 0);
-    r25 = 0;
-    while ((r25 & 0xFFFF) < 4) {
-        fightActionBiosSetDispBuff(obj, r25, 0);
-        r25++;
-    }
-    fightActionBiosSetBuffDataPtr(obj, 0);
-    fightActionBiosSetBuffDataId(obj, 0);
-    fightActionBiosSetActorFightTargetPtr(obj, 0);
-    fightActionBiosSetMotoFightActionDataPtr(obj, 0);
-    fightActionBiosSetFifoBanme(obj, -1);
-    fightActionBiosSetKind(obj, param4);
-    fightActionBiosSetBuff(obj, param5);
-    fightActionBiosSetFightActionDataPtr(obj, param6);
-    fightActionBiosSetActorFightTargetPtr(obj, param3);
-
-    {
-        u32 active = 0;
-        if (obj != 0) {
-            if ((fightActionBiosGetKind(obj) & 0xFFFF) != 0) {
-                if (fightActionBiosGetFightActionDataPtr(obj) != 0) {
-                    active = 1;
-                }
-            }
-        }
-        if ((active & 0xFF) == 0) {
-            r24 = 0;
-            goto end;
-        }
-    }
-
-    r27 = fightActionBiosGetKind(obj);
-    r25 = (u32)fightActionBiosGetBuff(obj);
-    r26 = fightActionBiosGetFightActionDataPtr(obj);
-    if (r26 != 0) {
-        param6 = 0;
-        r28 = r27 & 0xFFFF;
-        while (1) {
-            r24 = (void*)((u8*)r26 + ((u32)param6 & 0xFFFF) * 8);
-            r27 = fightActionDataBiosGetKind(r24);
-            if ((r27 & 0xFFFF) != 0) {
-                if (r28 == (fightActionDataBiosGetKind(r24) & 0xFFFF) && (void*)r25 == fightActionDataBiosGetBuff(r24)) {
-                    goto found;
-                }
-                param6 = (void*)((u32)param6 + 1);
-                continue;
-            }
-            r24 = 0;
-            break;
-        }
-    } else {
-        r24 = 0;
-    }
-found:
-    if (r24 != 0) {
-        fightActionBiosSetFightActionDataPtr(obj, r24);
-    }
-end:
-    if (r24 == 0) {
-        fightActionBiosSetKind(obj, 0);
-        fightActionBiosSetBuff(obj, 0);
-        fightActionBiosSetFightActionDataPtr(obj, 0);
-        r25 = 0;
-        while ((r25 & 0xFFFF) < 4) {
-            fightActionBiosSetDispBuff(obj, r25, 0);
-            r25++;
-        }
-        fightActionBiosSetBuffDataPtr(obj, 0);
-        fightActionBiosSetBuffDataId(obj, 0);
-        fightActionBiosSetActorFightTargetPtr(obj, 0);
-        fightActionBiosSetMotoFightActionDataPtr(obj, 0);
-        fightActionBiosSetFifoBanme(obj, -1);
-        return 4;
-    }
-    fightActionBiosSetBuffDataId(obj, param5);
-    fightActionBiosSetMotoFightActionDataPtr(obj, param2);
-    return 1;
+s32 fightActionCreate(void* action, void* motoAction, void* actorTarget, u32 kind,
+                      u32 buff, void* data) {
+    return fightActionCreateInline(action, motoAction, actorTarget, kind, buff, data);
 }
 
 /* 0x801F1460 | size: 0xB4 | fightActionInit */
@@ -506,3 +381,5 @@ void fightActionInit(u8* ptr) {
     fightActionBiosSetMotoFightActionDataPtr(ptr, 0);
     fightActionBiosSetFifoBanme(ptr, -1);
 }
+
+#endif /* FIGHT_ACTION_RANGE_801F1170_ONLY */

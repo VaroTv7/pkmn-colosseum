@@ -420,47 +420,40 @@ asm void fn_800E09E8(void) {
 }
 #else
 void fn_800E09E8(void* dst, void* src, u32 count) {
-    u32 i;
     u8* out;
+    s32 i;
     u8* control;
-    f32 t;
     f32 t2;
-    f32 t3;
+    f32 t;
     f32 a;
+    f32 step;
+    f32 t3;
     f32 b;
     f32 scratch[3];
 
-    if (count == 0) {
-        return;
-    }
-
     out = (u8*)dst;
     control = (u8*)src;
+    step = 1.0f / (f32)(count - 1);
     GSvecCopy(out, control);
-    if (count == 1) {
-        return;
-    }
-
     out += 0xc;
     for (i = 1; i < count - 1; i++, out += 0xc) {
-        t = (f32)i / (f32)(count - 1);
-        if (t < *(f32*)&lbl_8047CAFC) {
-            t = *(f32*)&lbl_8047CAFC;
+        t = (f32)i * step;
+        if (t < 0.0f) {
+            t = 0.0f;
         }
-        if (t > *(f32*)&lbl_8047CAF8) {
-            t = *(f32*)&lbl_8047CAF8;
+        if (t > 1.0f) {
+            t = 1.0f;
         }
 
         t2 = t * t;
         t3 = t2 * t;
         a = t3 - t2;
-        b = a - t2;
-
         vecScale(out, control + 0x24, a);
+        b = a - t2;
         vecScale(scratch, control + 0x18, b + t);
         GSvecAdd(out, out, scratch);
         b += a;
-        vecScale(scratch, control, *(f32*)&lbl_8047CAF8 + b);
+        vecScale(scratch, control, 1.0f + b);
         GSvecAdd(out, out, scratch);
         vecScale(scratch, control + 0xc, -b);
         GSvecAdd(out, out, scratch);
@@ -477,14 +470,12 @@ asm void _fadeEffectGetRandom__FUl(void) {
 #include "src/game/gs_render_fn_800E0C04.inc"
 }
 #else
-#pragma scheduling off
 u32 _fadeEffectGetRandom__FUl(u32 mod) {
     u32 a = fn_801ADCD8();
     u32 b = fn_801ADCD8();
     u32 combined = (b << 16) | a;
     return combined % mod;
 }
-#pragma scheduling reset
 #endif
 #endif
 
@@ -502,8 +493,6 @@ asm void fn_800E0CA0(void) {
 #include "src/game/gs_render_fn_800E0CA0.inc"
 }
 #else
-#pragma push
-#pragma fp_contract on
 f32 fn_800E0CA0(f32 x) {
     f32 scale;
     f32 tmp;
@@ -519,6 +508,5 @@ f32 fn_800E0CA0(f32 x) {
     x = lbl_8047CB34 * x + lbl_8047CB30;
     return scale * lbl_804011B8[__cvt_fp2unsigned(x)];
 }
-#pragma pop
 #endif
 #endif

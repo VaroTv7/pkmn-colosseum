@@ -9,7 +9,6 @@
  */
 #include "dolphin/types.h"
 
-#pragma use_lmw_stmw on
 
 typedef struct BattleRangeVec {
     f32 x;
@@ -129,7 +128,6 @@ BattleRangeIndexedEntry* fn_801EE07C(u32 index)
     return &lbl_80478F7C[id];
 }
 
-#pragma peephole off
 u16 fn_801EE0A8(u32 idx)
 {
     extern u16* lbl_80478F74;
@@ -138,7 +136,10 @@ u16 fn_801EE0A8(u32 idx)
     i = idx;
     return lbl_80478F74[i];
 }
-#pragma peephole on
+
+#endif
+
+#if defined(BATTLE_RANGE_EXACT_801EE0BC)
 
 s32 fn_801EE0BC(u16 id)
 {
@@ -151,8 +152,6 @@ s32 fn_801EE0BC(u16 id)
     return -1;
 }
 
-#pragma push
-#pragma optimize_for_size on
 void fn_801EE10C(u16 id, u8 value)
 {
     extern u8* fn_801EF1E4(u32 data);
@@ -169,10 +168,7 @@ void fn_801EE10C(u16 id, u8 value)
         *(u8*)(data + slot * 0x18 + 0x49C) = value;
     }
 }
-#pragma pop
 
-#pragma push
-#pragma optimize_for_size on
 u8 fn_801EE174(u16 id)
 {
     extern u8* fn_801EF1E4(u32 data);
@@ -190,10 +186,7 @@ u8 fn_801EE174(u16 id)
     }
     return 0;
 }
-#pragma pop
 
-#pragma push
-#pragma optimize_for_size on
 void fn_801EE1E0(u16 id, u16 value)
 {
     extern u8* fn_801EF1E4(u32 data);
@@ -210,10 +203,7 @@ void fn_801EE1E0(u16 id, u16 value)
         *(u16*)(data + slot * 0x18 + 0x4A0) = value;
     }
 }
-#pragma pop
 
-#pragma push
-#pragma optimize_for_size on
 u16 fn_801EE248(u16 id)
 {
     extern u8* fn_801EF1E4(u32 data);
@@ -231,10 +221,7 @@ u16 fn_801EE248(u16 id)
     }
     return 0;
 }
-#pragma pop
 
-#pragma push
-#pragma optimize_for_size on
 void fn_801EE2B4(u16 id, u8* value)
 {
     extern u8* fn_801EF1E4(u32 data);
@@ -252,10 +239,7 @@ void fn_801EE2B4(u16 id, u8* value)
         GScharCpy(data + slot * 0x18 + 0x490, value);
     }
 }
-#pragma pop
 
-#pragma push
-#pragma optimize_for_size on
 u8* fn_801EE328(u16 id)
 {
     extern u8* fn_801EF1E4(u32 data);
@@ -273,10 +257,7 @@ u8* fn_801EE328(u16 id)
     }
     return NULL;
 }
-#pragma pop
 
-#pragma push
-#pragma optimize_for_size on
 u8 fn_801EE398(void)
 {
     u16 i;
@@ -304,7 +285,6 @@ u8 fn_801EE398(void)
     }
     return 1;
 }
-#pragma pop
 
 u16 fn_801EE440(u16 index)
 {
@@ -319,8 +299,6 @@ u16 fn_801EE468(void)
     return 0x30;
 }
 
-#pragma push
-#pragma optimize_for_size on
 u16 fn_801EE470(u16 id)
 {
     extern u8* fn_801EF1E4(u32 data);
@@ -338,10 +316,7 @@ u16 fn_801EE470(u16 id)
     }
     return 0;
 }
-#pragma pop
 
-#pragma push
-#pragma optimize_for_size on
 void fn_801EE4DC(u16 id, u16 value)
 {
     extern u8* fn_801EF1E4(u32 data);
@@ -358,10 +333,7 @@ void fn_801EE4DC(u16 id, u16 value)
         *(u16*)(data + slot * 0xC + 6) = value;
     }
 }
-#pragma pop
 
-#pragma push
-#pragma optimize_for_size on
 u32 fn_801EE544(u16 id, u8* variant)
 {
     BattleRangeDef* def = &lbl_80478F6C[id];
@@ -398,7 +370,6 @@ u32 fn_801EE544(u16 id, u8* variant)
     }
     return 0;
 }
-#pragma pop
 
 s32 fn_801EE614(u16 id)
 {
@@ -458,8 +429,6 @@ void std243_shadowPokemonSetState(u32 id, u32 value)
     }
 }
 
-#pragma push
-#pragma optimize_for_size on
 u32 fn_801EE750(u16 id)
 {
     extern u8* fn_801EF1E4(u32 data);
@@ -477,10 +446,7 @@ u32 fn_801EE750(u16 id)
     }
     return 0;
 }
-#pragma pop
 
-#pragma push
-#pragma optimize_for_size on
 void fn_801EE7BC(u16 id, u32 value)
 {
     extern u8* fn_801EF1E4(u32 data);
@@ -497,7 +463,6 @@ void fn_801EE7BC(u16 id, u32 value)
         *(u32*)(data + slot * 0xC + 8) = value;
     }
 }
-#pragma pop
 
 s32 fn_801EE824(u16 id, u16 index)
 {
@@ -553,80 +518,144 @@ u8 fn_801EE8F4(u16 id)
 
 #if defined(BATTLE_RANGE_CANDIDATE_801EE958)
 
-void fn_801EE958(u32 id, u32 value)
+static inline BattleRangeDef* battleRangeGetDefInline(u16 id)
+{
+    BattleRangeDef* def = &lbl_80478F6C[id];
+
+    if (id == 0 || id > 0x60) {
+        def = NULL;
+    }
+    return def;
+}
+
+/* fn_801EE8F4 */
+static inline u8 battleRangeCheckFlag16Inline(u16 id)
+{
+    BattleRangeDef* def = battleRangeGetDefInline(id);
+
+    if (def != NULL) {
+        if (def->flag16 != 0) {
+            return std081_flagCheckTrue(def->flag16);
+        }
+        return 0;
+    }
+    return 0;
+}
+
+static inline void battleRangeSetFlag0CInline(u16 id)
+{
+    BattleRangeDef* def = battleRangeGetDefInline(id);
+
+    if (def != NULL) {
+        if (def->flag0C != 0) {
+            _flagSet(def->flag0C, 1);
+        }
+    }
+}
+
+static inline void battleRangeSetRuntimeStatusInline(u16 id, u32 status)
+{
+    extern u8* fn_801EF1E4(void* data);
+    BattleRangeDef* def = battleRangeGetDefInline(id);
+
+    if (def != NULL) {
+        u16 slot = def->runtimeSlot;
+        u8* data = fn_801EF1E4(NULL);
+
+        *(u32*)(data + slot * 0xC + 0xC) = status;
+    }
+}
+
+#if !defined(BATTLE_RANGE_ONLY_801EEB34)
+void fn_801EE958(u32 id, u8 value)
 {
     extern u8* fn_801EF1E4(void* data);
     extern u32 fightFloorGetStatus(s32, s32, s32, s32);
     BattleRangeDef* def;
     u8* data;
-    s16* activeIndex;
     u32 next;
+    s16* activeIndex;
+    u16 key;
+    u16 flag;
+    BattleRangeDef* tmp;
+    u32 status;
     u16 slot;
 
-    def = &lbl_80478F6C[(u16)id];
+    key = id;
+    tmp = &lbl_80478F6C[(u16)id];
     if ((u16)id == 0 || (u16)id > 0x60) {
         def = NULL;
+    } else {
+        def = tmp;
     }
     if (def == NULL) {
         return;
     }
-
-    if (def->flag16 == 0 || std081_flagCheckTrue(def->flag16) == 0) {
+    if (battleRangeCheckFlag16Inline(id) == 0) {
         data = fn_801EF1E4(NULL);
         if (data != NULL) {
-            activeIndex = (s16*)(data + (u16)id * 0x18 + 0x4A4);
+            activeIndex = (s16*)(data + key * 0x18 + 0x4A4);
             if (*activeIndex < 0) {
                 next = *(u32*)data;
                 *(u32*)data = next + 1;
-                *activeIndex = (s16)next;
+                *activeIndex = next;
             }
         }
-        if (def->flag0C != 0) {
-            _flagSet(def->flag0C, 1);
-        }
+        battleRangeSetFlag0CInline(id);
     }
-
-    id = fightFloorGetStatus(0, 0, 0x4A, 0);
-    slot = def->runtimeSlot;
-    data = fn_801EF1E4(NULL);
-    *(u32*)(data + slot * 0xC + 0xC) = id;
-    if (def->flag16 != 0) {
-        _flagSet(def->flag16, (u8)value);
+    flag = def->flag16;
+    status = fightFloorGetStatus(0, 0, 0x4A, 0);
+    tmp = battleRangeGetDefInline(id);
+    if (tmp != NULL) {
+        slot = tmp->runtimeSlot;
+        data = fn_801EF1E4(NULL);
+        *(u32*)(data + slot * 0xC + 0xC) = status;
+    }
+    if (flag != 0) {
+        _flagSet(flag, value);
     }
 }
 
-void fn_801EEB34(u32 id, u32 value)
+#endif
+
+#if !defined(BATTLE_RANGE_ONLY_801EE958)
+void fn_801EEB34(u32 id, u8 value)
 {
     extern u8* fn_801EF1E4(void* data);
     extern u32 fightFloorGetStatus(s32, s32, s32, s32);
-    BattleRangeDef* def;
+    /* RULE-EXCEPTION(user-approved): the two def pointers held in one two-element array, chosen for register allocation (permuter farm) — see docs/RULE_EXCEPTIONS.md */
+    BattleRangeDef* defs[2]; /* [0] def, [1] lookup */
     u8* data;
-    u32 fightStatus;
+    u32 status;
     u16 slot;
 
-    def = &lbl_80478F6C[(u16)id];
+    defs[1] = &lbl_80478F6C[(u16)id];
     if ((u16)id == 0 || (u16)id > 0x60) {
-        def = NULL;
+        defs[0] = NULL;
+    } else {
+        defs[0] = defs[1];
     }
-    if (def == NULL) {
+    if (defs[0] == NULL) {
         return;
     }
-
-    if (def->flag16 == 0 || std081_flagCheckTrue(def->flag16) == 0) {
-        if (def->flag0C != 0) {
-            _flagSet(def->flag0C, 1);
-        }
+    if (battleRangeCheckFlag16Inline(id) == 0) {
+        battleRangeSetFlag0CInline(id);
     }
-
-    fightStatus = fightFloorGetStatus(0, 0, 0x4A, 0);
-    slot = def->runtimeSlot;
-    data = fn_801EF1E4(NULL);
-    *(u32*)(data + slot * 0xC + 0xC) = fightStatus;
-    if (def->flag12 != 0) {
-        _flagSet(def->flag12, (u8)value);
+    status = fightFloorGetStatus(0, 0, 0x4A, 0);
+    defs[1] = battleRangeGetDefInline(id);
+    if (defs[1] != NULL) {
+        slot = defs[1]->runtimeSlot;
+        data = fn_801EF1E4(NULL);
+        *(u32*)(data + slot * 0xC + 0xC) = status;
+    }
+    if (defs[0]->flag12 != 0) {
+        _flagSet(defs[0]->flag12, value);
     }
 }
 
+#endif
+
+#if !defined(BATTLE_RANGE_ONLY_801EE958) && !defined(BATTLE_RANGE_ONLY_801EEB34)
 u8 fn_801EEAD0(u16 id)
 {
     BattleRangeDef* def = &lbl_80478F6C[id];
@@ -721,8 +750,6 @@ u8 fn_801EEE44(u16 id)
     return def->type;
 }
 
-#pragma push
-#pragma optimize_for_size on
 void fn_801EEE6C(u16 id, u16 value)
 {
     extern u8* fn_801EF1E4(u32 data);
@@ -732,10 +759,7 @@ void fn_801EEE6C(u16 id, u16 value)
         *(u16*)(data + id * 0x18 + 0x4A6) = value;
     }
 }
-#pragma pop
 
-#pragma push
-#pragma optimize_for_size on
 u16 fn_801EEEB8(u16 id)
 {
     extern u8* fn_801EF1E4(u32 data);
@@ -746,7 +770,6 @@ u16 fn_801EEEB8(u16 id)
     }
     return 0;
 }
-#pragma pop
 
 u16 fn_801EEF08(u16 id)
 {
@@ -761,8 +784,6 @@ u16 fn_801EEF08(u16 id)
     return 0;
 }
 
-#pragma push
-#pragma optimize_for_size on
 u32 fn_801EEF40(u16 id)
 {
     extern u8* fn_801EF1E4(u32 data);
@@ -780,7 +801,6 @@ u32 fn_801EEF40(u16 id)
     }
     return 0;
 }
-#pragma pop
 
 u16 fn_801EEFAC(u16 id, s32 side)
 {
@@ -811,4 +831,5 @@ u16 fn_801EEFF4(u16 id)
     return 0;
 }
 
+#endif
 #endif

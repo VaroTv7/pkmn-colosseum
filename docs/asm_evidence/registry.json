@@ -1,0 +1,1871 @@
+{
+  "_comment": "Authentic hand-written library assembly admitted by the quality scan. One entry per function: path, function, mnemonics (the exact set the retail routine uses), evidence (a document in docs/asm_evidence/ with the required sections). See docs/asm_evidence/README.md.",
+  "entries": [
+    {
+      "path": "src/musyx/runtime/reverb_candidate_80164520.c",
+      "function": "DoCrossTalk",
+      "address": "fn_80164C40",
+      "mnemonics": [
+        "addi",
+        "bdnz",
+        "blr",
+        "fctiw",
+        "fsubs",
+        "lfd",
+        "lfs",
+        "li",
+        "lis",
+        "lwz",
+        "lwzu",
+        "mtctr",
+        "ps_merge00",
+        "ps_mul",
+        "ps_muls0",
+        "ps_sum0",
+        "stfd",
+        "stfiwx",
+        "stw",
+        "stwu",
+        "xoris"
+      ],
+      "evidence": "docs/asm_evidence/musyx_reverb.md"
+    },
+    {
+      "path": "src/musyx/runtime/reverb_candidate_80164520.c",
+      "function": "HandleReverb",
+      "address": "fn_80164DD0",
+      "mnemonics": [
+        "add",
+        "addi",
+        "bdnz",
+        "beq",
+        "blr",
+        "bne+",
+        "cmpw",
+        "cmpwi",
+        "fadds",
+        "fctiwz",
+        "fmadds",
+        "fmr",
+        "fmuls",
+        "fnmsubs",
+        "fsubs",
+        "lfd",
+        "lfs",
+        "lfsx",
+        "li",
+        "lis",
+        "lmw",
+        "lwz",
+        "lwzu",
+        "mr",
+        "mtctr",
+        "mulli",
+        "slwi",
+        "stfd",
+        "stfiwx",
+        "stfs",
+        "stfsx",
+        "stmw",
+        "stw",
+        "stwu",
+        "xoris"
+      ],
+      "evidence": "docs/asm_evidence/musyx_reverb.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "DCEnable",
+      "mnemonics": [
+        "blr",
+        "mfspr",
+        "mtspr",
+        "ori",
+        "sync"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "DCInvalidateRange",
+      "mnemonics": [
+        "add",
+        "addi",
+        "bdnz",
+        "blelr",
+        "blr",
+        "clrlwi",
+        "cmplwi",
+        "dcbi",
+        "mtctr",
+        "srwi"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "DCFlushRange",
+      "mnemonics": [
+        "add",
+        "addi",
+        "bdnz",
+        "blelr",
+        "blr",
+        "clrlwi",
+        "cmplwi",
+        "dcbf",
+        "mtctr",
+        "sc",
+        "srwi"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "DCStoreRange",
+      "mnemonics": [
+        "add",
+        "addi",
+        "bdnz",
+        "blelr",
+        "blr",
+        "clrlwi",
+        "cmplwi",
+        "dcbst",
+        "mtctr",
+        "sc",
+        "srwi"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "DCFlushRangeNoSync",
+      "mnemonics": [
+        "add",
+        "addi",
+        "bdnz",
+        "blelr",
+        "blr",
+        "clrlwi",
+        "cmplwi",
+        "dcbf",
+        "mtctr",
+        "srwi"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "DCStoreRangeNoSync",
+      "mnemonics": [
+        "add",
+        "addi",
+        "bdnz",
+        "blelr",
+        "blr",
+        "clrlwi",
+        "cmplwi",
+        "dcbst",
+        "mtctr",
+        "srwi"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "DCZeroRange",
+      "mnemonics": [
+        "add",
+        "addi",
+        "bdnz",
+        "blelr",
+        "blr",
+        "clrlwi",
+        "cmplwi",
+        "dcbz",
+        "mtctr",
+        "srwi"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "ICInvalidateRange",
+      "mnemonics": [
+        "add",
+        "addi",
+        "bdnz",
+        "blelr",
+        "blr",
+        "clrlwi",
+        "cmplwi",
+        "icbi",
+        "isync",
+        "mtctr",
+        "srwi",
+        "sync"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "ICFlashInvalidate",
+      "mnemonics": [
+        "blr",
+        "mfspr",
+        "mtspr",
+        "ori"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "ICEnable",
+      "mnemonics": [
+        "blr",
+        "isync",
+        "mfspr",
+        "mtspr",
+        "ori"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "__LCEnable",
+      "mnemonics": [
+        "addi",
+        "bdnz",
+        "blr",
+        "dcbst",
+        "dcbt",
+        "dcbz_l",
+        "isync",
+        "li",
+        "lis",
+        "mfmsr",
+        "mfspr",
+        "mtctr",
+        "mtdbatl",
+        "mtdbatu",
+        "mtmsr",
+        "mtspr",
+        "nop",
+        "ori",
+        "oris"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "LCDisable",
+      "mnemonics": [
+        "addi",
+        "bdnz",
+        "blr",
+        "dcbi",
+        "li",
+        "lis",
+        "mfspr",
+        "mtctr",
+        "mtspr",
+        "rlwinm"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "LCStoreBlocks",
+      "mnemonics": [
+        "blr",
+        "clrlslwi",
+        "clrlwi",
+        "extrwi",
+        "mtspr",
+        "or",
+        "ori"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "LCQueueLength",
+      "mnemonics": [
+        "blr",
+        "extrwi",
+        "mfspr"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/dolphin/os/OSCache.c",
+      "function": "LCQueueWait",
+      "mnemonics": [
+        "bgt",
+        "blr",
+        "cmpw",
+        "extrwi",
+        "mfspr"
+      ],
+      "evidence": "docs/asm_evidence/oscache.md"
+    },
+    {
+      "path": "src/crt/__start.c",
+      "function": "__init_registers",
+      "mnemonics": [
+        "blr",
+        "li",
+        "lis",
+        "ori"
+      ],
+      "evidence": "docs/asm_evidence/start.md"
+    },
+    {
+      "path": "src/crt/__start.c",
+      "function": "__init_hardware",
+      "mnemonics": [
+        "bl",
+        "blr",
+        "mflr",
+        "mfmsr",
+        "mtlr",
+        "mtmsr",
+        "ori"
+      ],
+      "evidence": "docs/asm_evidence/start.md"
+    },
+    {
+      "path": "src/crt/__start.c",
+      "function": "__flush_cache",
+      "mnemonics": [
+        "add",
+        "addic",
+        "and",
+        "bge",
+        "blr",
+        "dcbst",
+        "icbi",
+        "isync",
+        "lis",
+        "ori",
+        "subf",
+        "subic.",
+        "sync"
+      ],
+      "evidence": "docs/asm_evidence/start.md"
+    },
+    {
+      "path": "src/trk/TRKSaveState.c",
+      "function": "TRKSaveExtended1Block",
+      "mnemonics": [
+        "b",
+        "blr",
+        "li",
+        "lis",
+        "mfdar",
+        "mfdbatl",
+        "mfdbatu",
+        "mfdsisr",
+        "mfibatl",
+        "mfibatu",
+        "mfpvr",
+        "mfspr",
+        "mfsr",
+        "mftb",
+        "mftbu",
+        "ori",
+        "stmw",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/trk_savestate.md"
+    },
+    {
+      "path": "src/trk/TRKSaveState.c",
+      "function": "TRKRestoreExtended1Block",
+      "mnemonics": [
+        "b",
+        "beq",
+        "blr",
+        "cmpwi",
+        "lbz",
+        "li",
+        "lis",
+        "lmw",
+        "lwz",
+        "mtdar",
+        "mtdbatl",
+        "mtdbatu",
+        "mtdsisr",
+        "mtibatl",
+        "mtibatu",
+        "mtspr",
+        "mtsr",
+        "mttbl",
+        "mttbu",
+        "ori",
+        "stb"
+      ],
+      "evidence": "docs/asm_evidence/trk_savestate.md"
+    },
+    {
+      "path": "src/trk/TRKInit.c",
+      "function": "TRK__write_aram",
+      "mnemonics": [
+        "dcbi"
+      ],
+      "evidence": "docs/asm_evidence/trk_init.md"
+    },
+    {
+      "path": "src/trk/TRKInit.c",
+      "function": "TRK__read_aram",
+      "mnemonics": [
+        "dcbi"
+      ],
+      "evidence": "docs/asm_evidence/trk_init.md"
+    },
+    {
+      "path": "src/trk/TRKInterrupt.c",
+      "function": "fn_800C11F4",
+      "mnemonics": [
+        "addi",
+        "blr",
+        "lfd",
+        "mffs",
+        "psq_l",
+        "psq_st",
+        "stfd",
+        "stwu"
+      ],
+      "evidence": "docs/asm_evidence/trk_fpscr.md"
+    },
+    {
+      "path": "src/trk/TRKInterrupt.c",
+      "function": "fn_800C1218",
+      "mnemonics": [
+        "addi",
+        "blr",
+        "lfd",
+        "mtfsf",
+        "psq_l",
+        "psq_st",
+        "stfd",
+        "stwu"
+      ],
+      "evidence": "docs/asm_evidence/trk_fpscr.md"
+    },
+    {
+      "path": "src/dolphin/sdk_range_8009A0F4.c",
+      "function": "OSExceptionVector",
+      "mnemonics": [
+        "addi",
+        "bne",
+        "entry",
+        "lhz",
+        "li",
+        "lis",
+        "lwz",
+        "mfcr",
+        "mfctr",
+        "mflr",
+        "mfmsr",
+        "mfsprg",
+        "mfsrr0",
+        "mfsrr1",
+        "mfxer",
+        "mr",
+        "mtsprg",
+        "mtsrr0",
+        "mtsrr1",
+        "nop",
+        "ori",
+        "rfi",
+        "rlwinm",
+        "rlwinm.",
+        "sth",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/os_vector.md"
+    },
+    {
+      "path": "src/dolphin/sdk_range_8009A0F4.c",
+      "function": "__OSPSInit",
+      "mnemonics": [
+        "li",
+        "mtspr"
+      ],
+      "evidence": "docs/asm_evidence/os_vector.md"
+    },
+    {
+      "path": "src/dolphin/sdk_range_800BA44C.c",
+      "function": "PushLight",
+      "mnemonics": [
+        "lwz",
+        "psq_l",
+        "psq_st",
+        "stw",
+        "xor"
+      ],
+      "evidence": "docs/asm_evidence/gx_transform.md"
+    },
+    {
+      "path": "src/dolphin/sdk_candidate_800BD454.c",
+      "function": "WriteMTXPS4x3",
+      "mnemonics": [
+        "psq_l",
+        "psq_st"
+      ],
+      "evidence": "docs/asm_evidence/gx_transform.md"
+    },
+    {
+      "path": "src/dolphin/sdk_candidate_800BD454.c",
+      "function": "WriteMTXPS3x3",
+      "mnemonics": [
+        "lfs",
+        "psq_l",
+        "psq_st",
+        "stfs"
+      ],
+      "evidence": "docs/asm_evidence/gx_transform.md"
+    },
+    {
+      "path": "src/dolphin/os/OSContext.c",
+      "function": "__OSLoadFPUContext",
+      "mnemonics": [
+        "beq",
+        "blr",
+        "clrlwi.",
+        "extrwi.",
+        "lfd",
+        "lhz",
+        "mfspr",
+        "mtfsf",
+        "psq_l"
+      ],
+      "evidence": "docs/asm_evidence/oscontext.md"
+    },
+    {
+      "path": "src/dolphin/os/OSContext.c",
+      "function": "__OSSaveFPUContext",
+      "mnemonics": [
+        "beq",
+        "blr",
+        "extrwi.",
+        "lfd",
+        "lhz",
+        "mffs",
+        "mfspr",
+        "ori",
+        "psq_st",
+        "stfd",
+        "sth"
+      ],
+      "evidence": "docs/asm_evidence/oscontext.md"
+    },
+    {
+      "path": "src/dolphin/os/OSContext.c",
+      "function": "OSSaveFPUContext",
+      "mnemonics": [
+        "addi",
+        "b"
+      ],
+      "evidence": "docs/asm_evidence/oscontext.md",
+      "branch_targets": [
+        "__OSSaveFPUContext"
+      ]
+    },
+    {
+      "path": "src/dolphin/os/OSContext.c",
+      "function": "OSSetCurrentContext",
+      "mnemonics": [
+        "blr",
+        "bne",
+        "clrlwi",
+        "cmpw",
+        "isync",
+        "lis",
+        "lwz",
+        "mfmsr",
+        "mtmsr",
+        "ori",
+        "rlwinm",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/oscontext.md"
+    },
+    {
+      "path": "src/dolphin/os/OSContext.c",
+      "function": "OSSaveContext",
+      "mnemonics": [
+        "blr",
+        "li",
+        "mfcr",
+        "mfctr",
+        "mflr",
+        "mfmsr",
+        "mfspr",
+        "mfxer",
+        "stmw",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/oscontext.md"
+    },
+    {
+      "path": "src/dolphin/os/OSContext.c",
+      "function": "OSLoadContext",
+      "mnemonics": [
+        "addi",
+        "b",
+        "beq",
+        "bge",
+        "ble",
+        "cmplw",
+        "lhz",
+        "lis",
+        "lmw",
+        "lwz",
+        "mfmsr",
+        "mtcrf",
+        "mtctr",
+        "mtlr",
+        "mtmsr",
+        "mtspr",
+        "mtsrr0",
+        "mtsrr1",
+        "mtxer",
+        "rfi",
+        "rlwinm",
+        "rlwinm.",
+        "sth",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/oscontext.md"
+    },
+    {
+      "path": "src/dolphin/os/OSContext.c",
+      "function": "OSGetStackPointer",
+      "mnemonics": [
+        "blr",
+        "mr"
+      ],
+      "evidence": "docs/asm_evidence/oscontext.md"
+    },
+    {
+      "path": "src/dolphin/os/OSContext.c",
+      "function": "OSSwitchFiber",
+      "mnemonics": [
+        "blr",
+        "blrl",
+        "lwz",
+        "mflr",
+        "mr",
+        "mtlr",
+        "stw",
+        "stwu"
+      ],
+      "evidence": "docs/asm_evidence/oscontext.md"
+    },
+    {
+      "path": "src/dolphin/os/OSContext.c",
+      "function": "OSInitContext",
+      "mnemonics": [
+        "b",
+        "li",
+        "ori",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/oscontext.md",
+      "branch_targets": [
+        "OSClearContext"
+      ]
+    },
+    {
+      "path": "src/dolphin/os/OSContext.c",
+      "function": "OSSwitchFPUContext",
+      "mnemonics": [
+        "beq",
+        "bl",
+        "cmpw",
+        "cmpwi",
+        "isync",
+        "lhz",
+        "lis",
+        "lwz",
+        "mfmsr",
+        "mtcrf",
+        "mtctr",
+        "mtlr",
+        "mtmsr",
+        "mtsrr0",
+        "mtsrr1",
+        "mtxer",
+        "ori",
+        "rfi",
+        "rlwinm",
+        "sth",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/oscontext.md"
+    },
+    {
+      "path": "src/dolphin/os/OSContext.c",
+      "function": "OSFillFPUContext",
+      "mnemonics": [
+        "beq",
+        "blr",
+        "extrwi.",
+        "isync",
+        "lfd",
+        "mffs",
+        "mfmsr",
+        "mfspr",
+        "mtmsr",
+        "ori",
+        "psq_st",
+        "stfd"
+      ],
+      "evidence": "docs/asm_evidence/oscontext.md"
+    },
+    {
+      "path": "src/crt/__start.c",
+      "function": "__start",
+      "mnemonics": [
+        "add",
+        "addi",
+        "andi.",
+        "b",
+        "bdnz",
+        "beq",
+        "beq+",
+        "bl",
+        "blrl",
+        "bne",
+        "cmplwi",
+        "lhz",
+        "li",
+        "lis",
+        "lwz",
+        "mr",
+        "mtctr",
+        "mtlr",
+        "rlwinm",
+        "stw",
+        "stwu"
+      ],
+      "evidence": "docs/asm_evidence/start.md",
+      "branch_targets": [
+        "exit"
+      ]
+    },
+    {
+      "path": "src/trk/TRKInit.c",
+      "function": "InitMetroTRK",
+      "mnemonics": [
+        "addi",
+        "b",
+        "bl",
+        "blr",
+        "bne",
+        "cmpwi",
+        "li",
+        "lis",
+        "lmw",
+        "lwz",
+        "mfcr",
+        "mflr",
+        "mfmsr",
+        "mr",
+        "mtlr",
+        "mtmsr",
+        "mtspr",
+        "mtsrr1",
+        "ori",
+        "stmw",
+        "stw",
+        "xori"
+      ],
+      "evidence": "docs/asm_evidence/trk_init.md",
+      "branch_targets": [
+        "TRK_main"
+      ]
+    },
+    {
+      "path": "src/trk/TRKInit.c",
+      "function": "InitMetroTRK_BBA",
+      "mnemonics": [
+        "addi",
+        "b",
+        "bl",
+        "blr",
+        "bne",
+        "cmpwi",
+        "li",
+        "lis",
+        "lmw",
+        "lwz",
+        "mfcr",
+        "mflr",
+        "mfmsr",
+        "mtlr",
+        "mtmsr",
+        "mtspr",
+        "mtsrr1",
+        "ori",
+        "stmw",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/trk_init.md",
+      "branch_targets": [
+        "TRK_main"
+      ]
+    },
+    {
+      "path": "src/trk/TRKInterrupt.c",
+      "function": "TRKInterruptHandler",
+      "mnemonics": [
+        "b",
+        "beq",
+        "bl",
+        "bne",
+        "cmpwi",
+        "lbz",
+        "lhz",
+        "li",
+        "lis",
+        "lmw",
+        "lwz",
+        "mfcr",
+        "mfctr",
+        "mflr",
+        "mfsprg",
+        "mfsrr0",
+        "mfxer",
+        "mtcrf",
+        "mtctr",
+        "mtdar",
+        "mtdsisr",
+        "mtlr",
+        "mtmsr",
+        "mtsprg",
+        "mtsrr0",
+        "mtsrr1",
+        "mtxer",
+        "ori",
+        "rfi",
+        "stb",
+        "sth",
+        "stmw",
+        "stw",
+        "sync",
+        "xori"
+      ],
+      "evidence": "docs/asm_evidence/trk_interrupt.md",
+      "branch_targets": [
+        "TRKExceptionHandler",
+        "TRKPostInterruptEvent"
+      ]
+    },
+    {
+      "path": "src/trk/TRKInterrupt.c",
+      "function": "TRKExceptionHandler",
+      "mnemonics": [
+        "addi",
+        "b",
+        "beq",
+        "cmpwi",
+        "lhz",
+        "li",
+        "lis",
+        "mfsprg",
+        "mfsrr0",
+        "mtcrf",
+        "mtsrr0",
+        "ori",
+        "rfi",
+        "stb",
+        "sth",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/trk_interrupt.md"
+    },
+    {
+      "path": "src/trk/TRKInterrupt.c",
+      "function": "TRKSwapAndGo",
+      "mnemonics": [
+        "and",
+        "b",
+        "beq",
+        "bl",
+        "cmpwi",
+        "lbz",
+        "li",
+        "lis",
+        "lmw",
+        "lwz",
+        "mfctr",
+        "mfdar",
+        "mfdsisr",
+        "mflr",
+        "mfmsr",
+        "mfxer",
+        "mtcrf",
+        "mtctr",
+        "mtlr",
+        "mtmsr",
+        "mtsrr0",
+        "mtxer",
+        "nor",
+        "ori",
+        "rfi",
+        "stb",
+        "stmw",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/trk_interrupt.md",
+      "branch_targets": [
+        "TRKInterruptHandlerEnableInterrupts"
+      ]
+    },
+    {
+      "path": "src/trk/TRKInterrupt.c",
+      "function": "TRKInterruptHandlerEnableInterrupts",
+      "mnemonics": [
+        "b",
+        "lis",
+        "lmw",
+        "lwz",
+        "mtctr",
+        "mtdar",
+        "mtdsisr",
+        "mtlr",
+        "mtmsr",
+        "mtxer",
+        "ori",
+        "sync"
+      ],
+      "evidence": "docs/asm_evidence/trk_interrupt.md",
+      "branch_targets": [
+        "TRKPostInterruptEvent"
+      ]
+    },
+    {
+      "path": "src/trk/TRKBoard_range_800C33BC.c",
+      "function": "TRKLoadContext",
+      "mnemonics": [
+        "b",
+        "beq",
+        "lhz",
+        "lmw",
+        "lwz",
+        "mfmsr",
+        "mr",
+        "mtcrf",
+        "mtctr",
+        "mtlr",
+        "mtmsr",
+        "mtsprg",
+        "mtxer",
+        "rlwinm",
+        "rlwinm.",
+        "sth"
+      ],
+      "evidence": "docs/asm_evidence/trk_loadcontext.md",
+      "branch_targets": [
+        "TRKInterruptHandler"
+      ]
+    },
+    {
+      "path": "src/game/gs_thread_exact_800F0030.c",
+      "function": "threadLoadGPRRegisters",
+      "tier": "first-party",
+      "mnemonics": [
+        "addi",
+        "blr",
+        "lwz",
+        "stw",
+        "stwu"
+      ],
+      "evidence": "docs/asm_evidence/gs_thread.md"
+    },
+    {
+      "path": "src/game/gs_thread_exact_800F0030.c",
+      "function": "threadLoadFPRRegisters",
+      "tier": "first-party",
+      "mnemonics": [
+        "addi",
+        "blr",
+        "lfd",
+        "lwz",
+        "stw",
+        "stwu"
+      ],
+      "evidence": "docs/asm_evidence/gs_thread.md"
+    },
+    {
+      "path": "src/game/gs_thread_exact_800F0030.c",
+      "function": "threadSaveGPRRegisters",
+      "tier": "first-party",
+      "mnemonics": [
+        "addi",
+        "blr",
+        "lwz",
+        "stw",
+        "stwu"
+      ],
+      "evidence": "docs/asm_evidence/gs_thread.md"
+    },
+    {
+      "path": "src/game/gs_thread_exact_800F0030.c",
+      "function": "threadSaveFPRRegisters",
+      "tier": "first-party",
+      "mnemonics": [
+        "addi",
+        "blr",
+        "lwz",
+        "stfd",
+        "stw",
+        "stwu"
+      ],
+      "evidence": "docs/asm_evidence/gs_thread.md"
+    },
+    {
+      "path": "src/game/gs_thread_exact_800F0030.c",
+      "function": "threadExecute",
+      "tier": "first-party",
+      "mnemonics": [
+        "bctr",
+        "beq",
+        "bl",
+        "cmplwi",
+        "li",
+        "lwz",
+        "mflr",
+        "mtctr",
+        "mtlr",
+        "stw",
+        "stwu",
+        "subi"
+      ],
+      "evidence": "docs/asm_evidence/gs_thread.md"
+    },
+    {
+      "path": "src/game/gs_thread_exact_800F0030.c",
+      "function": "fn_800F02F4",
+      "tier": "first-party",
+      "mnemonics": [
+        "addi",
+        "blr",
+        "lwz",
+        "mtlr"
+      ],
+      "evidence": "docs/asm_evidence/gs_thread.md"
+    },
+    {
+      "path": "src/game/gs_thread_exact_800F0030.c",
+      "function": "_threadSwitch",
+      "tier": "first-party",
+      "mnemonics": [
+        "beq",
+        "bl",
+        "blr",
+        "cmplwi",
+        "lwz",
+        "mflr",
+        "mtlr",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/gs_thread.md"
+    },
+    {
+      "path": "src/game/gs_thread_exact_800F106C.c",
+      "function": "cms_CallStdTrampoline",
+      "tier": "first-party",
+      "mnemonics": [
+        "addi",
+        "bctrl",
+        "blr",
+        "crclr",
+        "lfs",
+        "lwz",
+        "mflr",
+        "mtctr",
+        "mtlr",
+        "stw",
+        "stwu"
+      ],
+      "evidence": "docs/asm_evidence/gs_thread.md"
+    },
+    {
+      "path": "src/game/gs_scratch_exact_800EEDF8.c",
+      "function": "GSscratchInit",
+      "tier": "first-party",
+      "mnemonics": [
+        "add",
+        "addi",
+        "b",
+        "bdnz",
+        "beq",
+        "bl",
+        "blr",
+        "bne",
+        "clrlslwi",
+        "clrlwi.",
+        "li",
+        "lis",
+        "lwz",
+        "mflr",
+        "mr",
+        "mtctr",
+        "mtlr",
+        "or",
+        "srwi",
+        "stb",
+        "stbu",
+        "stbx",
+        "stw",
+        "stwu",
+        "subi"
+      ],
+      "evidence": "docs/asm_evidence/gs_scratch.md"
+    },
+    {
+      "path": "src/dolphin/sdk_range_8009A0F4.c",
+      "function": "OSDefaultExceptionHandler",
+      "mnemonics": [
+        "b",
+        "mfdar",
+        "mfdsisr",
+        "mfspr",
+        "stmw",
+        "stw",
+        "stwu"
+      ],
+      "evidence": "docs/asm_evidence/os_vector.md",
+      "branch_targets": [
+        "__OSUnhandledException"
+      ]
+    },
+    {
+      "path": "src/dolphin/sdk_range_8009A2D8.c",
+      "function": "DecrementerExceptionHandler",
+      "mnemonics": [
+        "b",
+        "mfspr",
+        "stmw",
+        "stw",
+        "stwu"
+      ],
+      "evidence": "docs/asm_evidence/os_alarm.md",
+      "branch_targets": [
+        "DecrementerExceptionCallback"
+      ]
+    },
+    {
+      "path": "src/dolphin/os/OSInterrupt.c",
+      "function": "ExternalInterruptHandler",
+      "mnemonics": [
+        "b",
+        "mfspr",
+        "stmw",
+        "stw",
+        "stwu"
+      ],
+      "evidence": "docs/asm_evidence/os_interrupt.md",
+      "branch_targets": [
+        "__OSDispatchInterrupt"
+      ]
+    },
+    {
+      "path": "src/dolphin/db/DB.c",
+      "function": "__DBExceptionDestination",
+      "mnemonics": [
+        "b",
+        "mfmsr",
+        "mtmsr",
+        "ori"
+      ],
+      "evidence": "docs/asm_evidence/db.md",
+      "branch_targets": [
+        "__DBExceptionDestinationAux"
+      ]
+    },
+    {
+      "path": "src/dolphin/os/OSTime_range_800A2778.c",
+      "function": "OSGetTime",
+      "mnemonics": [
+        "blr",
+        "bne",
+        "cmpw",
+        "mftb"
+      ],
+      "evidence": "docs/asm_evidence/os_time.md"
+    },
+    {
+      "path": "src/dolphin/os/OSTime_range_800A2778.c",
+      "function": "OSGetTick",
+      "mnemonics": [
+        "blr",
+        "mftb"
+      ],
+      "evidence": "docs/asm_evidence/os_time.md"
+    },
+    {
+      "path": "src/crt/runtime.c",
+      "function": "__cvt_fp2unsigned",
+      "mnemonics": [
+        "addi",
+        "addis",
+        "bge",
+        "blr",
+        "blt",
+        "fcmpu",
+        "fctiwz",
+        "fmr",
+        "fsub",
+        "lfd",
+        "li",
+        "lis",
+        "lwz",
+        "ori",
+        "stfd",
+        "stwu",
+        "subi"
+      ],
+      "evidence": "docs/asm_evidence/runtime.md"
+    },
+    {
+      "path": "src/crt/runtime.c",
+      "function": "__save_fpr",
+      "mnemonics": [
+        "blr",
+        "entry",
+        "stfd"
+      ],
+      "evidence": "docs/asm_evidence/runtime.md"
+    },
+    {
+      "path": "src/crt/runtime.c",
+      "function": "__restore_fpr",
+      "mnemonics": [
+        "blr",
+        "entry",
+        "lfd"
+      ],
+      "evidence": "docs/asm_evidence/runtime.md"
+    },
+    {
+      "path": "src/crt/runtime.c",
+      "function": "__save_gpr",
+      "mnemonics": [
+        "blr",
+        "entry",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/runtime.md"
+    },
+    {
+      "path": "src/crt/runtime.c",
+      "function": "__restore_gpr",
+      "mnemonics": [
+        "blr",
+        "entry",
+        "lwz"
+      ],
+      "evidence": "docs/asm_evidence/runtime.md"
+    },
+    {
+      "path": "src/crt/runtime.c",
+      "function": "__div2u",
+      "mnemonics": [
+        "add",
+        "adde",
+        "addi",
+        "addic",
+        "b",
+        "bdnz",
+        "bgt",
+        "blr",
+        "blt",
+        "bne",
+        "cmpw",
+        "cmpwi",
+        "cntlzw",
+        "li",
+        "mr",
+        "mtctr",
+        "or",
+        "slw",
+        "srw",
+        "subf",
+        "subfc",
+        "subfe.",
+        "subfic",
+        "subi",
+        "subic"
+      ],
+      "evidence": "docs/asm_evidence/runtime.md"
+    },
+    {
+      "path": "src/crt/runtime.c",
+      "function": "__div2i",
+      "mnemonics": [
+        "add",
+        "adde",
+        "addi",
+        "addic",
+        "b",
+        "bdnz",
+        "beq",
+        "bgt",
+        "blr",
+        "blt",
+        "bne",
+        "clrrwi.",
+        "cmpw",
+        "cmpwi",
+        "cntlzw",
+        "li",
+        "lwz",
+        "mr",
+        "mtctr",
+        "or",
+        "slw",
+        "srw",
+        "stw",
+        "stwu",
+        "subf",
+        "subfc",
+        "subfe.",
+        "subfic",
+        "subfze",
+        "subi",
+        "subic",
+        "xor."
+      ],
+      "evidence": "docs/asm_evidence/runtime.md"
+    },
+    {
+      "path": "src/crt/runtime.c",
+      "function": "__mod2u",
+      "mnemonics": [
+        "add",
+        "adde",
+        "addi",
+        "addic",
+        "b",
+        "bdnz",
+        "bgtlr",
+        "blr",
+        "blt",
+        "bne",
+        "cmpw",
+        "cmpwi",
+        "cntlzw",
+        "li",
+        "mr",
+        "mtctr",
+        "or",
+        "slw",
+        "srw",
+        "subf",
+        "subfc",
+        "subfe.",
+        "subfic",
+        "subi",
+        "subic"
+      ],
+      "evidence": "docs/asm_evidence/runtime.md"
+    },
+    {
+      "path": "src/crt/runtime.c",
+      "function": "__mod2i",
+      "mnemonics": [
+        "add",
+        "adde",
+        "addi",
+        "addic",
+        "b",
+        "bdnz",
+        "bge",
+        "bgelr",
+        "bgt",
+        "blr",
+        "blt",
+        "bne",
+        "cmpw",
+        "cmpwi",
+        "cntlzw",
+        "li",
+        "mr",
+        "mtctr",
+        "or",
+        "slw",
+        "srw",
+        "subf",
+        "subfc",
+        "subfe.",
+        "subfic",
+        "subfze",
+        "subi",
+        "subic"
+      ],
+      "evidence": "docs/asm_evidence/runtime.md"
+    },
+    {
+      "path": "src/crt/runtime.c",
+      "function": "__shl2i",
+      "mnemonics": [
+        "blr",
+        "or",
+        "slw",
+        "srw",
+        "subfic",
+        "subic"
+      ],
+      "evidence": "docs/asm_evidence/runtime.md"
+    },
+    {
+      "path": "src/crt/runtime.c",
+      "function": "__shr2u",
+      "mnemonics": [
+        "blr",
+        "or",
+        "slw",
+        "srw",
+        "subfic",
+        "subic"
+      ],
+      "evidence": "docs/asm_evidence/runtime.md"
+    },
+    {
+      "path": "src/crt/runtime.c",
+      "function": "__shr2i",
+      "mnemonics": [
+        "ble",
+        "blr",
+        "or",
+        "slw",
+        "sraw",
+        "srw",
+        "subfic",
+        "subic."
+      ],
+      "evidence": "docs/asm_evidence/runtime.md"
+    },
+    {
+      "path": "src/crt/runtime.c",
+      "function": "__cvt_dbl_usll",
+      "mnemonics": [
+        "addi",
+        "b",
+        "beq",
+        "bge",
+        "ble+",
+        "blr",
+        "clrlwi",
+        "clrrwi.",
+        "cmplwi",
+        "cmpwi",
+        "extrwi",
+        "li",
+        "lis",
+        "lwz",
+        "mr",
+        "neg",
+        "or",
+        "ori",
+        "oris",
+        "slw",
+        "srw",
+        "stfd",
+        "stwu",
+        "subfic",
+        "subfze",
+        "subi",
+        "subic"
+      ],
+      "evidence": "docs/asm_evidence/runtime.md"
+    },
+    {
+      "path": "src/hsd/debug.c",
+      "function": "HSD_SaveContext",
+      "mnemonics": [
+        "addi",
+        "b",
+        "lhz",
+        "lis",
+        "mfcr",
+        "mfctr",
+        "mflr",
+        "mfspr",
+        "mfsprg",
+        "mfsrr0",
+        "mfsrr1",
+        "mfxer",
+        "mtsprg",
+        "ori",
+        "sth",
+        "stmw",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/hsd_debug.md",
+      "branch_targets": [
+        "OSFillFPUContext"
+      ]
+    },
+    {
+      "path": "src/dolphin/sdk_range_800BB30C.c",
+      "function": "WriteMTXPS4x3",
+      "mnemonics": [
+        "psq_l",
+        "psq_st"
+      ],
+      "evidence": "docs/asm_evidence/gx_transform.md"
+    },
+    {
+      "path": "src/dolphin/sdk_range_800BB30C.c",
+      "function": "WriteMTXPS4x2",
+      "mnemonics": [
+        "psq_l",
+        "psq_st"
+      ],
+      "evidence": "docs/asm_evidence/gx_transform.md"
+    },
+    {
+      "path": "src/trk/TRKDispatch_range_800C0CD8.c",
+      "function": "TRK_flush_cache",
+      "mnemonics": [
+        "add",
+        "addic",
+        "and",
+        "bge",
+        "blr",
+        "dcbf",
+        "dcbst",
+        "icbi",
+        "isync",
+        "lis",
+        "ori",
+        "subf",
+        "subic.",
+        "sync"
+      ],
+      "evidence": "docs/asm_evidence/trk_dispatch.md"
+    },
+    {
+      "path": "src/trk/TRKDispatch_candidate_800C0E60.c",
+      "function": "fn_800C0E60",
+      "mnemonics": [
+        "blr",
+        "mfmsr"
+      ],
+      "evidence": "docs/asm_evidence/trk_dispatch.md"
+    },
+    {
+      "path": "src/trk/TRKDispatch_candidate_800C0E60.c",
+      "function": "fn_800C0E68",
+      "mnemonics": [
+        "blr",
+        "mtmsr"
+      ],
+      "evidence": "docs/asm_evidence/trk_dispatch.md"
+    },
+    {
+      "path": "src/trk/TRKDispatch_candidate_800C0E60.c",
+      "function": "TRK_ppc_memcpy",
+      "mnemonics": [
+        "addi",
+        "b",
+        "beq",
+        "blr",
+        "cmpw",
+        "lbzx",
+        "li",
+        "mfmsr",
+        "mtmsr",
+        "stbx",
+        "sync"
+      ],
+      "evidence": "docs/asm_evidence/trk_dispatch.md"
+    },
+    {
+      "path": "src/trk/targsupp.c",
+      "function": "TRKAccessFile",
+      "mnemonics": [
+        "blr",
+        "twi"
+      ],
+      "evidence": "docs/asm_evidence/trk_targsupp.md"
+    },
+    {
+      "path": "src/trk/targsupp.c",
+      "function": "TRKOpenFile",
+      "mnemonics": [
+        "blr",
+        "twi"
+      ],
+      "evidence": "docs/asm_evidence/trk_targsupp.md"
+    },
+    {
+      "path": "src/trk/targsupp.c",
+      "function": "TRKCloseFile",
+      "mnemonics": [
+        "blr",
+        "twi"
+      ],
+      "evidence": "docs/asm_evidence/trk_targsupp.md"
+    },
+    {
+      "path": "src/trk/targsupp.c",
+      "function": "TRKPositionFile",
+      "mnemonics": [
+        "blr",
+        "twi"
+      ],
+      "evidence": "docs/asm_evidence/trk_targsupp.md"
+    },
+    {
+      "path": "src/dolphin/sdk_candidate_8009DF3C.c",
+      "function": "OSDisableInterrupts",
+      "mnemonics": [
+        "blr",
+        "mfmsr",
+        "mtmsr",
+        "rlwinm"
+      ],
+      "evidence": "docs/asm_evidence/os_primitives.md"
+    },
+    {
+      "path": "src/dolphin/sdk_candidate_8009DF3C.c",
+      "function": "OSEnableInterrupts",
+      "mnemonics": [
+        "blr",
+        "mfmsr",
+        "mtmsr",
+        "ori",
+        "rlwinm"
+      ],
+      "evidence": "docs/asm_evidence/os_primitives.md"
+    },
+    {
+      "path": "src/dolphin/sdk_candidate_8009DF3C.c",
+      "function": "OSRestoreInterrupts",
+      "mnemonics": [
+        "b",
+        "beq",
+        "blr",
+        "cmpwi",
+        "mfmsr",
+        "mtmsr",
+        "ori",
+        "rlwinm"
+      ],
+      "evidence": "docs/asm_evidence/os_primitives.md"
+    },
+    {
+      "path": "src/dolphin/sdk_candidate_8009FADC.c",
+      "function": "fn_8009FADC",
+      "mnemonics": [
+        "blr",
+        "isync",
+        "mtlr",
+        "sync"
+      ],
+      "evidence": "docs/asm_evidence/os_primitives.md"
+    },
+    {
+      "path": "src/dolphin/sdk_range_800A07C4.c",
+      "function": "fn_800A1208",
+      "mnemonics": [
+        "entry",
+        "isync",
+        "mfspr",
+        "mtspr",
+        "nop",
+        "ori",
+        "rfi",
+        "sync"
+      ],
+      "evidence": "docs/asm_evidence/os_primitives.md"
+    },
+    {
+      "path": "src/dolphin/sdk_range_80098108.c",
+      "function": "__OSFPRInit",
+      "mnemonics": [
+        "addi",
+        "beq",
+        "blr",
+        "extrwi.",
+        "fmr",
+        "lfd",
+        "lis",
+        "mfmsr",
+        "mfspr",
+        "mtfsf",
+        "mtmsr",
+        "ori",
+        "ps_mr",
+        "psq_l"
+      ],
+      "evidence": "docs/asm_evidence/os_primitives.md"
+    },
+    {
+      "path": "src/dolphin/sdk_range_80098108.c",
+      "function": "__OSDBIntegrator",
+      "mnemonics": [
+        "blr",
+        "entry",
+        "li",
+        "lwz",
+        "mflr",
+        "mtlr",
+        "mtmsr",
+        "oris",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/os_primitives.md"
+    },
+    {
+      "path": "src/dolphin/sdk_range_80098108.c",
+      "function": "fn_8009A0C0",
+      "mnemonics": [
+        "bla",
+        "entry"
+      ],
+      "evidence": "docs/asm_evidence/os_primitives.md"
+    },
+    {
+      "path": "src/dolphin/sdk_range_800AC02C.c",
+      "function": "__AICallbackStackSwitch",
+      "mnemonics": [
+        "addi",
+        "blr",
+        "blrl",
+        "lis",
+        "lwz",
+        "mflr",
+        "mr",
+        "mtlr",
+        "stw",
+        "stwu",
+        "subi"
+      ],
+      "evidence": "docs/asm_evidence/os_primitives.md"
+    },
+    {
+      "path": "src/dolphin/os/OSMemory.c",
+      "function": "Config24MB",
+      "mnemonics": [
+        "addi",
+        "isync",
+        "li",
+        "lis",
+        "mflr",
+        "mfmsr",
+        "mtdbatl",
+        "mtdbatu",
+        "mtibatl",
+        "mtibatu",
+        "mtsrr0",
+        "mtsrr1",
+        "ori",
+        "rfi"
+      ],
+      "evidence": "docs/asm_evidence/os_primitives.md"
+    },
+    {
+      "path": "src/dolphin/os/OSMemory.c",
+      "function": "Config48MB",
+      "mnemonics": [
+        "addi",
+        "isync",
+        "li",
+        "lis",
+        "mflr",
+        "mfmsr",
+        "mtdbatl",
+        "mtdbatu",
+        "mtibatl",
+        "mtibatu",
+        "mtsrr0",
+        "mtsrr1",
+        "ori",
+        "rfi"
+      ],
+      "evidence": "docs/asm_evidence/os_primitives.md"
+    },
+    {
+      "path": "src/dolphin/os/OSMemory.c",
+      "function": "RealMode",
+      "mnemonics": [
+        "clrlwi",
+        "mfmsr",
+        "mtsrr0",
+        "mtsrr1",
+        "rfi",
+        "rlwinm"
+      ],
+      "evidence": "docs/asm_evidence/os_primitives.md"
+    },
+    {
+      "path": "src/dolphin/os/PPCArch.c",
+      "function": "PPCMffpscr",
+      "mnemonics": [
+        "mffs",
+        "stfd"
+      ],
+      "evidence": "docs/asm_evidence/ppcarch.md"
+    },
+    {
+      "path": "src/dolphin/os/PPCArch.c",
+      "function": "PPCMtfpscr",
+      "mnemonics": [
+        "lfd",
+        "li",
+        "mtfsf",
+        "stw"
+      ],
+      "evidence": "docs/asm_evidence/ppcarch.md"
+    },
+    {
+      "path": "src/game/gs_math_init.c",
+      "function": "GSmathInit",
+      "tier": "first-party",
+      "mnemonics": [
+        "addi",
+        "bl",
+        "blr",
+        "li",
+        "lwz",
+        "mflr",
+        "mtlr",
+        "mtspr",
+        "oris",
+        "stw",
+        "stwu"
+      ],
+      "evidence": "docs/asm_evidence/gs_math_init.md"
+    },
+    {
+      "path": "src/dolphin/os/OSReset_exact.c",
+      "function": "Reset_8009FF50",
+      "mnemonics": [
+        "b",
+        "blt",
+        "cmplwi",
+        "isync",
+        "li",
+        "lis",
+        "mfspr",
+        "mftb",
+        "mtspr",
+        "nop",
+        "ori",
+        "stw",
+        "subf",
+        "sync"
+      ],
+      "evidence": "docs/asm_evidence/os_reset.md"
+    }
+  ]
+}

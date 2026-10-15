@@ -84,7 +84,55 @@ typedef struct ToolentrySpeciesList {
     u16 speciesId[1];
 } ToolentrySpeciesList;
 
+static inline u16 toolentryCountValidPokemon(s32 player) {
+    extern void* fn_8006B09C(void*);
+    extern u8 pokemonCheckValid(void*);
+    extern void* heroBiosGetPokemonPtr(void*, u32);
+    u16 count;
+    s32 i;
+    u8 valid;
+
+    count = 0;
+    for (i = 0; i < 6; i++) {
+        valid = pokemonCheckValid(heroBiosGetPokemonPtr((u8*)fn_8006B09C((void*)player) + 0xb44, (u16)i)) != 0;
+        if (valid) {
+            count++;
+        }
+    }
+    return count;
+}
+
+static inline u16 toolentryEntryPokemonNum(s32 player) {
+    extern u32 fn_8006B1D4(void);
+    u16 limit;
+    u16 num;
+
+    limit = fn_8006B1D4();
+    num = toolentryCountValidPokemon(player);
+    if (num < limit) {
+        return num;
+    }
+    return limit;
+}
+
+static inline void* toolentryHeroPokemonPtr(s32 player, s32 index) {
+    extern u8* fn_8006B09C(void*);
+    extern void* heroBiosGetPokemonPtr(void*, u16);
+    return heroBiosGetPokemonPtr(fn_8006B09C((void*)player) + 0xb44, index);
+}
+
+static inline void* toolentryEntryPokemonPtr(s32 player, s32 index) {
+    extern u8* fn_8006B09C(void*);
+    extern void* heroBiosGetPokemonPtr(void*, u16);
+    return heroBiosGetPokemonPtr(fn_8006B09C((void*)player) + 0x2c, index);
+}
+
+#if !defined(TOOLENTRY_8025D788_ONLY) && !defined(TOOLENTRY_8025D164_ONLY) && !defined(TOOLENTRY_8025D3F4_ONLY) && !defined(TOOLENTRY_8025D644_ONLY)
+
 /* Address: 0x8025CD64 | Size: 0x54 | Pattern: field_accessor */
+#ifdef TOOLENTRY_DEBUG_ONLY
+static inline
+#endif
 void toolentryTaisenFreePokemonData(void* ctx, u32 slot, u32 param) {
     extern u32 lbl_8047B650;
     extern u32 fn_800E202C();
@@ -103,219 +151,127 @@ void toolentryTaisenFreePokemonData(void* ctx, u32 slot, u32 param) {
     }
 }
 
+/* RULE-EXCEPTION(user-approved): inline helper used by one function — see docs/RULE_EXCEPTIONS.md */
+static inline void toolentryCopyHeroData(void* dst, void* src) {
+    extern void* memcpy(void*, const void*, u32);
+    if (src != 0) {
+        memcpy(dst, src, 0xb18);
+    }
+}
+
+/* RULE-EXCEPTION(user-approved): one-use inline boundary preserves register allocation;
+ * see docs/RULE_EXCEPTIONS.md and docs/recon/toolentry_debug_pokemon_residual_20261008.md. */
+static inline void toolentryCreateDebugPokemonList(u8* pokemon) {
+    extern s32 lbl_80478D98;
+    extern void* GSmsgGetGSchar(u32);
+    extern void pokemonAllKaihuku(void*);
+    extern void pokemonSetCatchStatus(void*, u32, u32, u32, u32, u32, void*);
+    extern void pokemonCreate(void*, u16, u32, void*);
+    extern void* gamedataGetStatus(u32, u32);
+    s32 i;
+
+    for (i = 0; i < lbl_80478D98; i++) {
+        pokemonCreate(pokemon, i + 1, 10, gamedataGetStatus(0, 1));
+        pokemonSetCatchStatus(pokemon, 0, 8, 1, 0, 0, GSmsgGetGSchar(i + 0x1004));
+        pokemonAllKaihuku(pokemon);
+        pokemon += 0x138;
+    }
+}
+
 /* Address: 0x8025CDB8 | Size: 0x2B4 (692 bytes) */
-void toolentryDebugPokemonCreate(void* ctx, u32 param1, u32 param2, u32 param3) {
-    extern u32 lbl_80478D98;
-    extern u32 lbl_8047B650;
-    extern u32 lbl_8047B654;
-    extern void fn_8006B09C();
-    extern void fn_800E202C();
-    extern void fn_800E209C();
-    extern void fn_800E24B0();
-    extern void fn_800E27B0();
-    extern void fn_800E2C04();
-    extern void GSmsgGetGSchar();
-    extern void pokemonAllKaihuku();
-    extern void pokemonSetCatchStatus();
-    extern void pokemonCreate();
-    extern void pokemonInit();
-    extern void savedataGetStatus();
-    extern void heroInit();
-    extern void heroBiosGetPokemonPtr();
-    extern void gamedataGetStatus();
-    u8 sp[0x20];
-    u32 r0 = 0;
-    u32 r3 = (u32)ctx;
-    u32 r7 = 0;
-    u32 r8 = 0;
-    u32 r9 = 0;
-    u32 r28 = 0;
-    u32 r29 = 0;
-    u32 r30 = 0;
-    u32 r31 = 0;
-    u32 r4 = param1;
-    u32 r5 = param2;
-    u32 r6 = param3;
+void toolentryDebugPokemonCreate(void) {
+    extern s32 lbl_80478D98;
+    extern void* lbl_8047B650;
+    extern u8* lbl_8047B654;
+    extern u8* fn_8006B09C(void*);
+    extern void* GSmsgGetGSchar(u32);
+    extern void pokemonAllKaihuku(void*);
+    extern void pokemonSetCatchStatus(void*, u32, u32, u32, u32, u32, void*);
+    extern void pokemonCreate(void*, u16, u32, void*);
+    extern void pokemonInit(void*);
+    extern void* savedataGetStatus(u32, u32);
+    extern void heroInit(void*);
+    extern void* heroBiosGetPokemonPtr(void*, u16);
+    extern void* gamedataGetStatus(u32, u32);
+    extern void* memcpy(void*, const void*, u32);
+    extern u32 fn_800E202C(void*);
+    extern void fn_800E209C(u32);
+    extern void fn_800E24B0(u32);
+    extern u32 fn_800E2C04(u32, u32);
+    extern void* fn_800E27B0(u32);
+    s32 i;
+    s32 j;
+    u32 handle;
+    void* buffer;
+    u8* src;
+    void* dst;
+    s32 offset;
+    s32 k;
 
-    void (*ctr_fn)(void) = 0;
-    u32 ctr = 0;
-
-    r3 = 0x0;
-    r4 = 0x20;
-    r0 = lbl_80478D98;
-    lbl_8047B654 = r3;
-    r3 = r0 * 0x138;
-    r0 = r3 + 0x1f;
-    fn_800E2C04();
-    r0 = r3 & 0xFFFF;
-    if ((s32)r0 != (s32)0) {
-        fn_800E27B0();
+    lbl_8047B654 = 0;
+    handle = fn_800E2C04((lbl_80478D98 * 0x138 + 0x1f) & ~0x1f, 0x20);
+    if ((u16)handle != 0) {
+        buffer = fn_800E27B0(handle);
     } else {
-
-        r3 = 0x0;
+        buffer = 0;
     }
-    lbl_8047B654 = r3;
-    r30 = r3;
-    r31 = 0x0;
-    while (1) {
-        r0 = lbl_80478D98;
-        if ((s32)r31 >= (s32)r0) break;
-        r3 = 0x0;
-        r4 = 0x1;
-        gamedataGetStatus();
-        r0 = r31 + 0x1;
-        r6 = r3;
-        r3 = r30;
-        r5 = 0xa;
-        r4 = r0 & 0xFFFF;
-        pokemonCreate();
-        r3 = r31 + 0x1004;
-        GSmsgGetGSchar();
-        r9 = r3;
-        r3 = r30;
-        r4 = 0x0;
-        r5 = 0x8;
-        r6 = 0x1;
-        r7 = 0x0;
-        r8 = 0x0;
-        pokemonSetCatchStatus();
-        r3 = r30;
-        pokemonAllKaihuku();
-        r30 = r30 + 0x138;
-        r31 = r31 + 0x1;
+    lbl_8047B654 = buffer;
+    toolentryCreateDebugPokemonList(buffer);
 
+    toolentryTaisenFreePokemonData(0, 0, 0);
+    handle = fn_800E2C04(0x80, 0x20);
+    if ((u16)handle != 0) {
+        buffer = fn_800E27B0(handle);
+    } else {
+        buffer = 0;
     }
-    r3 = lbl_8047B650;
-    if (r3 != (u32)0x0) {
-        fn_800E202C();
-        r0 = r3 & 0xFFFF;
-        r30 = r3;
-        if (r3 != (u32)0x0) {
-            fn_800E24B0();
-            r3 = r30;
-            fn_800E209C();
+    lbl_8047B650 = buffer;
+
+    for (j = 0; j < 4; j++) {
+        heroInit(fn_8006B09C((void*)j) + 0xb44);
+        for (i = 0; i < 6; i++) {
+            pokemonInit(heroBiosGetPokemonPtr(fn_8006B09C((void*)j) + 0xb44, i));
         }
-        r0 = 0x0;
-        lbl_8047B650 = r0;
     }
-    r3 = 0x80;
-    r4 = 0x20;
-    fn_800E2C04();
-    r0 = r3 & 0xFFFF;
-    if (r3 != (u32)0x0) {
-        fn_800E27B0();
-    } else {
+    for (j = 0; j < 4; j++) {
+        heroInit(fn_8006B09C((void*)j) + 0x2c);
+        for (i = 0; i < 6; i++) {
+            pokemonInit(heroBiosGetPokemonPtr(fn_8006B09C((void*)j) + 0x2c, i));
+        }
+    }
+    /* RULE-EXCEPTION(user-approved): empty loop kept for retail's six-iteration CTR loop — see docs/RULE_EXCEPTIONS.md */
+    for (i = 0; i < 6; i++) {
+    }
 
-        r3 = 0x0;
-    }
-    lbl_8047B650 = r3;
-    r31 = 0x0;
-    do {
-        r3 = r31;
-        fn_8006B09C();
-        r3 = r3 + 0xb44;
-        heroInit();
-        r30 = 0x0;
-        do {
-            r3 = r31;
-            fn_8006B09C();
-            r4 = r30 & 0xFFFF;
-            r3 = r3 + 0xb44;
-            heroBiosGetPokemonPtr();
-            pokemonInit();
-            r30 = r30 + 0x1;
-        } while ((s32)r30 < (s32)0x6);
-        r31 = r31 + 0x1;
-    } while ((s32)r31 < (s32)0x4);
-    r30 = 0x0;
-    do {
-        r3 = r30;
-        fn_8006B09C();
-        r3 = r3 + 0x2c;
-        heroInit();
-        r31 = 0x0;
-        do {
-            r3 = r30;
-            fn_8006B09C();
-            r4 = r31 & 0xFFFF;
-            r3 = r3 + 0x2c;
-            heroBiosGetPokemonPtr();
-            pokemonInit();
-            r31 = r31 + 0x1;
-        } while ((s32)r31 < (s32)0x6);
-        r30 = r30 + 0x1;
-    } while ((s32)r30 < (s32)0x4);
-    r0 = 0x6;
-    ctr_fn = (void(*)(void))r0;
-    do {
-    } while (--ctr != 0);
-    r3 = 0x0;
-    r4 = 0x2;
-    savedataGetStatus();
-    r30 = r3;
-    r3 = 0x0;
-    fn_8006B09C();
-    r3 = r3 + 0xb44;
-    if (r30 != (u32)0x0) {
-        r4 = r30;
-        r5 = 0xb18;
-        memcpy((void*)r3, (const void*)r4, (u32)r5);
-    }
-    r29 = 0x0;
-    r31 = 0x0;
-    do {
-        if ((s32)r31 == (s32)0x0) {
-            r3 = 0x0;
-            r4 = 0x2;
-            savedataGetStatus();
-            r30 = r3;
-            r3 = r31;
-            fn_8006B09C();
-            r3 = r3 + 0xb44;
-            if (r30 != (u32)0x0) {
-                r4 = r30;
-                r5 = 0xb18;
-                memcpy((void*)r3, (const void*)r4, (u32)r5);
-            }
-
+    toolentryCopyHeroData(fn_8006B09C(0) + 0xb44, savedataGetStatus(0, 2));
+    offset = 0;
+    for (i = 0; i < 4; i++) {
+        if (i == 0) {
+            toolentryCopyHeroData(fn_8006B09C((void*)i) + 0xb44, savedataGetStatus(0, 2));
         } else {
-            r28 = 0x0;
-            do {
-                r0 = lbl_8047B654;
-                r3 = r31;
-                r30 = r0 + r29;
-                fn_8006B09C();
-                r4 = r28 & 0xFFFF;
-                r3 = r3 + 0xb44;
-                heroBiosGetPokemonPtr();
-                if (r3 != (u32)0x0) {
-                    r4 = r30;
-                    r5 = 0x138;
-                    memcpy((void*)r3, (const void*)r4, (u32)r5);
+            for (k = 0; k < 6; k++) {
+                src = lbl_8047B654 + offset;
+                dst = heroBiosGetPokemonPtr(fn_8006B09C((void*)i) + 0xb44, k);
+                if (dst != 0) {
+                    memcpy(dst, src, 0x138);
                 }
-                r28 = r28 + 0x1;
-                r29 = r29 + 0x138;
-            } while ((s32)r28 < (s32)0x6);
+                offset += 0x138;
+            }
         }
-        r31 = r31 + 0x1;
-    } while ((s32)r31 < (s32)0x4);
-    r3 = lbl_8047B654;
-    if (r3 != (u32)0x0) {
-        fn_800E202C();
-        r0 = r3 & 0xFFFF;
-        r30 = r3;
-        if (r3 != (u32)0x0) {
-            fn_800E24B0();
-            r3 = r30;
-            fn_800E209C();
-        }
-        r0 = 0x0;
-        lbl_8047B654 = r0;
     }
-    return;
+
+    if (lbl_8047B654 != 0) {
+        handle = fn_800E202C(lbl_8047B654);
+        if ((u16)handle != 0) {
+            fn_800E24B0(handle);
+            fn_800E209C(handle);
+        }
+        lbl_8047B654 = 0;
+    }
 }
 
 /* Address: 0x8025D06C | Size: 0x3c | Ghidra import */
+#ifndef TOOLENTRY_DEBUG_ONLY
 u32 fn_8025D06C(void)
 {
     extern u32 fn_8006ADEC();
@@ -382,109 +338,87 @@ f32 fn_8025D0A8(void* ctx, u32 param1, u32 param2) {
     }
     return scale;
 }
+#endif
 
+#endif /* carve guards */
+
+#if !defined(TOOLENTRY_8025D788_ONLY) && !defined(TOOLENTRY_DEBUG_ONLY) && !defined(TOOLENTRY_8025D3F4_ONLY) && !defined(TOOLENTRY_8025D644_ONLY)
 /* Address: 0x8025D164 | Size: 0x128 (296 bytes) */
-void fn_8025D164(void* ctx, u32 param1, u32 param2, u32 param3) {
-    extern u8 lbl_8039A648[];
-    extern u8 lbl_8039A664[];
-    extern u32 lbl_80478EAC;
+s32 fn_8025D164(void) {
+    extern f32 lbl_8039A648[];
+    extern f32 lbl_8039A664[];
+    extern ToolentrySpeciesList* lbl_80478EAC;
     extern f32 lbl_8047E658;
     extern f32 lbl_8047E65C;
-    extern void fn_8006B09C();
-    extern void fn_8006B5A8();
-    extern void pokemonBiosGetPokemonDataId();
-    extern void pokemonCheckValid();
-    extern void heroBiosGetPokemonPtr();
-    u8 sp[0x30];
-    u32 r0 = 0;
-    u32 r3 = (u32)ctx;
-    u32 r26 = 0;
-    u32 r27 = 0;
-    u32 r28 = 0;
-    u32 r29 = 0;
-    u32 r30 = 0;
-    u32 r31 = 0;
-    f32 f0 = 0.0f;
-    f32 f1 = 0.0f;
-    u32 r4 = param1;
-    u32 r5 = param2;
+    extern u8* fn_8006B09C(void*);
+    extern void* fn_8006B5A8();
+    extern u16 pokemonBiosGetPokemonDataId(void*);
+    extern u8 pokemonCheckValid(void*);
+    extern void* heroBiosGetPokemonPtr(void*, u16);
+    void* member;
+    s32 wins;
+    s32 i;
+    s32 count;
+    s32 level;
+    s32 type;
+    s32 rank;
+    ToolentrySpeciesList* speciesList;
+    u32 offset;
+    u16 species;
+    u16 entry;
+    f32 scale;
+    f32 factor;
 
-    void (*ctr_fn)(void) = 0;
-    u32 ctr = 0;
-
-    r28 = 0x0;
-    fn_8006B5A8();
-    r27 = *(u32*)((u8*)r3 + 0xC);
-    fn_8006B5A8();
-    r26 = *(u32*)((u8*)r3 + 0x0);
-    fn_8006B5A8();
-    r30 = *(u32*)((u8*)r3 + 0x14);
-    r29 = 0x0;
-    do {
-        r3 = 0x0;
-        fn_8006B09C();
-        r4 = r29 & 0xFFFF;
-        r3 = r3 + 0xb44;
-        heroBiosGetPokemonPtr();
-        r31 = r3;
-        pokemonCheckValid();
-        r0 = r3 & 0xFF;
-        if ((s32)r0 != (s32)0) {
-            r3 = r31;
-            pokemonBiosGetPokemonDataId();
-            r4 = lbl_80478EAC;
-            r0 = r3 & 0xFFFF;
-            r3 = 0x0;
-            do {
-                r5 = *(u16*)(r4 + r3);
-                if (r5 == (u32)0x0) break;
-                if (r0 == (u32)r5) {
-                    r28 = r28 + 0x1;
+    count = 0;
+    level = *(s32*)((u8*)fn_8006B5A8() + 0xc);
+    type = *(s32*)fn_8006B5A8();
+    wins = *(s32*)((u8*)fn_8006B5A8() + 0x14);
+    for (i = 0; i < 6; i++) {
+        member = heroBiosGetPokemonPtr(fn_8006B09C(0) + 0xb44, i);
+        if (pokemonCheckValid(member)) {
+            species = pokemonBiosGetPokemonDataId(member);
+            speciesList = lbl_80478EAC;
+            offset = 0;
+            while (1) {
+                entry = speciesList->speciesId[offset];
+                if (entry == 0) {
+                    break;
                 }
-                r3 = r3 + 0x2;
-            } while (1);
+                if (species == entry) {
+                    count++;
+                }
+                offset++;
+            }
         }
-        r29 = r29 + 0x1;
-    } while ((s32)r29 < (s32)0x6);
-    f1 = lbl_8047E658;
-    f0 = lbl_8047E65C;
-    ctr_fn = (void(*)(void))r28;
-    if ((s32)r28 > (s32)0x0) {
-        do {
-            f1 = f1 * f0;
-        } while (--ctr != 0);
     }
-    if ((s32)r26 == (s32)0x1) {
-        r3 = r30 + 0x1;
-        r0 = 0xa;
-        r0 = (s32)r3 / (s32)r0;
-        if ((s32)r0 > (s32)0xa) {
-            r0 = 0xa;
+    scale = lbl_8047E658;
+    factor = lbl_8047E65C;
+    while (count > 0) {
+        scale *= factor;
+        count--;
+    }
+    if (type == 1) {
+        rank = (wins + 1) / 10;
+        if (rank > 10) {
+            rank = 10;
         }
-        r3 = (u32)lbl_8039A664;
-        r0 = r0 << 2;
-        r3 = (u32)lbl_8039A664;
-        f0 = *(f32*)(void*)(r3 + r0);
-        f1 = f1 * f0;
+        scale *= lbl_8039A664[rank];
     } else {
-
-        if ((s32)r27 >= (s32)0x6) {
-            r27 = 0x6;
+        if (level >= 6) {
+            level = 6;
         }
-        r3 = (u32)lbl_8039A648;
-        r0 = r27 << 2;
-        r3 = (u32)lbl_8039A648;
-        f0 = *(f32*)(void*)(r3 + r0);
-        f1 = f1 * f0;
+        scale *= lbl_8039A648[level];
     }
-    f0 = (f64)(s32)f1;
-    *(f64*)(void*)(sp + 0x8) = f0;
-    r3 = *(u32*)(sp + 0xC);
-    return;
+    return (s32)scale;
 }
+
+#endif /* TOOLENTRY_8025D788_ONLY */
 
 /* Address: 0x8025D28C | Size: 0x24 | Pattern: null_check_getter */
 extern void* fn_8006B09C(void*);
+
+#if !defined(TOOLENTRY_8025D788_ONLY) && !defined(TOOLENTRY_8025D164_ONLY) && !defined(TOOLENTRY_DEBUG_ONLY)
+#if !defined(TOOLENTRY_8025D3F4_ONLY) && !defined(TOOLENTRY_8025D644_ONLY)
 u16 toolentryTaisenGetTrainerDataID(void* ctx) { return *(u16*)fn_8006B09C(ctx); }
 
 /* Address: 0x8025D2B0 | Size: 0x24 | Pattern: null_check_getter */
@@ -562,111 +496,43 @@ u32 toolentryGetTrainerBicFaceResID(void* ctx, u32 param1, u32 param2) {
     return ret;
 }
 
+#endif /* !TOOLENTRY_8025D3F4_ONLY */
+
+#if !defined(TOOLENTRY_8025D644_ONLY)
 /* Address: 0x8025D3F4 | Size: 0x16C (364 bytes) */
-void toolentryTaisenEntryPokemon(void* ctx, u32 param1, u32 param2, u32 param3) {
-    extern void fn_8006B09C();
-    extern void fn_8006B1D4();
-    extern void pokemonCheckValid();
-    extern void heroBiosGetPokemonPtr();
-    u8 sp[0x20];
-    u32 r0 = 0;
-    u32 r3 = (u32)ctx;
-    u32 r27 = 0;
-    u32 r28 = 0;
-    u32 r29 = 0;
-    u32 r30 = 0;
-    u32 r31 = 0;
-    u32 r4 = param1;
-    u32 r5 = param2;
+void toolentryTaisenEntryPokemon(void* ctx) {
+    typedef struct ToolentryHeroData {
+        u32 words[0xB18 / 4];
+    } ToolentryHeroData;
+    typedef struct ToolentryPokemonData {
+        u32 words[0x138 / 4];
+    } ToolentryPokemonData;
+    extern u8* fn_8006B09C(void*);
+    ToolentryHeroData* hero;
+    ToolentryPokemonData* src;
+    ToolentryPokemonData* dst;
+    s32 i;
+    s32 order;
+    s32 num;
 
-    void (*ctr_fn)(void) = 0;
-    u32 ctr = 0;
-
-    r27 = r3;
-    fn_8006B1D4();
-    r30 = 0x0;
-    r31 = r27;
-    r29 = r30;
-    r28 = r3 & 0xFFFF;
-    do {
-        r3 = r27;
-        fn_8006B09C();
-        r4 = r29 & 0xFFFF;
-        r3 = r3 + 0xb44;
-        heroBiosGetPokemonPtr();
-        pokemonCheckValid();
-        r3 = r3 & 0xFF;
-        r0 = r3 - r0; /* -borrow */;
-        r0 = r0 & 0xFF;
-        if ((s32)r0 != (s32)0) {
-            r3 = r30 & 0xFFFF;
-            r0 = r3 + 0x1;
-            r30 = r0 & 0xFFFF;
+    /* RULE-EXCEPTION(user-approved): codegen-only (void*)(s32) casts on ctx and local order chosen for register allocation — see docs/RULE_EXCEPTIONS.md */
+    num = toolentryEntryPokemonNum((s32)ctx);
+    hero = (ToolentryHeroData*)(fn_8006B09C((void*)(s32)ctx) + 0x2c);
+    *hero = *(ToolentryHeroData*)(fn_8006B09C((void*)(s32)ctx) + 0xb44);
+    for (i = 0; i < num; i++) {
+        order = *(s32*)(fn_8006B09C((void*)(s32)ctx) + 8 + i * 4);
+        src = toolentryHeroPokemonPtr((s32)ctx, order);
+        toolentryEntryPokemonPtr((s32)ctx, i);
+        dst = toolentryEntryPokemonPtr((s32)ctx, i);
+        if (dst != 0 && src != 0) {
+            *dst = *src;
         }
-        r29 = r29 + 0x1;
-    } while ((s32)r29 < (s32)0x6);
-    r0 = r30 & 0xFFFF;
-    if (r0 < r28) {
-        r28 = r30;
     }
-    r3 = r31;
-    r30 = r28 & 0xFFFF;
-    fn_8006B09C();
-    r28 = r3;
-    r3 = r31;
-    fn_8006B09C();
-    r0 = 0x163;
-    r5 = r28 + 0x28;
-    r4 = r3 + 0xb40;
-    ctr_fn = (void(*)(void))r0;
-    do {
-        r3 = *(u32*)((u8*)r4 + 0x4);
-        r0 = *(u32*)((u8*)r4 + 0x8);
-        *(u32*)((u8*)r5 + 0x4) = r3;
-        r5 += 8; *(u32*)r5 = r0;
-    } while (--ctr != 0);
-    r27 = 0x0;
-    r29 = 0x0;
-    while ((s32)r27 < (s32)r30) {
-
-        r3 = r31;
-        fn_8006B09C();
-        r0 = r29 + 0x8;
-        r28 = *(u32*)(r3 + r0);
-        r3 = r31;
-        fn_8006B09C();
-        r4 = r28 & 0xFFFF;
-        r3 = r3 + 0xb44;
-        heroBiosGetPokemonPtr();
-        r28 = r3;
-        r3 = r31;
-        fn_8006B09C();
-        r4 = r27 & 0xFFFF;
-        r3 = r3 + 0x2c;
-        heroBiosGetPokemonPtr();
-        r3 = r31;
-        fn_8006B09C();
-        r4 = r27 & 0xFFFF;
-        r3 = r3 + 0x2c;
-        heroBiosGetPokemonPtr();
-        if ((r3 != (u32)0x0) && (r28 != (u32)0x0)) {
-
-            r0 = 0x27;
-            ctr_fn = (void(*)(void))r0;
-            do {
-                r3 = *(u32*)((u8*)r4 + 0x4);
-                r0 = *(u32*)((u8*)r4 + 0x8);
-                *(u32*)((u8*)r5 + 0x4) = r3;
-                r5 += 8; *(u32*)r5 = r0;
-            } while (--ctr != 0);
-        }
-        r27 = r27 + 0x1;
-        r29 = r29 + 0x4;
-
-    }
-    return;
 }
+#endif /* !TOOLENTRY_8025D644_ONLY */
 
+#if !defined(TOOLENTRY_8025D3F4_ONLY)
+#if !defined(TOOLENTRY_8025D644_ONLY)
 /* Address: 0x8025D560 | Size: 0x24 | Pattern: null_check_getter */
 u32 toolentryTaisengetEtnryPokemonOrderNum(void* ctx) { return *(u32*)((u8*)fn_8006B09C(ctx) + 0x20); }
 
@@ -710,62 +576,43 @@ u32 toolentryTaisenSetEtnryPokemonOrderGBA(void* ctx, s32 count, u32* src) {
     return i;
 }
 
+#endif /* !TOOLENTRY_8025D644_ONLY */
+
 /* Address: 0x8025D644 | Size: 0x100 (256 bytes) */
-s32 toolentryTaisenSetEtnryPokemonOrder(void* ctx, u32 order, u32 param2, u32 param3) {
+/* RULE-EXCEPTION(user-approved): unsigned player parameter, a long copy of it,
+ * and a do/while(0) around the duplicate check, chosen for codegen (permuter
+ * farm) — see docs/RULE_EXCEPTIONS.md */
+s32 toolentryTaisenSetEtnryPokemonOrder(unsigned int player, s32 order) {
+    long playerId;
     typedef struct BattleFieldAccessor {
         u8 unk_00[8];
-        u32 values[6];
-        u32 count;
+        s32 values[6];
+        s32 count;
     } BattleFieldAccessor;
     extern BattleFieldAccessor* fn_8006B09C(void*);
-    extern u32 fn_8006B1D4(void*);
-    extern u32 pokemonCheckValid(void*);
-    extern void* heroBiosGetPokemonPtr(void*, u32);
     BattleFieldAccessor* entry;
-    u32 entryCount;
-    u32 liveCount;
-    u32 limit;
-    u32 rawLimit;
+    s32 entryCount;
     s32 i;
-    u32 r0;
-    u32 r3;
 
-    entry = fn_8006B09C(ctx);
+    playerId = player;
+    entry = fn_8006B09C((void*)playerId);
     entryCount = entry->count;
-    rawLimit = fn_8006B1D4(entry);
-    liveCount = 0;
-    limit = rawLimit & 0xFFFF;
-    i = liveCount;
-    do {
-        r3 = (u32)fn_8006B09C(ctx);
-        r3 = (u32)heroBiosGetPokemonPtr((void*)(r3 + 0xb44), i & 0xFFFF);
-        r3 = pokemonCheckValid((void*)r3);
-        r3 = r3 & 0xFF;
-        r0 = r3 != 0;
-        r0 = r0 & 0xFF;
-        if ((s32)r0 != (s32)0) {
-            r3 = liveCount & 0xFFFF;
-            r0 = r3 + 1;
-            liveCount = r0 & 0xFFFF;
-        }
-        i++;
-    } while (i < 6);
-    if ((liveCount & 0xFFFF) < limit) {
-        limit = liveCount;
-    }
-    if ((s32)entry->count >= (s32)(limit & 0xFFFF)) {
+    if (entry->count >= toolentryEntryPokemonNum(playerId)) {
         return -1;
     }
-    for (i = 0; i < (s32)entryCount; i++) {
-        if ((s32)entry->values[i] == (s32)order) {
-            return -1;
-        }
+    for (i = 0; i < entryCount; i++) {
+        do {
+            if (entry->values[i] == order) {
+                return -1;
+            }
+        } while (0);
     }
     entry->values[entryCount] = order;
     entry->count++;
     return entryCount;
 }
 
+#if !defined(TOOLENTRY_8025D644_ONLY)
 /* Address: 0x8025D744 | Size: 0x44 | Pattern: field_accessor */
 u32 toolentryTaisenInitPokemonOrder(void* ctx, u32 slot, u32 param) {
     extern void* fn_8006B09C();
@@ -778,7 +625,12 @@ u32 toolentryTaisenInitPokemonOrder(void* ctx, u32 slot, u32 param) {
     }
     return (u32)base;
 }
+#endif /* !TOOLENTRY_8025D644_ONLY */
 
+#endif /* !TOOLENTRY_8025D3F4_ONLY */
+#endif /* carve guards */
+
+#if !defined(TOOLENTRY_8025D164_ONLY) && !defined(TOOLENTRY_DEBUG_ONLY) && !defined(TOOLENTRY_8025D3F4_ONLY) && !defined(TOOLENTRY_8025D644_ONLY)
 /* Address: 0x8025D788 | Size: 0x80 | Pattern: field_accessor */
 void toolentryCopyHero(void* ctx, u32 slot, u32 param) {
     typedef struct {
@@ -800,43 +652,17 @@ void toolentryCopyHero(void* ctx, u32 slot, u32 param) {
 }
 
 /* Address: 0x8025D808 | Size: 0x94 */
-u32 toolentryTaisenGetEntryPokemonNum(void* ctx, u32 param1, u32 param2) {
-    extern void* fn_8006B09C(void*);
-    extern u32 fn_8006B1D4(void*);
-    extern u32 pokemonCheckValid(void*);
-    extern void* heroBiosGetPokemonPtr(void*, u32);
-    u32 r0;
-    u32 r3;
-    u32 r29;
-    u32 r30;
-    u32 r31;
-    void* saved;
+u16 toolentryTaisenGetEntryPokemonNum(void* ctx, u32 param1, u32 param2) {
+    u16 limit;
+    u16 num;
 
-    saved = ctx;
-    r3 = fn_8006B1D4(saved);
-    r31 = r3 & 0xFFFF;
-    r30 = 0;
-    r29 = 0;
-    do {
-        r3 = (u32)fn_8006B09C(saved);
-        r3 = (u32)heroBiosGetPokemonPtr((void *)(r3 + 0xb44), r29 & 0xFFFF);
-        r3 = pokemonCheckValid((void *)r3);
-        r3 = r3 & 0xFF;
-        r0 = r3 != 0;
-        r0 = r0 & 0xFF;
-        if ((s32)r0 != (s32)0) {
-            r3 = r30 & 0xFFFF;
-            r0 = r3 + 0x1;
-            r30 = r0 & 0xFFFF;
-        }
-        r29 = r29 + 0x1;
-    } while ((s32)r29 < (s32)0x6);
-    r0 = r30 & 0xFFFF;
-    r3 = r31;
-    if (r0 < r31) {
-        r3 = r30;
+    extern u32 fn_8006B1D4(void);
+    limit = fn_8006B1D4();
+    num = toolentryCountValidPokemon((s32)ctx);
+    if (num < limit) {
+        return num;
     }
-    return r3;
+    return limit;
 }
 
 /* Address: 0x8025D89C | Size: 0x78 | Pattern: field_accessor */
@@ -872,6 +698,10 @@ u32 toolentryTaisenGetPokemonNum(void* ctx, u32 slot, u32 param) {
     } while ((s32)r29 < (s32)0x6);
     return r30;
 }
+
+#endif /* TOOLENTRY_8025D164_ONLY */
+
+#if !defined(TOOLENTRY_8025D788_ONLY) && !defined(TOOLENTRY_8025D164_ONLY) && !defined(TOOLENTRY_DEBUG_ONLY) && !defined(TOOLENTRY_8025D3F4_ONLY) && !defined(TOOLENTRY_8025D644_ONLY)
 
 /* Address: 0x8025D914 | Size: 0x24 | Pattern: null_check_getter */
 void* toolentryTaisenGetHeroPtr(void* ctx) { return (u8*)fn_8006B09C(ctx) + 0xb44; }
@@ -995,3 +825,5 @@ u32 fn_8025DB80(void)
 
 /* Address: 0x8025DBB0 | Size: 0x24 | Pattern: null_check_getter */
 u32 fn_8025DBB0(void* ctx) { return *(u32*)((u8*)fn_8006B5A8(ctx) + 0x14); }
+
+#endif /* carve guards */

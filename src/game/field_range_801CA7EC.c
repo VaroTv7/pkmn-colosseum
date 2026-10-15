@@ -68,6 +68,11 @@ extern void etctoolSetPokemonNakigoe();
 #if defined(FIELD_801CA7EC_PREFIX_ACTIVE)
 #if !defined(PR424_FIELD_PREFIX_SPLIT) || \
     defined(PR424_FIELD_801CA7EC_801CA9F0)
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma — see docs/RULE_EXCEPTIONS.md */
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 u32 scriptAddPokecoupon(s32 delta)
 {
     heroGetStatus((u8*)0, 0xd, 0);
@@ -78,25 +83,35 @@ u32 scriptAddPokecoupon(s32 delta)
     }
     return (u32)heroGetStatus((u8*)0, 0xd, 0);
 }
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 
-#pragma push
-#pragma scheduling off
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 u32 fn_801CA858(u32 arg)
 {
     return heroSetStatus((u8*)0, 0xd, arg);
 }
-#pragma pop
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 
-#pragma push
-#pragma scheduling off
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 u32 fn_801CA884(void)
 {
     return (u32)heroGetStatus((u8*)0, 0xd, 0);
 }
-#pragma pop
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 
-#pragma push
-#pragma peephole off
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 s32 scriptAddPremium(s32 delta)
 {
     s32 newVal;
@@ -106,24 +121,36 @@ s32 scriptAddPremium(s32 delta)
     _flagSet(0xa9e, newVal);
     return newVal;
 }
-#pragma pop
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 
-#pragma push
-#pragma scheduling off
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 s32 scriptSetPremium(s32 value)
 {
     return _flagSet(0xa9e, value);
 }
-#pragma pop
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 
-#pragma push
-#pragma scheduling off
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 s32 scriptGetPremium(void)
 {
     return std082_flagGetValue(0xa9e);
 }
-#pragma pop
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma — see docs/RULE_EXCEPTIONS.md */
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 u32 scriptAddPokedoru(s32 delta)
 {
     if (delta >= 0) {
@@ -133,21 +160,33 @@ u32 scriptAddPokedoru(s32 delta)
     }
     return (u32)heroGetStatus((u8*)0, 0xc, 0);
 }
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 
-#pragma push
-#pragma scheduling off
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 u32 scriptGetPokedoru(void)
 {
     return (u32)heroGetStatus((u8*)0, 0xc, 0);
 }
-#pragma pop
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma — see docs/RULE_EXCEPTIONS.md */
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 void scriptSetEventCol(u8 enable)
 {
     if (lbl_80478CB0 >= 0) {
         GScolsys2SetObjEnable(lbl_80478CB0, enable);
     }
 }
+#if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
+#endif
 #endif
 
 #if !defined(PR424_FIELD_PREFIX_SPLIT)
@@ -165,9 +204,7 @@ s32 scriptSetEventColID(s32 id)
 #endif
 
 #if !defined(PR424_FIELD_PREFIX_SPLIT) || \
-    defined(PR424_FIELD_801CAA08_801CADA0)
-#pragma push
-#pragma scheduling off
+    defined(PR424_FIELD_801CAA08_801CADA0) || defined(PR424_FIELD_801CAA08_801CAAF4)
 s32 scriptSetCol(s32 index, u8 enable)
 {
     if (index >= 0) {
@@ -175,19 +212,15 @@ s32 scriptSetCol(s32 index, u8 enable)
     }
     return index;
 }
-#pragma pop
 
-#pragma push
-#pragma scheduling off
-u32 scriptHaveItem(u32 itemId)
+u32 scriptHaveItem(u16 itemId)
 {
     return heroItemCheckHaveItemDataId((u8*)0, itemId) & 0xFF;
 }
-#pragma pop
 
 u32 scriptAddItem(u16 itemId, s32 count)
 {
-    s32 ret = 0;
+    s32 ret;
     if (count > 0) {
         ret = heroItemAddItemDataId((u8*)0, itemId, count & 0xFFFF, -1);
     } else if (count < 0) {
@@ -196,23 +229,28 @@ u32 scriptAddItem(u16 itemId, s32 count)
     }
     return ret;
 }
-#pragma push
-#pragma scheduling off
+
 u32 scriptGetItem(s32 a, s32 b)
 {
     return floorEventGetTresure(4, a, b);
 }
-#pragma pop
 
+#endif
+
+#if !defined(PR424_FIELD_PREFIX_SPLIT) || \
+    defined(PR424_FIELD_801CAA08_801CADA0) || defined(PR424_FIELD_801CAAF4_801CAC6C)
 u32 scriptCheckTemochiPokemon(u8* arg)
 {
     u8 used[6];
-    u8* usedBase;
-    u8* usedEntry;
-    TemochiEntry* wanted;
     u32* wantedSpecies;
+    u8* p;
+    TemochiEntry* wanted;
+    u8* usedBase;
+    s32 i;
+    s32 j;
+    u16 species;
     void* mon;
-    s32 i, j;
+    u32 pid;
 
     used[0] = 0;
     used[1] = 0;
@@ -222,39 +260,32 @@ u32 scriptCheckTemochiPokemon(u8* arg)
     used[5] = 0;
 
     usedBase = used;
-    wanted = lbl_804670B4;
-    for (i = 0; i < 6; i++, wanted++) {
+    for (i = 0; i < 6; i++) {
+        wanted = &lbl_804670B4[i];
         if (wanted->field_4 != 0) {
-            usedEntry = usedBase;
+            p = usedBase;
             wantedSpecies = &wanted->field_4;
-            for (j = 0; j < 6; j++, usedEntry++) {
-                if (*usedEntry) {
-                    continue;
-                }
-                mon = heroGetStatus(arg, 3, j);
-                if (mon != NULL && pokemonCheckValid(mon) != 0) {
-                    u16 v1 = (u16)pokemonGetStatus(mon, 0, 0x6e, 0);
-                    u32 v2 = pokemonGetStatus(mon, 0, 0x6f, 0);
-                    if (v1 == *wantedSpecies && v2 == wantedSpecies[-1]) {
-                        goto matched_temochi;
+            for (j = 0; j < 6; p++, j++) {
+                if (*p == 0) {
+                    mon = heroGetStatus(arg, 3, j);
+                    if (mon != NULL && pokemonCheckValid(mon) != 0) {
+                        species = (u16)pokemonGetStatus(mon, 0, 0x6e, 0);
+                        pid = pokemonGetStatus(mon, 0, 0x6f, 0);
+                        if (species == *wantedSpecies && pid == wanted->field_0) {
+                            break;
+                        }
                     }
                 }
             }
-            if (j == 6) {
+            if (j >= 6) {
                 return 1;
             }
-            goto next_temochi;
-
-matched_temochi:
-            *usedEntry = 1;
+            used[j] = 1;
         }
-next_temochi:
-        ;
     }
 
-    usedEntry = usedBase;
-    for (i = 0; i < 6; i++, usedEntry++) {
-        if (!*usedEntry) {
+    for (i = 0; i < 6; usedBase++, i++) {
+        if (*usedBase == 0) {
             mon = heroGetStatus(arg, 3, i);
             if (mon != NULL && pokemonCheckValid(mon) != 0) {
                 return 1;
@@ -263,6 +294,11 @@ next_temochi:
     }
     return 0;
 }
+
+#endif
+
+#if !defined(PR424_FIELD_PREFIX_SPLIT) || \
+    defined(PR424_FIELD_801CAA08_801CADA0) || defined(PR424_FIELD_801CAC6C_801CADA0)
 void scriptStoreTemochiPokemon(u8* arg)
 {
     TemochiEntry* entry = lbl_804670B4;
@@ -282,8 +318,7 @@ void scriptStoreTemochiPokemon(u8* arg)
         }
     }
 }
-#pragma push
-#pragma scheduling off
+
 u32 scriptGetEarthRibbon(void)
 {
     void* status = savedataGetStatus(0, 2);
@@ -298,7 +333,6 @@ u32 scriptGetEarthRibbon(void)
     }
     return 0;
 }
-#pragma pop
 #endif
 
 #if !defined(PR424_FIELD_PREFIX_SPLIT)
@@ -310,8 +344,6 @@ u32 fn_801CADA0(void)
 
 #if !defined(PR424_FIELD_PREFIX_SPLIT) || \
     defined(PR424_FIELD_801CADA8_801CAE80)
-#pragma push
-#pragma peephole off
 void* std217_playerReceiveGiftPokemon(u8 kind)
 {
     void* result = NULL;
@@ -339,7 +371,6 @@ void* std217_playerReceiveGiftPokemon(u8 kind)
     }
     return result;
 }
-#pragma pop
 #endif
 
 #if !defined(PR424_FIELD_PREFIX_SPLIT)
@@ -367,16 +398,22 @@ u32 scriptGetPokemonNickName(s32 slot)
 #endif
 
 #if defined(FIELD_801CAF0C_SUFFIX_ACTIVE)
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma — see docs/RULE_EXCEPTIONS.md */
+#pragma push
+#pragma peephole off
 u32 scriptGetDarkPointZeroPokemonNum(void)
 {
-    u16 count = 0;
-    void* status = savedataGetStatus(0, 2);
+    void* status;
+    void* mon;
     u16 i;
-    f32 zero = lbl_8047E114;
+    u16 count;
 
+    count = 0;
+    status = savedataGetStatus(0, 2);
     for (i = 0; i < 6; i++) {
-        void* mon = heroBiosGetPokemonPtr(status, i);
-        if (pokemonCheckValid(mon) != 0 && pokemonBiosGetDarkFlag(mon) != 0 && pokemonGetDp(mon) == zero) {
+        mon = heroBiosGetPokemonPtr(status, i);
+        if ((u8)pokemonCheckValid(mon) != 0 && (u8)pokemonBiosGetDarkFlag(mon) != 0 &&
+            pokemonGetDp(mon) == lbl_8047E114) {
             count++;
         }
     }
@@ -416,6 +453,8 @@ u32 scriptGetPokemonNum(void)
     }
     return count;
 }
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (pop; push; peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
+#pragma pop
 
 #pragma push
 #pragma peephole off
@@ -429,6 +468,7 @@ u32 floorCharacterSetPos(u32 id, f32 x, f32 y, f32 z)
     floorCharacterBiosSetPos(bios, pos);
     return 1;
 }
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (pop; push; peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma pop
 
 #pragma push

@@ -49,8 +49,78 @@ void wazaSequenceSysRelease(void) {
  * Address: 0x801DADC0 | Size: 0x138
  */
 void fn_801DADC0(void* context) {
-    memset(lbl_80467C80 + 0x40, 0, 0x14);
-    memset(lbl_80467C80 + 0x54, 0, 0x20);
+    typedef struct WazaPoolHeader {
+        void* entries;
+        u16 count;
+        u8 active;
+        u8 pad07;
+        void* resourceA;
+        void* resourceB;
+        u16 handle;
+    } WazaPoolHeader;
+    typedef struct WazaSystemState {
+        void* receivers[16];
+        WazaPoolHeader pool;
+        u8 scratch[0x20];
+    } WazaSystemState;
+    extern void* floorDataBiosGetCurrentPtr(void);
+    extern u32 floorDataBiosGetGroupID(void*);
+    extern u32 floorDataBiosGetShadowReciveNum(void*);
+    extern void* floorDataBiosGetShadowReciveID(void*, u32);
+    extern void* floorDataBiosGetShadowLightID(void*);
+    extern void* GSresGetResource(u32, u32);
+    extern void fn_801019F8(void);
+    extern u16 _toolentryAlloc__FUl(u32);
+    extern void* fn_800E27B0(u16);
+    u8* base = lbl_80467C80;
+    WazaSystemState* state = (WazaSystemState*)lbl_80467C80;
+    u32 groupId;
+    void* floor;
+    void* resource;
+    s32 receiverCount;
+    u16 handle;
+    s32 count = (s32)context;
+    s32 i;
+    void** receivers;
+
+    memset(&state->pool, 0, sizeof(state->pool));
+    memset(state->scratch, 0, sizeof(state->scratch));
+
+    floor = floorDataBiosGetCurrentPtr();
+    groupId = floorDataBiosGetGroupID(floor);
+    receiverCount = floorDataBiosGetShadowReciveNum(floor);
+    lbl_8047B414 = 0;
+    receivers = (void**)base;
+    for (i = 0; i < receiverCount; i++) {
+        resource = GSresGetResource(
+            groupId, (u32)floorDataBiosGetShadowReciveID(floor, i));
+        if (resource != NULL) {
+            receivers[lbl_8047B414++] = resource;
+        }
+    }
+
+    resource = floorDataBiosGetShadowLightID(floor);
+    if (resource != NULL) {
+        lbl_8047B418 = (s32)GSresGetResource(groupId, (u32)resource);
+    }
+
+    if (count != 0) {
+        fn_801019F8();
+        receiverCount = count * 0x8C;
+        handle = _toolentryAlloc__FUl(receiverCount);
+        if (handle != 0) {
+            WazaPoolHeader* pool = &state->pool;
+
+            pool->handle = handle;
+            pool->count = count;
+            pool->entries = fn_800E27B0(handle);
+            memset(pool->entries, 0, receiverCount);
+            fn_801D301C();
+            pool->resourceA = NULL;
+            pool->resourceB = NULL;
+            pool->active = 0;
+        }
+    }
 }
 
 /**
@@ -241,19 +311,21 @@ void wazaSequenceSysFreeSequenceResource(void* obj) {
 
 #if defined(WAZA_SEQUENCE_SYS_TAIL_801DB288_801DB848)
 
+#if !defined(WAZA_SEQUENCE_SYS_TIME_ONLY)
 /**
  * wazaSequenceSysFreeWazaResource - Waza sequence data parse.
  * Address: 0x801DB288 | Size: 0x170
  */
-void wazaSequenceSysFreeWazaResource(void* seqData, ...) {
+void wazaSequenceSysFreeWazaResource(void* seqData) {
     extern u8 lbl_80467CD4[];
     u16 resourceId = *(u16*)((u8*)seqData + 0x30);
-    s32 references = 0;
+    s32 references;
     s32 i;
 
     if (resourceId != 0) {
         u8* owner = *(u8**)lbl_80467CC0;
         u16 ownerCount = *(u16*)(lbl_80467CC0 + 4);
+        references = 0;
 
         for (i = 0; i < ownerCount; i++, owner += 0x8C) {
             u8* entry = *(u8**)(owner + 0x68);
@@ -280,18 +352,22 @@ void wazaSequenceSysFreeWazaResource(void* seqData, ...) {
     }
 }
 
+#endif
+
+#if !defined(WAZA_SEQUENCE_SYS_FREE_ONLY)
 /**
  * wazaSequenceSysGetWazaTime - Waza sequence data complex parse.
  * Address: 0x801DB3F8 | Size: 0x450
  */
 s32 wazaSequenceSysGetWazaTime(void* owner, void* sequence, s32 timeType) {
-    extern const char lbl_80279788[];
     WazaSequence* waza = sequence;
-    const char* logBase = lbl_80279788;
     s32 pointName = waza->kind;
     s32 time = waza->field_10;
-    u8 type = timeType;
-    u8* timing = (u8*)*(void**)((u8*)owner + 0x2C) + (pointName * 0xD4);
+    s32 offset;
+    u8* timing;
+
+    owner = *(void**)((u8*)owner + 0x2C);
+    timing = (u8*)owner + (pointName * 0xD4);
 
     switch (waza->animationMode) {
     case 1:
@@ -299,172 +375,211 @@ s32 wazaSequenceSysGetWazaTime(void* owner, void* sequence, s32 timeType) {
         case 0:
         case 0xB:
         case 0x10:
-            switch (type) {
+            switch ((u8)timeType) {
+            case 7:
+                return 0;
             case 0:
-                return time;
+                offset = 0;
+                break;
+            case 5:
+                GSlogWrite("wazaSequenceSysGetWazaTime: requesting damage time for attack waza type!\n");
             case 3:
             case 4:
-                return time + *(s32*)(timing + 0x0C);
-            case 5:
-                GSlogWrite(&logBase[0]);
-                return time + *(s32*)(timing + 0x0C);
+                offset = *(s32*)(timing + 0x0C);
+                break;
             case 1:
             case 2:
             case 6:
-                return time + *(s32*)(timing + 0x10);
-            case 7:
-                return 0;
+                offset = *(s32*)(timing + 0x10);
+                break;
             default:
-                GSlogWrite(&logBase[0x4C]);
+                GSlogWrite("wazaSequenceSysGetWazaTime: invalid value for pointName!\n");
                 return 0;
             }
+            break;
+        case 8:
+        case 9:
+        case 10:
+            GSlogWrite("wazaSequenceSysGetWazaTime: DATA ERROR - attack waza triggers damage animation!\n");
+            return 0;
         default:
-            if (pointName >= 8 && pointName < 0xB) {
-                GSlogWrite(&logBase[0x88]);
-                return 0;
-            }
-            switch (type) {
-            case 0:
-                return time;
-            case 1:
-                GSlogWrite(&logBase[0]);
-                return time + *(s32*)(timing + 0x0C);
-            case 2:
-                return time + *(s32*)(timing + 0x10);
-            case 3:
-            case 4:
-                return time + *(s32*)(timing + 0x14);
-            case 5:
-                return time + *(s32*)(timing + 0x18);
-            case 6:
-                return time + *(s32*)(timing + 0x10);
+            switch ((u8)timeType) {
             case 7:
                 return 0;
+            case 0:
+                offset = 0;
+                break;
+            case 5:
+                GSlogWrite("wazaSequenceSysGetWazaTime: requesting damage time for attack waza type!\n");
+            case 3:
+                offset = *(s32*)(timing + 0x0C);
+                break;
+            case 4:
+                offset = *(s32*)(timing + 0x10);
+                break;
+            case 1:
+                offset = *(s32*)(timing + 0x14);
+                break;
+            case 2:
+            case 6:
+                offset = *(s32*)(timing + 0x18);
+                break;
             default:
-                GSlogWrite(&logBase[0x4C]);
+                GSlogWrite("wazaSequenceSysGetWazaTime: invalid value for pointName!\n");
                 return 0;
             }
+            break;
         }
+        break;
     case 2:
         switch (pointName) {
         case 0:
         case 0xB:
         case 0x10:
-            switch (type) {
+            switch ((u8)timeType) {
+            case 7:
+                return 0;
             case 0:
-                return time;
+                offset = 0;
+                break;
             case 3:
             case 4:
-                GSlogWrite(&logBase[0xDC]);
-                return time + *(s32*)(timing + 0x0C);
+                GSlogWrite("wazaSequenceSysGetWazaTime: requesting attack time for damage waza type!\n");
             case 5:
-                return time + *(s32*)(timing + 0x0C);
+                offset = *(s32*)(timing + 0x0C);
+                break;
             case 1:
             case 2:
             case 6:
-                return time + *(s32*)(timing + 0x10);
-            case 7:
-                return 0;
+                offset = *(s32*)(timing + 0x10);
+                break;
             default:
-                GSlogWrite(&logBase[0x4C]);
+                GSlogWrite("wazaSequenceSysGetWazaTime: invalid value for pointName!\n");
                 return 0;
             }
+            break;
+        case 8:
+        case 9:
+        case 10:
+            switch ((u8)timeType) {
+            case 7:
+                return 0;
+            case 0:
+                offset = 0;
+                break;
+            case 3:
+            case 4:
+                GSlogWrite("wazaSequenceSysGetWazaTime: requesting attack time for damage waza type!\n");
+            case 5:
+                offset = *(s32*)(timing + 0x0C);
+                break;
+            case 1:
+                offset = *(s32*)(timing + 0x10);
+                break;
+            case 2:
+            case 6:
+                offset = *(s32*)(timing + 0x14);
+                break;
+            default:
+                GSlogWrite("wazaSequenceSysGetWazaTime: invalid value for pointName!\n");
+                return 0;
+            }
+            break;
         default:
-            if (pointName >= 8 && pointName < 0xB) {
-                GSlogWrite(&logBase[0x88]);
-                return 0;
-            }
-            switch (type) {
-            case 0:
-                return time;
-            case 1:
-            case 5:
-                GSlogWrite(&logBase[0xDC]);
-                return time + *(s32*)(timing + 0x0C);
-            case 2:
-                return time + *(s32*)(timing + 0x10);
-            case 3:
-            case 4:
-            case 6:
-                return time + *(s32*)(timing + 0x14);
-            case 7:
-                return 0;
-            default:
-                GSlogWrite(&logBase[0x4C]);
-                return 0;
-            }
+            GSlogWrite("wazaSequenceSysGetWazaTime: DATA ERROR - attack waza triggers damage animation!\n");
+            return 0;
         }
+        break;
     case 3:
     case 4:
         switch (pointName) {
         case 0:
         case 0xB:
         case 0x10:
-            switch (type) {
+            switch ((u8)timeType) {
+            case 7:
+                return 0;
             case 0:
-                return time;
+                offset = 0;
+                break;
             case 3:
             case 4:
             case 5:
-                return time + *(s32*)(timing + 0x0C);
+                offset = *(s32*)(timing + 0x0C);
+                break;
             case 1:
             case 2:
             case 6:
-                return time + *(s32*)(timing + 0x10);
-            case 7:
-                return 0;
+                offset = *(s32*)(timing + 0x10);
+                break;
             default:
-                GSlogWrite(&logBase[0x4C]);
+                GSlogWrite("wazaSequenceSysGetWazaTime: invalid value for pointName!\n");
                 return 0;
             }
+            break;
+        case 8:
+        case 9:
+        case 10:
+            switch ((u8)timeType) {
+            case 7:
+                return 0;
+            case 0:
+                offset = 0;
+                break;
+            case 3:
+            case 4:
+            case 5:
+                offset = *(s32*)(timing + 0x0C);
+                break;
+            case 1:
+                offset = *(s32*)(timing + 0x10);
+                break;
+            case 2:
+            case 6:
+                offset = *(s32*)(timing + 0x14);
+                break;
+            default:
+                GSlogWrite("wazaSequenceSysGetWazaTime: invalid value for pointName!\n");
+                return 0;
+            }
+            break;
         default:
-            if (pointName >= 8 && pointName < 0xB) {
-                switch (type) {
-                case 0:
-                    return time;
-                case 3:
-                case 4:
-                case 5:
-                    return time + *(s32*)(timing + 0x0C);
-                case 1:
-                    return time + *(s32*)(timing + 0x10);
-                case 2:
-                case 6:
-                    return time + *(s32*)(timing + 0x14);
-                case 7:
-                    return 0;
-                default:
-                    GSlogWrite(&logBase[0x4C]);
-                    return 0;
-                }
-            }
-            switch (type) {
-            case 0:
-                return time;
-            case 1:
-                return time + *(s32*)(timing + 0x0C);
-            case 2:
-                return time + *(s32*)(timing + 0x10);
-            case 3:
-                return time + *(s32*)(timing + 0x14);
-            case 4:
-                return time + *(s32*)(timing + 0x18);
-            case 5:
-                return time + *(s32*)(timing + 0x14);
-            case 6:
-                return time + *(s32*)(timing + 0x10);
+            switch ((u8)timeType) {
             case 7:
                 return 0;
+            case 0:
+                offset = 0;
+                break;
+            case 3:
+            case 5:
+                offset = *(s32*)(timing + 0x0C);
+                break;
+            case 4:
+                offset = *(s32*)(timing + 0x10);
+                break;
+            case 1:
+                offset = *(s32*)(timing + 0x14);
+                break;
+            case 2:
+            case 6:
+                offset = *(s32*)(timing + 0x18);
+                break;
             default:
-                GSlogWrite(&logBase[0x4C]);
+                GSlogWrite("wazaSequenceSysGetWazaTime: invalid value for pointName!\n");
                 return 0;
             }
+            break;
         }
+        break;
     default:
-        GSlogWrite(&logBase[0x128]);
+        GSlogWrite("wazaSequenceSysGetWazaTime: invalid value for waza_type!\n");
         return 0;
     }
+
+    return time + offset;
 }
+
+#endif
 
 #endif
 

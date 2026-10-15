@@ -8,7 +8,6 @@ extern u8 lbl_80375CA8[];
 extern u32 lbl_8047B618;
 extern u16 GSrand(void);
 
-#pragma optimize_for_size on
 u8 fn_80238E30(u32 ctx, void *param2, u16 target) {
   extern u32 fightTrainerGetStatus();
   extern u32 fightFloorGetStatus();
@@ -60,9 +59,7 @@ found:
 not_found:
   return 0;
 }
-#pragma optimize_for_size reset
 
-#pragma optimize_for_size on
 u8 fn_80239058(void *ctx, void *param2, u32 param3) {
   extern u32 fightFloorGetStatus();
   extern u32 fightTrainerGetStatus();
@@ -90,7 +87,6 @@ u8 fn_80239058(void *ctx, void *param2, u32 param3) {
   }
   return 0;
 }
-#pragma optimize_for_size reset
 
 u8 fn_80239154(void *ctx, u32 param) {
   extern u32 fightTrainerGetStatus();
@@ -119,7 +115,6 @@ u8 fn_80239244(void *ctx, u32 param) {
   return (u8)wazaGetStatus(0, param, 0x5, 0);
 }
 
-#pragma optimize_for_size on
 char fn_802392A8(u32 r3, u32 r4) {
   extern int wazaGetStatus();
   extern u32 fightTrainerGetStatus();
@@ -149,7 +144,6 @@ char fn_802392A8(u32 r3, u32 r4) {
   bVar5 = bVar4 >= bVar5;
   return bVar5;
 }
-#pragma optimize_for_size reset
 
 u8 fn_802393A0(void *ctx, u32 param) {
   extern u32 fightTrainerGetStatus();
@@ -167,7 +161,6 @@ u8 fn_802393A0(void *ctx, u32 param) {
   return (u8)wazaGetStatus(0, param, 0x6, 0);
 }
 
-#pragma optimize_for_size on
 u8 fn_8023943C(int arg1, int arg2, int arg3) {
   extern int fightTrainerGetStatus();
   extern u8 wazaIsWazaTypeId();
@@ -175,9 +168,7 @@ u8 fn_8023943C(int arg1, int arg2, int arg3) {
   fightTrainerGetStatus(0, r, 2, 0);
   return wazaIsWazaTypeId(arg2, arg3);
 }
-#pragma optimize_for_size reset
 
-#pragma optimize_for_size on
 u8 fn_80239498(void *ctx, u32 param, u8 flag) {
   extern u32 fightTrainerGetStatus();
   extern u32 wazaGetStatus();
@@ -185,7 +176,6 @@ u8 fn_80239498(void *ctx, u32 param, u8 flag) {
                         0);
   return (u8)wazaGetStatus(0, param, 0x1A, flag);
 }
-#pragma optimize_for_size reset
 
 s16 fn_80239500(void *ctx, u32 param) {
   extern u32 fightTrainerGetStatus();
@@ -269,7 +259,6 @@ u32 fn_802395C8(u32 trainer, u32 move, u32 target) {
   return 9;
 }
 
-#pragma optimize_for_size on
 s32 fightTrainerAiGetValueAryMaxBanme(s32 *valueAry, u16 count, u8 useRandom) {
   s32 banmeAry[16];
   s32 max = -0xC8;
@@ -305,9 +294,7 @@ s32 fightTrainerAiGetValueAryMaxBanme(s32 *valueAry, u16 count, u8 useRandom) {
   }
   return banmeAry[idx];
 }
-#pragma optimize_for_size reset
 
-#pragma optimize_for_size on
 int fn_802398E4(int r3, int r4, u32 r5, u32 r6) {
   extern int fightTrainerGetStatus();
   int iVar1;
@@ -339,7 +326,6 @@ int fn_802398E4(int r3, int r4, u32 r5, u32 r6) {
   }
   return result;
 }
-#pragma optimize_for_size reset
 
 u32 fn_80239984(int r3, void *r4, u32 r5) {
   extern int fightTrainerGetStatus();
@@ -365,8 +351,7 @@ u32 fn_80239984(int r3, void *r4, u32 r5) {
   return result;
 }
 
-#pragma optimize_for_size on
-#pragma scheduling 601
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (push; optimization_level 2; opt_common_subs off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma optimization_level 2
 #pragma opt_common_subs off
@@ -388,11 +373,9 @@ s32 fightTrainerAiAddValue(s32 value, s32 delta) {
     return value;
   }
 }
+/* RULE-EXCEPTION(user-approved): restores the unit settings after the tagged local block above — see docs/RULE_EXCEPTIONS.md */
 #pragma pop
-#pragma scheduling reset
-#pragma optimize_for_size reset
 
-#pragma optimize_for_size on
 u32 fn_80239A40(u32 r3, u32 r4, u32 r5, u32 r6, u32 r7, u32 r8, u32 r9, u32 r10,
                 u8 param_9) {
   extern u8 fn_80008164();
@@ -479,9 +462,7 @@ u32 fn_80239A40(u32 r3, u32 r4, u32 r5, u32 r6, u32 r7, u32 r8, u32 r9, u32 r10,
   }
   return 0;
 }
-#pragma optimize_for_size reset
 
-#pragma optimize_for_size on
 u8 fn_80239CCC(u32 ctx, u32 p2, u32 p3, u32 p4, u32 p5, u32 p6, u32 p7, u32 p8,
                s32 p9) {
   extern u32 fightTrainerGetStatus();
@@ -534,9 +515,7 @@ u8 fn_80239CCC(u32 ctx, u32 p2, u32 p3, u32 p4, u32 p5, u32 p6, u32 p7, u32 p8,
   }
   return 0;
 }
-#pragma optimize_for_size reset
 
-#pragma optimize_for_size on
 u8 fn_80239EE8(u32 ctx, u32 p2, u32 p3, u32 p4, u32 p5, u32 p6, u32 p7,
                u32 p8) {
   extern u32 fightTrainerGetStatus();
@@ -591,9 +570,7 @@ u8 fn_80239EE8(u32 ctx, u32 p2, u32 p3, u32 p4, u32 p5, u32 p6, u32 p7,
   }
   return 0;
 }
-#pragma optimize_for_size reset
 
-#pragma optimize_for_size on
 u8 fn_8023A118(u32 ctx, u32 p2, u32 p3, u32 p4, u32 p5, u32 p6, u32 p7, u32 p8,
                u16 p9, u16 p10, u32 p11) {
   extern u32 GSmsgGetGSchar();
@@ -642,4 +619,3 @@ u8 fn_8023A118(u32 ctx, u32 p2, u32 p3, u32 p4, u32 p5, u32 p6, u32 p7, u32 p8,
   }
   return 0;
 }
-#pragma optimize_for_size reset

@@ -194,7 +194,22 @@ void fn_800574A8(void);
 void fn_80057400(void);
 void fn_800576C4(s32 state);
 void* fn_800551CC(void* pokemon, s32 direction, s32* moveState);
-s32 fn_800552D4(s8 box, s8 slot)
+static inline s32 menuCBFindBoxSlot(s32* state)
+{
+    MenuCBSlotInfo* entry;
+    s32 target;
+    s32 i;
+
+    target = state[2];
+    for (i = 0, entry = lbl_80267398; i < 32; entry++, i++) {
+        if (entry->kind == 0 && target == entry->slot) {
+            break;
+        }
+    }
+    return i;
+}
+
+s32 fn_800552D4(s32 box, s32 slot)
 {
     extern void* getPokemon__5PCBOXFScSc(void*, s8, s8);
     extern void delPokemon__5PCBOXFScSc(void*, s8, s8);
@@ -220,7 +235,7 @@ s32 fn_800552D4(s8 box, s8 slot)
     extern void* menuItemBiosGetPtr(s32);
     extern void fn_80057830(s16, s16, s32);
     extern MenuCBPane* windowSearchID(s32);
-    extern u32 fn_8005D738(u8);
+    extern u8 fn_8005D738(u8);
     extern void pokemonBiosSetPcboxMark(void*, u8);
     extern s32 fn_80057DE8(void*);
     extern s32 fn_8005D3D0(s32);
@@ -231,41 +246,52 @@ s32 fn_800552D4(s8 box, s8 slot)
     extern s32 fn_80057428(void);
     extern void fn_800574A8(void);
     MenuCBPokemonBlob pokemonCopy;
-    u16 name[0xE];
+    u16 name[0x10];
     s32 moveState[3];
-    void* boxPokemon;
-    void* alternatePokemon;
-    void* pokemon;
     MenuCBPane* window;
     void* item;
-    s32 canAct;
-    s32 context;
-    s32 action;
     s32 emptySlots;
     s32 i;
-    s32 haveCopy;
+    s32 action;
     s32 mode;
+    s32 context;
+    s32 answer;
     u32 nameValue;
+    u8 canAct;
     u8 mark;
+    void* pokemon;
+    void* boxPokemon;
+    void* alternatePokemon;
+    s32 haveCopy;
 
+    haveCopy = 0;
     boxPokemon = getPokemon__5PCBOXFScSc(NULL, box, slot);
     canAct = pokemonCheckValid(boxPokemon);
-    alternatePokemon = NULL;
-    context = 0;
     mode = 1;
 
     if (fn_800576B4() != 3) {
+        alternatePokemon = NULL;
         if (canAct == 0) {
             mode = 0;
+        } else {
+            context = 0;
         }
     } else {
         alternatePokemon = fn_800574E0();
-        context = canAct != 0 ? 2 : 1;
+        if (canAct == 0) {
+            context = 1;
+        } else {
+            context = 2;
+        }
     }
     if (mode == 0) {
         return slot;
     }
-    pokemon = alternatePokemon != NULL ? alternatePokemon : boxPokemon;
+    if (alternatePokemon == NULL) {
+        pokemon = boxPokemon;
+    } else {
+        pokemon = alternatePokemon;
+    }
 
     if (fn_80057694() == 0) {
         nameValue = pokemonGetStatus(pokemon, 0, 0x77, 0);
@@ -275,7 +301,20 @@ s32 fn_800552D4(s8 box, s8 slot)
         action = fn_80054B1C(context, 0);
         fn_800587D8();
     } else {
-        action = context >= 0 && context < 3 ? context : 8;
+        switch (context) {
+        case 0:
+            action = 0;
+            break;
+        case 1:
+            action = 1;
+            break;
+        case 2:
+            action = 2;
+            break;
+        default:
+            action = 8;
+            break;
+        }
     }
 
     switch (action) {
@@ -290,7 +329,7 @@ s32 fn_800552D4(s8 box, s8 slot)
         delPokemon__5PCBOXFScSc(NULL, box, slot);
         fn_800576C4(6);
         break;
-    case 3:
+    case 4:
         emptySlots = 6;
         for (i = 0; i < 6; i++) {
             if (pokemonCheckValid(heroGetStatus(NULL, 3, (u16)i)) != 0) {
@@ -311,42 +350,41 @@ s32 fn_800552D4(s8 box, s8 slot)
             while (fn_80054680() == 3) {
                 _threadSwitch();
             }
+            break;
         }
         lbl_8047A560 = 1;
         fn_800576C4(1);
         break;
-    case 4:
+    case 3:
         fadeSet(3, lbl_8047BE98);
         fadeCheck(1);
         fn_8005471C();
         fn_80056A80();
-        haveCopy = 0;
         if (fn_800576B4() == 3) {
             haveCopy = 1;
             pokemonCopy = *(MenuCBPokemonBlob*)fn_800574E0();
         }
         context = fn_80057694();
         fn_80057A38();
-        moveState[0] = alternatePokemon != NULL;
+        if (alternatePokemon != NULL) {
+            moveState[0] = 1;
+        } else {
+            moveState[0] = 0;
+        }
         moveState[1] = box;
         moveState[2] = slot;
         fn_80057C9C(pokemon, fn_800551CC, moveState);
-        fn_80056B74((MenuCBPane*)(s32)box, 0);
+        fn_80056B74((MenuCBPane*)box, 0);
         fn_80054760(0, 0);
         fn_80057A64(haveCopy != 0 ? &pokemonCopy : NULL, context);
         if (moveState[0] == 0) {
-            for (i = 0; i < 32; i++) {
-                if (lbl_80267398[i].kind == 0 &&
-                    lbl_80267398[i].slot == moveState[2]) {
-                    break;
-                }
-            }
+            i = menuCBFindBoxSlot(moveState);
             if (i < 32) {
                 item = menuItemBiosGetPtr(lbl_80267398[i].itemId);
                 fn_80057830(*(s16*)((u8*)item + 2),
                              *(s16*)((u8*)item + 4), 1);
             }
-            slot = (s8)moveState[2];
+            slot = moveState[2];
             window = windowSearchID(0x93);
             if (window != NULL) {
                 window->boxIndex = slot;
@@ -355,7 +393,7 @@ s32 fn_800552D4(s8 box, s8 slot)
         fadeSet(2, lbl_8047BE98);
         fadeCheck(1);
         break;
-    case 5:
+    case 6:
         fn_80058804((void*)0x1B88, 0);
         mark = fn_8005D738(pokemonBiosGetPcboxMark(pokemon));
         if (mark != 0xFF) {
@@ -363,15 +401,15 @@ s32 fn_800552D4(s8 box, s8 slot)
         }
         fn_800587D8();
         break;
-    case 6:
+    case 7:
         if (fn_80057DE8(pokemon) != 0) {
             fn_80058804((void*)0x1B94, 1);
             break;
         }
         fn_80058804((void*)0x1B91, 0);
-        action = fn_8005D3D0(1);
+        answer = fn_8005D3D0(1);
         fn_800587D8();
-        if (action == 1) {
+        if (answer == 1) {
             break;
         }
         nameValue = pokemonGetStatus(pokemon, 0, 0x77, 0);
@@ -399,6 +437,56 @@ s32 fn_800552D4(s8 box, s8 slot)
     return slot;
 }
 
+static inline void fn_800558B8_open(u32 box) {
+    extern u32 fn_80057B34(u32, u32);
+    fn_80057B34(3, box);
+    fn_80056B74((MenuCBPane*)box, 0);
+}
+
+static inline void fn_800558B8_rebuild(void) {
+    extern s32 fn_80057694(void);
+    extern void fn_80057A38(void);
+    extern u32 fn_80056A78(void);
+    extern void fn_80057A64(void*, s32);
+    extern s32 fn_8005D26C(void);
+    extern void fadeSet(s32, f32);
+    extern s32 fadeCheck(s32);
+    extern void fn_8005471C(void);
+    extern void fn_80056A80(void);
+    extern void* fn_800574E0(void);
+    extern s32 fn_800576B4(void);
+    extern void fn_80058804(void*, s32);
+    extern void fn_800587D8(void);
+    s32 haveCopy;
+    s32 result;
+    s32 count;
+    MenuCBPokemonBlob pokemonCopy;
+
+    haveCopy = 0;
+    fn_80058804((void*)0x1B87, 0);
+    result = fn_8005D26C();
+    fn_800587D8();
+    switch (result) {
+    case 0:
+        fadeSet(3, lbl_8047BE98);
+        fadeCheck(1);
+        fn_8005471C();
+        fn_80056A80();
+        if (fn_800576B4() == 3) {
+            haveCopy = 1;
+            pokemonCopy = *(MenuCBPokemonBlob*)fn_800574E0();
+        }
+        count = fn_80057694();
+        fn_80057A38();
+        fn_800558B8_open(fn_80056A78());
+        fn_80054760(0, 0);
+        fn_80057A64(haveCopy != 0 ? &pokemonCopy : NULL, count);
+        fadeSet(2, lbl_8047BE98);
+        fadeCheck(1);
+        break;
+    }
+}
+
 void fn_800558B8(void)
 {
     extern void soundStart(s32, s32, s32, s32);
@@ -422,14 +510,11 @@ void fn_800558B8(void)
     extern void fn_80057A38(void);
     extern u32 fn_80057B34(u32, u32);
     extern void fn_80057A64(void*, s32);
-    MenuCBPokemonBlob pokemonCopy;
-    void* pokemonCopyPtr;
     s32 selectedSlot;
     s32 slot;
     s32* selectedSlotPtr;
     s32 selection;
     s32 result;
-    s32 haveCopy;
 
     selectedSlot = 0;
     selectedSlotPtr = &selectedSlot;
@@ -496,40 +581,7 @@ void fn_800558B8(void)
             selectedSlotPtr = &selectedSlot;
             break;
         case 1:
-            haveCopy = 0;
-            fn_80058804((void*)0x1B87, 0);
-            result = fn_8005D26C();
-            fn_800587D8();
-            switch (result) {
-            case 0:
-                fadeSet(3, lbl_8047BE98);
-                fadeCheck(1);
-                fn_8005471C();
-                fn_80056A80();
-                if (fn_800576B4() == 3) {
-                    haveCopy = 1;
-                    pokemonCopy = *(MenuCBPokemonBlob*)fn_800574E0();
-                }
-                result = fn_80057694();
-                fn_80057A38();
-                {
-                    u32 box = fn_80056A78();
-                    fn_80057B34(3, box);
-                    fn_80056B74((MenuCBPane*)box, 0);
-                }
-                fn_80054760(0, 0);
-                if (haveCopy != 0) {
-                    pokemonCopyPtr = &pokemonCopy;
-                } else {
-                    pokemonCopyPtr = NULL;
-                }
-                fn_80057A64(pokemonCopyPtr, result);
-                fadeSet(2, lbl_8047BE98);
-                fadeCheck(1);
-                break;
-            default:
-                continue;
-            }
+            fn_800558B8_rebuild();
             break;
         }
     }
@@ -539,8 +591,6 @@ void fn_800558B8(void)
     menuCloseSync(0x93, 1);
 }
 
-#pragma push
-#pragma peephole off
 void fn_80055B98(MenuCBPane* pane) {
     menuOpenCustom(0x10e, 0x1f, 0, 0, 0, 0);
     fn_80056B74(pane, TRUE);
@@ -556,10 +606,7 @@ void fn_80055B98(MenuCBPane* pane) {
     fn_8005471C();
     fn_80056A80();
 }
-#pragma pop
 
-#pragma push
-#pragma peephole off
 s32 fn_80055C2C(MenuCBPane* pane, MenuCBPane* sprite) {
     s32 box;
     s32 capacity;
@@ -581,7 +628,6 @@ s32 fn_80055C2C(MenuCBPane* pane, MenuCBPane* sprite) {
     sprite->textId = 0x1b7f;
     return 0;
 }
-#pragma pop
 
 s32 fn_80055CD4(MenuCBPane* pane, MenuCBPane* sprite) {
     u8 box;
@@ -600,36 +646,23 @@ s32 fn_80055CD4(MenuCBPane* pane, MenuCBPane* sprite) {
     return result;
 }
 
-#pragma push
-#pragma peephole off
-#pragma scheduling off
 s32 fn_80055D34(MenuCBPane* pane) {
     MenuKeyInfo* keyInfo;
-    s8 count;
-    s32 box;
 
     keyInfo = windowGetKeyInfo();
     if ((keyInfo->buttonsRepeat & 8) != 0) {
-        count = pcboxGetNbPokemonBox();
-        box = (u8)pane->boxIndex + 1;
-        pane->boxIndex = box;
-        if ((s8)box >= count) {
+        if (++pane->boxIndex >= (s8)pcboxGetNbPokemonBox()) {
             pane->boxIndex = 0;
         }
     }
     if ((keyInfo->buttonsRepeat & 4) != 0) {
-        box = (u8)pane->boxIndex - 1;
-        pane->boxIndex = box;
-        if ((s8)box < 0) {
+        if (--pane->boxIndex < 0) {
             pane->boxIndex = pcboxGetNbPokemonBox() - 1;
         }
     }
     return 0;
 }
-#pragma pop
 
-#pragma push
-#pragma scheduling off
 void fn_80055DE0(void) {
     menuClose(0xa3);
     menuCloseSync(0xa3, 1);
@@ -638,4 +671,3 @@ void fn_80055DE0(void) {
 void fn_80055E10(void) {
     menuOpen(0xa3, 1);
 }
-#pragma pop

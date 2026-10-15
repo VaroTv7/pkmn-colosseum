@@ -154,7 +154,7 @@ extern void GSmodelSetTexAnimFrame(void* model, f32 frame);
 extern void GSmodelSetTexAnimRate(void* model, f32 rate);
 extern void GSmodelSetAnimType(void* model, u32 type);
 extern void GSmodelStartAnimation(void* model);
-extern void* fn_8018E050(u32 group, s32 people_id, void* param);
+extern void* peopleOpen(u32 group, s32 people_id, void* param);
 extern void* peopleSearchID(void* people);
 extern void* peopleGetModel(void* people);
 extern void GSmodelSetBoundCheck(void* model, s32 enabled);
@@ -230,9 +230,6 @@ extern s32 fn_801CFD08(void);
 
 #if !defined(FIELD_801CB180_SPLIT) || defined(FIELD_801CB180_RANGE_801CB180)
 
-#pragma push
-#pragma scheduling off
-#pragma peephole off
 s32 scriptIsTrigerPush(void)
 {
     s32 pushed = 0;
@@ -241,68 +238,13 @@ s32 scriptIsTrigerPush(void)
         pushed = 1;
     }
 
-#pragma scheduling on
     return pushed;
 }
-#pragma pop
 
-#pragma push
-#pragma scheduling off
-#pragma peephole off
 s32 fn_801CB1C4(void)
-{
-  s32 pushed = 0;
-  s32 axis;
-  s32 buttons;
-  ;
-  if ((fn_800F7BC4(1) & 0xF) != 0)
-  {
-    pushed = 1;
-  }
-  axis = (s8) fn_800F7A7C(1, 0);
-  if (axis > (1 * 0))
-  {
-    axis = (s8) fn_800F7A7C(1, 0);
-  }
-  else
-  {
-    axis = -((s8) fn_800F7A7C(1, 0));
-  }
-  if (axis > 2)
-  {
-    pushed = 1;
-  }
-  axis = (s8) fn_800F7A08(1, 0);
-  if (axis > 0)
-  {
-    axis = (s8) fn_800F7A08(1, 0);
-  }
-  else
-  {
-    axis = -((s8) fn_800F7A08(1, 0));
-  }
-  if (axis > 2)
-  {
-    pushed = 1;
-  }
-  if ((fn_800F7BC4(1) & 0x1F70) != 0)
-  {
-    pushed = 1;
-  }
-  #pragma scheduling on
-  #pragma scheduling on
-  return pushed;
-}
-#pragma pop
-
-#pragma push
-#pragma scheduling off
-#pragma peephole off
-s32 scriptIsMoveButtonPush(void)
 {
     s32 pushed = 0;
     s32 axis;
-    s32 buttons;
 
     if ((fn_800F7BC4(1) & 0xF) != 0) {
         pushed = 1;
@@ -328,13 +270,45 @@ s32 scriptIsMoveButtonPush(void)
         pushed = 1;
     }
 
-#pragma scheduling on
+    if ((fn_800F7BC4(1) & 0x1F70) != 0) {
+        pushed = 1;
+    }
+
     return pushed;
 }
-#pragma pop
 
-#pragma push
-#pragma scheduling off
+s32 scriptIsMoveButtonPush(void)
+{
+    s32 pushed = 0;
+    s32 axis;
+
+    if ((fn_800F7BC4(1) & 0xF) != 0) {
+        pushed = 1;
+    }
+
+    axis = (s8)fn_800F7A7C(1, 0);
+    if (axis > 0) {
+        axis = (s8)fn_800F7A7C(1, 0);
+    } else {
+        axis = -(s8)fn_800F7A7C(1, 0);
+    }
+    if (axis > 2) {
+        pushed = 1;
+    }
+
+    axis = (s8)fn_800F7A08(1, 0);
+    if (axis > 0) {
+        axis = (s8)fn_800F7A08(1, 0);
+    } else {
+        axis = -(s8)fn_800F7A08(1, 0);
+    }
+    if (axis > 2) {
+        pushed = 1;
+    }
+
+    return pushed;
+}
+
 void std005_threadIsRunning(s32 id)
 {
     fn_800F7068(id, 0);
@@ -349,7 +323,6 @@ void fn_801CB3DC(s32 id)
 {
     floorTerminateScriptThreads(id);
 }
-#pragma pop
 
 s32 scriptExecTask(void* callback, u32 priority, u32 arg2, u32 arg3, u32 arg4, u32 arg5)
 {
@@ -371,26 +344,18 @@ s32 scriptExecTask(void* callback, u32 priority, u32 arg2, u32 arg3, u32 arg4, u
     return fn_800F7318(task, callback, 0x1000, 1, 0, 4, arg2, arg3, arg4, arg5);
 }
 
-#pragma push
-#pragma peephole off
 void std209_threadRunScriptMode4(void* callback, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
 {
     cmsRunSync(callback, 4, arg1, arg2, arg3, arg4);
 }
-#pragma pop
 
-#pragma push
-#pragma peephole off
 void fn_801CB4E8(u32 resource, u32 arg)
 {
     void* object = GSresGetResource(std093_getCurrentGroupID(), resource);
 
     fn_80118874(object, arg);
 }
-#pragma pop
 
-#pragma push
-#pragma peephole off
 void std221_mapObjectLinkParticles(u32 model_id, u32 particle_bank_id)
 {
     void* model = GSresGetResource(std093_getCurrentGroupID(), model_id);
@@ -399,7 +364,6 @@ void std221_mapObjectLinkParticles(u32 model_id, u32 particle_bank_id)
     GSmodelLinkToGSparticleBank(model, particle_bank);
     GSmodelSetGSparticleLinkAttachMode(model, 4);
 }
-#pragma pop
 
 #endif
 
@@ -424,14 +388,12 @@ s32 fn_801CB59C(u32 resource)
 #endif
 
 #if defined(FIELD_801CB180_RANGE_801CB61C)
-#pragma push
-#pragma scheduling off
-#pragma peephole off
 s32 std166_mapObjectAttachToObject(u32 resource, u32 part_resource, s32 part)
 {
-    u32 group = std093_getCurrentGroupID();
     void* model;
     void* part_model;
+    void* gs_part;
+    u32 group = std093_getCurrentGroupID();
 
     if (peopleIsInGroup(group, resource) != NULL) {
         std070_characterAttachToCharacter(group, resource, group, part_resource, part);
@@ -446,17 +408,14 @@ s32 std166_mapObjectAttachToObject(u32 resource, u32 part_resource, s32 part)
             return 0;
         }
 
-        part_model = GSmodelGetPart(part_model, part);
-        GSmodelAttachToGSpart(model, part_model, 7, 0, 1);
-        GSpartFree(part_model);
+        gs_part = GSmodelGetPart(part_model, part);
+        GSmodelAttachToGSpart(model, gs_part, 7, 0, 1);
+        GSpartFree(gs_part);
     }
 
     return 1;
 }
-#pragma pop
 
-#pragma push
-#pragma peephole off
 s32 scriptWaitSyncMotion(u32 resource, s32 wait)
 {
     u32 group = std093_getCurrentGroupID();
@@ -482,7 +441,6 @@ s32 scriptWaitSyncMotion(u32 resource, s32 wait)
         return 1;
     }
 }
-#pragma pop
 #endif
 
 #if defined(FIELD_801CB180_RANGE_801CB7C4)
@@ -503,8 +461,9 @@ void std116_mapObjectStopAnimation(u32 resource)
 #endif
 
 #if defined(FIELD_801CB180_RANGE_801CB834)
-#pragma push
-#pragma peephole off
+/* Built with the unit-wide -opt nopeephole (configure.py), like
+ * field_range_801CB180.c. The unit owns its .sdata2 pool: the 0.5f rate
+ * and the s32-to-float bias (0x8047E150-0x8047E160). */
 void std115_mapObjectPlayAnimation(u32 resource, u32 anim_index, s32 frame, s32 loop)
 {
     u32 group = std093_getCurrentGroupID();
@@ -531,10 +490,7 @@ void std115_mapObjectPlayAnimation(u32 resource, u32 anim_index, s32 frame, s32 
         GSmodelStartAnimation(model);
     }
 }
-#pragma pop
 
-#pragma push
-#pragma peephole off
 void std114_mapObjectSetVisibility(u32 resource, s32 visible)
 {
     u32 group = std093_getCurrentGroupID();
@@ -549,7 +505,6 @@ void std114_mapObjectSetVisibility(u32 resource, s32 visible)
         }
     }
 }
-#pragma pop
 #endif
 
 #if defined(FIELD_801CB180_RANGE_801CB9D8)
@@ -560,8 +515,6 @@ void std113_mapObjectUnk_8018db68(u32 resource)
 #endif
 
 #if defined(FIELD_801CB180_RANGE_801CBA0C)
-#pragma push
-#pragma scheduling off
 s32 std112_modelGetResourceID(void* param)
 {
     s32 people_id;
@@ -572,17 +525,14 @@ s32 std112_modelGetResourceID(void* param)
     lbl_8047B3C8 = raw_id + 1;
     people_id = (s8)raw_id | 0x7FFE0000;
 
-    people = fn_8018E050(std093_getCurrentGroupID(), people_id, param);
+    people = peopleOpen(std093_getCurrentGroupID(), people_id, param);
     if (people == NULL) {
-#pragma scheduling on
         return 0;
     }
 
     GSmodelSetBoundCheck(peopleGetModel(peopleSearchID(people)), 0);
-#pragma scheduling on
     return people_id;
 }
-#pragma pop
 #endif
 
 #if defined(FIELD_801CB180_RANGE_801CBA84)
@@ -593,17 +543,12 @@ void fn_801CBA84(void)
 #endif
 
 #if defined(FIELD_801CBA90_RANGE_PREFIX)
-#pragma push
-#pragma scheduling off
 s32 std229_mapLoad395(void)
 {
     floorRequestChange(0x395);
     return 0;
 }
-#pragma pop
 
-#pragma push
-#pragma scheduling off
 s32 std223_askYesNoThenWarp395(void)
 {
     s32 state;
@@ -645,198 +590,19 @@ s32 std223_askYesNoThenWarp395(void)
 
     return result;
 }
-#pragma scheduling on
-#pragma pop
 #endif
 
-typedef struct FieldSha1Context {
-    u32 state[5];
-    u32 count[2];
-    u8 buffer[64];
-} FieldSha1Context;
+/*
+ * Save-data SHA-1 (0x801CBBAC - 0x801CDB04). fn_801CBBAC, fn_801CBE44 and
+ * fn_801CBF64 (SHA1Final) are linked from field_exact_801CBBAC.c,
+ * field_exact_801CBE44.c and field_exact_801CBF64.c; fn_801CC380
+ * (SHA1Transform) from field_exact_801CC380.c.
+ */
+#include "game/save/savedata_sha1.h"
 
-void fn_801CC380(u32 state[5], const u8 input[64]);
-void fn_801CBF64(u8 digest[20], FieldSha1Context* context);
+/* fn_801CBCDC: see src/game/memcard.c (whole memory-card TU candidate). */
 
-static inline void fieldSha1Update(FieldSha1Context* context,
-                                   const u8* input, u32 length)
-{
-    u32 index;
-    u32 part_length;
-    u32 i;
 
-    index = (context->count[0] >> 3) & 0x3F;
-    if ((context->count[0] += length << 3) < (length << 3)) {
-        context->count[1]++;
-    }
-    context->count[1] += length >> 29;
-    part_length = 64 - index;
-
-    if (length >= part_length) {
-        memcpy(&context->buffer[index], input, part_length);
-        fn_801CC380(context->state, context->buffer);
-        for (i = part_length; i + 63 < length; i += 64) {
-            fn_801CC380(context->state, &input[i]);
-        }
-        index = 0;
-    } else {
-        i = 0;
-    }
-    memcpy(&context->buffer[index], &input[i], length - i);
-}
-
-#if defined(FIELD_801CBA90_RANGE_PREFIX)
-void fn_801CBBAC(u8 digest[20], const u8* input, u32 length)
-{
-    FieldSha1Context context;
-    u32 index;
-    u32 part_length;
-    u32 i;
-    const u8* current_input;
-
-    context.state[0] = 0x67452301;
-    context.state[1] = 0xEFCDAB89;
-    context.state[2] = 0x98BADCFE;
-    context.state[3] = 0x10325476;
-    context.state[4] = 0xC3D2E1F0;
-    context.count[0] = 0;
-    context.count[1] = 0;
-
-    index = (context.count[0] >> 3) & 0x3F;
-    if ((context.count[0] += length << 3) < (length << 3)) {
-        context.count[1]++;
-    }
-    context.count[1] += length >> 29;
-
-    if (index + length > 63) {
-        part_length = 64 - index;
-        memcpy(&context.buffer[index], input, part_length);
-        fn_801CC380(context.state, context.buffer);
-        current_input = &input[part_length];
-        for (i = part_length; i + 63 < length; i += 64) {
-            fn_801CC380(context.state, current_input);
-            current_input += 64;
-        }
-        index = 0;
-    } else {
-        i = 0;
-    }
-    memcpy(&context.buffer[index], &input[i], length - i);
-    fn_801CBF64(digest, &context);
-}
-#endif
-
-#if defined(FIELD_801CBA90_RANGE_801CBCDC)
-u8 fn_801CBCDC(u8* data, u32 size, const u32 expected[5], u32 offset)
-{
-    u32* savedDigest;
-    u32* digest;
-    u32* key;
-    u8* cursor;
-    u32 processed;
-    s32 i;
-
-    savedDigest = &lbl_804670E8[16];
-    digest = &lbl_804670E8[21];
-    key = &lbl_804670E8[26];
-    memcpy(savedDigest, expected, 20);
-    key[0] = ~expected[0];
-    key[1] = ~expected[1];
-    key[2] = ~expected[2];
-    key[3] = ~expected[3];
-    key[4] = ~expected[4];
-
-    cursor = data + offset;
-    processed = offset;
-    while (processed < size) {
-        fn_801CBBAC((u8*)digest, cursor, 20);
-        ((u32*)cursor)[0] ^= key[0];
-        ((u32*)cursor)[1] ^= key[1];
-        ((u32*)cursor)[2] ^= key[2];
-        ((u32*)cursor)[3] ^= key[3];
-        ((u32*)cursor)[4] ^= key[4];
-        memcpy(key, digest, 20);
-        cursor += 20;
-        processed += 20;
-    }
-
-    fn_801CBBAC((u8*)key, data, size);
-    for (i = 0; i < 5; i++) {
-        if (key[i] != savedDigest[i]) {
-            return 0;
-        }
-    }
-    return 1;
-}
-#endif
-
-#if defined(FIELD_801CBA90_RANGE_801CBE44)
-void fn_801CBE44(void* dataArg, u32 size, void* outArg, u32 offset)
-{
-    extern u32 lbl_80467128[];
-    extern u32 lbl_80467150[];
-    u32* digest;
-    u32* key;
-    u8* cursor;
-    u8* data;
-    u8* outDigest;
-    u32 processed;
-
-    data = dataArg;
-    outDigest = outArg;
-    digest = lbl_80467128;
-    key = lbl_80467150;
-    fn_801CBBAC((u8*)digest, data, size);
-    key[0] = ~digest[0];
-    key[1] = ~digest[1];
-    key[2] = ~digest[2];
-    key[3] = ~digest[3];
-    key[4] = ~digest[4];
-
-    cursor = data + offset;
-    processed = offset;
-    while (processed < size) {
-        ((u32*)cursor)[0] ^= key[0];
-        ((u32*)cursor)[1] ^= key[1];
-        ((u32*)cursor)[2] ^= key[2];
-        ((u32*)cursor)[3] ^= key[3];
-        ((u32*)cursor)[4] ^= key[4];
-        fn_801CBBAC((u8*)key, cursor, 20);
-        cursor += 20;
-        processed += 20;
-    }
-    memcpy(outDigest, digest, 20);
-}
-#endif
-
-#if defined(FIELD_801CBA90_RANGE_801CBF64)
-void fn_801CBF64(u8 digest[20], FieldSha1Context* context)
-{
-    u8 bits[8];
-    u32 i;
-
-    for (i = 0; i < 8; i++) {
-        bits[i] = context->count[(i >= 4) ? 0 : 1] >>
-                  ((3 - (i & 3)) * 8);
-    }
-
-    fieldSha1Update(context, lbl_8047E160, 1);
-    while ((context->count[0] & 0x1F8) != 0x1C0) {
-        fieldSha1Update(context, lbl_8047E164, 1);
-    }
-    fieldSha1Update(context, bits, 8);
-
-    for (i = 0; i < 20; i++) {
-        digest[i] = context->state[i >> 2] >> ((3 - (i & 3)) * 8);
-    }
-
-    memset(context->buffer, 0, sizeof(context->buffer));
-    memset(context->state, 0, sizeof(context->state));
-    memset(context->count, 0, sizeof(context->count));
-    memset(bits, 0, sizeof(bits));
-    fn_801CC380(context->state, context->buffer);
-}
-#endif
 
 
 /* SHA-1's 16-word circular message schedule. */
@@ -995,769 +761,7 @@ void fn_801CC380(u32 state[5], const u8 input[64])
 #define task lbl_8047B3D4
 #define raw ((u8*)lbl_8047B3D4)
 #define file_info ((void*)((u8*)lbl_8047B3D4 + 0x8C))
-#if defined(FIELD_801CBA90_RANGE_801CDB04)
-void fn_801CDB04(void)
-{
-    s32 result;
-    s32 status;
-    u32 serial[2];
-    u8 attributes;
-    u8* buffer;
-
-    do {
-        switch (task->state) {
-        case 0:
-            task->card_result = 0;
-            task->next_state_after_delay = 0x32;
-            task->format_requested = 0;
-            task->initial_dialog_result = (u8) fn_800056D4();
-            task->callback_finished = 0;
-            fn_800056C4(task->initial_dialog_result);
-            if (task->task_kind >= 1 && task->task_kind <= 2) {
-                task->serial_check_enabled = 0;
-            } else if (task->task_kind == 4 &&
-                       gamedatasaveGetStatus(0, 4) == 0)
-            {
-                task->task_kind = 9;
-            }
-            task->retry_count = 0;
-            task->state = 1;
-            break;
-
-        case 1:
-            result = CARDProbeEx(task->card_channel, &task->sector_size,
-                                 &task->memory_size);
-            status = result;
-            if (result == 0) {
-                result = CARDGetResultCode(task->card_channel);
-            }
-            task->card_result = result;
-            if (status == 0) {
-                task->state = 2;
-            } else if (status == -1) {
-                task->state = 1;
-            } else if (task->retry_count++ < 6) {
-                task->card_result = -1;
-                task->state = 1;
-            } else {
-                task->error_code = status;
-                task->state = 0x2B;
-            }
-            break;
-
-        case 2:
-            result = CARDMountAsync(task->card_channel, task->card_work_area,
-                                    fn_801D0080, 0);
-            task->card_result = result == 0
-                                    ? CARDGetResultCode(task->card_channel)
-                                    : result;
-            task->state = 3;
-            break;
-
-        case 3:
-            result = task->card_result;
-            if (result == -1) {
-                result = CARDGetResultCode(task->card_channel);
-                task->card_result = result;
-            }
-            if (result == -1) {
-                task->state = 3;
-            } else if (result == 0 || result == -6 || result == -13) {
-                task->state = 4;
-            } else {
-                task->error_code = result;
-                task->state = 0x2B;
-            }
-            break;
-
-        case 4:
-            result = CARDCheckAsync(task->card_channel, NULL);
-            task->card_result = result == 0
-                                    ? CARDGetResultCode(task->card_channel)
-                                    : result;
-            task->state = 5;
-            break;
-
-        case 5:
-            result = task->card_result;
-            if (result == -1) {
-                result = CARDGetResultCode(task->card_channel);
-                task->card_result = result;
-            }
-            if (task->memory_size != 0x2000) {
-                result = -6;
-            }
-            switch (result) {
-            case -1:
-                task->state = 5;
-                break;
-            case 0:
-                if (task->task_kind != 3 && task->task_kind != 9 &&
-                    task->task_kind != 11 && task->serial_check_enabled)
-                {
-                    CARDGetSerialNo(task->card_channel, serial);
-                    if (((serial[0] ^ task->card_serial[0]) |
-                         (serial[1] ^ task->card_serial[1])) != 0)
-                    {
-                        task->error_code = 0x10;
-                        task->state = 0x2B;
-                        break;
-                    }
-                }
-                task->state = 9;
-                break;
-            case -6:
-            case -13:
-                switch (task->task_kind) {
-                case 1:
-                case 9:
-                    task->error_code = 7;
-                    task->resume_state = 6;
-                    task->state = 0x30;
-                    break;
-                default:
-                    task->error_code = result;
-                    task->state = 0x2B;
-                    break;
-                }
-                break;
-            default:
-                task->error_code = result;
-                task->state = 0x2B;
-                break;
-            }
-            break;
-
-        case 6:
-            if ((u8) task->error_code != 0) {
-                CARDFormatAsync(task->card_channel, NULL);
-                if (task->callback_finished != 0) {
-                    task->error_code = 0;
-                    task->state = 0x2B;
-                } else {
-                    task->next_state_after_delay = 7;
-                    task->error_code = 4;
-                    task->resume_state = 7;
-                    task->state = 0x30;
-                }
-            } else {
-                task->error_code = 0;
-                task->state = 0x2B;
-            }
-            break;
-
-        case 7:
-            fn_800056D4();
-            result = CARDFormatAsync(task->card_channel, NULL);
-            if (task->callback_finished != 0) {
-                task->error_code = result;
-                task->state = 0x2B;
-            } else {
-                task->card_result = result == 0
-                                        ? CARDGetResultCode(task->card_channel)
-                                        : result;
-                task->state = 8;
-            }
-            break;
-
-        case 8:
-            result = task->card_result;
-            if (result == -1) {
-                result = CARDGetResultCode(task->card_channel);
-                task->card_result = result;
-            }
-            if (result == -1) {
-                task->state = 8;
-            } else if (result == 0) {
-                fn_800056C4(task->initial_dialog_result);
-                task->next_state_after_delay = 0x32;
-                task->error_code = 9;
-                task->resume_state = 9;
-                task->state = 0x30;
-            } else {
-                task->error_code = result;
-                task->state = 0x2B;
-            }
-            break;
-
-        case 9:
-            task->state = fn_801CFD08();
-            break;
-
-        case 10:
-            if (task->error_code == 0) {
-                task->error_code = 0;
-                task->state = 0x2B;
-            } else {
-                task->error_code = 3;
-                task->next_state_after_delay = 13;
-                task->resume_state = 11;
-                task->state = 0x30;
-            }
-            break;
-
-        case 11:
-            fn_800056D4();
-            result = CARDDeleteAsync(task->card_channel,
-                                     &lbl_802758E8[0x3A00], NULL);
-            task->card_result = result == 0
-                                    ? CARDGetResultCode(task->card_channel)
-                                    : result;
-            task->state = 12;
-            break;
-
-        case 12:
-            result = task->card_result;
-            if (result == -1) {
-                result = CARDGetResultCode(task->card_channel);
-                task->card_result = result;
-            }
-            if (result == -1) {
-                task->state = 12;
-            } else if (result == 0 || result == -4) {
-                if (task->task_kind == 12) {
-                    task->error_code = 10;
-                    task->state = 0x2B;
-                } else {
-                    task->state = 13;
-                }
-            } else {
-                task->error_code = result;
-                task->state = 0x2B;
-            }
-            break;
-
-        case 13:
-            result = CARDCreateAsync(task->card_channel,
-                                     &lbl_802758E8[0x3A00],
-                                     0x60000, file_info, NULL);
-            task->card_result = result == 0
-                                    ? CARDGetResultCode(task->card_channel)
-                                    : result;
-            task->state = 14;
-            break;
-
-        case 14:
-            result = task->card_result;
-            if (result == -1) {
-                result = CARDGetResultCode(task->card_channel);
-                task->card_result = result;
-            }
-            if (result == -1) {
-                task->state = 14;
-            } else if (result == 0) {
-                raw[0x3E] = 1;
-                task->state = 15;
-            } else {
-                task->error_code = result;
-                task->state = 0x2B;
-            }
-            break;
-
-        case 15:
-            attributes = 0;
-            CARDGetAttributes(task->card_channel, *(s32*)&raw[0x90],
-                              &attributes);
-            attributes |= 0x18;
-            result = fn_800B5BE4(task->card_channel,
-                                 *(s32*)&raw[0x90], attributes, NULL);
-            task->card_result = result == 0
-                                    ? CARDGetResultCode(task->card_channel)
-                                    : result;
-            task->state = 16;
-            break;
-
-        case 16:
-            result = task->card_result;
-            if (result == -1) {
-                result = CARDGetResultCode(task->card_channel);
-                task->card_result = result;
-            }
-            if (result == -1) {
-                task->state = 16;
-            } else if (result == 0) {
-                task->state = 17;
-            } else {
-                task->error_code = result;
-                task->state = 0x2B;
-            }
-            break;
-
-        case 17:
-            buffer = (u8*) task->work_buffer;
-            memset(buffer, 0, 0x6000);
-            strcpy((char*) buffer, &lbl_802758E8[0x3A14]);
-            strcpy((char*) buffer + 0x20, &lbl_802758E8[0x3A28]);
-            memcpy(buffer + 0x40, &lbl_802758E8[0], 0x1800);
-            memcpy(buffer + 0x1840, &lbl_802758E8[0x1800], 0x2200);
-            for (status = 0; status < 0xE90; status++) {
-                *(u32*)(buffer + 0x3A40) += ((u32*) buffer)[status];
-            }
-            task->state = 18;
-            break;
-
-        case 18:
-            result = CARDWriteAsync(file_info, task->work_buffer,
-                                    raw[0x40] != 0 ? 0x4000 : 0x6000, 0,
-                                    NULL);
-            task->card_result = result == 0
-                                    ? CARDGetResultCode(task->card_channel)
-                                    : result;
-            task->state = 19;
-            break;
-
-        case 19:
-            result = task->card_result;
-            if (result == -1) {
-                result = CARDGetResultCode(task->card_channel);
-                task->card_result = result;
-            }
-            if (result == -1) {
-                task->state = 19;
-            } else if (result == 0) {
-                task->state = raw[0x40] != 0 ? 0x2C : 20;
-            } else {
-                task->error_code = result;
-                task->state = 0x2B;
-            }
-            break;
-
-        case 20:
-            buffer = (u8*) task->work_buffer;
-            memset(buffer, 0, 0x2000);
-            buffer[0] = 1;
-            buffer[1] = 1;
-            buffer[2] = 0;
-            buffer[3] = 0;
-            ((u32*) buffer)[3] =
-                -(((u32*) buffer)[0] + ((u32*) buffer)[1] +
-                  ((u32*) buffer)[2] + ((u32*) buffer)[3] +
-                  ((u32*) buffer)[4] + ((u32*) buffer)[5] +
-                  ((u32*) buffer)[6] + ((u32*) buffer)[7]);
-            task->field_20 = 0;
-            task->state = 21;
-            break;
-
-        case 21:
-            result = CARDWriteAsync(file_info, task->work_buffer, 0x2000,
-                                    task->field_20 * 0x1E000 + 0x6000,
-                                    NULL);
-            task->card_result = result == 0
-                                    ? CARDGetResultCode(task->card_channel)
-                                    : result;
-            task->state = 22;
-            break;
-
-        case 22:
-            result = task->card_result;
-            if (result == -1) {
-                result = CARDGetResultCode(task->card_channel);
-                task->card_result = result;
-            }
-            if (result == -1) {
-                task->state = 22;
-            } else if (result == 0) {
-                task->field_20++;
-                task->state = (u32)task->field_20 < 3 ? 21 : 23;
-            } else {
-                task->error_code = result;
-                task->state = 0x2B;
-            }
-            break;
-
-        case 23:
-            result = fn_800B5530(task->card_channel, raw[0x8C], &raw[0xA0]);
-            if (result != 0) {
-                task->error_code = result;
-                task->state = 0x2B;
-                break;
-            }
-            *(u32*)&raw[0xD8] = 0;
-            *(u32*)&raw[0xD0] = 0x40;
-            raw[0xCE] = (raw[0xCE] & ~0x03) | 0x02;
-            raw[0xCE] &= ~0x04;
-            *(u16*)&raw[0xD4] = 0x5555;
-            *(u16*)&raw[0xD6] = 0xAAAA;
-            result = CARDSetStatusAsync(task->card_channel, raw[0x8C],
-                                        &raw[0xA0], NULL);
-            task->card_result = result == 0
-                                    ? CARDGetResultCode(task->card_channel)
-                                    : result;
-            task->state = 24;
-            break;
-
-        case 24:
-            result = task->card_result;
-            if (result == -1) {
-                result = CARDGetResultCode(task->card_channel);
-                task->card_result = result;
-            }
-            if (result == -1) {
-                task->state = 24;
-            } else if (result == 0) {
-                if (task->task_kind == 9) {
-                    task->work_buffer->savedata =
-                        *(SavedataBody*)savedataGetStatus(0, 0);
-                    task->field_2c = 0;
-                    task->field_20 = -1;
-                    task->state = 37;
-                } else {
-                    task->error_code = 11;
-                    task->task_result = 2;
-                    task->state = 44;
-                }
-            } else {
-                task->error_code = result;
-                task->state = 0x2B;
-            }
-            break;
-
-        case 25:
-            task->state = 26;
-            break;
-
-        case 26:
-            result = fn_800B4C7C(file_info, task->work_buffer, 0x4000, 0,
-                                 NULL);
-            task->card_result = result == 0
-                                    ? CARDGetResultCode(task->card_channel)
-                                    : result;
-            task->state = 27;
-            break;
-
-        case 27:
-            result = task->card_result;
-            if (result == -1) {
-                result = CARDGetResultCode(task->card_channel);
-                task->card_result = result;
-            }
-            if (result == -1) {
-                task->state = 27;
-            } else if (result == 0) {
-                u32 checksum = 0;
-
-                for (status = 0; status < 0xE90; status++) {
-                    checksum += ((u32*)task->work_buffer)[status];
-                }
-                if (checksum != ((u32*)task->work_buffer)[0xE90]) {
-                    raw[0x40] = 1;
-                }
-                task->state = 28;
-            } else {
-                task->error_code = result;
-                task->state = 0x2B;
-            }
-            break;
-
-        case 28:
-            task->random_delay = 0;
-            task->field_20 = 0;
-            switch (task->task_kind) {
-            case 1:
-            case 2:
-                if (task->format_requested != 0) {
-                    task->error_code = 5;
-                    task->resume_state = 29;
-                    task->state = 0x30;
-                } else {
-                    task->state = 29;
-                }
-                break;
-            case 3:
-            case 8:
-                task->state = 29;
-                break;
-            default:
-                task->error_code = 2;
-                task->resume_state = 29;
-                task->state = 0x30;
-                break;
-            }
-            break;
-
-        case 29:
-            result = task->card_result;
-            if (result == -1) {
-                result = CARDGetResultCode(task->card_channel);
-                task->card_result = result;
-            }
-            if (result == -1) {
-                task->state = 29;
-            } else if (result == 0) {
-                task->state = 30;
-            } else {
-                task->error_code = result;
-                task->state = 0x2B;
-            }
-            break;
-
-        case 30:
-            result = fn_800B4C7C(file_info,
-                                 (u8*)task->work_buffer + 0x1E000 +
-                                     task->field_20 * 0x200,
-                                 0x200,
-                                 task->field_20 * 0x1E000 + 0x6000, NULL);
-            task->card_result = result == 0
-                                    ? CARDGetResultCode(task->card_channel)
-                                    : result;
-            task->state = 31;
-            break;
-
-        case 31:
-            task->state = fn_801CF9C8();
-            break;
-        case 32:
-            task->state = 33;
-            break;
-        case 33:
-            result = fn_800B4C7C(file_info, task->work_buffer, 0x1E000,
-                                 task->field_20 * 0x1E000 + 0x6000,
-                                 NULL);
-            task->card_result = result == 0
-                                    ? CARDGetResultCode(task->card_channel)
-                                    : result;
-            task->state = 34;
-            break;
-        case 34:
-            result = task->card_result;
-            if (result == -1) {
-                result = CARDGetResultCode(task->card_channel);
-                task->card_result = result;
-            }
-            if (result == -1) {
-                task->state = 34;
-            } else if (result == 0) {
-                task->state = 35;
-            } else {
-                task->error_code = result;
-                task->state = 0x2B;
-            }
-            break;
-        case 35:
-            task->state = fn_801CF7E4();
-            break;
-        case 36:
-            task->state = fn_801CF568();
-            break;
-        case 37:
-            task->state = fn_801CF320();
-            break;
-
-        case 38:
-            fn_800056D4();
-            result = CARDWriteAsync(file_info, task->work_buffer,
-                                    task->task_kind == 8 ? 0x1C000 : 0x1E000,
-                                    task->field_20 * 0x1E000 + 0x6000, NULL);
-            task->card_result = result == 0
-                                    ? CARDGetResultCode(task->card_channel)
-                                    : result;
-            *(u32*)&raw[0x38] = 0;
-            task->state = 39;
-            break;
-
-        case 39:
-            result = task->card_result;
-            if (result == -1) {
-                result = CARDGetResultCode(task->card_channel);
-                task->card_result = result;
-            }
-            (*(u32*)&raw[0x38])++;
-            if (result == -1) {
-                task->state = 39;
-            } else if (result == 0) {
-                switch (task->task_kind) {
-                case 8:
-                    task->resume_state = 40;
-                    task->state = 49;
-                    break;
-                case 1:
-                case 2:
-                case 3:
-                    task->error_code = 0x12;
-                    task->task_result = 3;
-                    task->state = task->format_requested ? 17 : 44;
-                    break;
-                case 4:
-                case 9:
-                case 10:
-                case 11:
-                    status = gamedatasaveGetStatus(savedataGetStatus(0, 1), 4);
-                    gamedatasaveSetStatus(savedataGetStatus(0, 1), 4,
-                                          status + 1);
-                default:
-                    task->error_code = 10;
-                    task->task_result = 4;
-                    task->state = task->format_requested ? 17 : 44;
-                    break;
-                }
-            } else {
-                task->error_code = result;
-                task->state = 0x2B;
-            }
-            break;
-
-        case 40:
-            if (task->random_delay-- != 0) {
-                task->card_result = -1;
-                task->state = 40;
-            } else {
-                task->card_result = 0;
-                task->state = 41;
-            }
-            break;
-
-        case 41:
-            if (fn_8008ABA0(2) == 0) {
-                task->state = 0x2B;
-                break;
-            }
-            result = CARDWriteAsync(file_info,
-                                    (u8*) task->work_buffer + 0x1C000,
-                                    0x2000,
-                                    task->field_20 * 0x1E000 + 0x1C000,
-                                    NULL);
-            task->card_result = result == 0
-                                    ? CARDGetResultCode(task->card_channel)
-                                    : result;
-            *(u32*)&raw[0x38] /= 14;
-            task->field_3d = 0;
-            task->state = 42;
-            break;
-
-        case 42:
-            result = task->card_result;
-            if (result == -1) {
-                result = CARDGetResultCode(task->card_channel);
-                task->card_result = result;
-            }
-            if (result == -1) {
-                (*(u32*)&raw[0x38])--;
-                if (task->field_3d == 0) {
-                    if (fn_8008ABA0(2) == 0) {
-                        CARDCancel(file_info);
-                        task->state = 0x2B;
-                        break;
-                    }
-                    if (*(u32*)&raw[0x38] < 3) {
-                        if (fn_80089D74(2) != 0) {
-                            CARDCancel(file_info);
-                            task->state = 0x2B;
-                            break;
-                        }
-                        task->field_3d = 1;
-                    }
-                }
-                task->state = 42;
-            } else if (result == 0) {
-                if (task->field_3d == 0) {
-                    fn_80089D74(2);
-                }
-                status = gamedatasaveGetStatus(savedataGetStatus(0, 1), 4);
-                gamedatasaveSetStatus(savedataGetStatus(0, 1), 4,
-                                      status + 1);
-                task->error_code = 0;
-                task->task_result = 4;
-                task->state = task->format_requested ? 17 : 44;
-            } else {
-                fn_80072A00(1);
-                task->error_code = result;
-                task->state = 0x2B;
-            }
-            break;
-
-        case 43:
-            task->task_result = -1;
-            task->state = 44;
-            break;
-
-        case 44:
-            if (raw[0x3E] != 0) {
-                if (fn_800057A8() == 4) {
-                    fn_800B01C4(task->card_channel, *(u32*) &raw[0x68]);
-                }
-                CARDGetSerialNo(task->card_channel, serial);
-                CARDClose(file_info);
-                raw[0x3E] = 0;
-            }
-            CARDUnmount(task->card_channel);
-            fn_800056C4(task->initial_dialog_result);
-            if (task->callback_finished != 0) {
-                task->state = 0;
-            } else if (task->task_kind == 3 || task->task_kind == 8) {
-                task->state = 0x32;
-            } else {
-                if (task->task_result >= 1 && task->task_result <= 4) {
-                    task->card_serial[0] = serial[0];
-                    task->card_serial[1] = serial[1];
-                    task->serial_check_enabled = 1;
-                }
-                task->resume_state = 45;
-                task->state = 0x30;
-            }
-            break;
-
-        case 45:
-            switch (task->task_kind) {
-            case 0:
-                if (task->task_result != 4) {
-                    task->error_code = 0xF;
-                    task->resume_state = 0x32;
-                    task->state = 0x30;
-                } else {
-                    task->state = 0x32;
-                }
-                break;
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-            case 9:
-            case 10:
-            case 11:
-            case 12:
-            case 13:
-                if (task->task_result == -1) {
-                    if (task->next_state_after_delay == 7) {
-                        task->error_code = 13;
-                    } else if (task->next_state_after_delay == 13) {
-                        task->error_code = 14;
-                    }
-                    task->resume_state = 46;
-                    task->state = 0x30;
-                } else {
-                    task->state = 0x32;
-                }
-                break;
-            default:
-                task->state = 0x32;
-                break;
-            }
-            break;
-
-        case 46:
-            task->error_code = 8;
-            task->resume_state = 47;
-            task->state = 0x30;
-            break;
-        case 47:
-            if ((u8) task->error_code != 0) {
-                task->task_result = 5;
-            }
-            task->state = 0x32;
-            break;
-        case 48:
-        case 49:
-        case 50:
-        default:
-            break;
-        }
-    } while (lbl_8047B3D4->card_result != -1);
-}
-#endif
+/* fn_801CDB04: see src/game/memcard.c (whole memory-card TU candidate). */
 #undef file_info
 #undef raw
 #undef task
@@ -1911,205 +915,8 @@ s32 fn_801CF568(void)
 }
 #endif
 
-#if defined(FIELD_801CBA90_RANGE_801CF7E4)
-s32 fn_801CF7E4(void)
-{
-    u8* task;
-    u8* save;
-    u8* destination;
-    u32* header;
-    u32 sum;
-    s32 taskKind;
-
-    task = (u8*)lbl_8047B3D4;
-    save = *(u8**)(task + 0x50);
-    *(u32*)(save + 0xC) = 0;
-    if (fn_801CBCDC(save, 0x1DFD8, (u32*)(save + 0x1DFEC), 0x18) != 0) {
-        taskKind = *(s32*)task;
-        if (taskKind != 3) {
-            *(u32*)(task + 0x2C) = *(u32*)(save + 4);
-            if (*(s32*)(task + 0x30) > *(s32*)(task + 0x2C)) {
-                *(u32*)(task + 0x2C) = *(u32*)(task + 0x30);
-                *(u32*)(task + 4) = 5;
-                if (taskKind >= 1 && taskKind < 3) {
-                    destination = *(u8**)(task + 0x58);
-                    memcpy(destination, save + 8, 0x1DFD0);
-                    *(u32*)(task + 0x10) = 0x25;
-                } else {
-                    *(u32*)(task + 0x10) = 0x24;
-                }
-                return 0x30;
-            }
-        }
-
-        if (taskKind >= 1 && taskKind < 4) {
-            destination = *(u8**)(task + 0x58);
-            memcpy(destination, save + 8, 0x1DFD0);
-            *(u32*)(task + 4) = 12;
-            *(u32*)(task + 8) = 3;
-            if (task[0x40] != 0) {
-                return 0x11;
-            }
-            return 0x2C;
-        }
-        return 0x24;
-    }
-
-    header = (u32*)(save + 0x1E000 + (*(u32*)(task + 0x20) << 9));
-    header[1] = 0;
-    header[3] = 0;
-    sum = header[0] + header[1] + header[2] + header[3];
-    sum += header[4] + header[5] + header[6] + header[7];
-    header[3] = -sum;
-    return 0x1F;
-}
-
-s32 fn_801CF9C8(void)
-{
-    u32 checksum;
-    u32* header;
-    s32 offset = 0x1E000;
-    s32 header_count;
-    s32 valid;
-    s32 newest_count = 0;
-    s32 newest_index = -1;
-    s32 i;
-    u64 current_id;
-    u64 card_id;
-
-    for (i = 0; i < 3; i++) {
-        header = (u32*)((u8*)lbl_8047B3D4->work_buffer + offset);
-        checksum = header[0];
-        checksum += header[1];
-        checksum += header[2];
-        checksum += header[3];
-        checksum += header[4];
-        checksum += header[5];
-        checksum += header[6];
-        checksum += header[7];
-        if (checksum != 0) {
-            lbl_8047B3D4->error_code = 0x11;
-            return 0x2B;
-        }
-
-        valid = 0;
-        if (((u8*)header)[0] == 1) {
-            if (((u8*)header)[1] == 1) {
-                valid = 1;
-            }
-        }
-        if (valid == 0) {
-            lbl_8047B3D4->error_code = 0x13;
-            return 0x2B;
-        }
-
-        header_count = ((s32*)header)[1];
-        if (header_count > newest_count) {
-            newest_count = header_count;
-            newest_index = i;
-            if (header_count > (s32)lbl_8047B3D4->serial_hi) {
-                lbl_8047B3D4->serial_hi = header_count;
-            }
-        }
-        offset += 0x200;
-    }
-
-    lbl_8047B3D4->field_20 = newest_index;
-
-    switch (lbl_8047B3D4->task_kind) {
-    case 10:
-    case 11: {
-        void* work_buffer = lbl_8047B3D4->work_buffer;
-
-        *(SavedataPayload*)((u8*)work_buffer + 8) =
-            *(SavedataPayload*)savedataGetStatus(0, 0);
-        lbl_8047B3D4->field_2c = lbl_8047B3D4->serial_hi;
-        return 0x25;
-    }
-
-    case 1:
-    case 2:
-    case 3:
-    case 5:
-    case 7:
-    case 9:
-    case 13:
-        if (newest_index == -1) {
-            if ((s32)lbl_8047B3D4->serial_hi > 0) {
-                switch (lbl_8047B3D4->task_kind) {
-                case 9:
-                    return 0xB;
-                case 3:
-                    break;
-                default:
-                    lbl_8047B3D4->error_code = 0x11;
-                    return 0x2B;
-                }
-            }
-
-            switch (lbl_8047B3D4->task_kind) {
-            case 1:
-            case 2:
-            case 3:
-                lbl_8047B3D4->error_code = 0xC;
-                lbl_8047B3D4->task_result = 1;
-                if (lbl_8047B3D4->format_requested != 0) {
-                    return 0x11;
-                }
-                return 0x2C;
-            default:
-                break;
-            }
-
-            memset(lbl_8047B3D4->work_buffer, 0, 0x1E000);
-            savedataCreate((u8*)lbl_8047B3D4->work_buffer + 8, 0);
-            lbl_8047B3D4->field_2c = 0;
-            lbl_8047B3D4->field_20 = -1;
-            return 0x24;
-        }
-        return 0x20;
-
-    case 4:
-    case 6:
-    case 8:
-        if (newest_index != -1) {
-            if (newest_count <= lbl_8047B3D4->field_2c) {
-                {
-                    u32* selected_header =
-                        (u32*)((u8*)lbl_8047B3D4->work_buffer + 0x20000 +
-                               newest_index * 0x200);
-                    header = selected_header;
-                }
-                current_id = gamedatasaveBiosGetMemcardID(
-                    gamedatasaveBiosGetPtr((void*)savedataGetStatus(0, 1)));
-                card_id = gamedatasaveBiosGetMemcardID(
-                    gamedatasaveBiosGetPtr(
-                        (void*)savedataGetStatus((u8*)header - 0x1FF8, 1)));
-                if (current_id == card_id) {
-                    if (lbl_8047B3D4->task_kind == 6) {
-                        lbl_8047B3D4->field_20 = newest_index;
-                        return 0x20;
-                    }
-
-                    {
-                        void* work_buffer = lbl_8047B3D4->work_buffer;
-                        SavedataPayload* destination =
-                            (SavedataPayload*)((u8*)work_buffer + 8);
-
-                        *destination = *(SavedataPayload*)savedataGetStatus(0, 0);
-                    }
-                    return 0x25;
-                }
-            }
-        }
-        /* fall through */
-
-    default:
-        lbl_8047B3D4->error_code = 0x13;
-        return 0x2B;
-    }
-}
-#endif
+/* fn_801CF7E4 is linked from field_exact_801CF7E4.c. */
+/* fn_801CF9C8: see src/game/memcard.c (whole memory-card TU candidate). */
 
 #if defined(FIELD_801CBA90_RANGE_801CFD08)
 s32 fn_801CFD08(void)
@@ -2251,133 +1058,4 @@ void fn_801D0080(void)
 }
 #endif
 
-#if defined(FIELD_801CBA90_RANGE_801D0090)
-s32 fn_801D0090(s32 error)
-{
-    extern void winMsgOpen(s32 window, u32 message, s32 arg2, s32 arg3);
-    extern s8 menuSubOpenYesNo(s32 port, s32 x, s32 y, s32 initial);
-    extern void msgctrlSetValue(s32 slot, s32 value);
-    u32 message;
-    u8 ask;
-    s32 initial;
-    s32 taskKind;
-
-    ask = 0;
-    taskKind = lbl_8047B3D4->task_kind;
-    switch (error) {
-    case 0:
-        return 0;
-    case 1:
-        message = 0x3C29;
-        break;
-    case 2:
-        if ((taskKind >= 5 && taskKind < 8) || taskKind == 13) {
-            message = 0x3C2C;
-        } else {
-            message = 0x3C04;
-        }
-        break;
-    case 3:
-        message = 0x3BFB;
-        break;
-    case 4:
-        message = 0x3C55;
-        break;
-    case 5:
-        message = 0x4421;
-        break;
-    case 6:
-        message = 0x3BFA;
-        ask = 1;
-        initial = 0;
-        break;
-    case 7:
-        message = 0x3C33;
-        ask = 1;
-        initial = 0;
-        break;
-    case 8:
-        message = 0x3D45;
-        ask = 1;
-        initial = 1;
-        break;
-    case 9:
-        message = 0x3C57;
-        break;
-    case 10:
-        if ((taskKind >= 5 && taskKind < 8) || taskKind == 13) {
-            message = 0x3C2E;
-        } else {
-            message = 0x3C06;
-        }
-        break;
-    case 11:
-        message = 0x3BFD;
-        break;
-    case 12:
-        message = 0x44E5;
-        break;
-    case 13:
-        message = 0x3D43;
-        break;
-    case 14:
-        message = 0x44D8;
-        break;
-    case 15:
-        if ((taskKind >= 5 && taskKind < 8) || taskKind == 13) {
-            message = 0x44D8;
-        } else {
-            message = 0x4444;
-        }
-        break;
-    case 16:
-        message = 0x3C34;
-        break;
-    case 17:
-        message = 0x4422;
-        if (taskKind != 2) {
-            winMsgOpen((s8)(u32)lbl_8047B3D4->gapp, message, 1, 1);
-            message = 0x44E4;
-        }
-        break;
-    case 18:
-        message = 0x4423;
-        break;
-    case 19:
-        message = 0x3C5D;
-        break;
-    case -3:
-        message = 0x3C32;
-        break;
-    case -4:
-        message = 0x3C31;
-        break;
-    case -5:
-        message = 0x3C5B;
-        break;
-    case -6:
-    case -13:
-        if (taskKind >= 1 && taskKind < 3 &&
-            lbl_8047B3D4->disk_id == (MemcardDiskId*)0x32) {
-            message = 0x4424;
-        } else {
-            message = 0x3C30;
-        }
-        break;
-    case -8:
-    case -9:
-        message = 0x3C5F;
-        msgctrlSetValue(0x2F, 0x30);
-        break;
-    default:
-        message = 0x3C30;
-        break;
-    }
-
-    winMsgOpen((s8)(u32)lbl_8047B3D4->gapp, message, 1, 1);
-    if (ask != 0 && menuSubOpenYesNo(0, 0x3C, 0xAA, initial) != 0) {
-        ask = 0;
-    }
-    return ask;
-}
-#endif
+/* fn_801D0090 is linked from field_exact_801D0090.c. */

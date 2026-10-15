@@ -132,7 +132,7 @@ extern void soundGetStatus(u32 index);
 
 void _sndCheckSndWorkALL(void)
 {
-    u32 i;
+    int i;
 
     GSlogWrite(lbl_80273748);
     for (i = 0; i < lbl_8047B0E8; i++) {
@@ -210,114 +210,8 @@ void fn_801677BC(u8 *flag)
     OSRestoreInterrupts(enabled);
 }
 
-typedef struct ParticleSortNode {
-    struct ParticleSortNode* next;
-    u32 flags;
-} ParticleSortNode;
-
-typedef struct ParticleSortState {
-    ParticleSortNode* secondPass[16];
-    u32 needsSort[16];
-    ParticleSortNode* head[16];
-} ParticleSortState;
-
-extern ParticleSortState lbl_80452708;
-extern void* memset(void* destination, int value, u32 size);
-
-ParticleSortNode* particleSort(s32 listIndex, ParticleSortNode** firstPass,
-                               ParticleSortNode** secondPass)
-{
-    ParticleSortNode* bucketHead[16];
-    ParticleSortNode* bucketTail[16];
-    ParticleSortNode* node;
-    ParticleSortNode* next;
-    ParticleSortNode* firstHead;
-    ParticleSortNode* firstTail;
-    ParticleSortNode* secondHead;
-    ParticleSortNode* secondTail;
-    u32 bucket;
-    s32 i;
-
-    node = lbl_80452708.head[listIndex];
-    if (lbl_80452708.needsSort[listIndex] == 0) {
-        if (node == NULL) {
-            *firstPass = NULL;
-            *secondPass = NULL;
-            return NULL;
-        }
-        *firstPass = (node->flags & 8) != 0 ? node : NULL;
-        *secondPass = lbl_80452708.secondPass[listIndex];
-        return node;
-    }
-
-    lbl_80452708.needsSort[listIndex] = 0;
-    if (node == NULL) {
-        lbl_80452708.secondPass[listIndex] = NULL;
-        *firstPass = NULL;
-        *secondPass = NULL;
-        return NULL;
-    }
-
-    memset(bucketHead, 0, sizeof(bucketHead));
-    memset(bucketTail, 0, sizeof(bucketTail));
-    while (node != NULL) {
-        next = node->next;
-        bucket = ((node->flags >> 25) & 7) +
-                 ((((node->flags >> 3) & 1) ^ 1) * 8);
-        node->next = NULL;
-        if (bucketHead[bucket] == NULL) {
-            bucketHead[bucket] = node;
-        } else {
-            bucketTail[bucket]->next = node;
-        }
-        bucketTail[bucket] = node;
-        node = next;
-    }
-
-    firstHead = NULL;
-    firstTail = NULL;
-    for (i = 0; i < 8; i++) {
-        if (bucketHead[i] != NULL) {
-            if (firstHead == NULL) {
-                firstHead = bucketHead[i];
-            } else {
-                firstTail->next = bucketHead[i];
-            }
-            firstTail = bucketTail[i];
-        }
-    }
-
-    secondHead = NULL;
-    secondTail = NULL;
-    for (i = 8; i < 16; i++) {
-        if (bucketHead[i] != NULL) {
-            if (secondHead == NULL) {
-                secondHead = bucketHead[i];
-            } else {
-                secondTail->next = bucketHead[i];
-            }
-            secondTail = bucketTail[i];
-        }
-    }
-
-    node = NULL;
-    if (firstTail != NULL) {
-        node = firstHead;
-        firstTail->next = secondHead;
-    }
-    if (secondTail != NULL) {
-        if (node == NULL) {
-            node = secondHead;
-        }
-        secondTail->next = NULL;
-    }
-
-    lbl_80452708.head[listIndex] = node;
-    lbl_80452708.secondPass[listIndex] = secondHead;
-    *firstPass = firstHead;
-    *secondPass = secondHead;
-    return node;
-}
+/* particleSort (0x80168934) is linked from pslist.c, the particle link-list
+ * unit it belongs to (it sorts pslist's per-link lists). */
 
 void fn_801677F4(u8 *flag)
 {
@@ -423,33 +317,19 @@ void _gsdvdError_MsgOpen(u32 message)
 
 void fn_801679E4(void)
 {
-    u32 offset;
     u32 i;
-    u8 value;
 
-    offset = 0;
-    i = 0;
-    value = 0;
-    while (i < lbl_8047B0C8) {
-        lbl_8047B0C4[offset] = value;
-        i++;
-        offset += 0x78;
+    for (i = 0; i < lbl_8047B0C8; i++) {
+        lbl_8047B0C4[i * 0x78] = 0;
     }
 }
 
 void fn_80167A14(void)
 {
-    u32 offset;
     u32 i;
-    u8 value;
 
-    offset = 0;
-    i = 0;
-    value = 0;
-    while (i < lbl_8047B0D0) {
-        lbl_8047B0CC[offset] = value;
-        i++;
-        offset += 0xD0;
+    for (i = 0; i < lbl_8047B0D0; i++) {
+        lbl_8047B0CC[i * 0xD0] = 0;
     }
 }
 
@@ -1037,7 +917,13 @@ void fn_80168408(GSFilter* filter, const u8* color)
     }
 }
 
-GSFilter* GSfilterCreate(const u8* color)
+/*
+ * fn_80168638 carries GSfilterCreate's body inline. The linked owner of
+ * fn_80168638 is the standalone carve gs_dvd_r47_80168638_o4s.c; this copy
+ * is kept in step with it. `inline` here means this file emits no
+ * out-of-line GSfilterCreate (gs_dvd_r47_prefix.c owns that one).
+ */
+inline GSFilter* GSfilterCreate(const u8* color)
 {
     GSFilter* filter;
     u8 capacity = lbl_804526E0.capacity;
@@ -1065,46 +951,83 @@ GSFilter* GSfilterCreate(const u8* color)
     return NULL;
 }
 
-void fn_80168638(u32 capacity)
+/*
+ * Tears the filter manager back down. Repeated expansion: retail carries
+ * this exact sequence on both allocation-failure paths.
+ */
+static inline void GSfilterRelease(void)
+{
+    u16 handle;
+
+    handle = lbl_804526E0.filterHandle;
+    if (handle != 0) {
+        fn_800E24B0(handle);
+        fn_800E209C(handle);
+    }
+    handle = lbl_804526E0.colorHandle;
+    if (handle != 0) {
+        fn_800E24B0(handle);
+        fn_800E209C(handle);
+    }
+    if (lbl_804526E0.renderState != 0) {
+        fn_800D75F4((void*)lbl_804526E0.renderState);
+    }
+    memset(&lbl_804526E0, 0, sizeof(GSFilterState));
+}
+
+/*
+ * Creates the filter render state and binds the viewport and colour
+ * arrays to it. Inline fingerprint: on the NULL path retail loads the
+ * result register with a fresh `li r28, 0` even though the preceding
+ * `mr. r28, r3` has just proven it zero; that is this helper's own
+ * `return NULL` materialised into the inlined return temp. Written
+ * inline in the caller, the store takes the tested value directly and
+ * no such load exists.
+ */
+static inline void* GSfilterRenderStateCreate(void)
+{
+    void* renderState = fn_800D7894();
+
+    if (renderState != NULL) {
+        fn_800D7868(renderState, 1, 1, 0, 2, 0, lbl_804526E0.viewport, 4);
+        fn_800D7868(renderState, 4, 1, 6, 10, 0, lbl_804526E0.colors, 4);
+        return renderState;
+    }
+    return NULL;
+}
+
+void fn_80168638(u8 capacity)
 {
     u32 size;
     u16 handle;
+    GSFilter* filter;
     u32 index;
-    void* renderState;
-    u32 clearColor;
+    u8 clearColor[4];
 
     memset(&lbl_804526E0, 0, sizeof(GSFilterState));
-    size = (capacity & 0xFF) * sizeof(GSFilter);
+    size = capacity * sizeof(GSFilter);
 
     handle = _toolentryAlloc__FUl(size);
     if (handle == 0) {
         return;
     }
     lbl_804526E0.filterHandle = handle;
-    lbl_804526E0.filters = fn_800E27B0(handle);
+    lbl_804526E0.filters = fn_800E27B0(lbl_804526E0.filterHandle);
     memset(lbl_804526E0.filters, 0, size);
 
     handle = _toolentryAlloc__FUl(size);
     if (handle == 0) {
-        fn_800E24B0(lbl_804526E0.filterHandle);
-        fn_800E209C(lbl_804526E0.filterHandle);
-        memset(&lbl_804526E0, 0, sizeof(GSFilterState));
+        GSfilterRelease();
         return;
     }
     lbl_804526E0.colorHandle = handle;
-    lbl_804526E0.colors = fn_800E27B0(handle);
+    lbl_804526E0.colors = fn_800E27B0(lbl_804526E0.colorHandle);
     memset(lbl_804526E0.colors, 0, size);
 
+    /* Retail allocates a third block and only checks it for failure. */
     handle = _toolentryAlloc__FUl(size);
     if (handle == 0) {
-        fn_800E24B0(lbl_804526E0.filterHandle);
-        fn_800E209C(lbl_804526E0.filterHandle);
-        fn_800E24B0(lbl_804526E0.colorHandle);
-        fn_800E209C(lbl_804526E0.colorHandle);
-        if (lbl_804526E0.renderState != 0) {
-            fn_800D75F4((void*)lbl_804526E0.renderState);
-        }
-        memset(&lbl_804526E0, 0, sizeof(GSFilterState));
+        GSfilterRelease();
         return;
     }
 
@@ -1118,19 +1041,18 @@ void fn_80168638(u32 capacity)
     lbl_804526E0.viewport[7] = 0;
     lbl_804526E0.capacity = capacity;
 
-    renderState = fn_800D7894();
-    if (renderState != NULL) {
-        fn_800D7868(renderState, 1, 1, 0, 2, 0, lbl_804526E0.viewport, 4);
-        fn_800D7868(renderState, 4, 1, 6, 10, 0, lbl_804526E0.colors, 4);
-    }
-    lbl_804526E0.renderState = (u32)renderState;
+    lbl_804526E0.renderState = (u32)GSfilterRenderStateCreate();
 
-    for (index = 0; index < (capacity & 0xFF); index++) {
-        lbl_804526E0.filters[index].index = index;
+    filter = lbl_804526E0.filters;
+    for (index = 0; (u8)index < capacity; index++, filter++) {
+        filter->index = index;
     }
 
-    clearColor = 0;
-    lbl_8047B100 = GSfilterCreate((const u8*)&clearColor);
+    clearColor[0] = 0;
+    clearColor[1] = 0;
+    clearColor[2] = 0;
+    clearColor[3] = 0;
+    lbl_8047B100 = GSfilterCreate(clearColor);
     GSgappCreate(1, 0xFC, 0, fn_80168284);
 }
 
@@ -1214,39 +1136,28 @@ u32 _sndStopBGM(GSsndEntry* entry, u32 fade, u32 arg2)
 
 u32 fn_80167720(u32 handle)
 {
-    GSsndEntry* entry;
-    u32 count;
-    u32 i;
+    int i;
 
-    entry = lbl_80478FAC;
-    i = 0;
-    count = lbl_8047B0E8;
-    while (i < count) {
-        if (entry->work != NULL && entry->work->handle == handle) {
+    for (i = 0; i < lbl_8047B0E8; i++) {
+        GSsndWork* work = lbl_80478FAC[i].work;
+
+        if (work != NULL && work->handle == handle) {
             return i;
         }
-        entry++;
-        i++;
     }
     return 0;
 }
 
 u32 soundFindOwner(u32 unkC, u32 unk10)
 {
-    GSsndEntry* entry;
-    u32 count;
-    u32 i;
+    int i;
 
-    entry = lbl_80478FAC;
-    i = 0;
-    count = lbl_8047B0E8;
-    while (i < count) {
-        if (entry->work != NULL && entry->work->unkC == unkC &&
-            entry->work->unk10 == unk10) {
+    for (i = 0; i < lbl_8047B0E8; i++) {
+        GSsndWork* work = lbl_80478FAC[i].work;
+
+        if (work != NULL && work->unkC == unkC && work->unk10 == unk10) {
             return i;
         }
-        entry++;
-        i++;
     }
     return -1;
 }
@@ -1262,17 +1173,10 @@ void _sndInitStack(void)
 
 void fn_80167A6C(void)
 {
-    u32 offset;
     u32 i;
-    u8 value;
 
-    offset = 0;
-    i = 0;
-    value = 0;
-    while (i < lbl_8047B0E0) {
-        lbl_8047B0DC[offset] = value;
-        i++;
-        offset += 0x14;
+    for (i = 0; i < lbl_8047B0E0; i++) {
+        lbl_8047B0DC[i * 0x14] = 0;
     }
 }
 
@@ -1380,10 +1284,13 @@ void _gsdvdErrorTask_801879AC(void)
             lbl_8047B0F0 = 0;
         }
         break;
-    case 10:
+    case 9:
         fn_800056D4();
         _gsdvdError_MsgOpen(lbl_80478C20);
         lbl_8047B0F0 = 10;
+        break;
+    case 10:
+        /* Fatal-error message is up; nothing further to do. */
         break;
     }
 }

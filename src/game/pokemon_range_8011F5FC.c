@@ -149,7 +149,7 @@ extern u32 wazaDataBiosGetFightTrainerAiWazaValueFuncPtr(u8* ptr);
 extern s32 pokemonGetDarkPokemonLevel(u8* pokemon);
 extern u32 pokemonDataCheckValid(u32 a, u16 key);
 extern u8 fn_80121ADC(u8* ptr, u32 slot);
-extern s32 pokemonSetWazaStatus(u8*, u32, u8);
+extern s8 pokemonSetWazaStatus(u8*, u32, u8);
 extern u32 pokemonWazaCheckValid(u8* ptr, u32 arg2);
 extern void pokemonInit(u8* ptr);
 extern s32 pokemonEvolutionCreateAddPokemon();
@@ -442,7 +442,7 @@ extern u32 GSrand(void);
 extern u8 lbl_8027296C[];
 s32 pokemonCheckSetMonohiroi(u8* pokemon);
 void pokemonAllKaihuku(u8* pokemon);
-extern u32 fn_801DE190(u32 idx, u32 base, u32 flag);
+extern u32 fn_801DE190(u16 idx, u32 base, u32 flag);
 extern void fn_801DA3CC(void);
 extern void fn_801DA36C(void);
 extern u32 lbl_80478F90; /* obj header ptr (SDA) */
@@ -458,7 +458,7 @@ extern void fn_801EEB34(void);
 u32 pokemonCheckFightOut(u8* ptr);
 extern void gamedataAttestBiosCopy(void* dst, const void* src);
 void pokemonCreate(u8* ptr, u32 pokemon_data_id, u32 level, const void* attest);
-u32 pokemonCreateRndFit(u8*, s32, s32, s32, u32);
+u32 pokemonCreateRndFit(u8*, s8, s8, s8, u32);
 extern void fadeSet(f32 duration, u32 mode);
 extern void fadeCheck(u32 wait);
 extern s32 evolutionOpen();
@@ -608,7 +608,7 @@ extern void fn_8006AE18(void);
 extern u8 lbl_802729C0[];
 extern u8 lbl_80272A10[];
 void heroMoveGetKenObjID(void);
-extern void fn_8018E050(void);
+extern void peopleOpen(void);
 extern void GSmodelEnableAnimBlend(void);
 extern void fn_8018CB5C(void);
 extern void fn_80189328(void);
@@ -1316,9 +1316,9 @@ extern u8 pokemonGetSex(u8* ptr);
 extern void pokemonSetOnDarkPokemonFlag(u8* ptr, u8 flag);
 extern void pokemonSetOnZukanFlag(u8* ptr, u8 flag);
 extern u32 pokemonGetOboeWazaDataBanme(u8* ptr, u32 arg2);
-extern s32 pokemonOboeWaza(u8* ptr, u8 target, u8* buf_ptr, u8* counter_ptr);
+extern s8 pokemonOboeWaza(u8* ptr, u8 target, u8* buf_ptr, u8* counter_ptr);
 extern u16 pokemonGetOboeWazaDataId(u8* ptr, u8 arg2, u8* counter_ptr);
-extern s32 pokemonSearchWazaDataId(u8* ptr, u16 target);
+extern s8 pokemonSearchWazaDataId(u8* ptr, u16 target);
 extern void pokemonWazaReplace(void* ptr, u32 idx, u32 arg);
 extern void pokemonWazaCreate(u8* ptr, u32 slot, u32 val);
 extern void pokemonSetCatchStatus(u8* arg1, u32 arg2, u8 arg3, u16 arg4, u8 arg5, u32 arg6, u32 arg7);
@@ -1513,7 +1513,6 @@ extern u8 lbl_80272948[];
 extern u32 lbl_80478F90;  /* obj header ptr (SDA) */
 /* undecompiled: fn removed (ROM-derived machine code), forward-declared for callers */
 /* 0x80122BC0 | 0xA4 */
-#pragma optimization_level 4
 /* 0x80122C64 | 0x178 */
 /* 0x80122DDC | 0x218 */
 /* 0x80122FF4 | 0x9C */
@@ -1531,7 +1530,7 @@ extern u32 lbl_80478F90;  /* obj header ptr (SDA) */
 /* 0x801236F8 | 0xC0 */
 /* 0x801237B8 | 0x3A4 */
 /* undecompiled: fn removed (ROM-derived machine code), forward-declared for callers */
-s32 pokemonSetWazaStatus(u8*, u32, u8);
+s8 pokemonSetWazaStatus(u8*, u32, u8);
 /* 0x80123B5C | 0xF8 */
 /* 0x80 | pokemonWazaReplace | generic */
 /* 0x80123CD4 | 0x84 */
@@ -1774,7 +1773,6 @@ void pokemonSetLevelBasisStatus(u8* obj, u32 level) {
 /* 0x8012805C | 0x2A4 */
 extern f32 lbl_8047D020;
 /* Preserve retail cross-TU helper calls after source consolidation. */
-#pragma dont_inline on
 s32 pokemonEvolutionAll(u8* pokemon, u32 evolution_id, u32 add_species,
                         void* evolution_arg, u8* hero, s32 set_memo,
                         s32 evolution_mode, s32 use_fade)
@@ -1858,7 +1856,6 @@ s32 pokemonEvolutionAll(u8* pokemon, u32 evolution_id, u32 add_species,
 
     return 0;
 }
-#pragma dont_inline reset
 /* 0x80128300 | 0x224 */
 extern u8 lbl_802729A4[];
 extern u8 lbl_80272998[];
@@ -2267,18 +2264,12 @@ extern u32 lbl_80478F90;  /* obj header ptr (SDA) */
 #pragma optimization_level 4
 #pragma optimization_level 4
 #pragma optimization_level 4
-#pragma optimization_level 2
-#pragma optimization_level reset
-#pragma optimization_level 4
-#pragma optimization_level 4
-#pragma optimization_level 4
 #pragma optimization_level 4
 #pragma optimization_level 4
 #pragma optimization_level 4
 #endif /* !POKEMON_RANGE_SPLIT */
 
 /* Target-order Pokemon range islands, selected by thin wrapper units. */
-#pragma optimization_level 4
 #if !defined(POKEMON_RANGE_SPLIT) || defined(POKEMON_RANGE_EXACT_8011F5FC)
 void pokemonBiosCopy(u32* dst, u32* src) {
 #ifdef PCPORT
@@ -2331,8 +2322,7 @@ u32 fn_8011F6D8(u8* ptr) {
 
 #endif /* POKEMON_RANGE_EXACT_8011F5FC */
 
-#if !defined(POKEMON_RANGE_SPLIT) || defined(POKEMON_RANGE_RESIDUAL_8011F77C)
-#endif /* POKEMON_RANGE_RESIDUAL_8011F77C */
+
 
 #if !defined(POKEMON_RANGE_SPLIT) || defined(POKEMON_RANGE_CANDIDATE_8011F910)
 void pokemonAddDpFormPokemonDpFilterId(u8* ptr, u16 itemDataId, u16 filterId) {
@@ -2446,253 +2436,9 @@ u8 pokemonIsDarkPokemon(u32 arg) {
 
 #endif /* POKEMON_RANGE_CANDIDATE_8011F910 */
 
-#if !defined(POKEMON_RANGE_SPLIT) || defined(POKEMON_RANGE_RESIDUAL_8011FCA4)
-void pokemonSetDarkPokemonStatus(u8* pokemon, u16 dark_id)
-{
-    s32 dp;
-
-    if (pokemon == NULL) {
-        return;
-    }
-
-    pokemonSetStatus(pokemon, 0, 0xC3, 0, 0);
-    pokemonSetStatus(pokemon, 0, 0xC5, 0, -100);
-    pokemonSetStatus(pokemon, 0, 0xC6, 0, 0);
-    pokemonSetStatus(pokemon, 0, 0xC7, 0, 0);
-    fn_8011B950((u8*)pokemonGetStatus(pokemon, 0, 0xC8, 0), 1);
-    pokemonSetStatus(pokemon, 0, 0xC3, 0, dark_id);
-
-    dp = (s32)(lbl_8047CFF4 * fn_801EEEB8(dark_id));
-    pokemonSetStatus(pokemon, 0, 0xC5, 0, dp);
-}
-
-static inline u32 pokemonGetLevelToExpInline(u32 pokemon, u8 level)
-{
-    u16 dataId;
-    u8 growId;
-    void* growData;
-
-    if (pokemon == 0) {
-        return 0;
-    }
-    dataId = (u16)pokemonGetStatus(pokemon, 0, 0x6E, 0);
-    growId = (u8)pokemonGetStatus(0, dataId, 0x11, 0);
-    growData = pokemonGrowDataBiosGetPtr(growId);
-    if (growData == NULL) {
-        return 0;
-    }
-    return pokemonGrowDataBiosGetExp(growData, level);
-}
-
-void pokemonToMenuPokemonStatus(u32 pokemon, u8* output)
-{
-    typedef struct MenuPokemonStatus {
-        u8 name[0x17];
-        u8 level;
-        u16 maxHp;
-        u16 hp;
-        union {
-            u32 integer;
-            f32 real;
-        } progressMax;
-        union {
-            u32 integer;
-            f32 real;
-        } progress;
-        u16 conditionIcon;
-        u16 displayValue;
-        u8 sex;
-        u8 darkState;
-        u16 status82;
-    } MenuPokemonStatus;
-    extern u8 fn_8011B67C();
-    extern u32 pokemonGetStatus();
-
-#define MENU ((MenuPokemonStatus*)output)
-    u8 level;
-    u32 baseExp;
-    u32 nextExp;
-    u32 convert[2];
-    u16 icon;
-
-    pokemonGetStatus(pokemon, 0, 0x6E, 0);
-    GScharCpy(MENU->name, pokemonGetStatus(pokemon, 0, 0x77, 0));
-    MENU->level = (u8)pokemonGetStatus(pokemon, 0, 0x7A, 0);
-    MENU->maxHp = (u16)pokemonGetStatus(pokemon, 0, 0x87, 0);
-    MENU->hp = (u16)pokemonGetStatus(pokemon, 0, 0x83, 0);
-
-    level = (u8)pokemonGetStatus(pokemon, 0, 0x7A, 0);
-    baseExp = pokemonGetLevelToExpInline(pokemon, level);
-
-    if ((u8)pokemonGetStatus(pokemon, 0, 0xC2, 0) == 0) {
-        nextExp = pokemonGetLevelToExpInline(pokemon, ++level);
-        MENU->progressMax.integer = nextExp - baseExp;
-        MENU->progress.integer =
-            pokemonGetStatus(pokemon, 0, 0x79, 0) - baseExp;
-    } else {
-        u16 darkMax;
-
-        darkMax = (u16)(u32)fn_801EEEB8(
-            (u16)pokemonGetStatus(pokemon, 0, 0xC3, 0));
-        convert[0] = 0x43300000;
-        convert[1] = darkMax;
-        MENU->progressMax.real = *(f64*)convert - lbl_8047D010;
-        if (pokemon == 0) {
-            MENU->progress.real = lbl_8047CFF0;
-        } else {
-            convert[0] = 0x43300000;
-            convert[1] =
-                pokemonGetStatus(pokemon, 0, 0xC5, 0) ^ 0x80000000;
-            MENU->progress.real =
-                (*(f64*)convert - lbl_8047D008) / lbl_8047CFF4;
-        }
-    }
-
-    if ((fn_80119ED0(3) == 0x7C || fn_80119ED0(3) == 0xC8) &&
-        fn_8011B67C(pokemon, 3) == 1) {
-        icon = 0x3A;
-    } else if ((fn_80119ED0(4) == 0x7C || fn_80119ED0(4) == 0xC8) &&
-               fn_8011B67C(pokemon, 4) == 1) {
-        icon = 0x3A;
-    } else if ((fn_80119ED0(5) == 0x7C || fn_80119ED0(5) == 0xC8) &&
-               fn_8011B67C(pokemon, 5) == 1) {
-        icon = 0x3B;
-    } else if ((fn_80119ED0(6) == 0x7C || fn_80119ED0(6) == 0xC8) &&
-               fn_8011B67C(pokemon, 6) == 1) {
-        icon = 0x3C;
-    } else if ((fn_80119ED0(7) == 0x7C || fn_80119ED0(7) == 0xC8) &&
-               fn_8011B67C(pokemon, 7) == 1) {
-        icon = 0x3D;
-    } else if ((fn_80119ED0(8) == 0x7C || fn_80119ED0(8) == 0xC8) &&
-               fn_8011B67C(pokemon, 8) == 1) {
-        icon = 0x3E;
-    } else {
-        icon = 0;
-    }
-    MENU->conditionIcon = icon;
-    MENU->displayValue = fn_8010BBB8(pokemon);
-    MENU->sex = menuSubGetPokemonSexForFightDisp(pokemon);
-
-    if ((u8)pokemonGetStatus(pokemon, 0, 0xC2, 0) == 0) {
-        MENU->darkState = 0;
-    } else if ((fn_80119ED0(0x3E) == 0x7C ||
-                fn_80119ED0(0x3E) == 0xC8) &&
-               fn_8011B67C(pokemon, 0x3E) != 0) {
-        MENU->darkState = 2;
-    } else {
-        MENU->darkState = 1;
-    }
-    MENU->status82 = (u16)pokemonGetStatus(pokemon, 0, 0x82, 0);
-#undef MENU
-}
-
-void pokemonToMenuPokemonStatusSubBar(u8* ptr, u8* out) {
-    extern u32 pokemonGetStatus(u8* ptr, u32 a, u32 b, u32 c);
-    extern void* pokemonGrowDataBiosGetPtr(u8 idx);
-    extern u32 pokemonGrowDataBiosGetExp(void* ptr, u8 idx);
-    u8 idx;
-    u32 base;
-    void* table;
-    u32 next;
-    u32 sp[2];
-    u32 val;
-    f32 scale;
-
-    idx = (u8)pokemonGetStatus(ptr, 0, 0x7A, 0);
-    if (ptr == NULL) {
-        base = 0;
-    } else {
-        table = pokemonGrowDataBiosGetPtr((u8)pokemonGetStatus(0, (u16)pokemonGetStatus(ptr, 0, 0x6E, 0), 0x11, 0));
-        if (table == NULL) {
-            base = 0;
-        } else {
-            base = pokemonGrowDataBiosGetExp(table, idx);
-        }
-    }
-
-    if ((u8)pokemonGetStatus(ptr, 0, 0xC2, 0) == 0) {
-        if (ptr == NULL) {
-            next = 0;
-        } else {
-            table = pokemonGrowDataBiosGetPtr((u8)pokemonGetStatus(0, (u16)pokemonGetStatus(ptr, 0, 0x6E, 0), 0x11, 0));
-            if (table == NULL) {
-                next = 0;
-            } else {
-                next = pokemonGrowDataBiosGetExp(table, (u8)(idx + 1));
-            }
-        }
-        *(u32*)(out + 0x1C) = next - base;
-        *(u32*)(out + 0x20) = pokemonGetStatus(ptr, 0, 0x79, 0) - base;
-    } else {
-        val = (u16)(u32)fn_801EEEB8((u16)pokemonGetStatus(ptr, 0, 0xC3, 0));
-        sp[0] = 0x43300000;
-        sp[1] = val;
-        *(f32*)(out + 0x1C) = *(f64*)sp - lbl_8047D010;
-        if (ptr == NULL) {
-            scale = lbl_8047CFF0;
-        } else {
-            sp[0] = 0x43300000;
-            sp[1] = pokemonGetStatus(ptr, 0, 0xC5, 0) ^ 0x80000000;
-            scale = (*(f64*)sp - lbl_8047D008) / lbl_8047CFF4;
-        }
-        *(f32*)(out + 0x20) = scale;
-    }
-}
-
-void pokemonToMenuWazaStatus(u8* ptr, u8* out) {
-    extern u32 GSmsgGetGSchar();
-    extern u32 fn_8010C46C();
-    extern u32 fn_8010C4D4();
-    extern u32 wazaGetMaxPP();
-    extern u32 wazaGetStatus();
-    extern u32 pokemonGetStatus();
-    u8 i;
-    u8 valid;
-    u16 slot2;
-    u16 id;
-    u16 resolved;
-    u16 extra;
-    u32 byte;
-    u8* slot;
-
-    memset(out, 0, 0x48);
-    *(u32*)out = pokemonGetStatus(ptr, 0, 0x77, 0);
-    for (i = 0; i < 4; i++) {
-        slot = out + i * 0xC + 4;
-        if (ptr == NULL) {
-            valid = 0;
-        } else if ((s32)pokemonGetStatus(ptr, 0, 0x7F, i) == 0) {
-            valid = 0;
-        } else if ((s32)pokemonGetStatus(ptr, 0, 0x7F, i) == 0x163) {
-            valid = 0;
-        } else {
-            valid = 1;
-        }
-        if (valid == 0) {
-            *(u32*)(slot + 0x0) = 0;
-            *(u32*)(slot + 0x4) = 0;
-            *(u8*)(slot + 0xA) = 0;
-            *(u8*)(slot + 0xB) = 0;
-        } else {
-            id = (u16)pokemonGetStatus(ptr, 0, 0x7F, i);
-            resolved = (u16)wazaGetStatus(0, id, 3, 0);
-            *(u32*)(slot + 0x0) = GSmsgGetGSchar(wazaGetStatus(0, id, 1, 0));
-            *(u32*)(slot + 0x4) = GSmsgGetGSchar(fn_8010C4D4(resolved));
-            *(u16*)(slot + 0x8) = (u16)fn_8010C46C(resolved);
-            if (ptr == NULL) {
-                byte = 0;
-            } else {
-                slot2 = i + 4;
-                extra = (u16)pokemonGetStatus(ptr, 0, 0x7F, slot2);
-                byte = wazaGetMaxPP(extra, (u8)pokemonGetStatus(ptr, 0, 0x81, slot2));
-            }
-            *(u8*)(slot + 0xA) = byte;
-            *(u8*)(slot + 0xB) = (u8)pokemonGetStatus(ptr, 0, 0x80, i);
-        }
-    }
-}
-
-#endif /* POKEMON_RANGE_RESIDUAL_8011FCA4 */
+/* pokemonSetDarkPokemonStatus through pokemonAllKaihuku (0x8011FCA4 -
+ * 0x80120B00) are linked from pokemon_range_8011F77C.c with the dark-gauge
+ * block before them. */
 
 #if !defined(POKEMON_RANGE_SPLIT) || defined(POKEMON_RANGE_EXACT_80120B00)
 void pokemonGetMezamerupower(u8* ptr, u16* out1, u16* out2) {
@@ -3002,86 +2748,91 @@ void pokemonReplace(u32* arg1, u32* arg2) {
 #endif /* POKEMON_RANGE_EXACT_80120B00 */
 
 #if !defined(POKEMON_RANGE_SPLIT) || defined(POKEMON_RANGE_RESIDUAL_80121C18)
-void* pokemonCreateSequence(void* arg) {
-    extern u32 pokemonGetStatus(void* obj, u32 a, u32 b, u32 c);
-    extern u16 fn_80119ED0(u32 val);
-    extern u32 fn_8011B67C(u8* ptr, u32 val);
-    extern u32 fn_801DE190(u32 idx, u32 base, u32 flag);
+
+/* fn_80121ADC's body: retail expands the TU's global in place. */
+static inline s32 pokemonSeqCheckSlot(u8* ptr, u32 slot) {
+    if ((u16)fn_80119ED0(slot) != 0x7c) { if ((u16)fn_80119ED0(slot) != 0xc8) { return 0; } }
+    return fn_8011B67C(ptr, slot);
+}
+
+static inline u8 pokemonSeqSpeciesValid(u16 species) {
+    if (species == 0) {
+        return 0;
+    }
+    if (pokemonGetStatus(NULL, species, 1, 0) == 0) {
+        return 0;
+    }
+    if (species >= *(u32*)lbl_80478F90) {
+        return 0;
+    }
+    return 1;
+}
+
+static inline u32 pokemonSeqIsRare(void* pokemon) {
+    u32 id;
+    u32 personality;
+
+    if (pokemon == NULL) {
+        return 0;
+    }
+    id = pokemonGetStatus(pokemon, 0, 0x75, 0);
+    personality = pokemonGetStatus(pokemon, 0, 0x6f, 0);
+    return (u32)(((id >> 16) ^ (id & 0xFFFF) ^ (personality >> 16) ^ (personality & 0xFFFF)) < 8);
+}
+
+static inline u8 pokemonSeqIsHealthy(u8* pokemon) {
+    if (pokemon == NULL) {
+        return 0;
+    }
+    if ((u8)pokemonSeqCheckSlot(pokemon, 3) == 1) {
+        return 0;
+    }
+    if ((u8)pokemonSeqCheckSlot(pokemon, 4) == 1) {
+        return 0;
+    }
+    if ((u8)pokemonSeqCheckSlot(pokemon, 5) == 1) {
+        return 0;
+    }
+    if ((u8)pokemonSeqCheckSlot(pokemon, 6) == 1) {
+        return 0;
+    }
+    if ((u8)pokemonSeqCheckSlot(pokemon, 7) == 1) {
+        return 0;
+    }
+    if ((u8)pokemonSeqCheckSlot(pokemon, 8) == 1) {
+        return 0;
+    }
+    return 1;
+}
+
+void* pokemonCreateSequence(void* pokemon) {
     extern void fn_801DA36C(void* obj, u32 val);
     extern void fn_801DA3CC(void* obj, u32 val);
-    u32 r30, r28, r29, r5, tmp, xv, tmp2;
-    u32 result, acc;
-    u8 valid;
+    u32 value; /* the personality, then the sequence (one variable in retail) */
+    u32 model;
+    u16 species;
+    /* RULE-EXCEPTION(user-approved): pointer carrier for the sequence, chosen for register allocation (permuter farm) — see docs/RULE_EXCEPTIONS.md */
+    void* sequence;
 
-    r30 = pokemonGetStatus(arg, 0, 0x6f, 0);
-    r28 = (u16)pokemonGetStatus(arg, 0, 0x6e, 0);
-
-    if (r28 == 0) {
-        valid = 0;
-    } else {
-        if (pokemonGetStatus(NULL, r28, 1, 0) == 0) { valid = 0; }
-        else if (r28 >= *(u32*)(u32)lbl_80478F90) { valid = 0; }
-        else { valid = 1; }
+    value = pokemonGetStatus(pokemon, 0, 0x6f, 0);
+    species = pokemonGetStatus(pokemon, 0, 0x6e, 0);
+    if (pokemonSeqSpeciesValid(species) == 0) {
+        return NULL;
     }
-    if ((u8)valid == 0) { return 0; }
-
-    r28 = pokemonGetStatus(NULL, r28, 0x66, 0);
-
-    if (arg == NULL) {
-        r5 = 0;
-    } else {
-        r29 = pokemonGetStatus(arg, 0, 0x75, 0);
-        tmp = pokemonGetStatus(arg, 0, 0x6f, 0);
-        xv = (r29 >> 16) ^ (r29 & 0xFFFF);
-        tmp2 = (tmp >> 16) ^ (tmp & 0xFFFF);
-        xv = xv ^ tmp2 ^ 8;
-        xv = __cntlzw(xv);
-        r5 = (u32)(8u << xv) >> 31;
+    model = pokemonGetStatus(NULL, species, 0x66, 0);
+    value = fn_801DE190(model, value, pokemonSeqIsRare(pokemon));
+    sequence = (void*)value;
+    if ((u8)pokemonSeqCheckSlot(pokemon, 8) == 1) {
+        fn_801DA3CC(sequence, 1);
     }
-
-    r30 = fn_801DE190((u16)r28, r30, r5);
-
-    if ((u16)fn_80119ED0(8) != 0x7c) { if ((u16)fn_80119ED0(8) != 0xc8) { result = 0; goto check8a; } }
-    result = fn_8011B67C((u8*)arg, 8);
-    check8a: if ((u8)result == 1) { fn_801DA3CC((void*)r30, 1); }
-
-    if ((u16)fn_80119ED0(7) != 0x7c) { if ((u16)fn_80119ED0(7) != 0xc8) { result = 0; goto check7a; } }
-    result = fn_8011B67C((u8*)arg, 7);
-    check7a: if ((u8)result == 1) { fn_801DA3CC((void*)r30, 2); }
-
-    if (arg == NULL) { acc = 0; goto done; }
-
-    if ((u16)fn_80119ED0(3) != 0x7c) { if ((u16)fn_80119ED0(3) != 0xc8) { result = 0; goto check3; } }
-    result = fn_8011B67C((u8*)arg, 3);
-    check3: if ((u8)result == 1) { acc = 0; goto done; }
-
-    if ((u16)fn_80119ED0(4) != 0x7c) { if ((u16)fn_80119ED0(4) != 0xc8) { result = 0; goto check4; } }
-    result = fn_8011B67C((u8*)arg, 4);
-    check4: if ((u8)result == 1) { acc = 0; goto done; }
-
-    if ((u16)fn_80119ED0(5) != 0x7c) { if ((u16)fn_80119ED0(5) != 0xc8) { result = 0; goto check5; } }
-    result = fn_8011B67C((u8*)arg, 5);
-    check5: if ((u8)result == 1) { acc = 0; goto done; }
-
-    if ((u16)fn_80119ED0(6) != 0x7c) { if ((u16)fn_80119ED0(6) != 0xc8) { result = 0; goto check6; } }
-    result = fn_8011B67C((u8*)arg, 6);
-    check6: if ((u8)result == 1) { acc = 0; goto done; }
-
-    if ((u16)fn_80119ED0(7) != 0x7c) { if ((u16)fn_80119ED0(7) != 0xc8) { result = 0; goto check7b; } }
-    result = fn_8011B67C((u8*)arg, 7);
-    check7b: if ((u8)result == 1) { acc = 0; goto done; }
-
-    if ((u16)fn_80119ED0(8) != 0x7c) { if ((u16)fn_80119ED0(8) != 0xc8) { result = 0; goto check8b; } }
-    result = fn_8011B67C((u8*)arg, 8);
-    check8b: if ((u8)result == 1) { acc = 0; goto done; }
-
-    acc = 1;
-    done:
-    if ((u8)acc == 1) {
-        fn_801DA36C((void*)r30, 1);
-        fn_801DA36C((void*)r30, 2);
+    if ((u8)pokemonSeqCheckSlot(pokemon, 7) == 1) {
+        fn_801DA3CC(sequence, 2);
     }
-    return (void*)r30;
+    if (pokemonSeqIsHealthy(pokemon) == 1) {
+        fn_801DA36C(sequence, 1);
+        fn_801DA36C(sequence, 2);
+    }
+    return sequence;
 }
 
 #endif /* POKEMON_RANGE_RESIDUAL_80121C18 */
@@ -3137,13 +2888,10 @@ void pokemonSetSequenceStatus(u8* ptr, void* obj) {
     }
 }
 
-#pragma optimization_level 2
 u8 pokemonGetAnnonKatati(u32 val) {
     return (u8)((((val >> 18) & 0xC0) | ((val >> 12) & 0x30) | ((val >> 6) & 0x0C) | (val & 0x03)) % 28);
 }
 
-#pragma optimization_level reset
-#pragma optimization_level 4
 void pokemonGetFriendFormPokemonFriendFilterId(u8* obj, u16 item_id, u32 filter_id)
 {
     extern u32 pokemonGetDarkPokemonLevel(u8* obj);
@@ -3295,15 +3043,15 @@ void pokemonGetEffortFromPokemon(u8* obj, u32 item_id, u32 double_effort,
                                  u32 defeated_species)
 {
     extern u32 gamedataAttestCheckValid(u32 value);
-    u16 effort[6][3];
+    u16* entry;
+    u8 i;
+    u8 j;
     u16 species;
-    u16 original_item;
-    u8 valid;
     u16 total;
     u8 multiplier;
-    u8 i;
+    u8 valid;
     u16 gain;
-    u16* entry;
+    u16 effort[6][3];
 
     *(PokemonEffortTable*)effort = *(PokemonEffortTable*)lbl_80272948;
 
@@ -3369,30 +3117,29 @@ void pokemonGetEffortFromPokemon(u8* obj, u32 item_id, u32 double_effort,
         multiplier = 2;
     }
 
-    original_item = (u16)item_id;
-    i = 0;
-    while (i < 6) {
+    j = 0;
+    while (j < 6) {
         if (total >= 510) {
             return;
         }
 
-        entry = effort[i];
+        entry = effort[j];
         gain = (u16)(multiplier * (u16)pokemonGetStatus(
             NULL, defeated_species, entry[1], 0));
-        if (original_item == 0x18) {
+        if ((u16)item_id == 0x18) {
             gain = (u16)(gain * 2);
         }
         if (total + gain > 510) {
-            gain = (u16)(gain - (total + gain - 510));
+            gain -= total + gain - 510;
         }
-        if (entry[2] + gain > 255) {
-            gain = (u16)(gain - (entry[2] + gain - 255));
+        if (gain + entry[2] > 255) {
+            gain -= gain + entry[2] - 255;
         }
 
         entry[2] += gain;
         total += gain;
         pokemonSetStatus(obj, 0, entry[0], 0, entry[2]);
-        i++;
+        j++;
     }
 }
 
@@ -3709,9 +3456,9 @@ inline u32 inline_fn(u16 val, u8* counter_ptr) {
     return pokemonGetStatus(NULL, val, 0x1e, *counter_ptr);
 }
 
-s32 pokemonOboeWaza(u8* ptr, u8 target, u8* buf_ptr, u8* counter_ptr) {
+s8 pokemonOboeWaza(u8* ptr, u8 target, u8* buf_ptr, u8* counter_ptr) {
     extern u32 pokemonGetStatus(u8* a, u32 b, u32 c, u32 d);
-    extern s32 pokemonSetWazaStatus(u8* a, u16 b, u8* c);
+    extern s8 pokemonSetWazaStatus(u8* a, u16 b, u8* c);
     u8* buf = buf_ptr;
     u8* counter = counter_ptr;
     u8 waza = target;
@@ -3754,141 +3501,146 @@ u16 pokemonGetOboeWazaDataId(u8* ptr, u8 arg2, u8* counter_ptr) {
 #endif /* POKEMON_RANGE_EXACT_801229F4 */
 
 #if !defined(POKEMON_RANGE_SPLIT) || defined(POKEMON_RANGE_RESIDUAL_801237B8)
-s32 pokemonSetWazaStatus(u8* obj, u32 id, u8 replace) {
-    extern u32 pokemonGetStatus(u8* obj, u32 id, u32 selector, u32 index);
-    extern void pokemonSetStatus(u8* obj, u32 param, u16 selector, u32 index,
-                                 u32 value);
-    extern u32* pokemonBiosGetPokemonWazaPtr(void* obj, u32 index, u32 mode);
+/* pokemonWazaCheckValid (0x80123CD4), expanded here. */
+static inline u8 pokemonWazaCheckValidInline(u8* ptr, u32 slot) {
+    extern u32 pokemonGetStatus(u8* ptr, u32 a, u32 b, u32 c);
+    if (ptr == NULL) {
+        return 0;
+    }
+    if ((s32)pokemonGetStatus(ptr, 0, 0x7f, slot) == 0) {
+        return 0;
+    }
+    if ((s32)pokemonGetStatus(ptr, 0, 0x7f, slot) == 0x163) {
+        return 0;
+    }
+    return 1;
+}
+
+/* pokemonSearchWazaDataId (below), pokemonWazaGetMaxPP (0x80123E70),
+ * pokemonWazaCreate (0x80123D58) and XD's pokemonWazaInit/_pokemonWazaCopy,
+ * expanded by pokemonSetWazaStatus as XD's calls them. */
+static inline s8 pokemonSearchWazaDataIdInline(u8* ptr, u16 target) {
+    extern u32 pokemonGetStatus(u8* ptr, u32 a, u32 b, u32 c);
+    u16 t;
     s8 i;
-    s8 found;
-    s32 ext_slot;
-    u16 target_id;
-    u8 valid;
-    s8 j;
-    u16 slot2;
-    u16 move_id;
-    u8 max_pp;
-    u32* dst;
-    u32* src;
+    if (ptr == NULL) {
+        return -1;
+    }
+    t = target;
+    for (i = 0; i < 4; i++) {
+        if (pokemonWazaCheckValidInline(ptr, i) != 0 &&
+            t == (s32)pokemonGetStatus(ptr, 0, 0x7f, i)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/* Register-allocation wrapper (see RULE-EXCEPTION on pokemonSetWazaStatus):
+ * one more inline level makes the search's i/t locals be created after the
+ * copy loop's pointer, which is what retail's r29/r28 colouring needs. */
+static inline s8 pokemonSearchWrapInline(u8* ptr, u16 target) {
+    return pokemonSearchWazaDataIdInline(ptr, target);
+}
+
+static inline u8 pokemonWazaGetMaxPPInline(u8* ptr, u16 waza) {
+    extern u32 pokemonGetStatus(u8* ptr, u32 a, u32 b, u16 c);
+    extern u8 wazaGetMaxPP(u16 type_id, u8 val);
+    u16 id;
+    u32 slot;
+    if (ptr == NULL) {
+        return 0;
+    }
+    slot = waza + 4;
+    id = (u16)pokemonGetStatus(ptr, 0, 0x7f, slot);
+    return wazaGetMaxPP(id, (u8)pokemonGetStatus(ptr, 0, 0x81, slot));
+}
+
+static inline void pokemonWazaInitInline(u8* ptr, u32 slot) {
+    extern void pokemonSetStatus(u8* obj, u32 param, u16 selector, u32 index, u32 value);
+    if (ptr == NULL) {
+        return;
+    }
+    pokemonSetStatus(ptr, 0, 0x7f, slot, 0);
+    pokemonSetStatus(ptr, 0, 0x80, slot, 0);
+    pokemonSetStatus(ptr, 0, 0x81, slot, 0);
+}
+
+static inline void pokemonWazaCreateInline(u8* ptr, u32 slot, u32 waza) {
+    extern void pokemonSetStatus(u8* obj, u32 param, u16 selector, u32 index, u16 value);
+    if (ptr == NULL) {
+        return;
+    }
+    pokemonWazaInitInline(ptr, slot);
+    pokemonSetStatus(ptr, 0, 0x7f, slot, waza);
+    pokemonSetStatus(ptr, 0, 0x80, slot, pokemonWazaGetMaxPPInline(ptr, slot));
+}
+
+static inline void pokemonWazaCopyInline(u8* ptr, u16 dst, u32 src) {
+    extern u32* pokemonBiosGetPokemonWazaPtr(void* obj, u32 index, u32 mode);
+    u32* d;
+    if (ptr == NULL) {
+        return;
+    }
+    d = pokemonBiosGetPokemonWazaPtr(ptr, dst, 0);
+    pokemonWazaBiosCopy(d, pokemonBiosGetPokemonWazaPtr(ptr, src, 0));
+}
+
+/* RULE-EXCEPTION(title-path): local compiler-control pragma plus
+ * register-allocation-only structure - see docs/RULE_EXCEPTIONS.md.
+ * MWCC colours these non-spilling webs in descending vreg order, and inline
+ * locals are numbered in reverse creation order (by inline level, then
+ * source order; parameter temps last). Retail's pairs (search i r29 /
+ * target r28, copy pointer r29, final max-PP id r29) need the search locals
+ * one level deeper (pokemonSearchWrapInline), the search target as a u16
+ * local rather than the frontend-hoisted (long)(u16)id (opt_loop_invariants
+ * off; with it on, the backend's rlwinm temp is the highest vreg and colours
+ * first), and the final slot-3 create open-coded so its max-PP id is created
+ * at the first level. XD (trevor403/xd-asm@b1087f18, func_FUN_80140ec8.s)
+ * calls pokemonSearchWazaDataId and pokemonWazaCreate out of line. */
+#pragma push
+#pragma opt_loop_invariants off
+s8 pokemonSetWazaStatus(u8* obj, u32 id, u8 replace) {
+    s8 i;
+    extern void pokemonSetStatus(u8* obj, u32 param, u16 selector, u32 index, u16 value);
 
     if (obj == NULL) {
         return -2;
     }
-
-    if (obj == NULL) {
-        found = -1;
-        goto search_done;
-    } else {
-        target_id = (u16)id;
-        for (found = 0; (s8)found < 4; found++) {
-            ext_slot = (s8)found;
-            if (obj == NULL) {
-                valid = 0;
-            } else if ((s32)pokemonGetStatus(obj, 0, 0x7F, ext_slot) == 0) {
-                valid = 0;
-            } else if ((s32)pokemonGetStatus(obj, 0, 0x7F, ext_slot) == 0x163) {
-                valid = 0;
-            } else {
-                valid = 1;
-            }
-            if ((u8)valid != 0) {
-                if ((s32)pokemonGetStatus(obj, 0, 0x7F, ext_slot) ==
-                    (s32)target_id) {
-                    goto search_done;
-                }
-            }
-        }
-        found = -1;
-    }
-search_done:
-    if ((s8)found >= 0) {
+    if (pokemonSearchWrapInline(obj, id) >= 0) {
         return -2;
     }
-
-    for (j = 0; (s8)j < 4; j++) {
-        if (obj == NULL) {
-            valid = 0;
-        } else if ((s32)pokemonGetStatus(obj, 0, 0x7F, (s8)j) == 0) {
-            valid = 0;
-        } else if ((s32)pokemonGetStatus(obj, 0, 0x7F, (s8)j) == 0x163) {
-            valid = 0;
-        } else {
-            valid = 1;
-        }
-        if ((u8)valid == 0) {
-            if (obj == NULL) {
-                return (s32)(u8)j;
-            }
-            pokemonSetStatus(obj, 0, 0x7F, (s8)j, 0);
-            pokemonSetStatus(obj, 0, 0x80, (s8)j, 0);
-            pokemonSetStatus(obj, 0, 0x81, (s8)j, 0);
-            pokemonSetStatus(obj, 0, 0x7F, (s8)j, (u16)id);
-            if (obj != NULL) {
-                slot2 = (u16)((s8)j + 4);
-                move_id = (u16)pokemonGetStatus(obj, 0, 0x7F, slot2);
-                max_pp = wazaGetMaxPP(
-                    move_id, (u8)pokemonGetStatus(obj, 0, 0x81, slot2));
-            } else {
-                max_pp = 0;
-            }
-            pokemonSetStatus(obj, 0, 0x80, (s8)j, (u8)max_pp);
-            return (s32)(u8)j;
+    for (i = 0; i < 4; i++) {
+        if (pokemonWazaCheckValidInline(obj, i) == 0) {
+            pokemonWazaCreateInline(obj, i, id);
+            return i;
         }
     }
-
     if (replace == 0) {
         return -1;
     }
-
-    for (i = 1; (s8)i < 4; i++) {
-        if (obj != NULL) {
-            dst = pokemonBiosGetPokemonWazaPtr(obj, (u16)((s8)i - 1), 0);
-            src = pokemonBiosGetPokemonWazaPtr(obj, (u32)(s8)i, 0);
-            pokemonWazaBiosCopy(dst, src);
-        }
+    for (i = 1; i < 4; i++) {
+        pokemonWazaCopyInline(obj, i - 1, i);
     }
-
     if (obj != NULL) {
-        pokemonSetStatus(obj, 0, 0x7F, 3, 0);
-        pokemonSetStatus(obj, 0, 0x80, 3, 0);
-        pokemonSetStatus(obj, 0, 0x81, 3, 0);
+        pokemonWazaInitInline(obj, 3);
+        pokemonSetStatus(obj, 0, 0x7f, 3, id);
+        pokemonSetStatus(obj, 0, 0x80, 3, pokemonWazaGetMaxPPInline(obj, 3));
     }
-    pokemonSetStatus(obj, 0, 0x7F, 3, (u16)id);
-    if (obj != NULL) {
-        move_id = (u16)pokemonGetStatus(obj, 0, 0x7F, 7);
-        max_pp = wazaGetMaxPP(
-            move_id, (u8)pokemonGetStatus(obj, 0, 0x81, 7));
-    } else {
-        max_pp = 0;
-    }
-    pokemonSetStatus(obj, 0, 0x80, 3, (u8)max_pp);
-
     return 3;
 }
+#pragma pop
 
-s32 pokemonSearchWazaDataId(u8* ptr, u16 target) {
-    extern u32 pokemonGetStatus(u8* a, u32 b, u32 c, u32 d);
+s8 pokemonSearchWazaDataId(u8* ptr, u16 target) {
+    extern u32 pokemonGetStatus(u8* ptr, u32 a, u32 b, u32 c);
     s8 i;
-    s32 ext_i;
-    u8 flag;
-    if (ptr == NULL) { return -1; }
-    for (i = 0; (s8)i < 4; i++) {
-        ext_i = (s8)i;
-        if (ptr == NULL) {
-            flag = 0;
-        } else {
-            if ((s32)pokemonGetStatus(ptr, 0, 0x7f, ext_i) == 0) {
-                flag = 0;
-            } else if ((s32)pokemonGetStatus(ptr, 0, 0x7f, ext_i) == 0x163) {
-                flag = 0;
-            } else {
-                flag = 1;
-            }
-        }
-        if ((u8)flag != 0) {
-            if ((s32)pokemonGetStatus(ptr, 0, 0x7f, (s8)i) == (s32)target) {
-                return i;
-            }
+    if (ptr == NULL) {
+        return -1;
+    }
+    for (i = 0; i < 4; i++) {
+        if (pokemonWazaCheckValidInline(ptr, i) != 0 &&
+            target == (s32)pokemonGetStatus(ptr, 0, 0x7f, i)) {
+            return i;
         }
     }
     return -1;
@@ -3992,19 +3744,29 @@ u8 pokemonCheckValid(u8* ptr) {
 
 #endif /* POKEMON_RANGE_EXACT_80123E70 */
 
-#if !defined(POKEMON_RANGE_SPLIT) || defined(POKEMON_RANGE_RESIDUAL_801240C4)
+#if !defined(POKEMON_RANGE_SPLIT) || defined(POKEMON_RANGE_EXACT_801240C4)
+/*
+ * pokemonCreate (0x801240C4). Exact at GC/1.3 -O4,p. The argument forms are
+ * load-bearing: MWCC computes a binary-op argument straight into its
+ * argument register but a narrowing cast through a temporary, which moves
+ * the clrlwi ahead of `mr r3,ptr`. The personality operands evaluate right
+ * to left, so the low half is written first. The two IV words are separate
+ * locals, and the loop bound is a shift pair so it stays a user variable
+ * (a cast would become a hoisted loop temporary and take r31). The local
+ * declaration order sets the callee-saved register choice.
+ */
 void pokemonCreate(u8* ptr, u32 pokemon_data_id, u32 level, const void* attest) {
-    u16 random;
-    u32 personality_high;
-    u32 experience;
-    u32 friendship;
-    u32 max_level;
-    void* grow_data;
     u32 learn_level;
-    u8 learn_counter;
+    void* grow_data;
+    u32 friendship;
     u8 current_level;
+    u32 experience;
     u8 grow_id;
+    u16 random;
     u8 valid;
+    u16 random2;
+    u8 learn_counter;
+    u32 max_level;
 
     if (ptr == NULL) {
         return;
@@ -4026,26 +3788,22 @@ void pokemonCreate(u8* ptr, u32 pokemon_data_id, u32 level, const void* attest) 
     }
 
     pokemonInit(ptr);
-    pokemonSetStatus(ptr, 0, 0x6E, 0, (u16)pokemon_data_id);
+    pokemonSetStatus(ptr, 0, 0x6E, 0, pokemon_data_id & 0xFFFF);
 
-    personality_high = GSrand() << 16;
-    pokemonSetStatus(ptr, 0, 0x6F, 0,
-                     personality_high | (GSrand() & 0xFFFF));
+    pokemonSetStatus(ptr, 0, 0x6F, 0, (GSrand() & 0xFFFF) | (GSrand() << 16));
 
     gamedataAttestBiosCopy((void*)pokemonGetStatus(ptr, 0, 0x70, 0), attest);
     pokemonSetStatus(ptr, 0, 0x77, 0,
                      GSmsgGetGSchar(pokemonGetStatus(NULL, pokemon_data_id, 1, 0)));
-    pokemonSetStatus(ptr, 0, 0x7A, 0, (u8)level);
+    pokemonSetStatus(ptr, 0, 0x7A, 0, level & 0xFF);
 
-    random = (u16)GSrand();
-    pokemonSetStatus(ptr, 0, 0x93, 0, random & 0x1F);
-    pokemonSetStatus(ptr, 0, 0x94, 0, (random >> 5) & 0x1F);
-    pokemonSetStatus(ptr, 0, 0x95, 0, (random >> 10) & 0x1F);
+    pokemonSetStatus(ptr, 0, 0x93, 0, (random = GSrand()) & 0x1F);
+    pokemonSetStatus(ptr, 0, 0x94, 0, (u8)((random >> 5) & 0x1F));
+    pokemonSetStatus(ptr, 0, 0x95, 0, (u8)((random >> 10) & 0x1F));
 
-    random = (u16)GSrand();
-    pokemonSetStatus(ptr, 0, 0x98, 0, random & 0x1F);
-    pokemonSetStatus(ptr, 0, 0x96, 0, (random >> 5) & 0x1F);
-    pokemonSetStatus(ptr, 0, 0x97, 0, (random >> 10) & 0x1F);
+    pokemonSetStatus(ptr, 0, 0x98, 0, (random2 = GSrand()) & 0x1F);
+    pokemonSetStatus(ptr, 0, 0x96, 0, (random2 >> 5) & 0x1F);
+    pokemonSetStatus(ptr, 0, 0x97, 0, (random2 >> 10) & 0x1F);
 
     grow_id = (u8)pokemonGetStatus(
         NULL, (u16)pokemonGetStatus(ptr, 0, 0x6E, 0), 0x11, 0);
@@ -4068,11 +3826,11 @@ void pokemonCreate(u8* ptr, u32 pokemon_data_id, u32 level, const void* attest) 
             if ((s32)pokemonGetStatus(NULL, species, 0x17, 1) == 0) {
                 ability_flag = 0;
             }
-            pokemonSetStatus(ptr, 0, 0xB7, 0, (u8)ability_flag);
+            pokemonSetStatus(ptr, 0, 0xB7, 0, ability_flag & 0xFF);
         }
     }
 
-    max_level = (u8)level;
+    max_level = (level << 24) >> 24;
     for (learn_level = 1; learn_level <= max_level; learn_level++) {
         learn_counter = 0;
         for (;;) {
@@ -4086,123 +3844,120 @@ void pokemonCreate(u8* ptr, u32 pokemon_data_id, u32 level, const void* attest) 
 
     pokemonResetBasisStatus(ptr);
 }
+#endif /* POKEMON_RANGE_EXACT_801240C4 */
 
-static u32 pokemonCreateRndFitRand32(void) {
-    u32 hi;
-    u32 lo;
+#if !defined(POKEMON_RANGE_SPLIT) || defined(POKEMON_RANGE_EXACT_80124410)
 
-    hi = GSrand() << 16;
-    lo = GSrand() & 0xFFFF;
-    return hi | lo;
+/*
+ * pokemonCreateRndFit (0x80124410): draw personality values until one fits
+ * the requested sex, nature and rarity (a negative request means "any").
+ * Exact with GC/1.3.2 only; see the RULE-EXCEPTION notes below.
+ */
+static inline u32 pokemonCreateRndFitRand32(void) {
+    return (GSrand() & 0xFFFF) | (GSrand() << 16);
 }
 
-static s32 pokemonCreateRndFitCurrentGroup(u8* ptr) {
-    extern u8 fn_80131574(u32);
-    u16 species;
-    u16 group;
+/*
+ * Fixed sex of obj's species: 0/1/2 when the species' sex ratio is one of
+ * the three fixed ratios, -1 when the sex follows from the personality.
+ * Never exists out of line (see pokemon_get_status_exact_8012640C.c).
+ */
+static inline s8 pokemonGetSexKotei(u8* obj) {
+    u16 ratio;
 
-    if (ptr == NULL) {
+    if (obj == NULL) {
         return 2;
     }
-
-    species = (u16)pokemonGetStatus(ptr, 0, 0x6E, 0);
-    group = (u16)pokemonGetStatus(NULL, species, 0x13, 0);
-
-    if ((s32)group == (s32)(u8)fn_80131574(0)) {
+    ratio = (u16)pokemonGetStatus(NULL, (u16)pokemonGetStatus(obj, 0, 0x6E, 0), 0x13, 0);
+    if (ratio == (u8)sexGetPokemonSexRaitoKotei(0)) {
         return 0;
     }
-    if ((s32)group == (s32)(u8)fn_80131574(1)) {
+    if (ratio == (u8)sexGetPokemonSexRaitoKotei(1)) {
         return 1;
     }
-    if ((s32)group == (s32)(u8)fn_80131574(2)) {
+    if (ratio == (u8)sexGetPokemonSexRaitoKotei(2)) {
         return 2;
     }
     return -1;
 }
 
-static u8 pokemonCreateRndFitGroupOrRandom(u8* ptr, u32 value) {
-    s8 group;
-    u16 species;
-    u16 threshold;
+/* Sex of obj's species for personality value rnd. */
+static inline u8 pokemonGetSexFromRnd(u8* obj, u32 rnd) {
+    u16 ratio;
+    s8 sex;
 
-    group = pokemonCreateRndFitCurrentGroup(ptr);
-    if (group >= 0) {
-        return (u8)group;
+    ratio = (u16)pokemonGetStatus(NULL, (u16)pokemonGetStatus(obj, 0, 0x6E, 0), 0x13, 0);
+    sex = pokemonGetSexKotei(obj);
+    if (sex < 0) {
+        if (ratio > (rnd & 0xFF)) {
+            sex = 1;
+        } else {
+            sex = 0;
+        }
     }
-
-    species = (u16)pokemonGetStatus(ptr, 0, 0x6E, 0);
-    threshold = (u16)pokemonGetStatus(NULL, species, 0x13, 0);
-    if ((u32)threshold > (value & 0xFF)) {
-        return 1;
-    }
-    return 0;
+    return sex;
 }
 
-static u8 pokemonCreateRndFitSeedHit(u32 value, u32 seed_xor) {
-    u32 x;
-
-    x = (value >> 16) ^ (value & 0xFFFF) ^ seed_xor ^ 8;
-    return (x >= 8 && x < 16) ? 1 : 0;
+/*
+ * RULE-EXCEPTION(title-path): single-use inline copy of pokemonGetSex
+ * (0x801231A4), which retail expands here -- see docs/RULE_EXCEPTIONS.md.
+ */
+static inline u8 pokemonCreateRndFitGetSex(u8* obj) {
+    if (obj == NULL) {
+        return 2;
+    }
+    return pokemonGetSexFromRnd(obj, pokemonGetStatus(obj, 0, 0x6F, 0));
 }
 
-u32 pokemonCreateRndFit(u8* ptr, s32 group_arg, s32 mod_arg, s32 seed_mode_arg, u32 seed) {
-    if (ptr == NULL) {
-        return pokemonCreateRndFitRand32();
-    }
+/* The pokemonCheckRare test for trainer id `id` and personality `rnd`. */
+static inline u8 pokemonCreateRndFitIsRare(u32 id, u32 rnd) {
+    return ((id >> 16) ^ (id & 0xFFFF) ^ (rnd >> 16) ^ (rnd & 0xFFFF)) < 8;
+}
 
-    for (;;) {
-        u32 value;
+u32 pokemonCreateRndFit(u8* ptr, s8 sex, s8 nature, s8 rare, u32 id) {
+    u32 rnd;
 
-        value = pokemonCreateRndFitRand32();
-
-        if ((s8)group_arg >= 0) {
-            s32 group;
-
-            group = pokemonCreateRndFitCurrentGroup(ptr);
-            if (group < 0) {
-                /* Retail emits this arm's pokemonGetStatus pair early (bl 9-10,
-                 * not 29-30), i.e. the == 2 arm is written first. */
-                if ((s8)group_arg == 2) {
-                    u32 current;
-                    u8 lhs;
-                    u8 rhs;
-
-                    current = pokemonGetStatus(ptr, 0, 0x6F, 0);
-                    lhs = pokemonCreateRndFitGroupOrRandom(ptr, current);
-                    rhs = pokemonCreateRndFitGroupOrRandom(ptr, value);
-                    if (lhs != rhs) {
-                        continue;
-                    }
-                } else {
-                    if ((u8)(s8)group_arg != pokemonCreateRndFitGroupOrRandom(ptr, value)) {
-                        continue;
-                    }
-                }
+    /*
+     * RULE-EXCEPTION(title-path): goto-entered retry loop, exact only under
+     * GC/1.3.2 (this carve's mw_version; the rest of the pokemon TU builds
+     * with GC/1.3) -- see docs/RULE_EXCEPTIONS.md. Retail enters the loop
+     * through a preheader placed after the function body, which MWCC's
+     * loop-invariant pass emits only when the loop head is a conditional
+     * branch target.
+     */
+    if (ptr != NULL) goto retry;
+    return pokemonCreateRndFitRand32();
+retry:
+    rnd = pokemonCreateRndFitRand32();
+    if (sex >= 0 && pokemonGetSexKotei(ptr) < 0) {
+        if (sex != 2) {
+            if (sex != pokemonGetSexFromRnd(ptr, rnd)) {
+                goto retry;
+            }
+        } else {
+            if (pokemonCreateRndFitGetSex(ptr) != pokemonGetSexFromRnd(ptr, rnd)) {
+                goto retry;
             }
         }
-
-        if ((s8)mod_arg >= 0 && (u8)(s8)mod_arg != (u8)(value % 25)) {
-            continue;
-        }
-
-        if ((s8)seed_mode_arg >= 0) {
-            u8 hit;
-
-            hit = pokemonCreateRndFitSeedHit(value, (seed >> 16) ^ (seed & 0xFFFF));
-            if ((s8)seed_mode_arg != 0) {
-                if (hit == 0) {
-                    continue;
-                }
-            } else if (hit == 1) {
-                continue;
+    }
+    if (nature >= 0 && nature != (u8)(rnd % 25)) {
+        goto retry;
+    }
+    if (rare >= 0) {
+        if (rare != 0) {
+            if (pokemonCreateRndFitIsRare(id, rnd) == 0) {
+                goto retry;
+            }
+        } else {
+            if (pokemonCreateRndFitIsRare(id, rnd) == 1) {
+                goto retry;
             }
         }
-
-        return value;
     }
+    return rnd;
 }
 
-#endif /* POKEMON_RANGE_RESIDUAL_801240C4 */
+#endif /* POKEMON_RANGE_EXACT_80124410 */
 
 void pokemonSetTokuseiFlag(u8* ptr, u32 arg2);
 /* body moved to pokemon_range_exact_801248C4.c: pokemonSetTokuseiFlag */
@@ -4210,7 +3965,6 @@ void pokemonInit(u8* ptr);
 /* body moved to pokemon_range_exact_801248C4.c: pokemonInit */
 
 #endif
-#pragma optimization_level 4
 #ifdef POKEMON_SET_STATUS_EXACT
 void pokemonSetStatus(u8* obj, u32 id, u32 selector, u32 subindex, u32 value)
 {
@@ -4529,6 +4283,7 @@ void pokemonSetStatus(u8* obj, u32 id, u32 selector, u32 subindex, u32 value);
 #endif
 
 #if !defined(POKEMON_SET_STATUS_EXACT) && !defined(POKEMON_RANGE_SPLIT)
+/* Linked owner: pokemon_get_status_exact_8012640C.c. */
 u32 pokemonGetStatus(u8* obj, u32 id, u32 selector, u32 d) {
     extern void* fn_8011E778(u32 idx);
     extern u32  fn_8011E760(u8* ptr);
@@ -5026,14 +4781,16 @@ u32 pokemonGetStatus(u8* obj, u32 id, u32 selector, u32 d) {
         return (u32)result;
     }
 
-    case 0xC2: return (u32)(u16)fn_8011E7C0(obj);
+    /* Case labels from retail's jumptable_8035E4B0; see
+     * pokemon_get_status_exact_8012640C.c, the linked owner. */
+    case 0xC9: return (u32)(u16)fn_8011E7C0(obj);
     case 0xC3: return (u32)(u16)fn_8011EE40(obj);
     case 0xC4: return fn_8011ED18(obj);
     case 0xC5: return fn_8011EE28(obj);
     case 0xC6: return fn_8011EE10(obj);
     case 0xC7: return (u32)(u16)fn_8011EDF8(obj);
-    case 0xC8: return (u32)(u8)fn_8011ED68(obj);
-    case 0xC9: return fn_8011EDC4(obj, d);
+    case 0xC2: return (u32)(u8)fn_8011ED68(obj);
+    case 0xC8: return fn_8011EDC4(obj, d);
     case 0xCB: return fn_801FDB60(obj);
     case 0xCC: return fn_801FDB48(obj);
     case 0xCD: return fn_801FDB14(obj, d);

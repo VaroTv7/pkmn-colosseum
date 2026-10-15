@@ -13,6 +13,7 @@
  */
 
 #include "dolphin/types.h"
+#include "dolphin/gx/GX.h"
 
 /* ===== External SDK / engine functions ===== */
 extern void  GSlogWrite(const char*, ...);             /* OSReport / GSlog */
@@ -70,15 +71,9 @@ typedef struct GSgfxState {
     u8 requestBufferFlag;
 } GSgfxState;
 
-typedef struct GSgfxRequestStrings {
-    char alreadyAllocated[0x28];
-    char allocationFailed[0x24];
-    char allocationSucceeded[1];
-} GSgfxRequestStrings;
 
 /* ===== String constants (rodata) ===== */
 extern const char lbl_80270440[]; /* "GSgfx: invalid matrix index" */
-extern const char lbl_802703C0[]; /* request-buffer status strings */
 extern const char lbl_80270460[]; /* "GSgfx: matrix stack underflow!" */
 extern const char lbl_80270480[]; /* "GSgfx: matrix stack overflow!" */
 extern const char lbl_802704A0[]; /* "0123456789ABCDEF" */
@@ -459,43 +454,53 @@ extern u32 lbl_8047AB3C;
 /* ==================================================================
  * fn_800D3FA4 -- GSgfx_BeginFrame
  *
- * Set up the rendering pipeline for a new frame. This is a large
- * function (0x654 = 1620 bytes) that configures:
- *   - GX FIFO
- *   - Clear color and Z buffer
- *   - Viewport and scissor
- *   - Default blend modes
- *   - TEV stages
- *   - Projection matrix
+ * Replays the recorded command queue into the GX pipeline for a new
+ * frame: two render passes over the 0x10/0x1000/0x2000 layers (timed
+ * into the stats block), with the screen-quad clear between them.
+ *
+ * Reconstructed helpers, each admitted by repeated expansion in retail:
+ * gfxRenderPass (the pass body, twice), gfxSetupLayerCamera (six times,
+ * differing only in the layer and pass constants) and gfxRunQueue (four
+ * times). The second pass drops flags 0x1 and 0x100 inside the pass
+ * body; retail still tests bit 0 there, because the TU was built without
+ * copy propagation (-opt nopropagation on this one-function unit; see
+ * configure.py). The 0.0f/640.0f/480.0f literals are the TU's own pool
+ * (.sdata2 0x8047CA20-0x8047CA30).
  * ================================================================== */
-void fn_800D3FA4(u32 flags, u8 setupCamera, u8 resetQueue) {
-    u8* state;
-    u8* stats;
-    u32 oldMode;
-    u32 oldMask;
-    u8 oldAlpha;
-    u32 start;
-    u32 cursor;
-    u32 camera;
+static inline void gfxSetupLayerCamera(u32 layer, u8 pass) {
+    u32 camera = GScameraGetActiveCamera();
 
-    state = (u8*)lbl_8047AA80;
-    stats = lbl_804001F0;
-
-    cursor = *(u32*)(state + 0x494) - *(u32*)(state + 0x490);
-    if (cursor > *(u32*)(stats + 0x28)) {
-        *(u32*)(stats + 0x28) = cursor;
+    if (camera != 0) {
+        fn_801B25C4(0x7F);
+        if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
+            GSlightSetupLights(*(void**)(camera + 0x0C));
+            GSmodelDrawAll(layer, pass);
+            gsParticleDraw(layer, pass);
+            HSD_FogSet(lbl_8047AA8C);
+            fn_80195A48();
+        }
+        fn_800D87AC(-1);
     }
+}
 
-    oldMode = *(u32*)(state + 0x00);
-    oldMask = *(u32*)(state + 0x04);
-    *(u32*)(state + 0x00) = 2;
-    HSD_FogSet(lbl_8047AA8C);
+static inline void gfxRunQueue(void) {
+    u32 cursor = *(u32*)((u8*)lbl_8047AA80 + 0x490);
 
-    state = (u8*)lbl_8047AA80;
-    state[0x1B] = 0;
-    *(u32*)(stats + 0x40) = 0;
-    *(u32*)(stats + 0x44) = 0;
-    *(u32*)(stats + 0x48) = 0;
+    while (cursor < *(u32*)((u8*)lbl_8047AA80 + 0x494)) {
+        cursor = (u32)gfxPlayCommands((u32*)cursor);
+    }
+}
+
+static inline void gfxRenderPass(u32 flags, u8 setupCamera, u8 pass) {
+    u32 start;
+
+    if (pass != 0) {
+        flags &= ~0x101;
+    }
+    ((u8*)lbl_8047AA80)[0x1B] = pass;
+    *(u32*)(lbl_804001F0 + 0x40 + pass * 12) = 0;
+    *(u32*)(lbl_804001F0 + 0x44 + pass * 12) = 0;
+    *(u32*)(lbl_804001F0 + 0x48 + pass * 12) = 0;
 
     if (flags & 1) {
         fn_801E17A8();
@@ -505,79 +510,62 @@ void fn_800D3FA4(u32 flags, u8 setupCamera, u8 resetQueue) {
         start = OSGetTick();
         *(u32*)((u8*)lbl_8047AA80 + 0x04) = 0x10;
         if (setupCamera != 0) {
-            camera = GScameraGetActiveCamera();
-            if (camera != 0) {
-                fn_801B25C4(0x7F);
-                if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
-                    GSlightSetupLights(*(void**)(camera + 0x0C));
-                    GSmodelDrawAll(0x10, 0);
-                    gsParticleDraw(0x10, 0);
-                    HSD_FogSet(lbl_8047AA8C);
-                    fn_80195A48();
-                }
-                fn_800D87AC(-1);
-            }
+            gfxSetupLayerCamera(0x10, pass);
         }
-        cursor = *(u32*)((u8*)lbl_8047AA80 + 0x490);
-        while (cursor < *(u32*)((u8*)lbl_8047AA80 + 0x494)) {
-            cursor = (u32)gfxPlayCommands((u32*)cursor);
-        }
-        *(u32*)(stats + 0x40) = OSGetTick() - start;
+        gfxRunQueue();
+        *(u32*)(lbl_804001F0 + 0x40 + pass * 12) = OSGetTick() - start;
     }
 
     if (flags & 0x1000) {
         start = OSGetTick();
         *(u32*)((u8*)lbl_8047AA80 + 0x04) = 0x1000;
         if (setupCamera != 0) {
-            camera = GScameraGetActiveCamera();
-            if (camera != 0) {
-                fn_801B25C4(0x7F);
-                if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
-                    GSlightSetupLights(*(void**)(camera + 0x0C));
-                    GSmodelDrawAll(0x1000, 0);
-                    gsParticleDraw(0x1000, 0);
-                    HSD_FogSet(lbl_8047AA8C);
-                    fn_80195A48();
-                }
-                fn_800D87AC(-1);
-            }
+            gfxSetupLayerCamera(0x1000, pass);
         }
-        *(u32*)(stats + 0x44) = OSGetTick() - start;
+        *(u32*)(lbl_804001F0 + 0x44 + pass * 12) = OSGetTick() - start;
     }
 
     if (flags & 0x2000) {
         start = OSGetTick();
         *(u32*)((u8*)lbl_8047AA80 + 0x04) = 0x2000;
         if (setupCamera != 0) {
-            camera = GScameraGetActiveCamera();
-            if (camera != 0) {
-                fn_801B25C4(0x7F);
-                if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
-                    GSlightSetupLights(*(void**)(camera + 0x0C));
-                    GSmodelDrawAll(0x2000, 0);
-                    gsParticleDraw(0x2000, 0);
-                    HSD_FogSet(lbl_8047AA8C);
-                    fn_80195A48();
-                }
-                fn_800D87AC(-1);
-            }
+            gfxSetupLayerCamera(0x2000, pass);
         }
-        cursor = *(u32*)((u8*)lbl_8047AA80 + 0x490);
-        while (cursor < *(u32*)((u8*)lbl_8047AA80 + 0x494)) {
-            cursor = (u32)gfxPlayCommands((u32*)cursor);
-        }
-        *(u32*)(stats + 0x48) = OSGetTick() - start;
+        gfxRunQueue();
+        *(u32*)(lbl_804001F0 + 0x48 + pass * 12) = OSGetTick() - start;
     }
+}
+
+void fn_800D3FA4(u32 flags, u8 setupCamera, u8 resetQueue) {
+    u8* state;
+    u32 oldMode;
+    u32 oldMask;
+    u8 oldAlpha;
+    u32 cursor;
+
+    state = (u8*)lbl_8047AA80;
+
+    cursor = *(u32*)(state + 0x494) - *(u32*)(state + 0x490);
+    if (cursor > *(u32*)(lbl_804001F0 + 0x28)) {
+        *(u32*)(lbl_804001F0 + 0x28) = cursor;
+    }
+
+    oldMode = *(u32*)(state + 0x00);
+    oldMask = *(u32*)(state + 0x04);
+    *(u32*)(state + 0x00) = 2;
+    HSD_FogSet(lbl_8047AA8C);
+
+    gfxRenderPass(flags, setupCamera, 0);
 
     *(u32*)((u8*)lbl_8047AA80 + 0x04) = -1;
     oldAlpha = ((u8*)lbl_8047AA80)[0x1A];
     ((u8*)lbl_8047AA80)[0x1A] = ((u8*)lbl_8047AA80)[0x1B];
-    gfxSetUpdates(0, 0, 1);
+    gfxSetUpdates(((u8*)lbl_8047AA80)[0x49C], 0, 1);
     gfxSetZMode(1, 7, 2);
     fn_800DA100(0, 7, 0, 1, 7, 0);
     gfxSetFlags(1);
     gfxClearFlags(6);
-    gfxSetOrtho(lbl_8047CA20, lbl_8047CA20, lbl_8047CA24, lbl_8047CA28);
+    gfxSetOrtho(0.0f, 0.0f, 640.0f, 480.0f);
     fn_800D9FB4(0);
     gfxSetCullMode(0);
     gfxSetVtxDesc((u32)lbl_803147C8);
@@ -597,84 +585,7 @@ void fn_800D3FA4(u32 flags, u8 setupCamera, u8 resetQueue) {
     gfxSetZMode(1, 7, 2);
     fn_800D9FB4(1);
 
-    flags &= (u32)-0x102;
-    state = (u8*)lbl_8047AA80;
-    state[0x1B] = 1;
-    *(u32*)(stats + 0x4C) = 0;
-    *(u32*)(stats + 0x50) = 0;
-    *(u32*)(stats + 0x54) = 0;
-
-    if (flags & 1) {
-        fn_801E17A8();
-    }
-
-    if (flags & 0x10) {
-        start = OSGetTick();
-        *(u32*)((u8*)lbl_8047AA80 + 0x04) = 0x10;
-        if (setupCamera != 0) {
-            camera = GScameraGetActiveCamera();
-            if (camera != 0) {
-                fn_801B25C4(0x7F);
-                if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
-                    GSlightSetupLights(*(void**)(camera + 0x0C));
-                    GSmodelDrawAll(0x10, 1);
-                    gsParticleDraw(0x10, 1);
-                    HSD_FogSet(lbl_8047AA8C);
-                    fn_80195A48();
-                }
-                fn_800D87AC(-1);
-            }
-        }
-        cursor = *(u32*)((u8*)lbl_8047AA80 + 0x490);
-        while (cursor < *(u32*)((u8*)lbl_8047AA80 + 0x494)) {
-            cursor = (u32)gfxPlayCommands((u32*)cursor);
-        }
-        *(u32*)(stats + 0x4C) = OSGetTick() - start;
-    }
-
-    if (flags & 0x1000) {
-        start = OSGetTick();
-        *(u32*)((u8*)lbl_8047AA80 + 0x04) = 0x1000;
-        if (setupCamera != 0) {
-            camera = GScameraGetActiveCamera();
-            if (camera != 0) {
-                fn_801B25C4(0x7F);
-                if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
-                    GSlightSetupLights(*(void**)(camera + 0x0C));
-                    GSmodelDrawAll(0x1000, 1);
-                    gsParticleDraw(0x1000, 1);
-                    HSD_FogSet(lbl_8047AA8C);
-                    fn_80195A48();
-                }
-                fn_800D87AC(-1);
-            }
-        }
-        *(u32*)(stats + 0x50) = OSGetTick() - start;
-    }
-
-    if (flags & 0x2000) {
-        start = OSGetTick();
-        *(u32*)((u8*)lbl_8047AA80 + 0x04) = 0x2000;
-        if (setupCamera != 0) {
-            camera = GScameraGetActiveCamera();
-            if (camera != 0) {
-                fn_801B25C4(0x7F);
-                if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
-                    GSlightSetupLights(*(void**)(camera + 0x0C));
-                    GSmodelDrawAll(0x2000, 1);
-                    gsParticleDraw(0x2000, 1);
-                    HSD_FogSet(lbl_8047AA8C);
-                    fn_80195A48();
-                }
-                fn_800D87AC(-1);
-            }
-        }
-        cursor = *(u32*)((u8*)lbl_8047AA80 + 0x490);
-        while (cursor < *(u32*)((u8*)lbl_8047AA80 + 0x494)) {
-            cursor = (u32)gfxPlayCommands((u32*)cursor);
-        }
-        *(u32*)(stats + 0x54) = OSGetTick() - start;
-    }
+    gfxRenderPass(flags, setupCamera, 1);
 
     ((u8*)lbl_8047AA80)[0x1B] = 0;
     gfxSetUpdates(1, 1, 1);
@@ -756,7 +667,7 @@ extern void fn_800DBBFC(u32, u32, u16, u16, u16, u16, u32, u32, u32, u32);
 extern void fn_800DBCE4(u32, u32, u8, u8, u32);
 extern void fn_800DBD70(u32, u32, u32, u32, u32, u32, u32, u8, u8, u32);
 extern void fn_800DBE5C(u32);
-extern void fn_800DBEB4(u32, void*);
+extern void fn_800DBEB4(u32, GXColor);
 extern void fn_800DBF1C(u32, u32);
 extern void fn_800DBF78(u32, u32);
 extern void fn_800DBFD4(u32, u32, u32, u32, u32);
@@ -769,143 +680,212 @@ extern void gfxSetTevStage(u32, u32, u32, u32, u32);
 #if !defined(GS_GFX_RANGE_SPLIT) || \
     defined(GS_GFX_RANGE_800D461C_800D55D0)
 /* ==================================================================
- * fn_800D461C -- GSlog_PrintFormatted
+ * fn_800D461C -- render-command interpreter
  *
- * Varargs printf-like function for the GS debug logging system.
- * At 0x97C (2428) bytes, this is a substantial printf implementation.
- * Uses "0123456789ABCDEF" for hex digit lookup.
+ * Replays one recorded GSgfx command: reads the command's argument words,
+ * advances the cursor and calls the handler, returning the next command.
+ * The unit owns its switch table (.data 0x80314188) and links as
+ * Matching. Case 39 reads its three words with `*p++` (retail advances the
+ * cursor before passing it); case 91 is a documented title-path exception
+ * (see docs/RULE_EXCEPTIONS.md).
  * ================================================================== */
 u32* gfxPlayCommands(u32* command)
 {
     u32* p = command + 1;
-    u32 copied;
+    GXColor copied;
     u32 argument;
 
     switch (command[0]) {
     case 1:
-        gfxSetPrimitive(p[0]); p += 1; break;
+        p += 1;
+        gfxSetPrimitive(p[-1]); break;
     case 2:
-        gfxBegin((u16)p[0]); p += 1; break;
+        p += 1;
+        gfxBegin((u16)p[-1]); break;
     case 3:
         gfxEnd(); break;
     case 4:
         fn_800D30AC(); break;
     case 5:
-        gfxVtxPos(((f32*)p)[0], ((f32*)p)[1], ((f32*)p)[2]); p += 3; break;
+        p += 3;
+        gfxVtxPos(((f32*)p)[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
     case 6:
-        fn_800D65CC((u16)p[0], (u16)p[1], (u16)p[2]); p += 3; break;
+        p += 3;
+        fn_800D65CC((u16)p[-3], (u16)p[-2], (u16)p[-1]); break;
     case 7:
-        fn_800D6518((s16)p[0], (s16)p[1], (s16)p[2]); p += 3; break;
+        p += 3;
+        fn_800D6518((s16)p[-3], (s16)p[-2], (s16)p[-1]); break;
     case 8:
-        fn_800D6464((u8)p[0], (u8)p[1], (u8)p[2]); p += 3; break;
+        p += 3;
+        fn_800D6464((u8)p[-3], (u8)p[-2], (u8)p[-1]); break;
     case 9:
-        fn_800D63B0((s8)p[0], (s8)p[1], (s8)p[2]); p += 3; break;
+        p += 3;
+        fn_800D63B0((s8)p[-3], (s8)p[-2], (s8)p[-1]); break;
     case 10:
-        fn_800D631C(((f32*)p)[0], ((f32*)p)[1]); p += 2; break;
+        p += 2;
+        fn_800D631C(((f32*)p)[-2], ((f32*)p)[-1]); break;
     case 11:
-        fn_800D6280((u16)p[0], (u16)p[1]); p += 2; break;
+        p += 2;
+        fn_800D6280((u16)p[-2], (u16)p[-1]); break;
     case 12:
-        fn_800D61E4((s16)p[0], (s16)p[1]); p += 2; break;
+        p += 2;
+        fn_800D61E4((s16)p[-2], (s16)p[-1]); break;
     case 13:
-        fn_800D6148((u8)p[0], (u8)p[1]); p += 2; break;
+        p += 2;
+        fn_800D6148((u8)p[-2], (u8)p[-1]); break;
     case 14:
-        fn_800D60AC((s8)p[0], (s8)p[1]); p += 2; break;
+        p += 2;
+        fn_800D60AC((s8)p[-2], (s8)p[-1]); break;
     case 15:
-        fn_800D6028((u16)p[0]); p += 1; break;
+        p += 1;
+        fn_800D6028((u16)p[-1]); break;
     case 16:
-        fn_800D5FA4((u8)p[0]); p += 1; break;
+        p += 1;
+        fn_800D5FA4((u8)p[-1]); break;
     case 17:
-        fn_800D5F34(((f32*)p)[0], ((f32*)p)[1], ((f32*)p)[2]); p += 3; break;
+        p += 3;
+        fn_800D5F34(((f32*)p)[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
     case 18:
-        fn_800D5EB4((s16)p[0], (s16)p[1], (s16)p[2]); p += 3; break;
+        p += 3;
+        fn_800D5EB4((s16)p[-3], (s16)p[-2], (s16)p[-1]); break;
     case 19:
-        fn_800D5E34((s8)p[0], (s8)p[1], (s8)p[2]); p += 3; break;
+        p += 3;
+        fn_800D5E34((s8)p[-3], (s8)p[-2], (s8)p[-1]); break;
     case 20:
-        fn_800D5DD0((u16)p[0]); p += 1; break;
+        p += 1;
+        fn_800D5DD0((u16)p[-1]); break;
     case 21:
-        fn_800D5D6C((u8)p[0]); p += 1; break;
+        p += 1;
+        fn_800D5D6C((u8)p[-1]); break;
     case 22:
-        fn_800D5CB8(p[0], (u8)p[1], (u8)p[2], (u8)p[3], (u8)p[4]); p += 5; break;
+        p += 5;
+        fn_800D5CB8(p[-5], (u8)p[-4], (u8)p[-3], (u8)p[-2], (u8)p[-1]); break;
     case 23:
-        gfxVtxColor(p[0], (u8)p[1], (u8)p[2], (u8)p[3]); p += 4; break;
+        p += 4;
+        gfxVtxColor(p[-4], (u8)p[-3], (u8)p[-2], (u8)p[-1]); break;
     case 24:
-        fn_800D5BA0(p[0], p[1]); p += 2; break;
+        p += 2;
+        fn_800D5BA0(p[-2], p[-1]); break;
     case 25:
-        fn_800D5B28(p[0], (u16)p[1]); p += 2; break;
+        p += 2;
+        fn_800D5B28(p[-2], (u16)p[-1]); break;
     case 26:
-        fn_800D5AB0(p[0], (u16)p[1]); p += 2; break;
+        p += 2;
+        fn_800D5AB0(p[-2], (u16)p[-1]); break;
     case 27:
-        fn_800D5A38(p[0], (u8)p[1]); p += 2; break;
+        p += 2;
+        fn_800D5A38(p[-2], (u8)p[-1]); break;
     case 28:
-        gfxVtxTexCoord(p[0], ((f32*)p)[1], ((f32*)p)[2]); p += 3; break;
+        p += 3;
+        gfxVtxTexCoord(p[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
     case 29:
-        fn_800D592C(p[0], (u16)p[1], (u16)p[2]); p += 3; break;
+        p += 3;
+        fn_800D592C(p[-3], (u16)p[-2], (u16)p[-1]); break;
     case 30:
-        fn_800D58A0(p[0], (s16)p[1], (s16)p[2]); p += 3; break;
+        p += 3;
+        fn_800D58A0(p[-3], (s16)p[-2], (s16)p[-1]); break;
     case 31:
-        fn_800D5814(p[0], (u8)p[1], (u8)p[2]); p += 3; break;
+        p += 3;
+        fn_800D5814(p[-3], (u8)p[-2], (u8)p[-1]); break;
     case 32:
-        fn_800D58A0(p[0], (s8)p[1], (s8)p[2]); p += 3; break;
+        p += 3;
+        fn_800D58A0(p[-3], (s8)p[-2], (s8)p[-1]); break;
     case 33:
-        fn_800D579C(p[0], (u16)p[1]); p += 2; break;
+        p += 2;
+        fn_800D579C(p[-2], (u16)p[-1]); break;
     case 34:
-        fn_800D5724(p[0], (u8)p[1]); p += 2; break;
+        p += 2;
+        fn_800D5724(p[-2], (u8)p[-1]); break;
     case 35:
-        fn_800D56C0((u8)p[0]); p += 1; break;
+        p += 1;
+        fn_800D56C0((u8)p[-1]); break;
     case 36:
-        fn_800D5648(((f32*)p)[0]); p += 1; break;
+        p += 1;
+        fn_800D5648(((f32*)p)[-1]); break;
     case 37:
-        fn_800D55D0(((f32*)p)[0]); p += 1; break;
+        p += 1;
+        fn_800D55D0(((f32*)p)[-1]); break;
     case 38:
-        gfxLoadTexture(p[0], p[1]); p += 2; break;
+        p += 2;
+        gfxLoadTexture(p[-2], p[-1]); break;
     case 39:
-        fn_800D848C(p[0], p[1], p[2], p + 3); p += 15; break;
+        {
+            u32 a = *p++;
+            u32 b = *p++;
+            u32 c = *p++;
+
+            fn_800D848C(a, b, c, p);
+            p += 12;
+        }
+        break;
     case 40:
-        gfxSetFlags(p[0]); p += 1; break;
+        p += 1;
+        gfxSetFlags(p[-1]); break;
     case 41:
-        gfxClearFlags(p[0]); p += 1; break;
+        p += 1;
+        gfxClearFlags(p[-1]); break;
     case 42:
-        GSgfxDLDraw(p[0]); p += 1; break;
+        p += 1;
+        GSgfxDLDraw(p[-1]); break;
     case 43:
-        gfxSetBlendMode(p[0], p[1], p[2]); p += 3; break;
+        p += 3;
+        gfxSetBlendMode(p[-3], p[-2], p[-1]); break;
     case 44:
-        fn_800DA428(p[0]); p += 1; break;
+        p += 1;
+        fn_800DA428(p[-1]); break;
     case 45:
-        fn_800DA3B0(p[0], (u8)p[1]); p += 2; break;
+        p += 2;
+        fn_800DA3B0(p[-2], (u8)p[-1]); break;
     case 46:
-        gfxSetUpdates(p[0], p[1], p[2]); p += 3; break;
+        p += 3;
+        gfxSetUpdates(p[-3], p[-2], p[-1]); break;
     case 47:
-        gfxSetZMode(p[0], p[1], p[2]); p += 3; break;
+        p += 3;
+        gfxSetZMode(p[-3], p[-2], p[-1]); break;
     case 48:
-        fn_800DA100(p[0], p[1], (u8)p[2], p[3], p[4], (u8)p[5]); p += 6; break;
+        p += 6;
+        fn_800DA100(p[-6], p[-5], (u8)p[-4], p[-3], p[-2], (u8)p[-1]); break;
     case 49:
-        fn_800DA08C(p[0]); p += 1; break;
+        p += 1;
+        fn_800DA08C(p[-1]); break;
     case 50:
-        gfxSetCullMode(p[0]); p += 1; break;
+        p += 1;
+        gfxSetCullMode(p[-1]); break;
     case 51:
-        fn_800D9FB4(p[0]); p += 1; break;
+        p += 1;
+        fn_800D9FB4(p[-1]); break;
     case 52:
-        fn_800D9F40(p[0]); p += 1; break;
+        p += 1;
+        fn_800D9F40(p[-1]); break;
     case 53:
-        fn_800D9ED8(p[0]); p += 1; break;
+        p += 1;
+        fn_800D9ED8(p[-1]); break;
     case 54:
-        fn_800D9E4C(p[0]); p += 1; break;
+        p += 1;
+        fn_800D9E4C(p[-1]); break;
     case 55:
-        fn_800D9D68((u16)p[0], (u16)p[1], (u16)p[2], (u16)p[3]); p += 4; break;
+        p += 4;
+        fn_800D9D68((u16)p[-4], (u16)p[-3], (u16)p[-2], (u16)p[-1]); break;
     case 56:
-        fn_800D9C24((u16)p[0], (u16)p[1], (u16)p[2], (u16)p[3]); p += 4; break;
+        p += 4;
+        fn_800D9C24((u16)p[-4], (u16)p[-3], (u16)p[-2], (u16)p[-1]); break;
     case 57:
-        fn_800D9BD0(((f32*)p)[0], ((f32*)p)[1], ((f32*)p)[2], ((f32*)p)[3]); p += 4; break;
+        p += 4;
+        fn_800D9BD0(((f32*)p)[-4], ((f32*)p)[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
     case 58:
-        gfxSetOrtho(((f32*)p)[0], ((f32*)p)[1], ((f32*)p)[2], ((f32*)p)[3]); p += 4; break;
+        p += 4;
+        gfxSetOrtho(((f32*)p)[-4], ((f32*)p)[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
     case 59:
         fn_800D834C(); break;
     case 60:
-        fn_800D8284(((f32*)p)[0], ((f32*)p)[1], ((f32*)p)[2]); p += 3; break;
+        p += 3;
+        fn_800D8284(((f32*)p)[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
     case 61:
-        fn_800D81EC(((f32*)p)[0], ((f32*)p)[1], ((f32*)p)[2]); p += 3; break;
+        p += 3;
+        fn_800D81EC(((f32*)p)[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
     case 62:
-        fn_800D8154(((f32*)p)[0], ((f32*)p)[1], ((f32*)p)[2]); p += 3; break;
+        p += 3;
+        fn_800D8154(((f32*)p)[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
     case 63:
         fn_800D8088(p); p += 12; break;
     case 64:
@@ -917,61 +897,88 @@ u32* gfxPlayCommands(u32* command)
     case 67:
         argument = (u8)*p++; fn_800D7D90(argument, p); p += 12; break;
     case 68:
-        fn_800D7D10((u8)p[0], p[1]); p += 2; break;
+        p += 2;
+        fn_800D7D10((u8)p[-2], p[-1]); break;
     case 69:
         fn_800D7C74(); break;
     case 70:
-        gfxSetVtxDesc(p[0]); p += 1; break;
+        p += 1;
+        gfxSetVtxDesc(p[-1]); break;
     case 71:
-        fn_800D76A8(p[0], (u16)p[1]); p += 2; break;
+        p += 2;
+        fn_800D76A8(p[-2], (u16)p[-1]); break;
     case 72:
-        gfxSetTevStage(p[0], p[1], p[2], p[3], p[4]); p += 5; break;
+        p += 5;
+        gfxSetTevStage(p[-5], p[-4], p[-3], p[-2], p[-1]); break;
     case 73:
-        fn_800DC1D4((u8)p[0]); p += 1; break;
+        p += 1;
+        fn_800DC1D4((u8)p[-1]); break;
     case 74:
-        fn_800DC14C(p[0], p[1], p[2], p[3], (u8)p[4], p[5]); p += 6; break;
+        p += 6;
+        fn_800DC14C(p[-6], p[-5], p[-4], p[-3], (u8)p[-2], p[-1]); break;
     case 75:
-        fn_800DC0D4(p[0], p[1], p[2], p[3], p[4]); p += 5; break;
+        p += 5;
+        fn_800DC0D4(p[-5], p[-4], p[-3], p[-2], p[-1]); break;
     case 76:
-        fn_800DC04C(p[0], p[1], p[2], p[3], (u8)p[4], p[5]); p += 6; break;
+        p += 6;
+        fn_800DC04C(p[-6], p[-5], p[-4], p[-3], (u8)p[-2], p[-1]); break;
     case 77:
-        fn_800DBFD4(p[0], p[1], p[2], p[3], p[4]); p += 5; break;
+        p += 5;
+        fn_800DBFD4(p[-5], p[-4], p[-3], p[-2], p[-1]); break;
     case 78:
-        fn_800DBF78(p[0], p[1]); p += 2; break;
+        p += 2;
+        fn_800DBF78(p[-2], p[-1]); break;
     case 79:
-        fn_800DBF1C(p[0], p[1]); p += 2; break;
+        p += 2;
+        fn_800DBF1C(p[-2], p[-1]); break;
     case 80:
-        argument = p[0];
-        p++;
+        argument = *p++;
         memcpy(&copied, p, sizeof(copied));
         p++;
-        fn_800DBEB4(argument, &copied);
+        fn_800DBEB4(argument, copied);
         break;
     case 81:
-        fn_800DBE5C(p[0]); p += 1; break;
+        p += 1;
+        fn_800DBE5C(p[-1]); break;
     case 82:
-        fn_800DBD70(p[2], p[3], p[4], p[5], p[6], p[7], p[8], (u8)p[9], (u8)p[0], p[1]); p += 10; break;
+        p += 10;
+        fn_800DBD70(p[-8], p[-7], p[-6], p[-5], p[-4], p[-3], p[-2], (u8)p[-1], (u8)p[-10], p[-9]); break;
     case 83:
-        fn_800DBCE4(p[0], p[1], (u8)p[2], (u8)p[3], p[4]); p += 5; break;
+        p += 5;
+        fn_800DBCE4(p[-5], p[-4], (u8)p[-3], (u8)p[-2], p[-1]); break;
     case 84:
-        fn_800DBBFC(p[2], p[3], (u16)p[4], (u16)p[5], (u16)p[6], (u16)p[7], p[8], p[9], p[0], p[1]); p += 10; break;
+        p += 10;
+        fn_800DBBFC(p[-8], p[-7], (u16)p[-6], (u16)p[-5], (u16)p[-4], (u16)p[-3], p[-2], p[-1], p[-10], p[-9]); break;
     case 85:
-        fn_800DBB84(p[0], p[1], p[2]); p += 3; break;
+        p += 3;
+        fn_800DBB84(p[-3], p[-2], p[-1]); break;
     case 86:
-        fn_800DBB0C(p[0], p[1], p[2]); p += 3; break;
+        p += 3;
+        fn_800DBB0C(p[-3], p[-2], p[-1]); break;
     case 87:
-        fn_800DBAA4(p[0]); p += 1; break;
+        p += 1;
+        fn_800DBAA4(p[-1]); break;
     case 88:
-        fn_800DBA54((u8)p[0]); p += 1; break;
+        p += 1;
+        fn_800DBA54((u8)p[-1]); break;
     case 89:
-        fn_800DB9F0(p[0], p[1], p[2]); p += 3; break;
+        p += 3;
+        fn_800DB9F0(p[-3], p[-2], p[-1]); break;
     case 90:
-        fn_800DB988(p[0], p[1], p[2]); p += 3; break;
+        p += 3;
+        fn_800DB988(p[-3], p[-2], p[-1]); break;
     case 91:
-        argument = p[0];
-        p++;
-        fn_800DB900(argument, p, (s8)p[25]);
-        p += 25;
+        {
+            u32* data;
+
+            argument = *p++;
+            /* RULE-EXCEPTION(title-path): pure copy of the cursor used only for scheduling - see docs/RULE_EXCEPTIONS.md
+             * Retail advances the cursor past the 25-word block before the
+             * call. */
+            data = p;
+            p += 25;
+            fn_800DB900(argument, data, (s8)data[24]);
+        }
         break;
     }
 
@@ -980,126 +987,7 @@ u32* gfxPlayCommands(u32* command)
 #endif
 
 
-#if !defined(GS_GFX_RANGE_SPLIT) || \
-    defined(GS_GFX_RANGE_800D461C_800D55D0)
-/* ==================================================================
- * fn_800D4F98 -- GSlog_QueueCommand
- *
- * Queue a rendering command via the GSlog debug/command system.
- * Used by lighting, material, and draw functions to batch commands.
- * 1388 bytes.
- * ================================================================== */
-typedef struct GSgfxCommandState {
-    u8 pad_000[0x494];
-    u32* commandWrite;
-} GSgfxCommandState;
-
-void gfxRecordCommand(u32 opcode, u32 paramCount, ...)
-{
-    typedef struct GSvaList {
-        u8 gpr;
-        u8 fpr;
-        u16 reserved;
-        u32* overflow;
-        u32* saveArea;
-    } GSvaList;
-    typedef GSvaList GSvaListArray[1];
-    extern void* __va_arg(void*, u32);
-    GSgfxCommandState* state;
-    GSvaListArray ap;
-    union {
-        f32 f;
-        u32 u;
-    } value;
-
-#define PUT_WORD(word)                                                       \
-    do {                                                                     \
-        *state->commandWrite++ = (u32)(word);                                \
-    } while (0)
-#define NEXT_WORD() (*(u32*)__va_arg(ap, 1))
-#define NEXT_FLOAT()                                                         \
-    (value.f = (f32)*(f64*)__va_arg(ap, 3), value.u)
-
-    state = (GSgfxCommandState*)lbl_8047AA80;
-    __builtin_va_info(&ap);
-    PUT_WORD(opcode);
-
-    switch (paramCount) {
-    case 10:
-        PUT_WORD(NEXT_WORD());
-    case 9:
-        PUT_WORD(NEXT_WORD());
-    case 8:
-        PUT_WORD(NEXT_WORD());
-    case 7:
-        PUT_WORD(NEXT_WORD());
-    case 6:
-        PUT_WORD(NEXT_WORD());
-    case 5:
-        PUT_WORD(NEXT_WORD());
-    case 4:
-        PUT_WORD(NEXT_WORD());
-    case 3:
-        PUT_WORD(NEXT_WORD());
-    case 2:
-        PUT_WORD(NEXT_WORD());
-    case 1:
-        PUT_WORD(NEXT_WORD());
-        break;
-
-    case 14:
-        PUT_WORD(NEXT_FLOAT());
-    case 13:
-        PUT_WORD(NEXT_FLOAT());
-    case 12:
-        PUT_WORD(NEXT_FLOAT());
-    case 11:
-        PUT_WORD(NEXT_FLOAT());
-        break;
-
-    case 15:
-        PUT_WORD(NEXT_WORD());
-        PUT_WORD(NEXT_FLOAT());
-        PUT_WORD(NEXT_FLOAT());
-        break;
-
-    case 16:
-        memcpy(state->commandWrite, *(void**)__va_arg(ap, 1), 0x30);
-        state->commandWrite += 0x30 / sizeof(u32);
-        break;
-
-    case 17:
-        PUT_WORD(NEXT_WORD());
-        memcpy(state->commandWrite, *(void**)__va_arg(ap, 1), 0x30);
-        state->commandWrite += 0x30 / sizeof(u32);
-        break;
-
-    case 18:
-        PUT_WORD(NEXT_WORD());
-        memcpy(state->commandWrite, *(void**)__va_arg(ap, 1), 0x18);
-        state->commandWrite = (u32*)((u8*)state->commandWrite + 0x60);
-        PUT_WORD(NEXT_WORD());
-        break;
-
-    case 19:
-        PUT_WORD(NEXT_WORD());
-        PUT_WORD(NEXT_WORD());
-        PUT_WORD(NEXT_WORD());
-        memcpy(state->commandWrite, *(void**)__va_arg(ap, 1), 0x30);
-        state->commandWrite += 0x30 / sizeof(u32);
-        break;
-
-    case 20:
-        PUT_WORD(NEXT_WORD());
-        PUT_WORD(*(u32*)__va_arg(ap, 0));
-        break;
-    }
-
-#undef NEXT_FLOAT
-#undef NEXT_WORD
-#undef PUT_WORD
-}
-#endif
+/* fn_800D4F98 (request recorder): src/game/gs_gfx_exact_800D4F98.c */
 
 #if !defined(GS_GFX_RANGE_SPLIT) || \
     defined(GS_GFX_RANGE_800D45F8_800D461C)
@@ -1128,77 +1016,42 @@ void fn_800D4610(u8 val) {
 }
 #endif
 
-#if !defined(GS_GFX_RANGE_SPLIT) || \
-    defined(GS_GFX_RANGE_800D461C_800D55D0)
-void fn_800D5504(u32 size) {
-    const GSgfxRequestStrings* strings =
-        (const GSgfxRequestStrings*)lbl_802703C0;
-
-    if (((GSgfxState*)lbl_8047AA80)->requestBuffer != 0) {
-        GSlogWrite(strings->alreadyAllocated);
-        return;
-    }
-
-    ((GSgfxState*)lbl_8047AA80)->requestBufferHandle =
-        _toolentryAlloc__FUl(size);
-    if (((GSgfxState*)lbl_8047AA80)->requestBufferHandle == 0) {
-        GSlogWrite(strings->allocationFailed);
-        return;
-    }
-
-    ((GSgfxState*)lbl_8047AA80)->requestBuffer = fn_800E27B0(
-        ((GSgfxState*)lbl_8047AA80)->requestBufferHandle);
-    ((GSgfxState*)lbl_8047AA80)->requestBufferPos =
-        ((GSgfxState*)lbl_8047AA80)->requestBuffer;
-    ((GSgfxState*)lbl_8047AA80)->requestBufferSize = size;
-    *(u32*)(lbl_804001F0 + 0x28) = 0;
-    GSlogWrite(strings->allocationSucceeded,
-               ((GSgfxState*)lbl_8047AA80)->requestBufferSize,
-               ((GSgfxState*)lbl_8047AA80)->requestBuffer);
-}
-#endif
+/* fn_800D5504 (request buffer allocator): src/game/gs_gfx_exact_800D4F98.c */
 
 #if !defined(GS_GFX_RANGE_SPLIT) || \
     defined(GS_GFX_RANGE_800D55D0_800D56C0)
-extern f32 lbl_8047CA30;
-extern f32 lbl_8047CA34;
-extern f32 lbl_8047CA38;
-/* fn_800D55D0/fn_800D5648 @ 93.33: the dropped-float vararg restored
- * (fn_800D4F98(.., val) -> crset cr1eq). Residual is a single prologue
- * scheduling diff: target issues `lfs f0, lbl_8047CA30@sda21` BEFORE the
- * `stw r0, 0x14(r1)` LR-save; CW always emits the LR store first.
- * scheduling 604 reschedules the whole fn (regress 80); not per-spot
- * controllable. Prologue-scheduler wall. */
+/* fn_800D55D0/fn_800D5648: the range and scale constants are this unit's
+ * own literals (.sdata2 0x8047CA30-0x8047CA40: 0.0f, 42.5f, 6.0f, pooled in
+ * first-use order and shared by both functions). As literals MWCC may load
+ * the lower bound before the LR save, as retail does; an extern variable
+ * load cannot be scheduled above that store. */
 #if 0
 asm void fn_800D55D0(void) {
 #include "src/game/gs_render_fn_800D55D0.inc"
 }
 #else
 void fn_800D55D0(f32 val) {
-    if (val < lbl_8047CA30 || val > lbl_8047CA34) return;
+    if (val < 0.0f || val > 42.5f) return;
     if (*(s32*)lbl_8047AA80 == 1) { gfxRecordCommand(0x25, 0xb, val); }
     else {
         u32 tmp;
-        tmp = (u32)(s32)(lbl_8047CA38 * val);
+        tmp = (u32)(s32)(6.0f * val);
         fn_800B944C(tmp, 0);
     }
 }
 #endif
 
-extern f32 lbl_8047CA30;
-extern f32 lbl_8047CA34;
-extern f32 lbl_8047CA38;
 #if 0
 asm void fn_800D5648(void) {
 #include "src/game/gs_render_fn_800D5648.inc"
 }
 #else
 void fn_800D5648(f32 val) {
-    if (val < lbl_8047CA30 || val > lbl_8047CA34) return;
+    if (val < 0.0f || val > 42.5f) return;
     if (*(s32*)lbl_8047AA80 == 1) { gfxRecordCommand(0x24, 0xb, val); }
     else {
         u32 tmp;
-        tmp = (u32)(s32)(lbl_8047CA38 * val);
+        tmp = (u32)(s32)(6.0f * val);
         fn_800B9404(tmp, 0);
     }
 }
@@ -1791,54 +1644,47 @@ asm void fn_800D67BC(void) {
 #include "src/game/gs_render_fn_800D67BC.inc"
 }
 #else
+/* Linked owner: gs_gfx_candidate_800D67BC.c (standalone carve). */
 void gfxBegin(u16 vertCount) {
-    u32 state;
-    u32 obj;
-    u16 drawCount;
-
-    state = lbl_8047AA80;
-    if (*(u8*)(state + 0x47e) == 1) {
+    if (*(u8*)(lbl_8047AA80 + 0x47e) == 1) {
         fn_800DB758(vertCount);
         return;
     }
-    if (*(s32*)state == 1) {
-        gfxRecordCommand(2, 1, (u32)vertCount);
+    if (*(s32*)lbl_8047AA80 == 1) {
+        gfxRecordCommand(2, 1, vertCount);
         return;
     }
-    if (*(u8*)(state + 0x1b) != *(u8*)(state + 0x1a)) {
+    if (*(u8*)(lbl_8047AA80 + 0x1b) != *(u8*)(lbl_8047AA80 + 0x1a)) {
         return;
     }
-    if ((*(u32*)(state + 0x4) & *(u32*)(state + 0x8)) == 0) {
+    if ((*(u32*)(lbl_8047AA80 + 0x4) & *(u32*)(lbl_8047AA80 + 0x8)) == 0) {
         return;
     }
 
-    obj = *(u32*)(state + 0x24);
-    if (obj == 0) {
-        obj = state + 0x20;
-        fn_800D7650((u8*)obj);
-        fn_800D7868((u8*)obj, 1, 0, 1, 4, 0, 0, 0);
-        if (*(u32*)(state + 0x10) & 4) {
-            fn_800D7868((u8*)obj, 2, 0, 2, 4, 0, 0, 0);
+    if (*(u32*)(lbl_8047AA80 + 0x24) == 0) {
+        fn_800D7650((u8*)*(u32*)(lbl_8047AA80 + 0x20));
+        fn_800D7868((u8*)*(u32*)(lbl_8047AA80 + 0x20), 1, 0, 1, 4, 0, 0, 0);
+        if (*(u32*)(lbl_8047AA80 + 0x10) & 4) {
+            fn_800D7868((u8*)*(u32*)(lbl_8047AA80 + 0x20), 2, 0, 2, 4, 0, 0, 0);
         }
-        if (*(u32*)(state + 0x10) & 1) {
-            fn_800D7868((u8*)obj, 4, 0, 6, 10, 0, 0, 0);
+        if (*(u32*)(lbl_8047AA80 + 0x10) & 1) {
+            fn_800D7868((u8*)*(u32*)(lbl_8047AA80 + 0x20), 4, 0, 6, 10, 0, 0, 0);
         }
-        if (*(u32*)(state + 0x10) & 2) {
-            fn_800D7868((u8*)obj, 6, 0, 8, 4, 0, 0, 0);
+        if (*(u32*)(lbl_8047AA80 + 0x10) & 2) {
+            fn_800D7868((u8*)*(u32*)(lbl_8047AA80 + 0x20), 6, 0, 8, 4, 0, 0, 0);
         }
-        *(u32*)(state + 0x24) = obj;
+        *(u32*)(lbl_8047AA80 + 0x24) = *(u32*)(lbl_8047AA80 + 0x20);
     }
 
-    drawCount = vertCount;
-    if (*(s32*)(state + 0x14) == 7) {
-        drawCount = (u16)((vertCount & 0x7fff) << 1);
+    if (*(s32*)(lbl_8047AA80 + 0x14) == 7) {
+        vertCount = (vertCount & 0x7fff) << 1;
     }
 
-    gfxLoadVtxDesc(obj);
-    gfxSetupChannelsTev(obj);
-    fn_800B928C(((u32*)lbl_80314350)[*(u32*)(state + 0x14)],
-                *(u32*)(obj + 0x4), drawCount);
-    fn_800D6A80(drawCount, *(s32*)(state + 0x14),
+    gfxLoadVtxDesc(*(u32*)(lbl_8047AA80 + 0x24));
+    gfxSetupChannelsTev(*(u32*)(lbl_8047AA80 + 0x24));
+    fn_800B928C(lbl_80314350[*(u32*)(lbl_8047AA80 + 0x14)],
+                *(u32*)(*(u32*)(lbl_8047AA80 + 0x24) + 0x4), vertCount);
+    fn_800D6A80(vertCount, *(s32*)(lbl_8047AA80 + 0x14),
                 (u32*)(lbl_804001F0 + 0xc), (u32*)(lbl_804001F0 + 0x4));
 }
 #endif

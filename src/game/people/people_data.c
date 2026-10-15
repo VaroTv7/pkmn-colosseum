@@ -252,6 +252,9 @@ typedef struct WazaMachineData {
     /* 0x04 */ u32 wazaId;
 } WazaMachineData;
 
+/* PEOPLE_DATA_801441A8_ONLY: the 0x801441A8 - 0x80144574 unit
+ * (people_data_suffix_801441A8.c) holds only friendXUp and hpRecover. */
+#if !defined(PEOPLE_DATA_801441A8_ONLY)
 /* ===================================================================
  * DECOMPILED: itemDataBiosGetPtr (aka "peopleFieldGetByIndex" in cross-file
  * comments, e.g. people_field.c)
@@ -269,6 +272,7 @@ extern PeopleFieldEntry lbl_80363CE8[]; /* gPeopleFieldArray */
 /* Returns u8* (not PeopleFieldEntry*) to match the extern declaration
  * used at this function's call sites elsewhere in this file (e.g. the
  * fn_80142B24 dispatcher below). */
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8* itemDataBiosGetPtr(u16 index) {
     u16 slot;
 
@@ -283,6 +287,7 @@ u8* itemDataBiosGetPtr(u16 index) {
 
     return (u8*)&lbl_80363CE8[slot];
 }
+#endif
 
 /* ===================================================================
  * STUB DECLARATIONS -- remaining functions
@@ -422,7 +427,7 @@ asm void fn_80140A9C(void) {
 #include "src/game/people/people_data_fn_80140A9C.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void fn_80140A9C(u32* a, u32* b) {
     volatile u32 new_var;
     u32 tmp;
@@ -432,6 +437,7 @@ void fn_80140A9C(u32* a, u32* b) {
     *a = *b;
     *b = tmp;
 }
+#endif
 #endif
 extern u32 lbl_80478BD8;   /* gPeopleFieldCount */
 
@@ -448,75 +454,126 @@ asm void fn_80140ACC(void) {
 }
 #else
 
+static inline u8 peopleItemIdValid(u16 id)
+{
+    if (itemGetStatus(0, id, 1, 0) == 0) {
+        return 0;
+    }
+    if (id >= lbl_80478BD8) {
+        return 0;
+    }
+    return 1;
+}
+
+static inline u8 peopleEntryValid(u32* entry)
+{
+    u16 id;
+
+    if (entry == NULL) {
+        return 0;
+    }
+    id = itemGetStatus((u32)entry, 0, 0x1b, 0);
+    if (id == 0) {
+        return 0;
+    }
+    if (!peopleItemIdValid(id)) {
+        return 0;
+    }
+    return 1;
+}
+
+static inline u8 peopleEntryMatches(u32* entry, u16 id)
+{
+    if (entry == NULL) {
+        return 0;
+    }
+    if (!peopleEntryValid(entry)) {
+        return 0;
+    }
+    if (id == itemGetStatus((u32)entry, 0, 0x1b, 0)) {
+        return 1;
+    }
+    return 0;
+}
+
+static inline u32* peopleFindEntry(u32* entries, u16 count, u16 id)
+{
+    u16 i;
+
+    if (entries == NULL) {
+        return NULL;
+    }
+    if (!peopleItemIdValid(id)) {
+        return NULL;
+    }
+    for (i = 0; i < count; i++) {
+        if (peopleEntryMatches(&entries[i], id)) {
+            return &entries[i];
+        }
+    }
+    return NULL;
+}
+
+static inline u32* peopleFindFreeEntry(u32* entries, u16 count, u16 id)
+{
+    u16 i;
+
+    if (entries == NULL) {
+        return NULL;
+    }
+    if (!peopleItemIdValid(id)) {
+        return NULL;
+    }
+    for (i = 0; i < count; i++) {
+        if (!peopleEntryValid(&entries[i])) {
+            return &entries[i];
+        }
+    }
+    return NULL;
+}
+
 /* Resolve the placement offset for a field-person record group. */
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 fn_80140588(u32* entries, u16 count, u16 dataIndex, u16 extent,
                 u8 accumulate)
 {
     u32* entry;
-    u16 i;
     s32 result;
+    u16 i;
 
     if (entries == NULL) {
         return -1;
     }
-    if (!PEOPLE_ITEM_ID_VALID(dataIndex)) {
+    if (!peopleItemIdValid(dataIndex)) {
         return -1;
     }
 
     if (accumulate == 0) {
-        if (entries == NULL) {
-            entry = NULL;
-        } else if (!PEOPLE_ITEM_ID_VALID(dataIndex)) {
-            entry = NULL;
-        } else {
-            entry = NULL;
-            for (i = 0; i < count; i++) {
-                u32* current = entries + i;
-                if (PEOPLE_ENTRY_VALID(current) &&
-                    dataIndex == PEOPLE_ENTRY_ID(current)) {
-                    entry = current;
-                    break;
-                }
-            }
-        }
-
+        entry = peopleFindEntry(entries, count, dataIndex);
         if (entry != NULL) {
-            result = (u16)extent - PEOPLE_ENTRY_COUNT(entry);
+            result = extent - itemGetStatus((u32)entry, 0, 0x1c, 0);
+        } else if (peopleFindFreeEntry(entries, count, dataIndex) != NULL) {
+            result = extent;
         } else {
-            u32* freeEntry;
-
-            if (entries == NULL || !PEOPLE_ITEM_ID_VALID(dataIndex)) {
-                freeEntry = NULL;
-            } else {
-                freeEntry = NULL;
-                for (i = 0; i < count; i++) {
-                    u32* current = entries + i;
-                    if (!PEOPLE_ENTRY_VALID(current)) {
-                        freeEntry = current;
-                        break;
-                    }
-                }
-            }
-            result = freeEntry != NULL ? (u16)extent : 0;
+            result = 0;
         }
     } else {
         result = 0;
         for (i = 0; i < count; i++) {
-            entry = entries + i;
-            if (!PEOPLE_ENTRY_VALID(entry)) {
-                result += (u16)extent;
-            } else if (PEOPLE_ENTRY_VALID(entry) &&
-                       dataIndex == PEOPLE_ENTRY_ID(entry)) {
-                result += (u16)extent - PEOPLE_ENTRY_COUNT(entry);
+            entry = &entries[i];
+            if (!peopleEntryValid(entry)) {
+                result += extent;
+            } else if (peopleEntryMatches(entry, dataIndex) == 1) {
+                result += extent - itemGetStatus((u32)entry, 0, 0x1c, 0);
             }
         }
     }
 
     return result;
 }
+#endif
 
-#pragma push
-#pragma optimization_level 2
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 fn_80140ACC(u32* base, u16 count, u16 id, u16 amount, s16 index, u16 unusedLimit, u8 sortMode) {
     u32* entry;
     u16 remaining;
@@ -613,7 +670,7 @@ s32 fn_80140ACC(u32* base, u16 count, u16 id, u16 amount, s16 index, u16 unusedL
     }
     return remaining;
 }
-#pragma pop
+#endif
 #endif
 extern u32 lbl_80478BD8;   /* gPeopleFieldCount */
 #if 0
@@ -621,7 +678,7 @@ asm void fn_80141308(void) {
 #include "src/game/people/people_data_fn_80141308.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 fn_80141308(u32* base, u16 count, u16 id, u16 amount, s16 index, u16 maxCount, u8 sortMode, u8 forceIndex) {
     u32 entryBase;
     u32 entryPtr;
@@ -1166,13 +1223,14 @@ s32 fn_80141308(u32* base, u16 count, u16 id, u16 amount, s16 index, u16 maxCoun
     return nextValue;
 }
 #endif
+#endif
 extern u32 lbl_80478BD8;   /* gPeopleFieldCount */
 #if 0
 asm void fn_80142368(void) {
 #include "src/game/people/people_data_fn_80142368.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32* fn_80142368(u32* base, u16 count, u16 id, u8 mode, u16 limit) {
     u32* entry;
     u16 i;
@@ -1204,13 +1262,14 @@ u32* fn_80142368(u32* base, u16 count, u16 id, u8 mode, u16 limit) {
     return NULL;
 }
 #endif
+#endif
 extern u32 lbl_80478BD8;   /* gPeopleFieldCount */
 #if 0
 asm void fn_801425E8(void) {
 #include "src/game/people/people_data_fn_801425E8.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void fn_801425E8(u32* base, u16 count, u8 mode) {
     u32* entry;
     u32* other;
@@ -1257,13 +1316,14 @@ void fn_801425E8(u32* base, u16 count, u8 mode) {
     }
 }
 #endif
+#endif
 extern u32 lbl_80478BD8;   /* gPeopleFieldCount */
 #if 0
 asm void fn_80142984(void) {
 #include "src/game/people/people_data_fn_80142984.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 fn_80142984(u16 id) {
     s32 r;
 
@@ -1272,13 +1332,14 @@ s32 fn_80142984(u16 id) {
     return lbl_80478BD8 > (u16)id;
 }
 #endif
+#endif
 extern u32 lbl_80478BD8;   /* gPeopleFieldCount */
 #if 0
 asm void fn_801429E8(void) {
 #include "src/game/people/people_data_fn_801429E8.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 fn_801429E8(u32 arg) {
     u16 r31;
     u8 valid;
@@ -1299,12 +1360,13 @@ s32 fn_801429E8(u32 arg) {
     return valid != 0;
 }
 #endif
+#endif
 #if 0
 asm void fn_80142A88(void) {
 #include "src/game/people/people_data_fn_80142A88.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void fn_80142A88(u32* base, u16 count) {
     u32* ptr;
     u16 i;
@@ -1319,6 +1381,7 @@ void fn_80142A88(u32* base, u16 count) {
     }
 }
 #endif
+#endif
 extern u8* itemDataBiosGetPtr(u16 idx);
 extern u8* itemBallDataBiosGetPtr(u16 idx);
 extern void fightItemBiosSetItemDataId(u8* p, u16 val);
@@ -1331,7 +1394,7 @@ asm void fn_80142B24(void* p, u32 a, u16 b, u32 c, u32 d) {
 #include "src/game/people/people_data_fn_80142B24.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void fn_80142B24(void* p, u32 a, u16 b, u32 c, u32 d) {
     u8* target;
 
@@ -1340,7 +1403,8 @@ void fn_80142B24(void* p, u32 a, u16 b, u32 c, u32 d) {
     }
 
     if (b < 0xb) {
-        target = itemDataBiosGetPtr((u16)a);
+        u16 idx = (u16)a;
+        target = itemDataBiosGetPtr(idx);
         if (target == NULL) {
             return;
         }
@@ -1350,7 +1414,8 @@ void fn_80142B24(void* p, u32 a, u16 b, u32 c, u32 d) {
             return;
         }
     } else {
-        target = p;
+        u8* ptr = p;
+        target = ptr;
         if (target == NULL) {
             return;
         }
@@ -1413,6 +1478,8 @@ void fn_80142B24(void* p, u32 a, u16 b, u32 c, u32 d) {
     }
 }
 #endif
+
+#endif
 extern u32 itemDataBiosGetName(u8* p);
 extern u8 itemDataBiosGetKind(u8* p);
 extern u32 itemDataBiosGetPrice(u8* p);
@@ -1448,8 +1515,7 @@ asm s32 itemGetStatus(u32 a, u16 b, u16 c, u32 d) {
 }
 #else
 /* Keep the standalone farm shape: later definitions must not auto-inline here. */
-#pragma push
-#pragma inline_depth(0)
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemGetStatus(u32 a, u16 b, u16 c, u32 d) {
     u8* target;
 
@@ -1542,7 +1608,7 @@ s32 itemGetStatus(u32 a, u16 b, u16 c, u32 d) {
         return 0;
     }
 }
-#pragma pop
+#endif
 #endif
 extern void jumptable_80367E70();
 extern u8 lbl_802730E0[];
@@ -1550,169 +1616,193 @@ extern u8 lbl_802730E0[];
 typedef struct ItemParamConvertEntry {
     u32 field;
     u32 srcOffset;
-    u32 mask;
-    u32 type;
+    u8 mask;
+    s32 type;
 } ItemParamConvertEntry;
 
-#define PEOPLE_SET_FLAG_BYTE(byte, mask, flag) \
-    ((byte) = (u8)(((byte) & (u8)~(mask)) | ((flag) ? (mask) : 0)))
+typedef struct ItemParamConvertTable {
+    ItemParamConvertEntry entries[32];
+} ItemParamConvertTable;
+
+typedef struct ItemParamBits {
+    u8 recoverFlag : 1;
+    u8 unused0_6 : 1;
+    u8 attackFlag : 1;
+    u8 recoverType : 4;
+    u8 unused0_0 : 1;
+    u8 defenceUp : 4;
+    u8 quickUp : 4;
+    u8 hitUp : 4;
+    u8 spAttackUp : 4;
+    u8 status7 : 1;
+    u8 status6 : 1;
+    u8 status5 : 1;
+    u8 status4 : 1;
+    u8 status3 : 1;
+    u8 status2 : 1;
+    u8 status1 : 1;
+    u8 status0 : 1;
+    u8 misc7 : 1;
+    u8 misc6 : 1;
+    u8 misc5 : 1;
+    u8 misc4 : 1;
+    u8 misc3 : 1;
+    u8 unused4 : 3;
+    s8 friend1Up;
+    s8 friend2Up;
+    s8 friend3Up;
+    u8 hpEffortUp;
+    u8 attackEffortUp;
+    u8 hpUp;
+    u8 ppUp;
+    u8 defenceEffortUp;
+    u8 quickEffortUp;
+    u8 spDefenceEffortUp;
+    u8 spAttackEffortUp;
+} ItemParamBits;
 
 #if 0
 asm void fn_80142EF8(void) {
 #include "src/game/people/people_data_fn_80142EF8.inc"
 }
 #else
-#pragma optimization_level 4
-void itemParamConvertOrigFormat(u8* dst, u8* src) {
-    ItemParamConvertEntry table[32];
+void itemParamConvertOrigFormat(u8* dstData, u8* src) {
+    ItemParamConvertTable table = *(ItemParamConvertTable*)lbl_802730E0;
+    ItemParamBits* dst = (ItemParamBits*)dstData;
     ItemParamConvertEntry* row;
-    u32* table_source;
-    u32* table_destination;
+    s32 i;
     u8* stream;
-    u32 i;
-    u32 bit;
-    u32 decoded;
-    u32 flag;
-    u32 type;
-    u8 srcByte;
-    u8 maskByte;
+    u8 mask;
+    u8 decoded;
     s8 signedValue;
+    u8 flag;
+    s32 type;
+    u8 srcByte;
+    s32 bit;
 
-    table_source = (u32*)lbl_802730E0 - 1;
-    table_destination = (u32*)table - 1;
-    for (i = 0; i < 0x40; i++) {
-        table_destination[1] = table_source[1];
-        table_destination += 2;
-        table_source += 2;
-        table_destination[0] = table_source[0];
-    }
     stream = src + 6;
-
-    for (i = 0, row = table; i < 0x20; i++, row++) {
+    for (i = 0, row = table.entries; i < 0x20; i++, row++) {
         type = row->type;
         srcByte = src[row->srcOffset];
-        maskByte = (u8)(row->mask >> 24);
-        decoded = 0;
-        flag = 0;
-        signedValue = 0;
-
-        if (type == 2 || type == 3) {
-            if ((srcByte & maskByte) != 0) {
+        if (type == 3 || type == 2) {
+            if ((srcByte & row->mask) != 0) {
                 decoded = *stream++;
                 if (type == 3) {
                     signedValue = (s8)decoded;
                 }
+            } else if (type == 3) {
+                signedValue = 0;
             }
         } else {
+            mask = row->mask;
             bit = 0;
-            while (bit < 8 && ((maskByte >> bit) & 1) == 0) {
+            srcByte &= mask;
+            while (bit < 8 && ((mask >> bit) & 1) == 0) {
                 bit++;
             }
-            decoded = (u8)((srcByte & maskByte) >> bit);
+            decoded = srcByte >> bit;
             if (type == 0) {
-                if (decoded != 0) {
-                    flag = 1;
-                } else {
+                if (decoded == 0) {
                     flag = 0;
+                } else {
+                    flag = 1;
                 }
             }
         }
 
         switch (row->field) {
         case 0:
-            PEOPLE_SET_FLAG_BYTE(dst[0], 0x80, flag);
+            dst->recoverFlag = flag;
             break;
         case 2:
-            PEOPLE_SET_FLAG_BYTE(dst[0], 0x20, flag);
+            dst->attackFlag = flag;
             break;
         case 3:
-            dst[0] = (u8)((dst[0] & (u8)~0x1e) | ((decoded & 0xf) << 1));
+            dst->recoverType = decoded;
             break;
         case 4:
-            dst[1] = (u8)((dst[1] & 0x0f) | ((decoded & 0xf) << 4));
+            dst->defenceUp = decoded;
             break;
         case 5:
-            dst[1] = (u8)((dst[1] & 0xf0) | (decoded & 0xf));
+            dst->quickUp = decoded;
             break;
         case 6:
-            dst[2] = (u8)((dst[2] & 0x0f) | ((decoded & 0xf) << 4));
+            dst->hitUp = decoded;
             break;
         case 7:
-            dst[2] = (u8)((dst[2] & 0xf0) | (decoded & 0xf));
+            dst->spAttackUp = decoded;
             break;
         case 8:
-            PEOPLE_SET_FLAG_BYTE(dst[3], 0x80, flag);
+            dst->status7 = flag;
             break;
         case 9:
-            PEOPLE_SET_FLAG_BYTE(dst[3], 0x40, flag);
+            dst->status6 = flag;
             break;
         case 10:
-            PEOPLE_SET_FLAG_BYTE(dst[3], 0x20, flag);
+            dst->status5 = flag;
             break;
         case 11:
-            PEOPLE_SET_FLAG_BYTE(dst[3], 0x10, flag);
+            dst->status4 = flag;
             break;
         case 12:
-            PEOPLE_SET_FLAG_BYTE(dst[3], 0x08, flag);
+            dst->status3 = flag;
             break;
         case 13:
-            PEOPLE_SET_FLAG_BYTE(dst[3], 0x04, flag);
+            dst->status2 = flag;
             break;
         case 14:
-            PEOPLE_SET_FLAG_BYTE(dst[3], 0x02, flag);
+            dst->status1 = flag;
             break;
         case 15:
-            PEOPLE_SET_FLAG_BYTE(dst[3], 0x01, flag);
+            dst->status0 = flag;
             break;
         case 16:
-            PEOPLE_SET_FLAG_BYTE(dst[4], 0x80, flag);
+            dst->misc7 = flag;
             break;
         case 17:
-            dst[8] = (u8)decoded;
+            dst->hpEffortUp = decoded;
             break;
         case 18:
-            dst[9] = (u8)decoded;
+            dst->attackEffortUp = decoded;
             break;
         case 19:
-            PEOPLE_SET_FLAG_BYTE(dst[4], 0x40, flag);
+            dst->misc6 = flag;
             break;
         case 20:
-            dst[0xa] = (u8)decoded;
+            dst->hpUp = decoded;
             break;
         case 21:
-            PEOPLE_SET_FLAG_BYTE(dst[4], 0x20, flag);
+            dst->misc5 = flag;
             break;
         case 22:
-            dst[0xb] = (u8)decoded;
+            dst->ppUp = decoded;
             break;
         case 23:
-            PEOPLE_SET_FLAG_BYTE(dst[4], 0x10, flag);
+            dst->misc4 = flag;
             break;
         case 24:
-            dst[0xc] = (u8)decoded;
+            dst->defenceEffortUp = decoded;
             break;
         case 25:
-            dst[0xd] = (u8)decoded;
+            dst->quickEffortUp = decoded;
             break;
         case 26:
-            dst[0xe] = (u8)decoded;
+            dst->spDefenceEffortUp = decoded;
             break;
         case 27:
-            dst[0xf] = (u8)decoded;
+            dst->spAttackEffortUp = decoded;
             break;
         case 28:
-            PEOPLE_SET_FLAG_BYTE(dst[4], 0x08, flag);
+            dst->misc3 = flag;
             break;
         case 29:
-            dst[5] = (u8)signedValue;
+            dst->friend1Up = signedValue;
             break;
         case 30:
-            dst[6] = (u8)signedValue;
+            dst->friend2Up = signedValue;
             break;
         case 31:
-            dst[7] = (u8)signedValue;
-            break;
-        default:
+            dst->friend3Up = signedValue;
             break;
         }
     }
@@ -1723,6 +1813,7 @@ asm void fn_801431AC(void) {
 #include "src/game/people/people_data_fn_801431AC.inc"
 }
 #else
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetRecoverType(u8* itemParam) {
     s32 selectedType;
     s32 selectedCount;
@@ -2029,7 +2120,8 @@ returnSixteen:
     return 0x16;
 }
 #endif
-#pragma optimization_level 4
+#endif
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s8 itemParamGetFriend3Up(u8* p) {
     ItemParamData* itemParam;
 
@@ -2037,411 +2129,397 @@ s8 itemParamGetFriend3Up(u8* p) {
     if (itemParam == NULL) return 0;
     return (s8)((u8)itemParam->friend3Up);
 }
+#endif
 
 #if 0
 asm void itemParamGetFriend2Up(void) {
 #include "src/game/people/people_data_fn_801436B8.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s8 itemParamGetFriend2Up(u8* p) {
     if (p == NULL) return 0;
     return (s8)p[0x6];
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetFriend1Up(void) {
 #include "src/game/people/people_data_fn_801436D4.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s8 itemParamGetFriend1Up(u8* p) {
     if (p == NULL) return 0;
     return (s8)p[0x5];
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetPPMaxFullFlag(void) {
 #include "src/game/people/people_data_fn_801436F0.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetPPMaxFullFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!((p[0x4] >> 3) & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 #if 0
 asm void itemParamGetSpAttackEffortUp(void) {
 #include "src/game/people/people_data_fn_80143718.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8 itemParamGetSpAttackEffortUp(u8* p) {
     if (p == NULL) return 0;
     return p[0xf];
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetSpDefenceEffortUp(void) {
 #include "src/game/people/people_data_fn_80143730.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8 itemParamGetSpDefenceEffortUp(u8* p) {
     if (p == NULL) return 0;
     return p[0xe];
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetQuickEffortUp(void) {
 #include "src/game/people/people_data_fn_80143748.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8 itemParamGetQuickEffortUp(u8* p) {
     if (p == NULL) return 0;
     return p[0xd];
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetDefenceEffortUp(void) {
 #include "src/game/people/people_data_fn_80143760.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8 itemParamGetDefenceEffortUp(u8* p) {
     if (p == NULL) return 0;
     return p[0xc];
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetEvolutionFlag(void) {
 #include "src/game/people/people_data_fn_80143778.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetEvolutionFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!((p[0x4] >> 4) & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 #if 0
 asm void itemParamGetPPUp(void) {
 #include "src/game/people/people_data_fn_801437A0.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8 itemParamGetPPUp(u8* p) {
     if (p == NULL) return 0;
     return p[0xb];
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetPPSelectFlag(void) {
 #include "src/game/people/people_data_fn_801437B8.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetPPSelectFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!((p[0x4] >> 5) & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 #if 0
 asm void itemParamGetHPUp(void) {
 #include "src/game/people/people_data_fn_801437E0.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8 itemParamGetHPUp(u8* p) {
     if (p == NULL) return 0;
     return p[0xa];
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetReviveFlag(void) {
 #include "src/game/people/people_data_fn_801437F8.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetReviveFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!((p[0x4] >> 6) & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 #if 0
 asm void itemParamGetAttackEffortUp(void) {
 #include "src/game/people/people_data_fn_80143820.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8 itemParamGetAttackEffortUp(u8* p) {
     if (p == NULL) return 0;
     return p[0x9];
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetHPEffortUp(void) {
 #include "src/game/people/people_data_fn_80143838.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8 itemParamGetHPEffortUp(u8* p) {
     if (p == NULL) return 0;
     return p[0x8];
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetPPMaxUpFlag(void) {
 #include "src/game/people/people_data_fn_80143850.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetPPMaxUpFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!((p[0x4] >> 7) & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 #if 0
 asm void itemParamGetConfuseFlag(void) {
 #include "src/game/people/people_data_fn_80143878.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetConfuseFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!(p[0x3] & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 #if 0
 asm void itemParamGetParalyzeFlag(void) {
 #include "src/game/people/people_data_fn_801438A0.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetParalyzeFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!((p[0x3] >> 1) & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 #if 0
 asm void itemParamGetFreezeFlag(void) {
 #include "src/game/people/people_data_fn_801438C8.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetFreezeFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!((p[0x3] >> 2) & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 #if 0
 asm void itemParamGetBurnFlag(void) {
 #include "src/game/people/people_data_fn_801438F0.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetBurnFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!((p[0x3] >> 3) & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 #if 0
 asm void itemParamGetPoisonFlag(void) {
 #include "src/game/people/people_data_fn_80143918.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetPoisonFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!((p[0x3] >> 4) & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 #if 0
 asm void itemParamGetSleepFlag(void) {
 #include "src/game/people/people_data_fn_80143940.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetSleepFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!((p[0x3] >> 5) & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 #if 0
 asm void itemParamGetLevelUpFlag(void) {
 #include "src/game/people/people_data_fn_80143968.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetLevelUpFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!((p[0x3] >> 6) & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 #if 0
 asm void itemParamGetGuardFlag(void) {
 #include "src/game/people/people_data_fn_80143990.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetGuardFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!((p[0x3] >> 7) & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 #if 0
 asm void itemParamGetSpAttackUp(void) {
 #include "src/game/people/people_data_fn_801439B8.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemParamGetSpAttackUp(u8* p) {
     if (p == NULL) return 0;
     return (u32)(p[0x2] & 0xF);
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetHitUp(void) {
 #include "src/game/people/people_data_fn_801439D4.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemParamGetHitUp(u8* p) {
     if (p == NULL) return 0;
     return (u32)((p[0x2] >> 4) & 0xF);
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetQuickUp(void) {
 #include "src/game/people/people_data_fn_801439F0.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemParamGetQuickUp(u8* p) {
     if (p == NULL) return 0;
     return (u32)(p[0x1] & 0xF);
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetDefenceUp(void) {
 #include "src/game/people/people_data_fn_80143A0C.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemParamGetDefenceUp(u8* p) {
     if (p == NULL) return 0;
     return (u32)((p[0x1] >> 4) & 0xF);
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetAttackUp(void) {
 #include "src/game/people/people_data_fn_80143A28.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemParamGetAttackUp(u8* p) {
     if (p == NULL) return 0;
     return (u32)((p[0x0] >> 1) & 0xF);
 }
+#endif
 #endif
 #if 0
 asm void itemParamGetCriticalFlag(void) {
 #include "src/game/people/people_data_fn_80143A44.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetCriticalFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!((p[0x0] >> 5) & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 #if 0
 asm void itemParamGetMeromeroFlag(void) {
 #include "src/game/people/people_data_fn_80143A6C.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma push
-#pragma peephole off
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemParamGetMeromeroFlag(u8* p) {
     s32 v;
     if (p == NULL) return 0;
     v = !!((p[0x0] >> 7) & 1);
     return v;
 }
-#pragma pop
+#endif
 #endif
 extern u32 lbl_80478BE0;
 extern u8 lbl_80368630[];
@@ -2450,35 +2528,38 @@ asm void itemParamGetPtr(void) {
 #include "src/game/people/people_data_fn_80143A94.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8* itemParamGetPtr(u8 idx) {
     u8* result = &lbl_80368630[(u8)idx * 16];
     if (idx < lbl_80478BE0) return result;
     return NULL;
 }
 #endif
+#endif
 #if 0
 asm void tasteDataGetAisyou(void) {
 #include "src/game/people/people_data_fn_80143ABC.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s8 tasteDataGetAisyou(u8* p, u16 idx) {
     if (p == NULL) return 0;
     if ((u32)(idx & 0xFFFF) >= 0x19) return 0;
     return (s8)(p[idx + 4]);
 }
 #endif
+#endif
 #if 0
 asm void tasteDataGetNigateMsgDataId(void) {
 #include "src/game/people/people_data_fn_80143AF0.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 tasteDataGetNigateMsgDataId(u8* p) {
     if (p == NULL) return 0;
     return *(u32*)p;
 }
+#endif
 #endif
 extern u32 lbl_80478BC8;
 extern u8 lbl_80367F78[];
@@ -2487,23 +2568,25 @@ asm void tasteDataGetPtr(void) {
 #include "src/game/people/people_data_fn_80143B08.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8* tasteDataGetPtr(u16 idx) {
     u8* result = &lbl_80367F78[(u16)idx * 32];
     if ((u16)idx < lbl_80478BC8) return result;
     return NULL;
 }
 #endif
+#endif
 #if 0
 asm void itemSoubiDataBiosGetFightKoukaDataId(void) {
 #include "src/game/people/people_data_fn_80143B30.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u16 itemSoubiDataBiosGetFightKoukaDataId(u8* p) {
     if (p == NULL) return 0;
     return *(u16*)p;
 }
+#endif
 #endif
 extern u32 lbl_80478BC0;
 extern u8 lbl_80367EF0[];
@@ -2512,63 +2595,68 @@ asm void itemSoubiDataBiosGetPtr(void) {
 #include "src/game/people/people_data_fn_80143B48.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8* itemSoubiDataBiosGetPtr(u16 idx) {
     u8* result = &lbl_80367EF0[(u16)idx * 2];
     if ((u16)idx < lbl_80478BC0) return result;
     return NULL;
 }
 #endif
+#endif
 #if 0
 asm void itemBiosSetNum(void) {
 #include "src/game/people/people_data_fn_80143B70.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void itemBiosSetNum(u8* p, u16 val) {
     if (p == NULL) return;
     *(u16*)(p + 0x2) = val;
 }
+#endif
 #endif
 #if 0
 asm void itemBiosSetItemDataId(void) {
 #include "src/game/people/people_data_fn_80143B80.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void itemBiosSetItemDataId(u8* p, u16 val) {
     if (p == NULL) return;
     *(u16*)(p + 0x0) = val;
 }
+#endif
 #endif
 #if 0
 asm void itemBallDataBiosSetFightKoukaDataId(void) {
 #include "src/game/people/people_data_fn_80143B90.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void itemBallDataBiosSetFightKoukaDataId(u8* p, u16 val) {
     if (p == NULL) return;
     *(u16*)(p + 0x0) = val;
 }
+#endif
 #endif
 #if 0
 asm void itemDataBiosSetBuff(void) {
 #include "src/game/people/people_data_fn_80143BA0.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void itemDataBiosSetBuff(u8* p, u32 val) {
     if (p == NULL) return;
     *(u32*)(p + 0x18) = val;
 }
+#endif
 #endif
 #if 0
 asm void itemDataBiosSetUseFriend(void) {
 #include "src/game/people/people_data_fn_80143BB0.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void itemDataBiosSetUseFriend(u8* p, u16 idx, u8 val) {
     u32 i;
     if (p == NULL) return;
@@ -2577,93 +2665,102 @@ void itemDataBiosSetUseFriend(u8* p, u16 idx, u8 val) {
     p[i + 0x24] = val;
 }
 #endif
+#endif
 #if 0
 asm void itemDataBiosSetFightUseKoukaDataId(void) {
 #include "src/game/people/people_data_fn_80143BD0.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void itemDataBiosSetFightUseKoukaDataId(u8* p, u16 val) {
     if (p == NULL) return;
     *(u16*)(p + 0xc) = val;
 }
+#endif
 #endif
 #if 0
 asm void itemDataBiosSetItemSoubiDataId(void) {
 #include "src/game/people/people_data_fn_80143BE0.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void itemDataBiosSetItemSoubiDataId(u8* p, u16 val) {
     if (p == NULL) return;
     *(u16*)(p + 0xa) = val;
 }
+#endif
 #endif
 #if 0
 asm void itemDataBiosSetDoc(void) {
 #include "src/game/people/people_data_fn_80143BF0.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void itemDataBiosSetDoc(u8* p, u32 val) {
     if (p == NULL) return;
     *(u32*)(p + 0x14) = val;
 }
+#endif
 #endif
 #if 0
 asm void itemDataBiosSetUseful(void) {
 #include "src/game/people/people_data_fn_80143C00.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void itemDataBiosSetUseful(u8* p, u8 val) {
     if (p == NULL) return;
     p[0x2] = val;
 }
+#endif
 #endif
 #if 0
 asm void itemDataBiosSetImportant(void) {
 #include "src/game/people/people_data_fn_80143C10.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void itemDataBiosSetImportant(u8* p, u8 val) {
     if (p == NULL) return;
     p[0x1] = val;
 }
+#endif
 #endif
 #if 0
 asm void itemDataBiosSetPrice(void) {
 #include "src/game/people/people_data_fn_80143C20.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void itemDataBiosSetPrice(u8* p, u16 val) {
     if (p == NULL) return;
     *(u16*)(p + 0x6) = val;
 }
+#endif
 #endif
 #if 0
 asm void itemDataBiosSetKind(void) {
 #include "src/game/people/people_data_fn_80143C30.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void itemDataBiosSetKind(u8* p, u8 val) {
     if (p == NULL) return;
     p[0x0] = val;
 }
+#endif
 #endif
 #if 0
 asm void itemDataBiosSetName(void) {
 #include "src/game/people/people_data_fn_80143C40.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void itemDataBiosSetName(u8* p, u32 val) {
     if (p == NULL) return;
     *(u32*)(p + 0x10) = val;
 }
+#endif
 #endif
 
 extern u32 lbl_80478BB8;
@@ -2671,7 +2768,7 @@ extern u32 lbl_80478BD0;
 extern ItemBallDataBios lbl_80367AF0[];
 extern WazaMachineData lbl_80368018[];
 
-#pragma optimization_level 4
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemBiosGetNum(u8* p) {
     ItemBiosData* item;
 
@@ -2679,7 +2776,9 @@ u32 itemBiosGetNum(u8* p) {
     if (item == NULL) return 0;
     return item->num;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemBiosGetItemDataId(u8* p) {
     ItemBiosData* item;
 
@@ -2687,7 +2786,9 @@ u32 itemBiosGetItemDataId(u8* p) {
     if (item == NULL) return 0;
     return item->itemDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemBallDataBiosGetSnatchSnatchWzxDataId(u8* p) {
     ItemBallDataBios* ballData;
 
@@ -2695,7 +2796,9 @@ u32 itemBallDataBiosGetSnatchSnatchWzxDataId(u8* p) {
     if (ballData == NULL) return 0;
     return ballData->snatchSnatchWzxDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemBallDataBiosGetSnatchShakeWzxDataId(u8* p) {
     ItemBallDataBios* ballData;
 
@@ -2703,7 +2806,9 @@ u32 itemBallDataBiosGetSnatchShakeWzxDataId(u8* p) {
     if (ballData == NULL) return 0;
     return ballData->snatchShakeWzxDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemBallDataBiosGetSnatchPokeoutWzxDataId(u8* p) {
     ItemBallDataBios* ballData;
 
@@ -2711,7 +2816,9 @@ u32 itemBallDataBiosGetSnatchPokeoutWzxDataId(u8* p) {
     if (ballData == NULL) return 0;
     return ballData->snatchPokeoutWzxDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemBallDataBiosGetSnatchMissWzxDataId(u8* p) {
     ItemBallDataBios* ballData;
 
@@ -2719,7 +2826,9 @@ u32 itemBallDataBiosGetSnatchMissWzxDataId(u8* p) {
     if (ballData == NULL) return 0;
     return ballData->snatchMissWzxDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemBallDataBiosGetSnatchBalllandWzxDataId(u8* p) {
     ItemBallDataBios* ballData;
 
@@ -2727,7 +2836,9 @@ u32 itemBallDataBiosGetSnatchBalllandWzxDataId(u8* p) {
     if (ballData == NULL) return 0;
     return ballData->snatchBalllandWzxDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemBallDataBiosGetSnatchAttackWzxDataId(u8* p) {
     ItemBallDataBios* ballData;
 
@@ -2735,7 +2846,9 @@ u32 itemBallDataBiosGetSnatchAttackWzxDataId(u8* p) {
     if (ballData == NULL) return 0;
     return ballData->snatchAttackWzxDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemBallDataBiosGetThrowWzxDataId(u8* p) {
     ItemBallDataBios* ballData;
 
@@ -2743,7 +2856,9 @@ u32 itemBallDataBiosGetThrowWzxDataId(u8* p) {
     if (ballData == NULL) return 0;
     return ballData->throwWzxDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemBallDataBiosGetDowninWzxDataId(u8* p) {
     ItemBallDataBios* ballData;
 
@@ -2751,7 +2866,9 @@ u32 itemBallDataBiosGetDowninWzxDataId(u8* p) {
     if (ballData == NULL) return 0;
     return ballData->downinWzxDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemBallDataBiosGetOutWzxDataId(u8* p) {
     ItemBallDataBios* ballData;
 
@@ -2759,7 +2876,9 @@ u32 itemBallDataBiosGetOutWzxDataId(u8* p) {
     if (ballData == NULL) return 0;
     return ballData->outWzxDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemBallDataBiosGetOpenWzxDataId(u8* p) {
     ItemBallDataBios* ballData;
 
@@ -2767,7 +2886,9 @@ u32 itemBallDataBiosGetOpenWzxDataId(u8* p) {
     if (ballData == NULL) return 0;
     return ballData->openWzxDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemBallDataBiosGetInWzxDataId(u8* p) {
     ItemBallDataBios* ballData;
 
@@ -2775,7 +2896,9 @@ u32 itemBallDataBiosGetInWzxDataId(u8* p) {
     if (ballData == NULL) return 0;
     return ballData->inWzxDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemBallDataBiosGetFightKoukaDataId(u8* p) {
     ItemBallDataBios* ballData;
 
@@ -2783,7 +2906,9 @@ u32 itemBallDataBiosGetFightKoukaDataId(u8* p) {
     if (ballData == NULL) return 0;
     return ballData->fightKoukaDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8* itemBallDataBiosGetPtr(u16 idx) {
     u16 ballId;
 
@@ -2791,7 +2916,9 @@ u8* itemBallDataBiosGetPtr(u16 idx) {
     if (ballId >= lbl_80478BB8) return NULL;
     return (u8*)&lbl_80367AF0[ballId];
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemDataBiosGetBattleUseFunc(u8* p) {
     ItemDataBios* itemData;
 
@@ -2799,7 +2926,9 @@ u32 itemDataBiosGetBattleUseFunc(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->battleUseFunc;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemDataBiosGetFieldUseFunc(u8* p) {
     ItemDataBios* itemData;
 
@@ -2807,7 +2936,9 @@ u32 itemDataBiosGetFieldUseFunc(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->fieldUseFunc;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemDataBiosGetItemEffectParam(u8* p) {
     ItemDataBios* itemData;
 
@@ -2815,7 +2946,9 @@ u32 itemDataBiosGetItemEffectParam(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->itemEffectParam;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemDataBiosGetBuff(u8* p) {
     ItemDataBios* itemData;
 
@@ -2823,7 +2956,9 @@ u32 itemDataBiosGetBuff(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->buff;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemDataBiosGetUseFriend(u8* p, u16 idx) {
     ItemDataBios* itemData;
     u16 friendIdx;
@@ -2835,7 +2970,9 @@ s32 itemDataBiosGetUseFriend(u8* p, u16 idx) {
     if (friendIdx >= 3) return 0;
     return (s8)((u8)itemData->useFriend[friendIdx]);
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemDataBiosGetKinomiNo(u16 itemId) {
     u16 itemNo;
 
@@ -2843,7 +2980,9 @@ u32 itemDataBiosGetKinomiNo(u16 itemId) {
     if (itemNo < 0x85 || itemNo > 0xAF) return 0xFF;
     return (u8)(itemId - 0x85);
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemDataBiosGetHidenMachineNo(u8* p) {
     ItemDataBios* itemData;
     u8 machineNo;
@@ -2861,12 +3000,16 @@ u32 itemDataBiosGetHidenMachineNo(u8* p) {
     if (machineNo < 0x32 || machineNo >= lbl_80478BD0) return 0xFF;
     return (u8)(machineNo - 0x32);
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemDataBiosGetWazaIDByWazaMachineNo(u32 machineNo) {
     if ((u8)machineNo >= lbl_80478BD0) return 0;
     return (u16)lbl_80368018[(u8)machineNo].wazaId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemDataBiosGetWazaMachineNo(u8* p) {
     ItemDataBios* itemData;
 
@@ -2875,7 +3018,9 @@ u32 itemDataBiosGetWazaMachineNo(u8* p) {
     if (itemData->kind != 4) return 0xFF;
     return (u8)itemData->buff;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemDataBiosGetFightUseKoukaDataId(u8* p) {
     ItemDataBios* itemData;
 
@@ -2883,7 +3028,9 @@ u32 itemDataBiosGetFightUseKoukaDataId(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->fightUseKoukaDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemDataBiosGetItemSoubiDataId(u8* p) {
     ItemDataBios* itemData;
 
@@ -2891,7 +3038,9 @@ u32 itemDataBiosGetItemSoubiDataId(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->itemSoubiDataId;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemDataBiosGetDoc(u8* p) {
     ItemDataBios* itemData;
 
@@ -2899,7 +3048,9 @@ u32 itemDataBiosGetDoc(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->doc;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8 fn_80143F9C(u8* p) {
     ItemDataBios* itemData;
 
@@ -2907,7 +3058,9 @@ u8 fn_80143F9C(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->field_03;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8 fn_80143FB4(u8* p) {
     ItemDataBios* itemData;
 
@@ -2915,7 +3068,9 @@ u8 fn_80143FB4(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->useful;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8 fn_80143FCC(u8* p) {
     ItemDataBios* itemData;
 
@@ -2923,7 +3078,9 @@ u8 fn_80143FCC(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->important;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemDataBiosGetCoupon(u8* p) {
     ItemDataBios* itemData;
 
@@ -2931,7 +3088,9 @@ u32 itemDataBiosGetCoupon(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->coupon;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemDataBiosGetPrice(u8* p) {
     ItemDataBios* itemData;
 
@@ -2939,7 +3098,9 @@ u32 itemDataBiosGetPrice(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->price;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u8 itemDataBiosGetKind(u8* p) {
     ItemDataBios* itemData;
 
@@ -2947,7 +3108,9 @@ u8 itemDataBiosGetKind(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->kind;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemDataBiosCheckExportable(u8* p) {
     ItemDataBios* itemData;
     u8 important;
@@ -2962,7 +3125,9 @@ s32 itemDataBiosCheckExportable(u8* p) {
     if (important != 0) return 0;
     return 1;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemDataBiosCheckImportable(u8* p) {
     ItemDataBios* itemData;
 
@@ -2970,7 +3135,9 @@ s32 itemDataBiosCheckImportable(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->name != 0;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 u32 itemDataBiosGetName(u8* p) {
     ItemDataBios* itemData;
 
@@ -2978,7 +3145,9 @@ u32 itemDataBiosGetName(u8* p) {
     if (itemData == NULL) return 0;
     return itemData->name;
 }
+#endif
 
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 itemUse2PokemonSimulation(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4) {
     void* savedFightFloor;
     void* fightFloor;
@@ -3000,7 +3169,16 @@ s32 itemUse2PokemonSimulation(void* arg0, void* arg1, void* arg2, void* arg3, vo
 
     return result;
 }
+#endif
 
+#endif /* !PEOPLE_DATA_801441A8_ONLY */
+
+#if defined(PEOPLE_DATA_801441A8_ONLY)
+extern u8* itemDataBiosGetPtr(u16 index);
+extern u32 itemDataBiosGetItemSoubiDataId(u8* p);
+#endif
+
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 s32 friendXUp__FP7PokemonP12FightPokemonScUsUs(
     void* pokemon, void* fightPokemon, s8 change, u16 lower, u16 upper)
 {
@@ -3011,7 +3189,7 @@ s32 friendXUp__FP7PokemonP12FightPokemonScUsUs(
     extern u16 pokemonBiosGetFriend(void*);
     extern void pokemonBiosSetFriend(void*, u16);
     extern u16 pokemonBiosGetItemDataId(void*);
-    extern u16 pokemonBiosGetCatchBallId(void*);
+    extern u8 pokemonBiosGetCatchBallId(void*);
     extern void* fightFloorGetFightPokemonPtrToFightTrainerPtr(s32, void*);
     extern void* fightTrainerCheckFightPokemonFightOut(void*, void*);
     extern void fn_802331A4(void*, s32);
@@ -3032,20 +3210,21 @@ s32 friendXUp__FP7PokemonP12FightPokemonScUsUs(
     } else {
         oldFriend = pokemonBiosGetFriend(pokemon);
     }
-
-    effectiveFriend = pokemonBiosGetFriend(pokemon);
     if (pokemonIsDarkPokemon(pokemon)) {
-        effectiveFriend += pokemonGetStatus(pokemon, 0, 0xC7, 0);
+        effectiveFriend = pokemonGetStatus(pokemon, 0, 0xC7, 0);
+    } else {
+        effectiveFriend = 0;
     }
-    if (effectiveFriend >= lower && effectiveFriend >= upper) {
+    effectiveFriend += pokemonBiosGetFriend(pokemon);
+    if (effectiveFriend < lower || effectiveFriend >= upper) {
         return 0;
     }
 
     adjusted = change;
     if (adjusted > 0) {
         item = itemDataBiosGetPtr(pokemonBiosGetItemDataId(pokemon));
-        if (item != NULL &&
-            itemDataBiosGetItemSoubiDataId(item) == 0x1B) {
+        if ((u16)(item == NULL ? 0 : itemDataBiosGetItemSoubiDataId(item)) ==
+            0x1B) {
             adjusted = adjusted * 150 / 100;
         }
         if (pokemonBiosGetCatchBallId(pokemon) == 0xB) {
@@ -3063,29 +3242,32 @@ s32 friendXUp__FP7PokemonP12FightPokemonScUsUs(
 
     if (pokemonIsDarkPokemon(pokemon)) {
         pokemonSetStatus(pokemon, 0, 0xC7, 0, newFriend);
-        if (fightPokemon != NULL) {
-            trainer = fightFloorGetFightPokemonPtrToFightTrainerPtr(
-                0, fightPokemon);
+        if (fightPokemon == NULL) {
+            trainer = NULL;
+        } else {
             trainer = fightTrainerCheckFightPokemonFightOut(
-                trainer, fightPokemon);
-            if (trainer != NULL) {
-                fn_802331A4(trainer, 0xC7);
-            }
+                fightFloorGetFightPokemonPtrToFightTrainerPtr(0, fightPokemon),
+                fightPokemon);
+        }
+        if (trainer != NULL) {
+            fn_802331A4(trainer, 0xC7);
         }
     } else {
         pokemonBiosSetFriend(pokemon, newFriend);
-        if (fightPokemon != NULL) {
-            trainer = fightFloorGetFightPokemonPtrToFightTrainerPtr(
-                0, fightPokemon);
+        if (fightPokemon == NULL) {
+            trainer = NULL;
+        } else {
             trainer = fightTrainerCheckFightPokemonFightOut(
-                trainer, fightPokemon);
-            if (trainer != NULL) {
-                fn_802331A4(trainer, 0x99);
-            }
+                fightFloorGetFightPokemonPtrToFightTrainerPtr(0, fightPokemon),
+                fightPokemon);
+        }
+        if (trainer != NULL) {
+            fn_802331A4(trainer, 0x99);
         }
     }
     return (s16)(newFriend - oldFriend);
 }
+#endif
 
 typedef struct ItemUsePokemonLog {
     s32 type;
@@ -3093,6 +3275,20 @@ typedef struct ItemUsePokemonLog {
     u16 extra;
 } ItemUsePokemonLog;
 
+static inline void peopleItemUseLogAdd(ItemUsePokemonLog* log, s16* logCount,
+                                       s32 type, u16 value)
+{
+    s16 count = *logCount;
+
+    if (count < 0x20) {
+        log[count].type = type;
+        log[count].value = value;
+        log[count].extra = 0;
+        *logCount = count + 1;
+    }
+}
+
+#if !defined(PEOPLE_DATA_80142EF8_ONLY)
 void hpRecover__FP20ITEMUSE2POKEMON_LOG1PsP7PokemonUcbUsP12FightPokemon(
     ItemUsePokemonLog* log, s16* logCount, void* pokemon, u8 recovery,
     u8 revive, u16 amount, void* fightPokemon)
@@ -3109,6 +3305,7 @@ void hpRecover__FP20ITEMUSE2POKEMON_LOG1PsP7PokemonUcbUsP12FightPokemon(
     u16 recoveryAmount;
     u8 revived;
     void* trainer;
+    u16 value;
 
     revived = 0;
     oldHp = pokemonBiosGetHp(pokemon);
@@ -3153,26 +3350,21 @@ void hpRecover__FP20ITEMUSE2POKEMON_LOG1PsP7PokemonUcbUsP12FightPokemon(
     }
     pokemonBiosSetHp(pokemon, newHp);
 
-    if (fightPokemon != NULL) {
-        trainer = fightFloorGetFightPokemonPtrToFightTrainerPtr(
-            0, fightPokemon);
+    if (fightPokemon == NULL) {
+        trainer = NULL;
+    } else {
         trainer = fightTrainerCheckFightPokemonFightOut(
-            trainer, fightPokemon);
-        if (trainer != NULL) {
-            fn_802331A4(trainer, 0x83);
-        }
+            fightFloorGetFightPokemonPtrToFightTrainerPtr(0, fightPokemon),
+            fightPokemon);
+    }
+    if (trainer != NULL) {
+        fn_802331A4(trainer, 0x83);
     }
 
-    if (revived != 0 && *logCount < 0x20) {
-        log[*logCount].type = 0x16;
-        log[*logCount].value = 0;
-        log[*logCount].extra = 0;
-        (*logCount)++;
+    if (revived != 0) {
+        peopleItemUseLogAdd(log, logCount, 0x16, 0);
     }
-    if (*logCount < 0x20) {
-        log[*logCount].type = 0x15;
-        log[*logCount].value = newHp - oldHp;
-        log[*logCount].extra = 0;
-        (*logCount)++;
-    }
+    value = newHp - oldHp;
+    peopleItemUseLogAdd(log, logCount, 0x15, value);
 }
+#endif

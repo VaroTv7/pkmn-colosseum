@@ -80,11 +80,18 @@ s32 fightTrainerAiSelectIrekaeDasuFightPokemon(void* ctx, u32 param1, u32 param2
 u32 fightTrainerAiWazaHit045(void* trainerCtx, u32 trainerSlot, u32 resultSlot, u32 resultType);
 u32 fightMenuFightTrainerGcHeroOpenMenu(void* ctx, u32 param1, u32 param2);
 
+/* Single-function carves: memo_r57b_8025FA20_prefix.c (memoGetScaleAngle)
+ * and memo_r57b_8025FBCC_o2.c (memoInitDebug). */
+#if defined(MEMO_8025FA20_ONLY) || defined(MEMO_8025FBCC_ONLY)
+#define PR424_MEMO_SPLIT
+#define PR424_MEMO_8025FA20_8025FEE4
+#endif
+
 #if !defined(PR424_MEMO_SPLIT) || \
     defined(PR424_MEMO_8025FA20_8025FEE4)
-/* Address: 0x8025FA20 | Size: 0x1AC | Ghidra import */
-void memoGetScaleAngle(u16 r3, f32 *r4, f32 *r5)
-
+#if !defined(MEMO_8025FBCC_ONLY)
+/* Address: 0x8025FA20 | Size: 0x1AC */
+void memoGetScaleAngle(u16 id, f32* scaleOut, f32* angleOut)
 {
     extern f32 lbl_8047E690;
     extern f32 lbl_8047E694;
@@ -94,157 +101,124 @@ void memoGetScaleAngle(u16 r3, f32 *r4, f32 *r5)
     extern f32 lbl_8047E6A4;
     extern f32 lbl_8047E6A8;
     extern f32 lbl_8047E6AC;
-  s32 id;
-  f32 fVar1;
+    f32 scale;
 
-  id = (u16)r3;
-  fVar1 = lbl_8047E690;
-  if (id != 0x92) {
-    if (id < 0x92) {
-      if (id != 0x4a) {
-        if (id < 0x4a) {
-          if (id != 0x26) {
-            if (id < 0x26) {
-              if (id != 0x1a) {
-                if ((id < 0x1a) && (id == 6)) {
-                  fVar1 = lbl_8047E6A0;
-                }
-              }
-              else {
-                fVar1 = lbl_8047E6A0;
-              }
-            }
-            else if (id == 0x44) {
-              fVar1 = lbl_8047E6A8;
-            }
-          }
-          else {
-            fVar1 = lbl_8047E694;
-          }
-        }
-        else if (id != 0x8e) {
-          if (id < 0x8e) {
-            if (id != 0x85) {
-              if ((id < 0x85) && (id < 0x4c)) {
-                fVar1 = lbl_8047E698;
-              }
-            }
-            else {
-              fVar1 = lbl_8047E698;
-            }
-          }
-          else if (id == 0x90) {
-            fVar1 = lbl_8047E6A4;
-          }
-          else if (0x8f < id) {
-            fVar1 = lbl_8047E69C;
-          }
-        }
-        else {
-          fVar1 = lbl_8047E69C;
-        }
-      }
-      else {
-        fVar1 = lbl_8047E698;
-      }
+    scale = lbl_8047E690;
+    switch (id) {
+    case 0x26:
+        scale = lbl_8047E694;
+        break;
+    case 0x4B:
+        scale = lbl_8047E698;
+        break;
+    case 0x91:
+        scale = lbl_8047E69C;
+        break;
+    case 0x12C:
+        scale = lbl_8047E6A0;
+        break;
+    case 0x8E:
+        scale = lbl_8047E69C;
+        break;
+    case 0x92:
+        scale = lbl_8047E6A4;
+        break;
+    case 0x90:
+        scale = lbl_8047E6A4;
+        break;
+    case 0xFA:
+        scale = lbl_8047E698;
+        break;
+    case 0x197:
+        scale = lbl_8047E6A4;
+        break;
+    case 0x198:
+        scale = lbl_8047E6A4;
+        break;
+    case 0x1A:
+        scale = lbl_8047E6A0;
+        break;
+    case 0x6:
+        scale = lbl_8047E6A0;
+        break;
+    case 0xE2:
+        scale = lbl_8047E69C;
+        break;
+    case 0xD9:
+        scale = lbl_8047E69C;
+        break;
+    case 0x14B:
+        scale = lbl_8047E6A8;
+        break;
+    case 0x44:
+        scale = lbl_8047E6A8;
+        break;
+    case 0x136:
+        scale = lbl_8047E69C;
+        break;
+    case 0x4A:
+        scale = lbl_8047E698;
+        break;
+    case 0x16B:
+        scale = lbl_8047E698;
+        break;
+    case 0x85:
+        scale = lbl_8047E698;
+        break;
     }
-    else if (id == 0x136) {
-      fVar1 = lbl_8047E69C;
+    if (angleOut != NULL) {
+        *angleOut = lbl_8047E6AC;
     }
-    else if (id < 0x136) {
-      if (id == 0xfa) {
-        fVar1 = lbl_8047E698;
-      }
-      else if (id < 0xfa) {
-        if (id == 0xe2) {
-          fVar1 = lbl_8047E69C;
-        }
-        else if ((id < 0xe2) && (id == 0xd9)) {
-          fVar1 = lbl_8047E69C;
-        }
-      }
-      else if (id == 300) {
-        fVar1 = lbl_8047E6A0;
-      }
+    if (scaleOut != NULL) {
+        *scaleOut = scale;
     }
-    else if (id == 0x16b) {
-      fVar1 = lbl_8047E698;
-    }
-    else if (id < 0x16b) {
-      if (id == 0x14b) {
-        fVar1 = lbl_8047E6A8;
-      }
-    }
-    else if (id == 0x198) {
-      fVar1 = lbl_8047E6A4;
-    }
-    else if ((id < 0x198) && (0x196 < id)) {
-      fVar1 = lbl_8047E6A4;
-    }
-  }
-  else {
-    fVar1 = lbl_8047E6A4;
-  }
-  if (r5 != (f32 *)0x0) {
-    *r5 = lbl_8047E6AC;
-  }
-  if (r4 != (f32 *)0x0) {
-    *r4 = fVar1;
-    return;
-  }
-  return;
 }
 
-/* Address: 0x8025FBCC | Size: 0x168 | Ghidra import */
-void memoInitDebug(u32 r3)
+#endif
 
+#if !defined(MEMO_8025FA20_ONLY)
+/* Adds a debug memo record for one species id unless it is already there. */
+static inline void memoDataSetDebugInline(u16 id)
 {
-  u16 *puVar1;
-  u32 uVar2;
-  u32 uVar3;
-  u16 uVar4;
-  
-  if (r3 == 0) {
-    savedataGetStatus(0,0xc);
-  }
-  for (uVar4 = 1; uVar4 < 0xfc; uVar4 = uVar4 + 1) {
-    puVar1 = (u16 *)savedataGetStatus(0,0xc);
-    for (uVar3 = 0; (uVar3 & 0xffff) < (u32)*puVar1; uVar3 = uVar3 + 1) {
-      if ((puVar1[(uVar3 & 0xffff) * 6 + 2] & 0x3fff) != uVar4) {
+    u16* memo;
+    u16 i;
+    u16 entryID;
+
+    memo = (u16*)savedataGetStatus(0, 0xC);
+    for (i = 0; i < *memo; i++) {
+        entryID = memo[i * 6 + 2] & 0x3FFF;
+        if (entryID == id) {
+            return;
         }
-        puVar1[(u32)*puVar1 * 6 + 2] = uVar4 | 0x8000;
-        uVar2 = _fadeEffectGetRandom__FUl(0xffffffff);
-        *(u32 *)(puVar1 + (u32)*puVar1 * 6 + 6) = uVar2;
-        *puVar1 = *puVar1 + 1;
-      }
-  }
-  uVar4 = 0x115;
-  do {
-    if (0x19b < uVar4) {
-      return;
     }
-    puVar1 = (u16 *)savedataGetStatus(0,0xc);
-    for (uVar3 = 0; (uVar3 & 0xffff) < (u32)*puVar1; uVar3 = uVar3 + 1) {
-      if ((puVar1[(uVar3 & 0xffff) * 6 + 2] & 0x3fff) != uVar4) {
-        }
-        puVar1[(u32)*puVar1 * 6 + 2] = uVar4 | 0x8000;
-        uVar2 = _fadeEffectGetRandom__FUl(0xffffffff);
-        *(u32 *)(puVar1 + (u32)*puVar1 * 6 + 6) = uVar2;
-        *puVar1 = *puVar1 + 1;
-      }
-    uVar4 = uVar4 + 1;
-  } while (1);
+    memo[*memo * 6 + 2] = id | 0x8000;
+    *(u32*)((u8*)memo + *memo * 12 + 0xC) = _fadeEffectGetRandom__FUl(-1);
+    *memo = *memo + 1;
 }
 
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
+/* Address: 0x8025FBCC | Size: 0x168 */
+void memoInitDebug(u16* block)
+{
+    u16 id;
+
+    if (block == NULL) {
+        block = (u16*)savedataGetStatus(0, 0xC);
+    }
+    for (id = 1; id <= 0xFB; id++) {
+        memoDataSetDebugInline(id);
+    }
+    for (id = 0x115; id <= 0x19B; id++) {
+        memoDataSetDebugInline(id);
+    }
+}
+#endif
+
+#if !defined(MEMO_8025FA20_ONLY) && !defined(MEMO_8025FBCC_ONLY)
 #if 0
 asm void memoDataGetPokemonTrainerRndFromID(void) {
 #include "src/game/colosseum_battle_fn_8025FD34.inc"
 }
 #endif
-#pragma pop
 u32 memoDataGetPokemonTrainerRndFromID(u16 *r3, u16 r4) {
 	  u16 *queue;
 	  u16 *countQueue;
@@ -273,15 +247,11 @@ u32 memoDataGetPokemonTrainerRndFromID(u16 *r3, u16 r4) {
   return 0;
 }
 
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 #if 0
 asm void memoDataGetPokemonRndFromID(void) {
 #include "src/game/colosseum_battle_fn_8025FDDC.inc"
 }
 #endif
-#pragma pop
 u32 memoDataGetPokemonRndFromID(u16 *r3, u16 r4) {
   u16 *queue;
   u16 *countQueue;
@@ -327,6 +297,7 @@ u16 memoDataGetPokemonID(u16 *r3, u32 r4)
     return res;
 }
 #endif
+#endif
 
 #if !defined(PR424_MEMO_SPLIT)
 /* Address: 0x8025FEE4 | Size: 0x34 | Ghidra import */
@@ -366,15 +337,11 @@ u32 memoDataSetMemoFlag(u16 *r3)
   return uVar3;
 }
 
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 #if 0
 asm void fn_8025FF9C(void) {
 #include "src/game/colosseum_battle_fn_8025FF9C.inc"
 }
 #endif
-#pragma pop
 void memoDataSet(u16 *r3, u32 r4) {
   extern u32 pokemonBiosGetPokemonDataId();
   u16 *queue;
@@ -410,15 +377,11 @@ void memoDataSet(u16 *r3, u32 r4) {
   *queue = (u16)(*queue + 1);
 }
 
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 #if 0
 asm void memoInit(void) {
 #include "src/game/colosseum_battle_fn_80260070.inc"
 }
 #endif
-#pragma pop
 void memoInit(u16 *r3) {
   u32 r31;
   u32 r30;

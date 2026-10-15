@@ -8,7 +8,8 @@
  *   fn_8010C46C, fn_8010C4A0, fn_8010C4D4, fn_8010C508
  *                -- surface-type table (lbl_8035B500) field readers /
  *                   type-vs-type interaction lookup
- *   GScolsy2UtilGetSidePlanePoint -- 3-component dot product
+ *   GScolsy2UtilGetSidePlanePoint -- 3-component dot product (now its own
+ *                   unit, GScolsys2Util_exact_8010C77C.c)
  *   GScolsys2GetObjEnable, GScolsys2SetObjEnable -- active-layer per-triangle visibility
  *                   flag get/set (via lbl_80404C68)
  *   fn_8010CBC0  -- returns the first word of lbl_80404C68
@@ -85,44 +86,28 @@ extern GSColSysState lbl_80404C68;
  * Range: 0x8010C220 - 0x8010E138
  * =================================================================== */
 
+/* Each carve compiles only its own range: this unit owns 0x8010C364 -
+ * 0x8010C3FC, gs_colsys_candidate_8010C46C.c defines GS_COLSYS_CANDIDATE_8010C46C
+ * for 0x8010C46C - 0x8010C77C, and the other functions below are linked from
+ * their own units (GS_COLSYS_WHOLE_RANGE is never defined). */
+#if defined(GS_COLSYS_WHOLE_RANGE)
 /* 0x8010C220 | 0x4 | void_stub */
 void fn_8010C220(void) {
 }
 
 /* 0x8010C224 | 0x140 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 void fn_8010C224(void) {
     /* TODO: match -- 320 bytes at 0x8010C224 */
 }
-#pragma pop
 
+#endif
+
+#if !defined(GS_COLSYS_CANDIDATE_8010C46C)
 /* 0x8010C364 | 0x24 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
-#pragma scheduling off
-#pragma scheduling off
-#pragma scheduling off
-#pragma scheduling off
-#pragma scheduling off
-#pragma scheduling off
-#pragma scheduling off
-#pragma scheduling off
 s32 fn_8010C364(void) {
     GStextureFree();
     return 1;
 }
-#pragma scheduling on
-#pragma scheduling on
-#pragma scheduling on
-#pragma scheduling on
-#pragma scheduling on
-#pragma scheduling on
-#pragma scheduling on
-#pragma scheduling on
-#pragma pop
 
 /* 0x8010C388 | 0x74 */
 extern void* lbl_80478E70; /* -> face-bios entry count */
@@ -131,6 +116,7 @@ extern char lbl_80272000[];
 extern char lbl_8035B4E8[];
 extern void GSlogWrite(char*, char*, ...);
 
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma — see docs/RULE_EXCEPTIONS.md */
 u32 fn_8010C388(u16 idx) {
     u8* entry;
     u16 i = idx;
@@ -147,6 +133,9 @@ u32 fn_8010C388(u16 idx) {
     return (*entry >> 7) & 1;
 }
 
+#endif
+
+#if defined(GS_COLSYS_WHOLE_RANGE)
 /* 0x8010C3FC | 0x70 */
 void* _menuFaceBiosGetPtr__FUs(u16 idx) {
     u8* entry;
@@ -164,46 +153,34 @@ void* _menuFaceBiosGetPtr__FUs(u16 idx) {
     return *(void**)(entry + 4);
 }
 
+#endif
+
+#if defined(GS_COLSYS_CANDIDATE_8010C46C)
 /* 0x8010C46C | 0x34 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 u16 fn_8010C46C(u16 typeIndex) {
     if (typeIndex >= lbl_80478B38) {
         return 0;
     }
     return *(u16*)((u8*)(lbl_8035B500 + typeIndex) + 2);
 }
-#pragma pop
 
 /* 0x8010C4A0 | 0x34 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 u8 fn_8010C4A0(u16 typeIndex) {
     if (typeIndex >= lbl_80478B38) {
         return 0;
     }
     return *(u8*)((u8*)(lbl_8035B500 + typeIndex) + 0);
 }
-#pragma pop
 
 /* 0x8010C4D4 | 0x34 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 u32 fn_8010C4D4(u16 typeIndex) {
     if (typeIndex >= lbl_80478B38) {
         return 0;
     }
     return *(u32*)((u8*)(lbl_8035B500 + typeIndex) + 4);
 }
-#pragma pop
 
 /* 0x8010C508 | 0x44 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 u16 fn_8010C508(u32 typeA, u32 typeB) {
     if (typeA >= lbl_80478B38) {
         return 0;
@@ -213,14 +190,10 @@ u16 fn_8010C508(u32 typeA, u32 typeB) {
     }
     return *(u16*)((u8*)lbl_8035B500 + (typeA * 0x2C) + (typeB * 2) + 8);
 }
-#pragma pop
 
 /* 0x8010C54C | 0x104 */
-#pragma push
-#pragma optimization_level 4
-#pragma dont_inline on
 s32 fn_8010C54C(u16 param1, u8 mode) {
-    s32 i;
+    u16 i;
     u16 code1;
     u16 code2;
     u16 result;
@@ -264,11 +237,8 @@ s32 fn_8010C54C(u16 param1, u8 mode) {
     }
     return score;
 }
-#pragma pop
 
 /* 0x8010C650 | 0xFC */
-#pragma push
-#pragma dont_inline on
 u16 fn_8010C650(u16 typeA, u16* arr, u16 count) {
     u16 i;
     u16 countA = 0;
@@ -306,67 +276,17 @@ u16 fn_8010C650(u16 typeA, u16* arr, u16 count) {
     }
     return 0x42;
 }
-#pragma dont_inline reset
-#pragma pop
 
 /* 0x8010C74C | 0x30 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
-#pragma inline_depth(0)
 u16 zokuseiGetWazaJoutai(u16 typeA, u16 typeB) {
     return fn_8010C508(typeA, typeB);
 }
-#pragma pop
 
-/* 0x8010C77C | 0x40 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-#pragma fp_contract on
-f32 GScolsy2UtilGetSidePlanePoint(Vec3f* normal, Vec3f* p1, Vec3f* p2) {
-    return (normal->x * (p2->x - p1->x))
-        + (normal->y * (p2->y - p1->y))
-        + (normal->z * (p2->z - p1->z));
-}
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma fp_contract off
-#pragma pop
+#endif
+
+#if defined(GS_COLSYS_WHOLE_RANGE)
+/* 0x8010C77C GScolsy2UtilGetSidePlanePoint: linked on its own as
+ * GScolsys2Util_exact_8010C77C.c. */
 
 /* 0x8010C7BC | 0x88 */
 s32 GScolsys2GetObjEnable(s32 triIndex, u32* outResult) {
@@ -432,9 +352,6 @@ s32 GScolsys2SetObjEnable(s32 triIndex, s32 visible) {
 }
 
 /* 0x8010C8D0 | 0x160 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 s32 fn_8010C8D0(Mtx out, u32 triIndex) {
     typedef struct ColAxes {
         Vec axis[3];
@@ -477,12 +394,8 @@ s32 fn_8010C8D0(Mtx out, u32 triIndex) {
     }
     return 1;
 }
-#pragma pop
 
 /* 0x8010CA30 | 0x190 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 s32 fn_8010CA30(Mtx out, u32 triIndex) {
     typedef struct ColAxes {
         Vec axis[3];
@@ -529,16 +442,11 @@ s32 fn_8010CA30(Mtx out, u32 triIndex) {
     }
     return 1;
 }
-#pragma pop
 
 /* 0x8010CBC0 | 0x10 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 u32 fn_8010CBC0(void) {
     return *(u32*)&lbl_80404C68;
 }
-#pragma pop
 
 /* 0x8010CBD0 | 0x34 */
 void* GScolsys2GetCurFloor(void) {
@@ -552,49 +460,29 @@ void* GScolsys2GetCurFloor(void) {
 }
 
 /* 0x8010CC04 | 0x50 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 void GScolsys2UnloadCCD(void) {
     /* TODO: match -- 80 bytes at 0x8010CC04 */
 }
-#pragma pop
 
 /* 0x8010CC54 | 0x118 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 void fn_8010CC54(void) {
     /* TODO: match -- 280 bytes at 0x8010CC54 */
 }
-#pragma pop
 
 /* 0x8010CD6C | 0x98 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 void fn_8010CD6C(void) {
     /* TODO: match -- 152 bytes at 0x8010CD6C */
 }
-#pragma pop
 
 /* 0x8010CE04 | 0x1E0 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 void fn_8010CE04(void) {
     /* TODO: match -- 480 bytes at 0x8010CE04 */
 }
-#pragma pop
 
 /* 0x8010CFE4 | 0x54 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 void fn_8010CFE4(void) {
     /* TODO: match -- 84 bytes at 0x8010CFE4 */
 }
-#pragma pop
 
 /* 0x8010D038 | 0x2C */
 s32 fn_8010D038(void) {
@@ -609,64 +497,37 @@ s32 fn_8010D038(void) {
 }
 
 /* 0x8010D064 | 0x10C */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 void fn_8010D064(void) {
     /* TODO: match -- 268 bytes at 0x8010D064 */
 }
-#pragma pop
 
 /* 0x8010D170 | 0x9C */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 void fn_8010D170(void) {
     /* TODO: match -- 156 bytes at 0x8010D170 */
 }
-#pragma pop
 
 /* 0x8010D20C | 0x1BC */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 void fn_8010D20C(void) {
     /* TODO: match -- 444 bytes at 0x8010D20C */
 }
-#pragma pop
 
 /* 0x8010D3C8 | 0x50C */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 void GScolsys2Draw(void) {
     /* TODO: match -- 1292 bytes at 0x8010D3C8 */
 }
-#pragma pop
 
 /* 0x8010D8D4 | 0x52C */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 void fn_8010D8D4(void) {
     /* TODO: match -- 1324 bytes at 0x8010D8D4 */
 }
-#pragma pop
 
 /* 0x8010DE00 | 0xF0 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 void fn_8010DE00(void) {
     /* TODO: match -- 240 bytes at 0x8010DE00 */
 }
-#pragma pop
 
 /* 0x8010DEF0 | 0x248 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
 void fn_8010DEF0(void) {
     /* TODO: match -- 584 bytes at 0x8010DEF0 */
 }
-#pragma pop
+#endif

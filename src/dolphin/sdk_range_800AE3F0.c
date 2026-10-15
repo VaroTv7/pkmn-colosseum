@@ -1154,12 +1154,17 @@ s32 CARDWriteAsync(CARDFileInfo* fileInfo, void* buffer, s32 length,
 #endif
 
 #if defined(SDK_EXACT_800AE3F0_800AE9FC) || \
+    defined(DSP_TASK_ONLY) || \
     defined(SDK_EXACT_800AF474_800AF8A0) || \
+    defined(SDK_EXACT_800AF8A0_800B016C) || \
+    defined(SDK_EXACT_800B0694_800B1788) || \
     defined(SDK_EXACT_800B1788_800B2070) || \
     defined(SDK_EXACT_800B2070_800B2968) || \
     defined(SDK_EXACT_800B4644_800B4DC4) || \
     defined(SDK_EXACT_800B4E50_800B4FC0) || \
-    defined(SDK_EXACT_800B5070_800B5184)
+    defined(SDK_EXACT_800B5070_800B5184) || \
+    defined(SDK_EXACT_800B671C_800B6FE0) || \
+    defined(SDK_EXACT_800B6FE0_800B71F0)
 #define SDK_RANGE_EXACT_ACTIVE
 #endif
 
@@ -1420,9 +1425,7 @@ u32 AIGetDSPSampleRate(void);
 
 void __AICallbackStackSwitch(AIDCallback callback);
 
-#pragma dont_inline on
 
-#pragma dont_inline off
 
 #endif
 
@@ -1488,7 +1491,6 @@ void __ARQInterruptServiceRoutine(void) {
     }
 }
 
-#pragma dont_inline on
 void ARQInit(void) {
     if (lbl_8047A94C != 1) {
         OSRegisterVersion(lbl_80478A38);
@@ -1503,7 +1505,6 @@ void ARQInit(void) {
         lbl_8047A94C = 1;
     }
 }
-#pragma dont_inline off
 
 void ARQPostRequest(ARQRequest* request, u32 owner, u32 type, u32 priority,
                     u32 source, u32 dest, u32 length, ARQCallback callback) {
@@ -1570,7 +1571,7 @@ u32 fn_800AE794(void) {
     return (DSP_REGS->mailToDspHi >> 15) & 1;
 }
 
-u32 fn_800AE7A4(void) {
+u32 DSPCheckMailFromDSP(void) {
     return (DSP_REGS->mailFromDspHi >> 15) & 1;
 }
 
@@ -1652,7 +1653,16 @@ void __DSP_debug_printf(char* fmt, ...) {
 }
 #endif
 
-#if !defined(SDK_RANGE_EXACT_ACTIVE)
+#if !defined(SDK_RANGE_EXACT_ACTIVE) || defined(DSP_TASK_ONLY)
+/* dsp_task.c: __DSPHandler .. __DSP_remove_task (DSP_TASK_ONLY builds the
+   whole object, 0x800AE9FC - 0x800AF280, with its strings). */
+#if defined(DSP_TASK_ONLY)
+/* dsp.c, defined above outside this build. */
+u32 fn_800AE794(void);
+u32 DSPCheckMailFromDSP(void);
+u32 DSPReadMailFromDSP(void);
+void DSPSendMailToDSP(u32 mail);
+#endif
 void __DSPHandler(__OSInterrupt interrupt, OSContext* context)
 {
     u8 unused[4];
@@ -1666,7 +1676,7 @@ void __DSPHandler(__OSInterrupt interrupt, OSContext* context)
     OSClearContext(&exception_context);
     OSSetCurrentContext(&exception_context);
 
-    while (fn_800AE7A4() == 0) {
+    while (DSPCheckMailFromDSP() == 0) {
     }
     mail = DSPReadMailFromDSP();
     if ((lbl_8047A96C->flags & 2) && (mail + 0x232F0000) == 2) {
@@ -1790,6 +1800,119 @@ void __DSPHandler(__OSInterrupt interrupt, OSContext* context)
     OSClearContext(&exception_context);
     OSSetCurrentContext(context);
 }
+
+#if defined(DSP_TASK_ONLY)
+void __DSP_exec_task(DSPTaskInfo* current, DSPTaskInfo* next)
+{
+    if (current != NULL) {
+        DSPSendMailToDSP((u32) current->dram_mmem_addr);
+        while (fn_800AE794() != 0) {
+        }
+        DSPSendMailToDSP(current->dram_length);
+        while (fn_800AE794() != 0) {
+        }
+        DSPSendMailToDSP(current->dram_addr);
+        while (fn_800AE794() != 0) {
+        }
+    } else {
+        DSPSendMailToDSP(0);
+        while (fn_800AE794() != 0) {
+        }
+        DSPSendMailToDSP(0);
+        while (fn_800AE794() != 0) {
+        }
+        DSPSendMailToDSP(0);
+        while (fn_800AE794() != 0) {
+        }
+    }
+
+    DSPSendMailToDSP((u32) next->iram_mmem_addr);
+    while (fn_800AE794() != 0) {
+    }
+    DSPSendMailToDSP(next->iram_length);
+    while (fn_800AE794() != 0) {
+    }
+    DSPSendMailToDSP(next->iram_addr);
+    while (fn_800AE794() != 0) {
+    }
+
+    if (next->state == 0) {
+        DSPSendMailToDSP(next->dsp_init_vector);
+        while (fn_800AE794() != 0) {
+        }
+        DSPSendMailToDSP(0);
+        while (fn_800AE794() != 0) {
+        }
+        DSPSendMailToDSP(0);
+        while (fn_800AE794() != 0) {
+        }
+        DSPSendMailToDSP(0);
+        while (fn_800AE794() != 0) {
+        }
+    } else {
+        DSPSendMailToDSP(next->dsp_resume_vector);
+        while (fn_800AE794() != 0) {
+        }
+        DSPSendMailToDSP((u32) next->dram_mmem_addr);
+        while (fn_800AE794() != 0) {
+        }
+        DSPSendMailToDSP(next->dram_length);
+        while (fn_800AE794() != 0) {
+        }
+        DSPSendMailToDSP(next->dram_addr);
+        while (fn_800AE794() != 0) {
+        }
+    }
+}
+
+void __DSP_boot_task(DSPTaskInfo* task)
+{
+    volatile u32 mail;
+
+    while (DSPCheckMailFromDSP() == 0) {
+    }
+    mail = DSPReadMailFromDSP();
+
+    DSPSendMailToDSP(0x80F3A001);
+    while (fn_800AE794() != 0) {
+    }
+    DSPSendMailToDSP((u32) task->iram_mmem_addr);
+    while (fn_800AE794() != 0) {
+    }
+    DSPSendMailToDSP(0x80F3C002);
+    while (fn_800AE794() != 0) {
+    }
+    DSPSendMailToDSP(task->iram_addr & 0xFFFF);
+    while (fn_800AE794() != 0) {
+    }
+    DSPSendMailToDSP(0x80F3A002);
+    while (fn_800AE794() != 0) {
+    }
+    DSPSendMailToDSP(task->iram_length);
+    while (fn_800AE794() != 0) {
+    }
+    DSPSendMailToDSP(0x80F3B002);
+    while (fn_800AE794() != 0) {
+    }
+    DSPSendMailToDSP(0);
+    while (fn_800AE794() != 0) {
+    }
+    DSPSendMailToDSP(0x80F3D001);
+    while (fn_800AE794() != 0) {
+    }
+    DSPSendMailToDSP(task->dsp_init_vector);
+    while (fn_800AE794() != 0) {
+    }
+
+    __DSP_debug_printf("DSP is booting task: 0x%08X\n", (u32)task);
+    __DSP_debug_printf("__DSP_boot_task()  : IRAM MMEM ADDR: 0x%08X\n", (u32)task->iram_mmem_addr);
+    __DSP_debug_printf("__DSP_boot_task()  : IRAM DSP ADDR : 0x%08X\n", task->iram_addr);
+    __DSP_debug_printf("__DSP_boot_task()  : IRAM LENGTH   : 0x%08X\n", task->iram_length);
+    __DSP_debug_printf("__DSP_boot_task()  : DRAM MMEM ADDR: 0x%08X\n", task->dram_length);
+    __DSP_debug_printf("__DSP_boot_task()  : Start Vector  : 0x%08X\n", task->dsp_init_vector);
+}
+#endif
+
 void __DSP_insert_task(DSPTaskInfo* task) {
     DSPTaskInfo* current;
 
@@ -1826,6 +1949,29 @@ void __DSP_insert_task(DSPTaskInfo* task) {
     }
 }
 
+#if defined(DSP_TASK_ONLY)
+/* Unreferenced in this game, so the linker strips it; its message stays in
+   .data as the last string of dsp_task.c (0x80312778). Body from the SDK's
+   dsp_task.c as kept by zeldaret/tww
+   (src/dolphin/dsp/dsp_task.c @ f5234ec8). */
+void __DSP_add_task(DSPTaskInfo* task) {
+    if (lbl_8047A964 == NULL) {
+        lbl_8047A96C = task;
+        lbl_8047A964 = task;
+        lbl_8047A968 = task;
+        task->next = task->prev = NULL;
+    } else {
+        lbl_8047A964->next = task;
+        task->next = NULL;
+        task->prev = lbl_8047A964;
+        lbl_8047A964 = task;
+    }
+
+    task->state = 0;
+    __DSP_debug_printf("__DSP_add_task() : Added task    : 0x%08X\n", (u32)task);
+}
+#endif
+
 void __DSP_remove_task(DSPTaskInfo* task) {
     task->flags = 0;
     task->state = 3;
@@ -1854,132 +2000,13 @@ void __DSP_remove_task(DSPTaskInfo* task) {
     task->next->prev = task->prev;
 }
 
-s32 fn_800B31F4(s32 chan)
-{
-    extern s32 lbl_80312960[8];
-    extern u32 lbl_80312980[8];
-    extern u16 lbl_80478A58;
-    extern s32 fn_80099400(s32, s32, u32*);
-    extern s32 IsCard(u32);
-    extern s32 __CARDClearStatus(s32);
-    extern s32 fn_800AF660(s32, u8*);
-    extern s32 fn_80098944(s32);
-    extern s32 __CARDUnlock(s32, u8*);
-    extern s32 __CARDEnableInterrupt(s32, s32);
-    extern void __CARDExiHandler(void);
-    extern void fn_8009870C(s32, void*);
-    extern void EXIUnlock(s32);
-    extern s32 __CARDRead(s32, u32, u32, void*, CARDCallback);
-    extern void __CARDMountCallback(s32, s32);
-    extern void DoUnmount(s32, s32);
-    CARDMountControl* card =
-        (CARDMountControl*)&lbl_803FC620[chan];
-    u32 id;
-    u8 status;
-    s32 result;
-    OSSramEx* sram;
-    s32 i;
-    u8 checksum;
-    s32 step;
-
-    if (card->mountStep == 0) {
-        if (fn_80099400(chan, 0, &id) == 0) {
-            result = -3;
-        } else if (IsCard(id)) {
-            result = 0;
-        } else {
-            result = -2;
-        }
-        if (result < 0) {
-            goto error;
-        }
-
-        card->cid = id;
-        card->size = id & 0xFC;
-        card->sectorSize = lbl_80312960[(id & 0x3800) >> 11];
-        card->cBlock = (card->size * 1024 * 1024 / 8) / card->sectorSize;
-        card->latency = lbl_80312980[(id & 0x700) >> 8];
-
-        result = __CARDClearStatus(chan);
-        if (result < 0) {
-            goto error;
-        }
-        result = fn_800AF660(chan, &status);
-        if (result < 0) {
-            goto error;
-        }
-        if (!fn_80098944(chan)) {
-            result = -3;
-            goto error;
-        }
-
-        if (!(status & 0x40)) {
-            result = __CARDUnlock(chan, card->id);
-            if (result < 0) {
-                goto error;
-            }
-            checksum = 0;
-            sram = __OSLockSramEx();
-            for (i = 0; i < 12; i++) {
-                sram->flashID[chan][i] = card->id[i];
-                checksum += card->id[i];
-            }
-            sram->flashIDCheckSum[chan] = (u8)~checksum;
-            __OSUnlockSramEx(TRUE);
-            return result;
-        }
-
-        card->mountStep = 1;
-        checksum = 0;
-        sram = __OSLockSramEx();
-        for (i = 0; i < 12; i++) {
-            checksum += sram->flashID[chan][i];
-        }
-        __OSUnlockSramEx(FALSE);
-        if (sram->flashIDCheckSum[chan] != (u8)~checksum) {
-            result = -5;
-            goto error;
-        }
-    }
-
-    if (card->mountStep == 1) {
-        if (card->cid == 0x80000004) {
-            u16 vendor;
-
-            sram = __OSLockSramEx();
-            vendor = *(u16*)sram->flashID[chan];
-            __OSUnlockSramEx(FALSE);
-            if (lbl_80478A58 != 0xFFFF && vendor != lbl_80478A58) {
-                result = -2;
-                goto error;
-            }
-        }
-        card->mountStep = 2;
-        result = __CARDEnableInterrupt(chan, TRUE);
-        if (result < 0) {
-            goto error;
-        }
-        fn_8009870C(chan, __CARDExiHandler);
-        EXIUnlock(chan);
-        DCInvalidateRange(card->workArea, 0xA000);
-    }
-
-    step = card->mountStep - 2;
-    result = __CARDRead(chan, card->sectorSize * step, 0x2000,
-                        (u8*)card->workArea + step * 0x2000,
-                        __CARDMountCallback);
-    if (result < 0) {
-        __CARDPutControlBlock((CARDControl*)card, result);
-    }
-    return result;
-
-error:
-    EXIUnlock(chan);
-    DoUnmount(chan, result);
-    return result;
-}
+#if !defined(DSP_TASK_ONLY)
+/* DoMount (fn_800B31F4) is defined in sdk_candidate_800B3078.c, the
+   CARDMount.c object. */
+extern s32 fn_800B31F4(s32 chan);
 void __CARDDefaultApiCallback(s32 chan, s32 result) {
 }
+#endif
 #endif
 #endif
 
@@ -2229,7 +2256,6 @@ void __CARDExtHandler(s32 chan) {
 
 #if !defined(SDK_RANGE_EXACT_ACTIVE) || \
     defined(SDK_EXACT_800AF474_800AF8A0)
-#pragma optimize_for_size on
 void __CARDTxHandler(s32 chan) {
     BOOL error;
     BOOL unlocked = FALSE;
@@ -2245,7 +2271,6 @@ void __CARDTxHandler(s32 chan) {
         callback(chan, (!error && fn_80098944(chan)) ? 0 : -3);
     }
 }
-#pragma optimize_for_size reset
 
 #if !defined(SDK_EXACT_800AF474_800AF8A0)
 void UnlockedCallback(s32 chan, s32 result) {
@@ -2310,7 +2335,7 @@ s32 __CARDEnableInterrupt(s32 chan, BOOL enable) {
     return err ? -3 : 0;
 }
 
-s32 fn_800AF660(s32 chan, u8* status) {
+s32 __CARDReadStatus(s32 chan, u8* status) {
     u32 cmd;
     s32 err;
 
@@ -2506,7 +2531,6 @@ u32 DummyLen(void) {
     return len;
 }
 
-#pragma dont_inline on
 void InitCallback(void* task) {
     CARDControl* card;
     s32 chan;
@@ -2526,7 +2550,6 @@ void InitCallback(void* task) {
     while (fn_800AE794() != 0) {
     }
 }
-#pragma dont_inline off
 
 #endif
 
@@ -2921,7 +2944,6 @@ void DoUnmount(s32 chan, s32 result) {
     OSRestoreInterrupts(enabled);
 }
 
-#pragma dont_inline on
 s32 CARDUnmount(s32 chan) {
     CARDControl* card;
     BOOL enabled;
@@ -2948,7 +2970,6 @@ s32 CARDUnmount(s32 chan) {
     OSRestoreInterrupts(enabled);
     return 0;
 }
-#pragma dont_inline off
 
 s32 CARDCancel(CARDFileInfo* fileInfo) {
     CARDFileInfo* file = fileInfo;
@@ -3009,8 +3030,6 @@ void DeleteCallback(s32 chan, s32 result) {
     }
 }
 
-#pragma push
-#pragma inline_depth(0)
 s32 CARDDeleteAsync(s32 chan, const char* fileName, CARDCallback callback) {
     CARDControl* card;
     s32 fileNo;
@@ -3046,7 +3065,6 @@ s32 CARDDeleteAsync(s32 chan, const char* fileName, CARDCallback callback) {
     }
     return result;
 }
-#pragma pop
 
 void __CARDSetDiskID(void* diskId) {
     CARDControl* card = lbl_803FC620;
@@ -3200,7 +3218,6 @@ s32 CARDGetAttributes(s32 chan, s32 fileNo, u8* attr) {
     return result;
 }
 
-#pragma dont_inline on
 void UpdateIconOffsets(CARDDirEntry* entry, CARDStat* stat);
 
 s32 CARDSetStatusAsync(s32 chan, s32 fileNo, CARDStat* stat,
@@ -3277,7 +3294,6 @@ s32 fn_800B57D0(s32 chan, s32 fileNo, CARDDirEntry* entry) {
     }
     return __CARDPutControlBlock(card, result);
 }
-#pragma dont_inline off
 
 s32 fn_800B5BE4(s32 chan, s32 fileNo, u8 attr, void* callback) {
     s32 result;
@@ -3291,14 +3307,13 @@ s32 fn_800B5BE4(s32 chan, s32 fileNo, u8 attr, void* callback) {
     return fn_800B588C(chan, fileNo, &entry, callback);
 }
 
-#pragma peephole off
 void* fn_800B5C5C(void* object) {
     extern GXData* gx;
     s32 format;
     u32 count;
-    extern u32 fn_800BAE5C(void* object);
+    extern u32 GXGetTexObjFmt(void* object);
 
-    format = fn_800BAE5C(object);
+    format = GXGetTexObjFmt(object);
     if (format != 8 && format != 9 && format != 10) {
         u8* data = (u8*)gx;
         count = *(u32*)(data + 0x2c8);
@@ -3311,7 +3326,6 @@ void* fn_800B5C5C(void* object) {
         return data + ((count & 3) << 4) + 0x288;
     }
 }
-#pragma peephole reset
 
 s32 fn_800AFEC4(s32 chan, CARDCallback callback) {
     CARDControl* card;
@@ -3371,7 +3385,6 @@ s32 fn_800AFFE0(s32 chan, u32 addr, void* callback) {
     return result;
 }
 
-#pragma peephole off
 GXTlutRegion* __GXDefaultTlutRegionCallback(u32 index) {
     extern GXData* gx;
     GXTlutRegion* region;
@@ -3383,9 +3396,20 @@ GXTlutRegion* __GXDefaultTlutRegionCallback(u32 index) {
     }
     return region;
 }
+#endif
+
+#if !defined(SDK_RANGE_EXACT_ACTIVE) || defined(SDK_EXACT_800B671C_800B6FE0)
+/* __GXInitGX: GXInit.c's last function (0x800B671C). */
+GXTlutRegion* __GXDefaultTlutRegionCallback(u32 index);
+
+#if defined(SDK_EXACT_800B671C_800B6FE0)
+/* GXInit.c's .sdata2 starts with the GX state pointer (0x8047C2E0). */
+extern u8 gxData_803FC860[];
+GXData* const gx = (GXData*)gxData_803FC860;
+#endif
 
 void __GXInitGX(void) {
-    extern GXData* gx;
+    extern GXData* const gx;
     extern GXRenderModeObj lbl_80312D30;
     extern GXRenderModeObj lbl_80312F4C;
     extern GXRenderModeObj lbl_803130F0;
@@ -3633,7 +3657,9 @@ void __GXInitGX(void) {
     fn_800BD91C(0x23, 0x16);
     fn_800BE30C();
 }
+#endif
 
+#if !defined(SDK_RANGE_EXACT_ACTIVE)
 #define GX_WRITE_U8(value)  (*(volatile u8*)0xCC008000 = (value))
 #define GX_WRITE_U32(value) (*(volatile u32*)0xCC008000 = (value))
 
@@ -3796,8 +3822,10 @@ void* GXInit(void* base, u32 size) {
 }
 #undef GX_WRITE_U8
 #undef GX_WRITE_U32
-#pragma peephole reset
+#endif
 
+#if !defined(SDK_RANGE_EXACT_ACTIVE) || defined(SDK_EXACT_800B6FE0_800B71F0)
+/* GXFifo.c head, 0x800B6FE0 - 0x800B71F0. */
 extern GXData* const gx;
 
 void fn_800B7594(u8 overflow, u8 underflow);
@@ -3851,13 +3879,13 @@ void GXCPInterruptHandler(s16 interrupt, OSContext* context) {
 void GXInitFifoPtrs(GXFifoObj* fifo, void* readPtr, void* writePtr);
 
 void GXInitFifoBase(GXFifoObj* fifo, void* base, u32 size) {
-    extern void fn_800B71F0(GXFifoObj* fifo, u32 hiWatermark, u32 loWatermark);
+    extern void GXInitFifoLimits(GXFifoObj* fifo, u32 hiWatermark, u32 loWatermark);
 
     fifo->base = base;
     fifo->top = (u8*)base + size - 4;
     fifo->size = size;
     fifo->count = 0;
-    fn_800B71F0(fifo, size - 0x4000, (size >> 1) & ~0x1f);
+    GXInitFifoLimits(fifo, size - 0x4000, (size >> 1) & ~0x1f);
     GXInitFifoPtrs(fifo, base, base);
 }
 

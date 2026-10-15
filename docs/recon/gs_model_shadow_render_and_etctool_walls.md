@@ -1,0 +1,290 @@
+# modelShadowRender (now linked) and fn_801E09E0 walls (lanes D4/D7, 2026-09-29)
+
+## `modelShadowRender__FP10GSgfxLayer` (96.13%)
+
+- Literal pool: the shadow TU's `.sdata2` pool is 0x8047CBC0–0x8047CBE8
+  (3.0f, 0.01f, 0.0f, 30.0f, 0.1f, 3000.0f, "shadow", and the unsigned
+  int-to-float bias), padded to 8 at both ends. Only modelShadowRender and
+  the linked `gs_model_shadow_candidate_800E9358` read it, and the latter
+  reads only 3.0f (`lbl_8047CBC0`, through `modelShadowGetAvgScl`). If this
+  function becomes exact, its carve can own 0x8047CBC4–0x8047CBE8, keeping
+  3.0f as the extern the linked carve needs. That requires the constants
+  as literals and "shadow" as a string literal emitted in `.sdata2` ahead of
+  the bias. With literals the pool already comes out in retail order (the
+  3.0f is emitted only while the helper reads a literal).
+- The code is still about 170 rows of allocation away. The candidate uses
+  r22–r31, one more than retail, because it hoists `&model->bound` out of
+  the cast-model loop; retail rematerialises `addi r6, r26, 0x4c` at every
+  use. The XD-named inline `modelShadowAddReceive(model, receiveModel,
+  light, bound)` (XD `_modelShadowAddReceive__FP8_GSmodelP8_GSmodelP7GSlightP7GSbound`,
+  UNUSED 0x2CC) aligns the loop tail with retail (70.0% raw vs 69.2%), but
+  the bound is still hoisted. The same happens when the helper computes the
+  bound itself, or also contains the light/scale checks.
+  `-opt nopropagation`, `-O3`, `noloop`, `nolifetimes`, `-inline deferred`
+  and `-O4,s` do not help.
+- Nothing was committed. The next step is a construct that stops MWCC's
+  loop-invariant motion of the bound address, which is needed before the
+  pool can be owned.
+
+### 2026-09-29 second pass (lane D4): 96.13% to 99.79%, not exact
+
+I replayed each step with mwcc-debugger (GC/2.6, same code as GC/1.3) and
+checked colouring orders with a copy of D5's GPR simulator
+(`simg.py` plus a select pass; K between 26 and 30 reproduces the dump).
+
+- A pragma scoped to an inline's definition has no effect; only the pragma
+  state at the function being compiled counts. `opt_common_subs off` on
+  the whole function does not remove the hoist.
+- The hoist is the frontend's loop-invariant motion. It creates
+  `@N = model + 0x4c` in the j-loop preheader (visible in
+  `frontend-01-ast-after-optimizations`). `#pragma opt_loop_invariants off`
+  removes it. Then CSE shares one bound address across the three calls
+  within an iteration, which still costs r22. Writing the argument three
+  distinct ways (`(u8*)model + 0x4cU`, `(s32)model + 0x4c`,
+  `(u32)model + 0x4c`, found by a 360-variant sweep) gives retail's
+  r23-r31 frame and per-call `addi r6, r26, 0x4c`. Loop syntax (while, goto,
+  a combined if) does not stop the hoist, and neither does routing the
+  bound through the XD-named `modelShadowAddReceive` inline.
+- Stack slots: nesting `modelShadowBoundToSize` one inline level deeper
+  (a single-use `modelShadowSetReceiver`) makes its GSvec temporary take
+  the lowest slot, as in retail (0x8, then 0x20/0x14 in the list loop).
+  Inline locals are allocated breadth-first.
+- The XD-named `modelShadowInitReceiveList` inline gives the first loop
+  retail's volatile counter and a zero constant that is not shared with the
+  model-loop counter.
+- `count = 0` before `set__5GSvecFfff(&avg, ...)` lets the scheduler put
+  `li r26,0` ahead of the call, as in retail. Separate named locals
+  `receiver`/`k` for the receiver loop, and the declaration order
+  receiver, i, j, model, count, slot, k, castModel, light, list, index,
+  valid, give retail's registers everywhere else.
+- Float literals fix the final `size < 0.1f` register order.
+
+What is left is 9 rows in the object-list loop: retail colours the
+searched model r27 and the list r23; the candidate gives r23/r24. The
+searched model is a backend-split web (a new, highest vreg). Its degree
+(17, below K) puts it in the last colouring group, where it takes light's
+dead r23. The simulator shows that retail's result needs that web coloured
+between `count` and `slot`. That means either `slot` at degree below K
+(retail's slot web would have to interfere with about 9 fewer values), or
+the searched model at degree 31-32. Renaming the web's variable, a
+separate named local, an `if (model != NULL)` body and a `while` loop all
+leave it unchanged.
+
+For the link: with `-str reuse,readonly` the unit's pool comes out exactly
+as retail's 0x8047CBC4-0x8047CBE8 contents (0.01f, 0.0f, 30.0f, 0.1f,
+3000.0f, "shadow", pad, bias). But the object's `.sdata2` is 8-aligned, so
+the unit must own 0x8047CBC0 as well. That means defining the 3.0f in
+this unit, probably as a `lbl_8047CBC0` global so the linked 800E9358
+carve still resolves. It also needs the unit split out of its
+list-comprehension flag group.
+
+### 2026-09-29 third pass (lane D7): exact and linked
+
+**The web structure.** A pairwise-merge search of the interference graph
+with the GPR simulator (every pair of live nodes merged, K 27 and 29), and a
+search of node and edge removals, find exactly one single change that gives
+retail's colouring: the searched model's web (the call-result temporary,
+r135) merged with the cast-model counter `j` (r41). Renumbering the merged
+node shows it must sit at `j`'s number (between `model` and `i`). So in retail
+the searched model and `j` are one register web.
+
+**Why it splits here.** Two things split it:
+- With `opt_lifetimes` on, the frontend gives every later web of a local a
+  fresh `@N` temporary (loop-2 `i` becomes @222, `model` @223).
+- The backend copy propagation (GC/2.6 0x56AB90; callbacks 0x56AE70,
+  0x56ACB0 and 0x56ABC0 through the driver at 0x56AEB0) replaces uses of
+  `mr j, rTemp` with the call-result temporary. It is all-or-nothing per
+  copy, runs one sweep per pass in instruction order, and fails when a use
+  of the destination is itself a `mr`. The frontend also folds a
+  same-type or single-use copy, and CSE (the pass before the first
+  propagation) flattens copy chains within a region.
+
+**The form.**
+- `opt_lifetimes off`, with the model stored in `j` and a separate
+  slot-loop counter.
+- A chain of seven type-changing copies (`hop0`..`listModel`) under
+  `opt_dead_assignments off`. The function gets four copy-propagation
+  passes (backend dumps 03/07/11/15), and each strips only the last copy of
+  the chain. `j` is evaluated first in every sweep, so it stays blocked
+  until the last pass, when `hop0` goes and every use lands on `j`.
+- At register allocation the call temporary coalesces into `j`, which gives
+  retail's r27/r23.
+- Chains of 4 to 6 copies, reused loop-1 variables, and two alternating
+  variables all fail (CSE or the frontend collapses them). Kills and dead
+  copies are not needed.
+
+**Tried first, no effect:**
+- XD's list loop (FUN_800fd4d4, trevor403/xd-asm @ b1087f18) is a rework.
+  Its searched model is also coloured early (r27, shared with the receiver
+  iterator), which fits the same kind of web merge.
+- `opt_dead_assignments off` alone (D6's fix), with or without
+  `opt_loop_invariants off`, and also `opt_lifetimes`, `opt_propagation`,
+  `opt_common_subs`, `opt_strength_reduction`, `opt_unroll_loops`,
+  `opt_dead_code` and `optimization_level 1-3`: no change, or worse.
+- Dead copies of the model, nested identity inlines (the frontend
+  substitutes simple inline arguments), and goto/label block splits.
+
+**The link.**
+- The unit owns `.sdata2` 0x8047CBC0-0x8047CBE8 and is built with
+  `-str reuse,readonly` in its own configure entry.
+  `sdata2_8047CB98` now ends at 0x8047CBC0 and `sdata2_8047CBE0` starts at
+  0x8047CBE8.
+- `lbl_8047CBC0/C4/C8` are named non-const `.sdata2` globals.
+  `explicit_zero_data` keeps the 0.0f out of `.sbss2`. The linked
+  800E9358/800E92D8 carves read `lbl_8047CBC0`/`lbl_8047CBC8` by name.
+- The other constants stay literals. Named data is emitted before the
+  literal pool, so the section is retail's byte for byte. `const`
+  definitions get folded into duplicate literals, and a named 0.1f changes
+  the final float-register order.
+- Report: 100% and complete. Full `ninja`: main.dol and common_rel.rel OK.
+
+## `fn_801E09E0` (95.66%) and `fn_801E0FB4` (100%, blocked)
+
+The wait loops convert `fn_800D3088()` (u32) and `fn_800D37CC()` (s32) to
+float. In retail those conversions use the TU-shared biases
+`lbl_8047E400`/`lbl_8047E408`. The pool 0x8047E3D8–0x8047E428 is shared
+with `gs_range_candidate_801DF1D0` (0x8047E3D8–0x8047E3F0) and
+`field_range_801DF790` (0x8047E3F4–0x8047E408). Both are asm-backed
+CodeCandidates whose objects reference those labels by name. A carve of
+`gs_candidate_801E09E0` would emit its own conversion doubles, so it cannot
+own or share the biases. A hand-written union conversion against the extern
+bias compiles to `fsub`+`frsp`, not retail's `fsubs`, so it is not an
+option either. This function can only link as part of the whole TU from
+0x801DF1D0 (every function exact, with the TU owning the pool). The float
+constants' scheduling differences (`lfd` biases before the `lfs` limit)
+are consistent with a literal pool, and would be the first thing to
+revisit in that whole-TU build.
+
+## Lane D2 follow-up (2026-09-29)
+
+- **Compiler:** GC/1.3 through 2.7 give the same 176-row aligned diff, so
+  this is not a compiler-version wall.
+- **Literals:** turning the extern pool constants and "shadow" into
+  literals leaves 179 differing rows. The literal pool matters for linking,
+  but it is not the wall.
+- **Replay** (mwcc-debugger, GC/2.6 = GC/1.3): the extra register comes from
+  the frontend, not the backend. The first backend dump already has the
+  inner (`j`) loop preheader holding hoisted address temps
+  `@189/@190/@191 = &model->scale.{y,x,z}`, `@192 = &model->bound` and
+  `model + 0x58`. The scale and +0x58 temps are folded back into their
+  loads by add-propagation. `@192` feeds only call arguments
+  (`mr r6, r73` x3, `mr r3, r73`), so it stays in a callee-saved register;
+  retail instead rematerialises `addi r6, r26, 76` at each call.
+- `#pragma opt_common_subs off` restores retail's r23-r31 frame (144
+  differing rows) but reloads the model flags that retail CSEs, so it is
+  not a whole-function answer. `opt_loop_invariants off`, `opt_lifetimes
+  off`, `opt_propagation off` and `opt_strength_reduction off` either keep
+  the hoist or are worse. So do a `(GSshadowBound*)((u8*)model + 0x4C)`
+  spelling and the loop-shape variants.
+- The first loops also differ in coalescing. Retail reuses the init loop's
+  zero register as the outer byte offset and loads `i` with `li r28, 0`;
+  ours copies the zero (`mr`). The inner loop has the same pattern (retail
+  `li r31, 0` for the offset, ours `mr r31, r26`). Both point at the
+  offsets/counters being distinct virtual registers created in a different
+  order, the same kind of priority effect as the GSpartGetTransform fix.
+
+## Etctool unit 0x801DF474-0x801E0FB4 (lane D2, 2026-09-29)
+
+### Unit boundary and settings
+
+- **Start:** the unit begins at `fn_801DF474`, not 0x801DF1D0. Its
+  `.sdata2` pool is 0x8047E3F0-0x8047E428, in this order: 2.0, 0.0, 0.7,
+  the signed and unsigned int-to-float biases, 1.0, 1.5, 0.6, 0.5, 0.8.
+  The pool at 0x8047E3C8-0x8047E3E8 repeats some of these values. A single
+  TU would have pooled the duplicates, so fn_801DE698-fn_801DF3D4 is a
+  separate unit.
+- **End:** the unit ends with `etctoolSetPokemonNakigoe`, at 0x801E0FB4.
+  An earlier note put the end at 0x801E1170; that was wrong.
+  `fn_801E0FB4` is XD's `_vtrUpdateFunc__FUlUl`. XD keeps it with the
+  GSvtr functions, and XD's etctool unit also ends with
+  `etctoolSetPokemonNakigoe`. `fn_801E0FB4` reads no pool constant, so it
+  is linked as the data-free carve `gs_exact_801E0FB4`
+  (0x801E0FB4-0x801E1170), next to the GSvtr carves after it.
+- **Data it owns:** the `lbl_80279A00` sequence table (.rodata, 0x68
+  bytes) and jump tables 80375100, 80375120, 80375160 and 803751B8. It
+  presumably also owns `lbl_803750C8` (.data, 0x38 bytes: three GSvecs
+  and a u16 0..8 table that no code references).
+- **Compiler:** GC/1.3 (GC/1.3.2 and GC/2.6 give the same code), with the
+  pool constants written as literals. Extern float stand-ins change the
+  scheduling. `fn_801DF474` still reads 2.0f through `extern lbl_8047E3F0`
+  and needs a literal in the whole-unit build.
+
+### Status
+
+| Function | Score |
+|---|---|
+| fn_801DF474 | 100% |
+| fn_801DF790 | 100% (one tagged getter) |
+| fn_801DFC30 | 100% (three tagged helpers) |
+| fn_801E03D4 | 100% |
+| fn_801E075C | 100% |
+| etctoolSetPokemonNakigoe | 100% |
+| fn_801E09E0 | 99.17% (two instructions short) |
+
+### How the last rows closed
+
+- **`fn_801DF790`:**
+  - State 11 expands XD's `pokemonWazaForget`/`pokemonWazaCopy`
+    (0x8013E9A0/0x8013EA24; XD asm has the same loop). The `u16 srcSlot`
+    parameter gives retail's in-place `clrlwi r24`, and the `dst` local
+    gives the direct `mr r27,r3`.
+  - The state-8 move-id copy needs an unevidenced
+    `fieldWazaGetId` getter (tagged).
+  - The getter's return temp adds one interference edge to `running`, which
+    then colours ahead of `wazaId`. `fieldWazaCountValid`'s invalid path
+    written as `count = 0;` with an else, instead of `return 0;`, removes
+    one temp and restores the order. The replay plus `simg.py` with K=29
+    (r1, r2 and r13 reserved) reproduces all three variants.
+- **`fn_801DF474`:** retail's `mr r26,r28` after the selection loop is
+  the frontend's hoisted copy of `(u32)selectedItem`, so `selectedItem`
+  is `s32`. The pcboxDelItem arguments must be masks (`& 0xFFFF`), not
+  `(u16)` casts. The frontend hoists a cast as a `rlwinm`+`mr` pair, which
+  the scheduler moves ahead of the copy. The backend hoists a mask as a
+  single `rlwinm`, which stays behind the copy, as in retail.
+
+### Remaining wall: `fn_801E09E0`
+
+Retail sets up the call like this:
+
+```
+mr   r0,r3
+addi r3,r1,20
+mr   r29,r0
+addi r4,r30,0
+```
+
+Ours is:
+
+```
+mr   r29,r3
+mr   r4,r30
+addi r3,r1,20
+```
+
+At the prologue, retail's `addi r30,r4,lo(lbl_803750C8)` goes straight to
+r30. We emit `addi r0` followed by `mr r30,r0`.
+
+- **The +0 is the whole problem.** Once `&sequencePositions[0]` is an
+  `addi` rather than a copy, the scheduler keeps `r3` live across the
+  object copy (the r0 routing follows; the direct-global form shows it).
+  That also frees the prologue coalesce.
+- **MWCC 1.3 never produced the unfolded +0.** The frontend folds `p + 0`
+  in every spelling tried: member offsets, `&p->x`, `(u8*)p + 0`, `const`
+  and enum zeros, inline helpers with a zero index, loops that run once,
+  and index variables. With `opt_propagation off`, a zero index survives,
+  but only as `li/mulli/add`.
+- **Pooled data can't be the source either.** An `addi rX,rBase,0` does
+  appear in this build when a function reaches pooled data at offset 0
+  (memcard `...rodata.0`, objalloc, pslist `.bss`). But no compiler version
+  or `-inline deferred` pools initialised `.data`, and retail's r30 is
+  reached only at +0/+12/+24.
+- **Other forms tried:** pointer-to-array, `f32*` and `u8*` bases, struct
+  wrappers, assignment placement, a named call-result local, and
+  per-function pragmas (`opt_propagation`, `opt_dead_assignments`,
+  `opt_lifetimes`, `opt_loop_invariants`, `opt_common_subs`,
+  optimisation levels 1-3). None gives retail's `addi r4,r30,0`. The best
+  is still the committed literal source (32 aligned rows, 24 of them
+  pool-label names).
+- **GC/1.1p1 and 1.2.5n** do emit this exact shape, because they print
+  every copy as `addi`. The rest of the function rules them out
+  (300+ rows).

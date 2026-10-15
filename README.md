@@ -30,25 +30,30 @@ uv run --with matplotlib tools/plot_progress.py -o /tmp/progress.png
 
 | Metric | Value |
 |---|---|
-| Fuzzy match | 87.85% |
-| Function match | 78.90% (6,788 / 8,603 functions) |
-| Code match | 43.15% (1,076,544 / 2,495,108 matched code bytes) |
-| Data match | 97.29% (2,136,689 / 2,196,100 matched data bytes) |
-| Linked into DOL | 1,164 / 2,287 scoring units (29.37% of code) |
+| Fuzzy match | 99.69% |
+| Function match | 98.36% (8,535 / 8,677 functions) |
+| Code match | 91.81% (2,299,812 / 2,504,940 matched code bytes) |
+| Data match | 58.84% (2,098,410 / 3,566,037 matched data bytes) |
+| Source-linked | 1,891 / 2,163 scoring units (90.48% of code) |
 
-These numbers come from the canonical dtk/objdiff report generated at
-`build/GC6E01/report.json`. Old campaign metrics and helper reports are archived
-under `archive/previous_campaign/` and are not used for the published progress.
+These measurements cover the **DOL and all 25 configured REL modules**, from the
+full `build/GC6E01/report.json` generated on 2026-10-12. All 26 rebuilt binaries
+passed their unchanged canonical hashes and direct byte comparisons. This is a
+matching reconstruction with original fallback objects where required, not a
+claim of 100% decompilation or gameplay testing. See
+[`docs/COUNT_SHEEP_INTEGRATION.md`](docs/COUNT_SHEEP_INTEGRATION.md) for validation
+scope, provenance, and the separate CI input-provisioning limitation.
 
-**"Scoring units" are not translation units.** Where one retail source region
-needs different compiler flags than its neighbours, the address range is split
-and each piece becomes its own scoring unit, compiled from the *same* `.c` file
-through a one-line `#include` shim — the `_o2`, `_o4p` and `_gc20` suffixes name
-the flag variant. This does not double-count: every unit owns a disjoint address
-range (all 8,603 functions resolve to 8,603 distinct addresses, none claimed
-twice), and the 2,495,108-byte code denominator matches the real `main.dol` text
-across its seven sections, 2,503,264 bytes, to within 0.3%. The percentages are
-measured against the whole game exactly once.
+The DOL alone is 91.78% code-matched and 94.95% data-matched. The combined data
+percentage also includes the large, mostly unreconstructed `common_rel` data
+region, so it is not comparable to an older DOL-only data percentage.
+
+**Scoring units are not translation units.** An original source region may be
+split into address-owned units with different compiler flags, compiled through
+one-line `#include` shims. The full report contains 8,677 distinct module/address
+function identities, with no duplicate claims. Its 2,504,940-byte code denominator
+contains 2,495,112 DOL bytes and 9,828 REL bytes; source-linked coverage is measured
+across those same outputs. The freeze tracks their exact section topology.
 
 After rebuilding the report, refresh the table with:
 
@@ -93,9 +98,10 @@ ninja
 python configure.py progress
 ```
 
-The build splits `sys/main.dol`, substitutes only objects declared in
-`configure.py`, links `build/GC6E01/main.dol`, and verifies it against
-`config/GC6E01/build.sha1`.
+The build splits `sys/main.dol` and the 25 configured original REL modules,
+substitutes only objects declared in `configure.py`, and verifies all 26 rebuilt
+outputs against `config/GC6E01/build.sha1`. Original RELs belong under
+`orig/GC6E01/files/`; complete loose modules or their FSYS archives are supported.
 
 ## Worker Worktrees
 

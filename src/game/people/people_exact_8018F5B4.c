@@ -27,7 +27,7 @@ f32 fn_8018F5E4(const PeopleInfoBiosEntry* info)
     return lbl_8047D8A8;
 }
 
-u32 fn_8018F5FC(const PeopleInfoBiosEntry* info)
+u8 fn_8018F5FC(const PeopleInfoBiosEntry* info)
 {
     if (info != NULL) {
         return (info->flags >> 2) & 3;
@@ -67,9 +67,12 @@ f32 charModelGetHeadYawMin(const PeopleInfoBiosEntry* info)
     return lbl_8047D8A8;
 }
 
-s32 charModelGetHeadPart(const PeopleInfoBiosEntry* info)
+s8 charModelGetHeadPart(const PeopleInfoBiosEntry* info)
 {
-    return (info != NULL) ? (s32)(s8)info->raw_09 : -1;
+    if (info != NULL) {
+        return (s8)info->raw_09;
+    }
+    return -1;
 }
 
 void* fn_8018F6B4(const PeopleInfoBiosEntry* info)

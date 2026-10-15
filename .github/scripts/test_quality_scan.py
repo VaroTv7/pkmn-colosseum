@@ -56,6 +56,162 @@ class QualityScanAllowlistTests(unittest.TestCase):
             "PSVECNormalize",
         ))
 
+    def test_condition_register_branch_must_still_target_local_label(self) -> None:
+        path = "src/musyx/runtime/reverb_candidate_80164520.c"
+        self.assertTrue(body_ok("beq cr7, done\ndone:\nblr", path, "HandleReverb"))
+        self.assertFalse(body_ok("beq cr7, ExternalFunction\nblr", path, "HandleReverb"))
+
+    def test_authentic_asm_needs_registry_entry_and_full_evidence(self) -> None:
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            doc = root / "docs" / "asm_evidence" / "reverb.md"
+            doc.parent.mkdir(parents=True)
+            entry = {"path": "src/musyx/reverb.c", "function": "HandleReverb",
+                     "mnemonics": ["stmw", "lis", "lfs", "blr"], "evidence": "docs/asm_evidence/reverb.md"}
+            doc.write_text("## HandleReverb\n- **Why it cannot be C:** stmw r14 in a -use_lmw_stmw off unit.\n")
+            self.assertTrue(quality_scan.evidence_problems(entry, root))  # two fields missing
+            doc.write_text(
+                "## HandleReverb\n"
+                "- **Why it cannot be C:** stmw r14 in a -use_lmw_stmw off unit; lis/@l small-data loads.\n"
+                "- **Other decompilations:** kept as asm in https://github.com/doldecomp/ttyd/blob/62131fc3/src/musyx/reverb.c\n"
+                "- **Origin:** MusyX 2.0 StdReverb, Factor 5.\n")
+            self.assertEqual(quality_scan.evidence_problems(entry, root), [])
+            doc.write_text(doc.read_text().replace("https://github.com/doldecomp/ttyd/blob/62131fc3/src/musyx/reverb.c", "the ttyd decompilation, file reverb.c"))
+            self.assertTrue(any("commit hash" in p for p in quality_scan.evidence_problems(entry, root)))
+
+    def _branch_entry(self, path: str = "src/trk/TRKInit.c") -> dict:
+        return {"path": path, "function": "InitMetroTRK", "mnemonics": ["addi", "b"],
+                "evidence": "docs/asm_evidence/trk_init.md", "branch_targets": ["TRK_main"]}
+
+    def _with_entry(self, entry: dict, symbols: set[str], evidence_ok: bool = True):
+        from unittest import mock
+        stack = contextlib.ExitStack()
+        stack.enter_context(mock.patch.dict(quality_scan.AUTHENTIC_ASM,
+                                            {(entry["path"], entry["function"]): entry}))
+        stack.enter_context(mock.patch.object(quality_scan, "function_symbols", lambda *a: symbols))
+        stack.enter_context(mock.patch.object(
+            quality_scan, "evidence_problems", lambda *a: [] if evidence_ok else ["incomplete"]))
+        return stack
+
+    def test_declared_branch_target_allowed_for_registered_library_asm(self) -> None:
+        entry = self._branch_entry()
+        with self._with_entry(entry, {"TRK_main"}):
+            self.assertTrue(body_ok("addi r1, r1, 8\nb TRK_main", entry["path"], "InitMetroTRK"))
+
+    def test_undeclared_branch_target_still_rejected(self) -> None:
+        entry = self._branch_entry()
+        with self._with_entry(entry, {"TRK_main", "OtherFunction"}):
+            self.assertFalse(body_ok("b OtherFunction", entry["path"], "InitMetroTRK"))
+
+    def test_declared_target_must_be_a_known_function(self) -> None:
+        entry = self._branch_entry()
+        with self._with_entry(entry, set()):
+            self.assertFalse(body_ok("b TRK_main", entry["path"], "InitMetroTRK"))
+
+    def test_branch_targets_rejected_outside_library_paths(self) -> None:
+        entry = self._branch_entry("src/game/fight.c")
+        with self._with_entry(entry, {"TRK_main"}):
+            self.assertFalse(body_ok("b TRK_main", entry["path"], "InitMetroTRK"))
+
+    def test_branch_targets_need_complete_evidence(self) -> None:
+        entry = self._branch_entry()
+        with self._with_entry(entry, {"TRK_main"}, evidence_ok=False):
+            self.assertFalse(body_ok("b TRK_main", entry["path"], "InitMetroTRK"))
+
+    def test_self_branch_allowed_for_registered_library_asm(self) -> None:
+        entry = self._branch_entry()
+        with self._with_entry(entry, set()):
+            self.assertTrue(body_ok("addi r1, r1, 8\nb InitMetroTRK", entry["path"], "InitMetroTRK"))
+
+    def test_branch_target_evidence_field_required(self) -> None:
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "config" / "GC6E01").mkdir(parents=True)
+            (root / "config" / "GC6E01" / "symbols.txt").write_text(
+                "TRK_main = .text:0x800C2B10; // type:function size:0x40\n")
+            doc = root / "docs" / "asm_evidence" / "trk_init.md"
+            doc.parent.mkdir(parents=True)
+            base = ("## InitMetroTRK\n"
+                    "- **Why it cannot be C:** ends in a tail branch MWCC never emits for C.\n"
+                    "- **Other decompilations:** kept as asm in https://github.com/zeldaret/tp/blob/abc1234/src/TRK/init.c\n"
+                    "- **Origin:** MetroTRK 0.4, Metrowerks debugger stub.\n")
+            doc.write_text(base)
+            entry = self._branch_entry()
+            self.assertTrue(any("External branch targets" in p
+                                for p in quality_scan.evidence_problems(entry, root)))
+            doc.write_text(base + "- **External branch targets:** `b TRK_main` at the end hands control to TRK_main.\n")
+            self.assertEqual(quality_scan.evidence_problems(entry, root), [])
+
+    def _first_party_root(self, tmp: str, verdict: str = "verdict: no-match (20 compilers compared)"):
+        from pathlib import Path
+        root = Path(tmp)
+        (root / "config" / "GC6E01").mkdir(parents=True)
+        (root / "config" / "GC6E01" / "symbols.txt").write_text("")
+        probes = root / "docs" / "asm_evidence" / "probes"
+        probes.mkdir(parents=True)
+        (probes / "GSscratchInit.txt").write_text(
+            "# Compiler probe: GSscratchInit\nGC/1.3: differs\n\n" + verdict + "\n")
+        doc = root / "docs" / "asm_evidence" / "gs_scratch.md"
+        doc.write_text(
+            "## GSscratchInit\n"
+            "- **Why it cannot be C:** moves r1 into the locked cache with subi r1 and mflr; C cannot address r1.\n"
+            "- **Compiler probe:** docs/asm_evidence/probes/GSscratchInit.txt shows no MWCC version reproduces it.\n"
+            "- **Origin:** Genius Sonority game code, first-party, scratch-memory setup.\n")
+        entry = {"path": "src/game/gs_scratch.c", "function": "GSscratchInit", "tier": "first-party",
+                 "mnemonics": ["mflr", "subi", "blr"], "evidence": "docs/asm_evidence/gs_scratch.md"}
+        return root, entry
+
+    def test_first_party_asm_accepted_with_probe(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root, entry = self._first_party_root(tmp)
+            self.assertEqual(quality_scan.evidence_problems(entry, root), [])
+
+    def test_first_party_asm_rejected_when_probe_matched(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root, entry = self._first_party_root(tmp, "verdict: MATCH GC/1.3")
+            self.assertTrue(quality_scan.evidence_problems(entry, root))
+
+    def test_first_party_asm_rejected_when_probe_inconclusive(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root, entry = self._first_party_root(tmp, "verdict: no-match (2 compilers compared)")
+            self.assertTrue(quality_scan.evidence_problems(entry, root))
+
+    def test_first_party_probe_must_be_for_the_same_function(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root, entry = self._first_party_root(tmp)
+            probe = root / "docs" / "asm_evidence" / "probes" / "GSscratchInit.txt"
+            probe.write_text(probe.read_text().replace("GSscratchInit", "OtherFunc"))
+            self.assertTrue(quality_scan.evidence_problems(entry, root))
+
+    def test_game_asm_without_first_party_tier_rejected(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root, entry = self._first_party_root(tmp)
+            del entry["tier"]
+            self.assertTrue(quality_scan.evidence_problems(entry, root))
+
+    def test_first_party_tier_rejected_outside_game_code(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root, entry = self._first_party_root(tmp)
+            entry["path"] = "src/dolphin/os/OS.c"
+            self.assertTrue(quality_scan.evidence_problems(entry, root))
+
+    def test_static_asm_function_is_scanned(self) -> None:
+        source = "static asm void Foo(void) {\n    nofralloc\n    lwz r3, 0(r4)\n    blr\n}\n"
+        self.assertFalse(source_ok(source, "src/dolphin/os/OS.c", [(3, "    lwz r3, 0(r4)")]))
+
+    def test_unregistered_asm_still_rejected(self) -> None:
+        self.assertFalse(body_ok("stmw r14, 8(r1)\nblr", "src/musyx/reverb.c", "HandleReverb"))
+
     def test_general_gpr_load_remains_forbidden(self) -> None:
         self.assertFalse(body_ok("ps_mul f1, f2, f3\nlwz r3, 0(r4)", quality_scan.DOLPHIN_PAIRED_SINGLE_PATH, "PSMTXInverse"))
 

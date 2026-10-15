@@ -17,35 +17,43 @@
  * wazaSequenceUpdate - Waza rendering setup.
  * Address: 0x801DB988 | Size: 0x188
  */
-s8 wazaSequenceUpdate(void* sequence) {
+s32 wazaSequenceUpdate(void* sequence) {
+    /* RULE-EXCEPTION(title-path): named shared log strings from this TU's
+     * original pool; see docs/RULE_EXCEPTIONS.md. */
+    extern const char lbl_802798F0[];
+    extern const char lbl_80279928[];
     WazaSequence* obj = sequence;
     WazaSequenceNode* node = obj->firstNode;
     WazaSequenceOwner* owner;
-    s32 elapsed;
-    s32 pending = 0;
+    s32 elapsed = msgGetCharsPerFrame();
     s32 running = 0;
+    s32 pending = 0;
 
-    elapsed = msgGetCharsPerFrame();
     obj->state += elapsed;
     owner = obj->owner;
 
-    if (fn_801DA74C(owner, obj->handle, obj->animationMode, 2) >
+    if (fn_801DA74C(owner, obj->moveIndex, obj->animationMode, 2) >
         (s32)obj->state) {
         pending = 1;
     }
 
     if (owner->motionBusy == 0 && owner->sequenceEnabled != 0 &&
-        fn_801DA74C(owner, obj->handle, obj->animationMode, 1) <
+        fn_801DA74C(owner, obj->moveIndex, obj->animationMode, 1) <
             (s32)obj->state) {
         return -1;
     }
 
     while (node != NULL) {
         switch (node->runtimeState) {
+        case 2:
+        default:
+            break;
         case 0:
             if (node->startTime <= (s32)obj->state) {
                 if (wazaSequenceEntryStart(node) != 0) {
                     pending++;
+                } else {
+                    GSlogWrite(lbl_802798F0);
                 }
             } else {
                 node->currentTime = node->startTime;
@@ -54,7 +62,9 @@ s8 wazaSequenceUpdate(void* sequence) {
             break;
         case 1:
             if (wazaSequenceEntryUpdate(node, elapsed) == 0) {
-                wazaSequenceEntryStop(node, FALSE);
+                if (wazaSequenceEntryStop(node, FALSE) == 0) {
+                    GSlogWrite(lbl_80279928);
+                }
             } else {
                 pending++;
             }
@@ -66,7 +76,7 @@ s8 wazaSequenceUpdate(void* sequence) {
     if (pending + running == 0) {
         return 0;
     }
-    return obj->stopping == 0;
+    return (s8)obj->stopping == 0;
 }
 
 #endif
@@ -260,12 +270,25 @@ WazaSequence* fn_801DBFB0(void) {
 
 #endif
 
-#if !defined(PR409_WAZA_SEQUENCE_SPLIT) || defined(PR409_WAZA_SEQUENCE_C014_CDA8)
+/* WAZA_SEQUENCE_C014_ONLY (set by wazaSequence_r52_801DC014_prefix.c) builds
+ * only 0x801DC014-0x801DCAA0: wazaSequenceLoadData, wazaSequenceEntryLink,
+ * fn_801DC46C, fn_801DC5F0 and _wazaSequenceEffectEntryLoad. */
+#if (!defined(PR409_WAZA_SEQUENCE_SPLIT) || defined(PR409_WAZA_SEQUENCE_C014_CDA8)) && \
+    !defined(WAZA_SEQUENCE_DCAA0_ONLY)
 
 /**
  * wazaSequenceLoadData - Waza screen distortion effect.
  * Address: 0x801DC014 | Size: 0x2FC
  */
+/* RULE-EXCEPTION(user-approved): single-use inline helpers; their return temps add the two coalesced neighbours that give seq retail's r31 - see docs/RULE_EXCEPTIONS.md */
+static inline u8* wazaSequenceLoadModel(u8* seq, u8* entry, u8* parsed) {
+    return _wazaSequenceModelEntryLoad(seq, entry, parsed);
+}
+
+static inline u8* wazaSequenceLoadParticle(u8* seq, u8* entry, u8* parsed) {
+    return _wazaSequenceParticleEntryLoad(seq, entry, parsed);
+}
+
 u8 wazaSequenceLoadData(void* sequence, void* resource) {
     extern u16 _toolentryAlloc__FUl(u32);
     extern void* fn_800E27B0(u16);
@@ -275,118 +298,126 @@ u8 wazaSequenceLoadData(void* sequence, void* resource) {
     extern void GSlogWrite(const char*, ...);
     extern const char lbl_8027997C[];
     extern f32 lbl_8047E3A0;
-    u8 parser[0xD8];
-    u8* seq = sequence;
+    u8 parser[0xB4];
     u8* header;
     u8* data;
-    u8* entry;
-    u8* parsed;
+    s32 earliest;
+    s32 adjustment;
     u8* current;
+    u8* parsed;
     s32 count;
     s32 i;
-    s32 earliest;
-    s32 value;
     u16 handle;
-    u32 type;
+    u8* entry;
+    s32 value;
+    u8* seq = sequence;
 
-    if (seq == NULL || *(void**)(seq + 0x3C) == NULL) {
+    if (seq == NULL) {
+        return FALSE;
+    }
+    if (*(void**)(seq + 0x3C) == NULL) {
         return FALSE;
     }
 
     header = fn_801DC46C(parser, resource);
     count = *(s32*)(header + 4) - 1;
     data = fn_801DC5F0(seq, header);
-    if (count == 0) {
-        return TRUE;
-    }
+    if (count != 0) {
+        handle = _toolentryAlloc__FUl(count * 0xB4);
+        if (handle != 0) {
+            *(void**)(seq + 0x24) = NULL;
+            entry = fn_800E27B0(handle);
+            *(s32*)(seq + 4) = count;
+            *(s32*)(seq + 0) = 0;
+            *(u16*)(seq + 0x28) = handle;
 
-    handle = _toolentryAlloc__FUl(count * 0xB4);
-    if (handle == 0) {
-        return TRUE;
-    }
-    *(void**)(seq + 0x24) = NULL;
-    entry = fn_800E27B0(handle);
-    *(s32*)(seq + 4) = count;
-    *(s32*)(seq + 0) = 0;
-    *(u16*)(seq + 0x28) = handle;
-
-    for (i = 0; i < count; i++, entry += 0xB4) {
-        parsed = fn_801DC46C(entry, data);
-        type = *(u32*)(entry + 4);
-        switch (type) {
-        case 1:
-            *(u32*)(entry + 0x78) = *(u32*)(parsed + 0);
-            data = parsed + 0x0C;
-            switch (*(u32*)(entry + 0x78)) {
-            case 0:
-                *(s32*)(entry + 0x7C) =
-                    (s32)(((f32)*(s32*)(parsed + 4) *
-                           (f32)(s32)fn_800D37CC()) /
-                          lbl_8047E3A0);
-                break;
-            case 1:
-                *(u32*)(entry + 0x7C) = *(u32*)(parsed + 4);
-                break;
-            case 2:
-                *(f32*)(entry + 0x7C) = *(f32*)(parsed + 4);
-                break;
-            case 3:
-                data += *(u32*)(parsed + 4) * 8;
-                *(u32*)(entry + 0x78) = 0;
-                *(u32*)(entry + 0x7C) = 0;
-                break;
+            for (i = 0; i < count; i++, entry += 0xB4) {
+                parsed = fn_801DC46C(entry, data);
+                switch (*(u32*)(entry + 4)) {
+                case 1:
+                    *(s32*)(entry + 0x78) = *(s32*)(parsed + 0);
+                    data = parsed + 0x0C;
+                    switch (*(s32*)(entry + 0x78)) {
+                    case 0:
+                        *(s32*)(entry + 0x7C) =
+                            (s32)(((f32)*(s32*)(parsed + 4) *
+                                   (f32)(s32)fn_800D37CC()) /
+                                  lbl_8047E3A0);
+                        break;
+                    case 1:
+                        *(s32*)(entry + 0x7C) = *(s32*)(parsed + 4);
+                        break;
+                    case 2:
+                        *(f32*)(entry + 0x7C) = *(f32*)(parsed + 4);
+                        break;
+                    case 3:
+                        data += *(s32*)(parsed + 4) * 8;
+                        *(s32*)(entry + 0x78) = 0;
+                        *(s32*)(entry + 0x7C) = 0;
+                        break;
+                    }
+                    break;
+                case 2:
+                    data = wazaSequenceLoadModel(seq, entry, parsed);
+                    break;
+                case 3:
+                    data = wazaSequenceLoadParticle(seq, entry, parsed);
+                    break;
+                case 4:
+                    data = _wazaSequenceEffectEntryLoad(entry, parsed);
+                    break;
+                case 5:
+                    switch (*(s32*)(parsed + 4)) {
+                    case 1:
+                    case 2:
+                        *(s32*)(entry + 0x7C) = 0;
+                        adjustment = -4;
+                        break;
+                    case 3:
+                    default:
+                        *(s32*)(entry + 0x7C) = *(s32*)(parsed + 8);
+                        adjustment = 0;
+                        break;
+                    }
+                    *(s32*)(entry + 0x78) = *(s32*)(parsed + 0);
+                    /* RULE-EXCEPTION(user-approved): codegen-only integer cast keeps retail's add operand order - see docs/RULE_EXCEPTIONS.md */
+                    data = (u8*)(adjustment + (s32)parsed);
+                    data += 0x0C;
+                    break;
+                case 6:
+                    *(s32*)(entry + 0x78) = *(s32*)(parsed + 0);
+                    data = parsed + 8;
+                    break;
+                case 0:
+                default:
+                    GSlogWrite(lbl_8027997C);
+                    fn_800E24B0(handle);
+                    fn_800E209C(handle);
+                    return FALSE;
+                }
+                wazaSequenceEntryLink(seq, entry);
             }
-            break;
-        case 2:
-            data = _wazaSequenceModelEntryLoad(seq, entry, parsed);
-            break;
-        case 3:
-            data = _wazaSequenceParticleEntryLoad(seq, entry, parsed);
-            break;
-        case 4:
-            data = _wazaSequenceEffectEntryLoad(entry, parsed);
-            break;
-        case 5:
-            type = *(u32*)(parsed + 4);
-            if (type == 1 || type == 2) {
-                *(u32*)(entry + 0x7C) = 0;
-                data = parsed + 8;
-            } else {
-                *(u32*)(entry + 0x7C) = *(u32*)(parsed + 8);
-                data = parsed + 0x0C;
-            }
-            *(u32*)(entry + 0x78) = *(u32*)(parsed + 0);
-            break;
-        case 6:
-            *(u32*)(entry + 0x78) = *(u32*)(parsed + 0);
-            data = parsed + 8;
-            break;
-        default:
-            GSlogWrite(lbl_8027997C);
-            fn_800E24B0(handle);
-            fn_800E209C(handle);
-            return FALSE;
-        }
-        wazaSequenceEntryLink(seq, entry);
-    }
 
-    earliest = 0;
-    current = *(u8**)(seq + 0x24);
-    while (current != NULL) {
-        value = *(s32*)(current + 0x70);
-        if (value < earliest) {
-            earliest = value;
-        }
-        current = *(u8**)(current + 0xA8);
-    }
-    if (earliest != 0) {
-        value = -earliest;
-        *(s32*)(seq + 0x10) = value;
-        current = *(u8**)(seq + 0x24);
-        while (current != NULL) {
-            *(s32*)(current + 0x70) += value;
-            *(s32*)(current + 0x74) += value;
-            current = *(u8**)(current + 0xA8);
+            earliest = 0;
+            current = *(u8**)(seq + 0x24);
+            while (current != NULL) {
+                value = *(s32*)(current + 0x70);
+                if (value < earliest) {
+                    earliest = value;
+                }
+                current = *(u8**)(current + 0xA8);
+            }
+            if (earliest != 0) {
+                value = -earliest;
+                *(s32*)(seq + 0x10) = value;
+                current = *(u8**)(seq + 0x24);
+                while (current != NULL) {
+                    *(s32*)(current + 0x70) += value;
+                    *(s32*)(current + 0x74) += value;
+                    current = *(u8**)(current + 0xA8);
+                }
+            }
+            return TRUE;
         }
     }
     return TRUE;
@@ -399,9 +430,13 @@ u8 wazaSequenceLoadData(void* sequence, void* resource) {
 void wazaSequenceEntryLink(void* sequencePtr, void* entryPtr) {
     u8* sequence = sequencePtr;
     u8* entry = entryPtr;
-    u8* current = *(u8**)(sequence + 0x24);
-    u8* previous = current;
-    s32 key = *(s32*)(entry + 8);
+    u8* previous;
+    s32 key;
+    u8* current;
+
+    current = *(u8**)(sequence + 0x24);
+    previous = current;
+    key = *(s32*)(entry + 8);
 
     if (key != 0) {
         while (current != NULL) {
@@ -410,52 +445,51 @@ void wazaSequenceEntryLink(void* sequencePtr, void* entryPtr) {
             }
             current = *(u8**)(current + 0xA8);
         }
+        if (current != NULL) {
+            *(s32*)(entry + 0x70) = *(s32*)(current + 0x70);
+            *(s32*)(entry + 0x70) +=
+                ((s32*)(current + 0x2C))[*(s32*)(entry + 0x10)];
+            /* RULE-EXCEPTION(user-approved): goto reproduces retail's key == 0 branch straight to the table lookup - see docs/RULE_EXCEPTIONS.md */
+            goto linked;
+        }
     }
+    *(s32*)(entry + 0x70) = ((s32*)(*(u8**)(*(u8**)(sequence + 0x3C) + 0x2C) +
+        *(s32*)(sequence + 0x0C) * 0xD4 + 0x0C))[*(s32*)(entry + 0x10)];
+linked:
 
-    if (current != NULL) {
-        *(s32*)(entry + 0x70) = *(s32*)(current + 0x70);
-        *(s32*)(entry + 0x70) +=
-            *(s32*)(current + 0x2C + *(s32*)(entry + 0x10) * 4);
-    } else {
-        u8* owner = *(u8**)(sequence + 0x3C);
-        u8* table = *(u8**)(owner + 0x2C);
-        s32 offset = *(s32*)(sequence + 0x0C) * 0xD4 + 0x0C;
-        offset += *(s32*)(entry + 0x10) * 4;
-        *(s32*)(entry + 0x70) = *(s32*)(table + offset);
-    }
-
-    *(s32*)(entry + 0x70) -=
-        *(s32*)(entry + 0x2C + *(s32*)(entry + 0x0C) * 4);
+    *(s32*)(entry + 0x70) -= ((s32*)(entry + 0x2C))[*(s32*)(entry + 0x0C)];
     *(s32*)(entry + 0x74) = *(s32*)(entry + 0x70);
 
-    if (previous == NULL) {
+    if (previous != NULL) {
+        if (*(s32*)(previous + 0x70) > *(s32*)(entry + 0x70) ||
+            (*(s32*)(entry + 4) == 6 &&
+             *(s32*)(previous + 0x70) == *(s32*)(entry + 0x70))) {
+            *(u8**)(entry + 0xA8) = previous;
+            *(void**)(entry + 0xAC) = NULL;
+            *(u8**)(previous + 0xAC) = entry;
+            *(u8**)(sequence + 0x24) = entry;
+        } else {
+            while (*(u8**)(previous + 0xA8) != NULL) {
+                if (*(s32*)(*(u8**)(previous + 0xA8) + 0x70) > *(s32*)(entry + 0x70)) {
+                    break;
+                }
+                if (*(s32*)(entry + 4) == 6 &&
+                    *(s32*)(previous + 0x70) == *(s32*)(entry + 0x70)) {
+                    break;
+                }
+                previous = *(u8**)(previous + 0xA8);
+            }
+            *(u8**)(entry + 0xA8) = *(u8**)(previous + 0xA8);
+            if (*(u8**)(entry + 0xA8) != NULL) {
+                *(u8**)(*(u8**)(entry + 0xA8) + 0xAC) = entry;
+            }
+            *(u8**)(previous + 0xA8) = entry;
+            *(u8**)(entry + 0xAC) = previous;
+        }
+    } else {
         *(u8**)(sequence + 0x24) = entry;
         *(void**)(entry + 0xA8) = NULL;
         *(void**)(entry + 0xAC) = NULL;
-    } else if (*(s32*)(previous + 0x70) > *(s32*)(entry + 0x70) ||
-               (*(s32*)(entry + 4) == 6 &&
-                *(s32*)(previous + 0x70) == *(s32*)(entry + 0x70))) {
-        *(u8**)(entry + 0xA8) = previous;
-        *(void**)(entry + 0xAC) = NULL;
-        *(u8**)(previous + 0xAC) = entry;
-        *(u8**)(sequence + 0x24) = entry;
-    } else {
-        u8* following = *(u8**)(previous + 0xA8);
-        while (following != NULL &&
-               *(s32*)(following + 0x70) <= *(s32*)(entry + 0x70)) {
-            if (*(s32*)(entry + 4) == 6 &&
-                *(s32*)(previous + 0x70) == *(s32*)(entry + 0x70)) {
-                break;
-            }
-            previous = following;
-            following = *(u8**)(following + 0xA8);
-        }
-        *(u8**)(entry + 0xA8) = following;
-        if (following != NULL) {
-            *(u8**)(following + 0xAC) = entry;
-        }
-        *(u8**)(previous + 0xA8) = entry;
-        *(u8**)(entry + 0xAC) = previous;
     }
     *(u8**)(entry + 0xB0) = sequence;
 }
@@ -464,10 +498,13 @@ void wazaSequenceEntryLink(void* sequencePtr, void* entryPtr) {
  * fn_801DC46C - Waza screen overlay effect.
  * Address: 0x801DC46C | Size: 0x184
  */
-void* fn_801DC46C(void* entryPtr, void* dataPtr) {
-    u8* entry = entryPtr;
-    u8* data = dataPtr;
+void* fn_801DC46C(u8* entry, void* dataPtr) {
+    extern s32 fn_800D37CC(void);
+    extern const f32 lbl_8047E3A0;
     s32 adjustment = 0;
+    /* RULE-EXCEPTION(user-approved): the switch and field reads go through a typed copy of dataPtr while the result is computed on dataPtr as an integer, as retail's registers do - see docs/RULE_EXCEPTIONS.md */
+    u8* data = dataPtr;
+    s32 i;
 
     switch (*(s32*)(data + 0x68)) {
     case 1:
@@ -475,54 +512,79 @@ void* fn_801DC46C(void* entryPtr, void* dataPtr) {
         adjustment = -4;
         break;
     case 2:
-        *(s32*)(entry + 0x18) = 1;
-        adjustment = -8;
+        *(s32*)(entry + 0x18) = *(s32*)(data + 0x6C);
+        adjustment = 0;
         break;
     }
+
+    *(s32*)(entry + 0x00) = *(s32*)(data + 0x00);
+    *(s32*)(entry + 0x04) = *(s32*)(data + 0x04);
+    *(s32*)(entry + 0x08) = *(s32*)(data + 0x10);
+    *(s32*)(entry + 0x0C) = *(s32*)(data + 0x14);
+    *(s32*)(entry + 0x10) = *(s32*)(data + 0x18);
+    *(s32*)(entry + 0x14) = *(s32*)(data + 0x1C);
+    *(s32*)(entry + 0x1C) = *(s32*)(data + 0x60);
+    *(s32*)(entry + 0x24) = *(s32*)(data + 0x64);
+    *(s32*)(entry + 0x20) = *(s32*)(data + 0x08);
+    *(s32*)(entry + 0x28) = *(s32*)(data + 0x0C);
+    memset(entry + 0x2C, 0, 0x40);
+    for (i = 0; i < 16; i++) {
+        *(s32*)(entry + i * 4 + 0x2C) =
+            (s32)((f32)*(s32*)(data + i * 4 + 0x20) * (f32)fn_800D37CC() / lbl_8047E3A0);
+    }
+
     *(void**)(entry + 0xA8) = NULL;
     *(void**)(entry + 0xAC) = NULL;
-    *(s32*)(entry + 0x6C) = 0;
-    *(s32*)(entry + 0x70) = 0;
     *(s32*)(entry + 0x74) = 0;
-    return data + adjustment + 0x70;
+    *(s32*)(entry + 0x70) = 0;
+    *(s32*)(entry + 0x6C) = 0;
+    dataPtr = (void*)(adjustment + (s32)dataPtr);
+    dataPtr = (u8*)dataPtr + 0x70;
+    return dataPtr;
 }
 
+
+#endif
+
+#if (!defined(PR409_WAZA_SEQUENCE_SPLIT) || defined(PR409_WAZA_SEQUENCE_C014_CDA8) || \
+     defined(PR409_WAZA_SEQUENCE_DC5F0)) && !defined(WAZA_SEQUENCE_DCAA0_ONLY)
 /**
  * fn_801DC5F0 - Waza screen overlay update.
  * Address: 0x801DC5F0 | Size: 0x22C
  */
-void* fn_801DC5F0(void* sequencePtr, void* dataPtr) {
+void* fn_801DC5F0(void* sequencePtr, u8* next) {
     extern void fn_8010147C(void* resource, u32 size, u32 group, u32 handle);
     extern void fn_801012E8(void* archive, u32 resourceArg, u32 callbackArg);
     extern void* GSresGetResource(u32 group, u32 resource);
     u8* sequence = sequencePtr;
-    u8* data = dataPtr;
-    u8* next = data;
-    u8* owner = *(u8**)(sequence + 0x3C);
+    s32* header = (s32*)next;
     u32 firstHandle = wazaSequenceSysGetResID();
     u32 secondHandle = wazaSequenceSysGetResID();
-    u32 size;
-    u32 flags;
-    u32 mode;
+    u8* owner = *(u8**)(sequence + 0x3C);
+    s32 size;
 
-    *(u32*)(sequence + 0x0C) = *(u32*)(next + 0x00);
-    if (*(u32*)(sequence + 0x0C) == 0x0B) {
-        if (*(u16*)(owner + 0x14) < *(u32*)(sequence + 0x0C)) {
-            *(u32*)(sequence + 0x0C) = 0;
+    *(s32*)(sequence + 0x0C) = header[0];
+    switch (*(s32*)(sequence + 0x0C)) {
+    case 0x0B:
+        if (*(u16*)(owner + 0x14) < *(s32*)(sequence + 0x0C)) {
+            *(s32*)(sequence + 0x0C) = 0;
         }
-    } else if (*(u32*)(sequence + 0x0C) >= 0x0C &&
-               *(u32*)(sequence + 0x0C) < 0x10 &&
-               *(u16*)(owner + 0x14) < *(u32*)(sequence + 0x0C)) {
-        *(u32*)(sequence + 0x0C) = 1;
+        break;
+    case 0x0C:
+    case 0x0D:
+    case 0x0E:
+    case 0x0F:
+        if (*(u16*)(owner + 0x14) < *(s32*)(sequence + 0x0C)) {
+            *(s32*)(sequence + 0x0C) = 1;
+        }
+        break;
     }
 
-    flags = *(u32*)(next + 0x08);
-    *(u32*)(sequence + 0x08) = flags;
+    *(u32*)(sequence + 0x08) = header[2];
     *(u8*)(sequence + 0x16) = 1;
     *(u8*)(sequence + 0x17) = 2;
 
-    mode = *(u32*)(next + 0x10);
-    switch (mode) {
+    switch (header[4]) {
     case 1:
         size = 0;
         next += 0x10;
@@ -532,38 +594,36 @@ void* fn_801DC5F0(void* sequencePtr, void* dataPtr) {
         next += 0x14;
         break;
     case 5:
-        *(u8*)(sequence + 0x17) = *(u32*)(next + 0x0C);
+        *(u8*)(sequence + 0x17) = header[3];
         /* fallthrough */
     default:
         next = (u8*)((((u32)next + 0x37) & ~0x1F));
-        size = *(u32*)(data + 0x14);
+        size = header[5];
         break;
     }
 
-    if (mode <= 3) {
+    if (header[4] <= 3) {
         *(u32*)(sequence + 0x08) |= 0x78;
     }
-    if (mode <= 5) {
-        flags = *(u32*)(sequence + 0x08);
-        if (flags & 0x80000000) {
-            flags ^= 0x80000000;
+    if (header[4] <= 5) {
+        if (*(u32*)(sequence + 0x08) & 0x00008000) {
+            *(u32*)(sequence + 0x08) = *(u32*)(sequence + 0x08) ^ 0x00008000;
         }
-        if (flags & 0x00010000) {
-            flags ^= 0x00010000;
+        if (*(u32*)(sequence + 0x08) & 0x00010000) {
+            *(u32*)(sequence + 0x08) = *(u32*)(sequence + 0x08) ^ 0x00010000;
         }
-        if (flags & 0x00020000) {
-            flags ^= 0x00020000;
+        if (*(u32*)(sequence + 0x08) & 0x00020000) {
+            *(u32*)(sequence + 0x08) = *(u32*)(sequence + 0x08) ^ 0x00020000;
         }
-        if (flags & 0x00040000) {
-            flags ^= 0x00040000;
+        if (*(u32*)(sequence + 0x08) & 0x00040000) {
+            *(u32*)(sequence + 0x08) = *(u32*)(sequence + 0x08) ^ 0x00040000;
         }
-        if (flags & 0x00080000) {
-            flags ^= 0x00080000;
+        if (*(u32*)(sequence + 0x08) & 0x00080000) {
+            *(u32*)(sequence + 0x08) = *(u32*)(sequence + 0x08) ^ 0x00080000;
         }
-        if (flags & 0x00100000) {
-            flags ^= 0x00100000;
+        if (*(u32*)(sequence + 0x08) & 0x00100000) {
+            *(u32*)(sequence + 0x08) = *(u32*)(sequence + 0x08) ^ 0x00100000;
         }
-        *(u32*)(sequence + 0x08) = flags;
     }
 
     if (size != 0) {
@@ -577,7 +637,7 @@ void* fn_801DC5F0(void* sequencePtr, void* dataPtr) {
                 *(u32*)(sequence + 0x20) = secondHandle;
             }
         }
-        next += (size + 0x1F) & ~0x1F;
+        next += (header[5] + 0x1F) & ~0x1F;
     } else {
         *(u32*)(sequence + 0x18) = 0;
         *(u32*)(sequence + 0x20) = 0;
@@ -586,81 +646,276 @@ void* fn_801DC5F0(void* sequencePtr, void* dataPtr) {
 
     return next;
 }
+#endif
+
+#if (!defined(PR409_WAZA_SEQUENCE_SPLIT) || defined(PR409_WAZA_SEQUENCE_C014_CDA8)) && \
+    !defined(WAZA_SEQUENCE_DCAA0_ONLY)
 
 /**
  * _wazaSequenceEffectEntryLoad - Waza screen effect composite.
  * Address: 0x801DC81C | Size: 0x284
  */
-void* _wazaSequenceEffectEntryLoad(void* entryPtr, void* dataPtr) {
-    u8* entry = entryPtr;
-    *(void**)(entry + 0x78) = NULL;
+typedef struct WazaEffectLoadList {
+    u8 pad_00[0x08];
+    u32 size;
+    u8 pad_0C[0x04];
+    struct WazaEffectLoadList* next;
+} WazaEffectLoadList;
+
+
+void* _wazaSequenceEffectEntryLoad(void* entryPtr, void* dataPtr)
+{
+    extern s32 fn_800D37CC(void);
+    extern u8* fn_801364A8(u8* work, u8* desc);
+    extern u32 fn_8013AABC(void* callbacks);
+    extern u32 electronStartEffect(void* callbacks);
+    extern u32 fn_8013A42C(void* callbacks);
+    extern u32 fn_801380D4(void* callbacks);
+    extern u32 fn_8013796C(void* callbacks);
+    extern u32 leaffxStartEffect(void* callbacks);
+    extern u32 fn_8013C5A0(void* callbacks);
+    extern u32 fn_8013B490(void* callbacks);
+    extern u32 fn_8013D6B8(void* callbacks);
+    extern u32 fn_8013DC18(void* callbacks);
+    extern u32 fn_8013E4D4(void* callbacks);
+    extern u32 patchiruTextureStart(void* callbacks);
+    extern u32 fn_8013F000(void* callbacks);
+    extern const f32 lbl_8047E3A0;
+    u8 parsed[0xD8];
+    u32 type;
+    u32 handle = 0;
+    WazaSequenceNode* entry = entryPtr;
+    const WazaEffectLoadList* list;
+    const WazaEffectLoadList* node;
+
+    entry->resourceId = 0;
+    entry->runtimeFlags =
+        (s32)(((f32)(s32)fn_800D37CC() * (f32)(s32)*(u32*)((u8*)dataPtr + 4)) /
+              lbl_8047E3A0);
+    entry->resource = *(void**)dataPtr;
+    entry->field_80 = 0;
+    entry->animationMode = 0;
+
+    dataPtr = fn_801364A8(parsed, dataPtr);
+    type = *(u32*)parsed;
+    switch (type) {
+    case 0:
+        list = *(const WazaEffectLoadList**)(parsed + 0x58);
+        entry->resourceId = fn_8013AABC(parsed + 8);
+        while (list != NULL) {
+            handle += list->size;
+            list = list->next;
+        }
+        break;
+    case 1:
+        entry->field_80 = *(u32*)(parsed + 0x58);
+        entry->resourceId = electronStartEffect(parsed + 8);
+        handle = *(u16*)(parsed + 0x52);
+        break;
+    case 2:
+        entry->resourceId = fn_8013A42C(parsed + 8);
+        handle = *(u16*)(parsed + 0x12);
+        break;
+    case 3:
+        entry->field_80 = *(u16*)(parsed + 0x16);
+        entry->resourceId = fn_801380D4(parsed + 8);
+        handle = *(u16*)(parsed + 0x1A);
+        break;
+    case 4:
+        entry->field_80 = *(u16*)(parsed + 0x30);
+        entry->animationMode = *(u16*)(parsed + 0x32);
+        entry->resourceId = fn_8013796C(parsed + 8);
+        handle = *(u16*)(parsed + 0x28);
+        break;
+    case 5:
+        entry->field_80 = *(s16*)(parsed + 0x52);
+        entry->resourceId = leaffxStartEffect(parsed + 8);
+        handle = *(u16*)(parsed + 0x46);
+        break;
+    case 6:
+        entry->resourceId = fn_8013C5A0(parsed + 8);
+        handle = *(u16*)(parsed + 0xAE);
+        break;
+    case 7:
+        entry->resourceId = fn_8013B490(parsed + 8);
+        handle = *(u16*)(parsed + 0xD6);
+        break;
+    case 8:
+        entry->resourceId = fn_8013D6B8(parsed + 8);
+        handle = 0;
+        node = *(const WazaEffectLoadList**)(parsed + 0x14);
+        while (node != NULL) {
+            handle += node->size;
+            node = node->next;
+        }
+        break;
+    case 9:
+        entry->resourceId = fn_8013DC18(parsed + 8);
+        handle = 0;
+        node = *(const WazaEffectLoadList**)(parsed + 0x1C);
+        while (node != NULL) {
+            handle += node->size;
+            node = node->next;
+        }
+        break;
+    case 10:
+        entry->resourceId = fn_8013E4D4(parsed + 8);
+        handle = *(u16*)(parsed + 0x3A);
+        break;
+    case 11:
+        entry->resourceId = patchiruTextureStart(parsed + 8);
+        /* RULE-EXCEPTION(user-approved): redundant reset retail performs here - see docs/RULE_EXCEPTIONS.md */
+        handle = 0;
+        break;
+    case 12:
+        entry->resourceId = fn_8013F000(parsed + 8);
+        handle = *(u16*)(parsed + 0xBA);
+        break;
+    }
+    if (entry->timing[entry->timingIndex - 1] == 0) {
+        entry->timing[entry->timingIndex - 1] = handle;
+    }
     return dataPtr;
 }
+
+#endif
+
+/* WAZA_SEQUENCE_DCAA0_ONLY (set by
+ * wazaSequence_candidate_801DC014_r40_801DCAA0_gc125n.c) builds this function
+ * alone; that unit compiles with -opt nopropagation. */
+#if (!defined(PR409_WAZA_SEQUENCE_SPLIT) || defined(PR409_WAZA_SEQUENCE_C014_CDA8)) && \
+    !defined(WAZA_SEQUENCE_C014_ONLY)
 
 /**
  * _wazaSequenceParticleEntryLoad - Waza screen effect finalize.
  * Address: 0x801DCAA0 | Size: 0x128
  */
-void* _wazaSequenceParticleEntryLoad(void* sequence, void* entryPtr,
-                                     void* dataPtr) {
-    typedef struct WazaParticleData {
-        s32 field_00;
-        s32 field_04;
-        u32 resourceSize;
-        s32 format;
-        u8 payload[];
-    } WazaParticleData;
+void* _wazaSequenceParticleEntryLoad(void* sequence, u8* entry,
+                                     u8* data) {
     extern void loadParticle(void*, u32, u32, s32);
     extern void* GSresGetResource(s32, s32);
     extern void* gsParticleBankLoad(void*);
-    WazaSequence* owner = sequence;
-    WazaSequenceNode* entry = entryPtr;
-    WazaParticleData* data = dataPtr;
-    WazaSequenceNode* linked;
-    u8* payload = data->payload + (data->format == 3 ? 4 : 0);
+    u8* header = data;
+    u8* current;
+    void* resource;
+    s32 skip;
+    s32 key;
 
-    if (entry->state != 0) {
-        linked = owner->firstNode;
-        while (linked != NULL && linked->linkKey != entry->state) {
-            linked = linked->next;
+    switch (*(s32*)(header + 0x0C)) {
+    case 3:
+        skip = 4;
+        break;
+    case 2:
+    case 4:
+    default:
+        skip = 0;
+        break;
+    }
+    data = (u8*)(skip + (s32)data);
+    data += 0x10;
+
+    key = *(s32*)(entry + 0x18);
+    if (key != 0) {
+        for (current = *(u8**)((u8*)sequence + 0x24); current != NULL;
+             current = *(u8**)(current + 0xA8)) {
+            if (*(s32*)current == key) {
+                break;
+            }
         }
-        entry->resource = linked->resource;
-        entry->resourceId = 0;
-        entry->runtimeFlags = 0;
+        *(void**)(entry + 0x88) = *(void**)(current + 0x88);
+        *(s32*)(entry + 0x78) = 0;
+        *(s32*)(entry + 0x7C) = 0;
     } else {
-        entry->resourceId = 0x4E20;
-        entry->runtimeFlags = wazaSequenceSysGetResID();
-        loadParticle(payload, data->resourceSize, 0x4E20,
-                     entry->runtimeFlags);
-        payload += (data->resourceSize + 0x1F) & ~0x1F;
-        entry->resource =
-            GSresGetResource(0x4E20, entry->runtimeFlags);
-        if (entry->resource != NULL) {
-            entry->resource = gsParticleBankLoad(entry->resource);
+        *(s32*)(entry + 0x78) = 0x4E20;
+        *(s32*)(entry + 0x7C) = wazaSequenceSysGetResID();
+        loadParticle(data, *(u32*)(header + 8), 0x4E20, *(s32*)(entry + 0x7C));
+        data += (*(u32*)(header + 8) + 0x1F) & ~0x1F;
+        resource = GSresGetResource(0x4E20, *(s32*)(entry + 0x7C));
+        if (resource != NULL) {
+            *(void**)(entry + 0x88) = gsParticleBankLoad(resource);
+        } else {
+            *(void**)(entry + 0x88) = NULL;
         }
     }
 
-    entry->field_80 = data->field_00;
-    entry->animationMode = data->field_04;
-    entry->textureAnimationMode = 0;
-    return payload;
+    *(s32*)(entry + 0x80) = *(s32*)(header + 0);
+    *(s32*)(entry + 0x84) = *(s32*)(header + 4);
+    *(s32*)(entry + 0x8C) = 0;
+    return data;
 }
 
+#endif
+
+#if (!defined(PR409_WAZA_SEQUENCE_SPLIT) || defined(PR409_WAZA_SEQUENCE_C014_CDA8) || \
+     defined(PR409_WAZA_SEQUENCE_DCBC8)) && !defined(WAZA_SEQUENCE_C014_ONLY) && \
+    !defined(WAZA_SEQUENCE_DCAA0_ONLY)
 /**
  * _wazaSequenceModelEntryLoad - Waza field effect handler.
  * Address: 0x801DCBC8 | Size: 0x1E0
  */
-void* _wazaSequenceModelEntryLoad(void* sequence, void* entryPtr,
-                                  void* dataPtr) {
-    u8* entry = entryPtr;
-    u8* data = dataPtr;
-    u32 size = (*(u32*)data + 0x1F) & ~0x1F;
+void* _wazaSequenceModelEntryLoad(void* sequence, u8* entry, u8* data) {
+    extern void fn_8010147C(void* resource, u32 size, u32 group, u32 handle);
+    extern void fn_801013A0(void* model, u32 group, u32 flags, u32 handle);
+    extern void* GSresGetResource(u32 group, u32 resource);
+    extern void GSmodelGetFrameCount(void* model, f32* start, f32* end);
+    extern const f32 lbl_8047E3B0;
+    u8* header = data;
+    u32 modelHandle = wazaSequenceSysGetResID();
+    u32 motionHandle = wazaSequenceSysGetResID();
+    f32 start;
+    f32 end;
 
-    *(u32*)(entry + 0x78) = 0x4E20;
-    *(void**)(entry + 0x7C) = NULL;
-    *(void**)(entry + 0x80) = NULL;
+    *(s32*)(entry + 0x78) = 0x4E20;
+    data = (u8*)(((u32)data + 0x43) & ~0x1F);
+    *(u32*)(entry + 0x80) = 0;
+    *(u32*)(entry + 0x7C) = 0;
     *(void**)(entry + 0xA4) = NULL;
-    return data + size;
+    fn_8010147C(data, *(u32*)(header + 0x1C), 0x4E20, modelHandle);
+    if (GSresGetResource(0x4E20, modelHandle) != NULL) {
+        *(u32*)(entry + 0x80) = modelHandle;
+        fn_801013A0(GSresGetResource(0x4E20, modelHandle), 0x4E20, 0, motionHandle);
+        if (GSresGetResource(0x4E20, motionHandle) != NULL) {
+            *(u32*)(entry + 0x7C) = motionHandle;
+            *(void**)(entry + 0xA4) = GSresGetResource(0x4E20, motionHandle);
+        }
+    }
+
+    data += (*(u32*)(header + 0x1C) + 0x1F) & ~0x1F;
+    *(s32*)(entry + 0x88) = *(s32*)(header + 0x00);
+    switch (*(s32*)(header + 0x04)) {
+    case 0:
+        *(s32*)(entry + 0x84) = 0;
+        break;
+    case 1:
+        *(s32*)(entry + 0x84) = 1;
+        break;
+    }
+    *(s32*)(entry + 0x90) = *(s32*)(header + 0x08);
+    switch (*(s32*)(header + 0x0C)) {
+    case 0:
+        *(s32*)(entry + 0x8C) = 0;
+        break;
+    case 1:
+        *(s32*)(entry + 0x8C) = 1;
+        break;
+    }
+    *(s32*)(entry + 0x94) = *(s32*)(header + 0x10);
+    *(s32*)(entry + 0x98) = *(s32*)(header + 0x14);
+    *(s32*)(entry + 0x9C) = *(s32*)(header + 0x18);
+
+    if (((s32*)(entry + 0x28))[*(s32*)(entry + 0x14)] == 0) {
+        start = lbl_8047E3B0;
+        end = lbl_8047E3B0;
+        if (*(void**)(entry + 0xA4) != NULL) {
+            GSmodelGetFrameCount(*(void**)(entry + 0xA4), &start, &end);
+        }
+        ((s32*)(entry + 0x28))[*(s32*)(entry + 0x14)] = (s32)(start >= end ? start : end);
+    }
+    return data;
 }
+#endif
+
+#if (!defined(PR409_WAZA_SEQUENCE_SPLIT) || defined(PR409_WAZA_SEQUENCE_C014_CDA8)) && \
+    !defined(WAZA_SEQUENCE_DCAA0_ONLY)
 
 #endif

@@ -309,7 +309,7 @@ extern void (*lbl_8047B198)(PSGeneratorState*, Mtx);
 extern const u8 lbl_802738B8[176];
 extern u8 lbl_8036BFC0[];
 
-#if !defined(PR410_PS_TARGET_ONLY)
+#if !defined(PR410_PS_TARGET_ONLY) && !defined(PR410_PS_VISIBILITY)
 
 void psSetGeneratorAngleRadiusScale(PSGeneratorState* gen, f32* scale,
                                     u8 applyToMotion) {
@@ -382,107 +382,10 @@ extern void GXSetChanAmbColor(s32 channel, PSColor color);
 extern void GXSetChanMatColor(s32 channel, PSColor color);
 extern void fn_800BC2F8(s32 reg, PSColor color);
 
-#if !defined(PR410_PS_SPLIT) || defined(PR410_PS_PREFIX)
+/* The particle link lists (_psListGetFirst, _psListDelete, _psListNew,
+ * _psListClear, _psLinkInit) and particleSort are linked from pslist.c. */
 
-#pragma dont_inline on
-PSParticle* _psListGetFirst(s32 linkNo) {
-    s32 valid = FALSE;
-
-    if (linkNo >= 0 && linkNo < PS_NUM_LINK) {
-        valid = TRUE;
-    }
-
-    if (valid == FALSE) {
-        __assert(lbl_802737B8, 0x98, lbl_802737C4);
-    }
-
-    return lbl_80452788[linkNo];
-}
-#pragma dont_inline reset
-
-#pragma dont_inline on
-void _psListDelete(PSParticle* pp, PSParticle* parent) {
-    lbl_80452748[pp->linkNo] = 1;
-
-    if (parent == NULL) {
-        if (lbl_80452788[pp->linkNo] != pp) {
-            __assert(lbl_802737B8, 0x88, lbl_802737B8 + 0x30);
-        }
-        lbl_80452788[pp->linkNo] = pp->next;
-    } else {
-        if (parent->next != pp) {
-            __assert(lbl_802737B8, 0x8B, lbl_802737B8 + 0x54);
-        }
-        parent->next = pp->next;
-    }
-
-    pp->next = lbl_8047B108;
-    lbl_8047B108 = pp;
-    lbl_8047B11A--;
-}
-#pragma dont_inline reset
-
-PSParticle* _psListNew(PSParticle* parent, u32 linkNo) {
-    PSParticle* pp;
-
-    if (lbl_8047B108 == NULL) {
-        lbl_8047B108 = fn_801A6928(sizeof(PSParticle));
-        memset(lbl_8047B108, 0, sizeof(PSParticle));
-    }
-
-    pp = lbl_8047B108;
-    if (pp == NULL) {
-        return NULL;
-    }
-
-    lbl_8047B11A++;
-    if (lbl_8047B11A > lbl_8047B114) {
-        lbl_8047B114 = lbl_8047B11A;
-    }
-
-    lbl_8047B108 = pp->next;
-    if (parent == NULL) {
-        pp->next = lbl_80452788[linkNo];
-        lbl_80452788[linkNo] = pp;
-    } else {
-        pp->next = parent->next;
-        parent->next = pp;
-    }
-
-    lbl_80452748[linkNo] = 1;
-    return pp;
-}
-
-void _psListClear(void) {
-    u32* dataBank = lbl_80452708;
-    u32* active;
-    PSParticle** list;
-    PSParticle* pp;
-    PSParticle* next;
-    s32 i;
-
-    pp = lbl_8047B108;
-    while (pp != NULL) {
-        next = pp->next;
-        fn_801A6960(pp);
-        pp = next;
-    }
-    lbl_8047B108 = NULL;
-
-    list = (PSParticle**)(dataBank + (2 * PS_NUM_LINK));
-    active = dataBank + PS_NUM_LINK;
-    for (i = 0; i < PS_NUM_LINK; i++) {
-        pp = list[i];
-        while (pp != NULL) {
-            next = pp->next;
-            fn_801A6960(pp);
-            pp = next;
-        }
-        list[i] = NULL;
-        active[i] = 0;
-        dataBank[i] = 0;
-    }
-}
+#if !defined(PR410_PS_SPLIT) || defined(PR410_PS_VISIBILITY)
 
 void psSetParticleVisibility(PSGeneratorState* gen, u8 visible) {
     PSParticle* pp;
@@ -492,9 +395,9 @@ void psSetParticleVisibility(PSGeneratorState* gen, u8 visible) {
     while (pp != NULL) {
         if (pp->scriptId == gen->familyId) {
             if (visible) {
-                *(s32*)&pp->flags &= ~0x20000000;
+                pp->flags = pp->flags & ~0x20000000;
             } else {
-                *(s32*)&pp->flags |= 0x20000000;
+                pp->flags = pp->flags | 0x20000000;
             }
         }
         pp = pp->next;
@@ -504,38 +407,13 @@ void psSetParticleVisibility(PSGeneratorState* gen, u8 visible) {
     while (child != NULL) {
         if (child->familyId == gen->familyId) {
             if (visible) {
-                *(s32*)&child->flags &= ~0x20000000;
+                child->flags = child->flags & ~0x20000000;
             } else {
-                *(s32*)&child->flags |= 0x20000000;
+                child->flags = child->flags | 0x20000000;
             }
         }
         child = child->next;
     }
-}
-
-s32 _psLinkInit(s32 count) {
-    s32 i;
-
-    for (i = 0; i < PS_NUM_LINK; i++) {
-        lbl_80452708[i] = 0;
-        lbl_80452748[i] = 0;
-        lbl_80452788[i] = NULL;
-    }
-
-    lbl_8047B108 = NULL;
-    for (i = count - 1; i >= 0; i--) {
-        PSParticle* pp = fn_801A6928(sizeof(PSParticle));
-
-        memset(pp, 0, sizeof(PSParticle));
-        if (pp == NULL) {
-            return -1;
-        }
-
-        pp->next = lbl_8047B108;
-        lbl_8047B108 = pp;
-    }
-
-    return i;
 }
 
 #endif
@@ -837,27 +715,8 @@ s32 psRemoveGeneratorAppSRT(PSGeneratorState* gen) {
     return refCount;
 }
 
-void psInitParticle(s32 count) {
-    u32* banks = (u32*)lbl_804527C8;
-    s32 i;
-
-    _psLinkInit(count);
-    lbl_8047B11A = 0;
-    lbl_8047B114 = 0;
-
-    for (i = 0; i < 64; i++) {
-        banks[i] = 0;
-        banks[64 + i] = 0;
-        banks[128 + i] = 0;
-        banks[192 + i] = 0;
-        banks[256 + i] = 0;
-        banks[320 + i] = 0;
-    }
-
-    for (i = 384; i < 392; i++) {
-        banks[i] = 0;
-    }
-}
+/* psInitParticle (0x8016A01C) is linked from ps_exact_8016A01C.c, which owns
+ * the per-bank tables it clears. */
 
 void psRemoveParticle(void) {
     u32* banks = (u32*)lbl_804527C8;
@@ -1198,8 +1057,6 @@ s32 psInitAppSRT(s32 count, s32 size) {
  * frame-generation update is independently verified against 0x8016ABF4-
  * 0x8016AC14 in the Colosseum retail disassembly.
  */
-#pragma push
-#pragma optimization_level 2
 void psDispMain(u32 linkMask, s32 mode) {
     s32 linkNo;
     s32 needsInit = TRUE;
@@ -1525,7 +1382,6 @@ void psDispMain(u32 linkMask, s32 mode) {
     }
 }
 
-#pragma pop
 
 #endif
 
@@ -1632,7 +1488,6 @@ void psSetPointJObj(s32 index, void* renderObj) {
 
 #if !defined(PR410_PS_SPLIT) || defined(PR410_PS_SUFFIX)
 
-#pragma dont_inline on
 void psKillAllParticle(void) {
     PSParticle* current;
     PSParticle* parent;
@@ -1674,7 +1529,6 @@ void psKillAllParticle(void) {
         }
     }
 }
-#pragma dont_inline reset
 
 PSParticle* psGenerateParticle0(
     PSParticle* parent, s32 linkNo, s32 bankIndex, void* object,
@@ -2251,9 +2105,6 @@ void modifyDir(PSParticle* pp, f32 angle) {
                     radialY * yawSin + pitchCos * (forward * yawCos);
 }
 
-#pragma push
-#pragma optimization_level 4
-#pragma peephole off
 void modifyDirGenBase(PSParticle* pp, f32 angle, f32 offsetX,
                       f32 offsetY, f32 offsetZ) {
     PSGeneratorState* generator = pp->peopleObj;
@@ -2307,7 +2158,6 @@ void modifyDirGenBase(PSParticle* pp, f32 angle, f32 offsetX,
                     radialY * yawSin + pitchCos * (forward * yawCos);
 }
 
-#pragma pop
 void psCopyGeneratorData(PSParticle* gen, void* peopleObj) {
     extern void psSetGeneratorAngleRadiusScale(PSGeneratorState*, f32*, u8);
     PSGeneratorState* dst = (PSGeneratorState*)gen;
@@ -2401,8 +2251,6 @@ void psInterpretParticles(u32 linkMask) {
  * Executes one frame of a single particle script. See file header for
  * identification evidence and coverage notes.
  * ====================================================================== */
-#pragma push
-#pragma optimization_level 3
 PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
     extern PSParticle* _psListGetNext(PSParticle*);
     u8 opcode;
@@ -3897,7 +3745,6 @@ PSParticle* psInterpretParticle0(PSParticle* pp, PSParticle* parentCtx) {
 
     return _psListGetNext(pp);
 }
-#pragma pop
 
 void psApplyOffsetLocalRotation(PSParticle* pp, f32* vec3) {
     typedef f32 Mtx[3][4];
@@ -4005,8 +3852,6 @@ u8 U8ClampAdd(u8 cur, f32 delta) {
  * display-space composition is still asm-only; this verified prefix is the
  * entry block at 0x8016CE2C.
  */
-#pragma push
-#pragma optimization_level 0
 void psDispSubAppSRT(PSParticle* pp, Mtx parentMatrix) {
     void psDispSubMakePolygon(PSParticle*, void*,
                               f32, f32, f32, f32, f32, f32,
@@ -4349,7 +4194,6 @@ rotate_axes:
                          axisXY, axisYX, axisYZ);
 }
 
-#pragma pop
 void psDispSubMakePolygon(PSParticle* pp, void* polygonData,
                           f32 centerX, f32 centerY, f32 centerZ,
                           f32 velocityX, f32 velocityY, f32 velocityZ,
@@ -4361,8 +4205,6 @@ void psDispSubMakePolygon(PSParticle* pp, void* polygonData,
  * camera/people-relative orientation modes remain asm-only; this covers the
  * direct basis path and target-verified generator scaling.
  */
-#pragma push
-#pragma optimization_level 2
 void psDispSub(PSParticle* pp, void* polygonData) {
     f32 axisXX;
     f32 axisXY;
@@ -4536,7 +4378,6 @@ void psDispSub(PSParticle* pp, void* polygonData) {
  * Configures point-trail raster width. Geometry/color emission remains
  * asm-only; this entry block is verified at 0x8016D8EC-0x8016D954.
  */
-#pragma pop
 PSParticle* psDispSubPointTrail(PSParticle* pp) {
     f32 widthValue;
     s32 width;
@@ -4650,8 +4491,6 @@ PSParticle* psDispSubPointTrail(PSParticle* pp) {
  * velocity.  Point raster emission remains to be decompiled; this is the
  * verified transform prefix at 0x8016DD68-0x8016DF14.
  */
-#pragma push
-#pragma optimization_level 0
 void psDispSubAPPSRTPoint(PSParticle* pp) {
     PSAppSRT* appSRT = (PSAppSRT*)pp->parentObj;
     Mtx appMatrix;
@@ -4830,7 +4669,6 @@ void psDispSubAPPSRTPoint(PSParticle* pp) {
         }
     }
 }
-#pragma pop
 
 /*
  * Allocates and links a generator after validating its bank/script tuple.
@@ -5085,8 +4923,6 @@ PSGeneratorState* psCreateGeneratorID(s32 linkNo, s32 bankIdx, s32 scriptId) {
  * Updates the particle material and ambient channel colors, including the
  * active alpha-light contribution. Verified against 0x8016E814-0x8016EA78.
  */
-#pragma push
-#pragma optimization_level 3
 void setupChanReg(PSParticle* pp) {
     GXColor mat;
     GXColor amb;
@@ -5156,7 +4992,6 @@ void setupChanReg(PSParticle* pp) {
  * remains asm-only; these register-cache paths are verified against
  * 0x8016E40C-0x8016E698.
  */
-#pragma pop
 void setupTevReg(PSParticle* pp) {
     GXColor reg1;
     GXColor reg2;
@@ -5251,7 +5086,6 @@ void setupTevReg(PSParticle* pp) {
  * Emits one particle polygon. The geometry modes remain asm-only; this
  * verified entry gate is shared by every mode at 0x8016C1E0-0x8016C240.
  */
-#pragma optimization_level 4
 void psDispSubMakePolygon(PSParticle* pp, void* polygonData,
                           f32 centerX, f32 centerY, f32 centerZ,
                           f32 velocityX, f32 velocityY, f32 velocityZ,
@@ -5593,8 +5427,6 @@ void psDispSubMakePolygon(PSParticle* pp, void* polygonData,
     }
 }
 
-#pragma push
-#pragma optimization_level 2
 void psExecGenerator(u32 linkMask) {
     PSGeneratorState* gen;
 
@@ -5696,16 +5528,12 @@ void psExecGenerator(u32 linkMask) {
     }
 }
 
-#pragma pop
 
 /*
  * Generator emitter. The shape cases follow the matching HSD generator
  * implementation in Melee's baselib/generator.c; field offsets and the newer
  * Euler-basis extension were checked against this target's retail body.
  */
-#pragma push
-#pragma optimization_level 4
-#pragma peephole off
 f32 generateParticle_8017424C(PSGeneratorState* gen) {
     extern PSParticle* psGenerateParticle(u8 linkNo, u8 bankIndex, u32 arg2, f32 posX, f32 posY, f32 posZ, u32 flags, f32 velocityX, f32 velocityY, f32 velocityZ, u8 animIndex, void* scriptData, u16 repeatCount, f32 lerpValue, void* arg14, f32 scaleFactor, f32 frictionFactor, PSGeneratorState* generator);
     Mtx basis;
@@ -6228,7 +6056,6 @@ f32 generateParticle_8017424C(PSGeneratorState* gen) {
     return gen->lifetime;
 }
 
-#pragma pop
 static inline s32 PSJObjMtxIsDirty(PSJObjTransform* jobj) {
     s32 dirty;
 

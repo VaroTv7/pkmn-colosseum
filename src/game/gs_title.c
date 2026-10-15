@@ -217,8 +217,8 @@ extern f64 sin(f32);
 /* Named asm symbols (used in inline asm .inc files) */
 extern void menuModelSetMotion(void);
 extern u8 menuSubOpenYesNo(s32, s32, s32, s32);
-extern void itemParamConvertOrigFormat(void);
-extern void itemParamGetRecoverType(void);
+extern void itemParamConvertOrigFormat(void* dst, void* src);
+extern u32 itemParamGetRecoverType(void* param);
 extern s32 pcboxGetPokemonBoxNbEmptySlot(s32, s8);
 extern void GSgfxBeginBackFBCapture(void);
 
@@ -284,41 +284,7 @@ extern u8 pokemonIsDarkPokemon(s32);
 extern f32 pokemonGetDp(void*);
 extern u8 lbl_803A1B90[];
 
-#if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_8002049C)
-void fn_8002049C(void) {
-    void* ctx;
-
-    lbl_8047A32C = 0;
-    ctx = floorGetCurrentContext();
-    lbl_8047A330 = GSthreadCreate(0x14, ctx, 0x2000, 1, 0, fn_8002058C);
-    lbl_8047A314 = 0;
-    lbl_8047A344 = lbl_8047B814;
-    lbl_8047A324 = NULL;
-    floorSetFadeScript(0, 0);
-    lbl_80478878 = lbl_80478878 + 1;
-    if ((s32)lbl_80478878 >= 4) {
-        lbl_80478878 = 0;
-    }
-    {
-        u8* base = lbl_803A1F88;
-        *(f32*)(base + 0x10) = lbl_8047B84C;
-        *(f32*)(base + 0x1c) = lbl_8047B850;
-        *(f32*)(base + 0x28) = lbl_8047B814;
-        *(f32*)(base + 0x34) = lbl_8047B814;
-        *(f32*)(base + 0x14) = lbl_8047B854;
-        *(f32*)(base + 0x20) = lbl_8047B858;
-        *(f32*)(base + 0x2c) = lbl_8047B814;
-        *(f32*)(base + 0x38) = lbl_8047B814;
-        *(f32*)(base + 0x18) = lbl_8047B85C;
-        *(f32*)(base + 0x24) = lbl_8047B860;
-        *(f32*)(base + 0x30) = lbl_8047B814;
-        *(f32*)(base + 0x3c) = lbl_8047B814;
-    }
-    if (fn_800FF548() == 0) {
-        fn_8002060C();
-    }
-}
-#endif
+/* fn_8002049C now lives in gs_title_8001EF78.c (the head of this TU). */
 
 /* =========================================================================
  * Function: GStitle_MainLoop
@@ -326,44 +292,7 @@ void fn_8002049C(void) {
  * Size:     0xE8
  * ========================================================================= */
 
-#if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_800203B4)
-void fn_800203B4(void) {
-    for (;;) {
-        if (lbl_8047A31C == 0x28) {
-            floorLink(0x39c, 0);
-            lbl_8047A31C = 0x3e8;
-            continue;
-        }
-
-        if (lbl_8047A320 == 0 && lbl_8047A324 != NULL) {
-            s32 phase;
-
-            lbl_8047A340 += lbl_8047A344;
-            phase = lbl_8047A33C;
-
-            if (phase < 2 && lbl_8047A328 == 0) {
-                u32 frames[2];
-                f32 threshold;
-
-                frames[0] = lbl_8047B808;
-                frames[1] = lbl_8047B80C;
-                threshold = *(f32*)&frames[phase];
-
-                if (GSmodelGetAnimFrame(lbl_8047A324) >= threshold) {
-                    if (lbl_8047A33C == 0) {
-                        soundStartRaw(0x46e, 0, 0);
-                    } else {
-                        soundStopRaw(0x46e, 0, 0);
-                    }
-                    lbl_8047A33C++;
-                }
-            }
-        }
-
-        _threadSwitch();
-    }
-}
-#endif
+/* fn_800203B4 now lives in gs_title_8001EF78.c (the head of this TU). */
 
 /* =========================================================================
  * Function: GStitle_Cleanup
@@ -374,27 +303,7 @@ void fn_800203B4(void) {
  * message boxes, then waits for the title thread to complete.
  * ========================================================================= */
 
-#if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80020328)
-void fn_80020328(void) {
-    menuCloseCustom(0x13, 0, 1);
-    menuCloseCustom(0x15, 0, 1);
-    menuCloseCustom(0x16, 0, 1);
-    winMsgClose(1);
-
-    if (lbl_8047A330 != NULL) {
-        for (;;) {
-            if (lbl_8047A32C == 1) {
-                GSthreadTerminate(lbl_8047A330);
-                break;
-            }
-            _threadSwitch();
-        }
-    }
-
-    lbl_8047A330 = NULL;
-    lbl_8047A32C = 0;
-}
-#endif
+/* fn_80020328 now lives in gs_title_8001EF78.c (the head of this TU). */
 
 /* ===================================================================
  * AUTO-GENERATED accessor functions
@@ -431,6 +340,315 @@ void fn_800216E0(u32 val) {
     lbl_8047A358 = val;
 }
 #endif
+
+extern void* menuItemBiosGetPtr(u32);
+extern u32 msgGetCharsPerFrame(void);
+
+/* Menu table at lbl_80478DDC (count at *lbl_80478DD8), 0x10 per entry. */
+typedef struct TitleMenuEntry {
+    u32 unk0;
+    u32 id;
+    u32 item;
+    u32 value;
+} TitleMenuEntry;
+
+/* Title slot table at lbl_80478DE4 (count at *lbl_80478DE0), 0x28 per slot. */
+typedef struct TitleSlot {
+    u32 flag;
+    u32 msg[9];
+} TitleSlot;
+
+/* The index-th visible item of the menu, or NULL. */
+static inline u8* titleGetMenuItemAt(u8* menu, s32 index) {
+    extern u8* menuItemBiosGetPtr(s32);
+    extern u8* menuDataBiosGetPtr(u32);
+    u8* result;
+    s32 count;
+    u8* item;
+
+    item = menuItemBiosGetPtr(*(s16*)(menuDataBiosGetPtr(*(u32*)(menu + 4)) + 4));
+    count = 0;
+    while (1) {
+        if (((u32)*(volatile u8*)item >> 7) & 1) {
+            if (index == count) {
+                result = item;
+                break;
+            }
+            count++;
+        }
+        if ((((u32)*(volatile u8*)item >> 6) & 1) == 0) {
+            item = menuItemBiosGetPtr(*(s16*)(item + 0x18));
+        } else {
+            result = NULL;
+            break;
+        }
+    }
+    return result;
+}
+
+/* The visible item of the menu at the cursor position *indexp. */
+static inline u8* titleGetMenuItem(u8* menu, u32* indexp) {
+    s32 index = *indexp;
+
+    return titleGetMenuItemAt(menu, index);
+}
+
+/* Index of the table entry whose item is the given one, or 0. */
+static inline s32 titleFindEntry(u8* item) {
+    extern u8* menuItemBiosGetPtr(s32);
+    extern u32 lbl_80478DD8;
+    extern u32 lbl_80478DDC;
+    u32 i;
+
+    for (i = 0; i < *(u32*)lbl_80478DD8; i++) {
+        if (item == menuItemBiosGetPtr((*(TitleMenuEntry**)&lbl_80478DDC)[i].item)) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+/* fn_80023DA8 - 0x80023DA8 | size: 0x3c */
+#if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80023DA8)
+s32 fn_80023DA8(void) {
+    winMsgOpen(2, 0x44c6, 1, 0);
+    winMsgClose(1);
+    return 1;
+}
+
+/* fn_80023DE4 - 0x80023DE4 | size: 0x3c */
+s32 fn_80023DE4(void) {
+    winMsgOpen(2, 0x4261, 1, 0);
+    winMsgClose(1);
+    return 1;
+}
+
+/* fn_80023E20 - 0x80023E20 | size: 0x3c */
+s32 fn_80023E20(void) {
+    winMsgOpen(2, 0x426a, 1, 0);
+    winMsgClose(1);
+    return 1;
+}
+
+/* fn_80023E5C - 0x80023E5C | size: 0x4 */
+void std018_nop18(void) { }
+#endif
+
+/* fn_80023E60 - 0x80023E60 | size: 0x300 */
+extern void windowGetCursorToItem(void);
+extern void fn_800E0060(void);
+extern void fn_800E0000(void);
+extern u32 lbl_8047A370;
+extern u32 lbl_8047A368;
+extern u32 lbl_8047A36C;
+extern f32 lbl_80478898;
+extern u32 lbl_8047A390;
+extern u8 lbl_8047A380;
+extern void wmapCursorMove(u8*, void*, u16*, u8*);
+extern u8 lbl_803A2058[];
+extern u8 lbl_803A204C[];
+#if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80023E60)
+s32 wmapMenuUpdate(u8* arg0) {
+    extern s32 windowGetCursorToItem(u8*);
+    extern u16* windowGetKeyInfo(void);
+    extern u8* menuDataBiosGetPtr(u32);
+    extern u8* menuItemBiosGetPtr(s32);
+    extern void fn_800E0060(f32*, f32*);
+    extern f32 fn_800E0000(f32*, f32*);
+    extern void std104_soundSetBackgroundMusic(s32, s32, s32);
+    u8* da18;
+    u8* r104318;
+    u16* temp_r5;
+    s32 result;
+    s32 target;
+    u8* p;
+    f32 sp14[3];
+    f32 sp08[3];
+
+    if ((s32)lbl_8047A370 == 1) {
+        return 0;
+    }
+
+    da18 = menuDataBiosGetPtr(*(u32*)(arg0 + 4));
+    r104318 = (u8*)windowGetCursorToItem(arg0);
+
+    if (r104318 == NULL) {
+        arg0[0x95] = 0;
+        return 0;
+    }
+
+    temp_r5 = windowGetKeyInfo();
+    wmapCursorMove(arg0, r104318, temp_r5, da18);
+
+    result = (s32)(s8)arg0[0x95] + (s32)(s8)arg0[0x94];
+    target = (s32)lbl_8047A368;
+    lbl_8047A36C = result;
+
+    if ((u32)target != (u32)result) {
+        lbl_80478898 = 90.0f;
+        lbl_8047A370 = 1;
+
+        p = titleGetMenuItemAt(arg0, target);
+        if (p != NULL) {
+            *(f32*)(lbl_803A2058 + 0) = (f32)(s32)(*(s16*)(p + 2));
+            *(f32*)(lbl_803A2058 + 4) = (f32)(s32)(*(s16*)(p + 4));
+            *(f32*)(lbl_803A2058 + 8) = 0.0f;
+        }
+
+        p = titleGetMenuItemAt(arg0, (s32)lbl_8047A36C);
+        if (p != NULL) {
+            *(f32*)(lbl_803A204C + 0) = (f32)(s32)(*(s16*)(p + 2));
+            *(f32*)(lbl_803A204C + 4) = (f32)(s32)(*(s16*)(p + 4));
+            *(f32*)(lbl_803A204C + 8) = 0.0f;
+        }
+
+        {
+            u8* cursor = (u8*)lbl_8047A390;
+            sp14[0] = *(f32*)(lbl_803A204C + 0) - (f32)(s32)(*(s16*)(cursor + 2));
+            sp14[1] = *(f32*)(lbl_803A204C + 4) - (f32)(s32)(*(s16*)(cursor + 4));
+            sp14[2] = 0.0f;
+            if (0.0f != sp14[0] || 0.0f != sp14[1]) {
+                fn_800E0060(sp08, sp14);
+                sp14[0] = 1.0f;
+                sp14[1] = 0.0f;
+                sp14[2] = 0.0f;
+                if (fn_800E0000(sp14, sp08) < 0.0f) {
+                    lbl_8047A380 = 1;
+                } else {
+                    lbl_8047A380 = 0;
+                }
+            }
+        }
+
+        std104_soundSetBackgroundMusic(0x464, 0, 0xFF);
+    }
+
+    return 0;
+}
+
+/* fn_80024160 - 0x80024160 | size: 0x1a8 */
+extern u32 lbl_8047A368;
+extern u32 lbl_80478DF4;
+typedef struct TitleMenuLink {
+    u8 dirMask;
+    u32 from;
+    u32 to;
+} TitleMenuLink;
+extern u32 lbl_80478DF0;
+void wmapCursorMove(u8* arg0, void* arg1, u16* arg2, u8* arg3) {
+    u8* candidate;
+    u8 mask;
+    u8 visible_index;
+    s32 entry_index;
+    u8* active;
+    s32 v;
+
+    (void)arg1;
+    v = *arg2;
+    mask = 0;
+    if ((v & 0x1) != 0) mask |= 0x1;
+    if ((v & 0x2) != 0) mask |= 0x4;
+    if ((v & 0x4) != 0) mask |= 0x8;
+    if ((v & 0x8) != 0) mask |= 0x2;
+
+    if (mask != 0) {
+        active = titleGetMenuItemAt(arg0, lbl_8047A368);
+
+        entry_index = 0;
+        while ((u32)entry_index < *(u32*)lbl_80478DF0) {
+            visible_index = 0;
+            candidate = menuItemBiosGetPtr(*(s16*)(arg3 + 4));
+            while (1) {
+                if (candidate == 0) {
+                    break;
+                }
+                if (((u32)*(volatile u8*)candidate >> 7) & 1) {
+                    if ((((TitleMenuLink*)lbl_80478DF4)[entry_index].dirMask & mask) == mask) {
+                        if (menuItemBiosGetPtr(((TitleMenuLink*)lbl_80478DF4)[entry_index].from) == active) {
+                            if (menuItemBiosGetPtr(((TitleMenuLink*)lbl_80478DF4)[entry_index].to) == candidate) {
+                                arg0[0x95] = visible_index;
+                                return;
+                            }
+                        }
+                    }
+                    visible_index++;
+                }
+                if ((((u32)*(volatile u8*)candidate >> 6) & 1) == 0) {
+                    candidate = menuItemBiosGetPtr(*(s16*)(candidate + 0x18));
+                } else {
+                    break;
+                }
+            }
+            entry_index++;
+        }
+    }
+}
+
+/* fn_80024308 - 0x80024308 | size: 0x130
+ *
+ * Status: 99.1% matched. Remaining: reg-alloc choice in second branch
+ * (f0/f1/f2 ordering: B8C8 in f1 vs f2, stack in f2 vs f0, B8898 in f0 vs f1),
+ * plus 2 anonymous @NNN@sda21 f64 magic constants for u32->f32 conversion
+ * (CW heuristic; target uses lbl_8047B8D0 name).
+ * Second branch: separate f3=(f32)(u32)fn_800D3088() to avoid __cvt_fp2unsigned.
+ */
+extern u32 lbl_8047A370;
+extern f32 lbl_8047A378;
+extern f32 lbl_8047A374;
+extern f32 lbl_80478898;
+extern u32 lbl_8047A36C;
+extern u32 lbl_8047A368;
+s32 wmapMenuInput(u8* arg0) {
+    extern u8* windowGetKeyInfo(void);
+    u8* ctx;
+    f32 f0;
+    f32 f1;
+    f32 f2;
+    f32 f3;
+
+    ctx = windowGetKeyInfo();
+    if (arg0 != 0) {
+        if ((s32)lbl_8047A370 != 1) {
+            if ((*(u16*)(ctx + 4) & 0x10) != 0) {
+                arg0[0x98] = 1;
+            }
+        }
+        if ((*(u16*)(ctx + 4) & 0x20) != 0) {
+            arg0[0x98] = 1;
+            arg0[0x99] = 1;
+        }
+    }
+
+    f2 = (f32)(u32)msgGetCharsPerFrame();
+    f3 = lbl_8047A378;
+    f0 = f3 * f2 + lbl_8047A374;
+    lbl_8047A374 = f0;
+    f1 = 12.0f;
+    if (f0 < f1) {
+        lbl_8047A374 = f1;
+        lbl_8047A378 = -f3;
+    } else {
+        f1 = 20.0f;
+        if (f0 > f1) {
+            lbl_8047A374 = f1;
+            lbl_8047A378 = -f3;
+        }
+    }
+
+    if ((s32)lbl_8047A370 == 1) {
+        f3 = (f32)(u32)msgGetCharsPerFrame();
+        f1 = lbl_80478898 - 4.5f * f3;
+        lbl_80478898 = f1;
+        if (f1 < 0.0f) {
+            lbl_80478898 = 0.0f;
+            lbl_8047A370 = 0;
+            lbl_8047A368 = lbl_8047A36C;
+        }
+    }
+    return 0;
+}
+#endif
+
 
 /* =========================================================================
  * Stubs for remaining GStitle functions (0x80024438-0x80025F84)
@@ -520,37 +738,19 @@ void fn_8002464C(u32 arg1, u32 arg2) {
 }
 
 /* 0x80024698 | 0x4 -- nop */
-#if 0
-asm void fn_80024698(void) {
-#include "src/game/gs_title_fn_80024698.inc"
-}
-#else
 void fn_80024698(void) { }
-#endif
 
 /* 0x8002469C | 0x30 */
 extern void* GSmsgGetGSchar(u32);
 extern void msgctrlSetValue(s32, void*);
-#if 0
-asm void fn_8002469C(void) {
-#include "src/game/gs_title_fn_8002469C.inc"
-}
-#else
 void fn_8002469C(void) {
     msgctrlSetValue(0x37, GSmsgGetGSchar(0x3cdf));
 }
-#endif
 
 /* 0x800246CC | 0x30 */
-#if 0
-asm void fn_800246CC(void) {
-#include "src/game/gs_title_fn_800246CC.inc"
-}
-#else
 void fn_800246CC(void) {
     msgctrlSetValue(0x37, GSmsgGetGSchar(0x3ce4));
 }
-#endif
 #endif
 
 /* 0x800246FC | 0x330
@@ -570,182 +770,85 @@ void fn_800246CC(void) {
  * After matching, writes alpha to arg1[0x67] and invokes msgctrlSetValue(0x37,..)
  * with a value pulled from lbl_80478DE4 indexed by lbl_802E4F58[table_index].
  *
- * The three inner blocks are deliberate duplicates (not a helper) -- matches
- * target asm exactly via goto LAB_XXX pattern (not break), which emits the
- * bne+b branch pair CW uses when the loop has a jump-table-style exit.
+ * The three inner blocks are the titleGetMenuItem/titleFindEntry inlines.
  *
- * Status: 91.6% matched. Remaining diffs: 7 non-volatile reg allocation
- * (uses r25-r31 vs target r27-r31 - we have 2 extra locals) + one extra
- * clrlwi from the (u8)fn_801902E0 cast on ret.
+ * Status: exact.
  */
 extern void* menuDataBiosGetPtr(s32);
 extern void* menuItemBiosGetPtr(u32);
-extern u32 lbl_80478DE4;
+extern TitleSlot* lbl_80478DE4;
 extern u32 lbl_8047A370;
 extern f32 lbl_80478898;
-extern f32 lbl_8047B8D8;
 extern u32 lbl_8047A368;
 extern u32 lbl_80478DDC;
 extern u32 lbl_80478DD8;
-extern f32 lbl_8047B8DC;
 extern u32 lbl_8047A36C;
 extern u8 lbl_802E4F58[];
 extern u32 lbl_80478DE0;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_800246FC)
-#if 0
-asm void fn_800246FC(void) {
-#include "src/game/gs_title_fn_800246FC.inc"
-}
-#else
-void wmapDrawInfo(u8* arg0, u8* arg1) {
-    extern u8 lbl_802E4F58[];
+static inline s32 titleUpdateCursor(u8* menu, u8* cursor) {
     extern f32 lbl_80478898;
-    extern u32 lbl_80478DD8;
-    extern u32 lbl_80478DDC;
-    extern u32 lbl_80478DE0;
-    extern u32 lbl_80478DE4;
     extern u32 lbl_8047A368;
     extern u32 lbl_8047A36C;
     extern u32 lbl_8047A370;
-    extern f32 lbl_8047B8D8;
-    extern f32 lbl_8047B8DC;
-    extern u8* menuItemBiosGetPtr(s32);
-    extern u8* menuDataBiosGetPtr(u32);
+    s32 index;
+    u8 alpha;
+
+    switch ((s32)lbl_8047A370) {
+    case 1:
+        if (lbl_80478898 > 45.0f) {
+            index = titleFindEntry(titleGetMenuItem(menu, &lbl_8047A368));
+            alpha = 255.0f * ((lbl_80478898 - 45.0f) / 45.0f);
+        } else {
+            index = titleFindEntry(titleGetMenuItemAt(menu, lbl_8047A36C));
+            alpha = 255.0f * ((45.0f - lbl_80478898) / 45.0f);
+        }
+        break;
+    default:
+        index = titleFindEntry(titleGetMenuItemAt(menu, lbl_8047A368));
+        alpha = 0xFF;
+        break;
+    }
+    cursor[0x67] = alpha;
+    return index;
+}
+
+static inline u32 titleSlotMessage(u32 slot, u32 index) {
+    extern u8 lbl_802E4F58[];
+    extern TitleSlot* lbl_80478DE4;
+
+    if (index > 9) {
+        index = 0;
+    }
+    return lbl_80478DE4[slot].msg[lbl_802E4F58[index]];
+}
+
+/* RULE-EXCEPTION(title-path): walk-helper choice (address vs value) made only for register assignment — see docs/RULE_EXCEPTIONS.md */
+void wmapDrawInfo(u8* arg0, u8* arg1) {
+    extern u8 lbl_802E4F58[];
+    extern u32 lbl_80478DD8;
+    extern u32 lbl_80478DE0;
+    extern TitleSlot* lbl_80478DE4;
     extern u32 std081_flagCheckTrue(void*);
     extern void* GSmsgGetGSchar(u32);
     extern void msgctrlSetValue(s32, void*);
-    u8* node;
-    u8* found;
     u32 slot;
-    u32 slot_offset;
-    s32 table_index;
-    s32 count;
-    s32 table_offset;
-    u32 alpha;
+    s32 index;
 
-    slot = 0;
-    slot_offset = 0;
-    while (slot < *(u32*)lbl_80478DE0) {
-        if (*(u32*)(lbl_80478DE4 + slot_offset) == 0 ||
-            (u8)std081_flagCheckTrue((void*)*(u32*)(lbl_80478DE4 + slot_offset)) != 0) {
-            switch ((s32)lbl_8047A370) {
-            case 1:
-                if (lbl_80478898 > lbl_8047B8D8) {
-                    table_index = lbl_8047A368;
-                    node = menuDataBiosGetPtr(*(u32*)(arg0 + 4));
-                    node = menuItemBiosGetPtr(*(s16*)(node + 4));
-                    count = 0;
-                    while (1) {
-                        if ((((u32)*(volatile u8*)node >> 7) & 1) != 0) {
-                            if (table_index == count) {
-                                found = node;
-                                break;
-                            }
-                            count++;
-                        }
-                        if ((((u32)*(volatile u8*)node >> 6) & 1) == 0) {
-                            node = menuItemBiosGetPtr(*(s16*)(node + 0x18));
-                        } else {
-                            found = 0;
-                            break;
-                        }
-                    }
-                    table_offset = 0;
-                    for (table_index = 0; (u32)table_index < *(u32*)lbl_80478DD8; table_index++) {
-                        if (found == menuItemBiosGetPtr(*(u32*)(lbl_80478DDC + table_offset + 8))) {
-                            goto LAB_800247D8;
-                        }
-                        table_offset += 0x10;
-                    }
-                    table_index = 0;
-                LAB_800247D8:;
-                    alpha = (u32)(s32)(lbl_8047B8DC * ((lbl_80478898 - lbl_8047B8D8) / lbl_8047B8D8));
-                } else {
-                    table_index = lbl_8047A36C;
-                    node = menuDataBiosGetPtr(*(u32*)(arg0 + 4));
-                    node = menuItemBiosGetPtr(*(s16*)(node + 4));
-                    count = 0;
-                    while (1) {
-                        if ((((u32)*(volatile u8*)node >> 7) & 1) != 0) {
-                            if (table_index == count) {
-                                found = node;
-                                break;
-                            }
-                            count++;
-                        }
-                        if ((((u32)*(volatile u8*)node >> 6) & 1) == 0) {
-                            node = menuItemBiosGetPtr(*(s16*)(node + 0x18));
-                        } else {
-                            found = 0;
-                            break;
-                        }
-                    }
-                    table_offset = 0;
-                    for (table_index = 0; (u32)table_index < *(u32*)lbl_80478DD8; table_index++) {
-                        if (found == menuItemBiosGetPtr(*(u32*)(lbl_80478DDC + table_offset + 8))) {
-                            goto LAB_8002488C;
-                        }
-                        table_offset += 0x10;
-                    }
-                    table_index = 0;
-                LAB_8002488C:;
-                    alpha = (u32)(s32)(lbl_8047B8DC * ((lbl_8047B8D8 - lbl_80478898) / lbl_8047B8D8));
-                }
-                break;
-            default:
-                table_index = lbl_8047A368;
-                node = menuDataBiosGetPtr(*(u32*)(arg0 + 4));
-                node = menuItemBiosGetPtr(*(s16*)(node + 4));
-                count = 0;
-                while (1) {
-                    if ((((u32)*(volatile u8*)node >> 7) & 1) != 0) {
-                        if (table_index == count) {
-                            found = node;
-                            break;
-                        }
-                        count++;
-                    }
-                    if ((((u32)*(volatile u8*)node >> 6) & 1) == 0) {
-                        node = menuItemBiosGetPtr(*(s16*)(node + 0x18));
-                    } else {
-                        found = 0;
-                        break;
-                    }
-                }
-                table_offset = 0;
-                for (table_index = 0; (u32)table_index < *(u32*)lbl_80478DD8; table_index++) {
-                    if (found == menuItemBiosGetPtr(*(u32*)(lbl_80478DDC + table_offset + 8))) {
-                        goto LAB_80024934;
-                    }
-                    table_offset += 0x10;
-                }
-                table_index = 0;
-            LAB_80024934:;
-                alpha = 0xFF;
-                break;
-            }
-
-            arg1[0x67] = (u8)alpha;
-            if ((u32)table_index < *(u32*)lbl_80478DD8) {
-                if ((u32)table_index > 9) {
-                    table_index = 0;
-                }
-                msgctrlSetValue(
-                    0x37,
-                    GSmsgGetGSchar(
-                        *(u32*)(lbl_80478DE4 + slot_offset + (((u32)lbl_802E4F58[table_index]) << 2) + 4)
-                    )
-                );
+    for (slot = 0; slot < *(u32*)lbl_80478DE0; slot++) {
+        if (lbl_80478DE4[slot].flag == 0 ||
+            (u8)std081_flagCheckTrue((void*)lbl_80478DE4[slot].flag) != 0) {
+            index = titleUpdateCursor(arg0, arg1);
+            if ((u32)index < *(u32*)lbl_80478DD8) {
+                msgctrlSetValue(0x37, GSmsgGetGSchar(titleSlotMessage(slot, index)));
                 return;
             }
+            break;
         }
-        slot_offset += 0x28;
-        slot++;
     }
 
     msgctrlSetValue(0x37, GSmsgGetGSchar(1));
 }
-#endif
 
 /* 0x80024A2C | 0x178
  *
@@ -757,65 +860,21 @@ void wmapDrawInfo(u8* arg0, u8* arg1) {
  * (special-cased to 0xC5F1200 when the entry id is 0x66 and fn_801902E0(0x45D)
  * returns non-zero - likely an "override" for a specific menu option).
  *
- * Status: 90.7% matched. Remaining diffs: register allocation swap
- * (lbl_8047A368 -> r28 vs target r30) + bne+b vs beq pattern.
+ * Status: exact.
  */
 extern u32 lbl_8047A368;
 extern u32 lbl_80478DDC;
 extern u32 lbl_80478DD8;
 extern u32 lbl_8047A370;
 extern f32 lbl_80478898;
-extern f32 lbl_8047B8A8;
-extern f32 lbl_8047B8DC;
-#if 0
-asm void fn_80024A2C(void) {
-#include "src/game/gs_title_fn_80024A2C.inc"
-}
-#else
 void fn_80024A2C(u8* arg0, u8* arg1) {
-    extern u32 lbl_80478DD8;
-    extern u32 lbl_8047A368;
-    extern u8* menuItemBiosGetPtr(s32);
-    extern u8* menuDataBiosGetPtr(u32);
-    u8* node;
-    u8* found;
-    u8* ptr;
     s32 index;
-    s32 offset;
+    u32 value;
 
-    index = lbl_8047A368;
-    node = menuDataBiosGetPtr(*(u32*)(arg0 + 4));
-    node = menuItemBiosGetPtr(*(s16*)(node + 4));
-    offset = 0;
-    while (1) {
-        if ((((u32)*(volatile u8*)node >> 7) & 1) != 0) {
-            if (index == offset) {
-                found = node;
-                break;
-            }
-            offset++;
-        }
-        if ((((u32)*(volatile u8*)node >> 6) & 1) == 0) {
-            node = menuItemBiosGetPtr(*(s16*)(node + 0x18));
-        } else {
-            found = 0;
-            break;
-        }
-    }
-
-    offset = 0;
-    for (index = 0; (u32)index < *(u32*)lbl_80478DD8; index++) {
-        node = menuItemBiosGetPtr(*(u32*)(lbl_80478DDC + offset + 8));
-        if (found == node) {
-            goto LAB_80024aec;
-        }
-        offset += 0x10;
-    }
-    index = 0;
-LAB_80024aec:
+    index = titleFindEntry(titleGetMenuItem(arg0, &lbl_8047A368));
     switch ((s32)lbl_8047A370) {
     case 1:
-        arg1[0x67] = lbl_8047B8DC * (lbl_80478898 / lbl_8047B8A8);
+        arg1[0x67] = 255.0f * (lbl_80478898 / 90.0f);
         break;
     default:
         arg1[0x67] = 0xFF;
@@ -823,17 +882,14 @@ LAB_80024aec:
     }
 
     if ((u32)index < *(u32*)lbl_80478DD8) {
-        u32 val;
-        ptr = (u8*)lbl_80478DDC + (index << 4);
-        if (*(u32*)(ptr + 4) == 0x66 && (u8)std081_flagCheckTrue((void*)0x45D) != 0) {
-            val = 0x0C5F1200;
+        if ((*(TitleMenuEntry**)&lbl_80478DDC)[index].id == 0x66 && (u8)std081_flagCheckTrue((void*)0x45D) != 0) {
+            value = 0x0C5F1200;
         } else {
-            val = *(u32*)(ptr + 0xC);
+            value = (*(TitleMenuEntry**)&lbl_80478DDC)[index].value;
         }
-        *(u32*)(arg1 + 0x58) = val;
+        *(u32*)(arg1 + 0x58) = value;
     }
 }
-#endif
 
 /* 0x80024BA4 | 0x138
  *
@@ -844,70 +900,25 @@ LAB_80024aec:
  * Likely corresponds to a menu cursor hover-highlight update:
  *   arg0 = menu context, arg1 = cursor/sprite target receiving the entry
  *
- * Status: 85.8% matched. Remaining diffs: pbVar3 saved to r29 non-volatile
- * (target keeps it in r3 volatile via call-return chaining - CW-scheduler
- * quirk we cannot force from source).
+ * Status: exact.
  */
 extern u32 lbl_8047A36C;
 extern u32 lbl_80478DDC;
 extern u32 lbl_80478DD8;
-#if 0
-asm void fn_80024BA4(void) {
-#include "src/game/gs_title_fn_80024BA4.inc"
-}
-#else
-void fn_80024BA4(s32 arg0, u8* arg1) {
-    extern u32 lbl_80478DD8;
-    extern u32 lbl_8047A36C;
-    extern u8* menuItemBiosGetPtr(s32);
-    extern u8* menuDataBiosGetPtr(u32);
-    extern u32 std081_flagCheckTrue(s32);
-    /* Declaration order: iVar6->r30, iVar29->r29, uVar7->r28 (shared with iVar6 dead).
-     * iVar2->r28 (overlaps uVar7 but not iVar6). pbVar3 saved for loop-1. */
-    s32 iVar6;
-    s32 iVar29;
-    u32 uVar7;
-    s32 iVar2;
-    u8* pbVar3;
-    u8* pbVar4;
+void fn_80024BA4(u8* arg0, u8* arg1) {
+    s32 index;
+    u32 value;
 
-    iVar6 = (s32)lbl_8047A36C;
-    pbVar3 = menuItemBiosGetPtr(*(s16*)((u8*)menuDataBiosGetPtr(*(u32*)(arg0 + 4)) + 4));
-    iVar29 = 0;
-    while (1) {
-        if (((u32)*(volatile u8*)pbVar3 >> 7) & 1) {
-            if (iVar6 != iVar29) {
-                iVar29 = iVar29 + 1;
-            } else {
-                goto LAB_80024c20;
-            }
-        }
-        if (((u32)*(volatile u8*)pbVar3 >> 6) & 1) break;
-        pbVar3 = menuItemBiosGetPtr(*(s16*)(pbVar3 + 0x18));
-    }
-    iVar29 = 0;
-LAB_80024c20:
-    uVar7 = 0;
-    iVar2 = 0;
-    for (; uVar7 < *(u32*)lbl_80478DD8; uVar7++) {
-        pbVar4 = menuItemBiosGetPtr(*(u32*)(lbl_80478DDC + iVar2 + 8));
-        if ((u8*)iVar29 == pbVar4) goto LAB_80024c64;
-        iVar2 = iVar2 + 0x10;
-    }
-    uVar7 = 0;
-LAB_80024c64:
-    if (uVar7 < *(u32*)lbl_80478DD8) {
-        u8 *entry = (u8*)lbl_80478DDC + (uVar7 << 4);
-        u32 val;
-        if (*(u32*)(entry + 4) == 0x66 && (u8)std081_flagCheckTrue(0x45D) != 0) {
-            val = 0x0C5F1200;
+    index = titleFindEntry(titleGetMenuItem(arg0, &lbl_8047A36C));
+    if ((u32)index < *(u32*)lbl_80478DD8) {
+        if ((*(TitleMenuEntry**)&lbl_80478DDC)[index].id == 0x66 && (u8)std081_flagCheckTrue((void*)0x45D) != 0) {
+            value = 0x0C5F1200;
         } else {
-            val = *(u32*)(entry + 0xC);
+            value = (*(TitleMenuEntry**)&lbl_80478DDC)[index].value;
         }
-        *(u32*)(arg1 + 0x58) = val;
+        *(u32*)(arg1 + 0x58) = value;
     }
 }
-#endif
 #endif
 
 /* 0x80024CDC | 0xE0
@@ -921,23 +932,15 @@ LAB_80024c64:
  *      sign when hitting either rail - classic ping-pong animation.
  *   4. Writing clamped alpha back to arg1[0x67].
  *
- * Status: 99.3% matched. Remaining diffs: 8 register-allocation choices
- * (target reuses r31 across bVar1 to iVar4 lifetime, we use r0 for iVar4)
- * plus 2 anonymous @NNN@sda21 constants (target binds to named lbl_8047B8D0
- * / lbl_8047B8B8). Both are deep CW internal heuristics; source-level
- * tricks cannot force them.
+ * Status: code exact. `iVar4 +=` keeps the alpha and the converted sum in
+ * one variable (retail's r31); a separate `iVar4 = (s32)(... + iVar4)`
+ * splits them (99.5%). Linked in gs_title_80023DA8.c, which owns the
+ * int->float bias doubles (lbl_8047B8B8 / lbl_8047B8D0) in its pool.
  */
 extern u32 msgGetCharsPerFrame(void);
 extern u32 lbl_8047A390;
-extern f64 lbl_8047B8D0;
-extern f64 lbl_8047B8B8;
 extern f32 lbl_8047A37C;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80024CDC)
-#if 0
-asm void fn_80024CDC(void) {
-#include "src/game/gs_title_fn_80024CDC.inc"
-}
-#else
 void fn_80024CDC(s32 arg0, u8* arg1) {
     f32 fVar2;
     s32 iVar4;
@@ -951,9 +954,7 @@ void fn_80024CDC(s32 arg0, u8* arg1) {
     iVar4 = *(u8*)(arg1 + 0x67);          /* current alpha (0..255)    */
     uVar3 = msgGetCharsPerFrame();                /* u32 tick counter          */
     fVar2 = lbl_8047A37C;                 /* f32 pulse speed           */
-    /* (f32)(u32)uVar3 -> unsigned int-to-float magic (no xor).  */
-    /* (f32)(s32)iVar4 -> signed int-to-float (xoris + stw).     */
-    iVar4 += fVar2 * (f32)(u32)uVar3;
+    iVar4 += fVar2 * (f32)uVar3;          /* one web: alpha stays in r31 */
 
     /* Clamp alpha to [0x40, 0xFF] and flip direction on rail.   */
     /* This produces the classic ping-pong / throb animation.   */
@@ -967,7 +968,6 @@ void fn_80024CDC(s32 arg0, u8* arg1) {
 
     *(u8*)(arg1 + 0x67) = (u8)iVar4;
 }
-#endif
 #endif
 
 /* 0x80024DBC | 0x170
@@ -996,15 +996,8 @@ extern u8 lbl_803A2058[];
 extern u8 lbl_803A204C[];
 extern u32 lbl_80478DD8;
 extern u32 lbl_8047A368;
-extern f64 lbl_8047B8B8;
 extern f32 lbl_8047A374;
-extern f32 lbl_8047B8E0;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80024DBC)
-#if 0
-asm void fn_80024DBC(void) {
-#include "src/game/gs_title_fn_80024DBC.inc"
-}
-#else
 void fn_80024DBC(s32 arg0, u8* arg1) {
     extern u8 lbl_803A204C[];
     extern u8 lbl_803A2058[];
@@ -1013,8 +1006,6 @@ void fn_80024DBC(s32 arg0, u8* arg1) {
     extern u32 lbl_8047A368;
     extern u32 lbl_8047A370;
     extern f32 lbl_8047A374;
-    extern f64 lbl_8047B8B8;
-    extern f32 lbl_8047B8E0;
     extern u8* menuItemBiosGetPtr(s32);
     extern u8* menuDataBiosGetPtr(u32);
     extern void GSlerpGetLinearInterpolationVector(void*, void*, void*);
@@ -1067,11 +1058,10 @@ LAB_80024E94:
     /* xoris + stw magic f64 pattern for int-to-float conversion. */
     /* Outer (s16) cast (not (s32)!) avoids an extra pre-store    */
     /* extsh that target doesn't emit.                            */
-    fB8E0 = lbl_8047B8E0;
+    fB8E0 = 9.0f;
     *(s16*)(arg1 + 0x50) = (s16)((f32)(s32)(s16)unaff_r28 + lbl_8047A374 + fB8E0);
     *(s16*)(arg1 + 0x52) = (s16)((f32)(s32)(s16)unaff_r31 + lbl_8047A374 + fB8E0);
 }
-#endif
 
 /* 0x80024F2C | 0x170
  *
@@ -1085,14 +1075,7 @@ extern u32 lbl_8047A370;
 extern f32 lbl_80478898;
 extern u32 lbl_80478DD8;
 extern u32 lbl_8047A368;
-extern f64 lbl_8047B8B8;
 extern f32 lbl_8047A374;
-extern f32 lbl_8047B8E0;
-#if 0
-asm void fn_80024F2C(void) {
-#include "src/game/gs_title_fn_80024F2C.inc"
-}
-#else
 void fn_80024F2C(s32 arg0, u8* arg1) {
     extern u8 lbl_803A204C[];
     extern u8 lbl_803A2058[];
@@ -1101,8 +1084,6 @@ void fn_80024F2C(s32 arg0, u8* arg1) {
     extern u32 lbl_8047A368;
     extern u32 lbl_8047A370;
     extern f32 lbl_8047A374;
-    extern f64 lbl_8047B8B8;
-    extern f32 lbl_8047B8E0;
     extern u8* menuItemBiosGetPtr(s32);
     extern u8* menuDataBiosGetPtr(u32);
     extern void GSlerpGetLinearInterpolationVector(void*, void*, void*);
@@ -1151,11 +1132,10 @@ LAB_80025004:
         }
         break;
     }
-    fB8E0 = lbl_8047B8E0;
+    fB8E0 = 9.0f;
     *(s16*)(arg1 + 0x50) = (s16)((f32)(s32)(s16)unaff_r28 + lbl_8047A374 + fB8E0);
     *(s16*)(arg1 + 0x52) = (s16)((f32)(s32)(s16)unaff_r31 - lbl_8047A374 + fB8E0);
 }
-#endif
 
 /* 0x8002509C | 0x170
  *
@@ -1168,14 +1148,7 @@ extern u32 lbl_8047A370;
 extern f32 lbl_80478898;
 extern u32 lbl_80478DD8;
 extern u32 lbl_8047A368;
-extern f64 lbl_8047B8B8;
 extern f32 lbl_8047A374;
-extern f32 lbl_8047B8E0;
-#if 0
-asm void fn_8002509C(void) {
-#include "src/game/gs_title_fn_8002509C.inc"
-}
-#else
 void fn_8002509C(s32 arg0, u8* arg1) {
     extern u8 lbl_803A204C[];
     extern u8 lbl_803A2058[];
@@ -1184,8 +1157,6 @@ void fn_8002509C(s32 arg0, u8* arg1) {
     extern u32 lbl_8047A368;
     extern u32 lbl_8047A370;
     extern f32 lbl_8047A374;
-    extern f64 lbl_8047B8B8;
-    extern f32 lbl_8047B8E0;
     extern u8* menuItemBiosGetPtr(s32);
     extern u8* menuDataBiosGetPtr(u32);
     extern void GSlerpGetLinearInterpolationVector(void*, void*, void*);
@@ -1236,11 +1207,10 @@ LAB_80025174:
         }
         break;
     }
-    fB8E0 = lbl_8047B8E0;
+    fB8E0 = 9.0f;
     *(s16*)(arg1 + 0x50) = (s16)((f32)(s32)(s16)unaff_r28 - lbl_8047A374 + fB8E0);
     *(s16*)(arg1 + 0x52) = (s16)((f32)(s32)(s16)unaff_r31 + lbl_8047A374 + fB8E0);
 }
-#endif
 
 /* 0x8002520C | 0x170
  *
@@ -1253,14 +1223,7 @@ extern u32 lbl_8047A370;
 extern f32 lbl_80478898;
 extern u32 lbl_80478DD8;
 extern u32 lbl_8047A368;
-extern f64 lbl_8047B8B8;
 extern f32 lbl_8047A374;
-extern f32 lbl_8047B8E0;
-#if 0
-asm void fn_8002520C(void) {
-#include "src/game/gs_title_fn_8002520C.inc"
-}
-#else
 void fn_8002520C(s32 arg0, u8* arg1) {
     extern u8 lbl_803A204C[];
     extern u8 lbl_803A2058[];
@@ -1269,8 +1232,6 @@ void fn_8002520C(s32 arg0, u8* arg1) {
     extern u32 lbl_8047A368;
     extern u32 lbl_8047A370;
     extern f32 lbl_8047A374;
-    extern f64 lbl_8047B8B8;
-    extern f32 lbl_8047B8E0;
     extern u8* menuItemBiosGetPtr(s32);
     extern u8* menuDataBiosGetPtr(u32);
     extern void GSlerpGetLinearInterpolationVector(void*, void*, void*);
@@ -1319,11 +1280,10 @@ LAB_800252E4:
         }
         break;
     }
-    fB8E0 = lbl_8047B8E0;
+    fB8E0 = 9.0f;
     *(s16*)(arg1 + 0x50) = (s16)((f32)(s32)(s16)unaff_r28 - lbl_8047A374 + fB8E0);
     *(s16*)(arg1 + 0x52) = (s16)((f32)(s32)(s16)unaff_r31 - lbl_8047A374 + fB8E0);
 }
-#endif
 
 /* 0x8002537C | 0x114
  *
@@ -1342,11 +1302,6 @@ extern u32 lbl_8047A370;
 extern f32 lbl_80478898;
 extern u32 lbl_80478DD8;
 extern u32 lbl_8047A368;
-#if 0
-asm void fn_8002537C(void) {
-#include "src/game/gs_title_fn_8002537C.inc"
-}
-#else
 void fn_8002537C(s32 arg0, u8* arg1) {
     extern u8 lbl_803A204C[];
     extern u8 lbl_803A2058[];
@@ -1401,7 +1356,6 @@ LAB_80025450:
     *(s16*)(arg1 + 0x50) = (s16)(unaff_r29 + 0xf);
     *(u16*)(arg1 + 0x52) = 0;
 }
-#endif
 
 /* 0x80025490 | 0x114
  *
@@ -1417,11 +1371,6 @@ extern u32 lbl_8047A370;
 extern f32 lbl_80478898;
 extern u32 lbl_80478DD8;
 extern u32 lbl_8047A368;
-#if 0
-asm void fn_80025490(void) {
-#include "src/game/gs_title_fn_80025490.inc"
-}
-#else
 inline u32 inline_fn(u32* arg0) {
     return *arg0;
 }
@@ -1480,11 +1429,10 @@ LAB_80025564:
     *(u16*)(arg1 + 0x50) = 0;
     *(s16*)(arg1 + 0x52) = (s16)(unaff_r29 + 0xf);
 }
-#endif
 
 /* 0x800255A4 | 0x18C
  *
- * worldMapPost -- title-screen audio/timing update driven by lbl_8047A384.
+ * fn_800255A4 -- title-screen audio/timing update driven by lbl_8047A384.
  *   IF title active (lbl_8047A384 != 0):
  *     fadeSet(lbl_8047B8E4, 3)     -- set BGM volume fade target
  *     soundStop(0x449, 0)            -- play SE cue
@@ -1518,27 +1466,12 @@ extern void menuIsCheck(void);
 extern void menuClose(void);
 extern void GStextureFree(void);
 extern u32 lbl_8047A384;
-extern f32 lbl_8047B8E4;
-extern f32 lbl_8047B8AC;
-extern f64 lbl_8047B8B8;
-extern f64 lbl_8047B8D0;
-extern f32 lbl_8047B8B0;
-extern f32 lbl_8047B8E8;
 extern u32 lbl_8047A388;
 extern u32 lbl_8047A38C;
-#if 0
-asm void fn_800255A4(void) {
-#include "src/game/gs_title_fn_800255A4.inc"
-}
-#else
 void worldMapPost(void) {
     extern u32 lbl_8047A384;
     extern u32 lbl_8047A388;
     extern u32 lbl_8047A38C;
-    extern f32 lbl_8047B8AC;
-    extern f32 lbl_8047B8B0;
-    extern f32 lbl_8047B8E4;
-    extern f32 lbl_8047B8E8;
     extern u32 msgGetCharsPerFrame(void);
     extern s32 fn_800D37CC(void);
     extern void GStextureFree(u32);
@@ -1550,21 +1483,19 @@ void worldMapPost(void) {
     extern void soundStop(s32, s32);
     extern void fadeCheck(s32);
     extern void fadeSet(f32, s32);
-    f32 limit;
     f32 accum;
 
     if (lbl_8047A384 != 0) {
-        fadeSet(lbl_8047B8E4, 3);
+        fadeSet(2.0f, 3);
         soundStop(0x449, 0);
-        accum = lbl_8047B8AC;
-        limit = lbl_8047B8B0;
-        while (accum < limit) {
+        accum = 0.0f;
+        while (accum < 1.0f) {
             _threadSwitch();
             accum = accum + (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
         }
         std137_soundStopAll(std228_soundGetCurrentBackgroundMusic(), 0x7d0, 0);
     } else {
-        fadeSet(lbl_8047B8E8, 3);
+        fadeSet(0.5f, 3);
         std137_soundStopAll(std228_soundGetCurrentBackgroundMusic(), 0x1f4, 0);
     }
     fadeCheck(1);
@@ -1575,7 +1506,6 @@ void worldMapPost(void) {
         if (lbl_8047A38C != 0) GStextureFree(lbl_8047A38C);
     }
 }
-#endif
 
 /* 0x80025730 | 0x280 */
 extern void menuItemBiosSetSelectFlag(void);
@@ -1593,207 +1523,106 @@ extern u32 lbl_80478DD8;
 extern u8 lbl_8047A3A8;
 extern u32 lbl_8047A388;
 extern void worldMapBikeRide(void);
-#if 0
-asm void fn_80025730(void) {
-#include "src/game/gs_title_fn_80025730.inc"
-}
-#else
 void worldMapMain(void) {
-    extern u32 lbl_80478DD8;
-    extern u32 lbl_8047A368;
-    extern u32 lbl_8047A388;
-    extern u32 lbl_8047A390;
-    extern u8 lbl_8047A3A8;
-    extern u32 lbl_8047A3AC;
-    extern void worldMapBikeRide();
-    extern void menuItemBiosSetSelectFlag();
-    extern void menuItemBiosGetPtr();
-    extern void fn_800D3074();
-    extern void GSgfxBeginBackFBCapture();
-    extern void GStextureCreate();
-    extern void menuClose();
-    extern void menuOpen();
-    extern void menuOpenCustom();
-    extern void windowGetActiveID();
-    extern void floorGetPrevFloorID();
-    extern void std081_flagCheckTrue();
-    extern void wmapCaptureDone();
-    u8 sp[0x20];
-    u32 tmp = 0;
-    u32 r3 = 0;
-    u32 r4 = 0;
-    u32 r5 = 0;
-    u32 r6 = 0;
-    u32 r7 = 0;
-    u32 r8 = 0;
-    u32 r28 = 0;
-    u32 r29 = 0;
-    u32 r30 = 0;
-    u32 r31 = 0;
-    void (*ctr_fn)(void) = 0;
-    u32 ctr = 0;
+    typedef struct TitleFloorEntry {
+        u32 flag;
+        u32 floor;
+        u32 item;
+        u32 pad;
+    } TitleFloorEntry;
+    extern u32 menuItemBiosGetPtr(u32 item);
+    extern void menuItemBiosSetSelectFlag(u32 item, u8 enable);
+    extern u8 std081_flagCheckTrue(u32 flag);
+    extern s32 windowGetActiveID(void);
+    extern s32 menuOpenCustom(s32 id, ...);
+    extern u32 floorGetPrevFloorID(void);
+    extern void fn_800D3074(s32 mode);
+    extern u32 GStextureCreate(s32, s32, s32, s32, s32);
+    extern void GSgfxBeginBackFBCapture(u32 texture, void (*callback)(void), s32 arg);
+    extern void menuOpen(s32 id, s32 arg);
+    extern void menuClose(s32 id);
+    extern void wmapCaptureDone(void);
+    s32 selected;
+    u8 enable;
+    u32 floor;
+    u32 i;
+    s32 result;
+    u32 count;
+    u8 change;
+    TitleFloorEntry* entry;
 
-    tmp = 0x0;
-    r3 = lbl_80478DDC;
-    *(u32*)(sp + 0x8) = tmp;
-    lbl_8047A368 = tmp;
-    r3 = *(u32*)((u8*)r3 + 0x8);
-    menuItemBiosGetPtr();
-    r28 = 0x0;
-    lbl_8047A390 = r3;
-    r31 = r28 << 4;
-    r29 = 0x0;
-    while (1) {
-        r3 = lbl_80478DD8;
-        tmp = *(u32*)((u8*)r3 + 0x0);
-        if (r29 >= tmp) break;
-        tmp = lbl_80478DDC;
-        r3 = lbl_8047A3AC;
-        r4 = tmp + r31;
-        tmp = *(u32*)((u8*)r4 + 0x4);
-        if (r3 == tmp) {
-            lbl_8047A368 = r28;
-            r3 = *(u32*)((u8*)r4 + 0x8);
-            menuItemBiosGetPtr();
-            lbl_8047A390 = r3;
+    selected = 0;
+    lbl_8047A368 = 0;
+    lbl_8047A390 = menuItemBiosGetPtr((*(TitleFloorEntry**)&lbl_80478DDC)[0].item);
+    for (i = count = 0; i < **(u32**)&lbl_80478DD8; i++) {
+        entry = &(*(TitleFloorEntry**)&lbl_80478DDC)[i];
+        if (lbl_8047A3AC == entry->floor) {
+            lbl_8047A368 = count;
+            selected = count;
+            lbl_8047A390 = menuItemBiosGetPtr(entry->item);
         }
-        r3 = lbl_80478DDC;
-        r30 = 0x1;
-        r3 = *(u32*)(r3 + r31);
-        if (r3 != 0) {
-            std081_flagCheckTrue();
-            tmp = r3 & 0xFF;
-            if (tmp == 0) {
-                r30 = 0x0;
+        enable = 1;
+        if ((*(TitleFloorEntry**)&lbl_80478DDC)[i].flag != 0 &&
+            std081_flagCheckTrue((*(TitleFloorEntry**)&lbl_80478DDC)[i].flag) == 0) {
+            enable = 0;
         }
+        menuItemBiosSetSelectFlag((*(TitleFloorEntry**)&lbl_80478DDC)[i].item, enable);
+        if (enable) {
+            count++;
         }
-        r3 = lbl_80478DDC;
-        tmp = r31 + 0x8;
-        r4 = r30;
-        r3 = *(u32*)(r3 + tmp);
-        menuItemBiosSetSelectFlag();
-        tmp = r30 & 0xFF;
-        if (tmp != 0) {
-            r28 = r28 + 0x1;
-        }
-        r31 = r31 + 0x10;
-        r29 = r29 + 0x1;
-
     }
-    windowGetActiveID();
-    r4 = r3;
-    r5 = (u32)sp + 0x8;
-    r3 = 0xbd;
-    r6 = 0x0;
-    r7 = 0x1;
-    r8 = 0x0;
-    menuOpenCustom();
-    if ((s32)r3 < 0) {
-        floorGetPrevFloorID();
-        r30 = r3;
 
+    result = menuOpenCustom(0xBD, windowGetActiveID(), &selected, 0, 1, 0);
+    if (result < 0) {
+        floor = floorGetPrevFloorID();
     } else {
-        r4 = lbl_80478DD8;
-        r7 = 0x0;
-        r6 = lbl_80478DDC;
-        r5 = *(u32*)((u8*)r4 + 0x0);
-        r4 = r6;
-        ctr_fn = (void(*)(void))r5;
-        if (r5 > 0) {
-            do {
-                tmp = *(u32*)((u8*)r4 + 0x8);
-                if (r3 == tmp) break;
-                r4 = r4 + 0x10;
-                r7 = r7 + 0x1;
-            } while (--ctr != 0);
-        }
-        if (r7 >= r5) {
-            r7 = 0x0;
-        }
-        r31 = r7 << 4;
-        r3 = r6 + r31;
-        tmp = *(u32*)((u8*)r3 + 0x4);
-        do {
-        if (tmp != 0x66) break;
-            r3 = 0x45d;
-            std081_flagCheckTrue();
-            tmp = r3 & 0xFF;
-            if (tmp == 0) break;
-            r30 = 0x7b;
-            break;
-        } while (0);
+        TitleFloorEntry* entries = *(TitleFloorEntry**)&lbl_80478DDC;
+        u32 j;
 
-        tmp = lbl_80478DDC;
-        r3 = tmp + r31;
-        r30 = *(u32*)((u8*)r3 + 0x4);
+        for (j = 0; j < **(u32**)&lbl_80478DD8; j++) {
+            if ((u32)result == entries[j].item) {
+                break;
+            }
+        }
+        if (j >= **(u32**)&lbl_80478DD8) {
+            j = 0;
+        }
+        if (entries[j].floor == 0x66 && std081_flagCheckTrue(0x45D) != 0) {
+            floor = 0x7B;
+        } else {
+            floor = (*(TitleFloorEntry**)&lbl_80478DDC)[j].floor;
+        }
     }
-    floorGetPrevFloorID();
-    if (r30 != r3) {
-        do {
-            if (r30 != 0x7a) break;
-            floorGetPrevFloorID();
-            if (r3 != 0xf) break;
-            tmp = 0x0;
-            goto L_80025910;
-        } while (0);
 
-        do {
-            if (r30 != 0xf) break;
-            floorGetPrevFloorID();
-            if (r3 != 0x7a) break;
-            tmp = 0x0;
-            break;
-        } while (0);
-
-        tmp = 0x1;
-        goto L_80025910;
-    }
-    tmp = 0x0;
-L_80025910:
-    tmp = tmp & 0xFF;
-    if (tmp == 1) {
-        r3 = 0x2;
-        fn_800D3074();
-        tmp = 0x0;
-        r3 = 0x0;
-        lbl_8047A3A8 = tmp;
-        r4 = 0x0;
-        r5 = 0x44;
-        r6 = 0x0;
-        r7 = 0x0;
-        GStextureCreate();
-        r4 = (u32)wmapCaptureDone;
-        lbl_8047A388 = r3;
-        r4 = (u32)wmapCaptureDone;
-        r5 = 0x0;
-        GSgfxBeginBackFBCapture();
-        while (1) {
-            tmp = lbl_8047A3A8;
-            if (tmp != 0) break;
-            ((void(*)(void))_threadSwitch)();
-
+    if (floor != floorGetPrevFloorID()) {
+        if (floor == 0x7A && floorGetPrevFloorID() == 0xF) {
+            change = 0;
+        } else if (floor == 0xF && floorGetPrevFloorID() == 0x7A) {
+            change = 0;
+        } else {
+            change = 1;
         }
-        r3 = 0xc3;
-        r4 = 0x0;
-        menuOpen();
-        r3 = 0xbd;
-        menuClose();
+    } else {
+        change = 0;
+    }
+    if (change == 1) {
+        fn_800D3074(2);
+        lbl_8047A3A8 = 0;
+        GSgfxBeginBackFBCapture(lbl_8047A388 = GStextureCreate(0, 0, 0x44, 0, 0),
+                                wmapCaptureDone, 0);
+        while (lbl_8047A3A8 == 0) {
+            _threadSwitch();
+        }
+        menuOpen(0xC3, 0);
+        menuClose(0xBD);
         worldMapBikeRide();
     }
-    r3 = r30;
-    r4 = 0x0;
-    ((void(*)(void))floorLink)();
-    return;
+    floorLink(floor, 0);
 }
-#endif
 #endif
 
 /* 0x800259B0 | 0xCC */
 extern void std114_mapObjectSetVisibility(void);
-extern f32 lbl_8047B8A8;
-extern f32 lbl_8047B8AC;
-extern f32 lbl_8047B8E8;
-extern f32 lbl_8047B8EC;
 extern u32 lbl_8047A368;
 extern u32 lbl_8047A36C;
 extern u32 lbl_8047A370;
@@ -1807,11 +1636,6 @@ extern u32 lbl_8047A388;
 extern u32 lbl_8047A390;
 extern u32 lbl_8047A3AC;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_800259B0)
-#if 0
-asm void fn_800259B0(void) {
-#include "src/game/gs_title_fn_800259B0.inc"
-}
-#else
 void worldMapPre(void) {
     extern u8 lbl_803A2058[];
     extern u8 lbl_803A204C[];
@@ -1824,16 +1648,16 @@ void worldMapPre(void) {
     lbl_8047A368 = 0;
     lbl_8047A36C = 0;
     lbl_8047A370 = 0;
-    lbl_80478898 = lbl_8047B8A8;
-    vec1[0] = lbl_8047B8AC;
-    vec1[1] = lbl_8047B8AC;
-    vec1[2] = lbl_8047B8AC;
-    vec2[0] = lbl_8047B8AC;
-    vec2[1] = lbl_8047B8AC;
-    vec2[2] = lbl_8047B8AC;
-    lbl_8047A374 = lbl_8047B8AC;
-    lbl_8047A378 = lbl_8047B8E8;
-    lbl_8047A37C = lbl_8047B8EC;
+    lbl_80478898 = 90.0f;
+    vec1[0] = 0.0f;
+    vec1[1] = 0.0f;
+    vec1[2] = 0.0f;
+    vec2[0] = 0.0f;
+    vec2[1] = 0.0f;
+    vec2[2] = 0.0f;
+    lbl_8047A374 = 0.0f;
+    lbl_8047A378 = 0.5f;
+    lbl_8047A37C = 8.0f;
     lbl_8047A380 = 0;
     lbl_8047A384 = 0;
     lbl_8047A388 = 0;
@@ -1847,7 +1671,6 @@ void worldMapPre(void) {
         lbl_8047A3AC = 0x66;
     }
 }
-#endif
 
 #if 0
 void fn_800259B0_old(void) {
@@ -1865,10 +1688,6 @@ void fn_800259B0_old(void) {
     extern u32 lbl_8047A388;
     extern u32 lbl_8047A390;
     extern u32 lbl_8047A3AC;
-    extern f32 lbl_8047B8A8;
-    extern f32 lbl_8047B8AC;
-    extern f32 lbl_8047B8E8;
-    extern f32 lbl_8047B8EC;
     extern void floorGetPrevFloorID();
     extern void fn_801CB954();
     u8 sp[0x10];
@@ -1882,13 +1701,13 @@ void fn_800259B0_old(void) {
     f32 f2 = 0.0f;
     f32 f3 = 0.0f;
 
-    f3 = lbl_8047B8A8;
+    f3 = 90.0f;
     r3 = (u32)lbl_803A2058;
     tmp = 0x0;
-    f2 = lbl_8047B8AC;
+    f2 = 0.0f;
     r6 = (u32)lbl_803A2058;
-    f1 = lbl_8047B8E8;
-    f0 = lbl_8047B8EC;
+    f1 = 0.5f;
+    f0 = 8.0f;
     r3 = (u32)lbl_803A204C;
     r5 = (u32)lbl_803A204C;
     r3 = 0xC6A0000;
@@ -1931,13 +1750,7 @@ void fn_800259B0_old(void) {
 #endif
 
 /* 0x80025A7C | 0x4 -- nop */
-#if 0
-asm void fn_80025A7C(void) {
-#include "src/game/gs_title_fn_80025A7C.inc"
-}
-#else
 void fn_80025A7C(void) { }
-#endif
 #endif
 
 /* 0x80025A80 | 0x19C
@@ -1956,8 +1769,7 @@ void fn_80025A7C(void) { }
  * Used by GSgfxBeginBackFBCapture as a particle callback; re-registered until it
  * returns 0 (fully faded).
  *
- * Status: 90.6% matched. Remaining diffs: FP register swaps in the
- * call-arg plumbing between fn_80025C1C calls.
+ * Status: exact.
  */
 extern void gfxSetOrtho(void);
 extern void gfxSetBlendMode(void);
@@ -1966,44 +1778,59 @@ extern void gfxSetZMode(void);
 extern void fn_800DA100(void);
 extern void gfxSetCullMode(void);
 extern void fn_800D9ED8(void);
-extern f32 lbl_8047B8AC;
-extern f32 lbl_8047B8F8;
-extern f32 lbl_8047B8FC;
-extern f32 lbl_8047B8F0;
-extern f32 lbl_8047B8F4;
 extern f32 lbl_8047A3A0;
-extern f32 lbl_8047B8B0;
-extern f32 lbl_8047B904;
-extern f32 lbl_8047B908;
-extern f32 lbl_8047B8E0;
 extern u32 lbl_8047A388;
 extern f32 lbl_8047A3A4;
-extern f32 lbl_8047B8E4;
-extern f32 lbl_8047B8C8;
-extern void wmapDrawCaptureQuad(f32, f32, f32, s32, s32, s32, f32*);
+extern void wmapDrawCaptureQuad(s32, f32, f32, f32, s32, s32, f32*);
+/*
+ * RULE-EXCEPTION(title-path): reconstructed stripped function, kept only for
+ * the .sdata2 pool order - see docs/RULE_EXCEPTIONS.md. Retail's pool has
+ * 320.0f, 240.0f, 640.0f, 480.0f and 1.2f (0x8047B8F0-0x8047B900) ahead of
+ * fn_80025A80's own 3.0f, although fn_80025A80 uses 640/480 before 320/240
+ * and only fn_80025F84 (which comes later) reads 1.2f. MWCC adds a literal
+ * when it first compiles it, so a function compiled before fn_80025A80 used
+ * them in that order and the linker stripped it. Its body is the shape of
+ * fn_80025F84's capture-centre store and 50 Hz-scaled frame wait; the name
+ * is a placeholder. force_active is off so mwld strips it as it did retail's.
+ */
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80025A80)
-#if 0
-asm void fn_80025A80(void) {
-#include "src/game/gs_title_fn_80025A80.inc"
+#pragma push
+#pragma force_active off
+void gsTitleStrippedCaptureWait(void)
+{
+    extern u8 lbl_803A2040[];
+    extern s32 fn_800D37CC(void);
+    extern u32 msgGetCharsPerFrame(void);
+    extern void gfxSetOrtho(f32, f32, f32, f32);
+    u32 frames;
+    u32 elapsed;
+    s32 tick;
+
+    *(f32*)lbl_803A2040 = 320.0f;
+    *(f32*)(lbl_803A2040 + 4) = 240.0f;
+    *(f32*)(lbl_803A2040 + 8) = 0.0f;
+    gfxSetOrtho(0.0f, 0.0f, 640.0f, 480.0f);
+    frames = 0x78 - (u32)((f32)fn_800D37CC() * 2.0f);
+    tick = fn_800D37CC();
+    if (tick == 0x32) {
+        frames = (f32)frames / 1.2f;
+    }
+    for (elapsed = 0; elapsed < frames; elapsed += tick) {
+        _threadSwitch();
+        tick = msgGetCharsPerFrame();
+    }
 }
-#else
+#pragma pop
+#endif
+
+
+#if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80025A80)
 s32 wmapRideOverlay(s32 param_1) {
     extern u8 lbl_803A204C[];
     extern u32 lbl_8047A388;
     extern f32 lbl_8047A3A0;
     extern f32 lbl_8047A3A4;
-    extern f32 lbl_8047B8AC;
-    extern f32 lbl_8047B8B0;
-    extern f32 lbl_8047B8C8;
-    extern f32 lbl_8047B8E0;
-    extern f32 lbl_8047B8E4;
-    extern f32 lbl_8047B8F0;
-    extern f32 lbl_8047B8F4;
-    extern f32 lbl_8047B8F8;
-    extern f32 lbl_8047B8FC;
-    extern f32 lbl_8047B904;
-    extern f32 lbl_8047B908;
-    extern void wmapDrawCaptureQuad(f32, f32, f32, s32, s32, s32, f32*);
+    extern void wmapDrawCaptureQuad(s32, f32, f32, f32, s32, s32, f32*);
     extern void gfxSetOrtho(f32, f32, f32, f32);
     extern void fn_800D9ED8(s32);
     extern void gfxSetCullMode(s32);
@@ -2013,7 +1840,7 @@ s32 wmapRideOverlay(s32 param_1) {
     extern void gfxSetBlendMode(s32, s32, s32);
     f32 local_18[3];
 
-    gfxSetOrtho(lbl_8047B8AC, lbl_8047B8AC, lbl_8047B8F8, lbl_8047B8FC);
+    gfxSetOrtho(0.0f, 0.0f, 640.0f, 480.0f);
     gfxSetBlendMode(1, 6, 7);
     gfxSetUpdates(1, 1, 0);
     gfxSetZMode(0, 1, 1);
@@ -2021,32 +1848,31 @@ s32 wmapRideOverlay(s32 param_1) {
     gfxSetCullMode(0);
     fn_800D9ED8(1);
 
-    local_18[0] = lbl_8047B8F0;
-    local_18[1] = lbl_8047B8F4;
-    local_18[2] = lbl_8047B8AC;
-    wmapDrawCaptureQuad(lbl_8047A3A0, lbl_8047B8B0, lbl_8047B904, param_1, 1, 0, local_18);
+    local_18[0] = 320.0f;
+    local_18[1] = 240.0f;
+    local_18[2] = 0.0f;
+    wmapDrawCaptureQuad(param_1, lbl_8047A3A0, 1.0f, 3.0f, 1, 0, local_18);
 
-    lbl_8047A3A0 = lbl_8047A3A0 - lbl_8047B908;
-    if (lbl_8047A3A0 < lbl_8047B8AC) lbl_8047A3A0 = lbl_8047B8AC;
+    lbl_8047A3A0 -= 2.25f;
+    if (lbl_8047A3A0 < 0.0f) lbl_8047A3A0 = 0.0f;
 
-    local_18[0] = lbl_8047B8F8 - (lbl_8047B8E0 + ((f32*)lbl_803A204C)[0]);
-    local_18[1] = lbl_8047B8FC - (lbl_8047B8E0 + ((f32*)lbl_803A204C)[1]);
-    local_18[2] = *(volatile f32*)&lbl_8047B8AC;
-    wmapDrawCaptureQuad(lbl_8047A3A4, lbl_8047B8B0, lbl_8047B8E4, (s32)lbl_8047A388, 1, 1, local_18);
+    local_18[0] = 640.0f - (9.0f + ((f32*)lbl_803A204C)[0]);
+    local_18[1] = 480.0f - (9.0f + ((f32*)lbl_803A204C)[1]);
+    local_18[2] = 0.0f;
+    wmapDrawCaptureQuad((s32)lbl_8047A388, lbl_8047A3A4, 1.0f, 2.0f, 1, 1, local_18);
 
-    lbl_8047A3A4 = lbl_8047A3A4 - lbl_8047B8C8;
-    if (lbl_8047A3A4 < lbl_8047B8AC) lbl_8047A3A4 = lbl_8047B8AC;
+    lbl_8047A3A4 = lbl_8047A3A4 - 4.5f;
+    if (lbl_8047A3A4 < 0.0f) lbl_8047A3A4 = 0.0f;
 
-    if (lbl_8047A3A4 <= *(volatile f32*)&lbl_8047B8AC && lbl_8047A3A0 <= lbl_8047B8AC) {
+    if (lbl_8047A3A4 <= 0.0f && lbl_8047A3A0 <= 0.0f) {
         return 0;
     }
     return 1;
 }
-#endif
 
 /* 0x80025C1C | 0x358
  *
- * fn_80025C1C(f32 rot, f32 size, f32 uv_ext, s32 tex, s32 flag_a,
+ * fn_80025C1C(s32 tex, f32 rot, f32 size, f32 uv_ext, s32 flag_a,
  *             s32 flag_b, f32 *pos)  -- GX quad render primitive.
  *
  *   1. Build two vec3s (vec_a, vec_b) based on flag_a (1 = symmetric scale,
@@ -2068,9 +1894,10 @@ s32 wmapRideOverlay(s32 param_1) {
  *      4 UV corners: (0,0) (1,0) (0,1) (1,1) via lbl_8047B8AC/B8B0.
  *   7. fn_800D6728() to flush the primitive.
  *
- * Status: 94.8% matched. Remaining diffs are FP register allocation inside
- * the vertex emission loop (4 similar call chains get slightly different
- * register assignments per iteration).
+ * result_2 is a 3x4 matrix (fn_800E042C builds it, fn_800E03B4 updates it,
+ * GSvecTransform applies it), which accounts for retail's 0xA0 frame.
+ *
+ * Status: exact.
  */
 extern void fn_800E042C(void);
 extern void fn_800E03B4(void);
@@ -2085,31 +1912,12 @@ extern void gfxVtxPos(void);
 extern void fn_800D5CB8(void);
 extern void gfxVtxTexCoord(void);
 extern void gfxEnd(void);
-extern f32 lbl_8047B8AC;
-extern f32 lbl_8047B8DC;
-extern f32 lbl_8047B8B0;
-extern f32 lbl_8047B8F0;
-extern f32 lbl_8047B8F4;
 extern u8 lbl_80314AE8[];
-extern f32 lbl_8047B90C;
-extern f32 lbl_8047B910;
-#if 0
-asm void fn_80025C1C(void) {
-#include "src/game/gs_title_fn_80025C1C.inc"
-}
-#else
-void wmapDrawCaptureQuad(f32 arg_f1, f32 arg_f2, f32 arg_f3,
-                 s32 arg_r3, s32 arg_r4, s32 arg_r5, f32 *arg_r6) {
+void wmapDrawCaptureQuad(s32 arg_r3, f32 arg_f1, f32 arg_f2, f32 arg_f3,
+                 s32 arg_r4, s32 arg_r5, f32 *arg_r6) {
     extern u8 lbl_80314AE8[];
-    extern f32 lbl_8047B8AC;
-    extern f32 lbl_8047B8B0;
-    extern f32 lbl_8047B8DC;
-    extern f32 lbl_8047B8F0;
-    extern f32 lbl_8047B8F4;
-    extern f32 lbl_8047B90C;
-    extern f32 lbl_8047B910;
     extern void gfxVtxTexCoord(s32, f32, f32);
-    extern void fn_800D5CB8(s32, s32, s32, s32, s32);
+    extern void fn_800D5CB8(s32, s32, s32, s32, u8);
     extern void gfxVtxPos(f32, f32, f32);
     extern void gfxEnd(void);
     extern void gfxBegin(s32);
@@ -2118,48 +1926,44 @@ void wmapDrawCaptureQuad(f32 arg_f1, f32 arg_f2, f32 arg_f3,
     extern void gfxLoadTexture(s32, s32);
     extern void gfxClearFlags(s32);
     extern void gfxSetFlags(s32);
-    extern void GSvecTransform(f32*, f32*, f32*);
-    extern void fn_800E03B4(f32*, f32*);
-    extern void fn_800E042C(f32*, f32*);
+    extern void GSvecTransform(f32*, f32 (*)[4], f32*);
+    extern void fn_800E03B4(f32 (*)[4], f32*);
+    extern void fn_800E042C(f32 (*)[4], f32*);
     extern void GSlerpGetLinearInterpolationVector(f32*, f32*, f32*);
     extern void fn_800E0CA0(f32);
-    f32 vec_a[3];
-    f32 vec_b[3];
+    f32 mtx[3][4];
     f32 result_1[3];
-    f32 result_2[3];
-    f32 vert_out[3];
+    f32 vec_b[3];
+    f32 vec_a[3];
     s32 scaled;
 
     if ((u8)arg_r4 == 1) {
-        vec_a[0] = lbl_8047B8AC; vec_a[1] = lbl_8047B8AC; vec_a[2] = lbl_8047B8AC;
         vec_b[0] = arg_f2;       vec_b[1] = arg_f2;       vec_b[2] = arg_f2;
+        vec_a[0] = 0.0f; vec_a[1] = 0.0f; vec_a[2] = 0.0f;
     } else {
+        vec_b[0] = 0.0f; vec_b[1] = 0.0f; vec_b[2] = 0.0f;
         vec_a[0] = arg_f2;       vec_a[1] = arg_f2;       vec_a[2] = arg_f2;
-        vec_b[0] = lbl_8047B8AC; vec_b[1] = lbl_8047B8AC; vec_b[2] = lbl_8047B8AC;
     }
     fn_800E0CA0(arg_f1);
     GSlerpGetLinearInterpolationVector(result_1, vec_b, vec_a);
-    scaled = (s32)(lbl_8047B8DC * result_1[0]);
+    scaled = (s32)(255.0f * result_1[0]);
 
     if ((u8)arg_r5 == 1) {
-        vec_a[0] = arg_f3;       vec_a[1] = arg_f3;       vec_a[2] = lbl_8047B8B0;
-        vec_b[0] = lbl_8047B8B0; vec_b[1] = lbl_8047B8B0; vec_b[2] = lbl_8047B8B0;
+        vec_b[0] = 1.0f; vec_b[1] = 1.0f; vec_b[2] = 1.0f;
+        vec_a[0] = arg_f3;       vec_a[1] = arg_f3;       vec_a[2] = 1.0f;
     } else {
-        vec_a[0] = lbl_8047B8B0; vec_a[1] = lbl_8047B8B0; vec_a[2] = lbl_8047B8B0;
-        vec_b[0] = arg_f3;       vec_b[1] = arg_f3;       vec_b[2] = lbl_8047B8B0;
+        vec_b[0] = arg_f3;       vec_b[1] = arg_f3;       vec_b[2] = 1.0f;
+        vec_a[0] = 1.0f; vec_a[1] = 1.0f; vec_a[2] = 1.0f;
     }
     fn_800E0CA0(arg_f1);
     GSlerpGetLinearInterpolationVector(result_1, vec_b, vec_a);
-    fn_800E042C(result_2, result_1);
+    fn_800E042C(mtx, result_1);
 
-    {
-        f32 bf0 = lbl_8047B8F0, bf4 = lbl_8047B8F4, bac = lbl_8047B8AC;
-        vec_b[0] = bf0; vec_b[1] = bf4; vec_b[2] = bac;
-        vec_a[0] = arg_r6[0]; vec_a[1] = arg_r6[1]; vec_a[2] = bac;
-    }
+    vec_b[0] = 320.0f; vec_b[1] = 240.0f; vec_b[2] = 0.0f;
+    vec_a[0] = arg_r6[0]; vec_a[1] = arg_r6[1]; vec_a[2] = 0.0f;
     fn_800E0CA0(arg_f1);
     GSlerpGetLinearInterpolationVector(result_1, vec_b, vec_a);
-    fn_800E03B4(result_2, result_1);
+    fn_800E03B4(mtx, result_1);
 
     gfxSetFlags(3);
     gfxClearFlags(4);
@@ -2168,53 +1972,46 @@ void wmapDrawCaptureQuad(f32 arg_f1, f32 arg_f2, f32 arg_f3,
     gfxLoadTexture(0, arg_r3);
     gfxBegin(4);
 
-    vec_b[0] = lbl_8047B90C; vec_b[1] = lbl_8047B910; vec_b[2] = lbl_8047B8AC;
-    GSvecTransform(vert_out, result_2, vec_b);
-    gfxVtxPos(vert_out[0], vert_out[1], vert_out[2]);
-    fn_800D5CB8(0, 0xff, 0xff, 0xff, (s32)(u8)scaled);
-    gfxVtxTexCoord(0, lbl_8047B8AC, lbl_8047B8AC);
+    vec_b[0] = (-320.0f); vec_b[1] = (-240.0f); vec_b[2] = 0.0f;
+    GSvecTransform(vec_a, mtx, vec_b);
+    gfxVtxPos(vec_a[0], vec_a[1], vec_a[2]);
+    fn_800D5CB8(0, 0xff, 0xff, 0xff, scaled);
+    gfxVtxTexCoord(0, 0.0f, 0.0f);
 
-    vec_b[0] = lbl_8047B8F0; vec_b[1] = lbl_8047B910; vec_b[2] = lbl_8047B8AC;
-    GSvecTransform(vert_out, result_2, vec_b);
-    gfxVtxPos(vert_out[0], vert_out[1], vert_out[2]);
-    fn_800D5CB8(0, 0xff, 0xff, 0xff, (s32)(u8)scaled);
-    gfxVtxTexCoord(0, lbl_8047B8B0, lbl_8047B8AC);
+    vec_b[0] = 320.0f; vec_b[1] = (-240.0f); vec_b[2] = 0.0f;
+    GSvecTransform(vec_a, mtx, vec_b);
+    gfxVtxPos(vec_a[0], vec_a[1], vec_a[2]);
+    fn_800D5CB8(0, 0xff, 0xff, 0xff, scaled);
+    gfxVtxTexCoord(0, 1.0f, 0.0f);
 
-    vec_b[0] = lbl_8047B90C; vec_b[1] = lbl_8047B8F4; vec_b[2] = lbl_8047B8AC;
-    GSvecTransform(vert_out, result_2, vec_b);
-    gfxVtxPos(vert_out[0], vert_out[1], vert_out[2]);
-    fn_800D5CB8(0, 0xff, 0xff, 0xff, (s32)(u8)scaled);
-    gfxVtxTexCoord(0, lbl_8047B8AC, lbl_8047B8B0);
+    vec_b[0] = (-320.0f); vec_b[1] = 240.0f; vec_b[2] = 0.0f;
+    GSvecTransform(vec_a, mtx, vec_b);
+    gfxVtxPos(vec_a[0], vec_a[1], vec_a[2]);
+    fn_800D5CB8(0, 0xff, 0xff, 0xff, scaled);
+    gfxVtxTexCoord(0, 0.0f, 1.0f);
 
-    vec_b[0] = lbl_8047B8F0; vec_b[1] = lbl_8047B8F4; vec_b[2] = lbl_8047B8AC;
-    GSvecTransform(vert_out, result_2, vec_b);
-    gfxVtxPos(vert_out[0], vert_out[1], vert_out[2]);
-    fn_800D5CB8(0, 0xff, 0xff, 0xff, (s32)(u8)scaled);
-    gfxVtxTexCoord(0, lbl_8047B8B0, lbl_8047B8B0);
+    vec_b[0] = 320.0f; vec_b[1] = 240.0f; vec_b[2] = 0.0f;
+    GSvecTransform(vec_a, mtx, vec_b);
+    gfxVtxPos(vec_a[0], vec_a[1], vec_a[2]);
+    fn_800D5CB8(0, 0xff, 0xff, 0xff, scaled);
+    gfxVtxTexCoord(0, 1.0f, 1.0f);
 
     gfxEnd();
 }
-#endif
 #endif
 
 /* 0x80025F74 | 0x10 */
 extern u8 lbl_8047A3A8;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80025F74)
-#if 0
-asm void fn_80025F74(void) {
-#include "src/game/gs_title_fn_80025F74.inc"
-}
-#else
 s32 wmapCaptureDone(void) {
     lbl_8047A3A8 = 1;
     return 0;
 }
 #endif
-#endif
 
 /* 0x80025F84 | 0x3EC
  *
- * worldMapBikeRide -- title splash setup (called once when title first shown).
+ * fn_80025F84 -- title splash setup (called once when title first shown).
  *   1. Activate 3 sprite handles 0xC6A1000/1001/1002 (fn_801CB954 activate=1).
  *   2. Pick an intro texture based on fn_801902E0(0x3E5):
  *        ret == 1: use 0xC6B1000 variant
@@ -2259,27 +2056,13 @@ extern u32 lbl_8047A384;
 extern u32 lbl_8047A394;
 extern u32 lbl_80478DEC;
 extern u32 lbl_8047A398;
-extern f32 lbl_8047B8A8;
 extern f32 lbl_8047A3A4;
 extern f32 lbl_8047A3A0;
 extern u32 lbl_8047A38C;
-extern f32 lbl_8047B914;
-extern f32 lbl_8047B918;
 extern u8 lbl_803A2040[];
-extern f32 lbl_8047B8F0;
-extern f32 lbl_8047B8F4;
-extern f32 lbl_8047B8AC;
 extern u32 lbl_8047A39C;
-extern f64 lbl_8047B8B8;
-extern f32 lbl_8047B8E4;
-extern f64 lbl_8047B8D0;
-extern f32 lbl_8047B900;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80025F84)
-#if 0
-asm void fn_80025F84(void) {
-#include "src/game/gs_title_fn_80025F84.inc"
-}
-#else
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimization_level 2) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimization_level 2
 void worldMapBikeRide(void) {
     extern u8 lbl_803A2040[];
@@ -2292,13 +2075,6 @@ void worldMapBikeRide(void) {
     extern u32 lbl_8047A39C;
     extern f32 lbl_8047A3A0;
     extern f32 lbl_8047A3A4;
-    extern f32 lbl_8047B8A8;
-    extern f32 lbl_8047B8E4;
-    extern f32 lbl_8047B8F0;
-    extern f32 lbl_8047B8F4;
-    extern f32 lbl_8047B900;
-    extern f32 lbl_8047B914;
-    extern f32 lbl_8047B918;
     extern u32 __cvt_fp2unsigned(f64);
     extern u32 msgGetCharsPerFrame(void);
     extern s32 fn_800D37CC(void);
@@ -2322,12 +2098,19 @@ void worldMapBikeRide(void) {
     extern void std114_mapObjectSetVisibility(u32, s32);
     extern u32 std112_modelGetResourceID(u32);
     extern s32 wmapRideOverlay(s32);
-    u32 obj_a, obj_b, obj_c, obj_d, obj_e;
-    u32 frame_a, frame_b;
+    u32 obj_c;
+    u32 obj_d;
+    u32 obj_e;
+    u32 obj_b;
+    u32 obj_a;
+    u32 start;
+    s32 tick;
     u32 tex;
     u32 elapsed;
+    u32 frame_b;
+    u32 frame_a;
     u32 delay;
-    s32 tick;
+    u32 wait2;
 
     std114_mapObjectSetVisibility(0xC6A1000, 1);
     std114_mapObjectSetVisibility(0xC6A1001, 1);
@@ -2335,11 +2118,11 @@ void worldMapBikeRide(void) {
     if (std081_flagCheckTrue(0x3e5) == 1) {
         tex = std112_modelGetResourceID(0xC6B1000);
         std114_mapObjectSetVisibility(tex, 0);
-        frame_a = 0;
+        start = 0;
     } else {
         tex = std112_modelGetResourceID(0xC6C1000);
         std114_mapObjectSetVisibility(tex, 0);
-        frame_a = 0;
+        start = 0;
     }
 
     obj_a = GSresGetResource(std093_getCurrentGroupID(), tex);
@@ -2359,29 +2142,38 @@ void worldMapBikeRide(void) {
     GSmodelSetGSparticleLinkAttachMode(GSresGetResource(std093_getCurrentGroupID(), tex), 4);
     std114_mapObjectSetVisibility(tex, 1);
     std166_mapObjectAttachToObject(tex, 0xC6A1000, 0);
-    std115_mapObjectPlayAnimation(tex, frame_a, 0, 1);
+    std115_mapObjectPlayAnimation(tex, start, 0, 1);
     std104_soundSetBackgroundMusic(0x449, 0, 0xff);
     lbl_8047A384 = tex;
 
     {
-        s32 idx, frame_offset;
         if (lbl_8047A380 == 0) {
-            idx = (s32)lbl_8047A394 + 1;
-            frame_offset = (s32)lbl_80478DEC + (s32)lbl_8047A394 * 0x10;
-            frame_a = *(u32*)(frame_offset + 0xA4);
-            frame_b = *(u32*)(frame_offset + 0xA8);
-            lbl_8047A394 = idx;
-            if (idx > 9) lbl_8047A394 = 0;
+            u32 idx;
+            u32 off;
+            u32 base;
+
+            idx = lbl_8047A394;
+            off = idx << 4;
+            base = (u32)lbl_80478DEC; /* RULE-EXCEPTION(title-path): no-op cast for register order - see docs/RULE_EXCEPTIONS.md */
+            frame_a = *(u32*)(base + off + 41 * 4);
+            frame_b = *(u32*)(base + off + 42 * 4);
+            lbl_8047A394 = idx + 1;
+            if ((s32)lbl_8047A394 > 9) lbl_8047A394 = 0;
         } else {
-            idx = (s32)lbl_8047A398 + 1;
-            frame_offset = (s32)lbl_80478DEC + (s32)lbl_8047A398 * 0x10;
-            frame_a = *(u32*)(frame_offset + 4);
-            frame_b = *(u32*)(frame_offset + 8);
-            lbl_8047A398 = idx;
-            if (idx > 9) lbl_8047A398 = 0;
+            u32 idx;
+            u32 off;
+            u32 base;
+
+            idx = lbl_8047A398;
+            off = idx << 4;
+            base = (u32)lbl_80478DEC; /* RULE-EXCEPTION(title-path): no-op cast for register order - see docs/RULE_EXCEPTIONS.md */
+            frame_a = *(u32*)(base + off + 1 * 4);
+            frame_b = *(u32*)(base + off + 2 * 4);
+            lbl_8047A398 = idx + 1;
+            if ((s32)lbl_8047A398 > 9) lbl_8047A398 = 0;
         }
-        lbl_8047A3A4 = lbl_8047B8A8;
-        lbl_8047A3A0 = lbl_8047B8A8;
+        lbl_8047A3A4 = 90.0f;
+        lbl_8047A3A0 = 90.0f;
         lbl_8047A38C = GStextureCreate(0, 0, 0x44, 0, 0);
         GSgfxBeginBackFBCapture(lbl_8047A38C, (void*)wmapRideOverlay, 0);
         cameraPlayAnime(std093_getCurrentGroupID(), frame_b, 0, 0);
@@ -2389,7 +2181,7 @@ void worldMapBikeRide(void) {
         delay = 1;
         tick = fn_800D37CC();
         if (tick == 0x32) {
-            delay = __cvt_fp2unsigned((f64)lbl_8047B914);
+            delay = (f32)delay / 1.2f;
             if (delay < 1) delay = 1;
         }
         for (elapsed = 0; elapsed < delay; elapsed = elapsed + tick) {
@@ -2397,38 +2189,37 @@ void worldMapBikeRide(void) {
             tick = msgGetCharsPerFrame();
         }
         std115_mapObjectPlayAnimation(0xC6A1000, frame_a, 0, 0);
-        delay = 0xae;
+        wait2 = 0xae;
         tick = fn_800D37CC();
         if (tick == 0x32) {
-            delay = __cvt_fp2unsigned((f64)lbl_8047B918);
-            if (delay < 1) delay = 1;
+            wait2 = (f32)wait2 / 1.2f;
+            if (wait2 < 1) wait2 = 1;
         }
-        for (elapsed = 0; elapsed < delay; elapsed = elapsed + tick) {
+        for (elapsed = 0; elapsed < wait2; elapsed = elapsed + tick) {
             _threadSwitch();
             tick = msgGetCharsPerFrame();
         }
     }
 
-    *(f32*)lbl_803A2040 = lbl_8047B8F0;
-    *(f32*)(lbl_803A2040 + 4) = lbl_8047B8F4;
-    *(f32*)(lbl_803A2040 + 8) = lbl_8047B8AC;
+    *(f32*)lbl_803A2040 = 320.0f;
+    *(f32*)(lbl_803A2040 + 4) = 240.0f;
+    *(f32*)(lbl_803A2040 + 8) = 0.0f;
     lbl_8047A39C = GSresGetResource(std093_getCurrentGroupID(), lbl_8047A384);
-    lbl_8047A3A4 = lbl_8047B8A8;
+    lbl_8047A3A4 = 90.0f;
 
-    delay = 0x78 - __cvt_fp2unsigned((f64)((f32)fn_800D37CC() * lbl_8047B8E4));
-    if (delay != 0) {
+    wait2 = 0x78 - (u32)((f32)fn_800D37CC() * 2.0f);
+    if (wait2 != 0) {
         tick = fn_800D37CC();
         if (tick == 0x32) {
-            delay = __cvt_fp2unsigned((f64)((f32)delay / lbl_8047B900));
-            if (delay < 1) delay = 1;
+            wait2 = (f32)wait2 / 1.2f;
+            if (wait2 < 1) wait2 = 1;
         }
     }
-    for (elapsed = 0; elapsed < delay; elapsed = elapsed + tick) {
+    for (elapsed = 0; elapsed < wait2; elapsed = elapsed + tick) {
         _threadSwitch();
         tick = msgGetCharsPerFrame();
     }
 }
-#endif
 #endif
 
 /* ===== Phase 2 recovery stubs ===== */
@@ -2436,11 +2227,6 @@ void worldMapBikeRide(void) {
 /* fn_8002058C - 0x8002058C | size: 0x2c */
 extern u8 lbl_8047A32C;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_8002058C)
-#if 0
-asm void fn_8002058C(void) {
-#include "src/game/gs_title_fn_8002058C.inc"
-}
-#else
 void fn_8002058C(void) {
     lbl_8047A32C = 0;
     fn_801EF644(-1);
@@ -2450,41 +2236,25 @@ void fn_8002058C(void) {
     }
 }
 #endif
-#endif
 
 /* fn_800205C8 - 0x800205C8 | size: 0x44 */
 extern void fn_800FB680(u32 a, u32 b, s32 c, u32 d);
 extern u32 lbl_8047A350;
 extern u32 lbl_80478880;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_800205C8)
-#if 0
-asm void fn_800205C8(void) {
-#include "src/game/gs_title_fn_800205C8.inc"
-}
-#else
-#pragma push
-#pragma optimization_level 1
 void fn_800205C8(u8* obj) {
     s32 mask = (s32)-0x100;
     u32 b = obj[0x8b];
     fn_800FB680(0, 0, b | mask, (&lbl_80478880)[lbl_8047A350]);
 }
-#pragma pop
-#endif
 #endif
 
 /* fn_8002060C - 0x8002060C | size: 0xc */
 extern u32 lbl_8047A350;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_8002060C)
-#if 0
-asm void fn_8002060C(void) {
-#include "src/game/gs_title_fn_8002060C.inc"
-}
-#else
 void fn_8002060C(void) {
     lbl_8047A350 = 0;
 }
-#endif
 #endif
 
 /* fn_80020618 - 0x80020618 | size: 0x304 */
@@ -2496,16 +2266,14 @@ extern void gamedatasaveSetStatus(s32, s32, s32);
 extern u32 lbl_8047B878;
 extern u8 lbl_803A1FC8[];
 extern u32 lbl_8047B880;
-extern u32 lbl_8047B868;
-extern u32 lbl_8047B86C;
-extern u32 lbl_8047B870;
-extern f32 lbl_8047B874;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80020618)
-#if 0
-asm void fn_80020618(void) {
-#include "src/game/gs_title_fn_80020618.inc"
-}
-#else
+/* Exact (2026-09-30). The option state is read straight out of
+ * lbl_803A1FC8 at each use, not through a pointer local: retail rebuilds the
+ * address per region (and caches it in r29 only where it uses it twice),
+ * while one pointer keeps it in r31 throughout and drops a saved register.
+ * The idle test compares the constant against the timer in that order, and
+ * the sine phase is built in two steps, so the constant multiplies the timer
+ * before the speed scales the product. */
 s32 fn_80020618(void) {
     typedef struct TitleOptionState {
         s32 selection;
@@ -2520,7 +2288,6 @@ s32 fn_80020618(void) {
         f32 phase;
         f32 speed;
     } TitleOptionState;
-    TitleOptionState* state;
     u8* keyInfo;
     f32 tickScale;
     f32 phase;
@@ -2528,52 +2295,52 @@ s32 fn_80020618(void) {
 
     keyInfo = windowGetKeyInfo();
     tickScale = (f32)(s32)fn_800D37CC();
-    state = (TitleOptionState*)lbl_803A1FC8;
-    state->delta = (f32)(u32)msgGetCharsPerFrame() / tickScale;
-    state->phase += state->delta;
-    if (state->phase >= *(f32*)&lbl_8047B868) {
-        state->phase = *(f32*)&lbl_8047B86C;
+    ((TitleOptionState*)lbl_803A1FC8)->delta = (f32)(u32)msgGetCharsPerFrame() / tickScale;
+    ((TitleOptionState*)lbl_803A1FC8)->phase += ((TitleOptionState*)lbl_803A1FC8)->delta;
+    if (((TitleOptionState*)lbl_803A1FC8)->phase >= 1.0f) {
+        ((TitleOptionState*)lbl_803A1FC8)->phase = 0.0f;
     }
 
     if (gamedatasaveGetStatus(0, 9) == 1) {
-        if (state->timer != *(f32*)&lbl_8047B86C) {
-            state->timer += state->delta;
-            if (state->timer >= *(f32*)&lbl_8047B868) {
-                state->timer = *(f32*)&lbl_8047B86C;
-                state->counter = 0;
+        if (0.0f != ((TitleOptionState*)lbl_803A1FC8)->timer) {
+            ((TitleOptionState*)lbl_803A1FC8)->timer += ((TitleOptionState*)lbl_803A1FC8)->delta;
+            if (((TitleOptionState*)lbl_803A1FC8)->timer >= 1.0f) {
+                ((TitleOptionState*)lbl_803A1FC8)->timer = 0.0f;
+                ((TitleOptionState*)lbl_803A1FC8)->counter = 0;
             }
         }
     } else {
-        state->timer += state->delta;
-        if (state->timer >= *(f32*)&lbl_8047B868) {
-            state->timer = *(f32*)&lbl_8047B86C;
-            state->counter++;
-            if ((state->counter % 2) == 0) {
-                state->toggle ^= 1;
-                if (state->toggle != 0) {
-                    state->amplitude = *(f32*)&lbl_8047B86C;
+        ((TitleOptionState*)lbl_803A1FC8)->timer += ((TitleOptionState*)lbl_803A1FC8)->delta;
+        if (((TitleOptionState*)lbl_803A1FC8)->timer >= 1.0f) {
+            ((TitleOptionState*)lbl_803A1FC8)->timer = 0.0f;
+            ((TitleOptionState*)lbl_803A1FC8)->counter++;
+            if ((((TitleOptionState*)lbl_803A1FC8)->counter % 2) == 0) {
+                ((TitleOptionState*)lbl_803A1FC8)->toggle ^= 1;
+                if (((TitleOptionState*)lbl_803A1FC8)->toggle != 0) {
+                    ((TitleOptionState*)lbl_803A1FC8)->amplitude = 0.0f;
                 } else {
-                    state->amplitude = *(f32*)&lbl_8047B870;
+                    ((TitleOptionState*)lbl_803A1FC8)->amplitude = 0.20943952f;
                 }
             }
         }
     }
 
-    phase = lbl_8047B874 * state->timer * state->speed;
-    state->output = state->amplitude * (f32)sin(phase);
+    phase = 6.2831855f * ((TitleOptionState*)lbl_803A1FC8)->timer;
+    phase = phase * ((TitleOptionState*)lbl_803A1FC8)->speed;
+    ((TitleOptionState*)lbl_803A1FC8)->output = ((TitleOptionState*)lbl_803A1FC8)->amplitude * (f32)sin(phase);
 
     value = *(u16*)(keyInfo + 6);
     if (value & 2) {
-        if (state->selection < 2) {
-            state->selection++;
+        if (((TitleOptionState*)lbl_803A1FC8)->selection < 2) {
+            ((TitleOptionState*)lbl_803A1FC8)->selection++;
         }
     } else if (value & 1) {
-        if (state->selection > 0) {
-            state->selection--;
+        if (((TitleOptionState*)lbl_803A1FC8)->selection > 0) {
+            ((TitleOptionState*)lbl_803A1FC8)->selection--;
         }
     } else {
         keyInfo = windowGetKeyInfo();
-        switch (state->selection) {
+        switch (((TitleOptionState*)lbl_803A1FC8)->selection) {
         case 0:
             if (*(u16*)(keyInfo + 6) & 4) {
                 fn_80166CC0(1);
@@ -2588,13 +2355,13 @@ s32 fn_80020618(void) {
                     fn_800F78A4(1, 0, 0xFF, 0x1E, 0);
                 }
                 gamedatasaveSetStatus(0, 9, 0);
-                state->counter = 1;
-                state->timer = *(f32*)&lbl_8047B868;
-                state->toggle = 1;
+                ((TitleOptionState*)lbl_803A1FC8)->counter = 1;
+                ((TitleOptionState*)lbl_803A1FC8)->timer = 1.0f;
+                ((TitleOptionState*)lbl_803A1FC8)->toggle = 1;
             }
             if (*(u16*)(keyInfo + 6) & 8) {
                 gamedatasaveSetStatus(0, 9, 1);
-                state->amplitude = *(f32*)&lbl_8047B86C;
+                ((TitleOptionState*)lbl_803A1FC8)->amplitude = 0.0f;
             }
             break;
         }
@@ -2602,34 +2369,19 @@ s32 fn_80020618(void) {
     return 0;
 }
 #endif
-#endif
 
 /* fn_8002091C - 0x8002091C | size: 0x10 */
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_8002091C)
-#if 0
-asm void fn_8002091C(void) {
-#include "src/game/gs_title_fn_8002091C.inc"
-}
-#else
 s32 fn_8002091C(void) {
     return *(s32*)lbl_803A1FC8;
 }
-#endif
 
 /* fn_8002092C - 0x8002092C | size: 0x90 */
-extern f32 lbl_8047B874;
-extern f32 lbl_8047B88C;
-extern f32 lbl_8047B888;
-#if 0
-asm void fn_8002092C(void) {
-#include "src/game/gs_title_fn_8002092C.inc"
-}
-#else
 void fn_8002092C(void* r3, u8* r4) {
     f32 f2;
     f32 f0;
-    f2 = (f32)sin(lbl_8047B874 * *(f32*)(lbl_803A1FC8 + 0x24));
-    f0 = lbl_8047B88C * f2 + lbl_8047B888;
+    f2 = (f32)sin(6.2831855f * *(f32*)(lbl_803A1FC8 + 0x24));
+    f0 = 0.1f * f2 + 1.1f;
     *(f32*)(r4 + 0x6c) = f0;
     *(f32*)(r4 + 0x68) = f0;
     if (*(s32*)lbl_803A1FC8 == 2) {
@@ -2638,22 +2390,13 @@ void fn_8002092C(void* r3, u8* r4) {
         *(s8*)(r4 + 4) = *(s8*)(r4 + 4) & ~2;
     }
 }
-#endif
 
 /* fn_800209BC - 0x800209BC | size: 0x90 */
-extern f32 lbl_8047B874;
-extern f32 lbl_8047B88C;
-extern f32 lbl_8047B888;
-#if 0
-asm void fn_800209BC(void) {
-#include "src/game/gs_title_fn_800209BC.inc"
-}
-#else
 void fn_800209BC(void* r3, u8* r4) {
     f32 f2;
     f32 f0;
-    f2 = (f32)sin(lbl_8047B874 * *(f32*)(lbl_803A1FC8 + 0x24));
-    f0 = lbl_8047B88C * f2 + lbl_8047B888;
+    f2 = (f32)sin(6.2831855f * *(f32*)(lbl_803A1FC8 + 0x24));
+    f0 = 0.1f * f2 + 1.1f;
     *(f32*)(r4 + 0x6c) = f0;
     *(f32*)(r4 + 0x68) = f0;
     if (*(s32*)lbl_803A1FC8 == 1) {
@@ -2662,22 +2405,13 @@ void fn_800209BC(void* r3, u8* r4) {
         *(s8*)(r4 + 4) = *(s8*)(r4 + 4) & ~2;
     }
 }
-#endif
 
 /* fn_80020A4C - 0x80020A4C | size: 0x90 */
-extern f32 lbl_8047B874;
-extern f32 lbl_8047B88C;
-extern f32 lbl_8047B888;
-#if 0
-asm void fn_80020A4C(void) {
-#include "src/game/gs_title_fn_80020A4C.inc"
-}
-#else
 void fn_80020A4C(void* r3, u8* r4) {
     f32 f2;
     f32 f0;
-    f2 = (f32)sin(lbl_8047B874 * *(f32*)(lbl_803A1FC8 + 0x24));
-    f0 = lbl_8047B88C * f2 + lbl_8047B888;
+    f2 = (f32)sin(6.2831855f * *(f32*)(lbl_803A1FC8 + 0x24));
+    f0 = 0.1f * f2 + 1.1f;
     *(f32*)(r4 + 0x6c) = f0;
     *(f32*)(r4 + 0x68) = f0;
     if (*(s32*)lbl_803A1FC8 == 0) {
@@ -2686,15 +2420,9 @@ void fn_80020A4C(void* r3, u8* r4) {
         *(s8*)(r4 + 4) = *(s8*)(r4 + 4) & ~2;
     }
 }
-#endif
 
 /* fn_80020ADC - 0x80020ADC | size: 0x58 */
 extern u32 GSsndGetOutputMode(void);
-#if 0
-asm void fn_80020ADC(void) {
-#include "src/game/gs_title_fn_80020ADC.inc"
-}
-#else
 void fn_80020ADC(void* r3, u8* r4) {
     if (GSsndGetOutputMode() != 1) {
         *(s8*)(r4 + 4) = *(s8*)(r4 + 4) | 2;
@@ -2702,14 +2430,8 @@ void fn_80020ADC(void* r3, u8* r4) {
         *(s8*)(r4 + 4) = *(s8*)(r4 + 4) & ~2;
     }
 }
-#endif
 
 /* fn_80020B34 - 0x80020B34 | size: 0x58 */
-#if 0
-asm void fn_80020B34(void) {
-#include "src/game/gs_title_fn_80020B34.inc"
-}
-#else
 void fn_80020B34(void* r3, u8* r4) {
     if (GSsndGetOutputMode() == 1) {
         *(s8*)(r4 + 4) = *(s8*)(r4 + 4) | 2;
@@ -2717,27 +2439,15 @@ void fn_80020B34(void* r3, u8* r4) {
         *(s8*)(r4 + 4) = *(s8*)(r4 + 4) & ~2;
     }
 }
-#endif
 
 /* fn_80020B8C - 0x80020B8C | size: 0x14 */
-#if 0
-asm void fn_80020B8C(void) {
-#include "src/game/gs_title_fn_80020B8C.inc"
-}
-#else
 void fn_80020B8C(void* r3, u8* r4) {
     *(f32*)(r4 + 0x70) = *(f32*)(lbl_803A1FC8 + 0x10);
 }
-#endif
 
 /* fn_80020BA0 - 0x80020BA0 | size: 0xfc */
 extern void windowDrawSprite(s32, s32, void*, s32, s32);
 extern u8 lbl_802EF0A8[];
-#if 0
-asm void fn_80020BA0(void) {
-#include "src/game/gs_title_fn_80020BA0.inc"
-}
-#else
 void fn_80020BA0(void* arg0, u8* arg1) {
     s16* ptr;
 
@@ -2755,7 +2465,6 @@ void fn_80020BA0(void* arg0, u8* arg1) {
     }
     windowDrawSprite((s16)(ptr[1] - *(s16*)(arg1 + 0x50)), (s16)(ptr[2] - *(s16*)(arg1 + 0x52)), arg0, 0x192, 0);
 }
-#endif
 
 /* fn_80020C9C - 0x80020C9C | size: 0x200 */
 extern void winSeqCheckMove(void);
@@ -2765,14 +2474,6 @@ extern void fn_8001E074(void);
 extern void fn_801D0748(void);
 extern void winMsgClose(s32);
 extern void menuCloseCustom(s32, s32, s32);
-extern u32 lbl_8047B86C;
-extern u32 lbl_8047B890;
-extern u32 lbl_8047B870;
-#if 0
-asm void fn_80020C9C(void) {
-#include "src/game/gs_title_fn_80020C9C.inc"
-}
-#else
 void fn_80020C9C(void) {
     extern void _threadSwitch(void);
     extern u8 winSeqCheckMove(s32);
@@ -2803,12 +2504,12 @@ void fn_80020C9C(void) {
     fn_800205C0(0);
 
     *(s32*)((u8*)&lbl_803A1FC8 + 0x0) = 0;
-    *(f32*)((u8*)&lbl_803A1FC8 + 0x14) = *(f32*)&lbl_8047B86C;
-    *(f32*)((u8*)&lbl_803A1FC8 + 0x10) = *(f32*)&lbl_8047B86C;
+    *(f32*)((u8*)&lbl_803A1FC8 + 0x14) = 0.0f;
+    *(f32*)((u8*)&lbl_803A1FC8 + 0x10) = 0.0f;
     *(s32*)((u8*)&lbl_803A1FC8 + 0x4) = 0;
-    *(f32*)((u8*)&lbl_803A1FC8 + 0x20) = *(f32*)&lbl_8047B86C;
-    *(f32*)((u8*)&lbl_803A1FC8 + 0x28) = *(f32*)&lbl_8047B890;
-    *(f32*)((u8*)&lbl_803A1FC8 + 0x18) = *(f32*)&lbl_8047B870;
+    *(f32*)((u8*)&lbl_803A1FC8 + 0x20) = 0.0f;
+    *(f32*)((u8*)&lbl_803A1FC8 + 0x28) = 3.0f;
+    *(f32*)((u8*)&lbl_803A1FC8 + 0x18) = 0.20943952f;
     *(s32*)((u8*)&lbl_803A1FC8 + 0x8) = 0;
     *(s32*)((u8*)&lbl_803A1FC8 + 0xc) = 0;
 
@@ -2850,7 +2551,6 @@ void fn_80020C9C(void) {
     } while (active != 0);
 }
 #endif
-#endif
 
 /* fn_80020EA4 - 0x80020EA4 | size: 0xb0 */
 extern u32 lbl_8047A360;
@@ -2858,11 +2558,6 @@ extern u32 lbl_8047A364;
 extern u32 lbl_802E4EF0[];
 extern u32 lbl_802E4ED8[];
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80020EA4)
-#if 0
-asm void fn_80020EA4(void) {
-#include "src/game/gs_title_fn_80020EA4.inc"
-}
-#else
 void fn_80020EA4(u8* r3, u8* r4) {
     u8* r31;
     r31 = r3;
@@ -2878,7 +2573,6 @@ void fn_80020EA4(u8* r3, u8* r4) {
     }
 }
 #endif
-#endif
 
 /* fn_80020F54 - 0x80020F54 | size: 0x19c */
 extern void* menuModelRender(void*);
@@ -2887,14 +2581,7 @@ extern s32 fn_801EF214(void);
 extern void fn_801021F8(u32, u32);
 extern u8 lbl_803A1FF8[];
 extern u8 lbl_80314F98[];
-extern u32 lbl_8047B898;
-extern u32 lbl_8047B89C;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80020F54)
-#if 0
-asm void fn_80020F54(void) {
-#include "src/game/gs_title_fn_80020F54.inc"
-}
-#else
 void fn_80020F54(u8* arg0, u8* arg1) {
     extern void gfxSetFlags(s32);
     extern void gfxClearFlags(s32);
@@ -2928,10 +2615,10 @@ void fn_80020F54(u8* arg0, u8* arg1) {
             gfxBegin(2);
             fn_800D61E4(0, 0);
             fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-            gfxVtxTexCoord(0, *(f32*)&lbl_8047B898, *(f32*)&lbl_8047B898);
+            gfxVtxTexCoord(0, 0.0f, 0.0f);
             fn_800D61E4(*(s16*)(arg1 + 0x54), *(s16*)(arg1 + 0x56));
             fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-            gfxVtxTexCoord(0, *(f32*)&lbl_8047B89C, *(f32*)&lbl_8047B89C);
+            gfxVtxTexCoord(0, 1.0f, 1.0f);
             gfxEnd();
         }
         /* FALL THROUGH */
@@ -2956,9 +2643,30 @@ void fn_80020F54(u8* arg0, u8* arg1) {
     }
 }
 #endif
-#endif
 
-/* fn_800210F0 - 0x800210F0 | size: 0x4d4 */
+/* fn_800210F0 - 0x800210F0 | size: 0x4d4
+ *
+ * GStitle_LoadSaveFile: the title menu loop. Exact (2026-09-30). The shapes
+ * that decide its registers, each read off the target:
+ *  - 0x8047A360 is one 8-byte object (symbols.txt), so the menu result and
+ *    the mode beside it are indexed, as the neighbouring functions already
+ *    spell them: retail keeps the base in r30 and stores the mode at
+ *    0x4(r30), where two @sda21 symbols would address each word separately;
+ *  - the loop tests its flag at the bottom (do/while), so the switch is
+ *    entered directly instead of jumping to the test first;
+ *  - the inner menu switch lays out case 1 after cases 2 and 3;
+ *  - the three message values are their own object, not the address-taken
+ *    work variables: those are passed to fn_8018F4C8 by address, so reusing
+ *    them puts the values in memory, while retail holds them in r27/r28
+ *    across the calls. As an array their elements outrank the state web and
+ *    take r28, leaving state r27; as separate scalars state takes r28 and
+ *    every "li" for the mode stores merges with it (26 lines);
+ *  - the confirmation answer is s8, the return type of menuSubOpenYesNo, and
+ *    is its own variable rather than state: assigning it to state splits that
+ *    web into a second register (6 lines).
+ * The name buffer is 0x20 bytes, which is what puts the saved registers at
+ * 0x3c and makes the frame 0x50.
+ */
 extern void menuColosseumBattle(void);
 extern void floorRequestChange(void);
 extern void fn_8006A718(void);
@@ -2978,14 +2686,8 @@ extern void fn_80005748(void);
 extern void fn_801EF274(void);
 extern void fn_80113FE8(void);
 extern u32 lbl_8047A35C;
-extern u32 lbl_8047B898;
 extern u32 lbl_8047A358;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_800210F0)
-#if 0
-asm void fn_800210F0(void) {
-#include "src/game/gs_title_fn_800210F0.inc"
-}
-#else
 s32 fn_800210F0(void)
 {
     extern u8 lbl_802EF0A8[];
@@ -3021,20 +2723,22 @@ s32 fn_800210F0(void)
     s32 result;
     s32 workA;
     s32 workB;
-    u8 nameBuf[0x10];
+    s8 answer;
+    s32 msgVals[3];
+    u8 nameBuf[0x20];
 
     state = 0;
     loop = 1;
-    lbl_8047A364 = 1;
+    (&lbl_8047A360)[1] = 1;
 
-    while (loop != 0) {
+    do {
         switch (state) {
         case 0:
             state = 1;
             break;
 
         case 1:
-            lbl_8047A364 = 1;
+            (&lbl_8047A360)[1] = 1;
             menuOpen(0x7F, 0);
             result = menuOpenCustom(0xAA, windowGetActiveID(),
                                     &lbl_8047A360, 0, 1, 0);
@@ -3049,9 +2753,6 @@ s32 fn_800210F0(void)
             switch ((s32)lbl_8047A360) {
             case 0:
                 break;
-            case 1:
-                state = 2;
-                break;
             case 2:
                 menuColosseumBattle(0);
                 loop = 0;
@@ -3060,8 +2761,11 @@ s32 fn_800210F0(void)
                 menuColosseumBattle(3);
                 loop = 0;
                 break;
+            case 1:
+                state = 2;
+                break;
             case 4:
-                lbl_8047A364 = 4;
+                (&lbl_8047A360)[1] = 4;
                 state = 4;
                 break;
             default:
@@ -3081,10 +2785,10 @@ s32 fn_800210F0(void)
                 result = 0x3C35;
             }
             winMsgOpen(2, result, 1, 1);
-            lbl_8047A364 = 5;
-            state = (s8)menuSubOpenYesNo(0, 0x3C, 0xA6, 1);
+            (&lbl_8047A360)[1] = 5;
+            answer = (s8)menuSubOpenYesNo(0, 0x3C, 0xA6, 1);
             winMsgClose(1);
-            if (state == 0) {
+            if (answer == 0) {
                 menuCloseCustom(0xAA, 0, 1);
                 menuCloseCustom(0x7A, 0, 1);
                 menuCloseCustom(0x7F, 0, 1);
@@ -3095,7 +2799,7 @@ s32 fn_800210F0(void)
                 menuNameEntryGetLastName(nameBuf);
                 savedataCreate(0, nameBuf);
                 fn_800056E4(1);
-                fn_800056EC(*(f32*)&lbl_8047B898);
+                fn_800056EC(0.0f);
                 heroMoveSyncWithHero();
                 floorLink(0x3A0, 0);
                 state = 0x64;
@@ -3128,18 +2832,22 @@ s32 fn_800210F0(void)
             fn_8010A010(lbl_803A1FF8, 0xF70400);
             fn_8018F4C8(peopleInfoBiosGetPtr(0xF70400), 1, &workA, &workB);
             menuModelSetMotion(lbl_803A1FF8, workA);
-            workA = fn_80005748();
-            workB = fn_801EF214();
-            result = fn_801EF274();
-            msgctrlSetValue(0x4C, (void*)workA);
-            msgctrlSetValue(0x2F, (void*)result);
-            msgctrlSetValue(0x30, (void*)workB);
+            msgVals[0] = fn_80005748();
+            msgVals[1] = fn_801EF214();
+            msgVals[2] = fn_801EF274();
+            msgctrlSetValue(0x4C, (void*)msgVals[0]);
+            msgctrlSetValue(0x2F, (void*)msgVals[2]);
+            msgctrlSetValue(0x30, (void*)msgVals[1]);
             menuOpen(0x16, 0);
             winMsgOpen(1, 0x3C22, 0, 1);
-            if ((s8)menuSubOpenYesNo(0, 0x3C, 0xD6, 1) == 0) {
+            answer = (s8)menuSubOpenYesNo(0, 0x3C, 0xD6, 1);
+            if (answer == 0) {
                 heroMoveSyncWithHero();
                 fn_80113FE8();
                 state = 0x64;
+                fn_800056E4(1);
+            } else if (answer == 1) {
+                state = 1;
                 fn_800056E4(1);
             } else {
                 state = 1;
@@ -3153,7 +2861,7 @@ s32 fn_800210F0(void)
         case 4:
             menuCloseCustom(0x7F, 0, 1);
             fn_80020C9C();
-            lbl_8047A364 = 1;
+            (&lbl_8047A360)[1] = 1;
             state = 1;
             break;
 
@@ -3169,7 +2877,7 @@ s32 fn_800210F0(void)
         default:
             break;
         }
-    }
+    } while (loop != 0);
 
     menuCloseCustom(0xAA, 0, 1);
     menuCloseCustom(0x7A, 0, 1);
@@ -3178,16 +2886,10 @@ s32 fn_800210F0(void)
     return lbl_8047A360;
 }
 #endif
-#endif
 
 /* fn_800215C4 - 0x800215C4 | size: 0x60 */
 extern u32 lbl_8047A35C;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_800215C4)
-#if 0
-asm void fn_800215C4(void) {
-#include "src/game/gs_title_fn_800215C4.inc"
-}
-#else
 void fn_800215C4(void) {
     menuCloseCustom(0xaa, 0, 1);
     menuCloseCustom(0x7a, 0, 1);
@@ -3196,19 +2898,12 @@ void fn_800215C4(void) {
     fn_8010A420(lbl_803A1FF8);
 }
 #endif
-#endif
 
 /* fn_80021624 - 0x80021624 | size: 0x20 */
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80021624)
-#if 0
-asm void fn_80021624(void) {
-#include "src/game/gs_title_fn_80021624.inc"
-}
-#else
 void fn_80021624(void) {
     fn_800210F0();
 }
-#endif
 #endif
 
 /* fn_80021644 - 0x80021644 | size: 0x9c */
@@ -3216,11 +2911,6 @@ extern void GSscene_SetMode(void);
 extern u32 lbl_8047A35C;
 extern u32 lbl_8047A358;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80021644)
-#if 0
-asm void fn_80021644(void) {
-#include "src/game/gs_title_fn_80021644.inc"
-}
-#else
 void fn_80021644(void) {
     extern void std104_soundSetBackgroundMusic(s32, s32, s32);
     extern void* std093_getCurrentGroupID(void);
@@ -3242,47 +2932,53 @@ void fn_80021644(void) {
     }
 }
 #endif
-#endif
 
 /* fn_800216E8 - 0x800216E8 | size: 0x1d4 */
 extern void fn_800F96E4(void*, s32, void*);
 extern void* pokemonBiosGetNicknamePtr(s32);
 extern u8 lbl_80266C7C[];
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_800216E8)
-#if 0
-asm void fn_800216E8(void) {
-#include "src/game/gs_title_fn_800216E8.inc"
-}
-#else
 void fn_800216E8(void* arg0, s32 arg1, u8* arg2, s16 arg3, s32 arg4) {
     struct TitleNameCand {
         s32 code;
         s32 msg;
         s32 link;
-    } table[21];
-    s32 i;
+    };
+    struct TitleNameTable {
+        struct TitleNameCand e[21];
+    } table;
+    /* RULE-EXCEPTION(user-approved): separate locals for the second search, declared first for register allocation - see docs/RULE_EXCEPTIONS.md */
+    u8* cand2;
+    struct TitleNameCand* entry2;
+    s32 code2;
     s32 j;
-    s32 msg;
+    u8* cand;
+    struct TitleNameCand* entry;
+    s32 i;
+    s32 code;
     s32 link;
     s16 x;
     s16 y;
+    s32 msg;
+    void* name;
 
-    for (i = 0; i < 21; i++) {
-        table[i] = ((struct TitleNameCand*)lbl_80266C7C)[i];
-    }
+    table = *(struct TitleNameTable*)lbl_80266C7C;
 
     if (arg3 <= 0) {
         fn_800F96E4(arg0, arg1 + 1, (void*)0x4261);
         return;
     }
 
-    for (i = 0; i < 21; i++) {
-        for (j = 0; j < arg3; j++) {
-            if (table[i].code == *(s32*)(arg2 + j * 8)) {
+    entry = table.e;
+    for (i = 0; i < 21; entry++, i++) {
+        code = entry->code;
+        cand = arg2;
+        for (j = 0; j < arg3; cand += 8, j++) {
+            if (code == *(s32*)cand) {
                 break;
             }
         }
-        if (j >= arg3) {
+        if (j < arg3) {
             break;
         }
     }
@@ -3292,34 +2988,41 @@ void fn_800216E8(void* arg0, s32 arg1, u8* arg2, s16 arg3, s32 arg4) {
         return;
     }
 
-    link = table[i].link;
-    msg = table[i].msg;
+    msg = table.e[i].msg;
+    link = table.e[i].link;
     x = *(s16*)(arg2 + j * 8 + 4);
     y = *(s16*)(arg2 + j * 8 + 6);
 
     if (link >= 0) {
-        for (i = i + 1; i < 21; i++) {
-            if (table[i].link >= 0 && table[i].link != link) {
-                for (j = 0; j < arg3; j++) {
-                    if (table[i].code == *(s32*)(arg2 + j * 8)) {
+        i++;
+        entry2 = &table.e[i];
+        for (; i < 21; entry2++, i++) {
+            if (entry2->link >= 0 && link != entry2->link) {
+                code2 = entry2->code;
+                cand2 = arg2;
+                for (j = 0; j < arg3; cand2 += 8, j++) {
+                    if (code2 == *(s32*)cand2) {
                         break;
                     }
                 }
-                if (j >= arg3) {
-                    msg = 0x4201;
+                if (j < arg3) {
                     break;
                 }
             }
         }
+        if (i < 21) {
+            msg = 0x4201;
+        }
     }
 
-    msgctrlSetValue(0x32, (void*)pokemonBiosGetNicknamePtr(arg4));
+    name = pokemonBiosGetNicknamePtr(arg4);
+    msgctrlSetValue(0x32, name);
     msgctrlSetValue(0x2F, (void*)(s32)x);
     msgctrlSetValue(0x30, (void*)(s32)y);
     fn_800F96E4(arg0, arg1 + 1, (void*)msg);
 }
-#endif
 
+#if !defined(GS_TITLE_800216E8_ONLY)
 /* fn_800218BC - 0x800218BC | size: 0x1e0 */
 extern void fn_80014118(s32, void*, void*);
 extern s32 pokemonCheckValid(s32);
@@ -3327,11 +3030,6 @@ extern s32 fn_800141BC(void*, s32);
 extern void fn_80014198(s32);
 extern u8 lbl_803A1B90[];
 extern u32 lbl_8047B8A0;
-#if 0
-asm void fn_800218BC(void) {
-#include "src/game/gs_title_fn_800218BC.inc"
-}
-#else
 s32 fn_800218BC(u32 arg0, u32* arg1)
 {
     extern f32 pokemonGetDp(void*);
@@ -3403,16 +3101,11 @@ s32 fn_800218BC(u32 arg0, u32* arg1)
     }
     return 1;
 }
-#endif
+#endif /* !GS_TITLE_800216E8_ONLY */
 #endif
 
 /* fn_80021A9C - 0x80021A9C | size: 0x78 */
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80021A9C)
-#if 0
-asm void fn_80021A9C(void) {
-#include "src/game/gs_title_fn_80021A9C.inc"
-}
-#else
 s32 fn_80021A9C(u32 r3, u32* r4) {
     u8* r5;
     s32 count;
@@ -3431,7 +3124,6 @@ s32 fn_80021A9C(u32 r3, u32* r4) {
     return 1;
 }
 #endif
-#endif
 
 /* fn_80021B14 - 0x80021B14 | size: 0x53c */
 extern void fn_80142EF8(void);
@@ -3446,11 +3138,6 @@ extern u8 lbl_80266DB0[];
 extern u8 lbl_80266D78[];
 extern s32 fn_80023968(u32, u32*);
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80021B14)
-#if 0
-asm void fn_80021B14(void) {
-#include "src/game/gs_title_fn_80021B14.inc"
-}
-#else
 s32 fn_80021B14(u32 arg0, u32* arg1) {
     typedef struct TitleEffectEntry {
         s32 code;
@@ -3461,100 +3148,103 @@ s32 fn_80021B14(u32 arg0, u32* arg1) {
         s32 code;
         s32 message;
     } TitleSpecialEntry;
+    typedef struct TitleSpecialTable {
+        TitleSpecialEntry entries[7];
+    } TitleSpecialTable;
     typedef struct TitleBgmTable {
         u16 entries[5];
     } TitleBgmTable;
-    extern void fn_80142EF8(void* dst, void* src);
-    extern s32 fn_801431AC(void* param);
+    extern s32 fn_80144574(void*, s32, s32, u16, u8);
+    extern void fn_800216E8(void*, s32, void*, s32, s32);
+    extern s32 fn_800141BC(void*, s32);
+    extern u8 fn_80121ADC(s32, s32);
+    u8 item_param[0x10];
+    u8 result;
 
-    u8 item_param[0x1CC];
-    TitleBgmTable bgm;
-    TitleSpecialEntry special[7];
-    TitleEffectEntry effects[32];
-    char message[0x84];
-    s32 slot;
-    s32 pokemon;
-    s32 data;
-    s32 count;
-    s32 i;
-    s32 special_index;
-    s32 effect_index;
-    s32 result;
-    s16 effect_count;
+    itemParamConvertOrigFormat(item_param, lbl_80478890);
+    switch ((s32)itemParamGetRecoverType(item_param)) {
+    case 0: {
+        char message[0x84];
+        TitleEffectEntry effects[32];
+        TitleSpecialTable special;
+        TitleBgmTable bgm;
+        s32 slot;
+        s32 data;
+        s32 pokemon;
+        s32 effectCount;
+        s32 text;
+        s32 code;
+        s32 specialIndex;
+        s32 effectIndex;
+        TitleEffectEntry* effect;
+        s32 bgmIndex;
+        s32 y;
+        s32 x;
+        TitleSpecialEntry* entry;
+        s32 owner;
 
-    fn_80142EF8(item_param, lbl_80478890);
-    result = fn_801431AC(item_param);
-
-    switch (result) {
-    case 0:
         slot = fn_80014110();
         fn_80014118(slot, &pokemon, &data);
-        if ((u8)fn_80121ADC(pokemon, 0x3E) != 0) {
+        if (fn_80121ADC(pokemon, 0x3E)) {
             msgctrlSetValue(0x32, (void*)pokemonBiosGetNicknamePtr(pokemon));
             winMsgOpen(2, 0x424D, 1, 0);
             winMsgClose(1);
             return 1;
         }
 
-        effect_count = fn_80144574(effects, pokemon, data, (u16)arg0, 0);
-        if (effect_count > 0) {
+        effectCount = fn_80144574(effects, pokemon, data, arg0, 0);
+        if ((s16)effectCount > 0) {
             bgm = *(TitleBgmTable*)lbl_80266DB0;
-            for (i = 0; i < 5; i++) {
-                if (arg0 == bgm.entries[i]) {
+            for (bgmIndex = 0; bgmIndex < 5; bgmIndex++) {
+                if (arg0 == bgm.entries[bgmIndex]) {
                     break;
                 }
             }
-            if (i < 5) {
-                result = 0x466;
-            } else {
-                result = 0x465;
-            }
-            soundStart(result, 0, 0xFF, 0);
+            soundStart(bgmIndex < 5 ? 0x466 : 0x465, 0, 0xFF, 0);
             fn_8001D378();
         }
 
-        special[0] = *(TitleSpecialEntry*)(lbl_80266D78 + 0x00);
-        special[1] = *(TitleSpecialEntry*)(lbl_80266D78 + 0x08);
-        special[2] = *(TitleSpecialEntry*)(lbl_80266D78 + 0x10);
-        special[3] = *(TitleSpecialEntry*)(lbl_80266D78 + 0x18);
-        special[4] = *(TitleSpecialEntry*)(lbl_80266D78 + 0x20);
-        special[5] = *(TitleSpecialEntry*)(lbl_80266D78 + 0x28);
-        special[6] = *(TitleSpecialEntry*)(lbl_80266D78 + 0x30);
-
-        count = (s32)effect_count;
-        if (count <= 0) {
+        owner = pokemon;
+        special = *(TitleSpecialTable*)lbl_80266D78;
+        if ((s16)effectCount <= 0) {
             fn_800F96E4(message, 0x41, (void*)0x4261);
         } else {
-            for (special_index = 0; special_index < 7; special_index++) {
-                for (effect_index = 0; effect_index < count; effect_index++) {
-                    if (special[special_index].code == effects[effect_index].code) {
+            entry = special.entries;
+            for (specialIndex = 0; specialIndex < 7; entry++, specialIndex++) {
+                code = entry->code;
+                effect = effects;
+                for (effectIndex = 0; effectIndex < (s16)effectCount; effect++, effectIndex++) {
+                    if (code == effect->code) {
                         break;
                     }
                 }
-                if (effect_index < count) {
+                if (effectIndex < (s16)effectCount) {
                     break;
                 }
             }
 
-            if (special_index >= 7) {
+            if (specialIndex >= 7) {
                 fn_800F96E4(message, 0x41, (void*)0x4261);
             } else {
-                msgctrlSetValue(0x32, (void*)pokemonBiosGetNicknamePtr(pokemon));
-                msgctrlSetValue(0x2F, (void*)(s32)effects[effect_index].x);
-                msgctrlSetValue(0x30, (void*)(s32)effects[effect_index].y);
-                fn_800F96E4(message, 0x41, (void*)special[special_index].message);
+                text = special.entries[specialIndex].message;
+                x = effects[effectIndex].x;
+                y = effects[effectIndex].y;
+                msgctrlSetValue(0x32, (void*)pokemonBiosGetNicknamePtr(owner));
+                msgctrlSetValue(0x2F, (void*)x);
+                msgctrlSetValue(0x30, (void*)y);
+                fn_800F96E4(message, 0x41, (void*)text);
             }
         }
 
         msgctrlSetValue(0x4D, message);
         winMsgOpen(2, 0xE0, 1, 0);
         winMsgClose(1);
-        if (effect_count > 0) {
+        if ((s16)effectCount > 0) {
             *arg1 = 1;
             return 0;
         }
         return 1;
-
+    }
     case 3:
     case 4:
     case 5:
@@ -3563,30 +3253,33 @@ s32 fn_80021B14(u32 arg0, u32* arg1) {
     case 8:
     case 9:
     case 10:
-    case 11:
+    case 11: {
+        u8 name[0x84];
+        s32 data;
+        TitleBgmTable bgm;
+        u8 effects[0x100];
+        s32 effect_count;
+        s32 slot;
+        s32 pokemon;
+        s32 i;
+
         slot = fn_800141BC((void*)arg0, 1);
         if (slot >= 0) {
             fn_80014118(slot, &pokemon, &data);
-            if ((u8)fn_80121ADC(pokemon, 0x3E) == 0) {
-                effect_count = fn_80144574(effects, pokemon, data, (u16)arg0, 0);
-                if (effect_count > 0) {
+            if (fn_80121ADC(pokemon, 0x3E) == 0) {
+                effect_count = fn_80144574(effects, pokemon, data, arg0, 0);
+                if ((s16)effect_count > 0) {
                     bgm = *(TitleBgmTable*)lbl_80266DB0;
                     for (i = 0; i < 5; i++) {
                         if (arg0 == bgm.entries[i]) {
                             break;
                         }
                     }
-                    if (i < 5) {
-                        result = 0x466;
-                    } else {
-                        result = 0x465;
-                    }
-                    soundStart(result, 0, 0xFF, 0);
+                    soundStart(i < 5 ? 0x466 : 0x465, 0, 0xFF, 0);
                     fn_8001D378();
                 }
-
-                fn_800216E8(message, 0x40, (u8*)effects, effect_count, pokemon);
-                msgctrlSetValue(0x4D, message);
+                fn_800216E8(name, 0x40, effects, effect_count, pokemon);
+                msgctrlSetValue(0x4D, name);
                 winMsgOpen(2, 0xE0, 1, 0);
                 winMsgClose(1);
             } else {
@@ -3595,31 +3288,35 @@ s32 fn_80021B14(u32 arg0, u32* arg1) {
                 winMsgClose(1);
                 effect_count = 0;
             }
-        } else {
-            effect_count = 0;
         }
-
         fn_80014198(slot);
-        if (slot >= 0 && effect_count > 0) {
-            if ((s32)arg0 < 0x2C && (s32)arg0 >= 0x27) {
+        if (slot >= 0 && (s16)effect_count > 0) {
+            switch (arg0) {
+            case 0x27:
+            case 0x28:
+            case 0x29:
+            case 0x2A:
+            case 0x2B:
                 *arg1 = 0;
-            } else {
+                break;
+            default:
                 *arg1 = 1;
+                break;
             }
-            return 0;
+            result = 0;
+        } else {
+            result = 1;
         }
-        return 1;
-
-    case 0x15:
+        return result;
+    }
+    case 21:
         return fn_80023968(arg0, arg1);
-
     default:
-    winMsgOpen(2, 0x426A, 1, 0);
-    winMsgClose(1);
-    return 1;
+        winMsgOpen(2, 0x426A, 1, 0);
+        winMsgClose(1);
+        return 1;
     }
 }
-#endif
 #endif
 
 /* fn_80022050 - 0x80022050 | size: 0x12c */
@@ -3628,11 +3325,6 @@ extern s32 fn_801347E8(s32, s8);
 extern void fn_800140FC(s32*, s32*);
 extern s32 fightTrainerIsSelectedItemBall(s32);
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80022050)
-#if 0
-asm void fn_80022050(void) {
-#include "src/game/gs_title_fn_80022050.inc"
-}
-#else
 s32 fn_80022050(s32 arg0, s32* arg1) {
     s32 sp14;
     s32 sp10;
@@ -3678,16 +3370,10 @@ s32 fn_80022050(s32 arg0, s32* arg1) {
     return 0;
 }
 #endif
-#endif
 
 /* fn_8002217C - 0x8002217C | size: 0x2fc */
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_8002217C)
-#if 0
-asm void fn_8002217C(void) {
-#include "src/game/gs_title_fn_8002217C.inc"
-}
-#else
-s32 fn_8002217C(u16 wazaDataId, u32* result) {
+s32 fn_8002217C(u32 wazaDataId, u32* result) {
     typedef struct TitleEffectEntry {
         s32 code;
         s16 x;
@@ -3711,16 +3397,24 @@ s32 fn_8002217C(u16 wazaDataId, u32* result) {
     s32 pokemon;
     s32 data;
     s16 effectCount;
+    s32 soundId;
+    s32 text;
+    s32 code;
     s32 specialIndex;
     s32 effectIndex;
+    TitleEffectEntry* effect;
     s32 bgmIndex;
-    s32 soundId;
+    s32 y;
+    void* nickname;
+    s32 x;
+    TitleSpecialEntry* entry;
+    s32 owner;
 
     slot = fn_80014110();
     fn_80014118(slot, &pokemon, &data);
     if ((u8)fn_80121ADC(pokemon, 0x3E)) {
-        msgctrlSetValue(
-            0x32, (void*)pokemonBiosGetNicknamePtr(pokemon));
+        nickname = pokemonBiosGetNicknamePtr(pokemon);
+        msgctrlSetValue(0x32, nickname);
         winMsgOpen(2, 0x424D, 1, 0);
         winMsgClose(1);
         return 1;
@@ -3740,15 +3434,17 @@ s32 fn_8002217C(u16 wazaDataId, u32* result) {
         fn_8001D378();
     }
 
+    owner = pokemon;
     special = *(TitleSpecialTable*)lbl_80266D78;
     if (effectCount <= 0) {
         fn_800F96E4(message, 0x41, (void*)0x4261);
     } else {
-        for (specialIndex = 0; specialIndex < 7; specialIndex++) {
-            for (effectIndex = 0; effectIndex < effectCount;
-                 effectIndex++) {
-                if (special.entries[specialIndex].code ==
-                    effects[effectIndex].code) {
+        entry = special.entries;
+        for (specialIndex = 0; specialIndex < 7; entry++, specialIndex++) {
+            code = entry->code;
+            effect = effects;
+            for (effectIndex = 0; effectIndex < effectCount; effect++, effectIndex++) {
+                if (code == effect->code) {
                     break;
                 }
             }
@@ -3760,15 +3456,13 @@ s32 fn_8002217C(u16 wazaDataId, u32* result) {
         if (specialIndex >= 7) {
             fn_800F96E4(message, 0x41, (void*)0x4261);
         } else {
-            msgctrlSetValue(
-                0x32, (void*)pokemonBiosGetNicknamePtr(pokemon));
-            msgctrlSetValue(
-                0x2F, (void*)(s32)effects[effectIndex].x);
-            msgctrlSetValue(
-                0x30, (void*)(s32)effects[effectIndex].y);
-            fn_800F96E4(
-                message, 0x41,
-                (void*)special.entries[specialIndex].message);
+            text = special.entries[specialIndex].message;
+            x = effects[effectIndex].x;
+            y = effects[effectIndex].y;
+            msgctrlSetValue(0x32, (void*)pokemonBiosGetNicknamePtr(owner));
+            msgctrlSetValue(0x2F, (void*)x);
+            msgctrlSetValue(0x30, (void*)y);
+            fn_800F96E4(message, 0x41, (void*)text);
         }
     }
 
@@ -3781,7 +3475,6 @@ s32 fn_8002217C(u16 wazaDataId, u32* result) {
     }
     return 1;
 }
-#endif
 
 /* fn_80022478 - 0x80022478 | size: 0x2a8 */
 extern void jumptable_802E4F00();
@@ -3789,96 +3482,96 @@ extern u8 lbl_80478888[8];
 extern s32 fn_80023068(u32, u32*);
 extern s32 fn_800232F0(u32, u32*);
 extern s32 fn_80023760(u32, u32*);
-#if 0
-asm void fn_80022478(void) {
-#include "src/game/gs_title_fn_80022478.inc"
-}
-#else
 s32 fn_80022478(u32 arg0, u32* arg1) {
-    u8 state_buf[0x110];
-    u8 text_buf[0x100];
-    u8 name_buf[0x40];
-    s32 sel;
+    typedef struct TitleBgmList {
+        u16 entries[5];
+    } TitleBgmList;
+    u8 name[0x84];
+    s32 data;
+    s16 effect_count;
+    u8 item_param[0x10];
+    u8 effects[0x100];
+    s32 pokemon;
     s32 slot;
-    s32 effect;
-    s32 sc;
-    s32 sd;
-    s32 sound_id;
+    TitleBgmList bgm;
+    s32 i;
+    u8 result;
 
-    ((void(*)(u8*, u8*))fn_80142EF8)(state_buf, lbl_80478888);
-    sel = ((s32(*)(u8*))fn_801431AC)(state_buf);
-    if ((u32)sel > 0x15) {
-        winMsgOpen(2, 0x426A, 1, 0);
-        winMsgClose(1);
-        return 1;
-    }
-
-    switch (sel) {
-    case 1:
-        return ((s32 (*)(u32, u32*))fn_80023760)(arg0, arg1);
-    case 2:
-        return ((s32 (*)(u32, u32*))fn_800232F0)(arg0, arg1);
-    case 19:
-    case 20:
-        return ((s32 (*)(u32, u32*))fn_80023068)(arg0, arg1);
-    case 21:
-        return ((s32 (*)(u32, u32*))fn_80023968)(arg0, arg1);
-    case 0:
-    case 8:
-    case 9:
-    case 18:
-        winMsgOpen(2, 0x426A, 1, 0);
-        winMsgClose(1);
-        return 1;
-    default:
+    itemParamConvertOrigFormat(item_param, lbl_80478888);
+    switch (itemParamGetRecoverType(item_param)) {
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
         slot = fn_800141BC((void*)arg0, 1);
         if (slot >= 0) {
-            fn_80014118(slot, &sc, &sd);
-            if (((u8)fn_80121ADC(sc, 0x3E) & 0xFF) == 0) {
-                effect = fn_80144574(text_buf, sc, sd, (u16)arg0, 0);
-                if ((s16)effect > 0) {
-                    {
-                        u16* bgm_table = (u16*)lbl_80266DB0;
-                        if (arg0 == bgm_table[0] ||
-                            arg0 == bgm_table[1] ||
-                            arg0 == bgm_table[2] ||
-                            arg0 == bgm_table[3] ||
-                            arg0 == bgm_table[4]) {
-                            sound_id = 0x466;
-                        } else {
-                            sound_id = 0x465;
+            fn_80014118(slot, &pokemon, &data);
+            if ((u8)fn_80121ADC(pokemon, 0x3E) == 0) {
+                effect_count = fn_80144574(effects, pokemon, data, (u16)arg0, 0);
+                if (effect_count > 0) {
+                    bgm = *(TitleBgmList*)lbl_80266DB0;
+                    for (i = 0; i < 5; i++) {
+                        if (arg0 == bgm.entries[i]) {
+                            break;
                         }
                     }
-                    soundStart(sound_id, 0, 0xFF, 0);
+                    soundStart(i < 5 ? 0x466 : 0x465, 0, 0xFF, 0);
                     fn_8001D378();
                 }
-                ((void(*)(void*, s32, u8*, s16, s32))fn_800216E8)(name_buf, 0x40, (u8*)sd, effect, sc);
-                msgctrlSetValue(0x4D, name_buf);
+                fn_800216E8(name, 0x40, (u8*)effects, effect_count, pokemon);
+                msgctrlSetValue(0x4D, name);
                 winMsgOpen(2, 0xE0, 1, 0);
                 winMsgClose(1);
             } else {
-                msgctrlSetValue(0x32, (void*)pokemonBiosGetNicknamePtr(sc));
+                msgctrlSetValue(0x32, (void*)pokemonBiosGetNicknamePtr(pokemon));
                 winMsgOpen(2, 0x424D, 1, 0);
                 winMsgClose(1);
-                effect = 0;
+                effect_count = 0;
             }
-        } else {
-            effect = 0;
         }
-
         fn_80014198(slot);
-        if (slot >= 0 && (s16)effect > 0) {
-            if (arg0 >= 0x27 && arg0 < 0x2C) {
+        if (slot >= 0 && effect_count > 0) {
+            switch (arg0) {
+            case 0x27:
+            case 0x28:
+            case 0x29:
+            case 0x2A:
+            case 0x2B:
                 *arg1 = 0;
-            } else {
+                break;
+            default:
                 *arg1 = 1;
+                break;
             }
-            return 0;
+            result = 0;
+        } else {
+            result = 1;
         }
+        return result;
+    case 1:
+        return fn_80023760(arg0, arg1);
+    case 2:
+        return fn_800232F0(arg0, arg1);
+    case 19:
+    case 20:
+        return fn_80023068(arg0, arg1);
+    case 21:
+        return fn_80023968(arg0, arg1);
+    default:
+        winMsgOpen(2, 0x426A, 1, 0);
+        winMsgClose(1);
         return 1;
     }
 }
-#endif
 
 /* fn_80022720 - 0x80022720 | size: 0x114
  *
@@ -3905,37 +3598,30 @@ s32 fn_80022478(u32 arg0, u32* arg1) {
  * syntax, scheduling pragmas).
  */
 extern u8 lbl_80266C54[];
-#if 0
-asm void fn_80022720(void) {
-#include "src/game/gs_title_fn_80022720.inc"
-}
-#else
-#pragma optimization_level 4
-#pragma scheduling off
+typedef struct TitleMsgEnt {
+    u16 id;
+    u32 msg;
+} TitleMsgEnt;
+typedef struct TitleMsgTable {
+    TitleMsgEnt e[5];
+} TitleMsgTable;
 s32 fn_80022720(u32 arg0, u32* arg1) {
-    s32 iVar1;
-    u32 *src;
-    u32 t0, t1, t2, t3, t4, t5, t6, t7, t8, t9;
-    u32 buf[10];
+    TitleMsgTable t;
+    s32 i;
 
-    src = (u32*)lbl_80266C54;
-    iVar1 = 0;
-    t0 = src[0]; t1 = src[1]; t2 = src[2]; t3 = src[3]; t4 = src[4];
-    t5 = src[5]; t6 = src[6]; t7 = src[7]; t8 = src[8]; t9 = src[9];
-    buf[0] = t0; buf[1] = t1; buf[2] = t2; buf[3] = t3; buf[4] = t4;
-    buf[5] = t5; buf[6] = t6; buf[7] = t7; buf[8] = t8; buf[9] = t9;
-    if ((((arg0 != *(u16*)((u8*)buf + 0x00)) && (iVar1 = 1, arg0 != *(u16*)((u8*)buf + 0x08))) &&
-         (iVar1 = 2, arg0 != *(u16*)((u8*)buf + 0x10))) &&
-        ((iVar1 = 3, arg0 != *(u16*)((u8*)buf + 0x18)) &&
-         (iVar1 = 4, arg0 != *(u16*)((u8*)buf + 0x20)))) {
-        iVar1 = 5;
+    t = *(TitleMsgTable*)lbl_80266C54;
+    i = 0;
+    for (i = 0; i < 5; i++) {
+        if (arg0 == t.e[i].id) {
+            break;
+        }
     }
-    winMsgOpen(2, (s32)*(u32*)((u8*)buf + iVar1 * 8 + 4), 1, 0);
+    winMsgOpen(2, t.e[i].msg, 1, 0);
     winMsgClose(1);
     *arg1 = 0;
     return 0;
 }
-#endif
+#pragma optimization_level 4
 
 /* fn_80022834 - 0x80022834 | size: 0x308 */
 extern void itemDataBiosGetPtr(void);
@@ -3950,20 +3636,13 @@ extern void evolutionWazaLearn(void);
 extern void pokemonWazaCreate(void);
 extern void pokemonGetSoubiItemSoubiDataId(void);
 extern void pokemonGetFriendFormPokemonFriendFilterId(void);
-#if 0
-asm void fn_80022834(void) {
-#include "src/game/gs_title_fn_80022834.inc"
-}
-#else
-#pragma scheduling on
-#pragma optimization_level 4
 s32 fn_80022834(u32 arg0, u32* arg1) {
     extern void* itemDataBiosGetPtr(u32);
     extern u32 itemDataBiosGetWazaMachineNo(void*);
     extern u32 itemDataBiosGetWazaIDByWazaMachineNo(u32);
     extern u32 itemDataBiosGetHidenMachineNo(void*);
     extern s32 menuSubOpenYesNo(s32, s32, s32, s32);
-    extern u32 pokemonBiosGetPokemonWazaDataId(s32, u32);
+    extern u32 pokemonBiosGetPokemonWazaDataId(s32, u16);
     extern void pokemonBiosGetPokemonDataId(s32);
     extern s32 pokemonDataBiosGetPtr(void);
     extern u8 pokemonDataBiosGetWazaMcn(s32, s32);
@@ -3973,20 +3652,20 @@ s32 fn_80022834(u32 arg0, u32* arg1) {
     extern void pokemonGetFriendFormPokemonFriendFilterId(s32, u32, s32);
     extern void cbForgetWazaSelect__FP7PokemonUsl(void);
 
-    s32 type_byte;
-    s32 slot;
-    s32 state;
-    s32 effect;
+    u8 status;
+    s32 i;
     s32 msg;
     void* handle;
-    u16 value16;
-    u8 status;
     s32 c;
+    u16 value16;
+    s32 state;
+    s32 type_byte;
+    s32 action;
     s32 tmp;
     u32 v2;
-    s32 i;
-    s32 action;
-    s32 sc;
+    s32 effect;
+    s32 slot;
+    u32 sc;
     s32 sd;
     u8 buf;
 
@@ -4026,7 +3705,7 @@ s32 fn_80022834(u32 arg0, u32* arg1) {
         } else {
             v2 = itemDataBiosGetWazaIDByWazaMachineNo(status);
             for (i = 0; i < 4; i++) {
-                if ((u16)v2 == (u16)pokemonBiosGetPokemonWazaDataId(c, (u16)i)) {
+                if ((u16)v2 == (u16)pokemonBiosGetPokemonWazaDataId(c, i)) {
                     break;
                 }
             }
@@ -4047,7 +3726,7 @@ s32 fn_80022834(u32 arg0, u32* arg1) {
                 } else {
                     tmp = evolutionWazaLearn(c, v2, &buf, 1, cbForgetWazaSelect__FP7PokemonUsl, 0);
                     if (tmp != 0) {
-                        pokemonWazaCreate(c, buf, (u16)v2);
+                        pokemonWazaCreate(c, buf, v2 & 0xFFFF);
                         pokemonGetFriendFormPokemonFriendFilterId(c, pokemonGetSoubiItemSoubiDataId(c), 4);
                     }
                 }
@@ -4067,181 +3746,114 @@ s32 fn_80022834(u32 arg0, u32* arg1) {
     }
     return 1;
 }
-#endif
 
 /* fn_80022B3C - 0x80022B3C | size: 0x318 */
-extern s32 pokemonDataBiosGetVoice(void);
+extern u16 pokemonDataBiosGetVoice(void);
 extern void soundStartSE(s32);
 extern s32 soundGetStatus(s32);
 extern void fn_80121B4C(s32, s32);
 extern void pokemonAddDpFormPokemonDpFilterId(s32, s32, s32);
 extern u8 lbl_80266C30[];
 extern u32 lbl_8047B8A0;
-#if 0
-asm void fn_80022B3C(void) {
-#include "src/game/gs_title_fn_80022B3C.inc"
-}
-#else
-#pragma optimization_level 4
-#pragma scheduling off
 s32 std163_useCologne(s32 arg0, s32 arg1) {
-    s32 sp8;
-    s32 spC;
-    s32 sp10;
-    s32 sp14;
-    s32 sp18;
-    s32 sp1C;
-    s32 sp20;
-    s32 sp24;
-    s32 sp28;
-    s32 sp2C;
-    s32 temp_r28;
-    s32 temp_r29;
-    s32 temp_r30;
-    s32 temp_r31;
-    s32 result;
+    typedef struct TitleItemMessage {
+        u16 item;
+        u32 useMessage;
+        u32 dpMessage;
+    } TitleItemMessage;
+    typedef struct TitleItemMessageTable {
+        TitleItemMessage entry[3];
+    } TitleItemMessageTable;
+    extern void pokemonBiosGetPokemonDataId(s32);
+    extern void* pokemonDataBiosGetPtr(void);
+    extern u16 pokemonDataBiosGetVoice(void*);
+    s32 pokemon;
+    s32 data;
+    TitleItemMessageTable table;
     s32 i;
-    s32 count;
-    f32 f0;
-    void* data_ptr;
-    f32 f1;
+    s32 entryOffset;
+    u32 target;
+    s32 wait;
+    s32 voice;
+    void* bios;
+    s32 j;
+    void* nickname;
 
-    data_ptr = &lbl_80266C30;
-    temp_r30 = arg0;
-    
-    /* Copy data from structure */
-    sp10 = *(s32*)data_ptr;
-    sp14 = *(s32*)((u8*)data_ptr + 4);
-    sp18 = *(s32*)((u8*)data_ptr + 8);
-    sp1C = *(s32*)((u8*)data_ptr + 0xC);
-    sp20 = *(s32*)((u8*)data_ptr + 0x10);
-    sp24 = *(s32*)((u8*)data_ptr + 0x14);
-    sp28 = *(s32*)((u8*)data_ptr + 0x18);
-    sp2C = *(s32*)((u8*)data_ptr + 0x1C);
-    
-    fn_80014118(temp_r30, &spC, &sp8);
-    result = pokemonCheckValid(spC);
-    
-    if ((result & 0xFF000000) == 0) {
+    table = *(TitleItemMessageTable*)lbl_80266C30;
+    fn_80014118(arg1, &pokemon, &data);
+    if ((u8)pokemonCheckValid(pokemon) == 0) {
         return 1;
     }
-    
-    /* Determine particle type */
-    temp_r29 = 0;
-    result = temp_r30 & 0xFFFF;
-    
-    if (result == (u16)sp10) {
-        temp_r29 = 0;
-    } else if (result == (u16)sp1C) {
-        temp_r29 = 1;
-    } else if (result == (u16)sp28) {
-        temp_r29 = 2;
-    } else {
-        temp_r29 = 3;
+
+    for (i = 0; i < 3; i++) {
+        if ((u16)arg0 == table.entry[i].item) {
+            break;
+        }
     }
-    
-    if (temp_r29 >= 3) {
+    if (i >= 3) {
         return 1;
     }
-    
-    /* Play particle sound effects */
-    pokemonBiosGetNicknamePtr(spC);
-    msgctrlSetValue(0x32, (void*)result);
-    msgctrlSetValue(0x2D, (void*)temp_r30);
-    
-    result = *(s32*)((u8*)(&sp10) + temp_r29 * 0xC);
-    winMsgOpen(2, result, 1, 0);
+    nickname = pokemonBiosGetNicknamePtr(pokemon);
+    msgctrlSetValue(0x32, nickname);
+    msgctrlSetValue(0x2D, (void*)arg0);
+    entryOffset = i * sizeof(TitleItemMessage);
+    winMsgOpen(2, *(u32*)((u8*)&table.entry[0].useMessage + entryOffset), 1, 0);
     winMsgClose(1);
-    
-    /* Check if particle system is available */
+
     if (gamedatasaveGetStatus(0, 9) == 0) {
-        /* Wait for particle system with timeout */
-        for (i = 0; i < 2; i++) {
+        for (j = 0; j < 2; j++) {
             fn_800F78A4(1, 0, 0xFF, 0x15, 0);
-            count = 0;
-            
-            while (count < 0x3C) {
+            for (wait = 0; wait < 0x3C; wait += msgGetCharsPerFrame()) {
                 _threadSwitch();
-                count += msgGetCharsPerFrame();
             }
         }
-        
-        /* Additional wait */
         fn_800F78A4(1, 0, 0xFF, 0x30, 0);
-        count = 0;
-        
-        while (count < 0x60) {
+        for (wait = 0; wait < 0x60; wait += msgGetCharsPerFrame()) {
             _threadSwitch();
-            count += msgGetCharsPerFrame();
         }
     }
-    
-    /* Validate and process particle */
-    temp_r29 = spC;
-    if (temp_r29 == 0) {
-        return 0;
-    }
-    
-    result = pokemonCheckValid(temp_r29);
-    if ((result & 0xFF000000) == 0) {
-        return 0;
-    }
-    
-    pokemonBiosGetPokemonDataId(temp_r29);
-    pokemonDataBiosGetPtr();
-    
-    result = pokemonDataBiosGetVoice();
-    if (result == 0) {
-        temp_r29 = 0;
+
+    target = pokemon;
+    if (target == 0) {
+        bios = 0;
+    } else if ((u8)pokemonCheckValid(target) == 0) {
+        bios = 0;
     } else {
-        temp_r29 = result & 0xFFFF;
-        soundStartSE(temp_r29);
+        pokemonBiosGetPokemonDataId(target);
+        bios = pokemonDataBiosGetPtr();
     }
-    
-    /* Wait for particle completion */
-    while (soundGetStatus(temp_r29) == 2) {
+    if (bios == 0) {
+        voice = 0;
+    } else {
+        voice = pokemonDataBiosGetVoice(bios);
+        soundStartSE(voice);
+    }
+    while (soundGetStatus(voice) == 2) {
         _threadSwitch();
     }
-    
-    /* Update particle state */
-    pokemonBiosGetNicknamePtr(spC);
-    result = fn_80121ADC(spC, 0x3E);
-    
-    if ((result & 0xFF000000) != 0) {
-        fn_80121B4C(spC, 0x3E);
+
+    msgctrlSetValue(0x32, pokemonBiosGetNicknamePtr(pokemon));
+    winMsgOpen(2, 0x3AF7, 1, 0);
+    winMsgClose(1);
+    if ((u8)fn_80121ADC(pokemon, 0x3E) != 0) {
+        fn_80121B4C(pokemon, 0x3E);
         winMsgOpen(2, 0x4277, 1, 0);
         winMsgClose(1);
     }
-    
-    /* Final particle processing */
-    f1 = pokemonGetDp((void*)spC);
-    f0 = lbl_8047B8A0;
-    
-    if (f1 > f0) {
-        pokemonAddDpFormPokemonDpFilterId(spC, temp_r30 & 0xFFFF, 4);
-        pokemonBiosGetNicknamePtr(spC);
-        result = fn_80121ADC(spC, 0x3E);
-        
-        if ((result & 0xFF000000) != 0) {
-            result = *(s32*)((u8*)(&sp10) + temp_r29 * 0xC);
-            winMsgOpen(2, result, 1, 0);
-            winMsgClose(1);
-        }
+    if (pokemonGetDp((void*)pokemon) > *(f32*)&lbl_8047B8A0) {
+        pokemonAddDpFormPokemonDpFilterId(pokemon, (u16)arg0, 4);
+        msgctrlSetValue(0x32, pokemonBiosGetNicknamePtr(pokemon));
+        winMsgOpen(2, *(u32*)((u8*)&table.entry[0].dpMessage + entryOffset), 1, 0);
+        winMsgClose(1);
     }
-    
     return 1;
 }
 #endif
-#endif
 
 /* fn_80022E54 - 0x80022E54 | size: 0x90 */
+extern void fadeSet(f32, s32);
 extern void std017_menuQueueAdd(void*, s32);
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80022E54)
-#if 0
-asm void fn_80022E54(void) {
-#include "src/game/gs_title_fn_80022E54.inc"
-}
-#else
 s32 fn_80022E54(void* r3, u32* r4) {
     void* r29;
     u32* r30;
@@ -4261,18 +3873,11 @@ s32 fn_80022E54(void* r3, u32* r4) {
     }
     return 1;
 }
-#endif
 
 /* fn_80022EE4 - 0x80022EE4 | size: 0x184 */
 extern s32 pokemonEvolutionCheck(s32, s32, u16, void*, void*);
 extern void menuOffScreenSetDisp(s32);
 extern void pokemonEvolutionAll(s32, s32, u16, void*, s32, s32, s32, s32);
-extern f32 lbl_8047B8A4;
-#if 0
-asm void fn_80022EE4(void) {
-#include "src/game/gs_title_fn_80022EE4.inc"
-}
-#else
 s32 fn_80022EE4(u32 arg0, u32* arg1) {
     extern s32 fn_80144574(void*, s32, s32, u16, s32);
     u8 text_buf[0x100];
@@ -4302,12 +3907,12 @@ s32 fn_80022EE4(u32 arg0, u32* arg1) {
 
     if (slot >= 0 && (s16)effect > 0) {
         effect = pokemonEvolutionCheck(sc, 1, (u16)arg0, &sp8, &spC);
-        fadeSet(lbl_8047B8A4, 3);
+        fadeSet(0.5f, 3);
         fadeCheck(1);
         menuOffScreenSetDisp(0);
         pokemonEvolutionAll(sc, effect, sp8, &spC, 0, 1, 0, 0);
         menuOffScreenSetDisp(1);
-        fadeSet(lbl_8047B8A4, 2);
+        fadeSet(0.5f, 2);
         fadeCheck(1);
         *arg1 = 1;
         return 0;
@@ -4315,133 +3920,108 @@ s32 fn_80022EE4(u32 arg0, u32* arg1) {
 
     return 1;
 }
-#endif
 #endif
 
 /* fn_80023068 - 0x80023068 | size: 0x20c */
 extern s32 fn_80019B48(s32);
 extern void fn_80019B1C(void);
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80023068)
-#if 0
-asm void fn_80023068(void) {
-#include "src/game/gs_title_fn_80023068.inc"
-}
-#else
 s32 fn_80023068(u32 arg0, u32* arg1) {
-    extern s32 fn_80144574(void*, s32, s32, u16, s32);
+    typedef struct TitleBgmList {
+        u16 entries[5];
+    } TitleBgmList;
+    extern s32 fn_80144574(void*, s32, s32, u16, u8);
     extern void fn_800216E8(void*, s32, void*, s32, s32);
-    u8 name_buf[0x84];
-    u8 text_buf[0x108];
-    s32 blocked;
-    s32 mode;
+    extern s32 fn_800141BC(void*, s32);
+    extern u8 fn_80121ADC(s32, s32);
+    s32 pokemon;
     s32 slot;
-    s32 sc;
-    s32 sd;
-    s32 effect;
+    TitleBgmList bgm;
+    u8 name[0x84];
+    u8 effects[0x108];
+    s32 effect_count;
+    s32 mode;
+    s32 data;
+    s32 blocked;
+    s32 i;
+    void* nickname;
 
     blocked = 0;
-    for (;;) {
-            { extern s32 fn_800141BC(void*, s32);
-              slot = fn_800141BC((void*)arg0, 1);
-            }
-        if (slot < 0) break;
-        
-        fn_80014118(slot, &sc, &sd);
-        
-        { extern u8 fn_80121ADC(s32, s32);
-          if (((u8)fn_80121ADC(sc, 0x3E) & 0xFF) == 0) {
-              mode = fn_80019B48((s8)slot);
-              fn_80019B1C();
-              if (mode >= 0) break;
-          } else {
-              blocked = 1;
-              break;
-          }
+    do {
+        slot = fn_800141BC((void*)arg0, 1);
+        if (slot < 0) {
+            break;
         }
-    }
+        fn_80014118(slot, &pokemon, &data);
+        if (fn_80121ADC(pokemon, 0x3E) != 0) {
+            blocked = 1;
+            break;
+        }
+        mode = fn_80019B48((s8)slot);
+        fn_80019B1C();
+    } while (mode < 0);
 
     if (slot >= 0) {
-        if (((s8)blocked & 0xFF) != 0) {
-            msgctrlSetValue(0x32, (void*)pokemonBiosGetNicknamePtr(sc));
+        if (blocked != 0) {
+            nickname = pokemonBiosGetNicknamePtr(pokemon);
+            msgctrlSetValue(0x32, nickname);
             winMsgOpen(2, 0x424D, 1, 0);
             winMsgClose(1);
-            effect = 0;
+            effect_count = 0;
         } else {
-            { extern s32 fn_80144574(void*, s32, s32, u16, s32);
-              effect = fn_80144574(text_buf, sc, sd, (u16)arg0, (u8)mode);
-            }
-            
-            if ((s16)effect > 0) {
-                s32 sound_id;
-                {
-                    u16* bgm_table = (u16*)lbl_80266DB0;
-                    if (arg0 == bgm_table[0] ||
-                        arg0 == bgm_table[1] ||
-                        arg0 == bgm_table[2] ||
-                        arg0 == bgm_table[3] ||
-                        arg0 == bgm_table[4]) {
-                        sound_id = 0x466;
-                    } else {
-                        sound_id = 0x465;
+            effect_count = fn_80144574(effects, pokemon, data, arg0, mode);
+            if ((s16)effect_count > 0) {
+                bgm = *(TitleBgmList*)lbl_80266DB0;
+                for (i = 0; i < 5; i++) {
+                    if (arg0 == bgm.entries[i]) {
+                        break;
                     }
                 }
-                soundStart(sound_id, 0, 0xFF, 0);
+                soundStart(i < 5 ? 0x466 : 0x465, 0, 0xFF, 0);
                 fn_8001D378();
             }
-            
-            { extern void fn_800216E8(void*, s32, void*, s32, s32);
-              fn_800216E8(name_buf, 0x40, text_buf, effect, sc);
-            }
-            msgctrlSetValue(0x4D, name_buf);
+            fn_800216E8(name, 0x40, effects, effect_count, pokemon);
+            msgctrlSetValue(0x4D, name);
             winMsgOpen(2, 0xE0, 1, 0);
             winMsgClose(1);
         }
     }
 
     fn_80014198(slot);
-    if (slot >= 0 && (s16)effect > 0) {
+    if (slot >= 0 && (s16)effect_count > 0) {
         *arg1 = 1;
         return 0;
     }
     return 1;
 }
 #endif
-#endif
 
 /* cbForgetWazaSelect__FP7PokemonUsl - 0x80023274 | size: 0x7c */
 extern s32 fn_80097B04(s32, s32);
-extern f32 lbl_8047B8A4;
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80023274)
-#if 0
-asm void cbForgetWazaSelect__FP7PokemonUsl(void) {
-#include "src/game/gs_title_fn_80023274.inc"
-}
-#else
 s32 cbForgetWazaSelect__FP7PokemonUsl(s32 r3, s32 r4) {
     s32 result;
 
-    fadeSet(lbl_8047B8A4, 3);
+    fadeSet(0.5f, 3);
     fadeCheck(1);
     result = fn_80097B04(r3, r4);
     if (result >= 4) {
         result = -1;
     }
-    fadeSet(lbl_8047B8A4, 2);
+    fadeSet(0.5f, 2);
     fadeCheck(1);
     return (s8)result;
 }
 #endif
-#endif
 
 /* fn_800232F0 - 0x800232F0 | size: 0x470 */
 extern s32 pokemonGetStatus(u32, s32, s32, s32);
-extern void std130_soundUnk_801653cc(void);
+extern void std130_soundUnk_801653cc(s32, s32, s32);
 extern void pokemonBiosGetLevel(void);
 extern void winMsgOpenLevelUpFiledStatus(void);
 extern void winMsgCloseLevelUpStatus(void);
 extern void pokemonSearchWazaDataId(void);
 extern void pokemonGetOboeWazaDataId(void);
-extern f32 lbl_8047B8A4;
 extern void fn_8011FC74(void);
 extern void fn_80106D3C(void);
 extern void fn_801069FC(void);
@@ -4461,69 +4041,62 @@ extern void fn_801096F8(void);
 extern void fn_8012805C(void);
 extern s32 cbForgetWazaSelect__FP7PokemonUsl(s32, s32);
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_800232F0)
-#if 0
-asm void fn_800232F0(void) {
-#include "src/game/gs_title_fn_800232F0.inc"
-}
-#else
 s32 fn_800232F0(u32 wazaDataId, u32* result) {
-    extern u8 pokemonBiosGetLevel(s32);
+    extern u32 pokemonBiosGetLevel(s32);
     extern s32 winMsgOpenLevelUpFiledStatus(void*, s32);
     extern void winMsgCloseLevelUpStatus(s32);
-    extern s8 pokemonSearchWazaDataId(s32, u16);
-    extern u16 pokemonGetOboeWazaDataId(s32, u8, u8*);
-    extern s32 evolutionWazaLearn(s32, u16, u8*, s32, void*, s32);
-    extern void pokemonWazaCreate(s32, u8, u16);
+    extern s8 pokemonSearchWazaDataId();
+    extern u32 pokemonGetOboeWazaDataId();
+    extern s32 evolutionWazaLearn();
+    extern void pokemonWazaCreate();
 
-    struct {
-        u8 unk0;
-        s16 unk2;
-        s16 unk4;
-        s16 unk6;
-        s16 unk8;
-        s16 unkA;
-        s16 unkC;
-    } delta;
-    struct {
-        u8 unk0;
-    } reset;
-    u8 effects[0x10C];
+    typedef struct TitleLevelUpStatus {
+        u8 mode;
+        s16 hp;
+        s16 attack;
+        s16 defense;
+        s16 speed;
+        s16 spAttack;
+        s16 spDefense;
+    } TitleLevelUpStatus;
+    extern s32 fn_800141BC(void*, s32);
+    extern s32 fn_80144574(void*, s32, s32, u16, u8);
     s32 pokemon;
     s32 data;
-    s32 slot;
-    s16 effectCount;
-    s16 old87;
-    s16 old88;
-    s16 old89;
-    s16 old8A;
-    s16 old8B;
-    s16 old8C;
-    s16 new87;
-    s16 new88;
-    s16 new89;
-    s16 new8A;
-    s16 new8B;
-    s16 new8C;
-    u16 moveId;
-    u16 value;
-    u32 valueData;
+    u16 evolveTo;
+    u32 evolveData;
     u8 learnSlot;
     u8 index;
-    u8 pokemonLevel;
+    s16 oldHp;
+    TitleLevelUpStatus delta;
+    s16 oldAttack;
+    s16 oldDefense;
+    s16 oldSpAttack;
+    s32 target;
+    TitleLevelUpStatus after;
+    u8 effects[0x100];
+    s16 oldSpDefense;
+    s16 oldSpeed;
+    s32 slot;
+    s32 effectCount;
+    u32 move;
+    u32 level;
+    u32 evolution;
+    void* nickname;
 
     index = 0;
     slot = fn_800141BC((void*)wazaDataId, 1);
     if (slot >= 0) {
         fn_80014118(slot, &pokemon, &data);
         if (pokemonIsDarkPokemon(pokemon) == 0) {
-            old87 = (s16)pokemonGetStatus(pokemon, 0, 0x87, 0);
-            old88 = (s16)pokemonGetStatus(pokemon, 0, 0x88, 0);
-            old89 = (s16)pokemonGetStatus(pokemon, 0, 0x89, 0);
-            old8A = (s16)pokemonGetStatus(pokemon, 0, 0x8A, 0);
-            old8B = (s16)pokemonGetStatus(pokemon, 0, 0x8B, 0);
-            old8C = (s16)pokemonGetStatus(pokemon, 0, 0x8C, 0);
-            effectCount = fn_80144574(effects, pokemon, data, (u16)wazaDataId, 0);
-            if (effectCount > 0) {
+            oldHp = pokemonGetStatus(target = pokemon, 0, 0x87, 0);
+            oldAttack = pokemonGetStatus(target, 0, 0x88, 0);
+            oldDefense = pokemonGetStatus(target, 0, 0x89, 0);
+            oldSpAttack = pokemonGetStatus(target, 0, 0x8A, 0);
+            oldSpDefense = pokemonGetStatus(target, 0, 0x8B, 0);
+            oldSpeed = pokemonGetStatus(target, 0, 0x8C, 0);
+            effectCount = fn_80144574(effects, pokemon, data, wazaDataId, 0);
+            if ((s16)effectCount > 0) {
                 fn_8001D378();
             } else {
                 effectCount = 0;
@@ -4532,66 +4105,67 @@ s32 fn_800232F0(u32 wazaDataId, u32* result) {
             effectCount = -1;
         }
 
-        switch (effectCount) {
+        switch ((s16)effectCount) {
         case 0:
-            ((void (*)(s32, s32, s32, s32))fn_80106D3C)(2, 0x4261, 1, 0);
-            ((void (*)(s32))fn_801069FC)(1);
+            winMsgOpen(2, 0x4261, 1, 0);
+            winMsgClose(1);
             break;
         case -1:
-            ((void (*)(s32, s32, s32, s32))fn_80106D3C)(2, 0x424C, 1, 0);
-            ((void (*)(s32))fn_801069FC)(1);
+            winMsgOpen(2, 0x424C, 1, 0);
+            winMsgClose(1);
             break;
         default:
-            ((void (*)(s32, s32, s32))std130_soundUnk_801653cc)(0x4CA, 0, 0xFF);
-            msgctrlSetValue(0x32, pokemonBiosGetNicknamePtr(pokemon));
-            msgctrlSetValue(0x2F, (void*)(u32)pokemonBiosGetLevel(pokemon));
-            ((void (*)(s32, s32, s32, s32))fn_80106D3C)(2, 0x423E, 1, 0);
-            ((void (*)(s32))fn_801069FC)(1);
+            std130_soundUnk_801653cc(0x4CA, 0, 0xFF);
+            nickname = pokemonBiosGetNicknamePtr(pokemon);
+            msgctrlSetValue(0x32, nickname);
+            level = pokemonBiosGetLevel(pokemon);
+            msgctrlSetValue(0x2F, (void*)(u8)level);
+            winMsgOpen(2, 0x423E, 1, 0);
+            winMsgClose(1);
 
-            new87 = (s16)pokemonGetStatus(pokemon, 0, 0x87, 0);
-            new88 = (s16)pokemonGetStatus(pokemon, 0, 0x88, 0);
-            new89 = (s16)pokemonGetStatus(pokemon, 0, 0x89, 0);
-            new8A = (s16)pokemonGetStatus(pokemon, 0, 0x8A, 0);
-            new8B = (s16)pokemonGetStatus(pokemon, 0, 0x8B, 0);
-            new8C = (s16)pokemonGetStatus(pokemon, 0, 0x8C, 0);
-            delta.unk0 = 1;
-            delta.unk2 = new87 - old87;
-            delta.unk4 = new88 - old88;
-            delta.unk6 = new89 - old89;
-            delta.unk8 = new8C - old8C;
-            delta.unkA = new8A - old8A;
-            delta.unkC = new8B - old8B;
+            target = pokemon;
+            after.hp = pokemonGetStatus(target, 0, 0x87, 0);
+            after.attack = pokemonGetStatus(target, 0, 0x88, 0);
+            after.defense = pokemonGetStatus(target, 0, 0x89, 0);
+            after.spAttack = pokemonGetStatus(target, 0, 0x8A, 0);
+            after.spDefense = pokemonGetStatus(target, 0, 0x8B, 0);
+            after.speed = pokemonGetStatus(target, 0, 0x8C, 0);
+            delta.hp = after.hp - oldHp;
+            delta.attack = after.attack - oldAttack;
+            delta.defense = after.defense - oldDefense;
+            delta.spAttack = after.spAttack - oldSpAttack;
+            delta.spDefense = after.spDefense - oldSpDefense;
+            delta.speed = after.speed - oldSpeed;
+            delta.mode = 1;
             winMsgOpenLevelUpFiledStatus(&delta, 1);
-            reset.unk0 = 0;
-            winMsgOpenLevelUpFiledStatus(&reset, 1);
+            after.mode = 0;
+            winMsgOpenLevelUpFiledStatus(&after, 1);
             winMsgCloseLevelUpStatus(1);
 
-            pokemonLevel = pokemonBiosGetLevel(pokemon);
+            level = pokemonBiosGetLevel(pokemon);
             index = 0;
-            while ((moveId = pokemonGetOboeWazaDataId(
-                        pokemon, pokemonLevel, &index)) != 0) {
-                if (pokemonSearchWazaDataId(pokemon, moveId) == -1 &&
-                    evolutionWazaLearn(pokemon, moveId, &learnSlot, 1,
-                        cbForgetWazaSelect__FP7PokemonUsl, 0) != 0) {
-                    pokemonWazaCreate(pokemon, learnSlot, moveId);
+            while ((u16)(move = pokemonGetOboeWazaDataId(pokemon, level, &index)) != 0) {
+                if (pokemonSearchWazaDataId(pokemon, move) == -1 &&
+                    evolutionWazaLearn(pokemon, move, &learnSlot, 1,
+                                       cbForgetWazaSelect__FP7PokemonUsl, 0) != 0) {
+                    pokemonWazaCreate(pokemon, learnSlot, move);
                 }
                 index++;
             }
-            value = pokemonEvolutionCheck(pokemon, 0, 0, &moveId, &valueData);
+            evolution = pokemonEvolutionCheck(pokemon, 0, 0, &evolveTo, &evolveData);
             break;
         }
     }
 
     fn_80014198(slot);
-    if (slot >= 0 && effectCount > 0) {
-        if (value != 0) {
-            fadeSet(lbl_8047B8A4, 3);
+    if (slot >= 0 && (s16)effectCount > 0) {
+        if ((u16)evolution != 0) {
+            fadeSet(0.5f, 3);
             fadeCheck(1);
             menuOffScreenSetDisp(0);
-            pokemonEvolutionAll(
-                pokemon, value, moveId, &valueData, 0, 1, 1, 0);
+            pokemonEvolutionAll(pokemon, evolution, evolveTo, &evolveData, 0, 1, 1, 0);
             menuOffScreenSetDisp(1);
-            fadeSet(lbl_8047B8A4, 2);
+            fadeSet(0.5f, 2);
             fadeCheck(1);
         }
         *result = 1;
@@ -4599,597 +4173,217 @@ s32 fn_800232F0(u32 wazaDataId, u32* result) {
     }
     return 1;
 }
-#endif
 
 /* fn_80023760 - 0x80023760 | size: 0x208 */
-#if 0
-asm void fn_80023760(void) {
-#include "src/game/gs_title_fn_80023760.inc"
-}
-#else
 s32 fn_80023760(u32 arg0, u32* arg1) {
-    u8 buf[0x80];
-    u16 entries[5];
-    s32 total;
+    typedef struct TitleBgmList {
+        u16 entries[5];
+    } TitleBgmList;
+    extern s32 fn_80144574(void*, s32, s32, u16, u8);
+    extern void fn_800216E8(void*, s32, void*, s32, s32);
+    extern s32 fn_800141BC(void*, s32);
+    extern u8 fn_80121ADC(s32, s32);
+    s32 pokemon;
+    u8* text;
     s32 slot;
-    s32 count;
-    s32 effect;
-    u32 sc;
-    u32 sd;
-    u32 species;
-    u32 msg;
+    u8 name[0x84];
+    u8 effects[0x108];
+    u16 total;
+    TitleBgmList bgm;
+    s32 effect_count;
+    s32 i;
+    s32 result;
+    s32 data;
 
     total = 0;
     fn_800141BC((void*)arg0, 0);
+    text = name;
     for (slot = 0; slot < 6; slot++) {
-        fn_80014118(slot, &sc, &sd);
-        if ((u8)pokemonCheckValid(sc) != 0) {
-            if ((s32)pokemonGetStatus(sc, 0, 0x83, 0) <= 0) {
-                if ((u8)fn_80121ADC(sc, 0x3E) == 0) {
-                    effect = fn_80144574(buf, sc, sd, (u16)arg0, 0);
-                    if ((s16)effect > 0) {
-                        memcpy(entries, lbl_80266DB0, sizeof(entries));
-                        count = 0;
-                        if (arg0 == entries[0]) {
-                            count = 0;
-                        } else if (arg0 == entries[1]) {
-                            count = 1;
-                        } else if (arg0 == entries[2]) {
-                            count = 2;
-                        } else if (arg0 == entries[3]) {
-                            count = 3;
-                        } else if (arg0 == entries[4]) {
-                            count = 4;
-                        } else {
-                            count = 5;
-                        }
-                        if (count < 5) {
-                            species = 0x466;
-                        } else {
-                            species = 0x465;
-                        }
-                        soundStart(species, 0, 0xFF, 0);
-                        fn_8001D378();
-                        fn_800216E8(buf, 0x40, (u8*)sd, effect, sc);
-                        msgctrlSetValue(0x4D, buf);
-                        winMsgOpen(2, 0xE0, 1, 0);
-                        winMsgClose(1);
-                        total = (u16)(total + effect);
-                    }
-                }
+        fn_80014118(slot, &pokemon, &data);
+        if ((u8)pokemonCheckValid(pokemon) == 0) {
+            continue;
+        }
+        if ((s32)pokemonGetStatus(pokemon, 0, 0x83, 0) > 0) {
+            continue;
+        }
+        if (fn_80121ADC(pokemon, 0x3E) != 0) {
+            continue;
+        }
+        effect_count = fn_80144574(effects, pokemon, data, arg0, 0);
+        if ((s16)effect_count <= 0) {
+            continue;
+        }
+        bgm = *(TitleBgmList*)lbl_80266DB0;
+        for (i = 0; i < 5; i++) {
+            if (arg0 == bgm.entries[i]) {
+                break;
             }
         }
+        soundStart(i < 5 ? 0x466 : 0x465, 0, 0xFF, 0);
+        fn_8001D378();
+        fn_800216E8(name, 0x40, effects, effect_count, pokemon);
+        msgctrlSetValue(0x4D, text);
+        winMsgOpen(2, 0xE0, 1, 0);
+        winMsgClose(1);
+        total += effect_count;
     }
-    if ((u16)total == 0) {
+
+    if (total == 0) {
         winMsgOpen(2, 0x4261, 1, 0);
         winMsgClose(1);
-        effect = -1;
+        result = -1;
     } else {
-        effect = 1;
+        result = 1;
     }
     fn_80014198(-1);
-    if (effect < 0) {
+    if (result < 0) {
         return 1;
     }
     *arg1 = 1;
     return 0;
 }
-#endif
 
 /* fn_80023968 - 0x80023968 | size: 0x234 */
 extern void* itemDataBiosGetItemEffectParam(void*);
 extern void* itemParamGetPtr(void*);
 extern u8 itemParamGetPPSelectFlag(void*);
-#if 0
-asm void fn_80023968(void) {
-#include "src/game/gs_title_fn_80023968.inc"
-}
-#else
-s32 fn_80023968(u32 arg0, u32* arg1)
-{
-    extern void* itemDataBiosGetPtr(u32);
+s32 fn_80023968(u32 arg0, u32* arg1) {
+    typedef struct TitleBgmList {
+        u16 entries[5];
+    } TitleBgmList;
+    extern s32 fn_80144574(void*, s32, s32, u16, u8);
     extern void fn_800216E8(void*, s32, void*, s32, s32);
-    u8 nameBuf[0x84];
-    u8 textBuf[0x108];
-    s32 blocked;
-    s32 mode;
+    extern s32 fn_800141BC(void*, s32);
+    extern u8 fn_80121ADC(s32, s32);
+    extern void* itemDataBiosGetPtr(u16);
+    s32 pokemon;
     s32 slot;
-    s32 sc;
-    s32 sd;
-    s32 effect;
+    TitleBgmList bgm;
+    u8 name[0x84];
+    u8 effects[0x108];
+    s32 effect_count;
+    s32 mode;
+    s32 data;
+    s32 blocked;
+    s32 i;
+    void* nickname;
 
     blocked = 0;
-    for (;;) {
+    do {
         slot = fn_800141BC((void*)arg0, 1);
         if (slot < 0) {
             break;
         }
-        fn_80014118(slot, &sc, &sd);
-        if ((u8)fn_80121ADC(sc, 0x3E) != 0) {
+        fn_80014118(slot, &pokemon, &data);
+        if (fn_80121ADC(pokemon, 0x3E) != 0) {
             blocked = 1;
             break;
         }
-        if (itemParamGetPPSelectFlag(
-                itemParamGetPtr(itemDataBiosGetItemEffectParam(
-                    itemDataBiosGetPtr((u16)arg0))))) {
+        if (itemParamGetPPSelectFlag(itemParamGetPtr(itemDataBiosGetItemEffectParam(
+                itemDataBiosGetPtr(arg0))))) {
             mode = fn_80019B48((s8)slot);
             fn_80019B1C();
         } else {
             mode = 0;
         }
-        if (mode >= 0) {
-            break;
-        }
-    }
+    } while (mode < 0);
 
     if (slot >= 0) {
-        if (blocked) {
-            msgctrlSetValue(0x32, pokemonBiosGetNicknamePtr(sc));
+        if (blocked != 0) {
+            nickname = pokemonBiosGetNicknamePtr(pokemon);
+            msgctrlSetValue(0x32, nickname);
             winMsgOpen(2, 0x424D, 1, 0);
             winMsgClose(1);
-            effect = 0;
+            effect_count = 0;
         } else {
-            u16* table;
-            s32 soundId;
-
-            effect = fn_80144574(textBuf, sc, sd, (u16)arg0, (u8)mode);
-            if ((s16)effect > 0) {
-                table = (u16*)lbl_80266DB0;
-                if (arg0 == table[0] || arg0 == table[1] ||
-                    arg0 == table[2] || arg0 == table[3] ||
-                    arg0 == table[4]) {
-                    soundId = 0x466;
-                } else {
-                    soundId = 0x465;
+            effect_count = fn_80144574(effects, pokemon, data, arg0, mode);
+            if ((s16)effect_count > 0) {
+                bgm = *(TitleBgmList*)lbl_80266DB0;
+                for (i = 0; i < 5; i++) {
+                    if (arg0 == bgm.entries[i]) {
+                        break;
+                    }
                 }
-                soundStart(soundId, 0, 0xFF, 0);
+                soundStart(i < 5 ? 0x466 : 0x465, 0, 0xFF, 0);
                 fn_8001D378();
             }
-            fn_800216E8(nameBuf, 0x40, textBuf, effect, sc);
-            msgctrlSetValue(0x4D, nameBuf);
+            fn_800216E8(name, 0x40, effects, effect_count, pokemon);
+            msgctrlSetValue(0x4D, name);
             winMsgOpen(2, 0xE0, 1, 0);
             winMsgClose(1);
         }
     }
 
     fn_80014198(slot);
-    if (slot >= 0 && (s16)effect > 0) {
+    if (slot >= 0 && (s16)effect_count > 0) {
         *arg1 = 1;
         return 0;
     }
     return 1;
 }
-#endif
 
 /* fn_80023B9C - 0x80023B9C | size: 0x20c */
-#if 0
-asm void fn_80023B9C(void) {
-#include "src/game/gs_title_fn_80023B9C.inc"
-}
-#else
 s32 fn_80023B9C(u32 arg0, u32* arg1) {
+    typedef struct TitleBgmList {
+        u16 entries[5];
+    } TitleBgmList;
+    extern s32 fn_80144574(void*, s32, s32, u16, u8);
     extern void fn_800216E8(void*, s32, void*, s32, s32);
-    u32 sc;
-    u32 sd;
-    volatile u16 entries[5];
-    u8 text_buf[0x100];
-    u8 name_buf[0x84];
-    register u32* out;
-    register u32 species;
-    register s32 slot;
-    register s32 effect;
-    register s32 match_index;
-    s32 sound_id;
-    void* msg;
+    extern s32 fn_800141BC(void*, s32);
+    extern u8 fn_80121ADC(s32, s32);
+    s32 pokemon;
+    s32 data;
+    TitleBgmList bgm;
+    u8 effects[0x100];
+    u8 name[0x84];
+    s32 slot;
+    s32 effect_count;
+    s32 i;
+    void* nickname;
 
-    species = arg0;
-    out = arg1;
-    slot = fn_800141BC((void*)species, 1);
+    slot = fn_800141BC((void*)arg0, 1);
     if (slot >= 0) {
-        fn_80014118(slot, &sc, &sd);
-        if ((u8)fn_80121ADC(sc, 0x3E) == 0) {
-            effect = fn_80144574(text_buf, sc, sd, (u16)species, 0);
-            if ((s16)effect > 0) {
-                *(u32*)&entries[0] = *(u32*)(lbl_80266DB0 + 0);
-                *(u32*)&entries[2] = *(u32*)(lbl_80266DB0 + 4);
-                entries[4] = *(u16*)(lbl_80266DB0 + 8);
-
-                match_index = 0;
-                if ((((species != entries[0]) && (match_index = 1, species != entries[1])) &&
-                     (match_index = 2, species != entries[2])) &&
-                    ((match_index = 3, species != entries[3]) &&
-                     (match_index = 4, species != entries[4]))) {
-                    match_index = 5;
+        fn_80014118(slot, &pokemon, &data);
+        if (fn_80121ADC(pokemon, 0x3E) == 0) {
+            effect_count = fn_80144574(effects, pokemon, data, arg0, 0);
+            if ((s16)effect_count > 0) {
+                bgm = *(TitleBgmList*)lbl_80266DB0;
+                for (i = 0; i < 5; i++) {
+                    if (arg0 == bgm.entries[i]) {
+                        break;
+                    }
                 }
-                if (match_index < 5) {
-                    sound_id = 0x466;
-                } else {
-                    sound_id = 0x465;
-                }
-                soundStart(sound_id, 0, 0xFF, 0);
+                soundStart(i < 5 ? 0x466 : 0x465, 0, 0xFF, 0);
                 fn_8001D378();
             }
-            fn_800216E8(name_buf, 0x40, text_buf, effect, sc);
-            msgctrlSetValue(0x4D, name_buf);
+            fn_800216E8(name, 0x40, effects, effect_count, pokemon);
+            msgctrlSetValue(0x4D, name);
             winMsgOpen(2, 0xE0, 1, 0);
             winMsgClose(1);
         } else {
-            msg = pokemonBiosGetNicknamePtr(sc);
-            msgctrlSetValue(0x32, msg);
+            nickname = pokemonBiosGetNicknamePtr(pokemon);
+            msgctrlSetValue(0x32, nickname);
             winMsgOpen(2, 0x424D, 1, 0);
             winMsgClose(1);
-            effect = 0;
+            effect_count = 0;
         }
     }
     fn_80014198(slot);
-
-    if (slot >= 0 && (s16)effect > 0) {
-        if ((s32)species >= 0x2C) goto species_store_one;
-        if ((s32)species >= 0x27) goto species_store_zero;
-        goto species_store_one;
-species_store_zero:
-        *out = 0;
-        goto ret_zero;
-species_store_one:
-        *out = 1;
-ret_zero:
+    if (slot >= 0 && (s16)effect_count > 0) {
+        switch (arg0) {
+        case 0x27:
+        case 0x28:
+        case 0x29:
+        case 0x2A:
+        case 0x2B:
+            *arg1 = 0;
+            break;
+        default:
+            *arg1 = 1;
+            break;
+        }
         return 0;
     }
-
     return 1;
 }
-#endif
-#endif
-
-/* fn_80023DA8 - 0x80023DA8 | size: 0x3c */
-#if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80023DA8)
-#if 0
-asm void fn_80023DA8(void) {
-#include "src/game/gs_title_fn_80023DA8.inc"
-}
-#else
-s32 fn_80023DA8(void) {
-    winMsgOpen(2, 0x44c6, 1, 0);
-    winMsgClose(1);
-    return 1;
-}
-#endif
-
-/* fn_80023DE4 - 0x80023DE4 | size: 0x3c */
-#if 0
-asm void fn_80023DE4(void) {
-#include "src/game/gs_title_fn_80023DE4.inc"
-}
-#else
-s32 fn_80023DE4(void) {
-    winMsgOpen(2, 0x4261, 1, 0);
-    winMsgClose(1);
-    return 1;
-}
-#endif
-
-/* fn_80023E20 - 0x80023E20 | size: 0x3c */
-#if 0
-asm void fn_80023E20(void) {
-#include "src/game/gs_title_fn_80023E20.inc"
-}
-#else
-s32 fn_80023E20(void) {
-    winMsgOpen(2, 0x426a, 1, 0);
-    winMsgClose(1);
-    return 1;
-}
-#endif
-
-/* fn_80023E5C - 0x80023E5C | size: 0x4 */
-#if 0
-asm void fn_80023E5C(void) {
-#include "src/game/gs_title_fn_80023E5C.inc"
-}
-#else
-void std018_nop18(void) { }
-#endif
-#endif
-
-/* fn_80023E60 - 0x80023E60 | size: 0x300 */
-extern void windowGetCursorToItem(void);
-extern void fn_800E0060(void);
-extern void fn_800E0000(void);
-extern u32 lbl_8047A370;
-extern u32 lbl_8047A368;
-extern u32 lbl_8047A36C;
-extern f32 lbl_8047B8A8;
-extern f32 lbl_80478898;
-extern f64 lbl_8047B8B8;
-extern f32 lbl_8047B8AC;
-extern u32 lbl_8047A390;
-extern f32 lbl_8047B8B0;
-extern u8 lbl_8047A380;
-extern void wmapCursorMove(u8*, void*, u16*, u8*);
-extern u8 lbl_803A2058[];
-extern u8 lbl_803A204C[];
-#if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80023E60)
-#if 0
-asm void fn_80023E60(void) {
-#include "src/game/gs_title_fn_80023E60.inc"
-}
-#else
-s32 wmapMenuUpdate(u8* arg0) {
-    extern s32 windowGetCursorToItem(u8*);
-    extern u16* windowGetKeyInfo(void);
-    extern u8* menuDataBiosGetPtr(u32);
-    extern u8* menuItemBiosGetPtr(s32);
-    extern void fn_800E0060(f32*, f32*);
-    extern f32 fn_800E0000(f32*, f32*);
-    extern void std104_soundSetBackgroundMusic(s32, s32, s32);
-    extern f64 lbl_8047B8B8;
-    /* nonvol alloc: r31=arg0, r30=DA18 result (called first), r29=104318 result (called second) */
-    u8* r104318;
-    u8* da18;
-    u16* temp_r5;
-    s32 result;
-    s32 target;
-    s32 found;
-    u8* p;
-    f32 sp14[3];
-    f32 sp08[3];
-    f32 cmpval;
-
-    if ((s32)lbl_8047A370 == 1) {
-        return 0;
-    }
-
-    da18 = menuDataBiosGetPtr(*(u32*)(arg0 + 4));
-    r104318 = (u8*)windowGetCursorToItem(arg0);
-
-    if (r104318 == NULL) {
-        arg0[0x95] = 0;
-        return 0;
-    }
-
-    temp_r5 = windowGetKeyInfo();
-    wmapCursorMove(arg0, r104318, temp_r5, da18);
-
-    result = (s32)(s8)arg0[0x95] + (s32)(s8)arg0[0x94];
-    target = (s32)lbl_8047A368;
-    lbl_8047A36C = result;
-
-    if ((u32)target != (u32)result) {
-        lbl_80478898 = lbl_8047B8A8;
-        lbl_8047A370 = 1;
-
-        p = menuDataBiosGetPtr(*(u32*)(arg0 + 4));
-        p = menuItemBiosGetPtr(*(s16*)(p + 4));
-        found = 0;
-        while (1) {
-            if (((u32)*(volatile u8*)p >> 7) & 1) {
-                if (target != found) goto SKIP1;
-                goto MATCH1;
-SKIP1:
-                found = found + 1;
-            }
-            if (((u32)*(volatile u8*)p >> 6) & 1) break;
-            p = menuItemBiosGetPtr(*(s16*)(p + 0x18));
-        }
-        p = NULL;
-MATCH1:
-        if (p != NULL) {
-            *(f32*)(lbl_803A2058 + 0) = (f32)(s32)(*(s16*)(p + 2));
-            *(f32*)(lbl_803A2058 + 8) = lbl_8047B8AC;
-            *(f32*)(lbl_803A2058 + 4) = (f32)(s32)(*(s16*)(p + 4));
-        }
-
-        target = (s32)lbl_8047A36C;
-        p = menuDataBiosGetPtr(*(u32*)(arg0 + 4));
-        p = menuItemBiosGetPtr(*(s16*)(p + 4));
-        found = 0;
-        while (1) {
-            if (((u32)*(volatile u8*)p >> 7) & 1) {
-                if (target != found) goto SKIP2;
-                goto MATCH2;
-SKIP2:
-                found = found + 1;
-            }
-            if (((u32)*(volatile u8*)p >> 6) & 1) break;
-            p = menuItemBiosGetPtr(*(s16*)(p + 0x18));
-        }
-        p = NULL;
-MATCH2:
-        if (p != NULL) {
-            *(f32*)(lbl_803A204C + 0) = (f32)(s32)(*(s16*)(p + 2));
-            *(f32*)(lbl_803A204C + 8) = lbl_8047B8AC;
-            *(f32*)(lbl_803A204C + 4) = (f32)(s32)(*(s16*)(p + 4));
-        }
-
-        {
-            u8* r5 = (u8*)lbl_8047A390;
-            f32 ref_x = *(f32*)(lbl_803A204C + 0);
-            f32 ref_y = *(f32*)(lbl_803A204C + 4);
-            cmpval = lbl_8047B8AC;
-            sp14[0] = ref_x - (f32)(s32)(*(s16*)(r5 + 2));
-            sp14[1] = ref_y - (f32)(s32)(*(s16*)(r5 + 4));
-            if (cmpval != sp14[0] || cmpval != sp14[1]) {
-                fn_800E0060(sp08, sp14);
-                sp14[1] = lbl_8047B8AC;
-                sp14[0] = lbl_8047B8B0;
-                sp14[2] = lbl_8047B8AC;
-                if (fn_800E0000(sp14, sp08) < lbl_8047B8AC) {
-                    lbl_8047A380 = 1;
-                } else {
-                    lbl_8047A380 = 0;
-                }
-            }
-        }
-
-        std104_soundSetBackgroundMusic(0x464, 0, 0xFF);
-    }
-
-    return 0;
-}
-#endif
-
-/* fn_80024160 - 0x80024160 | size: 0x1a8 */
-extern u32 lbl_8047A368;
-extern u32 lbl_80478DF4;
-extern u32 lbl_80478DF0;
-#if 0
-asm void fn_80024160(u8* arg0, void* arg1, u16* arg2, u8* arg3) {
-#include "src/game/gs_title_fn_80024160.inc"
-}
-#else
-void wmapCursorMove(u8* arg0, void* arg1, u16* arg2, u8* arg3) {
-    s32 chain_index;
-    s32 active_index;
-    s32 offset;
-    s32 visible_index;
-    u8 mask;
-    u8* active;
-    s32 entry_index;
-    u8* current;
-    u8* candidate;
-    s32 v;
-
-    (void)arg1;
-    v = *arg2;
-    mask = 0;
-    if ((v & 0x1) != 0) mask |= 0x1;
-    if ((v & 0x2) != 0) mask |= 0x4;
-    if ((v & 0x4) != 0) mask |= 0x8;
-    if ((v & 0x8) != 0) mask |= 0x2;
-
-    if (mask != 0) {
-        active_index = lbl_8047A368;
-        current = menuDataBiosGetPtr(*(u32*)(arg0 + 4));
-        current = menuItemBiosGetPtr(*(s16*)(current + 4));
-        chain_index = 0;
-        while (1) {
-            if (((u32)*(volatile u8*)current >> 7) & 1) {
-                if (active_index == chain_index) {
-                    active = current;
-                    break;
-                }
-                chain_index++;
-            }
-            if ((((u32)*(volatile u8*)current >> 6) & 1) == 0) {
-                current = menuItemBiosGetPtr(*(s16*)(current + 0x18));
-            } else {
-                active = 0;
-                break;
-            }
-        }
-
-        mask = (u8)mask;
-        entry_index = 0;
-        offset = 0;
-        while ((u32)entry_index < *(u32*)lbl_80478DF0) {
-            visible_index = 0;
-            candidate = menuItemBiosGetPtr(*(s16*)(arg3 + 4));
-            while (1) {
-                if (candidate == 0) {
-                    break;
-                }
-                if (((u32)*(volatile u8*)candidate >> 7) & 1) {
-                    if ((*(u8*)(lbl_80478DF4 + offset) & mask) == mask) {
-                        if (menuItemBiosGetPtr(*(u32*)(lbl_80478DF4 + offset + 4)) == active) {
-                            if (menuItemBiosGetPtr(*(u32*)(lbl_80478DF4 + offset + 8)) == candidate) {
-                                arg0[0x95] = (u8)visible_index;
-                                return;
-                            }
-                        }
-                    }
-                    visible_index++;
-                }
-                if ((((u32)*(volatile u8*)candidate >> 6) & 1) == 0) {
-                    candidate = menuItemBiosGetPtr(*(s16*)(candidate + 0x18));
-                } else {
-                    break;
-                }
-            }
-            offset += 0xC;
-            entry_index++;
-        }
-    }
-}
-#endif
-
-/* fn_80024308 - 0x80024308 | size: 0x130
- *
- * Status: 99.1% matched. Remaining: reg-alloc choice in second branch
- * (f0/f1/f2 ordering: B8C8 in f1 vs f2, stack in f2 vs f0, B8898 in f0 vs f1),
- * plus 2 anonymous @NNN@sda21 f64 magic constants for u32->f32 conversion
- * (CW heuristic; target uses lbl_8047B8D0 name).
- * Second branch: separate f3=(f32)(u32)fn_800D3088() to avoid __cvt_fp2unsigned.
- */
-extern u32 lbl_8047A370;
-extern f64 lbl_8047B8D0;
-extern f32 lbl_8047A378;
-extern f32 lbl_8047A374;
-extern u32 lbl_8047B8C0;
-extern u32 lbl_8047B8C4;
-extern f32 lbl_8047B8C8;
-extern f32 lbl_80478898;
-extern f32 lbl_8047B8AC;
-extern u32 lbl_8047A36C;
-extern u32 lbl_8047A368;
-#if 0
-asm void fn_80024308(void) {
-#include "src/game/gs_title_fn_80024308.inc"
-}
-#else
-#pragma push
-#pragma optimization_level 2
-#pragma scheduling on
-#pragma fp_contract on
-#pragma peephole off
-s32 wmapMenuInput(u8* arg0) {
-    extern u8* windowGetKeyInfo(void);
-    u8* ctx;
-    f32 f0;
-    f32 f1;
-    f32 f2;
-    f32 f3;
-
-    ctx = windowGetKeyInfo();
-    if (arg0 != 0) {
-        if ((s32)lbl_8047A370 != 1) {
-            if ((*(u16*)(ctx + 4) & 0x10) != 0) {
-                arg0[0x98] = 1;
-            }
-        }
-        if ((*(u16*)(ctx + 4) & 0x20) != 0) {
-            arg0[0x98] = 1;
-            arg0[0x99] = 1;
-        }
-    }
-
-    f2 = (f32)(u32)msgGetCharsPerFrame();
-    f3 = lbl_8047A378;
-    f0 = f3 * f2 + lbl_8047A374;
-    lbl_8047A374 = f0;
-    f1 = *(f32*)&lbl_8047B8C0;
-    if (f0 < f1) {
-        lbl_8047A374 = f1;
-        lbl_8047A378 = -f3;
-    } else {
-        f1 = *(f32*)&lbl_8047B8C4;
-        if (f0 > f1) {
-            lbl_8047A374 = f1;
-            lbl_8047A378 = -f3;
-        }
-    }
-
-    if ((s32)lbl_8047A370 == 1) {
-        f3 = (f32)(u32)msgGetCharsPerFrame();
-        f1 = lbl_80478898 - lbl_8047B8C8 * f3;
-        lbl_80478898 = f1;
-        if (f1 < lbl_8047B8AC) {
-            lbl_80478898 = lbl_8047B8AC;
-            lbl_8047A370 = 0;
-            lbl_8047A368 = lbl_8047A36C;
-        }
-    }
-    return 0;
-}
-#pragma pop
-#endif
 #endif

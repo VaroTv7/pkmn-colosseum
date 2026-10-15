@@ -136,7 +136,9 @@ typedef struct GXData_800BB30C {
     /* 0x434 */ f32 field_434;
     /* 0x438 */ f32 field_438;
     /* 0x43C */ f32 projection[6];
-    /* 0x454 */ u8 pad_454[0x8];
+    /* 0x454 */ u8 fgRange;
+    /* 0x455 */ u8 pad_455[3];
+    /* 0x458 */ f32 fgSideX;
     /* 0x45C */ u32 texMapSize[8];
     /* 0x47C */ u32 texMapWrap[8];
     /* 0x49C */ u32 texmapId[16];
@@ -153,7 +155,6 @@ typedef struct GXData_800BB30C {
 
 extern GXData_800BB30C* const gx;
 extern volatile u16* __cpReg;
-extern u32 lbl_80313590[];
 extern u32 lbl_80313608[];
 
 extern void fn_800BB780(u32 dstCoord, u32 func, u32 srcParam, u32 mtx,
@@ -203,20 +204,24 @@ volatile PPCWGPipe_800BB30C GXWGFifo_800BB30C : 0xCC008000;
     GX_FIFO_U32 = (reg)
 
 #if defined(SDK_800BB30C_PREFIX_ACTIVE)
-void fn_800BB30C(u32 texMap, u32 texCoord) {
-    GXData_800BB30C* p = gx;
-    u32 size = p->texMapSize[texMap];
-    u32 wrap = p->texMapWrap[texMap];
-
-    p->suTs0[texCoord] = (p->suTs0[texCoord] & 0xFFFF0000U) | (size & 0x3FF);
-    p->suTs1[texCoord] = (p->suTs1[texCoord] & 0xFFFF0000U) | ((size >> 10) & 0x3FF);
-    p->suTs0[texCoord] = (p->suTs0[texCoord] & ~0x10000U) | (((wrap & 3) == 1) << 16);
-    p->suTs1[texCoord] = (p->suTs1[texCoord] & ~0x10000U) | ((((wrap >> 2) & 3) == 1) << 16);
-
-    GX_BP_REG(p->suTs0[texCoord]);
-    GX_BP_REG(p->suTs1[texCoord]);
-    p->field_002 = 0;
+void fn_800BB30C(u32 tmap, u32 tcoord) {
+    u32 w;
+    u32 h;
+    u8 s_bias;
+    u8 t_bias;
+    w = gx->texMapSize[tmap] & 0x3FF;
+    h = (gx->texMapSize[tmap] & 0xFFC00) >> 10;
+    gx->suTs0[tcoord] = (gx->suTs0[tcoord] & ~0xFFFFU) | w;
+    gx->suTs1[tcoord] = (gx->suTs1[tcoord] & ~0xFFFFU) | h;
+    s_bias = (gx->texMapWrap[tmap] & 3) == 1;
+    t_bias = ((gx->texMapWrap[tmap] >> 2) & 3) == 1;
+    gx->suTs0[tcoord] = (gx->suTs0[tcoord] & ~0x10000U) | ((u32)s_bias << 16);
+    gx->suTs1[tcoord] = (gx->suTs1[tcoord] & ~0x10000U) | ((u32)t_bias << 16);
+    GX_BP_REG(gx->suTs0[tcoord]);
+    GX_BP_REG(gx->suTs1[tcoord]);
+    gx->field_002 = 0;
 }
+
 
 void __GXSetSUTexRegs(void) {
     extern void fn_800BB30C(u32 texMap, u32 texCoord);
@@ -275,24 +280,6 @@ void __GXSetSUTexRegs(void) {
 
 void __GXSetTmemConfig(u32 config) {
     switch (config) {
-    case 2:
-        GX_BP_REG(0x8C0D8000);
-        GX_BP_REG(0x900DC000);
-        GX_BP_REG(0x8D0D8800);
-        GX_BP_REG(0x910DC800);
-        GX_BP_REG(0x8E0D9000);
-        GX_BP_REG(0x920DD000);
-        GX_BP_REG(0x8F0D9800);
-        GX_BP_REG(0x930DD800);
-        GX_BP_REG(0xAC0DA000);
-        GX_BP_REG(0xB00DC400);
-        GX_BP_REG(0xAD0DA800);
-        GX_BP_REG(0xB10DCC00);
-        GX_BP_REG(0xAE0DB000);
-        GX_BP_REG(0xB20DD400);
-        GX_BP_REG(0xAF0DB800);
-        GX_BP_REG(0xB30DDC00);
-        break;
     case 1:
         GX_BP_REG(0x8C0D8000);
         GX_BP_REG(0x900DC000);
@@ -311,6 +298,7 @@ void __GXSetTmemConfig(u32 config) {
         GX_BP_REG(0xAF0DB800);
         GX_BP_REG(0xB30DF800);
         break;
+    case 0:
     default:
         GX_BP_REG(0x8C0D8000);
         GX_BP_REG(0x900DC000);
@@ -332,6 +320,8 @@ void __GXSetTmemConfig(u32 config) {
     }
 }
 
+
+#if !defined(SDK_800BB30C_PREFIX_ONLY)
 void fn_800BB780(u32 dstCoord, u32 func, u32 srcParam, u32 mtx,
                  u32 normalize, u32 postMtx, u32 normalizeColor,
                  u8 bias, u8 arg8, u32 arg9) {
@@ -412,43 +402,48 @@ void fn_800BC024(void) {
     }
 }
 
-#pragma dont_inline on
-#pragma peephole off
 void __GXFlushTextureState(void) {
     GX_BP_REG(gx->field_124);
     gx->field_002 = 0;
 }
-#pragma peephole on
-#pragma dont_inline reset
+
+/* Stage-zero color, later-stage color, stage-zero alpha, later-stage alpha. */
+static u32 TEVCOpTableST0[5] = { /* 0x80313590 */
+    0xC008F8AF, 0xC008A89F, 0xC008AC8F, 0xC008FFF8, 0xC008FFFA,
+};
+static u32 TEVCOpTableST1[5] = { /* 0x803135A4 */
+    0xC008F80F, 0xC008089F, 0xC0080C8F, 0xC008FFF8, 0xC008FFF0,
+};
+static u32 TEVAOpTableST0[5] = { /* 0x803135B8 */
+    0xC108F2F0, 0xC108FFD0, 0xC108F2F0, 0xC108FFC0, 0xC108FFD0,
+};
+static u32 TEVAOpTableST1[5] = { /* 0x803135CC */
+    0xC108F070, 0xC108FF80, 0xC108F070, 0xC108FFC0, 0xC108FF80,
+};
 
 void GXSetTevOp(s32 stage, u32 mode) {
     u32* color;
     u32* alpha;
-    u32* table = lbl_80313590;
-    GXData_800BB30C* p;
-    u32 colorReg;
-    u32 alphaReg;
+    u32 reg;
 
     if (stage == 0) {
-        color = &table[mode];
-        alpha = color + 10;
+        color = TEVCOpTableST0 + mode;
+        alpha = TEVAOpTableST0 + mode;
     } else {
-        u32* base = &table[mode];
-        color = base + 5;
-        alpha = base + 15;
+        color = TEVCOpTableST1 + mode;
+        alpha = TEVAOpTableST1 + mode;
     }
 
-    p = gx;
-    colorReg = p->tevColorEnv[stage];
-    colorReg = (colorReg & 0xFF000000) | (*color & 0xFFFFFF);
-    GX_BP_REG(colorReg);
-    p->tevColorEnv[stage] = colorReg;
+    reg = gx->tevColorEnv[stage];
+    reg = (*color & ~0xFF000000) | (reg & 0xFF000000);
+    GX_BP_REG(reg);
+    gx->tevColorEnv[stage] = reg;
 
-    alphaReg = p->tevAlphaEnv[stage];
-    alphaReg = (alphaReg & 0xFF00000F) | (*alpha & 0x00FFFFF0);
-    GX_BP_REG(alphaReg);
-    p->tevAlphaEnv[stage] = alphaReg;
-    p->field_002 = 0;
+    reg = gx->tevAlphaEnv[stage];
+    reg = (*alpha & ~0xFF00000F) | (reg & 0xFF00000F);
+    GX_BP_REG(reg);
+    gx->tevAlphaEnv[stage] = reg;
+    gx->field_002 = 0;
 }
 
 void GXSetTevColorIn(u32 stage, u32 a, u32 b, u32 c, u32 d) {
@@ -482,7 +477,6 @@ void GXSetTevAlphaIn(u32 stage, GXTevAlphaArg_800BB30C a,
 void GXSetTevColorOp(u32 stage, s32 op, u32 bias, u32 scale, u32 clamp,
                  u32 outReg) {
     u32 reg;
-    GXData_800BB30C* p;
 
     reg = gx->tevColorEnv[stage];
     reg = __rlwimi(reg, op & 1, 18, 13, 13);
@@ -490,22 +484,19 @@ void GXSetTevColorOp(u32 stage, s32 op, u32 bias, u32 scale, u32 clamp,
         reg = __rlwimi(reg, scale, 20, 10, 11);
         reg = __rlwimi(reg, bias, 16, 14, 15);
     } else {
-        reg = __rlwimi(reg, op, 19, 10, 11);
+        reg = __rlwimi(reg, (op >> 1) & 3, 20, 10, 11);
         reg = __rlwimi(reg, 3, 16, 14, 15);
     }
-    reg = __rlwimi(reg, clamp, 19, 12, 12);
+    reg = __rlwimi(reg, clamp & 0xFF, 19, 12, 12);
     reg = __rlwimi(reg, outReg, 22, 8, 9);
-    GX_FIFO_U8 = 0x61;
-    p = gx;
-    GX_FIFO_U32 = reg;
-    p->tevColorEnv[stage] = reg;
-    p->field_002 = 0;
+    GX_BP_REG(reg);
+    gx->tevColorEnv[stage] = reg;
+    gx->field_002 = 0;
 }
 
 void GXSetTevAlphaOp(u32 stage, s32 op, u32 bias, u32 scale, u32 clamp,
                  u32 outReg) {
     u32 reg;
-    GXData_800BB30C* p;
 
     reg = gx->tevAlphaEnv[stage];
     reg = __rlwimi(reg, op & 1, 18, 13, 13);
@@ -513,17 +504,16 @@ void GXSetTevAlphaOp(u32 stage, s32 op, u32 bias, u32 scale, u32 clamp,
         reg = __rlwimi(reg, scale, 20, 10, 11);
         reg = __rlwimi(reg, bias, 16, 14, 15);
     } else {
-        reg = __rlwimi(reg, op, 19, 10, 11);
+        reg = __rlwimi(reg, (op >> 1) & 3, 20, 10, 11);
         reg = __rlwimi(reg, 3, 16, 14, 15);
     }
-    reg = __rlwimi(reg, clamp, 19, 12, 12);
+    reg = __rlwimi(reg, clamp & 0xFF, 19, 12, 12);
     reg = __rlwimi(reg, outReg, 22, 8, 9);
-    GX_FIFO_U8 = 0x61;
-    p = gx;
-    GX_FIFO_U32 = reg;
-    p->tevAlphaEnv[stage] = reg;
-    p->field_002 = 0;
+    GX_BP_REG(reg);
+    gx->tevAlphaEnv[stage] = reg;
+    gx->field_002 = 0;
 }
+#endif /* !SDK_800BB30C_PREFIX_ONLY */
 #endif
 
 typedef struct GXColor_800BC2F8 {
@@ -544,7 +534,7 @@ typedef struct GXFogAdjTable_800BCCDC {
     u16 r[10];
 } GXFogAdjTable_800BCCDC;
 
-#if defined(SDK_800BB30C_PREFIX_ACTIVE)
+#if defined(SDK_800BB30C_PREFIX_ACTIVE) && !defined(SDK_800BB30C_PREFIX_ONLY)
 void fn_800BC2F8(u32 id, GXColor_800BC2F8 color) {
     u32 reg0;
     u32 reg1;
@@ -567,30 +557,24 @@ void fn_800BC2F8(u32 id, GXColor_800BC2F8 color) {
 }
 
 void fn_800BC36C(u32 id, GXColorS10_800BC36C color) {
-    GXData_800BB30C* p;
     u32 reg0;
     u32 reg1;
 
     reg0 = 0;
     reg0 = (reg0 & ~0x7FFU) | (color.r & 0x7FF);
-    reg0 = (reg0 & ~0x7FF000U) | ((color.a << 12) & 0x7FF000U);
+    reg0 = (reg0 & ~0x7FF000U) | ((color.a & 0x7FF) << 12);
     reg0 = (reg0 & 0xFFFFFFU) | ((id * 2 + 0xE0) << 24);
 
-    p = gx;
     reg1 = 0;
     reg1 = (reg1 & ~0x7FFU) | (color.b & 0x7FF);
-    reg1 = (reg1 & ~0x7FF000U) | ((color.g << 12) & 0x7FF000U);
-
-    *(volatile u8*)0xCC008000 = 0x61;
-    *(volatile u32*)0xCC008000 = reg0;
+    reg1 = (reg1 & ~0x7FF000U) | ((color.g & 0x7FF) << 12);
     reg1 = (reg1 & 0xFFFFFFU) | ((id * 2 + 0xE1) << 24);
-    *(volatile u8*)0xCC008000 = 0x61;
-    *(volatile u32*)0xCC008000 = reg1;
-    *(volatile u8*)0xCC008000 = 0x61;
-    *(volatile u32*)0xCC008000 = reg1;
-    *(volatile u8*)0xCC008000 = 0x61;
-    *(volatile u32*)0xCC008000 = reg1;
-    p->field_002 = 0;
+
+    GX_BP_REG(reg0);
+    GX_BP_REG(reg1);
+    GX_BP_REG(reg1);
+    GX_BP_REG(reg1);
+    gx->field_002 = 0;
 }
 
 void fn_800BC3E0(u32 id, GXColor_800BC2F8 color) {
@@ -672,7 +656,9 @@ void GXSetTevSwapModeTable(u32 table, u32 red, u32 green, u32 blue, u32 alpha) {
 }
 #endif
 
-#if defined(SDK_800BC618_SUFFIX_ACTIVE)
+#if defined(SDK_800BC618_SUFFIX_ACTIVE) || defined(SDK_800BD2E0_ONLY)
+#if !defined(SDK_800BE348_ONLY) && !defined(SDK_800BCFDC_ONLY) && !defined(SDK_800BD58C_ONLY)
+#if !defined(SDK_800BD2E0_ONLY)
 void fn_800BC618(u32 comp0, u8 ref0, u32 op, u32 comp1, u8 ref1) {
     u32 reg = ref0;
 
@@ -685,35 +671,47 @@ void fn_800BC618(u32 comp0, u8 ref0, u32 op, u32 comp1, u8 ref1) {
     gx->field_002 = 0;
 }
 
-void fn_800BC66C(u32 op, u32 format, u32 bias) {
-    u32 zFormat;
-    u32 reg;
-    GXData_800BB30C* p;
+#define ZTEX_SET_REG(field, pos, size, value) \
+    (field) = ((field) & ~(((1 << (size)) - 1) << (31 - (pos) - (size) + 1))) | \
+              ((int)(value) << (31 - (pos) - (size) + 1))
 
-    reg = (bias & 0xFFFFFFU) | 0xF4000000U;
+/* GXSetZTexture */
+void fn_800BC66C(int op, int format, u32 bias) {
+    u32 val1;
+    u32 val2;
+    u32 val3;
+
+    val1 = 0;
+    ZTEX_SET_REG(val1, 8, 24, bias);
+    ZTEX_SET_REG(val1, 0, 8, 0xF4);
+
+    val2 = 0;
     switch (format) {
     case 0x11:
-        zFormat = 0;
+        val3 = 0;
         break;
     case 0x13:
-        zFormat = 1;
+        val3 = 1;
         break;
     case 0x16:
-        zFormat = 2;
+        val3 = 2;
         break;
     default:
-        zFormat = 2;
+        val3 = 2;
         break;
     }
 
-    p = gx;
-    GX_BP_REG(reg);
-    reg = (zFormat & 3) | (op << 2);
-    reg = (reg & 0xFFFFFFU) | 0xF5000000U;
-    GX_BP_REG(reg);
-    p->field_002 = 0;
+    ZTEX_SET_REG(val2, 30, 2, val3);
+    ZTEX_SET_REG(val2, 28, 2, op);
+    ZTEX_SET_REG(val2, 0, 8, 0xF5);
+
+    GX_BP_REG(val1);
+    GX_BP_REG(val2);
+
+    gx->field_002 = 0;
 }
 
+#if !defined(SDK_800BC618_ONLY)
 void fn_800BC8C8(u32 nStages) {
     GXData_800BB30C* p = gx;
 
@@ -752,7 +750,7 @@ void fn_800BCEBC(u32 value) {
     p->field_002 = 0;
 }
 
-void fn_800BD0F8(void) {}
+void fn_800BD0F8(f32 nearz, f32 sideX) {}
 
 void GXCallDisplayList(void* list, u32 nbytes) {
     if (gx->dirtyState != 0) {
@@ -767,7 +765,10 @@ void GXCallDisplayList(void* list, u32 nbytes) {
     GX_FIFO_U32 = (u32)list;
     GX_FIFO_U32 = nbytes;
 }
+#endif /* !SDK_800BC618_ONLY */
+#endif
 
+#if !defined(SDK_800BC618_ONLY)
 void fn_800BD2E0(f32* projection, s32 type) {
     GXData_800BB30C* p = gx;
 
@@ -796,6 +797,11 @@ void fn_800BD2E0(f32* projection, s32 type) {
     gx->field_002 = 1;
 }
 
+#endif /* !SDK_800BC618_ONLY */
+#endif /* !SDK_800BE348_ONLY && !SDK_800BCFDC_ONLY */
+#if !defined(SDK_800BD2E0_ONLY) && !defined(SDK_800BC618_ONLY)
+#if !defined(SDK_800BE348_ONLY) && !defined(SDK_800BCFDC_ONLY)
+#if !defined(SDK_800BD58C_ONLY)
 void fn_800BD394(f32* projection) {
     GXData_800BB30C* p;
     u32 type;
@@ -873,10 +879,50 @@ void fn_800BD554(u32 index) {
     __GXSetMatrixIndex(0);
 }
 
+#endif /* !SDK_800BD58C_ONLY */
+/* The FIFO copies are the vendor's paired-single inline asm helpers;
+   evidence: docs/asm_evidence/gx_transform.md */
+static inline void WriteMTXPS4x3(register volatile void* dst, register f32 src[3][4])
+{
+    register f32 ps_0, ps_1, ps_2, ps_3, ps_4, ps_5;
+
+    asm {
+        psq_l   ps_0, 0(src), 0, 0
+        psq_l   ps_1, 8(src), 0, 0
+        psq_l   ps_2, 16(src), 0, 0
+        psq_l   ps_3, 24(src), 0, 0
+        psq_l   ps_4, 32(src), 0, 0
+        psq_l   ps_5, 40(src), 0, 0
+        psq_st  ps_0, 0(dst), 0, 0
+        psq_st  ps_1, 0(dst), 0, 0
+        psq_st  ps_2, 0(dst), 0, 0
+        psq_st  ps_3, 0(dst), 0, 0
+        psq_st  ps_4, 0(dst), 0, 0
+        psq_st  ps_5, 0(dst), 0, 0
+    }
+}
+
+/* Paired-single inline asm helper; evidence: docs/asm_evidence/gx_transform.md */
+static inline void WriteMTXPS4x2(register volatile void* dst, register f32 src[3][4])
+{
+    register f32 ps_0, ps_1, ps_2, ps_3;
+
+    asm {
+        psq_l   ps_0, 0(src), 0, 0
+        psq_l   ps_1, 8(src), 0, 0
+        psq_l   ps_2, 16(src), 0, 0
+        psq_l   ps_3, 24(src), 0, 0
+        psq_st  ps_0, 0(dst), 0, 0
+        psq_st  ps_1, 0(dst), 0, 0
+        psq_st  ps_2, 0(dst), 0, 0
+        psq_st  ps_3, 0(dst), 0, 0
+    }
+}
+
 void GXLoadTexMtxImm(f32 mtx[3][4], u32 id, s32 type) {
     u32 addr;
     u32 count;
-    u32 length;
+    u32 reg;
 
     if (id >= 0x40) {
         addr = (id - 0x40) * 4 + 0x500;
@@ -890,62 +936,53 @@ void GXLoadTexMtxImm(f32 mtx[3][4], u32 id, s32 type) {
         count = 12;
     }
 
-    length = (count - 1) << 16;
+    reg = addr | (count - 1) << 16;
     GX_FIFO_U8 = 0x10;
-    GX_FIFO_U32 = addr | length;
+    GX_FIFO_U32 = reg;
 
     if (type == 0) {
-        f64* pairs = (f64*)mtx;
-        volatile f64* fifo = (volatile f64*)0xCC008000;
-
-        *fifo = pairs[0];
-        *fifo = pairs[1];
-        *fifo = pairs[2];
-        *fifo = pairs[3];
-        *fifo = pairs[4];
-        *fifo = pairs[5];
+        WriteMTXPS4x3(&GX_FIFO_U32, mtx);
     } else {
-        f64* pairs = (f64*)mtx;
-        volatile f64* fifo = (volatile f64*)0xCC008000;
-
-        *fifo = pairs[0];
-        *fifo = pairs[1];
-        *fifo = pairs[2];
-        *fifo = pairs[3];
+        WriteMTXPS4x2(&GX_FIFO_U32, mtx);
     }
 }
 
-void fn_800BD640(f32 left, f32 top, f32 width, f32 height, f32 nearz,
-                 f32 farz, u32 field) {
-    GXData_800BB30C* p;
+/* RULE-EXCEPTION(user-approved): extern pool stand-in for the 0.5f GXProject shares at 0x8047C3E8 — see docs/RULE_EXCEPTIONS.md */
+extern const f32 lbl_8047C3E8; /* 0.5f, shared with GXProject */
+
+void fn_800BD640(f32 left, f32 top, f32 wd, f32 ht, f32 nearz, f32 farz,
+                 u32 field) {
     f32 sx;
     f32 sy;
     f32 sz;
     f32 ox;
     f32 oy;
     f32 oz;
+    f32 zmin;
+    f32 zmax;
 
     if (field == 0) {
-        top -= 0.5f;
+        top -= lbl_8047C3E8;
     }
 
-    p = gx;
-    p->projection[0] = left;
-    p->projection[1] = top;
-    p->projection[2] = width;
-    p->projection[3] = height;
-    p->projection[4] = nearz;
-    p->projection[5] = farz;
+    sx = wd * lbl_8047C3E8;
+    sy = -ht * lbl_8047C3E8;
+    ox = 342.0f + (left + wd * lbl_8047C3E8);
+    oy = 342.0f + (top + ht * lbl_8047C3E8);
+    zmin = 16777215.0f * nearz;
+    zmax = 16777215.0f * farz;
+    sz = zmax - zmin;
+    oz = zmax;
 
-    sx = width * 0.5f;
-    sy = -height * 0.5f;
-    ox = 342.0f + left + sx;
-    oy = 342.0f + top + height * 0.5f;
-    sz = 16777215.0f * farz - 16777215.0f * nearz;
-    oz = 16777215.0f * farz;
+    gx->projection[0] = left;
+    gx->projection[1] = top;
+    gx->projection[2] = wd;
+    gx->projection[3] = ht;
+    gx->projection[4] = nearz;
+    gx->projection[5] = farz;
 
-    if (p->pad_454[0] != 0) {
-        fn_800BD0F8();
+    if (gx->fgRange != 0) {
+        fn_800BD0F8(nearz, gx->fgSideX);
     }
 
     GX_FIFO_U8 = 0x10;
@@ -956,8 +993,10 @@ void fn_800BD640(f32 left, f32 top, f32 width, f32 height, f32 nearz,
     GX_FIFO_F32 = ox;
     GX_FIFO_F32 = oy;
     GX_FIFO_F32 = oz;
-    p->field_002 = 1;
+    gx->field_002 = 1;
 }
+#if !defined(SDK_800BD58C_ONLY)
+
 
 void fn_800BD744(void) {
     fn_800BD640(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1);
@@ -1390,11 +1429,15 @@ void fn_800BCEF4(s32 pixelFmt, u32 zFmt) {
     gx->field_002 = 0;
 }
 
-void fn_800BCFDC(u32 zCompLoc) {
+#endif /* !SDK_800BD58C_ONLY */
+#endif /* !SDK_800BE348_ONLY && !SDK_800BCFDC_ONLY */
+
+#if !defined(SDK_800BE348_ONLY) && !defined(SDK_800BD58C_ONLY)
+void fn_800BCFDC(u8 dither) {
     GXData_800BB30C* p = gx;
     u32 value = p->field_1D0;
 
-    value = __rlwimi(value, zCompLoc, 2, 29, 29);
+    value = __rlwimi(value, dither, 2, 29, 29);
     GX_BP_REG(value);
     p->field_1D0 = value;
     p->field_002 = 0;
@@ -1412,7 +1455,9 @@ void GXSetDstAlpha(u32 enable, u32 alpha) {
     p->field_002 = 0;
 }
 
-#pragma optimize_for_size off
+#endif /* !SDK_800BE348_ONLY */
+
+#if !defined(SDK_800BE348_ONLY) && !defined(SDK_800BCFDC_ONLY) && !defined(SDK_800BD58C_ONLY)
 void GXSetClipMode(u32 clipMode) {
     GX_FIFO_U8 = 0x10;
     GX_FIFO_U32 = 0x1005;
@@ -1420,19 +1465,22 @@ void GXSetClipMode(u32 clipMode) {
     gx->field_002 = 1;
 }
 
-#pragma optimize_for_size reset
+#endif /* !SDK_800BE348_ONLY && !SDK_800BCFDC_ONLY */
 
-void fn_800BD044(u32 arg0, u32 arg1) {
-    GXData_800BB30C* p = gx;
-    u32 value = arg1;
+#if !defined(SDK_800BE348_ONLY) && !defined(SDK_800BD58C_ONLY)
+void fn_800BD044(u8 oddMask, u8 evenMask) {
+    u32 reg = 0;
 
-    value &= 0xFFU;
-    value |= (arg0 & 0xFFU) << 1U;
-    value &= 0xFFU;
-    GX_BP_REG(0x44000000U | value);
-    p->field_002 = 0;
+    reg = (reg & ~1U) | evenMask;
+    reg = (reg & ~2U) | ((u32)oddMask << 1);
+    reg = (reg & 0xFFFFFFU) | 0x44000000U;
+    GX_BP_REG(reg);
+    gx->field_002 = 0;
 }
 
+#endif /* !SDK_800BE348_ONLY */
+
+#if !defined(SDK_800BE348_ONLY) && !defined(SDK_800BCFDC_ONLY) && !defined(SDK_800BD58C_ONLY)
 void fn_800BD07C(u32 fieldMode, u32 halfAspectRatio) {
     GXData_800BB30C* p = gx;
 
@@ -1458,6 +1506,9 @@ void fn_800BD830(u32 arg0, u32 arg1) {
     gx->field_002 = 0;
 }
 
+#endif /* !SDK_800BE348_ONLY && !SDK_800BCFDC_ONLY */
+
+#if !defined(SDK_800BCFDC_ONLY) && !defined(SDK_800BD58C_ONLY)
 void TRKNubMainLoop(void) {
     extern s32 TRKGetNextEvent(TRKEvent* event);
     extern void* TRKGetBuffer(s32 bufferIndex);
@@ -1518,4 +1569,6 @@ void TRKNubMainLoop(void) {
 void TRKDestructEvent(TRKEvent* event) {
     TRKReleaseBuffer(event->bufferIndex);
 }
+#endif /* !SDK_800BCFDC_ONLY */
+#endif
 #endif

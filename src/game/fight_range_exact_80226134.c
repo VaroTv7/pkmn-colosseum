@@ -4,23 +4,18 @@
  */
 #include "dolphin/types.h"
 
-#pragma use_lmw_stmw on
 
 extern u8* lbl_8047B610;
 extern u8 lbl_8047B614;
-extern u8 lbl_80478D78[1];
+extern u8 lbl_80478D78[8];
 extern u32 lbl_8047B618;
 extern void* lbl_8047B62C;
 extern u8 lbl_80379F58[];
 extern u8 lbl_80379A22[];
 extern void fn_80211B94(void*, void*, u8);
-extern void fn_802274F0(u32, char, char, char);
-extern void fightApplyDamageVariance(char, char);
+extern void fn_802274F0(u32, u8, u8, u8);
+extern void fightApplyDamageVariance(u8, u8);
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
 #define fn_801F54A4 fightFloorGetStatus
 #define fn_802624CC fightMenuOpenMsg
 void fn_80226134(void) {
@@ -40,10 +35,6 @@ void fn_80226134(void) {
     lbl_8047B610 = lbl_8047B610 + 5;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
 #define fn_801F54A4 fightFloorGetStatus
 #define fn_802624CC fightMenuOpenMsg
 void fn_802261B0(void) {
@@ -63,10 +54,6 @@ void fn_802261B0(void) {
     lbl_8047B610 = lbl_8047B610 + 5;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
 #define fn_801F000C fightMainWaitFrame
 #define fn_8026246C fightMenuCloseMsg
 void fn_8022622C(void) {
@@ -77,10 +64,6 @@ void fn_8022622C(void) {
     lbl_8047B610 += 3;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
 #define fn_802624CC fightMenuOpenMsg
 void fn_80226284(void) {
     extern u8 fn_802624CC();
@@ -90,10 +73,6 @@ void fn_80226284(void) {
     lbl_8047B610 += 3;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
 #define fn_802624CC fightMenuOpenMsg
 void fn_802262D0(void) {
     extern u8 fn_802624CC();
@@ -103,12 +82,6 @@ void fn_802262D0(void) {
     lbl_8047B610 += 5;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
-#pragma dont_inline on
-#pragma optimization_level 4
 #define fn_8012640C pokemonGetStatus
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_801F4C14 fightFloorSetStatus
@@ -257,10 +230,6 @@ _join:
   return;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_8012640C pokemonGetStatus
 void fn_802266EC(void) {
@@ -270,10 +239,6 @@ void fn_802266EC(void) {
     lbl_8047B610++;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_8012640C pokemonGetStatus
 #define fn_8011BEB4 wazaGetStatus
@@ -301,11 +266,6 @@ void fn_80226730(void) {
     lbl_8047B610 = lbl_8047B610 + 1;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
-#pragma optimize_for_size on
 #define fn_801F54A4 fightFloorGetStatus
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_802656AC fightMenuGetFightOutPokemonPtrToStatusMenuId
@@ -355,11 +315,7 @@ void fn_802267E8(void) {
     lbl_8047B610 = lbl_8047B610 + 2;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
-#pragma dont_inline on
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimization_level 4; opt_lifetimes off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimization_level 4
 #pragma opt_lifetimes off
 void fn_80226914(void)
@@ -542,12 +498,9 @@ void fn_80226914(void)
     lbl_8047B610 += 2;
 }
 
+/* RULE-EXCEPTION(user-approved): local compiler-control pragmas kept for this function; the unit builds with unit-level flags — see docs/RULE_EXCEPTIONS.md */
 #pragma opt_lifetimes reset
-#pragma opt_propagation off
-#pragma opt_lifetimes off
 #pragma optimization_level 2
-#pragma use_lmw_stmw on
-#pragma optimize_for_size on
 void fn_80226F0C(void) {
     extern u32 lbl_8047B618;
     extern void _threadSwitch();
@@ -583,11 +536,8 @@ void fn_80226F0C(void) {
     return;
 }
 
+/* RULE-EXCEPTION(user-approved): local compiler-control pragmas kept for this function; the unit builds with unit-level flags — see docs/RULE_EXCEPTIONS.md */
 #pragma optimization_level reset
-#pragma opt_lifetimes reset
-#pragma opt_propagation reset
-#pragma use_lmw_stmw on
-#pragma optimize_for_size on
 void fn_80226FD4(void)
 
 {
@@ -641,24 +591,10 @@ void fn_80226FD4(void)
     }
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
 void WS_DAMAGE_LOSS_ONLY(void) { fightApplyDamageVariance(0, 1); lbl_8047B610 = lbl_8047B610 + 1; }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
 void WS_DAMAGE_LOSS(void) { fightApplyDamageVariance(1, 1); lbl_8047B610 = lbl_8047B610 + 1; }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
-#pragma dont_inline on
-#pragma optimize_for_size on
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_80205184 fightOutPokemonGetUseWazaDataId
 #define fn_8012640C pokemonGetStatus
@@ -672,7 +608,7 @@ void WS_DAMAGE_LOSS(void) { fightApplyDamageVariance(1, 1); lbl_8047B610 = lbl_8
 #define fn_8020981C fightWazaCheckWriteJoutaiDataId
 #define fn_802097C8 fightWazaWriteJoutaiDataId
 #define fn_801F4C14 fightFloorSetStatus
-void fightApplyDamageVariance(char r3, char r4)
+void fightApplyDamageVariance(u8 r3, u8 r4)
 {
     extern u32 GSrand();
     extern void fn_8011BBD8();
@@ -758,14 +694,6 @@ void fightApplyDamageVariance(char r3, char r4)
   return;
 }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
 void fn_80227490(void) { fn_802274F0(0, 1, 1, 0); }
 
-#pragma optimize_for_size reset
-#pragma dont_inline reset
-#pragma optimization_level reset
-#pragma opt_propagation reset
 void WS_TYPE_CHECK(void) { fn_802274F0(1, 1, 1, 0); }

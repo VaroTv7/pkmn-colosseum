@@ -23,6 +23,23 @@ Read `AGENTS.md` first. Its guardrails override this document.
 Track exact-source and linked deltas separately. If the goal says "linked",
 only functions in newly completed objects count toward it.
 
+## Title-path rule exceptions (user decision, 2026-09-28)
+
+For title-screen path code only, a byte-exact form that breaks the policy
+below may be used and linked, provided it is tagged `RULE-EXCEPTION(title-path)`
+in the source and listed in `docs/RULE_EXCEPTIONS.md` with the rule it breaks
+and what a clean fix needs. These are recorded for revisiting, not strict wins.
+AGENTS.md's hard rules still apply.
+
+**Byte match first (user decision, 2026-09-29).** For now the goal is byte
+matching across the whole project: a 100% form that breaks the strict policy
+below (shaping temporaries, per-unit compiler flags chosen because they match,
+pragmas, stand-in literals and the like) is merged anyway, tagged
+`RULE-EXCEPTION(title-path)` on the title path or `RULE-EXCEPTION(user-approved)`
+elsewhere, and listed in `docs/RULE_EXCEPTIONS.md`. The tagged entries are
+resolved in a clean-up pass at the end. AGENTS.md's hard rules (no `.inc`, no
+asm outside the evidenced registry, no assets) are not affected.
+
 ## Strict acceptance policy
 
 Accept only source that is plausible program logic and preserves observable
@@ -33,7 +50,9 @@ Reject a result when exactness depends on any of the following:
 
 - an edited, added, staged, or committed `.inc` file;
 - asm wrappers, inline asm, or included assembly, except the existing narrow
-  Dolphin paired-single allowlist;
+  Dolphin paired-single allowlist and registered authentic hand-written
+  library assembly with documented evidence (docs/asm_evidence/README.md;
+  user decision, 2026-09-28);
 - local `optimization_level`, `optimize_for_size`, `scheduling`, `peephole`,
   `opt_propagation`, or similar compiler-control pragmas;
 - dummy/self assignments, uninitialized reads, volatile added only to color
@@ -66,6 +85,50 @@ helper when the target itself proves one existed:
   again after CSE folded the first test), a return value routed through a temp
   and copied to its home register, or a helper's `return 0` merged into the
   caller's own return-0 block.
+- **Inlining-only copies (user decision, 2026-09-27).** An extra register copy
+  that controlled compiler tests show only an inlined body produces, e.g. a value
+  materialised in one register and copied to its home register
+  (`li r28,0; mr r31,r28`) where every in-place form under every compiler version
+  and flag emits two separate loads, counts as the "routed through a temp and
+  copied to its home register" fingerprint. The test evidence must be recorded
+  in the commit. A different register *choice* with no extra instruction is not
+  a fingerprint: that is allocation, and stays rejected (fn_80132C6C).
+- **Same-engine sister-title function (user decision, 2026-09-28).** Pokémon XD
+  (GXXE01) shares Colosseum's GS engine. A helper is admitted when XD has it as
+  a named function and every one of these holds:
+  - the helper body makes the same calls in the same order, with the same
+    argument sources, as that XD function;
+  - the helper is named after the XD function (unmangled; a leading underscore
+    may be dropped);
+  - the source comment and the commit record the XD symbol, its address, and the
+    reference used (TeamOrre/xd-decomp `symbols.txt`, trevor403/xd-asm) with its
+    commit.
+
+  XD evidence only shows that the helper existed. It does not admit an invented
+  helper, a different body, or a helper whose only XD evidence is its register
+  choice. The normal gates below still apply. First use:
+  `floorInitScene`, `peopleMoveTypeRandomRot` and `peopleUpdateShadows`; see
+  `docs/recon/title_walls_evidence.md`.
+- **Named computed values (user decision, 2026-09-28).** A local that names a
+  *computed* value, assigned in its own statement, is natural source (it is
+  not a shaping temporary) when retail's instruction order shows that
+  statement came where the source puts it. It must be a value the code needs
+  anyway (e.g. a pointer or size argument). Retail's code must show it
+  computed before the neighbouring statement, and C must have no other way to
+  express that order. First use: THPPlayer.c fn_801E2CA8's `src` pointer for
+  the ring-buffer memcpy calls; retail computes it before the byte count, and
+  the function already names `dst` the same way. A pure copy of an existing
+  variable or parameter stays rejected under the temporaries rule above (e.g.
+  spline's `f32 t = tension;`).
+- **C++ reference bindings (user decision, 2026-09-28).** In a translation
+  unit evidenced as C++ (mangled symbols of that object in Colosseum or in the
+  XD demo linker map), a local declared as a reference to const bound to a
+  computed value (`T* const& p = &table[i];`) is natural C++ source, even
+  though its only visible effect is that MWCC holds the value in a front-end
+  temporary. Record the C++ evidence in the source header. It does not admit
+  copies of existing variables in C (spline's `f32 t = tension;` stays
+  rejected), and it doesn't make a C unit C++ without that evidence. First
+  use: dbgMenu_r61_prefix_80132C6C.cpp fn_80132C6C.
 - **Semantics unchanged.** The helper is plain program logic with a name that
   describes what it does, and inlining it by hand would leave the source
   meaning identical.
@@ -421,6 +484,29 @@ After merge:
 ## Handoff ledger
 
 Update this compact block after each merged batch or farm rotation.
+
+### Paused title-path lanes (2026-09-28): resume from here
+
+All agent lanes are stopped (user). Only the recomp session and the local model
+(worker, watchdog, promotion loop, dashboard) keep running. The title path is at
+208/210 accepted; row 7 (fn_8013024C) needs the whole hero_move TU linked, and
+row 43 (camera) is ported natively by the recomp. Each paused lane kept its
+worktree and branch, with a handoff note at `.lane-handoff/<LANE>.md` on its
+branch:
+
+| Lane | Worktree / branch | State |
+|---|---|---|
+| H1 hero_move group 1 | .claude/worktrees/agent-a83c9a2476167b0f6 | Merged (b504aa1a). cbPoison 99.44 left |
+| H2 hero_move group 2 | .claude/worktrees/agent-ad596fa78fac34e3a | NOT merged: conflicts with H1's shared-declaration edits. getStep 95.6, updateAnimation 99.5, fn_8012CA84 98.5, fn_8012D39C 98.9, and updateChat is exact with HEROMOVE_MEMBER typing |
+| H3 hero_move group 3 + TU plan | .claude/worktrees/agent-a3496e9355dd5a3aa | NOT merged: conflicts with H1. fn_8013024C, fn_8012F1FC, heroMoveSyncWithHero (neck-mode exception), fn_8012E388 and moveLeader at 100; tools/hero_move_tu.py generates the whole-TU source; the link plan is in the header |
+| X43 row 43/40/20 callees | .claude/worktrees/agent-a022db8f4a94f9763 | Merged (_msgGetCodeInfo). The handoff has fn_800D258C's exact form (volatile extern zero, an exception) and the jobj.c whole-TU route |
+| X38 row 38 fsys | .claude/worktrees/agent-adc1af562fd6659a0 | Merged (3 functions). Row 38: 14 blockers left; the handoff lists the next targets |
+
+Next step for row 7: one hero_move integration pass. Rebase H2's and H3's
+branches onto main, and resolve the shared declarations the same way (NaN extern
+unsized, literal sqrt constants, helpers above their users, HEROMOVE_MEMBER enum
+typing, deferred inlining with reverse address order). Then make the remaining
+functions exact and link the whole TU with H3's plan.
 
 ```text
 Baseline commit:
@@ -1927,3 +2013,583 @@ Repository hygiene: generated docs/progress_history.json and local
 Next action: continue byte-weighted source recovery from 61.151150%, prioritizing
   large reference-backed HSD/MSL/SDK and game functions.
 ```
+
+### Local fleet disk-full recovery - 2026-09-23
+
+Both old worker processes (83442, 83445) exited with ENOSPC. Queue state remained
+valid; the message-owner manual claim remained held. Recovered the Mac's missing
+attempt-002 manifest for fightTrainerCheckCanIrekaeFightPokemon from its retained
+candidate under an owner claim and build lock: 74.333336%, not exact or promoted.
+The baseline source hash was restored and verified. Dreamworld's interrupted
+pokemonToMenuPokemonStatus response/error report was preserved; normal startup
+recovered the orphaned task to pending.
+
+Removed only untracked duplicate compiler cache files whose size and SHA-256
+matched the live toolchain, in the four inactive
+`/private/tmp/pkmn-colosseum-agent-{hsd,people,sdk,win-sprite}` worktrees.
+Reclaimed 687,964,376 bytes. The larger subsequent free-space increase was
+independent; do not attribute it to this cleanup. No source, attempt history,
+report, branch or worktree was deleted; the people's lane dirty source remains.
+Before reusing these lanes, reprovision their private compiler caches through
+normal configure/Ninja downloads. Do not symlink the live compiler caches.
+
+Restarted the existing profiles as PIDs 98163 (mac-m3-fast, 7b, context 8192,
+512-byte ceiling, three-second delay) and 98164 (dreamworld-3080ti, 14b,
+context 16384). Both processes were checked live and advanced to new tasks.
+These PIDs are historical evidence, not permission to restart without checking
+current handles. Recovery manifests and cache hashes are under ignored
+`build/local_llm_campaign/manual/message_group_lookup_font/`.
+
+### Message comparison configuration cleanup - 2026-09-23
+
+Verified local fleet PIDs 98163 and 98164 live, requested graceful SIGTERM,
+and confirmed both handles absent before editing shared configure.py. Removed
+only the legacy O2 override for gs_msg_r56b_800F9EE4_o2; it now inherits the
+normal O4,p flags. No compiler version, split, or object status changed.
+The source comparison now has unsigned lengths and ordinary indexed loops,
+without local compiler controls. GScharCmp rises from 72.458336% to
+95.833336%, with three prologue instruction differences remaining. This is
+partial candidate progress, not new exact source or linked code.
+
+All-source/report, full retail link/SHA, native semantic tests, source quality
+and the 8,602-function regression audit pass. The owner-only queue refresh
+updates 27 message tasks and preserves attempt history; no fleet-wide sync or
+farm reconciliation was performed. Restarted the same profiles as PIDs 45071
+(mac-m3-fast, 7b, context 8192, 512-byte ceiling, three-second delay) and 45072
+(dreamworld-3080ti, 14b, context 16384), both with a 1024-token proposal cap.
+Both new processes were checked live and had claimed fresh tasks. These are
+historical handles: inspect current state before any future restart.
+Evidence lives under ignored
+`build/local_llm_campaign/manual/message_group_font_setter/`.
+
+### TEV data ownership maintenance - 2026-09-24
+
+Verified workers 45071 and 45072 live, saved their arguments and context
+limits, requested graceful SIGTERM, and confirmed both handles absent before
+changing shared symbols/splits. Paired the 80-byte TEV preset range with
+dolphin/sdk_candidate_800BBC0C; the former data owner keeps its other 508
+bytes and all 109 relocations. dtk's required data-unit reordering preserves
+all other ranges. GXSetTevOp becomes raw/canonical exact (+140 matched code),
+with no linked-code increase and an explicit -80 linked-data delta while
+the SDK object remains CodeCandidate. Full retail SHA and audits pass.
+
+Removed the SDK root's six legacy compiler-control pragma lines without
+raw regressions. Canonical 100% is still not enough to promote this object:
+fn_800BBCE0 is raw 99.85981%, and the compiled wrapper emits seven functions
+outside the scored range. Five owner functions with canonical/raw score
+discrepancies were added to the queue; three are blocked on intermediate
+wrapper source resolution. Do not run a global canonical-only sync that
+would discard these records without first fixing or preserving this audit
+coverage. Existing attempts and exact-review records remain intact.
+
+Restarted the saved profiles as PIDs 53561 (mac-m3-fast, 7b, context 8192,
+512-byte ceiling, three-second delay) and 53562 (dreamworld-3080ti, 14b,
+context 16384), each retaining its 1024-token cap. Both new process handles
+were checked live. These PIDs are historical evidence, not instructions to
+restart without rechecking current process state. The complete maintenance
+and validation records are under ignored
+`build/local_llm_campaign/manual/message_group_tev_integration/`.
+
+### Floor-929 draw dependency acceptance - 2026-10-02
+
+Accepted and linked `wazaSequenceUpdate`, `wazaSequenceFree`,
+`wazaSequenceSysFreeWazaResource`, `wazaSequenceEntryStop`, and `fn_801DEF0C`.
+The latter links with the already-exact neighbors `fn_801DEE14` and
+`fn_801DF070`. Five units contain 2,956 raw-identical text bytes and 109
+identical normalized relocations. Full DOL and both REL SHA-1 checks pass;
+the all-source report regression check against `d07f7fdf` passes.
+
+Two new function boundaries have a concrete link reason: split resource
+cleanup from the incomplete timing dispatcher at `0x801DB3F8`, and split the
+three exact animation functions from incomplete callbacks at `0x801DEE14`.
+No data ranges move. Entry-stop's existing wrapper now emits only its owned
+function. All accepted units use the existing GC/1.3 base optimization flags.
+
+Do not accept the normalized `fdiff.py` score alone: branch destinations are
+masked. Raw checks found and corrected four branch destinations in Free and
+EntryStop. Relocation checks also corrected `fn_801DF070`'s draft 1.0f literal
+to retail's shared 0.5f. Source exceptions remain listed in RULE_EXCEPTIONS.md.
+
+Compared with `d07f7fdf`: +5 exact functions / +2,468 matched code bytes, and
++7 linked functions / +2,956 linked code bytes. Totals: 7,640/8,608 exact
+functions; 1,733,920/2,498,020 matched code bytes (69.41177%);
+1,574,168/2,498,020 linked code bytes (63.01663%). The earlier teardown
+acceptance (`wazaSequenceSysRelease`, 304 bytes) is already in that baseline.
+
+Campaign remains paused. This accepts the reported decomp blockers, not the
+native callback registration or a headed boot beyond `0x80020F54`; those
+still require integration and closure validation in the native project.
+
+### Floor-929 entry start/update acceptance - 2026-10-02
+
+Accepted and linked `wazaSequenceEntryUpdate` and `wazaSequenceEntryStart`,
+using the new m2c batch `006854c45caf2c32d34a` as analysis input. Restored
+retail timing comparisons, wait/control dispatch, sound failure handling,
+and error logging. Draft output was checked against the target rather than
+accepted verbatim.
+
+The adjacent functions share one unit at `0x801D81CC-0x801D87B0` and generate
+all three switch tables at `0x803725C8-0x80372628`. Separate units introduced
+padding at the middle table's four-byte-aligned address; the merged unit
+preserves MWCC's eight-byte section alignment without object rewriting.
+The shared data owner is split around these generated tables, with the
+existing prefix/suffix contents retained. dtk's required data-unit ordering
+changes no other section extents.
+
+Acceptance: 1,508 raw-identical text bytes, 96 raw-identical generated data
+bytes, and 75 identical normalized relocations, including jump destinations.
+Full DOL and both REL SHA-1 checks pass; the all-source report has no
+regressions against `b083b3de`. Matching exceptions are source-tagged and
+listed in RULE_EXCEPTIONS.md.
+
+Compared with `b083b3de`: +2 exact functions / +1,508 matched code bytes,
+and +2 linked functions / +1,508 linked code bytes. The switch tables were
+already linked data, so they are not new data progress. Campaign remains
+paused. Native registration of callback `0x80020F54` and its remaining
+closure still require validation in the native project.
+
+### PDA mail animation exact-source acceptance - 2026-10-02
+
+Accepted exact source for `fn_8004D26C` and `fn_8004E8E0` using m2c batch
+`006854c45caf2c32d34a` to recover the value-flow shape. Both 224-byte phase
+callbacks now keep the original value, threshold, and computed sum as distinct
+scalars. A tagged no-op reference supplies retail's final FP web priority;
+the existing local peephole setting is now tagged and documented too.
+
+The two functions add 448 matched code bytes and two exact functions. They do
+not add linked code: `menu_pda_mail_r54b_8004BDB8_suffix` still contains
+incomplete peers and remains `CodeCandidate`. The full-report audit has no
+regressions, and canonical DOL/REL hash outputs remain current. Totals are
+7,644/8,608 exact functions and 1,735,876/2,498,020 matched code bytes;
+linked code remains 1,575,676 bytes (63.076996%). Campaign remains paused.
+
+### Menu-middle savedata selector acceptance - 2026-10-02
+
+Accepted and linked `fn_8006ACCC` (232 text bytes). The m2c batch
+`006854c45caf2c32d34a` exposed the original control-flow partition: savedata
+rule types 0 and 1 share the direct-slot path, while case 2 and the default
+share the four-slot trainer search. Expressing that partition as a switch
+restores retail's otherwise redundant `bge` plus unconditional branch.
+
+The one-function unit is raw instruction- and relocation-exact. No compiler
+shaping exception is required. The full-report audit has zero regressions and
+the DOL plus both REL hashes pass. Compared with `a1a776e0`: +1 exact function,
++232 matched code bytes, +1 linked function, and +232 linked code bytes. Totals
+are 7,645/8,608 exact functions, 1,736,108 matched code bytes, and 1,575,908
+linked code bytes. Campaign execution remains paused.
+
+### Debug-menu helper tail linkage - 2026-10-02
+
+Split the contiguous exact helper tail at `0x80134228-0x8013433C` from the
+incomplete `dbgMenu` candidate and linked `_dbgMenuGetWin__Fl`,
+`_dbgMenuGetIndex__FP14tagWINDOW_WORK`, `dbgMenuGetRootMenu`,
+`dbgMenuGetLink__Fl`, and `debugMenuGetNum__Fv` as a standalone source unit.
+The m2c batch `1ec415ae08498296bee3` was used to triage the surrounding menu
+work; these five functions were already exact and needed ownership isolation.
+
+The new unit is 276 raw-identical text bytes with identical relocations. Full
+DOL and REL hashes pass, and the report regression check against `56449a94`
+has no regressions. This adds five linked functions and 276 linked code bytes,
+with no change to the exact-source count. Totals are 7,646/8,608 exact
+functions, 1,736,156 matched code bytes, and 1,576,184 linked code bytes
+(63.097336%). Campaign execution remains paused.
+
+### Debug-menu interior helper linkage - 2026-10-02
+
+Split and linked `_dbgMenuCheckTerminate__FP14tagWINDOW_WORKl` at
+`0x80133BE4-0x80133C3C` and `_dbgMenuGetMsgID__FP14tagWINDOW_WORKl` at
+`0x80133E1C-0x80133E6C`, leaving the three incomplete neighboring ranges as
+separate candidates. The m2c validation batch `3f0ea4520f6f4376c442`
+independently scored both helpers at 100%; the canonical report already
+counted them as exact source inside the former incomplete owner.
+
+The two new units contribute 168 raw-identical linked text bytes and two
+linked functions, with no change to the exact-source count. The message-ID
+helper retains its existing local peephole setting, now source-tagged and
+listed in RULE_EXCEPTIONS.md. Full DOL and REL hashes pass, and the report
+regression audit has no regressions. Totals are 7,646/8,608 exact functions,
+1,736,156 matched code bytes, and 1,576,352 linked code bytes (63.104057%).
+Campaign execution remains paused.
+
+### PDA helper-island linkage - 2026-10-02
+
+Split and linked four exact PDA helpers across three units:
+`fn_800388C4`, `fn_80038A00`, `fn_80039004`, and `fn_8003907C`. The typed
+m2c drafts from batch `96273ca160367902ab70` were used as structural
+baselines, with the accepted source retaining the canonical implementations
+and data references.
+
+`fn_80038990` deliberately remains in a candidate unit. Its function text is
+exact, but isolating it emits a private 16-byte `.sdata2` conversion pool and
+perturbs canonical data layout, so it is not counted as linked progress.
+
+The accepted units contribute four linked functions and 508 raw-identical
+text bytes, with no change to exact-source totals. Full DOL and REL hashes,
+metric integrity, wrapper policy, quality tests, and the report regression
+audit pass. Totals are 7,646/8,608 exact functions, 1,736,156 matched code
+bytes, and 1,586,368 linked code bytes (63.505016%). Campaign execution
+remains paused.
+
+### PDA menu callback islands - 2026-10-02
+
+Split and linked three exact PDA callback islands: `fn_80038250` through
+`fn_80038380` at `0x80038250-0x8003842C`, `fn_80039498` through
+`fn_80039604` at `0x80039498-0x80039644`, and `fn_800398D4` through
+`fn_80039970` at `0x800398D4-0x80039A50`. These cover menu-sequence setup,
+selection clamping, item-list visibility, clipping, and cursor positioning.
+
+Typed m2c drafts from batch `96273ca160367902ab70` were used as structural
+baselines for all ten functions. In particular, the `fn_80039498` draft
+identified retail's four-word copy from `lbl_80267120`; using that existing
+table keeps the exact object text-only instead of duplicating the initializer
+in `.rodata` and shifting the retail data layout.
+
+The three units contribute ten linked functions and 1,284 raw-identical text
+bytes, with no change to exact-source totals. Full DOL and REL hashes, metric
+integrity, wrapper policy, quality tests, and the report regression audit
+pass. Totals are 7,646/8,608 exact functions, 1,736,156 matched code bytes,
+and 1,585,860 linked code bytes (63.484680%). Campaign execution remains
+paused.
+
+### PDA callback prefix linkage - 2026-10-02
+
+Split and linked the 13-function exact PDA callback run at
+`0x80037174-0x800376F8`, including `fn_80037180`, the four empty callbacks,
+the panel draw and colour callbacks, the message selector, and
+`fn_800376C8`. The source definition of `fn_80037180` now sits in retail
+address order, and the exact wrapper maps its old address-style
+`fn_80132A38` reference to the linked `msgctrlSetValue` symbol.
+
+The typed m2c draft from batch `96273ca160367902ab70` was used as a
+structural baseline for `fn_80037180`; it independently recovered the same
+callback flow and canonical message-control call. The four following fade
+callbacks remain in the residual candidate even though their function text
+scores 100% in the parent. Isolating them emits a private `0.0f` `.sdata2`
+entry; MWLink shifts the named PDA constant pool and fails the main DOL hash.
+External and volatile reload rewrites either shorten or reorder the retail
+instruction stream, so no score-only linkage is claimed.
+
+The accepted unit contributes 13 linked functions and 1,412 raw-identical
+text bytes, with no change to exact-source totals. Full DOL and REL hashes,
+metric integrity, wrapper policy, quality tests, and the report regression
+audit pass. Totals are 7,646/8,608 exact functions, 1,736,156 matched code
+bytes, and 1,584,576 linked code bytes (63.433277%). Campaign execution
+remains paused.
+
+### menuFight Pokemon-change suffix linkage - 2026-10-02
+
+Split and linked the contiguous exact menuFight suffix at
+`0x80010C98-0x80011288`: `menuPokemonCheckPokemonChange`,
+`menuFightOpenGBAMain`, `menuFightOpenGBAIrekae`, and
+`menuFightCloseTarget`. The m2c draft for the main function was structurally
+useful but did not compile; the accepted standalone source preserves the
+already exact canonical implementation and its original declarations.
+
+The new unit contributes four linked functions and 1,520 raw-identical text
+bytes, with no change to exact-source totals because all four functions were
+already exact inside the incomplete menuFight owner. Full DOL and REL hashes
+pass, the metric-integrity check passes, and the report regression audit has
+no regressions. Totals are 7,646/8,608 exact functions, 1,736,156 matched code
+bytes, and 1,577,872 linked code bytes (63.16491%). Campaign execution remains
+paused.
+
+### menuFight move-control block linkage - 2026-10-02
+
+Split and linked the contiguous exact block at `0x80010588-0x80010C98`:
+`menuFightDrawWaza`, `menuFightDrawCmdMsg`, `menuFightWazaButton`,
+`menuFightWazaCtrl`, and `menuFightMainCtrl`. The standalone source preserves
+the canonical implementations and the parent unit's GC/1.3 no-peephole build
+flags; its only table dependency remains an external reference.
+
+The new unit contributes five linked functions and 1,808 raw-identical text
+bytes, with no change to exact-source totals because the functions were
+already exact in the incomplete owner. Full DOL and REL hashes, metric
+integrity, wrapper policy, and report regression checks pass. Totals are
+7,646/8,608 exact functions, 1,736,156 matched code bytes, and 1,579,680
+linked code bytes (63.237286%). Campaign execution remains paused.
+
+### PDA-mail exact row/cursor block linkage - 2026-10-02
+
+Split and linked eight exact PDA-mail callbacks across three units from
+`0x8004C5B0-0x8004D34C`: `fn_8004C5B0`, the five row widgets
+`fn_8004C6C0` through `fn_8004CDD8`, `fn_8004CF78`, and `fn_8004D26C`.
+The available m2c drafts were used as structural references but ranged from
+compile failures to non-exact output; acceptance uses the already exact
+canonical implementations in retail address order.
+
+`fn_8004C4A4` was deliberately left in the preceding candidate. Its text
+scores 100% in the original owner, but a standalone carve emits a duplicate
+`0x4330000080000000` conversion constant. MWLink folds the retail pool entry,
+shifts later `.sdata2` symbols by eight bytes, and fails the main DOL hash.
+An explicit external-bias rewrite removes the duplicate section but changes
+the stack and FP instruction schedule, so it is not accepted.
+
+The accepted units contribute eight linked functions and 3,484 raw-identical
+text bytes. Full DOL and REL hashes, metric integrity, wrapper policy, and the
+report regression audit pass. Totals are 7,646/8,608 exact functions,
+1,736,156 matched code bytes, and 1,583,164 linked code bytes (63.376755%).
+Campaign execution remains paused.
+
+### PDA value-callback linkage - 2026-10-02
+
+Split and linked the exact PDA helper island at `0x80038124-0x80038170`:
+`fn_80038124` and `fn_80038138`. The following non-exact `fn_80038170`
+remains in its own candidate unit without changing its 81.02% score.
+
+The accepted unit contributes two linked functions and 76 raw-identical text
+bytes, with no change to exact-source totals. Full DOL and REL hashes, metric
+integrity, wrapper policy, quality tests, and the report regression audit
+pass. Totals are 7,646/8,608 exact functions, 1,736,156 matched code bytes,
+and 1,586,444 linked code bytes (63.508057%). Campaign execution remains
+paused.
+
+### PDA normal-button callback linkage - 2026-10-02
+
+Split and linked the exact PDA button callback `fn_80039F44` at
+`0x80039F44-0x80039F70`. The adjacent `fn_80039A84` m2c draft confirmed the
+existing control flow; a 640-candidate local rewrite search did not improve
+its 99.0954% score, so that function remains in the preceding candidate.
+
+The accepted unit contributes one linked function and 44 raw-identical text
+bytes, with no change to exact-source totals. Full DOL and REL hashes, metric
+integrity, wrapper policy, quality tests, and the report regression audit
+pass. Totals are 7,646/8,608 exact functions, 1,736,156 matched code bytes,
+and 1,586,488 linked code bytes (63.509823%). Campaign execution remains
+paused.
+
+### PDA model-texture renderer linkage - 2026-10-02
+
+Extracted and linked the exact GC/2.0 PDA renderer `fn_800492CC` at
+`0x800492CC-0x800495C8`. The latest typed m2c draft independently recovered
+the mode dispatch, one- or two-texture `menuModelRender` path, alpha
+calculation, and duplicated graphics setup. The accepted standalone source
+retains the already exact canonical implementation and references all scene,
+graphics, and float symbols externally, so the unit owns only text.
+
+The accepted unit contributes one linked function and 764 raw-identical text
+bytes, with no change to exact-source totals. Full DOL and REL hashes, metric
+integrity, wrapper policy, quality tests, and the report regression audit
+pass. Totals are 7,646/8,608 exact functions, 1,736,156 matched code bytes,
+and 1,587,252 linked code bytes (63.540405%). Campaign execution remains
+paused.
+
+### menuPokemonChange destination-handler linkage - 2026-10-02
+
+Split and linked the exact `fn_8002F284` destination handler at
+`0x8002F284-0x8002F79C`. A narrow compile-only guard lets the dedicated
+wrapper compile this function alone while the prefix and suffix candidates
+continue to include the full parent source unchanged. The current m2c draft
+is marked unsupported and contains unset-register gaps; it was useful only
+as a coarse outline of the repeated party checks and destination-state flow,
+not as acceptance evidence.
+
+The accepted unit contributes one linked function and 1,304 raw-identical
+text bytes, with no change to exact-source totals. Full DOL and REL hashes,
+metric integrity, wrapper policy, quality tests, and the report regression
+audit pass. Totals are 7,646/8,608 exact functions, 1,736,156 matched code
+bytes, and 1,588,556 linked code bytes (63.592606%). Campaign execution
+remains paused.
+
+### GBA upload worker linkage - 2026-10-02
+
+Split and linked the exact menu GBA upload functions `fn_8007B350` and
+`fn_8007B6A4` at `0x8007B350-0x8007B6D8`. They are standalone units because
+the upload setup uses the parent chunk's no-peephole setting while the worker
+callback uses the normal chunk flags. The latest typed m2c drafts independently
+recover the upload-buffer setup, CRC loop, worker launch, and completion flag;
+the accepted source preserves the already exact canonical implementations.
+
+The two units contribute 904 raw-identical linked text bytes, with no change to
+exact-source totals. Full DOL and REL hashes, metric integrity, asm-wrapper
+policy, quality tests, and report checks pass. Totals are 7,646/8,608 exact
+functions, 1,736,156 matched code bytes, and 1,589,460 linked code bytes
+(63.62879%). Campaign execution remains paused.
+
+### E-card shop save-flow linkage - 2026-10-02
+
+Split and linked the exact menu function `fn_800798E8` at
+`0x800798E8-0x80079C1C`. The latest typed m2c draft has no unknown fields,
+unknown types, unset registers, or translation gaps and independently recovers
+the capacity checks, savedata snapshot and rollback, item commit, and final
+confirmation flow. The accepted standalone source preserves the canonical
+implementation and uses the parent function's no-peephole unit setting.
+
+The unit contributes 820 raw-identical linked text bytes, with no change to
+exact-source totals. Full DOL and REL hashes, metric integrity, asm-wrapper
+policy, quality tests, and report checks pass. Totals are 7,646/8,608 exact
+functions, 1,736,156 matched code bytes, and 1,590,280 linked code bytes
+(63.661617%). Campaign execution remains paused.
+
+### Coupon display callback linkage - 2026-10-02
+
+Split and linked four exact menu callbacks at `0x8007A5E8-0x8007A850`:
+`fn_8007A5E8`, `fn_8007A664`, `fn_8007A6F0`, and `fn_8007A82C`. Three
+standalone units preserve the normal, no-peephole, and scheduling-off compiler
+requirements without local compiler-control pragmas. The typed m2c drafts
+independently recover the coupon value, mode visibility, rank selection, and
+fade-check behavior; the accepted source retains the canonical typed forms.
+
+The units contribute 616 raw-identical linked text bytes, with no change to
+exact-source totals. Full DOL and REL hashes, metric integrity, asm-wrapper
+policy, quality tests, and report checks pass. Totals are 7,646/8,608 exact
+functions, 1,736,156 matched code bytes, and 1,590,896 linked code bytes
+(63.686283%). Campaign execution remains paused.
+
+### menuShop travel-cancellation linkage - 2026-10-02
+
+Split and linked the exact `fn_8002D5D4` travel-cancellation handler at
+`0x8002D5D4-0x8002D91C`. The typed m2c draft independently recovers the three
+location-state branches, menu normalization, allocation lifetime, and final
+event trigger. The accepted standalone source retains the canonical inline
+helpers. It also preserves the parent source's declaration context for
+`fn_80018F54`; adding a modern prototype removed retail's saved `location`
+copy and measured 99.5%, while the original implicit declaration restores the
+exact call sequence without artificial register shaping.
+
+The unit contributes 840 raw-identical linked text bytes, with no change to
+exact-source totals. Full DOL and REL hashes, metric integrity, asm-wrapper
+policy, quality tests, and report checks pass. Totals are 7,646/8,608 exact
+functions, 1,736,156 matched code bytes, and 1,591,736 linked code bytes
+(63.719906%). Campaign execution remains paused.
+
+### menuPokemon controller/close linkage - 2026-10-02
+
+Split and linked `menuPokemonCtrl` and `menuPokemonClose` at
+`0x8001AF44-0x8001B1EC`. Separate standalone units preserve the controller's
+no-peephole setting and the close callback's O4/scheduling-off settings at
+object scope. The typed m2c draft independently recovers the controller's two
+animation-state loops, sprite positioning, and shared timer update; acceptance
+uses the existing canonical typed implementation.
+
+The two units contribute 680 raw-identical linked text bytes, with no change
+to exact-source totals. Full DOL and REL hashes, metric integrity, asm-wrapper
+policy, quality tests, and report checks pass. Totals are 7,646/8,608 exact
+functions, 1,736,156 matched code bytes, and 1,592,416 linked code bytes
+(63.747128%). Campaign execution remains paused.
+
+### menuPokemon entry-point linkage - 2026-10-02
+
+Split and linked the five exact entry points from `menuPokemonOpenItemGive`
+through `menuPokemonMain` at `0x8001BCEC-0x8001BEBC`. Four open wrappers share
+an O4/no-peephole unit; `menuPokemonMain` uses a separate O4/scheduling-off
+unit. The typed m2c drafts independently confirm each argument permutation,
+state update, and synchronous close path. The accepted source preserves the
+original block-scope declaration differences, including the unprototyped
+`menuPokemonOpenSub` call in `menuPokemonOpenItemUse`.
+
+The two units contribute 464 raw-identical linked text bytes, with no change
+to exact-source totals. Full DOL and REL hashes, metric integrity, asm-wrapper
+policy, quality tests, and report checks pass. Totals are 7,646/8,608 exact
+functions, 1,736,156 matched code bytes, and 1,592,880 linked code bytes
+(63.765705%). Campaign execution remains paused.
+
+### menuNameEntry visibility callback linkage - 2026-10-02
+
+Split and linked eight exact name-entry visibility callbacks at
+`0x80026478-0x80026740`. Three standalone units preserve the parent O4p mode
+and the callbacks' normal/no-peephole variants. The typed m2c drafts confirm
+the selected-Pokemon gender tests and state-table lookups. Natural branch
+polarity produces all six state callbacks exactly; the two gender callbacks
+retain a semantic shared epilogue for their validity/sex short circuit.
+
+The following three exact-scoring animation callbacks remain candidate-only:
+their source comments explicitly document declaration-order register shaping,
+which is not acceptable promotion evidence. The accepted units contribute 712
+raw-identical linked text bytes, with no change to exact-source totals. Full
+DOL and REL hashes, metric integrity, asm-wrapper policy, quality tests, and
+report checks pass. Totals are 7,646/8,608 exact functions, 1,736,156 matched
+code bytes, and 1,593,592 linked code bytes (63.79421%). Campaign execution
+remains paused.
+
+### PDA-mail metadata/cursor linkage - 2026-10-02
+
+Split and linked ten exact PDA-mail callbacks at `0x8004D590-0x8004DA64`.
+Three standalone units preserve target address order and isolate the one normal
+peephole callback from the attachment, text, cursor, phase, and modal-list
+callbacks built no-peephole. The typed m2c drafts report no translation or
+saved-register gaps for the entire run and independently recover the same
+mail-ID lookups, visibility decisions, cursor wrap, and attachment dispatch.
+
+The units contribute 1,236 raw-identical linked text bytes, with no change to
+exact-source totals. Full DOL and REL hashes, metric integrity, asm-wrapper
+policy, quality tests, and report checks pass. Totals are 7,646/8,608 exact
+functions, 1,736,156 matched code bytes, and 1,594,828 linked code bytes
+(63.843685%). Campaign execution remains paused.
+
+### menuCB Pokemon metadata callback linkage - 2026-10-02
+
+Split and linked ten exact Pokemon metadata callbacks at
+`0x80053A60-0x80053ED8`. The first nine callbacks use a standalone
+no-peephole unit; the nickname callback remains in a normal-peephole unit.
+This preserves the measured compiler variants without local pragmas in either
+accepted source. Three independent m2c sweeps recover the same mark, held-item,
+sex, species, level, and nickname behavior with no translation, transfer,
+saved-register, field, or type diagnostics.
+
+The units contribute 1,144 raw-identical linked text bytes, with no change to
+exact-source totals. Full DOL and REL hashes, metric integrity, asm-wrapper
+policy, quality tests, and report checks pass. Totals are 7,646/8,608 exact
+functions, 1,736,156 matched code bytes, and 1,595,972 linked code bytes
+(63.88948%). Campaign execution remains paused.
+
+### menuNameEntry selection callback linkage - 2026-10-02
+
+Split and linked seven exact name-entry selection callbacks at
+`0x80028444-0x80028830`. Four standalone units preserve the inherited O4,
+scheduling, and no-peephole modes at unit level while removing local compiler
+pragmas and register-named locals from accepted source. Three independent m2c
+sweeps corroborate the selection-label lookup, input handling, phase control,
+and opposite human/Pokemon model visibility predicates.
+
+The units contribute 1,004 raw-identical linked text bytes, with no change to
+exact-source totals. Full DOL and REL hashes, metric integrity, asm-wrapper
+policy, quality tests, and report checks pass. Totals are 7,646/8,608 exact
+functions, 1,736,156 matched code bytes, and 1,596,976 linked code bytes
+(63.929672%). Campaign execution remains paused.
+
+### menuCB selection callback linkage - 2026-10-02
+
+Split and linked six exact menuCB callbacks at `0x80056610-0x80056854`.
+Three standalone units preserve the observed compiler boundary: `fn_80056610`,
+`fn_80056704`, and `fn_800567AC` use the parent source's no-peephole mode,
+while `fn_800566B4`, `fn_800566D8`, and `fn_800566E8` retain the normal mode.
+The typed m2c drafts independently recover the same state dispatch, globals,
+selection wrapping, menu visibility calls, and animation direction updates.
+
+The units contribute 580 raw-identical linked text bytes, with no change to
+exact-source totals. Full DOL and REL hashes, metric integrity, asm-wrapper
+policy, quality tests, and report checks pass. Totals are 7,646/8,608 exact
+functions, 1,736,156 matched code bytes, and 1,597,556 linked code bytes
+(63.952889%). Campaign execution remains paused.
+
+### menuCB Pokemon-state callback linkage - 2026-10-02
+
+Split and linked eight exact menuCB callbacks at `0x800573C0-0x80057538`.
+The first five and final two callbacks compile under the normal GC/1.3 O4p
+mode; `fn_800574A8` is isolated under the parent source's scheduling-off mode.
+The latest typed m2c validation has no unknown-field, translation, or unset-
+register diagnostics for any callback and independently scores three exact;
+the accepted source preserves all eight previously measured canonical bodies.
+
+The units contribute 376 raw-identical linked text bytes, with no change to
+exact-source totals. Full DOL and REL hashes, metric integrity, asm-wrapper
+policy, quality tests, and report checks pass. Totals are 7,646/8,608 exact
+functions, 1,736,156 matched code bytes, and 1,597,932 linked code bytes
+(63.967943%). Campaign execution remains paused.
+
+### menuShop varargs/display callback linkage - 2026-10-02
+
+Split and linked seven exact menuShop callbacks at
+`0x80029FAC-0x8002A5B0`. Both standalone units preserve the parent source's
+inherited GC/1.3 O4p, scheduling-on, no-peephole mode. The first unit records
+the existing byte-match-first exceptions in its four manually reconstructed
+varargs/table callbacks; the second uses cleaned typed source for three display
+callbacks. The typed m2c batch confirms the same table/varargs loop structure
+but cannot compile its generated full-TU drafts around that context, so it is
+structural evidence rather than acceptance evidence.
+
+The units contribute 1,540 raw-identical linked text bytes, with no change to
+exact-source totals. Full DOL and REL hashes, metric integrity, asm-wrapper
+policy, quality tests, and report checks pass. Totals are 7,646/8,608 exact
+functions, 1,736,156 matched code bytes, and 1,599,472 linked code bytes
+(64.029576%). Campaign execution remains paused.

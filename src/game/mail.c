@@ -25,8 +25,8 @@
  * fn_801D1338 - Waza get sequence count.
  * Address: 0x801D1338 | Size: 0x2C
  */
-#if !defined(PR424_MAIL_SPLIT_1338_1470) || \
-    defined(PR424_MAIL_1338_13E4)
+#if (!defined(PR409_MAIL_SPLIT) || defined(PR409_MAIL_1338_1470)) && \
+    (!defined(PR424_MAIL_SPLIT_1338_1470) || defined(PR424_MAIL_1338_13E4))
 u16 fn_801D1338(void) {
     return *(u16*)((u8*)savedataGetStatus(0, 10) + 0x444);
 }
@@ -48,14 +48,11 @@ typedef struct MailPartyScratchExt {
  * Address: 0x801D1364 | Size: 0x38
  * Stores handle as u16 at party+0x444 via savedataGetStatus(0, 0xA).
  */
-#pragma push
-#pragma peephole off
 void* fn_801D1364(u16 handle, s32 idx) {
     MailPartyScratchExt* party = (MailPartyScratchExt*)savedataGetStatus(0, 0x0A);
     party->sortMode = handle;
     return party;
 }
-#pragma pop
 
 /**
  * fn_801D139C - Waza get entry type.
@@ -272,8 +269,6 @@ u32 fn_801D1650(u32 idx) {
  * fn_801D167C - Waza set current handle.
  * Address: 0x801D167C | Size: 0x48
  */
-#pragma push
-#pragma peephole off
 void fn_801D167C(u8 handle) {
     s32 slot = handle & 0xFF;
     WazaPartyScratch* party = (WazaPartyScratch*)savedataGetStatus(0, 0x0A);
@@ -281,18 +276,15 @@ void fn_801D167C(u8 handle) {
         party->currentHandle = handle;
     }
 }
-#pragma pop
 
 /**
  * fn_801D16C4 - Waza get current handle.
  * Address: 0x801D16C4 | Size: 0x2C
  */
-#pragma scheduling off
 u8 fn_801D16C4(void) {
     WazaPartyScratch* party = (WazaPartyScratch*)savedataGetStatus(0, 0x0A);
     return party->currentHandle;
 }
-#pragma scheduling on
 #endif
 
 #if !defined(PR424_MAIL_SPLIT_167C_1A44)
@@ -320,105 +312,13 @@ u32 mailGetAttachFileGroup(s32 idx) {
  * Mid-level functions controlling move animation playback.
  * ========================================================================= */
 
-/**
- * fn_801D1734 - Waza animation play with target tracking.
- * Address: 0x801D1734 | Size: 0x130
- */
-u8 fn_801D1734(s32 sequence, s32 index) {
-    extern u32* lbl_80478EA0;
-    extern u16* lbl_80478EA4;
-    WazaEntry* entry;
-    u16 current;
-    u16 count;
+extern u32* lbl_80478EA0;
+extern u16* lbl_80478EA4;
 
-    if (sequence < 0 || (u32)sequence >= *lbl_80478E98) {
-        entry = NULL;
-    } else {
-        entry = &lbl_80478E9C[sequence];
-    }
-    current = entry == NULL ? 0xFFFF : *(u16*)((u8*)entry + 2);
-
-    if (current == 0xFFFF) {
-        count = 0xFFFF;
-    } else {
-        count = 0;
-        while (current < *lbl_80478EA0) {
-            if (*(u16*)((u8*)lbl_80478EA4 + current * 4 + 2) == 0) {
-                break;
-            }
-            count++;
-            current++;
-        }
-    }
-    if (count == 0xFFFF || index >= count) {
-        return 0xFF;
-    }
-
-    if (sequence < 0 || (u32)sequence >= *lbl_80478E98) {
-        entry = NULL;
-    } else {
-        entry = &lbl_80478E9C[sequence];
-    }
-    current = entry == NULL ? 0xFFFF : *(u16*)((u8*)entry + 2);
-    if (current == 0xFFFF) {
-        return 0xFF;
-    }
-    return ((u8*)lbl_80478EA4)[(u16)(current + index) * 4];
-}
-
-/**
- * fn_801D1864 - Waza animation play with camera.
- * Address: 0x801D1864 | Size: 0x140
- */
-u16 fn_801D1864(s32 sequence, s32 index) {
-    extern u32* lbl_80478EA0;
-    extern u16* lbl_80478EA4;
-    WazaEntry* entry;
-    u16 current;
-    u16 count;
-
-    if (sequence < 0 || (u32)sequence >= *lbl_80478E98) {
-        entry = NULL;
-    } else {
-        entry = &lbl_80478E9C[sequence];
-    }
-    current = entry == NULL ? 0xFFFF : *(u16*)((u8*)entry + 2);
-
-    if (current == 0xFFFF) {
-        count = 0xFFFF;
-    } else {
-        count = 0;
-        while (current < *lbl_80478EA0) {
-            if (*(u16*)((u8*)lbl_80478EA4 + current * 4 + 2) == 0) {
-                break;
-            }
-            count++;
-            current++;
-        }
-    }
-    if (count == 0xFFFF || index >= count) {
-        return 0xFFFF;
-    }
-
-    if (sequence < 0 || (u32)sequence >= *lbl_80478E98) {
-        entry = NULL;
-    } else {
-        entry = &lbl_80478E9C[sequence];
-    }
-    current = entry == NULL ? 0xFFFF : *(u16*)((u8*)entry + 2);
-    if (current == 0xFFFF) {
-        return 0xFFFF;
-    }
-    return *(u16*)((u8*)lbl_80478EA4 + (u16)(current + index) * 4 + 2);
-}
-
-/**
- * fn_801D19A4 - Waza animation speed control.
- * Address: 0x801D19A4 | Size: 0xA0
- */
-u32 fn_801D19A4(s32 idx) {
-    extern u32* lbl_80478EA0;
-    extern u16* lbl_80478EA4;
+/* RULE-EXCEPTION(user-approved): inline copy of fn_801D19A4 (with break instead of an
+ * early return) so fn_801D1734/fn_801D1864 expand it as retail does — see
+ * docs/RULE_EXCEPTIONS.md */
+static inline u32 mailGetSequenceLength(s32 idx) {
     WazaEntry* entry;
     u16 current;
     u32 count;
@@ -440,7 +340,114 @@ u32 fn_801D19A4(s32 idx) {
 
     count = 0;
     while (current < *lbl_80478EA0) {
-        if (lbl_80478EA4[current * 2 + 1] == 0) {
+        /* RULE-EXCEPTION(user-approved): no-op (u16) cast on the u16 index re-extends it in
+         * the loop body as retail does — see docs/RULE_EXCEPTIONS.md */
+        if (lbl_80478EA4[(u16)current * 2 + 1] == 0) {
+            break;
+        }
+        count++;
+        current++;
+    }
+    return count;
+}
+
+/**
+ * fn_801D1734 - Waza animation play with target tracking.
+ * Address: 0x801D1734 | Size: 0x130
+ */
+u8 fn_801D1734(s32 sequence, s32 index) {
+    WazaEntry* entry;
+    u16 current;
+    u16 count;
+
+    count = mailGetSequenceLength(sequence);
+    if (count == 0xFFFF) {
+        return 0xFF;
+    }
+    if (index >= count) {
+        return 0xFF;
+    }
+
+    if (sequence < 0 || (u32)sequence >= *lbl_80478E98) {
+        entry = NULL;
+    } else {
+        entry = &lbl_80478E9C[sequence];
+    }
+    if (entry == NULL) {
+        current = 0xFFFF;
+    } else {
+        current = *(u16*)((u8*)entry + 2);
+    }
+    if (current == 0xFFFF) {
+        return 0xFF;
+    }
+    current += index;
+    return ((u8*)lbl_80478EA4)[current * 4];
+}
+
+/**
+ * fn_801D1864 - Waza animation play with camera.
+ * Address: 0x801D1864 | Size: 0x140
+ */
+u16 fn_801D1864(s32 sequence, s32 index) {
+    WazaEntry* entry;
+    u16 current;
+    u16 count;
+
+    count = mailGetSequenceLength(sequence);
+    if (count == 0xFFFF) {
+        return 0xFFFF;
+    }
+    if (index >= count) {
+        return 0xFFFF;
+    }
+
+    if (sequence < 0 || (u32)sequence >= *lbl_80478E98) {
+        entry = NULL;
+    } else {
+        entry = &lbl_80478E9C[sequence];
+    }
+    if (entry == NULL) {
+        current = 0xFFFF;
+    } else {
+        current = *(u16*)((u8*)entry + 2);
+    }
+    if (current == 0xFFFF) {
+        return 0xFFFF;
+    }
+    current += index;
+    return lbl_80478EA4[current * 2 + 1];
+}
+
+/**
+ * fn_801D19A4 - Waza animation speed control.
+ * Address: 0x801D19A4 | Size: 0xA0
+ */
+u32 fn_801D19A4(s32 idx) {
+    WazaEntry* entry;
+    u16 current;
+    u32 count;
+
+    if (idx < 0 || (u32)idx >= *lbl_80478E98) {
+        entry = NULL;
+    } else {
+        entry = &lbl_80478E9C[idx];
+    }
+
+    if (entry == NULL) {
+        current = 0xFFFF;
+    } else {
+        current = *(u16*)((u8*)entry + 2);
+    }
+    if (current == 0xFFFF) {
+        return 0xFFFF;
+    }
+
+    count = 0;
+    while (current < *lbl_80478EA0) {
+        /* RULE-EXCEPTION(user-approved): no-op (u16) cast on the u16 index re-extends it in
+         * the loop body as retail does — see docs/RULE_EXCEPTIONS.md */
+        if (lbl_80478EA4[(u16)current * 2 + 1] == 0) {
             return count;
         }
         count++;
@@ -511,36 +518,27 @@ u32 mailGetSubject(s32 idx) {
  * Address: 0x801D1B10 | Size: 0x3C
  * Calls savedataGetStatus(0, 0xA), stores (handle & 0xFF) to result+0x442.
  */
-#pragma push
-#pragma peephole off
 void fn_801D1B10(s32 handle) {
     WazaPartyScratch* party = (WazaPartyScratch*)savedataGetStatus(0, 0x0A);
     party->selectedHandle = (u8)handle;
 }
-#pragma pop
 
 /**
  * mailGetSortMode - Waza get byte from battle party at offset 0x442.
  * Address: 0x801D1B4C | Size: 0x2C
  */
-#pragma scheduling off
 u8 mailGetSortMode(void) {
     WazaPartyScratch* party = (WazaPartyScratch*)savedataGetStatus(0, 0x0A);
     return party->selectedHandle;
 }
-#pragma scheduling on
 
-static inline s32 mailFlagIndex(s32 mailId)
+static inline s32 mailGetFlagPos(s32 mailId, u8* mask)
 {
     if (mailId < 0 || mailId >= 0x200) {
         return -1;
     }
+    *mask = 1 << (7 - mailId % 8);
     return mailId / 8;
-}
-
-static inline u8 mailFlagMask(s32 mailId)
-{
-    return 1 << (7 - mailId % 8);
 }
 
 /**
@@ -550,8 +548,8 @@ static inline u8 mailFlagMask(s32 mailId)
 BOOL fn_801D1B78(s32 mailId) {
     WazaPartyScratch* party =
         (WazaPartyScratch*)savedataGetStatus(0, 0x0A);
-    s32 index = mailFlagIndex(mailId);
-    u8 mask = mailFlagMask(mailId);
+    u8 mask;
+    s32 index = mailGetFlagPos(mailId, &mask);
 
     if (index < 0) {
         return FALSE;
@@ -566,8 +564,8 @@ BOOL fn_801D1B78(s32 mailId) {
 BOOL fn_801D1C20(s32 mailId) {
     WazaPartyScratch* party =
         (WazaPartyScratch*)savedataGetStatus(0, 0x0A);
-    s32 index = mailFlagIndex(mailId);
-    u8 mask = mailFlagMask(mailId);
+    u8 mask;
+    s32 index = mailGetFlagPos(mailId, &mask);
 
     if (index < 0) {
         return FALSE;
@@ -580,8 +578,6 @@ BOOL fn_801D1C20(s32 mailId) {
  * mailChkReceiveMail - Waza effect trajectory calculation.
  * Address: 0x801D1CC4 | Size: 0x94
  */
-#pragma push
-#pragma peephole off
 BOOL mailChkReceiveMail(s32 idx) {
     WazaPartyScratch* party = (WazaPartyScratch*)savedataGetStatus(0, 0x0A);
     u16 count;
@@ -606,7 +602,6 @@ BOOL mailChkReceiveMail(s32 idx) {
     }
     return TRUE;
 }
-#pragma pop
 
 /**
  * Append a mailbox ID and clear its received flag.
@@ -629,8 +624,7 @@ BOOL mailAddMailbox(s32 mailId) {
     party->count++;
 
     party = (WazaPartyScratch*)savedataGetStatus(0, 0x0A);
-    index = mailFlagIndex(mailId);
-    mask = mailFlagMask(mailId);
+    index = mailGetFlagPos(mailId, &mask);
     if (index >= 0) {
         party->receivedFlags[index] &= ~mask;
     }
@@ -673,14 +667,18 @@ s32 mailGetReceiveNumber(s32 mailId)
     return idx;
 }
 
+#endif
+
+/* The final mailbox carve links separately from the earlier mail candidates. */
+#if !defined(PR409_MAIL_SPLIT) || defined(PR409_MAIL_1B10_2080) || \
+    defined(PR409_MAIL_1F0C_2080)
+
 /**
  * mailGetMailIDInMailbox - Waza get party entry by index from u16 array.
  * Address: 0x801D1F0C | Size: 0x70
  * Gets party via savedataGetStatus(0, 0xA), bounds-checks idx against party+0x400,
  * returns u16 at party[idx*2].
  */
-#pragma push
-#pragma peephole off
 s32 mailGetMailIDInMailbox(s32 idx) {
     WazaPartyScratch* party;
     WazaPartyScratch* countParty;
@@ -695,25 +693,22 @@ neg1:
 load:
     return party->seqIds[idx];
 }
-#pragma pop
 
 /**
  * mailGetNbMailInMailbox - Waza get active effect count from party+0x400.
  * Address: 0x801D1F7C | Size: 0x2C
  */
-#pragma scheduling off
 u16 mailGetNbMailInMailbox(void) {
     WazaPartyScratch* party = (WazaPartyScratch*)savedataGetStatus(0, 0x0A);
     return party->count;
 }
-#pragma scheduling on
 
 /**
- * mailInitMailbox - Waza effect color modulation.
+ * mailInitMailbox - Clear mailbox state and initialize every sequence ID.
  * Address: 0x801D1FA8 | Size: 0xD8
  */
 void mailInitMailbox(WazaPartyScratch* mailbox) {
-    s32 i;
+    u32 i;
 
     memset(mailbox, 0, 0x446);
     mailbox->selectedHandle = 0;

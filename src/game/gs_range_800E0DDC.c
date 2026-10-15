@@ -98,7 +98,7 @@ extern void lightGetFrameCount__FP9_HSD_AObj(u8*);
 extern void fn_800DE09C(void);
 extern void fn_800DE128(void);
 extern void fn_800E09E8(void*, void*, u32);
-extern u8 fn_800E0E14(u32, u32);
+extern u8 fn_800E0E14(u8, u8);
 extern u32 _matGSmatObjMakeTExp(void*, void*, void*, void*, void*);
 extern void _matGSmatEnableEnvMapExt(u8*);
 extern s32 _matGSmatObjLoad(u8*);
@@ -412,6 +412,7 @@ extern u32 lbl_8047AB40;
 extern u32 lbl_8047AB44;
 
 
+#if !defined(GS_RANGE_800E0E14_ONLY)
 u32 fn_800E0DDC(void)
 {
     typedef struct GSFreeBlock {
@@ -438,296 +439,346 @@ u32 fn_800E0DDC(void)
     }
     return total;
 }
+#endif
 
 
 #if !defined(GS_RANGE_800E0DDC_ONLY)
+/* GSmem free-list node (lives at the start of each free block). */
+typedef struct GSFreeBlock {
+    struct GSFreeBlock* prev;
+    struct GSFreeBlock* next;
+    u32 size;
+} GSFreeBlock;
+
+/* GSmem handle-table entry; the table grows down from lbl_8047AB34. */
+typedef struct GSMemHandle {
+    u16 used;
+    u16 locked;
+    u8* data;
+    u32 size;
+    u16 pinned;
+    u16 checksum;
+} GSMemHandle;
+
+static inline u32 gsMemLargestFree(void) {
+    GSFreeBlock* block;
+    u32 largest = 0;
+
+    for (block = (GSFreeBlock*)lbl_8047AB30; block != NULL; block = block->next) {
+        if (block->size > largest) {
+            largest = block->size;
+        }
+    }
+    return largest;
+}
+
+static inline GSMemHandle* gsMemFindHandle(u8* data) {
+    GSMemHandle* handle;
+
+    for (handle = (GSMemHandle*)lbl_8047AB34; handle >= (GSMemHandle*)lbl_8047AB38; handle--) {
+        if (handle->used != 0 && handle->data == data) {
+            return handle;
+        }
+    }
+    return NULL;
+}
+
+/* Forward copy used to slide allocations down; word-wise when the
+ * regions are at least a word apart. */
+static inline void gsMemCopy(u8* dst, u8* src, u32 size) {
+    u32 distance = src - dst;
+
+    if ((distance > 0 ? distance : -distance) >= 4) {
+        u32* wordDst = (u32*)dst;
+        u32* wordSrc = (u32*)src;
+        u32 words = size >> 2;
+        u32 bytes = size & 3;
+
+        while (words != 0) {
+            *wordDst++ = *wordSrc++;
+            words--;
+        }
+        dst = (u8*)wordDst;
+        src = (u8*)wordSrc;
+        while (bytes != 0) {
+            *dst++ = *src++;
+            bytes--;
+        }
+    } else {
+        while (size != 0) {
+            *dst++ = *src++;
+            size--;
+        }
+    }
+}
+
+static inline void gsMemMergeNext(GSFreeBlock* block) {
+    if (block->next != NULL && block->next == (GSFreeBlock*)((u8*)block + block->size)) {
+        block->size += block->next->size;
+        if (block->next->next != NULL) {
+            block->next->next->prev = block;
+        }
+        block->next = block->next->next;
+    }
+}
+
+static inline void gsMemMergePrev(GSFreeBlock* block) {
+    if (block->prev != NULL && (GSFreeBlock*)((u8*)block->prev + block->prev->size) == block) {
+        block->prev->size += block->size;
+        if (block->next != NULL) {
+            block->next->prev = block->prev;
+        }
+        block->prev->next = block->next;
+    }
+}
+
+static inline void gsMemInsertFree(GSFreeBlock* block, u32 size) {
+    GSFreeBlock* before = NULL;
+    GSFreeBlock* scan;
+
+    for (scan = (GSFreeBlock*)lbl_8047AB30; scan != NULL && scan < block; scan = scan->next) {
+        before = scan;
+    }
+    if (before != NULL) {
+        block->prev = before;
+        block->next = before->next;
+    } else {
+        block->prev = NULL;
+        block->next = (GSFreeBlock*)lbl_8047AB30;
+        lbl_8047AB30 = (u32)block;
+    }
+    block->size = size;
+    if (block->prev != NULL) {
+        block->prev->next = block;
+    }
+    if (block->next != NULL) {
+        block->next->prev = block;
+    }
+    gsMemMergeNext(block);
+    gsMemMergePrev(block);
+}
+
+static inline u8 gsMemPaddingIntact(GSMemHandle* handle) {
+    u8* tail;
+
+    if (handle->data[0] != 0) {
+        return 0;
+    }
+    if (handle->data[1] != 0) {
+        return 0;
+    }
+    if (handle->data[2] != 0) {
+        return 0;
+    }
+    if (handle->data[3] != 0) {
+        return 0;
+    }
+    tail = handle->data + handle->size - 4;
+    if (tail[0] != 0) {
+        return 0;
+    }
+    if (tail[1] != 0) {
+        return 0;
+    }
+    if (tail[2] != 0) {
+        return 0;
+    }
+    if (tail[3] != 0) {
+        return 0;
+    }
+    return 1;
+}
+
+static inline void gsMemClearPadding(GSMemHandle* handle) {
+    u8* tail;
+
+    tail = handle->data;
+    tail[0] = 0;
+    tail[1] = 0;
+    tail[2] = 0;
+    tail[3] = 0;
+    tail = handle->data + handle->size - 4;
+    tail[0] = 0;
+    tail[1] = 0;
+    tail[2] = 0;
+    tail[3] = 0;
+}
+
+static inline u16 gsMemChecksum(GSMemHandle* handle) {
+    u32 sum = 0x3D94;
+    u16* half = (u16*)handle->data;
+    u32 halves = handle->size >> 1;
+    u32 bytes = handle->size & 1;
+    u8* data;
+
+    while (halves != 0) {
+        sum += *half++;
+        halves--;
+    }
+    data = (u8*)half;
+    while (bytes != 0) {
+        sum += *data++;
+        bytes--;
+    }
+    return sum;
+}
+
+#if !defined(GS_RANGE_800E0E14_ONLY)
 /* Compact the movable allocations in the GS scratch heap. */
 u32 fn_800E1544(void)
 {
-    typedef struct GSFreeBlock {
-        struct GSFreeBlock* prev;
-        struct GSFreeBlock* next;
-        u32 size;
-    } GSFreeBlock;
-    typedef struct GSAllocDesc {
-        u16 used;
-        u16 locked;
-        u8* data;
-        u32 size;
-        u16 pinned;
-        u16 checksum;
-    } GSAllocDesc;
     extern const char lbl_80270BB8[];
-
     GSFreeBlock* block;
-    GSFreeBlock* scan;
-    GSFreeBlock* before;
-    GSFreeBlock* after;
     GSFreeBlock* fresh;
-    GSAllocDesc* desc;
-    GSAllocDesc* candidates[4];
-    GSAllocDesc* chosen[4];
-    u8* source;
+    GSFreeBlock* prev;
+    GSFreeBlock* next;
+    GSMemHandle* desc;
+    GSMemHandle* saved;
+    GSMemHandle** entry;
+    GSMemHandle* top;
+    GSMemHandle* bottom;
+    GSMemHandle* candidates[4];
     u8* destination;
+    u8* source;
     u32 oldLargest;
-    u32 newLargest;
+    u32 size;
+    u32 remaining;
     u32 total;
-    u32 bestTotal;
-    u32 remainder;
-    u32 candidateCount;
-    u32 chosenCount;
-    u32 i;
-    u32 j;
     u32 sum;
-    u32 wasHead;
+    s32 count;
+    s32 i;
+    s32 j;
+    u8 wasHead;
 
-#define COPY_BYTES(dst_, src_, count_)                                     \
-    do {                                                                    \
-        u8* copyDst = (u8*)(dst_);                                         \
-        u8* copySrc = (u8*)(src_);                                         \
-        u32 copyCount = (count_);                                          \
-        if (copySrc > copyDst) {                                           \
-            for (i = 0; i < copyCount; i++) {                             \
-                copyDst[i] = copySrc[i];                                   \
-            }                                                               \
-        } else if (copyDst > copySrc) {                                    \
-            for (i = copyCount; i != 0; i--) {                            \
-                copyDst[i - 1] = copySrc[i - 1];                           \
-            }                                                               \
-        }                                                                   \
-    } while (0)
-
-#define COALESCE_FREE(node_)                                                \
-    do {                                                                    \
-        GSFreeBlock* mergeNode = (node_);                                  \
-        if (mergeNode->next != 0 &&                                        \
-            (u8*)mergeNode + mergeNode->size ==                            \
-                (u8*)mergeNode->next) {                                    \
-            GSFreeBlock* mergeNext = mergeNode->next;                      \
-            mergeNode->size += mergeNext->size;                            \
-            mergeNode->next = mergeNext->next;                             \
-            if (mergeNode->next != 0) {                                    \
-                mergeNode->next->prev = mergeNode;                         \
-            }                                                               \
-        }                                                                   \
-        if (mergeNode->prev != 0 &&                                        \
-            (u8*)mergeNode->prev + mergeNode->prev->size ==                \
-                (u8*)mergeNode) {                                          \
-            GSFreeBlock* mergePrev = mergeNode->prev;                      \
-            mergePrev->size += mergeNode->size;                            \
-            mergePrev->next = mergeNode->next;                             \
-            if (mergePrev->next != 0) {                                    \
-                mergePrev->next->prev = mergePrev;                         \
-            }                                                               \
-        }                                                                   \
-    } while (0)
-
-#define INSERT_FREE(node_)                                                  \
-    do {                                                                    \
-        GSFreeBlock* insertNode = (node_);                                 \
-        GSFreeBlock* insertBefore = 0;                                     \
-        GSFreeBlock* insertAfter = (GSFreeBlock*)lbl_8047AB30;             \
-        while (insertAfter != 0 && insertAfter < insertNode) {             \
-            insertBefore = insertAfter;                                    \
-            insertAfter = insertAfter->next;                               \
-        }                                                                   \
-        insertNode->prev = insertBefore;                                   \
-        insertNode->next = insertAfter;                                    \
-        if (insertBefore != 0) {                                           \
-            insertBefore->next = insertNode;                               \
-        } else {                                                            \
-            lbl_8047AB30 = (u32)insertNode;                                \
-        }                                                                   \
-        if (insertAfter != 0) {                                            \
-            insertAfter->prev = insertNode;                                \
-        }                                                                   \
-        COALESCE_FREE(insertNode);                                         \
-    } while (0)
-
-    oldLargest = 0;
-    for (block = (GSFreeBlock*)lbl_8047AB30; block != 0;
-         block = block->next) {
-        if (oldLargest < block->size) {
-            oldLargest = block->size;
-        }
-    }
-
+    oldLargest = gsMemLargestFree();
     block = (GSFreeBlock*)lbl_8047AB30;
-    if (block != 0 && block->next != 0) {
-        do {
-        u8* blockEnd = (u8*)block + block->size;
-        if (blockEnd == (u8*)lbl_8047AB38) {
-            block = block->next;
-            continue;
-        }
-
-        desc = (GSAllocDesc*)lbl_8047AB34;
-        while (desc >= (GSAllocDesc*)lbl_8047AB38) {
-            if (desc->used != 0 && desc->data == blockEnd) {
-                break;
+    if (block != NULL && block->next != NULL) {
+        while (block != NULL) {
+            size = block->size;
+            bottom = (GSMemHandle*)lbl_8047AB38;
+            if ((u8*)block + size != (u8*)bottom) {
+            top = (GSMemHandle*)lbl_8047AB34;
+            desc = gsMemFindHandle((u8*)block + size);
+            if (desc == NULL) {
+                GSlogWrite(lbl_80270BB8);
+                return 0;
             }
-            desc--;
-        }
-        if (desc < (GSAllocDesc*)lbl_8047AB38) {
-            GSlogWrite(lbl_80270BB8);
-            return 0;
-        }
-
-        if (desc->locked == 0 && desc->pinned == 0) {
-            wasHead = (block == (GSFreeBlock*)lbl_8047AB30);
-            before = block->prev;
-            after = block->next;
-            source = desc->data;
-            destination = (u8*)block;
-            COPY_BYTES(destination, source, desc->size);
-            desc->data = destination;
-
-            fresh = (GSFreeBlock*)(destination + desc->size);
-            fresh->prev = before;
-            fresh->next = after;
-            fresh->size = block->size;
-            if (before != 0) {
-                before->next = fresh;
+            if (desc->locked == 0 && desc->pinned == 0) {
+                wasHead = 0;
+                if ((GSFreeBlock*)lbl_8047AB30 == block) {
+                    wasHead = 1;
+                }
+                prev = block->prev;
+                next = block->next;
+                fresh = (GSFreeBlock*)((u8*)block + desc->size);
+                if (block->prev != NULL) {
+                    block->prev->next = fresh;
+                }
+                if (block->next != NULL) {
+                    block->next->prev = fresh;
+                }
+                gsMemCopy((u8*)block, desc->data, desc->size);
+                desc->data = (u8*)block;
+                fresh->prev = prev;
+                fresh->next = next;
+                fresh->size = size;
+                gsMemMergeNext(fresh);
+                if (wasHead) {
+                    lbl_8047AB30 = (u32)fresh;
+                }
+                block = (GSFreeBlock*)lbl_8047AB30;
+                continue;
             }
-            if (after != 0) {
-                after->prev = fresh;
-            }
-            if (fresh->next != 0 &&
-                (u8*)fresh + fresh->size == (u8*)fresh->next) {
-                GSFreeBlock* mergeNext = fresh->next;
-                fresh->size += mergeNext->size;
-                fresh->next = mergeNext->next;
-                if (fresh->next != 0) {
-                    fresh->next->prev = fresh;
+
+            candidates[0] = NULL;
+            candidates[1] = NULL;
+            candidates[2] = NULL;
+            candidates[3] = NULL;
+            entry = candidates;
+            count = 0;
+            total = 0;
+            for (desc = top; desc >= bottom; desc--) {
+                if (desc->used == 0 || desc->locked != 0 || desc->size > block->size ||
+                    desc->data <= (u8*)block || desc->pinned != 0) {
+                    continue;
+                }
+                if (count < 4 && total + desc->size <= block->size) {
+                    candidates[count++] = desc;
+                    total += desc->size;
+                    continue;
+                }
+                for (i = 0; i < count; i++) {
+                    saved = candidates[i];
+                    candidates[i] = desc;
+                    sum = 0;
+                    for (j = 0; j < count; j++) {
+                        sum += candidates[j]->size;
+                    }
+                    if (sum > total && sum <= block->size) {
+                        total = sum;
+                        i = count;
+                    } else {
+                        candidates[i] = saved;
+                    }
                 }
             }
-            if (wasHead != 0) {
-                lbl_8047AB30 = (u32)fresh;
+            if (count > 0) {
+
+            prev = block->prev;
+            next = block->next;
+            remaining = block->size;
+            if (block == (GSFreeBlock*)lbl_8047AB30) {
+                lbl_8047AB30 = (u32)next;
+            }
+            if (prev != NULL) {
+                prev->next = next;
+            }
+            if (next != NULL) {
+                next->prev = prev;
+            }
+            destination = (u8*)block;
+            for (i = 0; i < count; i++) {
+                source = (*entry)->data;
+                gsMemCopy(destination, source, (*entry)->size);
+                (*entry)->data = destination;
+                destination += (*entry)->size;
+                remaining -= (*entry)->size;
+                gsMemInsertFree((GSFreeBlock*)source, (*entry)->size);
+                entry++;
+            }
+            if (remaining >= sizeof(GSFreeBlock)) {
+                fresh = (GSFreeBlock*)destination;
+                fresh->prev = prev;
+                fresh->next = next;
+                fresh->size = remaining;
+                if (fresh->prev != NULL) {
+                    fresh->prev->next = fresh;
+                } else {
+                    lbl_8047AB30 = (u32)fresh;
+                }
+                if (fresh->next != NULL) {
+                    fresh->next->prev = fresh;
+                }
+                gsMemMergeNext(fresh);
+                gsMemMergePrev(fresh);
+            } else {
+                desc = candidates[count - 1];
+                desc->size += remaining;
+                if (*(u8*)&lbl_8047AB28 != 0) {
+                    gsMemClearPadding(desc);
+                    desc->checksum = gsMemChecksum(desc);
+                }
             }
             block = (GSFreeBlock*)lbl_8047AB30;
             continue;
-        }
-
-        candidateCount = 0;
-        bestTotal = 0;
-        for (desc = (GSAllocDesc*)lbl_8047AB34;
-             desc >= (GSAllocDesc*)lbl_8047AB38; desc--) {
-            if (desc->used == 0 || desc->locked != 0 || desc->pinned != 0 ||
-                desc->data <= (u8*)block || desc->size > block->size) {
-                continue;
             }
-            if (candidateCount < 4 &&
-                bestTotal + desc->size <= block->size) {
-                candidates[candidateCount++] = desc;
-                bestTotal += desc->size;
-            } else {
-                for (i = 0; i < candidateCount; i++) {
-                    GSAllocDesc* displaced = candidates[i];
-
-                    candidates[i] = desc;
-                    total = 0;
-                    for (j = 0; j < candidateCount; j++) {
-                        total += candidates[j]->size;
-                    }
-                    if (total > bestTotal && total <= block->size) {
-                        bestTotal = total;
-                        break;
-                    }
-                    candidates[i] = displaced;
-                }
             }
-        }
-
-        if (candidateCount == 0) {
             block = block->next;
-            continue;
-        }
-
-        chosenCount = candidateCount;
-        for (i = 0; i < candidateCount; i++) {
-            chosen[i] = candidates[i];
-        }
-
-        before = block->prev;
-        after = block->next;
-        remainder = block->size;
-        if (block == (GSFreeBlock*)lbl_8047AB30) {
-            lbl_8047AB30 = (u32)after;
-        }
-        if (before != 0) {
-            before->next = after;
-        }
-        if (after != 0) {
-            after->prev = before;
-        }
-
-        destination = (u8*)block;
-        for (j = 0; j < chosenCount; j++) {
-            desc = chosen[j];
-            source = desc->data;
-            COPY_BYTES(destination, source, desc->size);
-            desc->data = destination;
-
-            fresh = (GSFreeBlock*)source;
-            fresh->size = desc->size;
-            INSERT_FREE(fresh);
-            destination += desc->size;
-            remainder -= desc->size;
-        }
-
-        if (remainder >= sizeof(GSFreeBlock)) {
-            fresh = (GSFreeBlock*)destination;
-            fresh->prev = before;
-            fresh->next = after;
-            fresh->size = remainder;
-            if (before != 0) {
-                before->next = fresh;
-            } else {
-                lbl_8047AB30 = (u32)fresh;
-            }
-            if (after != 0) {
-                after->prev = fresh;
-            }
-            COALESCE_FREE(fresh);
-        } else {
-            desc = chosen[chosenCount - 1];
-            desc->size += remainder;
-            if (*(u8*)&lbl_8047AB28 != 0) {
-                desc->data[0] = 0;
-                desc->data[1] = 0;
-                desc->data[2] = 0;
-                desc->data[3] = 0;
-                desc->data[desc->size - 4] = 0;
-                desc->data[desc->size - 3] = 0;
-                desc->data[desc->size - 2] = 0;
-                desc->data[desc->size - 1] = 0;
-                sum = 0x3D94;
-                for (i = 0; i + 1 < desc->size; i += 2) {
-                    sum += *(u16*)&desc->data[i];
-                }
-                if ((desc->size & 1) != 0) {
-                    sum += desc->data[desc->size - 1];
-                }
-                desc->checksum = (u16)sum;
-            }
-        }
-        block = (GSFreeBlock*)lbl_8047AB30;
-        } while (block != 0);
-    }
-
-    newLargest = 0;
-    for (scan = (GSFreeBlock*)lbl_8047AB30; scan != 0;
-         scan = scan->next) {
-        if (newLargest < scan->size) {
-            newLargest = scan->size;
         }
     }
-
-#undef INSERT_FREE
-#undef COALESCE_FREE
-#undef COPY_BYTES
-    return newLargest - oldLargest;
+    return gsMemLargestFree() - oldLargest;
 }
+#endif
 
 extern u8 lbl_80270658[];
 extern u32 lbl_8047AB30;
@@ -746,227 +797,157 @@ extern u32 lbl_8047AB50;
 extern f64 lbl_8047CB50;
 extern f32 lbl_8047CB48;
 extern u32 lbl_8047AB3C;
-#if 0
-asm void fn_800E0E14(void) {
-#include "src/game/gs_render_fn_800E0E14.inc"
-}
-#else
-u8 fn_800E0E14(u32 verbose, u32 dumpMap) {
-    typedef struct GSAllocDescCheck {
-        u16 used;
-        u16 locked;
-        u8* data;
-        u32 size;
-        u16 pinned;
-        u16 checksum;
-    } GSAllocDescCheck;
+u8 fn_800E0E14(u8 verbose, u8 dumpMap) {
+    extern void GSlogWritef(const char*, ...);
+    GSFreeBlock* block;
+    GSFreeBlock* next;
+    GSMemHandle* desc;
+    u32 cursor;
+    u32 size;
+    u32 largest;
+    u32 total;
     u8 ok;
-    u32* block;
-    u8* cursor;
-    u8* end;
     u32 allocatedCount;
     u32 freeCount;
-    u32 largestFree;
-    u32 totalFree;
 
     ok = 1;
-    if (verbose != 0) {
-        GSlogWrite((char*)lbl_80270658);
+    allocatedCount = 0;
+    freeCount = 0;
+    if (verbose) {
+        GSlogWrite("--[ GSmem state check ]--------------------------\n");
     }
-
-    block = (u32*)lbl_8047AB30;
-    if (block != NULL && block[0] != 0) {
-        GSlogWrite((char*)lbl_80270658 + 0x34);
+    if ((GSFreeBlock*)lbl_8047AB30 != NULL && ((GSFreeBlock*)lbl_8047AB30)->prev != NULL) {
+        GSlogWrite("!!! first block's previous pointer is not NULL\n");
         ok = 0;
     }
-    freeCount = 0;
-    while (block != 0) {
-        u32* next;
-
+    for (block = (GSFreeBlock*)lbl_8047AB30; block != NULL; block = block->next) {
         freeCount++;
         if ((u32)block < lbl_8047AB68 || (u32)block > lbl_8047AB64) {
+            GSlogWrite("!!! Free block is outside of GSmem area\n");
             ok = 0;
-            GSlogWrite((char*)lbl_80270658 + 0x64);
         }
         if ((u32)block >= lbl_8047AB38) {
+            GSlogWrite("!!! Free block exists in memory entry table\n");
             ok = 0;
-            GSlogWrite((char*)lbl_80270658 + 0x90);
         }
-        if ((u32)block + block[2] > lbl_8047AB38) {
+        if ((u32)block + block->size > lbl_8047AB38) {
+            GSlogWrite("!!! Free block includes space in memory entry table\n");
             ok = 0;
-            GSlogWrite((char*)lbl_80270658 + 0xc0);
         }
-        next = (u32*)block[1];
+        next = block->next;
         if (next != NULL) {
-            if (next[0] != (u32)block) {
-                GSlogWrite((char*)lbl_80270658 + 0xf8);
+            if (next->prev != block) {
+                GSlogWrite("!!! Free block list pointers inconsistent\n");
                 ok = 0;
             }
-            if (next == (u32*)((u8*)block + block[2])) {
-                GSlogWrite((char*)lbl_80270658 + 0x124);
+            if (next == (GSFreeBlock*)((u8*)block + block->size)) {
+                GSlogWrite("!!! Free blocks have not been merged correctly\n");
                 ok = 0;
             }
             if (block > next) {
-                GSlogWrite((char*)lbl_80270658 + 0x154);
+                GSlogWrite("!!! Free block list pointers not linear\n");
                 ok = 0;
-            }
-        }
-        block = next;
-    }
-
-    allocatedCount = 0;
-    {
-        GSAllocDescCheck* desc;
-        for (desc = (GSAllocDescCheck*)lbl_8047AB34;
-             desc >= (GSAllocDescCheck*)lbl_8047AB38; desc--) {
-            u32 sum;
-            u32 i;
-
-            if (desc->used == 0) {
-                continue;
-            }
-            allocatedCount++;
-            if ((u32)desc->data < lbl_8047AB68 ||
-                (u32)(desc->data + desc->size) > lbl_8047AB38) {
-                GSlogWrite((char*)lbl_80270658 + 0x180);
-                ok = 0;
-            }
-            if (*(u8*)&lbl_8047AB28 != 0) {
-                u8* tail;
-
-                tail = desc->data + desc->size - 4;
-                if (desc->data[0] != 0 || desc->data[1] != 0 ||
-                    desc->data[2] != 0 || desc->data[3] != 0 ||
-                    tail[0] != 0 || tail[1] != 0 ||
-                    tail[2] != 0 || tail[3] != 0) {
-                    GSlogWrite((char*)lbl_80270658 + 0x1ac, desc->used);
-                    ok = 0;
-                    desc->data[0] = 0;
-                    desc->data[1] = 0;
-                    desc->data[2] = 0;
-                    desc->data[3] = 0;
-                    tail[0] = 0;
-                    tail[1] = 0;
-                    tail[2] = 0;
-                    tail[3] = 0;
-                }
-                if (desc->locked == 0) {
-                    sum = 0x3D94;
-                    for (i = 0; i + 1 < desc->size; i += 2) {
-                        sum += *(u16*)(desc->data + i);
-                    }
-                    if ((desc->size & 1) != 0) {
-                        sum += desc->data[desc->size - 1];
-                    }
-                    if (desc->checksum != (u16)sum) {
-                        GSlogWrite((char*)lbl_80270658 + 0x1d8,
-                                   desc->used);
-                        ok = 0;
-                    }
-                }
             }
         }
     }
 
-    if (dumpMap != 0) {
-        GSlogWrite((char*)lbl_80270658 + 0x208);
-    }
-    cursor = (u8*)lbl_8047AB68;
-    end = (u8*)lbl_8047AB38;
-    while (cursor < end) {
-        GSAllocDescCheck* desc;
-        GSAllocDescCheck* found;
-        u32 size;
-
-        found = NULL;
-        for (desc = (GSAllocDescCheck*)lbl_8047AB34;
-             desc >= (GSAllocDescCheck*)lbl_8047AB38; desc--) {
-            if (desc->used != 0 && desc->data == cursor) {
-                found = desc;
-                break;
-            }
+    for (desc = (GSMemHandle*)lbl_8047AB34; (u32)desc >= lbl_8047AB38; desc--) {
+        if (desc->used == 0) {
+            continue;
         }
-        if (found != NULL && found->used != 0) {
-            size = found->size;
-            if (dumpMap != 0) {
-                GSlogWrite((char*)lbl_80270658 + 0x21c, cursor,
-                            cursor + size - 1, size, found->used,
-                            found->locked, found->pinned);
+        allocatedCount++;
+        if ((u32)desc->data < lbl_8047AB68 || (u32)(desc->data + desc->size) > lbl_8047AB38) {
+            GSlogWrite("!!! Block exists in an invalid memory area\n");
+            ok = 0;
+        }
+        if (*(u8*)&lbl_8047AB28 == 0) {
+            continue;
+        }
+        if (!gsMemPaddingIntact(desc)) {
+            GSlogWrite("!!! Padding bytes overwritten in handle %d\n", desc->used);
+            ok = 0;
+            gsMemClearPadding(desc);
+        }
+        if (desc->locked == 0 && desc->checksum != gsMemChecksum(desc)) {
+            GSlogWrite("!!! Block modified without lock in handle %d\n", desc->used);
+            ok = 0;
+        }
+    }
+
+    if (dumpMap) {
+        GSlogWrite("Memory map dump:\n");
+    }
+    cursor = lbl_8047AB68;
+    while (cursor < lbl_8047AB38) {
+        desc = gsMemFindHandle((u8*)cursor);
+        if (desc != NULL && desc->used != 0) {
+            if (dumpMap) {
+                GSlogWrite("  %08Xh -> %08Xh: allocated block (size=%d, handle=%d, locks=%d, align=%d)\n",
+                           cursor, cursor + (desc->size - 1), desc->size, desc->used,
+                           desc->locked, desc->pinned);
             }
-        } else {
-            size = *(u32*)(cursor + 8);
-            if (dumpMap != 0) {
-                GSlogWrite((char*)lbl_80270658 + 0x268, cursor,
-                            cursor + size - 1, *(u32*)cursor,
-                            *(u32*)(cursor + 4));
-            }
-            if ((*(u32*)cursor != 0 &&
-                 (*(u32*)cursor < lbl_8047AB68 ||
-                  *(u32*)cursor > lbl_8047AB64)) ||
-                (*(u32*)(cursor + 4) != 0 &&
-                 (*(u32*)(cursor + 4) < lbl_8047AB68 ||
-                  *(u32*)(cursor + 4) > lbl_8047AB64))) {
-                GSlogWrite((char*)lbl_80270658 + 0x2a8, cursor);
-                ok = 0;
-                break;
-            }
-            if (size == 0 || cursor + size > end) {
-                GSlogWrite((char*)lbl_80270658 + 0x2e8, cursor);
-                ok = 0;
-                break;
-            }
+            cursor += desc->size;
+            continue;
+        }
+        block = (GSFreeBlock*)cursor;
+        if (dumpMap) {
+            GSlogWrite("  %08Xh -> %08Xh: free block (size=%d, prev=%08Xh, next=%08Xh)\n", cursor,
+                       cursor + (block->size - 1), block->size, block->prev, block->next);
+        }
+        if ((block->prev != NULL && ((u32)block->prev < lbl_8047AB68 || (u32)block->prev > lbl_8047AB64)) ||
+            (block->next != NULL && ((u32)block->next < lbl_8047AB68 || (u32)block->next > lbl_8047AB64))) {
+            GSlogWrite("!!! pointer at %08Xh does not appear to be a valid free block\n", cursor);
+            ok = 0;
+            break;
+        }
+        size = block->size;
+        if (cursor + size > lbl_8047AB38 || size == 0) {
+            GSlogWrite("!!! pointer at %08Xh has invalid size %08Xh\n", cursor, size);
+            ok = 0;
+            break;
         }
         cursor += size;
     }
-
-    if ((u32)cursor != lbl_8047AB38) {
+    if (cursor != lbl_8047AB38) {
+        GSlogWrite("!!! End of memory map does not line up with last block! [last:%08X != end:%08X]\n",
+                   cursor, lbl_8047AB38);
         ok = 0;
-        GSlogWrite((char*)lbl_80270658 + 0x318, cursor);
     }
     if (allocatedCount != lbl_8047AB4C) {
+        GSlogWrite("!!! Used block count does not match internal counter\n");
         ok = 0;
-        GSlogWrite((char*)lbl_80270658 + 0x36c);
     }
 
-    if (verbose != 0) {
-        GSlogWrite((char*)lbl_80270658 + 0x3a4, lbl_8047AB68, lbl_8047AB64);
-        GSlogWrite((char*)lbl_80270658 + 0x3cc, lbl_8047AB4C);
-        GSlogWrite((char*)lbl_80270658 + 0x3e8, lbl_8047AB48);
-        GSlogWrite((char*)lbl_80270658 + 0x404, lbl_8047AB34 - lbl_8047AB38 + 0x10);
-        largestFree = 0;
-        block = (u32*)lbl_8047AB30;
-        while (block != NULL) {
-            if (block[2] > largestFree) {
-                largestFree = block[2];
+    if (verbose) {
+        GSlogWrite("GSmem memory area:   %08Xh -> %08Xh\n", lbl_8047AB68, lbl_8047AB64);
+        GSlogWrite("Active allocations:  %d\n", lbl_8047AB4C);
+        GSlogWrite("Active locks:        %d\n", lbl_8047AB48);
+        GSlogWrite("Entry table size:    %d bytes\n", lbl_8047AB34 - lbl_8047AB38 + 0x10);
+        largest = 0;
+        for (block = (GSFreeBlock*)lbl_8047AB30; block != NULL; block = block->next) {
+            if (block->size > largest) {
+                largest = block->size;
             }
-            block = (u32*)block[1];
         }
-        GSlogWrite((char*)lbl_80270658 + 0x424, largestFree);
-        totalFree = 0;
-        block = (u32*)lbl_8047AB30;
-        while (block != NULL) {
-            totalFree += block[2];
-            block = (u32*)block[1];
+        GSlogWrite("Largest free space:  %d bytes\n", largest);
+        total = 0;
+        for (block = (GSFreeBlock*)lbl_8047AB30; block != NULL; block = block->next) {
+            total += block->size;
         }
-        GSlogWrite((char*)lbl_80270658 + 0x444, totalFree);
-        GSlogWrite((char*)lbl_80270658 + 0x464, freeCount);
-        GSlogWrite((char*)lbl_80270658 + 0x480, lbl_8047AB60);
-        GSlogWrite((char*)lbl_80270658 + 0x49c, lbl_8047AB5C);
-        GSlogWrite((char*)lbl_80270658 + 0x4b8, lbl_8047AB58);
-        GSlogWrite((char*)lbl_80270658 + 0x4d4, lbl_8047AB54);
-        GSlogWrite((char*)lbl_80270658 + 0x4f0, lbl_8047AB50);
-        GSlogWritef((char*)lbl_80270658 + 0x50c,
-                    lbl_8047CB48 *
-                        ((f32)((f64)(freeCount - 1) - lbl_8047CB50) /
-                         (f32)((f64)(freeCount + allocatedCount) -
-                               lbl_8047CB50)));
-        GSlogWrite((char*)lbl_80270658 + 0x52c);
+        GSlogWrite("Total free space:    %d bytes\n", total);
+        GSlogWrite("Total free blocks:   %d\n", freeCount);
+        GSlogWrite("Total allocations:   %d\n", lbl_8047AB60);
+        GSlogWrite("Total locks:         %d\n", lbl_8047AB5C);
+        GSlogWrite("Total unlocks:       %d\n", lbl_8047AB58);
+        GSlogWrite("Total frees:         %d\n", lbl_8047AB54);
+        GSlogWrite("Total entry resizes: %d\n", lbl_8047AB50);
+        GSlogWritef("Fragmentation:       %.1f%%\n",
+                    100.0f * ((f32)(freeCount - 1) / (f32)(freeCount + allocatedCount)));
+        GSlogWrite("-------------------------------------------------\n");
     }
-
     if (!ok) {
         lbl_8047AB3C = 0;
     }
     return ok;
 }
-#endif
 #endif

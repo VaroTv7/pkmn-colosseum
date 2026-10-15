@@ -42,6 +42,7 @@ extern void __assert(const char* file, s32 line, const char* condition);
 extern void std079_flagSetTrue(u32 id);
 extern u16 fightStartEncount();
 
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (push; peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma peephole off
 u32 menuCB_Battle(MenuCBBattleSetup* setup)

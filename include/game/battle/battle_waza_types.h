@@ -92,7 +92,7 @@ struct WazaSequence {
     /* 0x24 */ WazaSequenceNode* firstNode;
     /* 0x28 */ u8 pad_28[2];
     /* 0x2A */ u16 handle;
-    /* 0x2C */ u8 pad_2C[2];
+    /* 0x2C */ u16 moveIndex;
     /* 0x2E */ u16 animationMode;
     /* 0x30 */ u8 pad_30[0x0C];
     /* 0x3C */ WazaSequenceOwner* owner;
@@ -108,7 +108,8 @@ typedef struct WazaPartyScratch {
 
 /* Waza effect data table entry (stride 0xD4) */
 typedef struct WazaEffectTblEntry {
-    /* 0x00 */ u8  pad_00[0x90];
+    /* 0x00 */ u8  pad_00[0x4C];
+    /* 0x4C */ u32 field_4C[0x11];
     /* 0x90 */ s32 field_90;                 /* set by fn_801DD100 */
     /* 0x94 */ u8  pad_94[0xD4 - 0x94];
 } WazaEffectTblEntry;
@@ -205,7 +206,7 @@ extern void  fn_80118C88(void* particleNode, u32 visible);
 extern GSpart* GSmodelGetPart(struct GSmodel* model, s32 partIndex);
 void  set__5GSvecFfff(f32* vec, f32 x, f32 y, f32 z);
 extern void  fn_80118FB0(u8* particleNode, GSpart* part, u32 state,
-                         u32 byte5, u32 initFromZero, u32 attachModel);
+                         u8 byte5, u32 initFromZero, u8 attachModel);
 extern void  fn_80118D18(void* particleNode, u8 enabled);
 extern void  fn_80118DE0(u8* particleNode, f32* scale, u32 applyToGenerator,
                          u32 angleRadiusScale);
@@ -328,14 +329,14 @@ extern void _wazaSequenceCameraDoDollyPosition__FP21TemplateExpFileHeaderP24waza
 extern void _wazaSequenceCameraDoFOV__FP13ModelSequenceP24wazaSequenceCameraParamsif(
     void* modelSequence, void* cameraParams, s32 flags, s32 shift);
 extern s32 _wazaSequenceCameraSelectDuration__FUcPff(
-    u8 mode, f32* thresholds, s32 duration);
+    s32 mode, f32* thresholds, s32 duration);
 extern void _wazaSequenceCameraSelectMotion__FP13ModelSequenceP12WazaSequenceP24wazaSequenceCameraParams(
     void* modelSequence, void* wazaSequence, void* cameraParams);
 extern void _wazaSequenceCameraCalculateParams__FP13ModelSequenceiP24wazaSequenceCameraParams(
     void* modelSequence, s32 flags, void* cameraParams);
 extern void _wazaViewerFinalize(u8 r, u8 g, u8 b, f32 duration);
 extern void _wazaViewerUpdate(void);
-extern void _wazaViewerInitialize(s32 slot, f32 zoom, f32 speed);
+extern void _wazaViewerInitialize(void);
 extern void wazaViewerThread(void);
 extern void fn_801D56B0(void);
 extern void fn_801D58E4(void);
@@ -353,8 +354,8 @@ extern u8 wazaSequenceEntryStop(void* entry, BOOL immediate);
 extern u8 wazaSequenceEntryUpdate(void* entry, s32 elapsed);
 extern u8 wazaSequenceEntryStart(void* entry);
 extern u8 _wazaSequenceEffectEntryStart(void* entry);
-extern u8 _wazaSequenceParticleEntryStart(void* entry);
-extern u8 _wazaSequenceModelEntryStart(void* entry);
+extern u8 _wazaSequenceParticleEntryStart(WazaSequenceNode* entry);
+extern u8 _wazaSequenceModelEntryStart(WazaSequenceNode* entry);
 extern void* fn_801D97F0(void* entry);
 extern void fn_801D9950(void* owner, f32* scale, s32 selector);
 extern u8 wazaSequencePokemonMotionStart(void* owner, BOOL enabled);
@@ -396,14 +397,14 @@ extern void fn_801DB088(void);
 extern void fn_801DB100(void* obj);
 extern void* fn_801DB154(void);
 extern void wazaSequenceSysFreeSequenceResource(void* obj);
-extern void wazaSequenceSysFreeWazaResource(void* seqData, ...);
+extern void wazaSequenceSysFreeWazaResource(void* seqData);
 extern s32 wazaSequenceSysGetWazaTime(void* owner, void* sequence, s32 timeType);
 extern s32 wazaSequenceSysGetModelShadowLight__Fv(void);
 extern s32 wazaSequenceSysGetModelShadowCount__Fv(void);
 extern void* wazaSequenceSysGetModelShadowList__Fv(void);
 extern void wazaSequenceSysResetAnimationExcept(void* except);
 extern void fn_801DB8FC(void* entry, u32 drawFlags, u8 modelID);
-extern s8 wazaSequenceUpdate(void* sequence);
+extern s32 wazaSequenceUpdate(void* sequence);
 extern void wazaSequenceApplyStop(void* obj);
 extern void fn_801DBC30(void* obj);
 extern void wazaSequenceStart(void* sequence);
@@ -411,13 +412,13 @@ extern void wazaSequenceFree(void* obj);
 extern WazaSequence* fn_801DBFB0(void);
 extern u8 wazaSequenceLoadData(void* sequence, void* resource);
 extern void wazaSequenceEntryLink(void* sequence, void* entry);
-extern void* fn_801DC46C(void* entry, void* data);
-extern void* fn_801DC5F0(void* sequence, void* data);
+extern void* fn_801DC46C(u8* entry, void* data);
+extern void* fn_801DC5F0(void* sequence, u8* data);
 extern void* _wazaSequenceEffectEntryLoad(void* entry, void* data);
-extern void* _wazaSequenceParticleEntryLoad(void* sequence, void* entry,
-                                            void* data);
-extern void* _wazaSequenceModelEntryLoad(void* sequence, void* entry,
-                                         void* data);
+extern void* _wazaSequenceParticleEntryLoad(void* sequence, u8* entry,
+                                            u8* data);
+extern void* _wazaSequenceModelEntryLoad(void* sequence, u8* entry,
+                                         u8* data);
 extern void* fn_801DCDA8(void* obj, s32 fieldEffect);
 extern s32 fn_801DCDCC(void* obj);
 extern void fn_801DCE0C(void* obj);
@@ -427,16 +428,21 @@ extern void fn_801DCF84(void* obj);
 extern void fn_801DCFD8(void* obj);
 extern void fn_801DD028(void* obj);
 extern void fn_801DD078(void* obj);
+#if defined(BATTLE_WAZA_GETWAZA_U16)
+extern void* GetWaza__12NullSequenceCFUsUs(void* obj, u16 search_key1, u16 search_key2);
+#else
+/* Legacy s32 view kept for callers whose matched codegen depends on it. */
 extern void* GetWaza__12NullSequenceCFUsUs(void* obj, s32 search_key1, s32 search_key2);
+#endif
 extern void fn_801DD100(WazaSequenceOwner* owner, WazaSequence* sequence);
 extern void fn_801DD158(void* obj);
 extern void fn_801DD23C(void* obj);
 extern void fn_801DD3E4(void* obj);
 extern BOOL sequenceLoad(void* effect, void* data);
-extern u8 fn_801DD5E8(void* effect, void* resource);
+extern u8 fn_801DD5E8(void* effect, u8* resource);
 extern BOOL fn_801DDB4C(void* owner, void* resource);
 extern s32 fn_801DDC10(u16 index, u16 type);
-extern BOOL fn_801DDD28(void* owner, u16 group, u16 index, u32 variant);
+extern BOOL fn_801DDD28(void* owner, u16 group, u16 index, u8 variant);
 extern void fn_801DDEE4(void* owner, u16 group, u16 type, u8 variant,
                         u32* resourceGroup, u32* resourceId);
 extern BOOL fn_801DE164(s32 slot);

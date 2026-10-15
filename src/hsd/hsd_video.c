@@ -1,9 +1,14 @@
 /**
  * @file hsd_video.c
- * @brief sysdolphin video.c tail, 0x801BF6AC - 0x801C01C8.
+ * @brief Legacy video.c candidate, now scored only for HSD_VICopyXFBAsync
+ *        (fn_801BF8A0, 0x801BF8A0 - 0x801BFA1C).
  *
- * The bodies follow the canonical sysdolphin video implementation.  The
- * retail addresses and embedded "video.c" panic identify this TU.
+ * HAL's video.c is src/hsd/video.c (the full TU) and is carved into
+ * video_exact_801BF1F0.c, video_candidate_801BF6AC.c and
+ * video_exact_801BFA1C.c. fn_801BF8A0 calls HSD_VIGetDrawDoneWaitingFlag
+ * out of line, which the library-flag TU reproduces only with a local
+ * dont_inline pragma (100% with it, 97.21% without); this older
+ * non-deferred source keeps its previous 97.63% score.
  */
 #include "dolphin/types.h"
 #include "dolphin/gx/GX.h"
@@ -253,6 +258,19 @@ void HSD_VICopyEFB2XFB(HSD_VIStatus* vi, void* buffer, HSD_RenderPass rpass)
             fn_800B9B14(GXGetYScaleFactor(rmode->efbHeight,
                                           rmode->xfbHeight));
         fn_800B96BC(rmode->fbWidth, n_xfb_lines);
+        {
+            u8* ptr = buffer;
+            u32 i = n_xfb_lines;
+            if (i != rmode->xfbHeight) {
+                u32 width = rmode->fbWidth;
+                u32 stride = ((width + 15) & ~15) * 2;
+                u32 count = (stride * n_xfb_lines) >> 2;
+                while (count) {
+                    *ptr++ = 0x10801080;
+                    count--;
+                }
+            }
+        }
         fn_800B9E88(buffer, TRUE);
         rest = rmode->xfbHeight - n_xfb_lines;
         /*

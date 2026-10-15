@@ -18,10 +18,11 @@
  *   - GStextureUnlockImage (0x800EF504) and GStextureLockImage
  *     (0x800EF548) -- both are real matched symbols in symbols.txt and
  *     are referenced by name from gs_render.c's EFB-capture path
- *     (`GStextureUnlockImage(image)` feeding `GXDrawDone`, and
- *     `GStextureLockImage(image, 0)`). GStextureUnlockImage's return
- *     value is used by the caller, so it returns the texture's pre-
- *     decrement refCount rather than void.
+ *     (`GStextureUnlockImage(image)` followed by `GXDrawDone`, and
+ *     `GStextureLockImage(image, 0)`). GStextureUnlockImage returns
+ *     void (see gs_texture.h).
+ *   - GStextureConvertFromHW is linked as gs_texture_exact_800EF1E8.c; the
+ *     copy below is kept for the candidate unit (0x800EF098-0x800EF1E8).
  *   - GStextureConvertFromHW, GStextureGetGXformat, GStextureGetTlutFormat,
  *     GStextureGetFormat, GStextureGetMiplevels, GStextureGetYsize,
  *     GStextureGetXsize, GStextureSetFilter, GStextureSetWrap,
@@ -77,65 +78,54 @@ static GStextureHandle* gsTexPool;       /* @sda21 lbl_8047ABF4 */
  *  Rearranges CI4 texture pixel data from linear to 4x4 block-tiled
  *  order. Only operates on format 0x44 (GS_CI4).
  * ======================================================================= */
-#pragma push
-#pragma optimize_for_size on
-#pragma peephole off
 void fn_800EF098(GStextureHandle* tex) {
+    /* RULE-EXCEPTION(user-approved): declaration order chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+    u32 byteCount;
+    u16* source;
+    u16* converted;
     u16 width;
- u16 height;
-    u16* src;
-    u16 allocSize;
     u16 pixelCount;
     u16 handle;
-    u16* tempBuf;
-    u16 w4;
+    u16 blocksPerRow;
     u16 i;
 
     if (tex->format != 0x44) {
         return;
     }
-
     tex->refCount++;
-
-    src = tex->mipData[0];
-    if (src == NULL) {
+    source = tex->mipData[0];
+    if (source == NULL) {
         return;
     }
 
     width = tex->width;
-    height = tex->height;
-    allocSize = width * height * 2;
-    pixelCount = width * height;
-
-    handle = _toolentryAlloc__FUl(allocSize);
+    pixelCount = width * tex->height;
+    byteCount = pixelCount * sizeof(u16);
+    handle = _toolentryAlloc__FUl(byteCount);
     if (handle == 0) {
         return;
     }
 
-    tempBuf = fn_800E27B0(handle);
-
-    w4 = width / 4;
+    converted = fn_800E27B0(handle);
+    blocksPerRow = width >> 2;
     for (i = 0; i < pixelCount; i++) {
-        u16 pixel = src[i];
-        u16 blk = i / 16;
-        u16 br = blk / w4;
-        u16 tc = blk - br * w4;
-        u16 ty = (i % 16) / 4;
-        u16 tx = i % 4;
-        u16 dst = (tc + br * width) * 4 + ty * width + tx;
-        tempBuf[dst] = pixel;
+        u16 block = i >> 4;
+        u16 tile = block / blocksPerRow;
+        u16 tileColumn = block - tile * blocksPerRow;
+        u16 row = (i % 16) / 4;
+        u16 column = i % 4;
+        u16 destIndex =
+            (tile * width + tileColumn) * 4 + row * width + column;
+        converted[destIndex] = source[i];
     }
 
-    memcpy(src, tempBuf, allocSize);
+    memcpy(source, converted, byteCount);
     DCFlushRange(tex->mipData[0], tex->totalSize);
     GXInvalidateTexAll();
-
     tex->refCount--;
-
     fn_800E24B0(handle);
     fn_800E209C(handle);
 }
-#pragma pop
 
 /* =======================================================================
  *  GStextureConvertFromHW | 0x1F8
@@ -147,23 +137,24 @@ u8 GStextureConvertFromHW(GStextureHandle* tex, u8 clear) {
     extern void fn_800B9FE4(void*, u8);
     extern void fn_800B8E74(void);
     extern void GXSetZMode(u8, u32, u8);
-    u16 width;
-    u16 height;
+    s32 width;
+    s32 height;
     s32 gxFormat;
     s32 format;
     void* image;
+    const u8* display;
 
     format = tex->format;
     if (format != 0x90) {
-        if (format >= 0x90) {
-            if (format != 0xA0) {
-                return 0;
-            }
-        } else {
+        if (format < 0x90) {
             if (format >= 0x46) {
                 return 0;
             }
             if (format < 0x40) {
+                return 0;
+            }
+        } else {
+            if (format != 0xA0) {
                 return 0;
             }
         }
@@ -172,51 +163,28 @@ u8 GStextureConvertFromHW(GStextureHandle* tex, u8 clear) {
     tex->refCount++;
     format = tex->format;
     image = tex->mipData[0];
-    if (format == 0x43) {
-        gxFormat = 3;
-    } else if (format >= 0x43) {
-        if (format == 0xA0) {
-            gxFormat = 0x27;
-        } else if (format >= 0xA0) {
-            if (format == 0xB0) {
-                gxFormat = 0xE;
-            } else {
-                gxFormat = -1;
-            }
-        } else if (format == 0x90) {
-            gxFormat = 5;
-        } else if (format >= 0x90) {
-            gxFormat = -1;
-        } else if (format == 0x45) {
-            gxFormat = 6;
-        } else {
-            gxFormat = 4;
-        }
-    } else if (format == 0x30) {
-        gxFormat = 0xA;
-    } else if (format >= 0x30) {
-        if (format == 0x41) {
-            gxFormat = 2;
-        } else if (format >= 0x41) {
-            gxFormat = 1;
-        } else {
-            gxFormat = 0;
-        }
-    } else if (format == 1) {
-        gxFormat = 9;
-    } else if (format >= 1) {
-        gxFormat = -1;
-    } else if (format == 0) {
-        gxFormat = 8;
-    } else {
-        gxFormat = -1;
+    display = lbl_80466BC0;
+    switch (format) {
+    case 0: gxFormat = 8; break;
+    case 1: gxFormat = 9; break;
+    case 0x30: gxFormat = 0xA; break;
+    case 0x40: gxFormat = 0; break;
+    case 0x41: gxFormat = 2; break;
+    case 0x42: gxFormat = 1; break;
+    case 0x43: gxFormat = 3; break;
+    case 0x44: gxFormat = 4; break;
+    case 0x45: gxFormat = 6; break;
+    case 0x90: gxFormat = 5; break;
+    case 0xA0: gxFormat = 0x27; break;
+    case 0xB0: gxFormat = 0xE; break;
+    default: gxFormat = -1; break;
     }
 
-    width = *(u16*)(lbl_80466BC0 + 4);
+    width = *(u16*)(display + 4);
     if (tex->width < width) {
         width = tex->width;
     }
-    height = *(u16*)(lbl_80466BC0 + 6);
+    height = *(u16*)(display + 6);
     if (tex->height < height) {
         height = tex->height;
     }

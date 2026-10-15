@@ -139,7 +139,8 @@ typedef struct FieldParticleNode {
 struct FieldParticleBank {
     u8 active;
     u8 texture_type;
-    u8 pad_02[6];
+    u8 pad_02[2];
+    void* file;
     FieldParticleNode* slots[64];
 };
 
@@ -426,8 +427,8 @@ extern u8 lbl_8047ADB0;
 void gsParticleUpdate(u32 particleCount);
 void fn_80118874(u8* list, u32 notify);
 extern void psSetGeneratorAngleRadiusScale(void);
-extern f32 lbl_8047CFE8;
-extern f32 lbl_8047CFEC;
+extern const f32 lbl_8047CFE8; /* 0.0f */
+extern const f32 lbl_8047CFEC; /* 1.0f */
 void* psCreateGeneratorID(u32 use_alt, u8 texture_type, u32 selector);
 void* fn_800D3094(void);
 extern u32 lbl_8047ADAC;
@@ -699,7 +700,7 @@ extern void fn_8006AE18(void);
 extern u8 lbl_802729C0[];
 extern u8 lbl_80272A10[];
 void heroMoveGetKenObjID(void);
-extern void fn_8018E050(void);
+extern void peopleOpen(void);
 extern void GSmodelEnableAnimBlend(void);
 extern void fn_8018CB5C(void);
 extern void fn_80189328(void);
@@ -1587,7 +1588,7 @@ static inline void destroyFieldParticleInstance(u8* obj, u32 notify) {
     obj[0] = 0;
 }
 
-#if !defined(FIELD_BANK_ACTIVE) || defined(FIELD_EXACT_80117E58_801183EC)
+#if !defined(FIELD_BANK_ACTIVE) || defined(FIELD_EXACT_80117E58_80118100)
 /* 0x80117E58 | 0x1C8 */
 extern u32 lbl_8047AD80;
 extern u32 lbl_8047AD84;
@@ -1596,8 +1597,6 @@ extern u32 lbl_8047AD88;
 extern u32 lbl_8047AD8C;
 extern u32 lbl_8047AD90;
 extern u32 lbl_8047AD94;
-#pragma push
-#pragma peephole off
 void tvInitFloor(void* arg) {
     extern u32 std093_getCurrentGroupID(void);
     extern void* GSresGetResource(u32 a, u32 b);
@@ -1670,10 +1669,8 @@ void tvInitFloor(void* arg) {
     GSmodelSetTextureChange(GSresGetResource(std093_getCurrentGroupID(), *(u32*)((u8*)lbl_8047AD88 + 8)), (void*)lbl_8047AD8C);
     lbl_80478B40 = 0;
 }
-#pragma pop
 /* 0x48 | fn_80118020 | single_call_straight */
 extern u32 lbl_802727C8[];
-#pragma peephole off
 void fn_80118020(void) {
     extern void fn_800FF4D4(void* ptr, u32 val);
     u32 local[3];
@@ -1682,7 +1679,6 @@ void fn_80118020(void) {
     local[2] = lbl_802727C8[2];
     fn_800FF4D4(local, 1);
 }
-#pragma peephole on
 /* Address: 0x80118068 | Size: 0x8 | Pattern: return_constant */
 u32 fn_80118068(void) { return 0; }
 /* 0x80118070 | 0x90 */
@@ -1693,7 +1689,6 @@ extern u32 lbl_8047AD94;
 extern u32 lbl_80478B40;
 extern u32 lbl_8047AD80;
 extern u32 lbl_8047AD84;
-#pragma peephole off
 void tvRelease2(void) {
     extern u32 std093_getCurrentGroupID(void);
     extern void* GSresGetResource(u32 a, u32 b);
@@ -1718,13 +1713,13 @@ void tvRelease2(void) {
     lbl_8047AD80 = 0;
     lbl_8047AD84 = 0;
 }
-#pragma peephole on
+#endif
+
+#if !defined(FIELD_BANK_ACTIVE) || defined(FIELD_EXACT_80118100_801183EC)
 /* 0x80118100 | 0x4 | void_stub */
-#pragma optimization_level 4
 void fn_80118100(void) {
 }
 /* 0x80118104 | 0xAC */
-#pragma optimization_level 4
 void gsParticleDraw(u32 a, u8 b) {
     void* result;
     u32 val;
@@ -1852,161 +1847,112 @@ void fn_801181B0(void) {
 extern FieldParticleBank* lbl_8047AD9C;
 extern u32 lbl_8047ADA0;
 extern u8 lbl_8047ADB0;
+/* Copy a vector into the node's local transform and mirror it into the
+ * generator (each helper is expanded two to four times below). */
+static inline void fieldParticleSetPosition(FieldParticleNode* node, f32* v) {
+    GSvecCopy(node->local_position, v);
+    node->generator->position[0] = v[0];
+    node->generator->position[1] = v[1];
+    node->generator->position[2] = v[2];
+}
+
+static inline void fieldParticleSetRotation(FieldParticleNode* node, f32* v) {
+    GSvecCopy(node->local_rotation, v);
+    node->generator->rotation[0] = v[0];
+    node->generator->rotation[1] = v[1];
+    node->generator->rotation[2] = v[2];
+}
+
+static inline void fieldParticleSetScale(FieldParticleNode* node, f32* v) {
+    GSvecCopy(node->local_scale, v);
+    node->generator->scale[0] = v[0];
+    node->generator->scale[1] = v[1];
+    node->generator->scale[2] = v[2];
+}
+
 void gsParticleUpdate(u32 particleCount) {
-    extern void* fn_800EE150(void*, void*);
-    extern void fn_800EE3BC(void*, void*, void*, void*);
-    extern void fn_800EE828(void*);
-    extern void fn_800DFEEC(void*, void*, void*);
-    extern void fn_800E019C(void*, void*, void*);
-    extern void fn_800E01D0(void*, void*);
+    extern void* GSmodelGetPart(u32, u32);
+    extern void GSpartGetTransform(void*, f32*, f32*, f32*);
+    extern void GSpartFree(void*);
+    extern void GSvecTransformQuat(f32*, f32*, f32*);
+    extern void GSvecAdd(f32*, f32*, f32*);
 
     f32 pos[3];
     f32 rot[3];
     f32 scale[3];
-    f32 quat[3];
-    f32 work[3];
+    f32 quat[4];
+    f32 offset[3];
+    u32 i;
     u32 outerIdx = 0;
-    u32 byteOff = 0;
 
     while (outerIdx < lbl_8047ADA0) {
-        u8* slot = (u8*)lbl_8047AD9C + byteOff;
-        if (*slot == 1) {
+        FieldParticleBank* bank = &lbl_8047AD9C[outerIdx];
+        if (bank->active == 1) {
             u32 innerIdx = 0;
-            u8* entry = slot;
             do {
-                u8* obj = *(u8**)(entry + 8);
-                if (obj != NULL && *(u32*)(obj + 0x44) != 0 && obj[6] != 0) {
-                    void* handle = fn_800EE150(*(void**)(obj + 0x48), *(void**)(obj + 0x4C));
-                    u8* target;
+                FieldParticleNode* node = bank->slots[innerIdx];
+                if (node != NULL && node->transform_state != 0 && node->field_06 != 0) {
+                    void* part = GSmodelGetPart(node->field_48, node->field_4C);
 
-                    fn_800EE3BC(handle, pos, rot, scale);
-                    fn_800EE828(handle);
+                    GSpartGetTransform(part, pos, rot, scale);
+                    GSpartFree(part);
                     fn_800E06EC(quat, rot);
-                    fn_800DFEEC(work, quat, obj + 0x50);
-                    fn_800E019C(pos, pos, work);
-                    fn_800E019C(rot, rot, obj + 0x5C);
-                    fn_800E0108(scale, scale, obj + 0x68);
+                    GSvecTransformQuat(offset, quat, node->transformed_position);
+                    GSvecAdd(pos, pos, offset);
+                    GSvecAdd(rot, rot, node->transformed_rotation);
+                    fn_800E0108(scale, scale, node->transformed_scale);
 
-                    fn_800E01D0(obj + 0x14, obj + 0x50);
-                    target = *(u8**)(obj + 0x10);
-                    *(f32*)(target + 0x20) = *(f32*)(obj + 0x50);
-                    *(f32*)(target + 0x24) = *(f32*)(obj + 0x54);
-                    *(f32*)(target + 0x28) = *(f32*)(obj + 0x58);
+                    fieldParticleSetPosition(node, node->transformed_position);
+                    fieldParticleSetRotation(node, node->transformed_rotation);
+                    fieldParticleSetScale(node, node->transformed_scale);
 
-                    fn_800E01D0(obj + 0x20, obj + 0x5C);
-                    target = *(u8**)(obj + 0x10);
-                    *(f32*)(target + 0x8C) = *(f32*)(obj + 0x5C);
-                    *(f32*)(target + 0x90) = *(f32*)(obj + 0x60);
-                    *(f32*)(target + 0x94) = *(f32*)(obj + 0x64);
-
-                    fn_800E01D0(obj + 0x2C, obj + 0x68);
-                    target = *(u8**)(obj + 0x10);
-                    *(f32*)(target + 0x98) = *(f32*)(obj + 0x68);
-                    *(f32*)(target + 0x9C) = *(f32*)(obj + 0x6C);
-                    *(f32*)(target + 0xA0) = *(f32*)(obj + 0x70);
-
-                    switch (*(u32*)(obj + 0x44)) {
-                    case 0:
-                        fn_800E01D0(obj + 0x14, pos);
-                        target = *(u8**)(obj + 0x10);
-                        *(f32*)(target + 0x20) = pos[0];
-                        *(f32*)(target + 0x24) = pos[1];
-                        *(f32*)(target + 0x28) = pos[2];
-                        break;
+                    /* Retail's jump table: 1 position, 2 rotation, 3 scale,
+                     * 4 position+rotation, 5 rotation+scale,
+                     * 6 position+scale, 7 all three; 0 does nothing. */
+                    switch (node->transform_state) {
                     case 1:
-                        fn_800E01D0(obj + 0x20, rot);
-                        target = *(u8**)(obj + 0x10);
-                        *(f32*)(target + 0x8C) = rot[0];
-                        *(f32*)(target + 0x90) = rot[1];
-                        *(f32*)(target + 0x94) = rot[2];
+                        fieldParticleSetPosition(node, pos);
                         break;
                     case 2:
-                        fn_800E01D0(obj + 0x2C, scale);
-                        target = *(u8**)(obj + 0x10);
-                        *(f32*)(target + 0x98) = scale[0];
-                        *(f32*)(target + 0x9C) = scale[1];
-                        *(f32*)(target + 0xA0) = scale[2];
+                        fieldParticleSetRotation(node, rot);
                         break;
                     case 3:
-                        fn_800E01D0(obj + 0x14, pos);
-                        target = *(u8**)(obj + 0x10);
-                        *(f32*)(target + 0x20) = pos[0];
-                        *(f32*)(target + 0x24) = pos[1];
-                        *(f32*)(target + 0x28) = pos[2];
-                        fn_800E01D0(obj + 0x20, rot);
-                        target = *(u8**)(obj + 0x10);
-                        *(f32*)(target + 0x8C) = rot[0];
-                        *(f32*)(target + 0x90) = rot[1];
-                        *(f32*)(target + 0x94) = rot[2];
+                        fieldParticleSetScale(node, scale);
                         break;
                     case 4:
-                        fn_800E01D0(obj + 0x20, rot);
-                        target = *(u8**)(obj + 0x10);
-                        *(f32*)(target + 0x8C) = rot[0];
-                        *(f32*)(target + 0x90) = rot[1];
-                        *(f32*)(target + 0x94) = rot[2];
-                        fn_800E01D0(obj + 0x2C, scale);
-                        target = *(u8**)(obj + 0x10);
-                        *(f32*)(target + 0x98) = scale[0];
-                        *(f32*)(target + 0x9C) = scale[1];
-                        *(f32*)(target + 0xA0) = scale[2];
+                        fieldParticleSetPosition(node, pos);
+                        fieldParticleSetRotation(node, rot);
                         break;
                     case 5:
-                        fn_800E01D0(obj + 0x14, pos);
-                        target = *(u8**)(obj + 0x10);
-                        *(f32*)(target + 0x20) = pos[0];
-                        *(f32*)(target + 0x24) = pos[1];
-                        *(f32*)(target + 0x28) = pos[2];
-                        fn_800E01D0(obj + 0x2C, scale);
-                        target = *(u8**)(obj + 0x10);
-                        *(f32*)(target + 0x98) = scale[0];
-                        *(f32*)(target + 0x9C) = scale[1];
-                        *(f32*)(target + 0xA0) = scale[2];
+                        fieldParticleSetRotation(node, rot);
+                        fieldParticleSetScale(node, scale);
                         break;
                     case 6:
-                        fn_800E01D0(obj + 0x14, pos);
-                        target = *(u8**)(obj + 0x10);
-                        *(f32*)(target + 0x20) = pos[0];
-                        *(f32*)(target + 0x24) = pos[1];
-                        *(f32*)(target + 0x28) = pos[2];
-                        fn_800E01D0(obj + 0x20, rot);
-                        target = *(u8**)(obj + 0x10);
-                        *(f32*)(target + 0x8C) = rot[0];
-                        *(f32*)(target + 0x90) = rot[1];
-                        *(f32*)(target + 0x94) = rot[2];
-                        fn_800E01D0(obj + 0x2C, scale);
-                        target = *(u8**)(obj + 0x10);
-                        *(f32*)(target + 0x98) = scale[0];
-                        *(f32*)(target + 0x9C) = scale[1];
-                        *(f32*)(target + 0xA0) = scale[2];
+                        fieldParticleSetPosition(node, pos);
+                        fieldParticleSetScale(node, scale);
                         break;
                     case 7:
-                    default:
+                        fieldParticleSetPosition(node, pos);
+                        fieldParticleSetRotation(node, rot);
+                        fieldParticleSetScale(node, scale);
                         break;
                     }
 
-                    obj[6] = obj[5] == 0 ? 1 : 0;
+                    node->field_06 = node->field_05 == 0;
                 }
                 innerIdx++;
-                entry += 4;
             } while (innerIdx < 0x40);
         }
-        byteOff += 0x108;
         outerIdx++;
     }
 
-    {
-        u32 i;
-        for (i = 0; i < particleCount; i++) {
-            psInterpretParticles(0);
-            psExecGenerator(0);
-        }
+    for (i = 0; i < particleCount; i++) {
+        psInterpretParticles(0);
+        psExecGenerator(0);
     }
 
     if (fn_800057A0() == 2) {
-        u8 count = lbl_8047ADB0 + 1;
-        lbl_8047ADB0 = count;
-        if (count >= 5) {
+        if (++lbl_8047ADB0 >= 5) {
             psInterpretParticles(0);
             psExecGenerator(0);
             lbl_8047ADB0 = 0;
@@ -2136,8 +2082,8 @@ void fn_80118F7C(u8* obj, f32* arg) {
     set__5GSvecFfff(arg, f1, f2, f3);
 }
 /* 0x80118FB0 | 0x12C */
-extern f32 lbl_8047CFE8;
-extern f32 lbl_8047CFEC;
+extern const f32 lbl_8047CFE8; /* 0.0f */
+extern const f32 lbl_8047CFEC; /* 1.0f */
 void fn_80118FB0(u8* obj, GSpart* part, u32 state, u32 byte5,
                  u32 init_from_zero, u32 attach_model) {
     extern void GSvecCopy(void* dst, void* src);
@@ -2347,17 +2293,52 @@ typedef struct FieldParticleFile {
     u8* texture;
 } FieldParticleFile;
 
+static inline FieldParticleBank* fieldParticleGetFreeBank(void)
+{
+    FieldParticleBank* bank = lbl_8047AD9C;
+    u32 i;
+
+    for (i = 0; i < lbl_8047ADA0; i++, bank++) {
+        if (bank->active == 0) {
+            return bank;
+        }
+    }
+    return NULL;
+}
+
+static inline u8 fieldParticleTextureTypeUsed(u8 texture_type)
+{
+    FieldParticleBank* bank = lbl_8047AD9C;
+    u32 i;
+
+    for (i = 0; i < lbl_8047ADA0; i++, bank++) {
+        if (bank->texture_type == texture_type) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static inline u8 fieldParticleGetFreeTextureType(void)
+{
+    u8 texture_type;
+
+    for (texture_type = 0; texture_type < 0x40; texture_type++) {
+        if (!fieldParticleTextureTypeUsed(texture_type)) {
+            return texture_type;
+        }
+    }
+    return 0xFF;
+}
+
 void* gsParticleBankLoad(void* resource)
 {
     FieldParticleFile* file = resource;
     FieldParticleBank* bank;
-    FieldParticleBank* banks;
-    u32 i;
-    u32 j;
-    u32 bank_count;
     u8 texture_type;
+    u32 i;
     char* messages = (char*)lbl_802727D8;
-    u16 description_magic;
+    s32 version;
 
     switch (file->magic) {
     case 0x47505430:
@@ -2375,102 +2356,27 @@ void* gsParticleBankLoad(void* resource)
     file->description += (u32)file;
     file->data += (u32)file;
     file->texture += (u32)file;
-    description_magic = *(u16*)file->description;
-    if (description_magic != 0x43) {
-        GSlogWrite(messages + 0x128, 0x43);
+    version = *(u16*)file->description;
+    if (version != 0x43) {
+        GSlogWrite(messages + 0x128, 0x43, version);
         return NULL;
     }
     DCFlushRange(file->data, (file->dataSize + 0x1F) & ~0x1F);
 
-    banks = lbl_8047AD9C;
-    bank_count = lbl_8047ADA0;
-    bank = banks;
-    i = bank_count;
-    if (i != 0) {
-        do {
-            if (bank->active == 0) {
-                break;
-            }
-            bank++;
-        } while (--i != 0);
-        if (i == 0) {
-            bank = NULL;
-        }
-    } else {
-        bank = NULL;
-    }
+    bank = fieldParticleGetFreeBank();
     if (bank == NULL) {
         return NULL;
     }
-
-    texture_type = 0;
-    while (texture_type < 0x40) {
-        FieldParticleBank* other_bank = banks;
-        u32 in_use = 0;
-
-        j = bank_count;
-        if (j != 0) {
-            do {
-                if (other_bank->texture_type == texture_type) {
-                    in_use = 1;
-                    break;
-                }
-                other_bank++;
-            } while (--j != 0);
-        }
-        if (in_use == 0) {
-            break;
-        }
-        texture_type++;
-    }
-    if (texture_type == 0x40) {
-        texture_type = 0xFF;
-    }
+    texture_type = fieldParticleGetFreeTextureType();
     if (texture_type == 0xFF) {
         return NULL;
     }
 
     bank->active = 1;
     bank->texture_type = texture_type;
-    *(void**)((u8*)bank + 4) = file;
-    {
-        u8* clear = (u8*)bank;
-
-        for (i = 0; i < 2; i++) {
-            *(u32*)(clear + 0x08) = 0;
-            *(u32*)(clear + 0x0C) = 0;
-            *(u32*)(clear + 0x10) = 0;
-            *(u32*)(clear + 0x14) = 0;
-            *(u32*)(clear + 0x18) = 0;
-            *(u32*)(clear + 0x1C) = 0;
-            *(u32*)(clear + 0x20) = 0;
-            *(u32*)(clear + 0x24) = 0;
-            *(u32*)(clear + 0x28) = 0;
-            *(u32*)(clear + 0x2C) = 0;
-            *(u32*)(clear + 0x30) = 0;
-            *(u32*)(clear + 0x34) = 0;
-            *(u32*)(clear + 0x38) = 0;
-            *(u32*)(clear + 0x3C) = 0;
-            *(u32*)(clear + 0x40) = 0;
-            *(u32*)(clear + 0x44) = 0;
-            *(u32*)(clear + 0x48) = 0;
-            *(u32*)(clear + 0x4C) = 0;
-            *(u32*)(clear + 0x50) = 0;
-            *(u32*)(clear + 0x54) = 0;
-            *(u32*)(clear + 0x58) = 0;
-            *(u32*)(clear + 0x5C) = 0;
-            *(u32*)(clear + 0x60) = 0;
-            *(u32*)(clear + 0x64) = 0;
-            *(u32*)(clear + 0x68) = 0;
-            *(u32*)(clear + 0x6C) = 0;
-            *(u32*)(clear + 0x70) = 0;
-            *(u32*)(clear + 0x74) = 0;
-            *(u32*)(clear + 0x78) = 0;
-            *(u32*)(clear + 0x7C) = 0;
-            *(u32*)(clear + 0x80) = 0;
-            *(u32*)(clear + 0x84) = 0;
-            clear += 0x80;
-        }
+    bank->file = file;
+    for (i = 0; i < 0x40; i++) {
+        bank->slots[i] = NULL;
     }
     psInitDataBank(bank->texture_type, file->description, file->data, file->texture, 0);
     return bank;
@@ -2552,8 +2458,8 @@ void gsParticleKillOldest(FieldParticleInstanceList* list) {
 
 #if !defined(FIELD_BANK_ACTIVE) || defined(FIELD_CANDIDATE_80119BD0_80119D90)
 /* 0x80119BD0 | 0x1C0 */
-extern f32 lbl_8047CFE8;
-extern f32 lbl_8047CFEC;
+extern const f32 lbl_8047CFE8; /* 0.0f */
+extern const f32 lbl_8047CFEC; /* 1.0f */
 void gsParticlePtclHook(u32 arg1, u32 arg2, u32 arg5, u8* arg6) {
     u8* node = arg6;
     struct GSmodel* resource;
@@ -2623,53 +2529,67 @@ void gsParticlePtclHook(u32 arg1, u32 arg2, u32 arg5, u8* arg6) {
 
 #if !defined(FIELD_BANK_ACTIVE) || defined(FIELD_CANDIDATE_8011A0A8_8011A280)
 /* 0x8011A0A8 | 0x1D8 */
+static inline u8* fieldStatusEntryGet(u8* obj, u16 id) {
+    extern u8 fn_80119E90(u16 idx);
+    extern u32 fn_80119ED0(u16 idx);
+    extern u8* fn_80119F10(u16 idx);
+    extern u8* statusGetStatus(u8* a, void* b, u32 c, u32 d, u32 e);
+    u16 idx;
+    u8* base;
+    idx = fn_80119E90(id);
+    base = fn_80119F10(id);
+    base = statusGetStatus(base, obj, 0, fn_80119ED0(id), 0);
+    if (base == NULL) {
+        return NULL;
+    }
+    return base + idx * 16;
+}
+
+static inline u8 fieldStatusEntryActive(u8* entry) {
+    if (entry == NULL) {
+        return 0;
+    }
+    if (fn_8011A090(entry) == 0) {
+        return 0;
+    }
+    return 1;
+}
+
+static inline u8 fieldStatusEntryHas(u8* obj, u16 id) {
+    u8* entry;
+    if (id == 0) {
+        return 0;
+    }
+    entry = fieldStatusEntryGet(obj, id);
+    if (entry == NULL) {
+        return 0;
+    }
+    if (fieldStatusEntryActive(entry) == 1) {
+        if (fn_8011A090(entry) == id) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 void fn_8011A0A8(u8* dst, u8* src, u16 type)
 {
     u8* dst_entry;
     u8* src_entry;
-    u8 index;
-    u8 table;
-    u32 mask;
 
     if (type == 0) {
         return;
     }
-
-    index = fn_80119E90(type);
-    table = fn_80119F10(type);
-    mask = fn_80119ED0(type);
-    dst_entry = statusGetStatus(table, dst, 0, mask, 0);
-    if (dst_entry != NULL) {
-        dst_entry += index * 16;
-    }
+    dst_entry = fieldStatusEntryGet(dst, type);
     if (dst_entry == NULL) {
         return;
     }
-
-    index = fn_80119E90(type);
-    table = fn_80119F10(type);
-    mask = fn_80119ED0(type);
-    src_entry = statusGetStatus(table, src, 0, mask, 0);
-    if (src_entry != NULL) {
-        src_entry += index * 16;
-    }
-    if (src_entry == NULL || fn_8011A090(src_entry) == 0 ||
-        fn_8011A090(src_entry) != type) {
+    if (fieldStatusEntryHas(src, type) == 0) {
         return;
     }
-
-    index = fn_80119E90(type);
-    table = fn_80119F10(type);
-    mask = fn_80119ED0(type);
-    src_entry = statusGetStatus(table, src, 0, mask, 0);
+    src_entry = fieldStatusEntryGet(src, type);
     if (src_entry != NULL) {
-        src_entry += index * 16;
-    }
-    if (src_entry != NULL) {
-        ((u32*)dst_entry)[0] = ((u32*)src_entry)[0];
-        ((u32*)dst_entry)[1] = ((u32*)src_entry)[1];
-        ((u32*)dst_entry)[2] = ((u32*)src_entry)[2];
-        ((u32*)dst_entry)[3] = ((u32*)src_entry)[3];
+        *(FieldStatusEntry*)dst_entry = *(FieldStatusEntry*)src_entry;
     }
 }
 #endif
@@ -3339,9 +3259,30 @@ p2_check:
 
 #if !defined(FIELD_BANK_ACTIVE) || defined(FIELD_CANDIDATE_8011B2C0_8011B444)
 /* 0x8011B2C0 | 0x184 */
+/* Status-entry lookup: the entry table from fn_80119F10/statusGetStatus,
+ * indexed by fn_80119E90 in 16-byte records. fn_8011B444 expands the same
+ * sequence twice in place; as an inline, the table result feeds the offset
+ * without the extra register copy a flat local produces. The block-scope
+ * prototypes follow the widths retail's callers assume (no masks after
+ * fn_80119F10/fn_80119ED0/fn_80119DD0). */
+static inline u8* fieldEntryGet(void* obj, u16 id) {
+    extern u8 fn_80119E90(u16 idx);
+    extern u32 fn_80119ED0(u16 idx);
+    extern u8* fn_80119F10(u16 idx);
+    extern u8* statusGetStatus(u8* a, void* b, u32 c, u32 d, u32 e);
+    u16 idx;
+    u8* base;
+    idx = fn_80119E90(id);
+    base = fn_80119F10(id);
+    base = statusGetStatus(base, obj, 0, fn_80119ED0(id), 0);
+    if (base == NULL) {
+        return NULL;
+    }
+    return base + idx * 16;
+}
 void fn_8011B2C0(void* obj, u16 id, u16 arg3) {
     extern u8 fn_80119D90(u16 idx);
-    extern u8 fn_80119DD0(u16 idx);
+    extern u32 fn_80119DD0(u16 idx);
     extern u8 fn_80119E50(u16 idx);
     extern u8 fn_80119E90(u16 idx);
     extern u32 fn_80119ED0(u16 idx);
@@ -3355,18 +3296,13 @@ void fn_8011B2C0(void* obj, u16 id, u16 arg3) {
     extern void fn_80119FF0(u8* ptr, u16 val);
     extern u32 fn_8011A030(u8* ptr);
     extern u8* statusGetStatus(u8* a, void* b, u32 c, u32 d, u32 e);
-    u32 idx;
     u8 type;
     u32 old_count;
-    u8* selector;
     u8* elem;
 
     if (id == 0) { return; }
 
-    idx = (u8)fn_80119E90(id);
-    selector = fn_80119F10(id);
-    elem = statusGetStatus(selector, obj, 0, fn_80119ED0(id), 0);
-    elem = elem == NULL ? NULL : elem + ((u16)idx << 4);
+    elem = fieldEntryGet(obj, id);
     if (elem == NULL) { return; }
 
     type = fn_80119E50(id);
@@ -3390,7 +3326,7 @@ void fn_8011B2C0(void* obj, u16 id, u16 arg3) {
     if (type == 4) {
         u32 count = old_count + 1;
         u32 limit = fn_80119DD0(id);
-        if (limit < (u8)count) {
+        if ((u8)limit < (u8)count) {
             count = limit;
         }
         fn_80119FB0(elem, count);
@@ -3629,7 +3565,6 @@ extern f32 lbl_8047CFDC;
 extern f32 lbl_8047CFE0;
 u8 floorUpdateFieldCamera(void);
 extern u32 lbl_80478B48;  /* NPC count (SDA) */
-#pragma optimization_level 4
 u8 fn_80119D90(u16 idx) {
     u8* entry;
     if ((u32)idx >= lbl_80478B48) { entry = NULL; } else { entry = lbl_8035BBA8 + (u32)idx * 0x14; }
@@ -3637,7 +3572,6 @@ u8 fn_80119D90(u16 idx) {
     return entry[0x4];
 }
 extern u32 lbl_80478B48;  /* NPC count (SDA) */
-#pragma optimization_level 4
 u8 fn_80119DD0(u16 idx) {
     u8* entry;
     if ((u32)idx >= lbl_80478B48) { entry = NULL; } else { entry = lbl_8035BBA8 + (u32)idx * 0x14; }
@@ -3645,7 +3579,6 @@ u8 fn_80119DD0(u16 idx) {
     return entry[0x3];
 }
 extern u32 lbl_80478B48;  /* NPC count (SDA) */
-#pragma optimization_level 4
 u16 fn_80119E10(u16 idx) {
     u8* entry;
     if ((u32)idx >= lbl_80478B48) { entry = NULL; } else { entry = lbl_8035BBA8 + (u32)idx * 0x14; }
@@ -3653,7 +3586,6 @@ u16 fn_80119E10(u16 idx) {
     return *(u16*)(entry + 0xa);
 }
 extern u32 lbl_80478B48;  /* NPC count (SDA) */
-#pragma optimization_level 4
 u8 fn_80119E50(u16 idx) {
     u8* entry;
     if ((u32)idx >= lbl_80478B48) { entry = NULL; } else { entry = lbl_8035BBA8 + (u32)idx * 0x14; }
@@ -3661,7 +3593,6 @@ u8 fn_80119E50(u16 idx) {
     return entry[0x2];
 }
 extern u32 lbl_80478B48;  /* NPC count (SDA) */
-#pragma optimization_level 4
 u8 fn_80119E90(u16 idx) {
     u8* entry;
     if ((u32)idx >= lbl_80478B48) { entry = NULL; } else { entry = lbl_8035BBA8 + (u32)idx * 0x14; }
@@ -3669,7 +3600,6 @@ u8 fn_80119E90(u16 idx) {
     return entry[0x1];
 }
 extern u32 lbl_80478B48;  /* NPC count (SDA) */
-#pragma optimization_level 4
 u16 fn_80119ED0(u16 idx) {
     u8* entry;
     if ((u32)idx >= lbl_80478B48) { entry = NULL; } else { entry = lbl_8035BBA8 + (u32)idx * 0x14; }
@@ -3677,7 +3607,6 @@ u16 fn_80119ED0(u16 idx) {
     return *(u16*)(entry + 0x8);
 }
 extern u32 lbl_80478B48;  /* NPC count (SDA) */
-#pragma optimization_level 4
 u8 fn_80119F10(u16 idx) {
     u8* entry;
     if ((u32)idx >= lbl_80478B48) { entry = NULL; } else { entry = lbl_8035BBA8 + (u32)idx * 0x14; }
@@ -3685,7 +3614,6 @@ u8 fn_80119F10(u16 idx) {
     return entry[0x0];
 }
 extern u32 lbl_80478B48;  /* NPC count (SDA) */
-#pragma optimization_level 4
 u32 fn_80119F50(u16 idx) {
     u8* entry;
     if ((u32)idx >= lbl_80478B48) { entry = NULL; } else { entry = lbl_8035BBA8 + (u32)idx * 0x14; }

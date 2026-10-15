@@ -13,14 +13,18 @@
 #include "game/effect/effect_util_types.h"
 
 
+#ifndef PCBOX_SETPOKEMON_ONLY
+
 /* 0x8013433C | 0xE4 */
 #if 0
 asm void pcboxSwapItemSlot(void) {
 #include "src/game/effect/effect_util_pcboxSwapItemSlot.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma scheduling on
+#if !defined(NO_LOCAL_PRAGMAS_PCBOX_CANDIDATE_8013433C)
+#endif
+#if !defined(NO_LOCAL_PRAGMAS_PCBOX_CANDIDATE_8013433C)
+#endif
 s32 pcboxSwapItemSlot(void* base, s16 idx1, s16 idx2) {
     extern void fn_80140A9C(void*, void*);
     void* b;
@@ -53,9 +57,30 @@ s32 pcboxSwapItemSlot(void* base, s16 idx1, s16 idx2) {
     fn_80140A9C(entry1, entry2);
     return 1;
 }
-#pragma scheduling off
+#if !defined(NO_LOCAL_PRAGMAS_PCBOX_CANDIDATE_8013433C)
+#endif
 #endif
 
+
+static inline void* pcboxGetSaveStatus(void* base) {
+    if (base == 0) {
+        base = (void*)savedataGetStatus(0, 3);
+    }
+    return base;
+}
+
+static inline s16 pcboxFindItem(void* status, u16 effect_id) {
+    extern u8 fn_801429E8(void*);
+    extern s32 itemGetStatus(void*, u32, u32, u32);
+    s32 i;
+    for (i = 0; i < 0xeb; i++) {
+        if (fn_801429E8((u8*)status + 0x6dec + i * 4)) {
+            if (itemGetStatus((u8*)status + 0x6dec + i * 4, 0, 0x1b, 0) == effect_id) break;
+        }
+    }
+    if (i < 0xeb) return i;
+    return -1;
+}
 
 /* 0x80134420 | 0x164 */
 #if 0
@@ -63,39 +88,57 @@ asm void pcboxGetItemCapacity(void) {
 #include "src/game/effect/effect_util_pcboxGetItemCapacity.inc"
 }
 #else
-#pragma optimization_level 4
-u16 pcboxGetItemCapacity(void* base, u16 effect_id) {
-    extern u8 itemDataBiosGetPtr(u16);
+#if !defined(NO_LOCAL_PRAGMAS_PCBOX_CANDIDATE_8013433C)
+#endif
+static inline void* pcboxGetItemSlot(void* status, s16 idx) {
+    void* entry;
+    if (idx < 0 || idx >= 0xeb) {
+        entry = 0;
+    } else {
+        entry = (u8*)status + 0x6dec + (s32)idx * 4;
+    }
+    return entry;
+}
+
+static inline u16 pcboxGetItemSlotNum(void* entry) {
     extern u8 fn_801429E8(void*);
     extern s32 itemGetStatus(void*, u32, u32, u32);
-    void* cur;
-    void* entry;
-    s16 idx;
-    u16 val;
-    s32 i;
-    if (base == 0) {
-        base = (void*)savedataGetStatus(0, 3);
-    }
-    if (!itemDataBiosGetPtr(effect_id)) return 0;
-    cur = (u8*)base;
-    for (i = 0; i < 0xeb; i++, cur = (u8*)cur + 4) {
-        if (fn_801429E8((u8*)cur + 0x6dec)) {
-            if (itemGetStatus((u8*)cur + 0x6dec, 0, 0x1b, 0) == effect_id) break;
-        }
-    }
-    idx = (i < 0xeb) ? (s16)i : -1;
-    if (idx < 0) return 0;
-    entry = (idx >= 0 && idx < 0xeb) ? ((u8*)base + 0x6dec + (s32)idx * 4) : 0;
     if (entry == 0) {
-        val = 0xFFFF;
-    } else if (fn_801429E8(entry)) {
-        val = itemGetStatus(entry, 0, 0x1c, 0) & 0xFFFF;
-    } else {
-        val = 0xFFFF;
+        return 0xFFFF;
     }
-    if (val > 0x3e7) val = 0;
-    return (u16)(0x3e7 - val);
+    if (!fn_801429E8(entry)) {
+        return 0xFFFF;
+    }
+    return itemGetStatus(entry, 0, 0x1c, 0);
 }
+
+static inline u16 pcboxGetItemNum(void* status, u16 effect_id) {
+    s16 idx;
+    u16 num;
+    idx = pcboxFindItem(status, effect_id);
+    if (idx >= 0) {
+        num = pcboxGetItemSlotNum(pcboxGetItemSlot(status, idx));
+        if (num > 0x3e7) {
+            num = 0;
+        }
+    } else {
+        num = 0;
+    }
+    return num;
+}
+
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma — see docs/RULE_EXCEPTIONS.md */
+#if !defined(NO_LOCAL_PRAGMAS_PCBOX_CANDIDATE_8013433C)
+#endif
+u16 pcboxGetItemCapacity(void* base, u16 effect_id) {
+    extern void* itemDataBiosGetPtr(u16);
+    void* status;
+    status = pcboxGetSaveStatus(base);
+    if (!itemDataBiosGetPtr(effect_id)) return 0;
+    return (u16)(0x3e7 - pcboxGetItemNum(status, effect_id));
+}
+#if !defined(NO_LOCAL_PRAGMAS_PCBOX_CANDIDATE_8013433C)
+#endif
 #endif
 
 
@@ -105,28 +148,23 @@ asm void pcboxAddItem(void) {
 #include "src/game/effect/effect_util_pcboxAddItem.inc"
 }
 #else
-#pragma scheduling on
+#if !defined(NO_LOCAL_PRAGMAS_PCBOX_CANDIDATE_8013433C)
+#endif
 u16 pcboxAddItem(void* base, u16 effect_id, u16 r5) {
     extern void* itemDataBiosGetPtr(u16);
     extern u8 fn_801429E8(void*);
     extern s32 itemGetStatus(void*, u32, u32, u32);
     extern u16 fn_80140ACC(void*, u16, u16, u16, s16, u16, u32);
     void* status; void* cur; s16 idx; s32 i;
-    status = base;
-    if (status == 0) { status = (void*)savedataGetStatus(0, 3); }
+    status = pcboxGetSaveStatus(base);
     if (r5 == 0) return r5;
     if (!itemDataBiosGetPtr(effect_id)) return r5;
-    cur = status;
-    for (i = 0; i < 0xeb; i++, cur = (u8*)cur + 4) {
-        if (fn_801429E8((u8*)cur + 0x6dec)) {
-            if (itemGetStatus((u8*)cur + 0x6dec, 0, 0x1b, 0) == effect_id) break;
-        }
-    }
-    idx = (i < 0xeb) ? (s16)i : -1;
+    idx = pcboxFindItem(status, effect_id);
     if (idx < 0) return r5;
     return (u16)fn_80140ACC((u8*)status + 0x6dec, 0xeb, effect_id, r5, idx, 0x3e7, 0);
 }
-#pragma scheduling off
+#if !defined(NO_LOCAL_PRAGMAS_PCBOX_CANDIDATE_8013433C)
+#endif
 #endif
 
 
@@ -136,27 +174,22 @@ asm void pcboxDelItem(void) {
 #include "src/game/effect/effect_util_pcboxDelItem.inc"
 }
 #else
-#pragma scheduling on
+#if !defined(NO_LOCAL_PRAGMAS_PCBOX_CANDIDATE_8013433C)
+#endif
 u16 pcboxDelItem(void* base, u16 effect_id, u16 r5) {
     extern void* itemDataBiosGetPtr(u16);
     extern u8 fn_801429E8(void*);
     extern s32 itemGetStatus(void*, u32, u32, u32);
     extern u16 fn_80141308(void*, u16, u16, u16, s16, u16, u32, u32);
     void* status; void* cur; s16 idx; s32 i;
-    status = base;
-    if (status == 0) { status = (void*)savedataGetStatus(0, 3); }
+    status = pcboxGetSaveStatus(base);
     if (r5 == 0) return r5;
     if (!itemDataBiosGetPtr(effect_id)) return r5;
-    cur = status;
-    for (i = 0; i < 0xeb; i++, cur = (u8*)cur + 4) {
-        if (fn_801429E8((u8*)cur + 0x6dec)) {
-            if (itemGetStatus((u8*)cur + 0x6dec, 0, 0x1b, 0) == effect_id) break;
-        }
-    }
-    idx = (i < 0xeb) ? (s16)i : -1;
+    idx = pcboxFindItem(status, effect_id);
     return (u16)fn_80141308((u8*)status + 0x6dec, 0xeb, effect_id, r5, idx, 0x3e7, 0, 0);
 }
-#pragma scheduling off
+#if !defined(NO_LOCAL_PRAGMAS_PCBOX_CANDIDATE_8013433C)
+#endif
 #endif
 
 #if 0
@@ -164,18 +197,35 @@ asm void pcboxGetItem(void) {
 #include "src/game/effect/effect_util_pcboxGetItem.inc"
 }
 #else
-#pragma optimization_level 4
+#if !defined(NO_LOCAL_PRAGMAS_PCBOX_CANDIDATE_8013433C)
+#endif
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma — see docs/RULE_EXCEPTIONS.md */
+#if !defined(NO_LOCAL_PRAGMAS_PCBOX_CANDIDATE_8013433C)
+#endif
 void* pcboxGetItem(void* base, s16 index) {
-    if (base == 0) {
-        base = (void*)savedataGetStatus(0, 3);
+    void* status;
+    void* entry;
+    status = base;
+    if (status == 0) {
+        status = (void*)savedataGetStatus(0, 3);
     }
     if (index < 0 || index >= 0xeb) {
-        return NULL;
+        entry = 0;
+    } else {
+        entry = (u8*)status + 0x6dec + (s32)index * 4;
     }
-    return (u8*)base + 0x6dec + (s32)index * 4;
+    return entry;
 }
+#if !defined(NO_LOCAL_PRAGMAS_PCBOX_CANDIDATE_8013433C)
+#endif
 #endif
 
+
+#endif /* PCBOX_SETPOKEMON_ONLY */
+
+#ifndef PCBOX_ITEMS_ONLY
+
+#ifndef PCBOX_SETPOKEMON_ONLY
 
 /* 0x801347D0 | 0x8 | return_const */
 u16 pcboxGetNbItemSlot(s32 box) { return 235; }
@@ -188,6 +238,8 @@ s8 fn_801347D8(void) { return 30; }
 /* 0x801347E0 | 0x8 | return_const */
 s8 pcboxGetNbPokemonBox(void) { return 3; }
 
+
+#endif /* PCBOX_SETPOKEMON_ONLY */
 
 /* One box contains its name/header followed by 30 Pokemon records. */
 typedef struct PCBoxPokemonRecord {
@@ -210,14 +262,14 @@ static inline u8* pcboxGetPokemonRecord(PCBoxData* base, s8 box, s8 index)
     return base[box].pokemon[index].data;
 }
 
+#ifndef PCBOX_SETPOKEMON_ONLY
+
 /* 0x801347E8 | 0x104 */
 #if 0
 asm void fn_801347E8(void) {
 #include "src/game/effect/effect_util_fn_801347E8.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma scheduling on
 s8 pcboxGetPokemonBoxNbEmptySlot(PCBoxData* base, s8 box) {
     s8 index;
     s8 count = 0;
@@ -253,7 +305,6 @@ s8 pcboxGetPokemonBoxNbEmptySlot(PCBoxData* base, s8 box) {
     }
     return (s8)(30 - count);
 }
-#pragma scheduling off
 #endif
 
 
@@ -263,8 +314,6 @@ asm void getPokemonBoxNbUsedSlot__5PCBOXFSc(void) {
 #include "src/game/effect/effect_util_getPokemonBoxNbUsedSlot__5PCBOXFSc.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma scheduling on
 s32 getPokemonBoxNbUsedSlot__5PCBOXFSc(PCBoxData* base, s8 box) {
     u8* pokemon;
     s32 count = 0;
@@ -285,7 +334,6 @@ s32 getPokemonBoxNbUsedSlot__5PCBOXFSc(PCBoxData* base, s8 box) {
     }
     return count;
 }
-#pragma scheduling off
 #endif
 
 
@@ -295,8 +343,6 @@ asm void fn_801349DC(void) {
 #include "src/game/effect/effect_util_fn_801349DC.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma scheduling on
 s32 pcboxSetPokemonBoxName(void* base, s8 slot, u16* name) {
     extern void GScharCpy(void*, u16*);
     s32 len;
@@ -318,7 +364,6 @@ s32 pcboxSetPokemonBoxName(void* base, s8 slot, u16* name) {
     GScharCpy((u8*)base + (s32)s * 0x24a4, name);
     return 1;
 }
-#pragma scheduling off
 #endif
 
 #if 0
@@ -326,7 +371,6 @@ asm void pcboxGetPokemonBoxName(void) {
 #include "src/game/effect/effect_util_fn_80134A98.inc"
 }
 #else
-#pragma scheduling on
 void* pcboxGetPokemonBoxName(void* base, s8 index) {
     s8 i;
     if (base == 0) {
@@ -341,7 +385,6 @@ _ret0:
 _compute:
     return (u8*)base + (s32)i * 0x24a4;
 }
-#pragma scheduling off
 #endif
 
 
@@ -351,8 +394,6 @@ asm void delPokemon__5PCBOXFScSc(void) {
 #include "src/game/effect/effect_util_delPokemon__5PCBOXFScSc.inc"
 }
 #else
-#pragma optimization_level 4
-#pragma scheduling on
 s32 delPokemon__5PCBOXFScSc(void* base, s8 slot, s8 idx) {
     extern u8 pokemonCheckValid(void*);
     extern void pokemonInit(void*);
@@ -378,7 +419,6 @@ s32 delPokemon__5PCBOXFScSc(void* base, s8 slot, s8 idx) {
     pokemonInit(entry);
     return 1;
 }
-#pragma scheduling off
 #endif
 
 
@@ -388,7 +428,6 @@ asm void pcboxAddPokemon(void) {
 #include "src/game/effect/effect_util_fn_80134BC0.inc"
 }
 #else
-#pragma optimization_level 2
 s32 pcboxAddPokemon(void* base, void* src, s8 slot) {
     extern u8 pokemonCheckValid(void*);
     extern void pokemonAllKaihuku(void*);
@@ -459,45 +498,38 @@ s32 pcboxAddPokemon(void* base, void* src, s8 slot) {
 #endif
 
 
+#endif /* PCBOX_SETPOKEMON_ONLY */
+
 /* 0x80134E10 | 0xE0 */
 #if 0
 asm void setPokemon__5PCBOXFP7PokemonScSc(void) {
 #include "src/game/effect/effect_util_setPokemon__5PCBOXFP7PokemonScSc.inc"
 }
 #else
-#pragma optimization_level 4
-s32 setPokemon__5PCBOXFP7PokemonScSc(void* base, void* src, s8 slot, s8 idx) {
+s32 setPokemon__5PCBOXFP7PokemonScSc(PCBoxData* base, PCBoxPokemonRecord* src, s8 box, s8 index) {
     extern void pokemonAllKaihuku(void*);
-    u8* entry;
-    s8 s;
-    s8 e;
-    u32 i;
-    u32* dst32;
-    u32* src32;
+    PCBoxPokemonRecord* entry;
     if (base == 0) {
-        base = (void*)savedataGetStatus(0, 3);
+        base = (PCBoxData*)savedataGetStatus(0, 3);
     }
-    s = slot;
-    e = idx;
-    if (s < 0 || s >= 3 || e < 0 || e >= 0x1e) {
+    if (box < 0 || box >= 3) {
+        entry = 0;
+    } else if (index < 0 || index >= 30) {
         entry = 0;
     } else {
-        entry = (u8*)base + (s32)s * 0x24a4 + (s32)e * 0x138 + 0x14;
+        entry = &base[box].pokemon[index];
     }
-    if (entry == 0) return 0;
-    dst32 = (u32*)entry;
-    src32 = (u32*)src;
-    for (i = 0; i < 0x27; i++) {
-        dst32[0] = src32[0];
-        dst32[1] = src32[1];
-        dst32 += 2;
-        src32 += 2;
+    if (entry == 0) {
+        return 0;
     }
+    *entry = *src;
     pokemonAllKaihuku(entry);
     return 1;
 }
 #endif
 
+
+#ifndef PCBOX_SETPOKEMON_ONLY
 
 /* 0x80134EF0 | 0x98 */
 #if 0
@@ -505,7 +537,6 @@ asm void getPokemon__5PCBOXFScSc(void) {
 #include "src/game/effect/effect_util_fn_80134EF0.inc"
 }
 #else
-#pragma scheduling on
 void* getPokemon__5PCBOXFScSc(void* base, s8 r4, s8 r5) {
     u8* new_var;
     s8 slot;
@@ -528,7 +559,6 @@ void* getPokemon__5PCBOXFScSc(void* base, s8 r4, s8 r5) {
 done:
     return new_var;
 }
-#pragma scheduling off
 #endif
 
 
@@ -538,7 +568,6 @@ asm void pcboxInit(void) {
 #include "src/game/effect/effect_util_pcboxInit.inc"
 }
 #else
-#pragma scheduling on
 void pcboxInit(void* base) {
     extern void msgctrlSetValue(u32, u32);
     extern void fn_800F96E4(void*, u32, u32);
@@ -563,7 +592,6 @@ void pcboxInit(void* base) {
     } while (i < 3);
     fn_80142A88(status + 0x6dec, 0xeb);
 }
-#pragma scheduling off
 #endif
 
 
@@ -573,7 +601,6 @@ asm void pcboxSetStatus(void) {
 #include "src/game/effect/effect_util_fn_80135024.inc"
 }
 #else
-#pragma optimization_level 4
 void pcboxSetStatus(void) {
 }
 #endif
@@ -581,3 +608,7 @@ void pcboxSetStatus(void) {
 
 /* 0x80135028 | 0x8 | return_const */
 u32 pcboxGetStatus() { return 0; }
+
+#endif /* PCBOX_SETPOKEMON_ONLY */
+
+#endif /* PCBOX_ITEMS_ONLY */

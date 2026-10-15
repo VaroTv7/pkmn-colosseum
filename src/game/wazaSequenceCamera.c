@@ -11,34 +11,33 @@
  */
 
 #include "game/battle/battle_waza_types.h"
-#include "crt/math.h"
+#include "crt/math_ppc.h"
 #include "dolphin/mtx.h"
+#include "game/battle/waza_camera_stop.h"
 
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
-#pragma peephole on
+/* Camera parameters computed per move (lbl_804673A0, 0x34 bytes). */
+typedef struct WazaSequenceCameraParams {
+    s32 motion;         /* 0x00 */
+    f32 size;           /* 0x04 */
+    f32 height;         /* 0x08 */
+    f32 rotationMin;    /* 0x0C */
+    f32 rotationMax;    /* 0x10 */
+    f32 rotationBase;   /* 0x14 */
+    f32 heightMin;      /* 0x18 */
+    f32 heightMax;      /* 0x1C */
+    f32 distanceMin;    /* 0x20 */
+    f32 distanceMax;    /* 0x24 */
+    f32 nearLength;     /* 0x28 */
+    f32 middleLength;   /* 0x2C */
+    f32 farLength;      /* 0x30 */
+} WazaSequenceCameraParams;
+
 
 /**
  * wazaSequenceCameraGetPattern__Fbi - Waza multi-hit advance.
  * Address: 0x801D2B4C | Size: 0x120
  */
+#ifndef WAZA_CAMERA_FILE_ONLY
 void* wazaSequenceCameraGetPattern__Fbi(u8 shortTable, s32 flags) {
     typedef struct WazaCameraPattern {
         f32 duration;
@@ -92,6 +91,7 @@ void* wazaSequenceCameraGetPattern__Fbi(u8 shortTable, s32 flags) {
     }
     return &lbl_803721C0[_fadeEffectGetRandom__FUl(13)];
 }
+#endif
 
 /**
  * fn_801D2C6C - Waza get global state from SDA.
@@ -103,54 +103,6 @@ extern u32 lbl_8047B3E8;
 extern s32 lbl_8047B410;
 extern f32 lbl_80478CDC;
 
-typedef union WazaCameraFloatShape {
-    f32 value;
-    u32 bits;
-} WazaCameraFloatShape;
-
-static inline f32 wazaCameraSqrtf(f32 value)
-{
-    extern f32 lbl_8047E1FC;
-    extern f64 lbl_8047E218;
-    extern f64 lbl_8047E220;
-    extern f64 lbl_8047E228;
-    WazaCameraFloatShape shape;
-    f64 estimate;
-    s32 exponent;
-    s32 fpclass;
-
-    if (value > lbl_8047E1FC) {
-        estimate = __frsqrte(value);
-        estimate = lbl_8047E218 * estimate *
-                   (lbl_8047E220 - value * (estimate * estimate));
-        estimate = lbl_8047E218 * estimate *
-                   (lbl_8047E220 - value * (estimate * estimate));
-        estimate = lbl_8047E218 * estimate *
-                   (lbl_8047E220 - value * (estimate * estimate));
-        return (f32)(value * estimate);
-    }
-    if ((f64)value < lbl_8047E228) {
-        return lbl_80478AC0[0];
-    }
-    shape.value = value;
-    exponent = shape.bits & 0x7F800000;
-    switch (exponent) {
-    case 0x7F800000:
-        fpclass = (shape.bits & 0x007FFFFF) != 0 ? 1 : 2;
-        break;
-    case 0:
-        fpclass = (shape.bits & 0x007FFFFF) != 0 ? 5 : 3;
-        break;
-    default:
-        fpclass = 4;
-        break;
-    }
-    if (fpclass == 1) {
-        return lbl_80478AC0[0];
-    }
-    return value;
-}
-
 extern u8 lbl_80467CC0[];
 extern void fn_801DD158(void* obj);
 extern void fn_801DF1D0(void* obj);
@@ -160,9 +112,11 @@ extern void _threadSwitch(void);
 extern s32 fn_8017B2CC(s32 id);
 extern void fn_800F915C(s32 id);
 extern void fn_8017B1CC(s32 id);
+#ifndef WAZA_CAMERA_FILE_ONLY
 void* fn_801D2C6C(void) {
     return lbl_8047B3EC;
 }
+#endif
 
 /* =========================================================================
  * WAZA ANIMATION STATE MACHINES (0x801D2C74 - 0x801D7230)
@@ -175,6 +129,7 @@ void* fn_801D2C6C(void) {
  * fn_801D2C74 - Waza animation pre-check.
  * Address: 0x801D2C74 | Size: 0xB4
  */
+#ifndef WAZA_CAMERA_FILE_ONLY
 void fn_801D2C74(void* owner) {
     extern void GSscene_SetMode(s32 arg);
     extern void cameraStopAnime(void* arg);
@@ -206,20 +161,37 @@ void fn_801D2C74(void* owner) {
         }
     }
 }
+#endif
 
 /**
  * fn_801D2D28 - Waza animation setup from move data.
  * Address: 0x801D2D28 | Size: 0x26C
  */
-void fn_801D2D28(void) {
+void fn_801D2D28(void)
+{
     typedef struct CameraFovKey {
         f32 start;
         f32 end;
         u32 startFrame;
         u32 endFrame;
     } CameraFovKey;
+    typedef struct WazaCameraMove {
+        u8 pad00[0x4C];
+        u32 targetParts[3];
+        u8 pad58[0x7C];
+    } WazaCameraMove;
+    typedef struct WazaCameraSequence {
+        u8 pad00[0x24];
+        void* model;
+        u8 pad28[4];
+        WazaCameraMove* moves;
+        u16 pad30;
+        u16 moveIndex;
+    } WazaCameraSequence;
     extern CameraFovKey lbl_804673D4[];
     extern u8 lbl_8047B3F4;
+    extern u32 lbl_8047B3E8;
+    extern f32 lbl_80478CDC;
     extern u32 msgGetCharsPerFrame(void);
     extern void* GSmodelGetPart(void*, u32);
     extern void GSpartGetTransform(void*, Vec*, void*, void*);
@@ -230,11 +202,10 @@ void fn_801D2D28(void) {
     extern void cameraMoveTargetOfs(s32, Vec*, f32);
     extern f32 GSlerpGetLinearInterpolationFloat(f32, f32, f32);
     extern void cameraSetFov(f32);
-    extern BOOL cameraMoveEndCheckSpecial(s32);
-    extern f32 lbl_8047E1E0;
-    u8* sequence;
-    u8* model;
-    CameraFovKey* key;
+    extern u32 cameraMoveEndCheckSpecial(u8);
+    CameraFovKey* key = lbl_804673D4;
+    WazaCameraMove* move;
+    void* model;
     Vec target;
     Vec origin;
     void* part;
@@ -243,73 +214,56 @@ void fn_801D2D28(void) {
     u32 partId;
     u32 i;
 
-    if (lbl_8047B3F4 == 0 || lbl_8047B3EC == NULL) {
-        return;
-    }
-
-    if ((u8*)lbl_8047B3F0 != NULL && *(u32*)((u8*)lbl_8047B3F0 + 0x18) != 0 &&
-        *(u32*)((u8*)lbl_8047B3F0 + 0x20) != 0) {
-        return;
-    }
-
-    frame = msgGetCharsPerFrame();
-    sequence = lbl_8047B3EC;
-    model = *(u8**)(sequence + 0x24);
-    key = (CameraFovKey*)(*(u8**)(sequence + 0x2C) +
-                          *(u16*)(sequence + 0x32) * 0xD4);
-    if ((u8*)lbl_8047B3F0 != NULL) {
-        partId = *(u32*)((u8*)key + 0x4C + ((u8*)lbl_8047B3F0)[0x17] * 4);
-    } else {
-        partId = *(u32*)((u8*)key + 0x54);
-    }
-    part = GSmodelGetPart(model, partId);
-    if (part != NULL) {
-        GSpartGetTransform(part, &target, NULL, NULL);
-        if ((u8*)lbl_8047B3F0 != NULL && *(u16*)((u8*)lbl_8047B3F0 + 0x2E) == 3 &&
-            (*(u16*)((u8*)lbl_8047B3F0 + 0x2C) == 0x154 ||
-             *(u16*)((u8*)lbl_8047B3F0 + 0x2C) == 0x6E)) {
-            GSscene_GetCameraPositionVector(&origin);
+    if (lbl_8047B3F4 != 0 && lbl_8047B3EC != NULL &&
+        (lbl_8047B3F0 == NULL || *(u32*)((u8*)lbl_8047B3F0 + 0x18) == 0 ||
+         *(u32*)((u8*)lbl_8047B3F0 + 0x20) == 0)) {
+        frame = msgGetCharsPerFrame();
+        move = &((WazaCameraSequence*)lbl_8047B3EC)->moves[
+            ((WazaCameraSequence*)lbl_8047B3EC)->moveIndex];
+        model = ((WazaCameraSequence*)lbl_8047B3EC)->model;
+        if (lbl_8047B3F0 != NULL) {
+            partId = move->targetParts[((u8*)lbl_8047B3F0)[0x17]];
         } else {
-            GSmodelGetPosition(*(u8**)((u8*)lbl_8047B3EC + 0x24), &origin);
+            partId = move->targetParts[2];
         }
-        GSvecSub(&target, &target, &origin);
-        cameraMoveTargetOfs(7, &target, lbl_8047E1E0);
-        GSpartFree(part);
-    }
-
-    lbl_8047B3E8 += frame;
-    key = lbl_804673D4;
-    for (i = 0; i < 2; i++, key++) {
-        if (lbl_8047B3E8 <= key->startFrame) {
-            lbl_80478CDC = key->start;
-            break;
-        }
-        if (lbl_8047B3E8 <= key->endFrame) {
-            t = (f32)(lbl_8047B3E8 - key->startFrame) /
-                (f32)(key->endFrame - key->startFrame);
-            lbl_80478CDC =
-                GSlerpGetLinearInterpolationFloat(key->start, key->end, t);
-            break;
-        }
-        lbl_80478CDC = key->end;
-    }
-    cameraSetFov(lbl_80478CDC);
-
-    if (lbl_8047B3F0 == NULL && !cameraMoveEndCheckSpecial(0)) {
-        void* activeSequence = lbl_8047B3F0;
-        if (activeSequence == NULL) {
-            GSscene_SetMode(8);
-        } else {
-            if (*(u32*)((u8*)activeSequence + 0x18) != 0 &&
-                *(u32*)((u8*)activeSequence + 0x20) != 0) {
-                cameraStopAnime(activeSequence);
+        part = GSmodelGetPart(model, partId);
+        if (part != NULL) {
+            GSpartGetTransform(part, &target, NULL, NULL);
+            if (lbl_8047B3F0 != NULL && *(u16*)((u8*)lbl_8047B3F0 + 0x2E) == 3 &&
+                (*(u16*)((u8*)lbl_8047B3F0 + 0x2C) == 0x154 ||
+                 *(u16*)((u8*)lbl_8047B3F0 + 0x2C) == 0x6E)) {
+                GSscene_GetCameraPositionVector(&origin);
+            } else {
+                GSmodelGetPosition(*(void**)((u8*)lbl_8047B3EC + 0x24), &origin);
             }
-            lbl_8047B3F0 = NULL;
+            GSvecSub(&target, &target, &origin);
+            cameraMoveTargetOfs(7, &target, 0.2f);
+            GSpartFree(part);
         }
-        fn_801765F4(0);
-        lbl_8047B3EC = NULL;
-        if (fn_800057A8() == 2) {
-            GSscene_SetMode(2);
+
+        lbl_8047B3E8 += frame;
+        for (i = 0; i < 2; i++, key++) {
+            if (lbl_8047B3E8 <= key->startFrame) {
+                lbl_80478CDC = key->start;
+                break;
+            }
+            if (lbl_8047B3E8 <= key->endFrame) {
+                t = (f32)(lbl_8047B3E8 - key->startFrame) /
+                    (f32)(key->endFrame - key->startFrame);
+                lbl_80478CDC = GSlerpGetLinearInterpolationFloat(key->start, key->end, t);
+                break;
+            }
+            lbl_80478CDC = key->end;
+        }
+        cameraSetFov(lbl_80478CDC);
+
+        if (lbl_8047B3F0 == NULL && (u8)cameraMoveEndCheckSpecial(0) == 0) {
+            /* RULE-EXCEPTION(title-path): redundant status temporary preserves
+             * retail's li/cmpwi/bne; see docs/RULE_EXCEPTIONS.md. */
+            s32 moving = 0;
+            if (moving == 0) {
+                wazaCameraStop();
+            }
         }
     }
 }
@@ -386,10 +340,6 @@ void battleCameraStartWaza(void* owner, void* sequence) {
     extern void clear__5GSvecFv(void* vec);
     extern void GSlerpGetLinearInterpolationVector(void* dst, void* src,
                                                    void* target, f32 t);
-    extern f32 lbl_8047E1F0;
-    extern f32 lbl_8047E1F4;
-    extern f32 lbl_8047E1F8;
-    extern f32 lbl_8047E1FC;
     extern u8 lbl_804673A0[];
     extern u16 battleGridGetNumPokemonsForTrainer(u32 id);
     extern void cameraSetTargetExt(u32 a, u32 b, u32 c);
@@ -411,19 +361,22 @@ void battleCameraStartWaza(void* owner, void* sequence) {
     Vec offsetScale;
     Vec center;
     Vec rootPosition;
+    Vec ownerPosition;
     void* model;
-    u32 flags = 0;
-    s32 paramsFlags = 0;
-    f32 scaleValue;
-    s32 shift = 0;
+    u8* bound;
     u8 reverse = FALSE;
+    s32 paramsFlags = 0;
+    s32 shift = 0;
+    /* RULE-EXCEPTION(user-approved): separate shift for the offset-anime path, chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+    s32 animShift;
+    f32 scaleValue;
 
     if (lbl_8047B3F4 == 0) {
         return;
     }
 
     if (*(s8*)(ownerBytes + 0x76) < 0 &&
-        (sequenceBytes == NULL || ((*(u32*)(sequenceBytes + 0x08) & 0x80) == 0))) {
+        (sequenceBytes == NULL || ((*(s32*)(sequenceBytes + 0x08) & 0x80) != 0x80))) {
         reverse = TRUE;
     }
 
@@ -436,42 +389,42 @@ void battleCameraStartWaza(void* owner, void* sequence) {
             GSresGetResource(*(u32*)(sequenceBytes + 0x18),
                              *(u32*)(sequenceBytes + 0x20)) != NULL) {
             model = *(void**)(ownerBytes + 0x24);
+            animShift = 0;
             if (reverse) {
-                shift = 4;
+                animShift = 4;
             }
 
             cameraPlayOffsetAnime(
                 *(u32*)(sequenceBytes + 0x18), *(u32*)(sequenceBytes + 0x20),
                 0, 0);
 
-            flags = *(u32*)(sequenceBytes + 0x08);
-            if (flags & 0x4) {
+            if (*(u32*)(sequenceBytes + 0x08) & 0x4) {
                 clear__5GSvecFv(&offsetPosition);
                 clear__5GSvecFv(&offsetRotation);
                 if (*(s8*)(ownerBytes + 0x76) < 0 &&
-                    (flags & 0x02000000)) {
-                    offsetRotation.y = lbl_8047E1F0;
+                    (*(u32*)(sequenceBytes + 0x08) & 0x02000000) == 0x02000000) {
+                    offsetRotation.y = 3.1415927f;
                 }
-                if (flags & 0x00800000) {
+                if ((*(u32*)(sequenceBytes + 0x08) & 0x00800000) == 0x00800000) {
                     battleGridGetNormalisedScale((f32*)&offsetScale);
-                    if (flags & 0x01000000) {
-                        offsetScale.y = lbl_8047E1F4;
+                    if ((*(u32*)(sequenceBytes + 0x08) & 0x01000000) == 0x01000000) {
+                        offsetScale.y = 1.0f;
                     }
                 } else {
-                    set__5GSvecFfff((f32*)&offsetScale, lbl_8047E1F4,
-                                    lbl_8047E1F4, lbl_8047E1F4);
+                    set__5GSvecFfff((f32*)&offsetScale, 1.0f,
+                                    1.0f, 1.0f);
                 }
             } else {
                 GSmodelGetPosition(model, &offsetPosition);
-                if (flags & 0x00004000) {
+                if (*(u32*)(sequenceBytes + 0x08) & 0x00004000) {
+                    bound = GSmodelGetBound(model);
                     GSlerpGetLinearInterpolationVector(
-                        &center, (u8*)GSmodelGetBound(model) + 0x10,
-                        (u8*)GSmodelGetBound(model) + 0x1C, lbl_8047E1F8);
+                        &center, bound + 0x10, bound + 0x1C, 0.5f);
                     GSvecAdd(&offsetPosition, &offsetPosition, &center);
                 }
                 if (*(u16*)(sequenceBytes + 0x2E) == 2 &&
-                    (ownerBytes[0x18] & 2) != 0 &&
-                    GSmodelIsRootNullAdded(model) != 0) {
+                    (ownerBytes[0x18] & 2) == 2 &&
+                    (u8)GSmodelIsRootNullAdded(model) != 0) {
                     GSmodelGetRootPosition(model, (GSvec*)&rootPosition);
                     offsetPosition.y += rootPosition.y;
                 }
@@ -481,7 +434,7 @@ void battleCameraStartWaza(void* owner, void* sequence) {
                     (f32*)&offsetScale, scaleValue, scaleValue, scaleValue);
             }
 
-            fn_801765F4(shift);
+            fn_801765F4(animShift);
             cameraMoveStop();
             cameraSetOffsetPosition(&offsetPosition);
             cameraSetOffsetRotation(&offsetRotation);
@@ -491,25 +444,24 @@ void battleCameraStartWaza(void* owner, void* sequence) {
             return;
         }
 
-        flags = *(u32*)(sequenceBytes + 0x08);
-        if (flags & 0x00200000) {
+        if (*(u32*)(sequenceBytes + 0x08) & 0x00200000) {
             paramsFlags |= 2;
-        } else if (flags & 0x00000200) {
+        } else if (*(u32*)(sequenceBytes + 0x08) & 0x00000200) {
             paramsFlags |= 4;
-        } else if (flags & 0x00400000) {
-            GSmodelGetPosition(*(void**)(ownerBytes + 0x24), &rootPosition);
-            if (rootPosition.z < lbl_8047E1FC) {
+        } else if (*(u32*)(sequenceBytes + 0x08) & 0x00400000) {
+            GSmodelGetPosition(*(void**)(ownerBytes + 0x24), &ownerPosition);
+            if (ownerPosition.z < 0.0f) {
                 paramsFlags |= 4;
             } else {
                 paramsFlags |= 8;
             }
         }
 
-        if (flags & 0x00000400) {
+        if (*(u32*)(sequenceBytes + 0x08) & 0x00000400) {
             paramsFlags |= 0x20;
-        } else if (flags & 0x00000800) {
+        } else if (*(u32*)(sequenceBytes + 0x08) & 0x00000800) {
             paramsFlags |= 0x40;
-        } else if (flags & 0x00001000) {
+        } else if (*(u32*)(sequenceBytes + 0x08) & 0x00001000) {
             paramsFlags |= 0x80;
         }
     } else {
@@ -538,7 +490,7 @@ void battleCameraStartWaza(void* owner, void* sequence) {
         u32 targetId;
 
         if (activeSequence != NULL) {
-            targetId = *(u32*)(cameraParams + 0x4C + activeSequence[0x17] * 4);
+            targetId = ((u32*)(cameraParams + 0x4C))[activeSequence[0x17]];
         } else {
             targetId = *(u32*)(cameraParams + 0x54);
         }
@@ -598,29 +550,10 @@ void _wazaSequenceCameraDoPosition__FP13ModelSequenceP24wazaSequenceCameraParams
     extern void cameraSetRotY(f32);
     extern void cameraUpdate(void);
     extern void cameraMovePosition(s32, Vec*, f32);
-    extern void cameraMoveRotationXYZ(f32, f32, f32, f32);
+    /* RULE-EXCEPTION(user-approved): codegen-only prototype with a leading int, reproducing retail's li r3,7 before the call - see docs/RULE_EXCEPTIONS.md */
+    extern void cameraMoveRotationXYZ(s32, f32, f32, f32, f32);
     extern void GSscene_GetCameraDirectionVector(Vec*);
     extern void GSscene_SetCameraDirectionVector(Vec*);
-    extern f32 lbl_8047E1F4;
-    extern f32 lbl_8047E1F8;
-    extern f32 lbl_8047E1FC;
-    extern f32 lbl_8047E200;
-    extern f32 lbl_8047E204;
-    extern f32 lbl_8047E208;
-    extern f32 lbl_8047E20C;
-    extern f32 lbl_8047E210;
-    extern f64 lbl_8047E218;
-    extern f64 lbl_8047E220;
-    extern f64 lbl_8047E228;
-    extern f32 lbl_8047E230;
-    extern f32 lbl_8047E234;
-    extern f64 lbl_8047E238;
-    extern f32 lbl_8047E240;
-    extern f32 lbl_8047E244;
-    extern f32 lbl_8047E248;
-    extern f32 lbl_8047E24C;
-    extern f32 lbl_8047E250;
-    extern f32 lbl_8047E254;
     u8* sequence = modelSequence;
     WazaSequenceCameraParamsLocal* params = cameraParams;
     WazaSequenceCameraPattern* pattern;
@@ -637,148 +570,141 @@ void _wazaSequenceCameraDoPosition__FP13ModelSequenceP24wazaSequenceCameraParams
 
     case 1: {
         Vec direction;
-        f32 offset_distance;
-        f32 height;
+        /* RULE-EXCEPTION(user-approved): declaration order chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
         f32 distance;
-        f32 duration_scale;
-        f32 len0;
-        f32 len2;
-        u8* duration_ptr =
-            (u8*)pattern + (*(u32*)pattern << 2);
+        f32 height;
+        f32 offset;
+        f32 square;
+        u8* durationPtr = (u8*)pattern + (*(u32*)pattern << 2);
 
-        duration = *(s32*)(duration_ptr + 4);
+        duration = *(s32*)(durationPtr + 4);
         if (duration == 0) {
-            duration = *(s32*)(duration_ptr + 8);
+            duration = *(s32*)(durationPtr + 8);
         }
         duration <<= shift;
 
-        offset_distance = lbl_8047E200 + lbl_8047E204 * fn_800E0BE4();
-        height = lbl_8047E1F4 + lbl_8047E208 * fn_800E0BE4();
-        distance = lbl_8047E20C + lbl_8047E210 * fn_800E0BE4();
+        offset = 10.0f * fn_800E0BE4() + 25.0f;
+        height = 9.0f * fn_800E0BE4() + 1.0f;
+        distance = 30.0f * fn_800E0BE4() + 20.0f;
 
         cameraSetDistance(distance);
         cameraSetHeight(height);
-        cameraSetRotY(lbl_8047E1FC);
+        cameraSetRotY(0.0f);
         cameraUpdate();
 
         GSscene_GetCameraDirectionVector(&direction);
         if (reverse) {
-            direction.x += lbl_8047E204;
+            direction.x += 10.0f;
         } else {
-            direction.x -= lbl_8047E204;
+            direction.x -= 10.0f;
         }
         GSscene_SetCameraDirectionVector(&direction);
         if (reverse) {
-            direction.x += offset_distance;
+            direction.x += offset;
         } else {
-            direction.x -= offset_distance;
+            direction.x -= offset;
         }
+        cameraMovePosition(7, &direction, (f32)duration / (f32)fn_800D37CC());
 
-        duration_scale = (f32)duration / (f32)fn_800D37CC();
-        cameraMovePosition(7, &direction, duration_scale);
-
-        len0 = wazaCameraSqrtf(offset_distance * offset_distance + height * height);
-        len2 = wazaCameraSqrtf(distance * distance + len0 * len0);
-        params->out_near = len0;
-        params->out_far = len2;
-        params->out_mid = lbl_8047E1F8 * (len0 + len2);
+        square = offset * offset + height * height;
+        params->out_near = sqrtf(square);
+        params->out_far = sqrtf(distance * distance + square);
+        params->out_mid = 0.5f * (params->out_near + params->out_far);
         break;
     }
 
     case 2: {
         f32 distance;
         f32 height;
-        f32 rot_a;
-        f32 rot_b;
-        f32 duration_scale;
-        f32 len0;
-        f32 len2;
-        u8* duration_ptr =
-            (u8*)pattern + (*(u32*)pattern << 2);
+        f32 rotA;
+        f32 rotB;
+        f32 length;
+        u8* durationPtr = (u8*)pattern + (*(u32*)pattern << 2);
 
-        duration = *(s32*)(duration_ptr + 4);
+        duration = *(s32*)(durationPtr + 4);
         if (duration == 0) {
-            duration = *(s32*)(duration_ptr + 8);
+            duration = *(s32*)(durationPtr + 8);
         }
         duration <<= shift;
 
-        distance = params->distance_min +
-            (params->distance_max - params->distance_min) * fn_800E0BE4();
+        /* RULE-EXCEPTION(user-approved): distance_min staged in the reused scalar length for retail's f28 - see docs/RULE_EXCEPTIONS.md */
+        length = params->distance_min;
+        distance = length + (params->distance_max - length) * fn_800E0BE4();
         height = params->height_min +
             (params->height_max - params->height_min) * fn_800E0BE4();
-
         if (reverse) {
-            rot_a = (params->rotation_min - params->rotation_max) * fn_800E0BE4() +
-                    (params->rotation_min - params->rotation_base);
-            rot_b = (params->rotation_min - params->rotation_max) * fn_800E0BE4() +
-                    (params->rotation_min - params->rotation_base);
+            /* RULE-EXCEPTION(user-approved): rotation_min staged in rotA (reused scalar) for allocation - see docs/RULE_EXCEPTIONS.md */
+            rotA = params->rotation_min;
+            rotA = (params->rotation_base - rotA) -
+                   (params->rotation_max - rotA) * fn_800E0BE4();
+            rotB = (params->rotation_base - params->rotation_min) -
+                   (params->rotation_max - params->rotation_min) * fn_800E0BE4();
         } else {
-            rot_a = (params->rotation_max - params->rotation_min) * fn_800E0BE4() +
-                    (params->rotation_base + params->rotation_min);
-            rot_b = (params->rotation_max - params->rotation_min) * fn_800E0BE4() +
-                    (params->rotation_base + params->rotation_min);
+            /* RULE-EXCEPTION(user-approved): rotation_min staged in rotA (reused scalar) for allocation - see docs/RULE_EXCEPTIONS.md */
+            rotA = params->rotation_min;
+            rotA = (params->rotation_max - rotA) * fn_800E0BE4() +
+                   (params->rotation_base + rotA);
+            rotB = (params->rotation_max - params->rotation_min) * fn_800E0BE4() +
+                   (params->rotation_base + params->rotation_min);
         }
-        if (rot_a > rot_b) {
-            f32 tmp = rot_a;
-            rot_a = rot_b;
-            rot_b = tmp;
+        if (rotA > rotB) {
+            f32 swap = rotA;
+            rotA = rotB;
+            rotB = swap;
         }
 
         cameraSetDistance(distance);
         cameraSetHeight(height);
-        cameraSetRotY(rot_a);
+        cameraSetRotY(rotA);
         cameraUpdate();
+        cameraMoveRotationXYZ(7, 0.0f, rotB, 0.0f, (f32)duration / (f32)fn_800D37CC());
 
-        duration_scale = (f32)duration / (f32)fn_800D37CC();
-        cameraMoveRotationXYZ(lbl_8047E1FC, rot_b, lbl_8047E1FC, duration_scale);
-
-        len0 = wazaCameraSqrtf(distance * distance + height * height);
-        len2 = wazaCameraSqrtf(rot_b * rot_b + len0 * len0);
-        params->out_near = len0;
-        params->out_far = len2;
-        params->out_mid = lbl_8047E1F8 * (len0 + len2);
+        length = sqrtf(distance * distance + height * height);
+        params->out_far = length;
+        params->out_mid = length;
+        params->out_near = length;
         break;
     }
 
     case 3: {
         Vec direction;
         f32 distance;
-        f32 height;
         f32 rotation;
-        f32 duration_scale;
         f32 length;
-        u8* duration_ptr =
-            (u8*)pattern + (*(u32*)pattern << 2);
+        u8* durationPtr = (u8*)pattern + (*(u32*)pattern << 2);
 
-        duration = *(s32*)(duration_ptr + 4);
+        duration = *(s32*)(durationPtr + 4);
         if (duration == 0) {
-            duration = *(s32*)(duration_ptr + 8);
+            duration = *(s32*)(durationPtr + 8);
         }
         duration <<= shift;
 
-        distance = params->distance_min +
-            (params->distance_max - params->distance_min) * fn_800E0BE4();
-        height = params->height_min +
+        /* RULE-EXCEPTION(user-approved): distance_min staged in the reused scalar length for retail's f28 - see docs/RULE_EXCEPTIONS.md */
+        length = params->distance_min;
+        distance = length + (params->distance_max - length) * fn_800E0BE4();
+        /* RULE-EXCEPTION(user-approved): the height is kept in the reused scalar length for retail's f28 - see docs/RULE_EXCEPTIONS.md */
+        length = params->height_min +
             (params->height_max - params->height_min) * fn_800E0BE4();
         if (reverse) {
-            rotation = (params->rotation_base - params->rotation_min) * fn_800E0BE4() -
-                       (params->rotation_base - params->rotation_min);
+            /* RULE-EXCEPTION(user-approved): rotation_min staged in rotation (reused scalar) for allocation - see docs/RULE_EXCEPTIONS.md */
+            rotation = params->rotation_min;
+            rotation = (params->rotation_base - rotation) -
+                       (params->rotation_max - rotation) * fn_800E0BE4();
         } else {
-            rotation = (params->rotation_max - params->rotation_min) * fn_800E0BE4() +
-                       (params->rotation_base + params->rotation_min);
+            /* RULE-EXCEPTION(user-approved): rotation_min staged in rotation (reused scalar) for allocation - see docs/RULE_EXCEPTIONS.md */
+            rotation = params->rotation_min;
+            rotation = (params->rotation_max - rotation) * fn_800E0BE4() +
+                       (params->rotation_base + rotation);
         }
 
         cameraSetDistance(distance);
-        cameraSetHeight(height);
+        cameraSetHeight(length);
         cameraSetRotY(rotation);
         cameraUpdate();
         GSscene_GetCameraDirectionVector(&direction);
+        cameraMovePosition(7, &direction, (f32)duration / (f32)fn_800D37CC());
 
-        duration_scale = (f32)duration / (f32)fn_800D37CC();
-        cameraMovePosition(7, &direction, duration_scale);
-
-        length = wazaCameraSqrtf(distance * distance + height * height +
-                                 rotation * rotation);
+        length = sqrtf(distance * distance + length * length);
         params->out_far = length;
         params->out_mid = length;
         params->out_near = length;
@@ -788,33 +714,29 @@ void _wazaSequenceCameraDoPosition__FP13ModelSequenceP24wazaSequenceCameraParams
     case 4: {
         Vec direction;
         f32 rotation;
-        f32 duration_scale;
         f32 length;
-        u8* duration_ptr =
-            (u8*)pattern + (*(u32*)pattern << 2);
+        u8* durationPtr = (u8*)pattern + (*(u32*)pattern << 2);
 
-        duration = *(s32*)(duration_ptr + 4);
+        duration = *(s32*)(durationPtr + 4);
         if (duration == 0) {
-            duration = *(s32*)(duration_ptr + 8);
+            duration = *(s32*)(durationPtr + 8);
         }
-        duration <<= shift;
+        /* Retail does not scale this case's duration by shift. */
 
         if (reverse) {
-            rotation = params->rotation_base - lbl_8047E230;
+            rotation = params->rotation_base - 0.47123894f;
         } else {
-            rotation = lbl_8047E230 + params->rotation_base;
+            rotation = 0.47123894f + params->rotation_base;
         }
 
-        cameraSetDistance(lbl_8047E234);
-        cameraSetHeight(lbl_8047E200);
+        cameraSetDistance(110.0f);
+        cameraSetHeight(25.0f);
         cameraSetRotY(rotation);
         cameraUpdate();
         GSscene_GetCameraDirectionVector(&direction);
+        cameraMovePosition(7, &direction, (f32)duration / (f32)fn_800D37CC());
 
-        duration_scale = (f32)duration / (f32)fn_800D37CC();
-        cameraMovePosition(7, &direction, duration_scale);
-
-        length = wazaCameraSqrtf((f32)lbl_8047E238);
+        length = sqrtf(110.0f * 110.0f + 25.0f * 25.0f);
         params->out_far = length;
         params->out_mid = length;
         params->out_near = length;
@@ -822,64 +744,59 @@ void _wazaSequenceCameraDoPosition__FP13ModelSequenceP24wazaSequenceCameraParams
     }
 
     case 5: {
-        f32 scale_factor;
+        Vec direction;
+        f32 scale;
         f32 distance;
         f32 height;
         f32 rotation;
-        f32 duration_scale;
         f32 length;
+        u8* durationPtr = (u8*)pattern + (*(u32*)pattern << 2);
+        /* RULE-EXCEPTION(user-approved): mode declared after durationPtr for register allocation - see docs/RULE_EXCEPTIONS.md */
         s32 mode = *(s32*)(sequence + 0x10);
-        u8* duration_ptr =
-            (u8*)pattern + (*(u32*)pattern << 2);
 
-        duration = *(s32*)(duration_ptr + 4);
+        duration = *(s32*)(durationPtr + 4);
         if (duration == 0) {
-            duration = *(s32*)(duration_ptr + 8);
+            duration = *(s32*)(durationPtr + 8);
         }
         duration <<= shift;
 
         switch (mode) {
         case -2:
         case -1:
-            scale_factor = lbl_8047E240;
+            scale = 0.875f;
             break;
         case 1:
-            scale_factor = lbl_8047E244;
+            scale = 1.4f;
             break;
         case 2:
-            scale_factor = lbl_8047E248;
+            scale = 1.8f;
             break;
         case 3:
-            scale_factor = lbl_8047E24C;
+            scale = 3.0f;
             break;
         default:
-            scale_factor = lbl_8047E1F4;
+            scale = 1.0f;
             break;
         }
 
-        distance = lbl_8047E250 * scale_factor;
-        height = params->height_min +
-            (params->height_max - params->height_min) * fn_800E0BE4();
+        distance = 50.0f * scale;
+        /* RULE-EXCEPTION(user-approved): height_min staged in the reused scalar rotation for allocation - see docs/RULE_EXCEPTIONS.md */
+        rotation = params->height_min;
+        height = rotation + (params->height_max - rotation) * fn_800E0BE4();
         if (reverse) {
-            rotation = params->rotation_base - lbl_8047E254;
+            rotation = params->rotation_base - 0.7853982f;
         } else {
-            rotation = lbl_8047E254 + params->rotation_base;
+            rotation = 0.7853982f + params->rotation_base;
         }
 
         cameraSetDistance(distance);
         cameraSetHeight(height);
         cameraSetRotY(rotation);
         cameraUpdate();
+        GSscene_GetCameraDirectionVector(&direction);
+        cameraMovePosition(7, &direction, (f32)duration / (f32)fn_800D37CC());
 
-        {
-            Vec direction;
-            GSscene_GetCameraDirectionVector(&direction);
-            duration_scale = (f32)duration / (f32)fn_800D37CC();
-            cameraMovePosition(7, &direction, duration_scale);
-        }
-
-        length = wazaCameraSqrtf(distance * distance + height * height +
-                                 lbl_8047E254 * lbl_8047E254);
+        length = sqrtf(distance * distance + height * height);
         params->out_far = length;
         params->out_mid = length;
         params->out_near = length;
@@ -925,28 +842,23 @@ void _wazaSequenceCameraDoDollyPosition__FP21TemplateExpFileHeaderP24wazaSequenc
     extern void GSvecAdd(Vec*, Vec*, Vec*);
     extern s32 fn_800D37CC(void);
     extern void cameraMovePosition(s32, Vec*, f32);
-    extern f32 lbl_8047E1F8;
-    extern f32 lbl_8047E1FC;
-    extern f32 lbl_8047E260;
-    extern f32 lbl_8047E264;
-    extern f32 lbl_8047E268;
-    extern f32 lbl_8047E26C;
     u8* file = header;
     WazaCameraParams* camera = params;
     Vec direction;
     Vec position;
+    s32 randomDelay;
     s32 duration;
     s32 delay;
-    s32 randomDelay;
-    f32 threshold0 = lbl_8047E1F8;
-    f32 threshold1 = lbl_8047E260;
+    f32 threshold0 = 0.5f;
+    f32 threshold1 = 0.75f;
     f32 distance0;
     f32 distance1;
     f32 nearDistance;
     f32 farDistance;
     f32 height;
     f32 rotation;
-    BOOL alternate;
+    f32 chance;
+    u8 alternate;
 
     duration = *(s32*)(file + (*(s32*)file << 2) + 4);
     if (duration == 0) {
@@ -954,23 +866,25 @@ void _wazaSequenceCameraDoDollyPosition__FP21TemplateExpFileHeaderP24wazaSequenc
     }
     duration <<= shift;
 
-    if (fn_800E0BE4() <= lbl_8047E264) {
-        threshold0 = lbl_8047E268;
-        threshold1 = lbl_8047E26C;
+    if (fn_800E0BE4() <= 0.7f) {
+        threshold0 = 0.3f;
+        threshold1 = 0.65f;
         alternate = TRUE;
     } else {
         alternate = FALSE;
     }
 
-    if (fn_800E0BE4() < threshold0) {
+    chance = fn_800E0BE4();
+    if (chance < threshold0) {
         randomDelay = 0;
-    } else if (fn_800E0BE4() < threshold1) {
-        s32 minimumDuration = duration >> 1;
+    } else if (chance < threshold1) {
+        s32 fullDuration;
 
         randomDelay = 0;
+        fullDuration = duration;
         duration = _fadeEffectGetRandom__FUl(duration);
-        if (duration < minimumDuration) {
-            duration = minimumDuration;
+        if (duration < (fullDuration >> 1)) {
+            duration = fullDuration >> 1;
         }
     } else {
         randomDelay = _fadeEffectGetRandom__FUl(duration);
@@ -979,28 +893,34 @@ void _wazaSequenceCameraDoDollyPosition__FP21TemplateExpFileHeaderP24wazaSequenc
         }
     }
 
-    distance0 = camera->nearDistance +
-        (camera->middleDistance - camera->nearDistance) * fn_800E0BE4();
-    distance1 = camera->nearDistance +
-        (camera->middleDistance - camera->nearDistance) * fn_800E0BE4();
+    distance0 = camera->distanceMin +
+        (camera->distanceMax - camera->distanceMin) * fn_800E0BE4();
     nearDistance = distance0;
+    distance1 = camera->distanceMin +
+        (camera->distanceMax - camera->distanceMin) * fn_800E0BE4();
     farDistance = distance1;
+    /* RULE-EXCEPTION(user-approved): the height is staged in distance1 (reused scalar) as retail's f0 temporary - see docs/RULE_EXCEPTIONS.md */
     if (alternate) {
         if (distance0 < distance1) {
-            nearDistance = distance1;
             farDistance = distance0;
+            nearDistance = distance1;
         }
-    } else if (distance0 > distance1) {
-        nearDistance = distance1;
-        farDistance = distance0;
+        distance1 = camera->heightMin +
+            (camera->heightMax - camera->heightMin) * fn_800E0BE4();
+        height = distance1;
+    } else {
+        if (distance0 > distance1) {
+            farDistance = distance0;
+            nearDistance = distance1;
+        }
+        distance1 = camera->heightMin +
+            (camera->heightMax - camera->heightMin) * fn_800E0BE4();
+        height = distance1;
     }
 
-    height = camera->heightMin +
-        (camera->heightMax - camera->heightMin) * fn_800E0BE4();
     if (reverse) {
-        rotation = -((camera->rotationRange - camera->rotationBase) *
-                     fn_800E0BE4() -
-                     (camera->rotationOffset - camera->rotationBase));
+        rotation = (camera->rotationOffset - camera->rotationBase) -
+                   (camera->rotationRange - camera->rotationBase) * fn_800E0BE4();
     } else {
         rotation = (camera->rotationRange - camera->rotationBase) *
                        fn_800E0BE4() +
@@ -1014,20 +934,72 @@ void _wazaSequenceCameraDoDollyPosition__FP21TemplateExpFileHeaderP24wazaSequenc
     GSscene_GetCameraDirectionVector(&direction);
     GSscene_GetCameraPositionVector(&position);
     GSvecSub(&direction, &direction, &position);
-    direction.z = lbl_8047E1FC;
+    direction.y = 0.0f;
     vecScale(&direction, &direction, farDistance / nearDistance);
-    direction.z = height;
+    direction.y = height;
     GSvecAdd(&direction, &direction, &position);
     delay = duration - randomDelay;
     cameraMovePosition(7, &direction, (f32)delay / (f32)fn_800D37CC());
 
-    camera->nearLength =
-        wazaCameraSqrtf(nearDistance * nearDistance + height * height);
-    distance0 = lbl_8047E1F8 * (nearDistance + farDistance);
-    camera->middleLength =
-        wazaCameraSqrtf(distance0 * distance0 + height * height);
-    camera->farLength =
-        wazaCameraSqrtf(farDistance * farDistance + height * height);
+    camera->nearDistance =
+        sqrtf(nearDistance * nearDistance + height * height);
+    distance0 = 0.5f * (nearDistance + farDistance);
+    camera->middleDistance =
+        sqrtf(distance0 * distance0 + height * height);
+    camera->farDistance =
+        sqrtf(farDistance * farDistance + height * height);
+}
+
+typedef struct WazaSequenceCameraParamsFov {
+    s32 mode;
+    f32 scaleMin;
+    f32 scaleMax;
+    u8 pad_0C[0x1C];
+    f32 ranges[3];
+} WazaSequenceCameraParamsFov;
+
+extern f64 atan2(f64, f64);
+
+/* RULE-EXCEPTION(user-approved): inline helper reconstructed for codegen; each fov is staged in its own output before the degree scaling - see docs/RULE_EXCEPTIONS.md */
+static inline void _wazaSequenceCameraFovRange(
+    WazaSequenceCameraParamsFov* params, f32 radius, f32* lowFov, f32* highFov)
+{
+    f32 span = 0.75f * params->scaleMin;
+    if (params->scaleMax > span) {
+        span = params->scaleMax;
+    }
+    *lowFov = (f32)atan2(0.5f * span, radius);
+    *lowFov = 57.29578f * (2.0f * *lowFov);
+    *highFov = (f32)atan2(2.0f * span, radius);
+    *highFov = 57.29578f * (2.0f * *highFov);
+}
+
+/* RULE-EXCEPTION(user-approved): inline helper reconstructed for codegen; hasSecond is copied from hasFirst to keep retail's mr - see docs/RULE_EXCEPTIONS.md */
+static inline void _wazaSequenceCameraFovMix(s32 choice, f32* mixStart, f32* mixEnd)
+{
+    u8 hasFirst;
+    u8 hasSecond;
+
+    hasFirst = FALSE;
+    hasSecond = hasFirst;
+    if ((choice & 1) == 1) {
+        *mixStart = 0.0f;
+        hasFirst = TRUE;
+        *mixEnd = 0.2f;
+    }
+    if ((choice & 2) == 2) {
+        if (!hasFirst) {
+            *mixStart = 0.35f;
+        }
+        *mixEnd = 0.6f;
+        hasSecond = TRUE;
+    }
+    if ((choice & 4) == 4) {
+        if (!hasSecond) {
+            *mixStart = 0.75f;
+        }
+        *mixEnd = 1.0f;
+    }
 }
 
 /**
@@ -1044,21 +1016,10 @@ void _wazaSequenceCameraDoFOV__FP13ModelSequenceP24wazaSequenceCameraParamsif(
         u32 startFrame;
         u32 endFrame;
     } CameraFovKey;
-    typedef struct WazaSequenceCameraParamsFov {
-        s32 mode;
-        f32 scaleMin;
-        f32 scaleMax;
-        u8 pad_0C[0x1C];
-        f32 range0;
-        f32 range1;
-        f32 range2;
-    } WazaSequenceCameraParamsFov;
     typedef struct WazaSequenceCameraFovTiming {
         s32 count;
         u8 pad_04[8];
-        s32 frame0;
-        s32 frame1;
-        s32 frame2;
+        s32 frames[3];
     } WazaSequenceCameraFovTiming;
     typedef struct WazaSequenceCameraFovPattern {
         s32 mode;
@@ -1068,71 +1029,57 @@ void _wazaSequenceCameraDoFOV__FP13ModelSequenceP24wazaSequenceCameraParamsif(
         u32 flags;
         s32 timingMode;
     } WazaSequenceCameraFovPattern;
-    extern f32 atan2(f32, f32);
+    extern f64 atan2(f64, f64);
     extern f32 fn_800E0BE4(void);
     extern void battleCameraDisable(void);
     extern void cameraSetFov(f32);
     extern CameraFovKey lbl_804673D4[];
     extern f32 lbl_80478CDC;
     extern u32 lbl_8047B3E8;
-    extern f32 lbl_8047E1E0;
-    extern f32 lbl_8047E1F4;
-    extern f32 lbl_8047E1F8;
-    extern f32 lbl_8047E1FC;
-    extern f32 lbl_8047E260;
-    extern f32 lbl_8047E270;
-    extern f32 lbl_8047E274;
-    extern f32 lbl_8047E278;
-    extern f32 lbl_8047E27C;
-    extern f32 lbl_8047E280;
-    extern f32 lbl_8047E284;
     u8* sequence = modelSequence;
-    WazaSequenceCameraParamsFov* params = cameraParams;
+    /* RULE-EXCEPTION(user-approved): declaration order chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
     WazaSequenceCameraFovTiming* timing;
-    WazaSequenceCameraFovPattern* pattern;
-    CameraFovKey* key;
-    u8* timingCursor;
+    s32 count;
     s32 prevFrame;
     s32 nextFrame;
-    s32 count;
     s32 i;
-    u32 choice;
-    u8 hasFirst;
-    u8 hasSecond;
+    WazaSequenceCameraFovPattern* pattern;
+    s32 duration;
+    s32 startFrame;
+    s32 endFrame;
+    s32 sequenceId;
+    s32 choice;
+    f32 mixStart;
+    f32 mixEnd;
     f32 currentFov;
     f32 lowFov;
     f32 highFov;
-    f32 span;
-    f32 mixStart;
-    f32 mixEnd;
+    f32 fov;
 
+    sequenceId = *(u16*)(sequence + 0x32);
     timing = (WazaSequenceCameraFovTiming*)
-        (*(u8**)(sequence + 0x2C) + *(u16*)(sequence + 0x32) * 0xD4);
+        (*(u8**)(sequence + 0x2C) + sequenceId * 0xD4);
     count = timing->count;
-    span = lbl_8047E260 * params->scaleMin;
-    if (params->scaleMax > span) {
-        span = params->scaleMax;
+    mixStart = 0.0f;
+    mixEnd = 1.0f;
+    _wazaSequenceCameraFovRange(cameraParams, ((WazaSequenceCameraParamsFov*)cameraParams)->ranges[0], &lowFov, &highFov);
+    if (lowFov < 15.0f) {
+        lowFov = 15.0f;
+    }
+    if (highFov < 15.0f) {
+        highFov = 15.0f;
+    }
+    if (lowFov > 85.0f) {
+        lowFov = 85.0f;
+    }
+    if (highFov > 85.0f) {
+        highFov = 85.0f;
     }
 
-    lowFov = lbl_8047E270 *
-        (lbl_8047E274 * atan2(lbl_8047E1F8 * span, params->range0));
-    highFov = lbl_8047E270 *
-        (lbl_8047E274 * atan2(lbl_8047E274 * span, params->range0));
-
-    if (lowFov < lbl_8047E278) {
-        lowFov = lbl_8047E278;
-    }
-    if (highFov < lbl_8047E278) {
-        highFov = lbl_8047E278;
-    }
-    if (lowFov > lbl_8047E27C) {
-        lowFov = lbl_8047E27C;
-    }
-    if (highFov > lbl_8047E27C) {
-        highFov = lbl_8047E27C;
-    }
-
-    if (params->mode == 0 || (params->mode >= 4 && params->mode < 6)) {
+    switch (((WazaSequenceCameraParamsFov*)cameraParams)->mode) {
+    case 0:
+    case 4:
+    case 5:
         if (flags & 0x20) {
             choice = 1;
         } else if (flags & 0x80) {
@@ -1140,173 +1087,102 @@ void _wazaSequenceCameraDoFOV__FP13ModelSequenceP24wazaSequenceCameraParamsif(
         } else {
             choice = 2;
         }
-
-        mixStart = lbl_8047E1FC;
-        mixEnd = lbl_8047E1F4;
-        hasFirst = FALSE;
-        hasSecond = FALSE;
-        if (choice & 1) {
-            mixStart = lbl_8047E1FC;
-            mixEnd = lbl_8047E1E0;
-            hasFirst = TRUE;
-        }
-        if (choice & 2) {
-            if (!hasFirst) {
-                mixStart = lbl_8047E280;
-            }
-            mixEnd = lbl_8047E284;
-            hasSecond = TRUE;
-        }
-        if (choice & 4) {
-            if (!hasSecond) {
-                mixStart = lbl_8047E260;
-            }
-            mixEnd = lbl_8047E1F4;
-        }
-
-        currentFov = lowFov + (highFov - lowFov) *
-            (mixStart + (mixEnd - mixStart) * fn_800E0BE4());
-        lbl_804673D4[0].start = currentFov;
-        lbl_804673D4[0].end = currentFov;
-        lbl_804673D4[1].start = currentFov;
-        lbl_804673D4[1].end = currentFov;
-        lbl_80478CDC = currentFov;
-        lbl_804673D4[0].startFrame = timing->frame0 << shift;
-        lbl_804673D4[0].endFrame = timing->frame0 << shift;
-        lbl_804673D4[1].startFrame = timing->frame0 << shift;
-        lbl_804673D4[1].endFrame = timing->frame0 << shift;
-        lbl_8047B3E8 = timing->frame0 << shift;
-        cameraSetFov(currentFov);
+        _wazaSequenceCameraFovMix(choice, &mixStart, &mixEnd);
+        fov = mixStart + (mixEnd - mixStart) * fn_800E0BE4();
+        fov = fov * (highFov - lowFov) + lowFov;
+        lbl_804673D4[1].end = fov;
+        lbl_804673D4[1].start = fov;
+        lbl_804673D4[0].end = fov;
+        lbl_804673D4[0].start = fov;
+        lbl_80478CDC = fov;
+        lbl_804673D4[1].endFrame = timing->frames[0] << shift;
+        lbl_804673D4[1].startFrame = timing->frames[0] << shift;
+        lbl_804673D4[0].endFrame = timing->frames[0] << shift;
+        lbl_804673D4[0].startFrame = timing->frames[0] << shift;
+        lbl_8047B3E8 = timing->frames[0] << shift;
+        cameraSetFov(fov);
         return;
     }
 
     pattern = (WazaSequenceCameraFovPattern*)((u8*)wazaSequenceCameraGetPattern__Fbi(
-        (*(u16*)(sequence + 0x32) != 8 && *(u16*)(sequence + 0x32) != 9), flags) + 4);
+        sequenceId != 8 && sequenceId != 9, flags) + 4);
 
-    mixStart = lbl_8047E1FC;
-    mixEnd = lbl_8047E1F4;
-    hasFirst = FALSE;
-    hasSecond = FALSE;
-    if (pattern->initialFlags & 1) {
-        mixStart = lbl_8047E1FC;
-        mixEnd = lbl_8047E1E0;
-        hasFirst = TRUE;
-    }
-    if (pattern->initialFlags & 2) {
-        if (!hasFirst) {
-            mixStart = lbl_8047E280;
-        }
-        mixEnd = lbl_8047E284;
-        hasSecond = TRUE;
-    }
-    if (pattern->initialFlags & 4) {
-        if (!hasSecond) {
-            mixStart = lbl_8047E260;
-        }
-        mixEnd = lbl_8047E1F4;
-    }
-
-    currentFov = lowFov + (highFov - lowFov) *
-        (mixStart + (mixEnd - mixStart) * fn_800E0BE4());
-    lbl_804673D4[0].start = currentFov;
-    lbl_804673D4[0].end = currentFov;
-    lbl_804673D4[1].start = currentFov;
-    lbl_804673D4[1].end = currentFov;
-    lbl_80478CDC = currentFov;
-    lbl_804673D4[0].startFrame = timing->frame0 << shift;
-    lbl_804673D4[0].endFrame = timing->frame0 << shift;
-    lbl_804673D4[1].startFrame = timing->frame0 << shift;
-    lbl_804673D4[1].endFrame = timing->frame0 << shift;
-    lbl_8047B3E8 = timing->frame0 << shift;
-    cameraSetFov(currentFov);
+    _wazaSequenceCameraFovMix(pattern->initialFlags, &mixStart, &mixEnd);
+    fov = mixStart + (mixEnd - mixStart) * fn_800E0BE4();
+    fov = fov * (highFov - lowFov) + lowFov;
+    lbl_804673D4[1].end = fov;
+    lbl_804673D4[1].start = fov;
+    lbl_804673D4[0].end = fov;
+    lbl_804673D4[0].start = fov;
+    lbl_80478CDC = fov;
+    lbl_804673D4[1].endFrame = timing->frames[0] << shift;
+    lbl_804673D4[1].startFrame = timing->frames[0] << shift;
+    lbl_804673D4[0].endFrame = timing->frames[0] << shift;
+    lbl_804673D4[0].startFrame = timing->frames[0] << shift;
+    lbl_8047B3E8 = timing->frames[0] << shift;
+    cameraSetFov(fov);
 
     if (count <= 2) {
         return;
     }
 
-    prevFrame = timing->frame0;
-    key = lbl_804673D4;
-    timingCursor = (u8*)timing;
-    for (i = 0; i < 2; i++, key++, pattern++, timingCursor += 4, currentFov = key->end) {
-        nextFrame = *(s32*)(timingCursor + 0x10);
-        if (prevFrame == nextFrame) {
-            key->startFrame = prevFrame << shift;
-            key->endFrame = prevFrame << shift;
-            key->start = currentFov;
-            key->end = currentFov;
-            continue;
-        }
-
-        if (pattern->mode >= 3 && pattern->mode < 5) {
-            s32 duration =
-                _wazaSequenceCameraSelectDuration__FUcPff(
-                    pattern->durationMode, pattern->thresholds,
-                    nextFrame - prevFrame);
-            f32 radius = *(f32*)((u8*)params + 0x2C);
-
-            span = lbl_8047E260 * params->scaleMin;
-            if (params->scaleMax > span) {
-                span = params->scaleMax;
-            }
-
-            lowFov = lbl_8047E270 *
-                (lbl_8047E274 * atan2(lbl_8047E1F8 * span, radius));
-            highFov = lbl_8047E270 *
-                (lbl_8047E274 * atan2(lbl_8047E274 * span, radius));
-
-            if (lowFov < lbl_8047E278) {
-                lowFov = lbl_8047E278;
-            }
-            if (highFov < lbl_8047E278) {
-                highFov = lbl_8047E278;
-            }
-            if (lowFov > lbl_8047E27C) {
-                lowFov = lbl_8047E27C;
-            }
-            if (highFov > lbl_8047E27C) {
-                highFov = lbl_8047E27C;
-            }
-
-            hasFirst = FALSE;
-            hasSecond = FALSE;
-            if (pattern->flags & 1) {
-                mixStart = lbl_8047E1FC;
-                mixEnd = lbl_8047E1E0;
-                hasFirst = TRUE;
-            }
-            if (pattern->flags & 2) {
-                if (!hasFirst) {
-                    mixStart = lbl_8047E280;
-                }
-                mixEnd = lbl_8047E284;
-                hasSecond = TRUE;
-            }
-            if (pattern->flags & 4) {
-                if (!hasSecond) {
-                    mixStart = lbl_8047E260;
-                }
-                mixEnd = lbl_8047E1F4;
-            }
-
-            key->end = lowFov + (highFov - lowFov) *
-                (mixStart + (mixEnd - mixStart) * fn_800E0BE4());
-            if (pattern->timingMode == 2) {
-                key->endFrame = nextFrame << shift;
-                key->startFrame = (nextFrame - duration) << shift;
-            } else {
-                key->startFrame = prevFrame << shift;
-                key->endFrame = (prevFrame + duration) << shift;
-            }
-            key->start = currentFov;
-        } else {
-            key->startFrame = prevFrame << shift;
-            key->endFrame = nextFrame << shift;
-            key->start = currentFov;
-            key->end = currentFov;
-        }
-
-        params = (WazaSequenceCameraParamsFov*)((u8*)params + 4);
+    nextFrame = timing->frames[0];
+    currentFov = fov;
+    for (i = 0; i < 2; i++, pattern++) {
         prevFrame = nextFrame;
+        nextFrame = timing->frames[i + 1];
+        if (prevFrame == nextFrame) {
+            lbl_804673D4[i].startFrame = prevFrame << shift;
+            lbl_804673D4[i].endFrame = prevFrame << shift;
+            lbl_804673D4[i].start = currentFov;
+            lbl_804673D4[i].end = currentFov;
+        } else switch (pattern->mode) {
+        case 3:
+        case 4: {
+            duration = _wazaSequenceCameraSelectDuration__FUcPff(
+                pattern->durationMode, pattern->thresholds, nextFrame - prevFrame);
+            _wazaSequenceCameraFovRange(cameraParams,
+                ((WazaSequenceCameraParamsFov*)cameraParams)->ranges[i + 1], &lowFov, &highFov);
+            if (lowFov < 15.0f) {
+                lowFov = 15.0f;
+            }
+            if (highFov < 15.0f) {
+                highFov = 15.0f;
+            }
+            if (lowFov > 85.0f) {
+                lowFov = 85.0f;
+            }
+            if (highFov > 85.0f) {
+                highFov = 85.0f;
+            }
+            _wazaSequenceCameraFovMix(pattern->flags, &mixStart, &mixEnd);
+            fov = mixStart + (mixEnd - mixStart) * fn_800E0BE4();
+            fov = fov * (highFov - lowFov) + lowFov;
+            if (pattern->timingMode == 2) {
+                endFrame = nextFrame;
+                startFrame = nextFrame - duration;
+            } else {
+                startFrame = prevFrame;
+                endFrame = prevFrame + duration;
+            }
+            lbl_804673D4[i].startFrame = startFrame << shift;
+            lbl_804673D4[i].endFrame = endFrame << shift;
+            lbl_804673D4[i].start = currentFov;
+            currentFov = fov;
+            lbl_804673D4[i].end = fov;
+            break;
+        }
+        /* RULE-EXCEPTION(user-approved): explicit labels for modes 0-2 shape retail's compare tree - see docs/RULE_EXCEPTIONS.md */
+        case 0:
+        case 1:
+        case 2:
+        default:
+            lbl_804673D4[i].startFrame = prevFrame << shift;
+            lbl_804673D4[i].endFrame = nextFrame << shift;
+            lbl_804673D4[i].start = currentFov;
+            lbl_804673D4[i].end = currentFov;
+            break;
+        }
     }
 }
 
@@ -1316,7 +1192,7 @@ void _wazaSequenceCameraDoFOV__FP13ModelSequenceP24wazaSequenceCameraParamsif(
  * State machine for spread/multi-target move animations.
  */
 s32 _wazaSequenceCameraSelectDuration__FUcPff(
-    u8 mode, f32* thresholds, s32 duration)
+    s32 mode, f32* thresholds, s32 duration)
 {
     extern f32 fn_800E0BE4();
     f32 random;
@@ -1420,6 +1296,7 @@ s32 _wazaSequenceCameraSelectDuration__FUcPff(
         if (random < thresholds[2]) {
             return duration < 20 ? duration : 20;
         }
+        return duration;
     }
     return duration;
 }
@@ -1433,13 +1310,12 @@ void _wazaSequenceCameraSelectMotion__FP13ModelSequenceP12WazaSequenceP24wazaSeq
 {
     extern f32 fn_800E0BE4(void);
     extern s32 lbl_80478CD8;
-    extern const f32 lbl_8047E1F4;
     u32 flags;
     u8 option0;
     u8 option1;
     u8 option2;
     u8 option3;
-    s32 count;
+    s32 count = 0;
     s32* motion;
     f32 interval;
 
@@ -1449,8 +1325,6 @@ void _wazaSequenceCameraSelectMotion__FP13ModelSequenceP12WazaSequenceP24wazaSeq
         return;
     }
 
-    count = 0;
-    option0 = option1 = option2 = option3 = 0;
     if (wazaSequence != NULL) {
         flags = *(u32*)((u8*)wazaSequence + 8);
         if ((flags & 1) != 0) {
@@ -1477,7 +1351,10 @@ void _wazaSequenceCameraSelectMotion__FP13ModelSequenceP12WazaSequenceP24wazaSeq
 
     if (count == 0) {
         count = 4;
-        option0 = option1 = option2 = option3 = 1;
+        option0 = 1;
+        option1 = 1;
+        option2 = 1;
+        option3 = 1;
     } else if (count == 1) {
         if (option0) {
             *motion = 3;
@@ -1495,7 +1372,7 @@ void _wazaSequenceCameraSelectMotion__FP13ModelSequenceP12WazaSequenceP24wazaSeq
         return;
     }
 
-    interval = lbl_8047E1F4 / (f32)count;
+    interval = 1.0f / (f32)count;
     for (;;) {
         f32 random;
         f32 limit;
@@ -1503,7 +1380,7 @@ void _wazaSequenceCameraSelectMotion__FP13ModelSequenceP12WazaSequenceP24wazaSeq
         random = fn_800E0BE4();
         limit = interval;
         if (option0) {
-            if (random < limit) {
+            if (limit > random) {
                 *motion = 3;
                 if (lbl_80478CD8 != *motion) {
                     break;
@@ -1512,7 +1389,7 @@ void _wazaSequenceCameraSelectMotion__FP13ModelSequenceP12WazaSequenceP24wazaSeq
             limit += interval;
         }
         if (option1) {
-            if (random < limit) {
+            if (limit > random) {
                 *motion = 0;
                 if (lbl_80478CD8 != *motion) {
                     break;
@@ -1521,7 +1398,7 @@ void _wazaSequenceCameraSelectMotion__FP13ModelSequenceP12WazaSequenceP24wazaSeq
             limit += interval;
         }
         if (option2) {
-            if (random < limit) {
+            if (limit > random) {
                 *motion = 1;
                 if (lbl_80478CD8 != *motion) {
                     break;
@@ -1529,7 +1406,7 @@ void _wazaSequenceCameraSelectMotion__FP13ModelSequenceP12WazaSequenceP24wazaSeq
             }
             limit += interval;
         }
-        if (option3 && random < limit) {
+        if (option3 && limit > random) {
             *motion = 2;
             if (lbl_80478CD8 != *motion) {
                 break;
@@ -1546,146 +1423,152 @@ void _wazaSequenceCameraSelectMotion__FP13ModelSequenceP12WazaSequenceP24wazaSeq
 void _wazaSequenceCameraCalculateParams__FP13ModelSequenceiP24wazaSequenceCameraParams(
     void* modelSequence, s32 flags, void* cameraParams)
 {
+    typedef struct WazaCameraBound {
+        u8 pad_00[0x14];
+        f32 minY;
+        u8 pad_18[0x08];
+        f32 maxY;
+        u8 pad_24[0x04];
+        Vec size;
+    } WazaCameraBound;
     extern void* GSmodelGetBound(void*);
     extern void GSmodelGetRotation(void*, Vec*);
     extern f32 vecMag(Vec*);
-    extern f32 lbl_8047E1F4, lbl_8047E1FC, lbl_8047E200, lbl_8047E20C;
-    extern f32 lbl_8047E240, lbl_8047E244, lbl_8047E248, lbl_8047E24C;
-    extern f32 lbl_8047E250, lbl_8047E288, lbl_8047E28C, lbl_8047E290;
-    extern f32 lbl_8047E294, lbl_8047E298, lbl_8047E29C, lbl_8047E2A0;
-    extern f32 lbl_8047E2A4, lbl_8047E2A8, lbl_8047E2AC, lbl_8047E2B0;
-    extern f32 lbl_8047E2B4, lbl_8047E2B8, lbl_8047E2BC, lbl_8047E2C0;
-    extern f32 lbl_8047E2C4, lbl_8047E2C8, lbl_8047E2CC, lbl_8047E2D0;
-    extern f32 lbl_8047E2D4, lbl_8047E2D8;
     u8* sequence = modelSequence;
-    u8* params = cameraParams;
+    WazaSequenceCameraParams* params = cameraParams;
     void* model = *(void**)(sequence + 0x24);
-    u8* bound = GSmodelGetBound(model);
+    WazaCameraBound* bound = GSmodelGetBound(model);
+    Vec* extent;
     Vec rotation;
-    f32 distanceScale;
+    /* RULE-EXCEPTION(user-approved): declaration order chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
     f32 sizeScale;
     f32 lower;
     f32 upper;
-    f32 magnitude;
+    f32 distanceScale;
     s32 mode;
 
     GSmodelGetRotation(model, &rotation);
-    *(f32*)(params + 0x14) = rotation.y;
+    params->rotationBase = rotation.y;
     mode = *(s32*)(sequence + 0x10);
     switch (mode) {
     case -2:
-        sizeScale = lbl_8047E288;
-        distanceScale = lbl_8047E240;
+        sizeScale = 1.1f;
+        distanceScale = 0.875f;
         break;
     case -1:
-        sizeScale = lbl_8047E288;
-        distanceScale = lbl_8047E240;
+        sizeScale = 1.1f;
+        distanceScale = 0.875f;
         break;
     case 1:
-        sizeScale = lbl_8047E28C;
-        distanceScale = lbl_8047E244;
+        sizeScale = 1.25f;
+        distanceScale = 1.4f;
         break;
     case 2:
-        sizeScale = lbl_8047E290;
-        distanceScale = lbl_8047E248;
+        sizeScale = 1.3f;
+        distanceScale = 1.8f;
         break;
     case 3:
-        sizeScale = lbl_8047E294;
-        distanceScale = lbl_8047E24C;
+        sizeScale = 1.5f;
+        distanceScale = 3.0f;
         break;
     default:
-        sizeScale = lbl_8047E298;
-        distanceScale = lbl_8047E1F4;
+        sizeScale = 1.2f;
+        distanceScale = 1.0f;
         break;
     }
 
     if (flags & 1) {
-        *(f32*)(params + 0x0C) = lbl_8047E1FC;
-        *(f32*)(params + 0x10) = lbl_8047E29C;
+        params->rotationMin = 0.0f;
+        params->rotationMax = 0.5237035f;
     } else if (flags & 2) {
-        *(f32*)(params + 0x0C) = lbl_8047E2A0;
-        *(f32*)(params + 0x10) = lbl_8047E2A4;
+        params->rotationMin = 0.31415927f;
+        params->rotationMax = 0.62831855f;
     } else if (flags & 4) {
         if (mode > 0) {
-            *(f32*)(params + 0x0C) = lbl_8047E2A0;
-            *(f32*)(params + 0x10) = lbl_8047E2A4;
+            params->rotationMin = 0.31415927f;
+            params->rotationMax = 0.62831855f;
         } else {
-            *(f32*)(params + 0x0C) = lbl_8047E2A4;
-            *(f32*)(params + 0x10) = lbl_8047E2A8;
+            params->rotationMin = 0.62831855f;
+            params->rotationMax = 0.9424779f;
         }
     } else if (flags & 8) {
         if (mode > 0) {
-            *(f32*)(params + 0x0C) = lbl_8047E2A4;
-            *(f32*)(params + 0x10) = lbl_8047E2A8;
+            params->rotationMin = 0.62831855f;
+            params->rotationMax = 0.9424779f;
         } else {
-            *(f32*)(params + 0x0C) = lbl_8047E2A8;
-            *(f32*)(params + 0x10) = lbl_8047E2AC;
+            params->rotationMin = 0.9424779f;
+            params->rotationMax = 1.2566371f;
         }
     } else if (flags & 0x10) {
-        *(f32*)(params + 0x0C) = lbl_8047E2AC;
-        *(f32*)(params + 0x10) = lbl_8047E2B0;
+        params->rotationMin = 1.2566371f;
+        params->rotationMax = 1.5707964f;
     } else if (mode > 0) {
-        *(f32*)(params + 0x0C) = lbl_8047E2A0;
-        *(f32*)(params + 0x10) = lbl_8047E2A8;
+        params->rotationMin = 0.31415927f;
+        params->rotationMax = 0.9424779f;
     } else {
-        *(f32*)(params + 0x0C) = lbl_8047E2A0;
-        *(f32*)(params + 0x10) = lbl_8047E2B4;
+        params->rotationMin = 0.31415927f;
+        params->rotationMax = 1.0995574f;
     }
 
     if (flags & 0x20) {
-        *(f32*)(params + 0x20) = lbl_8047E200;
-        *(f32*)(params + 0x24) = lbl_8047E2C0;
-        lower = lbl_8047E2B8;
-        upper = lbl_8047E2BC;
+        lower = 6.0f;
+        upper = 8.0f;
+        params->distanceMin = 25.0f;
+        params->distanceMax = 35.0f;
     } else if (flags & 0x40) {
-        *(f32*)(params + 0x20) = lbl_8047E2C0;
-        *(f32*)(params + 0x24) = lbl_8047E250;
-        lower = lbl_8047E2B8;
-        upper = lbl_8047E2C4;
+        params->distanceMin = 35.0f;
+        params->distanceMax = 50.0f;
+        lower = 6.0f;
+        upper = 11.0f;
     } else if (flags & 0x80) {
-        *(f32*)(params + 0x20) = lbl_8047E250;
-        *(f32*)(params + 0x24) = lbl_8047E2C8;
-        lower = lbl_8047E2B8;
-        upper = lbl_8047E20C;
+        params->distanceMin = 50.0f;
+        params->distanceMax = 60.0f;
+        lower = 6.0f;
+        upper = 20.0f;
     } else {
-        *(f32*)(params + 0x20) = lbl_8047E20C;
-        *(f32*)(params + 0x24) = lbl_8047E2C8;
-        lower = lbl_8047E2B8;
-        upper = lbl_8047E20C;
+        /* RULE-EXCEPTION(user-approved): chained assignment so distanceMin is stored from upper's register, as retail - see docs/RULE_EXCEPTIONS.md */
+        params->distanceMin = upper = 20.0f;
+        params->distanceMax = 60.0f;
+        lower = 6.0f;
     }
 
-    *(f32*)(params + 0x20) *= distanceScale;
-    *(f32*)(params + 0x24) *= distanceScale;
-    magnitude = vecMag((Vec*)(bound + 0x28));
-    *(f32*)(params + 0x04) = lbl_8047E2CC * magnitude;
-    *(f32*)(params + 0x08) = *(f32*)(bound + 0x2C);
-    *(f32*)(params + 0x18) = *(f32*)(bound + 0x14);
-    *(f32*)(params + 0x1C) = *(f32*)(bound + 0x20);
+    extent = &bound->size;
+    params->distanceMin *= distanceScale;
+    params->distanceMax *= distanceScale;
+    /* RULE-EXCEPTION(user-approved): size and height read into block temporaries before the stores, so extent->y loads before the size store as in retail - see docs/RULE_EXCEPTIONS.md */
+    {
+        f32 size = 0.57735026f * vecMag(extent);
+        f32 height = extent->y;
+        params->size = size;
+        params->height = height;
+    }
+    params->heightMin = bound->minY;
+    params->heightMax = bound->maxY;
 
-    if (*(f32*)(params + 0x18) < lower) {
-        *(f32*)(params + 0x18) = lower;
-        if (*(f32*)(params + 0x1C) < lower) {
-            *(f32*)(params + 0x1C) = lbl_8047E294 * lower;
+    if (params->heightMin < lower) {
+        params->heightMin = lower;
+        if (params->heightMax < lower) {
+            params->heightMax = 1.5f * lower;
         }
     }
-    if (*(f32*)(params + 0x1C) > upper) {
-        *(f32*)(params + 0x1C) = upper;
-        if (*(f32*)(params + 0x18) > upper) {
-            *(f32*)(params + 0x18) = lbl_8047E2D0 * upper;
+    if (params->heightMax > upper) {
+        params->heightMax = upper;
+        if (params->heightMin > upper) {
+            params->heightMin = 0.8f * upper;
         }
     }
-    *(f32*)(params + 0x04) *= sizeScale;
-    *(f32*)(params + 0x08) *= sizeScale;
-    if (*(f32*)(params + 0x20) < lbl_8047E20C) {
-        *(f32*)(params + 0x20) = lbl_8047E20C;
+    params->size *= sizeScale;
+    params->height *= sizeScale;
+    if (params->distanceMin < 20.0f) {
+        params->distanceMin = 20.0f;
     }
-    if (*(f32*)(params + 0x24) < lbl_8047E2D4) {
-        *(f32*)(params + 0x24) = lbl_8047E2D4;
+    if (params->distanceMax < 40.0f) {
+        params->distanceMax = 40.0f;
     }
-    if (*(f32*)(params + 0x20) > lbl_8047E2D8) {
-        *(f32*)(params + 0x20) = lbl_8047E2D8;
+    if (params->distanceMin > 48.0f) {
+        params->distanceMin = 48.0f;
     }
-    if (*(f32*)(params + 0x24) > lbl_8047E2C8) {
-        *(f32*)(params + 0x24) = lbl_8047E2C8;
+    if (params->distanceMax > 60.0f) {
+        params->distanceMax = 60.0f;
     }
 }

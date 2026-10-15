@@ -2,11 +2,19 @@
  * @file menu_offscreen.c
  * @brief menuOffScreen -- back-framebuffer capture / fade-transition
  *        offscreen texture (Colosseum "menu" UI subsystem). Split from
- *        the gs_model.c splitter bucket (address range 0x80109664 -
- *        0x80109894, 11 fns). Corresponds to XD's menuOffScreen.cpp
+ *        the gs_model.c splitter bucket (address range 0x801093C8 -
+ *        0x80109894, 12 fns). Corresponds to XD's menuOffScreen.cpp
  *        (0x801145EC-0x80114D30); 8 anchor symbols strictly monotonic,
  *        with _menuCBOffScreen (segment's and XD TU's last fn) an exact
  *        size match. menuOffScreenInit is called by menuInit (menu.c).
+ *
+ *        fn_801093C8 is XD's first function here, menuOffScreenDraw
+ *        (TeamOrre/xd-decomp config/GXXE01/symbols.txt @4989794e,
+ *        0x801145EC): it drives the same fade state (lbl_8047AD2C..AD3C).
+ *        The TU owns the .sdata2 literal pool 0x8047CE48-0x8047CE70
+ *        (255, 100, 0, 640, 480, 1, and the two int-to-float doubles), in
+ *        first-use order; menuOffScreenFadeSet/Create/Init share its 0.0f
+ *        and 1.0f.
  */
 #include "dolphin/types.h"
 
@@ -78,7 +86,10 @@ extern u32 lbl_8047ACF8;  /* saved tick */
 extern u32 lbl_8047ACEC;  /* tick counter */
 extern u32 lbl_8047ACE8;  /* tick base */
 extern u8 lbl_80478B28;   /* max slot byte */
-extern u8 lbl_8047AD20;
+/* Capture-done flag: set by _menuCBOffScreen from the back-framebuffer
+ * capture callback and polled by menuOffScreenCheckEnable, so it is
+ * volatile (every read reloads it). */
+extern volatile u8 lbl_8047AD20;
 extern u8 lbl_8047AD21;
 extern u8 lbl_8047AD22;
 extern u8 lbl_8047AD23;
@@ -103,8 +114,6 @@ extern f32 lbl_8047CD90;  /* sdata2: float constant */
 extern f32 lbl_8047CD94;  /* sdata2: float constant */
 extern f64 lbl_8047CD98;  /* sdata2: double constant */
 extern f32 lbl_8047CE3C;  /* sdata2: float constant */
-extern f32 lbl_8047CE50;  /* sdata2: float constant */
-extern f32 lbl_8047CE5C;  /* sdata2: float constant */
 extern f32 lbl_8047CE70;  /* sdata2: float constant */
 extern u8  lbl_80404A98[];  /* table for display */
 extern u8  lbl_80271E10[];  /* format string */
@@ -127,7 +136,7 @@ extern void gfxSetCullMode(s32);
 extern void gfxSetPrimitive(s32);
 extern void gfxSetVtxDesc(s32);
 extern void gfxBegin(s32);
-extern void gfxVtxPos(f32);
+extern void gfxVtxPos(f32, f32, f32);
 extern void fn_800D5CB8(s32, s32, s32, s32, s32);
 extern void gfxEnd(void);
 
@@ -274,36 +283,92 @@ extern void menuModelRender(void);
 extern s32 menuModelCheck(void* obj, u8 wait);
 extern s32 menuModelFree(void* p);
 
+extern u8 lbl_80314AE8[];
+extern void fn_800D5CB8(s32, s32, s32, s32, s32);
+extern void gfxEnd(void);
+extern void gfxLoadTexture(s32, void*);
+extern void gfxVtxTexCoord(s32, f32, f32);
+extern s32 fn_800D37CC(void);
+extern void fn_800D9F40(s32);
+extern u32 msgGetCharsPerFrame(void);
+
+/* 0x801093C8 | 0x29C */
+void fn_801093C8(void) {
+    s32 alpha;
+    f32 progress;
+
+    if (lbl_8047AD24 != 0) {
+        lbl_8047AD3C += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
+        if (lbl_8047AD3C >= lbl_8047AD38) {
+            lbl_8047AD3C = lbl_8047AD38;
+            lbl_8047AD24 = 0;
+        }
+    }
+    if (lbl_8047AD22 == 0) return;
+    if (lbl_8047AD20 == 0) return;
+
+    progress = lbl_8047AD2C +
+        (lbl_8047AD3C / lbl_8047AD38) * (lbl_8047AD34 - lbl_8047AD2C);
+    lbl_8047AD30 = progress;
+    alpha = (s32)(255.0f -
+        (255.0f * progress) / 100.0f);
+
+    if (lbl_8047AD23 != 0) {
+        fn_800D9ED8(1);
+    } else {
+        fn_800D9ED8(0);
+    }
+    gfxSetFlags(3);
+    gfxClearFlags(4);
+    gfxSetOrtho(0.0f, 0.0f,
+                640.0f, 480.0f);
+    gfxSetBlendMode(0, 1, 1);
+    gfxSetUpdates(1, 1, 1);
+    gfxSetZMode(1, 2, 1);
+    gfxSetCullMode(0);
+    gfxSetPrimitive(4);
+    gfxSetVtxDesc((s32)lbl_80314AE8);
+    gfxLoadTexture(0, (void*)lbl_8047AD28);
+    gfxBegin(4);
+
+    gfxVtxPos(0.0f, 0.0f, 0.0f);
+    fn_800D5CB8(0, alpha, alpha, alpha, 0xFF);
+    gfxVtxTexCoord(0, 0.0f, 0.0f);
+    gfxVtxPos(640.0f, 0.0f, 0.0f);
+    fn_800D5CB8(0, alpha, alpha, alpha, 0xFF);
+    gfxVtxTexCoord(0, 1.0f, 0.0f);
+    gfxVtxPos(0.0f, 480.0f, 0.0f);
+    fn_800D5CB8(0, alpha, alpha, alpha, 0xFF);
+    gfxVtxTexCoord(0, 0.0f, 1.0f);
+    gfxVtxPos(640.0f, 480.0f, 0.0f);
+    fn_800D5CB8(0, alpha, alpha, alpha, 0xFF);
+    gfxVtxTexCoord(0, 1.0f, 1.0f);
+    gfxEnd();
+    if (lbl_8047AD23 == 0) fn_800D9F40(0);
+}
+
 /* 0x80109664 | 0x48 */
-#pragma push
-#pragma peephole off
-u8 menuOffScreenFadeSync(u8 param) {
-    u8 r31 = (u8)param;
-    goto check;
-loop:
-    if (lbl_8047AD24 == 0) { goto done; }
-    _threadSwitch();
-check:
-    if (r31 != 0) { goto loop; }
-done:
+u8 menuOffScreenFadeSync(u8 wait) {
+    while (wait) {
+        if (lbl_8047AD24 == 0) {
+            break;
+        }
+        _threadSwitch();
+    }
     return lbl_8047AD24;
 }
-#pragma pop
 
 /* 0x801096AC | 0x3C */
-void menuOffScreenFadeSet(f32 f1, f32 f2) {
-    f32 f0 = lbl_8047CE50;
-    f32 f3 = lbl_8047AD30;
+void menuOffScreenFadeSet(f32 target, f32 time) {
     lbl_8047AD24 = 1;
-    if (((!f2) && (!f2)) && (!f2)) {
+    lbl_8047AD2C = lbl_8047AD30;
+    lbl_8047AD34 = target;
+    lbl_8047AD30 = 0.0f;
+    lbl_8047AD38 = time;
+    lbl_8047AD3C = 0.0f;
+    if (time == 0.0f) {
+        lbl_8047AD3C = lbl_8047AD38 = 1.0f;
     }
-    lbl_8047AD2C = f3;
-    lbl_8047AD34 = f1;
-    lbl_8047AD30 = (0, f0);
-    lbl_8047AD38 = f2;
-    lbl_8047AD3C = f0;
-    if (f0 != f2) { return; }
-    lbl_8047AD3C = (lbl_8047AD38 = lbl_8047CE5C);
 }
 
 /* 0x801096E8 | 0x10 */
@@ -327,20 +392,15 @@ u8 menuOffScreenIsDoing(void) { return lbl_8047AD21; }
 u32 menuOffScreenGetPtr(void) { return lbl_8047AD28; }
 
 /* 0x80109718 | 0x4C */
-#pragma push
-#pragma peephole off
-u8 menuOffScreenCheckEnable(u8 param) {
-    u8 r31 = (u8)param;
-    goto check;
-loop:
-    if (lbl_8047AD20 != 0) { goto done; }
-    _threadSwitch();
-check:
-    if (r31 != 0) { goto loop; }
-done:
-    return (u8)*(volatile u8*)&lbl_8047AD20;
+u8 menuOffScreenCheckEnable(u8 wait) {
+    while (wait) {
+        if (lbl_8047AD20 != 0) {
+            break;
+        }
+        _threadSwitch();
+    }
+    return lbl_8047AD20;
 }
-#pragma pop
 
 /* 0x80109764 | 0x18 */
 void menuOffScreenRelease(void) {
@@ -351,32 +411,19 @@ void menuOffScreenRelease(void) {
 }
 
 /* 0x8010977C | 0x94 */
-#pragma push
-#pragma peephole off
-u8 menuOffScreenCreate(u32 param) {
-    u32 r31 = param;
+u8 menuOffScreenCreate(u32 wait) {
     lbl_8047AD24 = 0;
-    lbl_8047AD28 = lbl_8047AD28;  /* read */
     lbl_8047AD21 = 1;
     lbl_8047AD20 = 0;
     lbl_8047AD22 = 0;
-    lbl_8047AD2C = lbl_8047CE50;
-    lbl_8047AD30 = lbl_8047CE50;
-    lbl_8047AD34 = lbl_8047CE50;
-    lbl_8047AD38 = lbl_8047CE50;
-    lbl_8047AD3C = lbl_8047CE50;
+    lbl_8047AD2C = 0.0f;
+    lbl_8047AD30 = 0.0f;
+    lbl_8047AD34 = 0.0f;
+    lbl_8047AD38 = 0.0f;
+    lbl_8047AD3C = 0.0f;
     GSgfxBeginBackFBCapture(lbl_8047AD28, _menuCBOffScreen__FP9GStextureUlPv, (void*)0);
-    r31 = (u8)r31;
-    goto check;
-loop:
-    if (lbl_8047AD20 != 0) { goto done; }
-    _threadSwitch();
-check:
-    if (r31 != 0) { goto loop; }
-done:
-    return (u8)*(volatile u8*)&lbl_8047AD20;
+    return menuOffScreenCheckEnable(wait);
 }
-#pragma pop
 
 /* 0x80109810 | 0x74 */
 void menuOffScreenInit(void) {
@@ -388,11 +435,11 @@ void menuOffScreenInit(void) {
     lbl_8047AD22 = 0;
     lbl_8047AD23 = 0;
     lbl_8047AD24 = 0;
-    lbl_8047AD38 = lbl_8047CE50;
-    lbl_8047AD3C = lbl_8047CE50;
-    lbl_8047AD2C = lbl_8047CE50;
-    lbl_8047AD30 = lbl_8047CE50;
-    lbl_8047AD34 = lbl_8047CE50;
+    lbl_8047AD38 = 0.0f;
+    lbl_8047AD3C = 0.0f;
+    lbl_8047AD2C = 0.0f;
+    lbl_8047AD30 = 0.0f;
+    lbl_8047AD34 = 0.0f;
 }
 
 /* 0x80109884 | 0x10 */

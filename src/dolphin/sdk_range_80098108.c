@@ -69,8 +69,15 @@ typedef void (*OSExceptionHandler)(u8 exception, OSContext* context, u32 dsisr, 
 extern OSBootInfo* BootInfo_8047A6A0;
 extern u32* BI2DebugFlag_8047A6A4;
 extern OSExceptionHandler* OSExceptionTable_8047A6C4;
+#if !defined(SDK_EXI_ECB_STATIC)
 extern EXIControl lbl_803FB3C8[];
-extern DVDDriveInfo DriveInfo_803FB4A0;
+#else
+/* EXIBios.c's Ecb is file-static: the compiler keeps its base address in a
+   register across EXIGetID's inlined helpers. */
+static EXIControl lbl_803FB3C8[3];
+#endif
+static DVDDriveInfo DriveInfo_803FB4A0;
+static DVDCommandBlock DriveBlock_803FB4C0;
 extern OSSavedRegionAddress __OSSavedRegionStart;
 extern OSSavedRegionAddress __OSSavedRegionEnd;
 
@@ -83,9 +90,9 @@ volatile u32 __EXIRegs[15] AT_ADDRESS(0xCC006800);
 u32 __OSBusClock AT_ADDRESS(0x800000F8);
 s32 __EXIProbeStartTime[2] AT_ADDRESS(0x800030C0);
 
-extern u8 __OSDBINTSTART[];
-extern u8 __OSDBINTEND[];
-extern u8 __OSDBJUMPEND[];
+void __OSDBINTSTART(void);
+void __OSDBINTEND(void);
+void __OSDBJUMPEND(void);
 extern u8 __OSEVStart[];
 extern u8 __OSEVEnd[];
 extern u32 __OSEVSetNumber[];
@@ -97,11 +104,15 @@ static volatile OSLowMem* const LowMem = (volatile OSLowMem*)0x80000000;
 s32 fn_80099400(s32 chan, u32 dev, u32* id);
 BOOL fn_80098790(s32 chan);
 u32 fn_800986A0(s32 chan, s32 exi, s32 tc, s32 ext);
-u32 fn_8009A23C(void);
+u32 __OSGetDIConfig(void);
 u32 OSGetConsoleType(void);
 void fn_80098110(s32 chan, EXIControl* exi);
 void* memmove(void* dst, const void* src, size_t n);
 void* memset(void* dst, int value, size_t n);
+
+/* SDK_OS_SUFFIX_ONLY (sdk_r48_80099790_suffix.c) builds only OS.c's
+   0x80099790 - 0x8009A0E0 run, with its .data, .sdata and .bss. */
+#if !defined(SDK_OS_SUFFIX_ONLY)
 
 /* 0x80098108 | size: 0x8 */
 #pragma push
@@ -295,7 +306,7 @@ BOOL EXISync(s32 chan) {
             if (exi->state & 4) {
                 CompleteTransfer(chan);
 
-                if (fn_8009A23C() != 0xFF || exi->immLen != 4 ||
+                if (__OSGetDIConfig() != 0xFF || exi->immLen != 4 ||
                     (__EXIRegs[chan * 5] & 0x70) ||
                     __EXIRegs[(chan * 5) + 4] != 0x01010000) {
                     result = TRUE;
@@ -802,9 +813,92 @@ BOOL fn_800993D0(s32 chan) {
  * __EXIAttach, EXIDetach and EXIUnlock are all inlined here in the target,
  * so their bodies are repeated rather than called.
  */
+#endif /* !SDK_OS_SUFFIX_ONLY */
 #ifndef SDK_EXI_PREFIX_ONLY
+#if !defined(SDK_OS_SUFFIX_ONLY)
+/* RULE-EXCEPTION(user-approved): local optimization_level 0, as the
+   neighbouring EXIBios functions in this file use — see
+   docs/RULE_EXCEPTIONS.md */
+#pragma push
+#pragma optimization_level 0
+/*
+ * RULE-EXCEPTION(user-approved): inline copies of __EXIAttach, EXIUnlock
+ * and EXIDetach (EXIBios.c); retail expands all three inside EXIGetID, so
+ * they are repeated here as static inlines — see docs/RULE_EXCEPTIONS.md
+ */
+static inline int EXIGetID_Attach(s32 chan, EXICallback extCallback) {
+    EXIControl* exi;
+    BOOL enabled;
+
+    exi = &lbl_803FB3C8[chan];
+    enabled = OSDisableInterrupts();
+
+    if ((exi->state & 8) || !fn_80098790(chan)) {
+        OSRestoreInterrupts(enabled);
+        return 0;
+    }
+
+    fn_800986A0(chan, 1, 0, 0);
+    exi->extCallback = extCallback;
+    __OSUnmaskInterrupts(0x100000U >> (chan * 3));
+    exi->state |= 8;
+
+    OSRestoreInterrupts(enabled);
+    return 1;
+}
+
+static inline int EXIGetID_Unlock(s32 chan) {
+    EXIControl* exi;
+    BOOL enabled;
+    EXICallback unlockedCallback;
+
+    exi = &lbl_803FB3C8[chan];
+    enabled = OSDisableInterrupts();
+
+    if (!(exi->state & 0x10)) {
+        OSRestoreInterrupts(enabled);
+        return 0;
+    }
+
+    exi->state &= ~0x10;
+    fn_80098110(chan, exi);
+    if (exi->items > 0) {
+        unlockedCallback = exi->queue[0].callback;
+        if (--exi->items > 0) {
+            memmove(&exi->queue[0], &exi->queue[1], exi->items * 8);
+        }
+        unlockedCallback(chan, 0);
+    }
+
+    OSRestoreInterrupts(enabled);
+    return 1;
+}
+
+static inline int EXIGetID_Detach(s32 chan) {
+    EXIControl* exi;
+    BOOL enabled;
+
+    exi = &lbl_803FB3C8[chan];
+    enabled = OSDisableInterrupts();
+
+    if (!(exi->state & 8)) {
+        OSRestoreInterrupts(enabled);
+        return 1;
+    }
+
+    if ((exi->state & 0x10) && (exi->device == 0)) {
+        OSRestoreInterrupts(enabled);
+        return 0;
+    }
+
+    exi->state &= ~8;
+    __OSMaskInterrupts(0x500000U >> (chan * 3));
+
+    OSRestoreInterrupts(enabled);
+    return 1;
+}
+
 s32 fn_80099400(s32 chan, u32 dev, u32* id) {
-    extern u32 fn_800986A0(s32 chan, s32 exi, s32 tc, s32 ext);
     EXIControl* exi = &lbl_803FB3C8[chan];
     int err;
     u32 cmd;
@@ -821,26 +915,12 @@ s32 fn_80099400(s32 chan, u32 dev, u32* id) {
             return exi->idTime;
         }
 
-        /* __EXIAttach(chan, NULL) */
-        {
-            EXIControl* aexi = &lbl_803FB3C8[chan];
-
-            enabled = OSDisableInterrupts();
-            if ((aexi->state & 8) || !fn_80098790(chan)) {
-                OSRestoreInterrupts(enabled);
-                return 0;
-            }
-            fn_800986A0(chan, TRUE, FALSE, FALSE);
-            aexi->extCallback = NULL;
-            __OSUnmaskInterrupts(0x100000u >> (chan * 3));
-            aexi->state |= 8;
-            OSRestoreInterrupts(enabled);
+        if (!EXIGetID_Attach(chan, NULL)) {
+            return 0;
         }
 
         startTime = __EXIProbeStartTime[chan];
     }
-
-    enabled = OSDisableInterrupts();
 
     err = !EXILock(chan, dev, (chan < 2 && dev == 0) ? (EXICallback)fn_800993D0 : NULL);
     if (err == 0) {
@@ -854,14 +934,11 @@ s32 fn_80099400(s32 chan, u32 dev, u32* id) {
             err |= !EXIDeselect(chan);
         }
 
-        EXIUnlock(chan);
+        EXIGetID_Unlock(chan);
     }
 
-    OSRestoreInterrupts(enabled);
-
     if ((chan < 2) && (dev == 0)) {
-        fn_80098AE8(chan);
-
+        EXIGetID_Detach(chan);
         enabled = OSDisableInterrupts();
         err |= __EXIProbeStartTime[chan] != startTime;
 
@@ -875,29 +952,114 @@ s32 fn_80099400(s32 chan, u32 dev, u32* id) {
         if (err) {
             return 0;
         }
+
         return exi->idTime;
     }
 
     if (err) {
         return 0;
     }
+
     return 1;
 }
+#pragma pop
 
-#pragma peephole off
+#endif /* !SDK_OS_SUFFIX_ONLY */
+
+/* OS.c. Hand-written Dolphin SDK asm (zeroes the FPRs, paired singles
+   too when HID2[PSE] is set); evidence: docs/asm_evidence/os_primitives.md */
+extern f64 ZeroF_8047A6B0;
+extern f32 ZeroPS_8047A6B8[2];
+
+asm void __OSFPRInit(void) {
+    nofralloc
+    mfmsr   r3
+    ori     r3, r3, 0x2000
+    mtmsr   r3
+    mfspr   r3, 920 /* HID2 */
+    extrwi. r3, r3, 1, 2
+    beq     _regular
+    lis     r3, ZeroPS_8047A6B8@ha
+    addi    r3, r3, ZeroPS_8047A6B8@l
+    psq_l   f0, 0(r3), 0, 0
+    ps_mr   f1, f0
+    ps_mr   f2, f0
+    ps_mr   f3, f0
+    ps_mr   f4, f0
+    ps_mr   f5, f0
+    ps_mr   f6, f0
+    ps_mr   f7, f0
+    ps_mr   f8, f0
+    ps_mr   f9, f0
+    ps_mr   f10, f0
+    ps_mr   f11, f0
+    ps_mr   f12, f0
+    ps_mr   f13, f0
+    ps_mr   f14, f0
+    ps_mr   f15, f0
+    ps_mr   f16, f0
+    ps_mr   f17, f0
+    ps_mr   f18, f0
+    ps_mr   f19, f0
+    ps_mr   f20, f0
+    ps_mr   f21, f0
+    ps_mr   f22, f0
+    ps_mr   f23, f0
+    ps_mr   f24, f0
+    ps_mr   f25, f0
+    ps_mr   f26, f0
+    ps_mr   f27, f0
+    ps_mr   f28, f0
+    ps_mr   f29, f0
+    ps_mr   f30, f0
+    ps_mr   f31, f0
+_regular:
+    lfd     f0, ZeroF_8047A6B0
+    fmr     f1, f0
+    fmr     f2, f0
+    fmr     f3, f0
+    fmr     f4, f0
+    fmr     f5, f0
+    fmr     f6, f0
+    fmr     f7, f0
+    fmr     f8, f0
+    fmr     f9, f0
+    fmr     f10, f0
+    fmr     f11, f0
+    fmr     f12, f0
+    fmr     f13, f0
+    fmr     f14, f0
+    fmr     f15, f0
+    fmr     f16, f0
+    fmr     f17, f0
+    fmr     f18, f0
+    fmr     f19, f0
+    fmr     f20, f0
+    fmr     f21, f0
+    fmr     f22, f0
+    fmr     f23, f0
+    fmr     f24, f0
+    fmr     f25, f0
+    fmr     f26, f0
+    fmr     f27, f0
+    fmr     f28, f0
+    fmr     f29, f0
+    fmr     f30, f0
+    fmr     f31, f0
+    mtfsf   0xFF, f0
+    blr
+}
+
 u32 OSGetConsoleType(void) {
     if (BootInfo_8047A6A0 == NULL || BootInfo_8047A6A0->consoleType == 0) {
         return 0x10000002;
     }
     return BootInfo_8047A6A0->consoleType;
 }
-#pragma peephole reset
 
 extern u32 BOOT_REGION_START : 0x812FDFF0;
 extern u32 BOOT_REGION_END : 0x812FDFEC;
 
-#pragma push
-#pragma peephole off
 static void ClearArena(void) {
     if (OSGetResetCode() != 0x80000000) {
         __OSSavedRegionStart.address = 0;
@@ -934,9 +1096,7 @@ static void ClearArena(void) {
         }
     }
 }
-#pragma pop
 
-#pragma peephole off
 static void InquiryCallback(s32 result, DVDCommandBlock* block) {
     (void)result;
 
@@ -949,14 +1109,13 @@ static void InquiryCallback(s32 result, DVDCommandBlock* block) {
         break;
     }
 }
-#pragma peephole reset
 
 static void OSExceptionInit(void);
 
-/* 0x80099A44 | size: 0x3D8 */
 const char* __OSVersion =
     "<< Dolphin SDK - OS\trelease build: Mar 17 2003 04:20:41 (0x2301) >>";
 
+/* 0x80099A44 | size: 0x3D8 */
 void OSInit(void) {
     extern void OSDisableInterrupts(void);
     extern void OSEnableInterrupts(void);
@@ -992,24 +1151,21 @@ void OSInit(void) {
     extern void DCInvalidateRange(void* addr, u32 nBytes);
     extern void DVDInquiryAsync(DVDCommandBlock* block, DVDDriveInfo* info,
                                 void* callback);
-    extern DVDCommandBlock DriveBlock_803FB4C0;
     extern s64 __OSStartTime;
-    extern u32 AreWeInitialized_8047A6C0;
+    extern BOOL AreWeInitialized_8047A6C0;
     extern u32 BI2DebugFlagHolder_8047A6A8;
     extern u32 __PADSpec;
     extern u32 __DVDLongFileNameFlag;
-    extern u32 __OSInIPL;
-    extern u32 __OSIsGcam;
     extern u8 __ArenaLo[];
     extern u8 __ArenaHi[];
     extern u8 _stack_addr[];
 
     u32 consoleType;
-    void* bi2StartAddr;
+    u32* debugInfo;
+    void* debugArenaLo;
 
     if (AreWeInitialized_8047A6C0 == FALSE) {
         AreWeInitialized_8047A6C0 = TRUE;
-
         __OSStartTime = __OSGetSystemTime();
         OSDisableInterrupts();
 
@@ -1022,34 +1178,33 @@ void OSInit(void) {
         PPCDisableSpeculation();
         PPCSetFpNonIEEEMode();
 
-        BootInfo_8047A6A0 = (OSBootInfo*)0x80000000;
         BI2DebugFlag_8047A6A4 = 0;
+        BootInfo_8047A6A0 = (OSBootInfo*)0x80000000;
         __DVDLongFileNameFlag = 0;
 
-        bi2StartAddr = (void*)(*(u32*)0x800000F4);
-        if (bi2StartAddr) {
-            BI2DebugFlag_8047A6A4 = (u32*)((char*)bi2StartAddr + 0xC);
-            __PADSpec = ((u32*)bi2StartAddr)[9];
-            *(u8*)0x800030E8 = *BI2DebugFlag_8047A6A4;
-            *(u8*)0x800030E9 = __PADSpec;
+        debugInfo = (u32*)(*(u32*)0x800000F4);
+        if (debugInfo != NULL) {
+            BI2DebugFlag_8047A6A4 = &debugInfo[3];
+            __PADSpec = debugInfo[9];
+            *(u8*)0x800030E8 = (u8)*BI2DebugFlag_8047A6A4;
+            *(u8*)0x800030E9 = (u8)__PADSpec;
         } else if (BootInfo_8047A6A0->arenaHi) {
-            BI2DebugFlagHolder_8047A6A8 = *(u8*)0x800030E8;
+            BI2DebugFlagHolder_8047A6A8 = (u32)*(u8*)0x800030E8;
             BI2DebugFlag_8047A6A4 = &BI2DebugFlagHolder_8047A6A8;
-            __PADSpec = *(u8*)0x800030E9;
+            __PADSpec = (u32)*(u8*)0x800030E9;
         }
 
         __DVDLongFileNameFlag = 1;
 
-        OSSetArenaLo((!BootInfo_8047A6A0->arenaLo)
-                         ? (void*)__ArenaLo
-                         : (void*)BootInfo_8047A6A0->arenaLo);
-        if ((!BootInfo_8047A6A0->arenaLo) && (BI2DebugFlag_8047A6A4) &&
+        OSSetArenaLo((BootInfo_8047A6A0->arenaLo == 0) ? (void*)__ArenaLo
+                                                          : (void*)BootInfo_8047A6A0->arenaLo);
+        if ((BootInfo_8047A6A0->arenaLo == 0) && (BI2DebugFlag_8047A6A4 != NULL) &&
             (*BI2DebugFlag_8047A6A4 < 2)) {
-            OSSetArenaLo((void*)(((u32)(char*)_stack_addr + 0x1F) & 0xFFFFFFE0));
+            debugArenaLo = (char*)(((u32)_stack_addr + 0x1f) & ~0x1f);
+            OSSetArenaLo(debugArenaLo);
         }
-        OSSetArenaHi((!BootInfo_8047A6A0->arenaHi)
-                         ? (void*)__ArenaHi
-                         : (void*)BootInfo_8047A6A0->arenaHi);
+        OSSetArenaHi((BootInfo_8047A6A0->arenaHi == 0) ? (void*)__ArenaHi
+                                                          : (void*)BootInfo_8047A6A0->arenaHi);
 
         OSExceptionInit();
         __OSInitSystemCall();
@@ -1064,10 +1219,9 @@ void OSInit(void) {
         __OSInitSram();
         __OSThreadInit();
         __OSInitAudioSystem();
-
         PPCMthid2(PPCMfhid2() & 0xBFFFFFFF);
 
-        if (!__OSInIPL) {
+        if (__OSInIPL == FALSE) {
             __OSInitMemoryProtection();
         }
 
@@ -1083,21 +1237,21 @@ void OSInit(void) {
         case 0x10000000:
         case 0x20000000:
             switch (consoleType & 0x0FFFFFFF) {
-            case 0x00000001:
+            case 0x10000000:
                 OSReport("Mac Emulator\n");
                 break;
-            case 0x00000002:
+            case 0x10000001:
                 OSReport("PC Emulator\n");
                 break;
-            case 0x00000003:
+            case 0x10000002:
                 OSReport("EPPC Arthur\n");
                 break;
-            case 0x00000004:
+            case 0x10000003:
                 OSReport("EPPC Minnow\n");
                 break;
             default:
                 OSReport("Development HW%d (%08x)\n",
-                         (consoleType & 0xFFFFFFF) - 3, consoleType);
+                         (consoleType & 0x0FFFFFFF) - 3, consoleType);
                 break;
             }
             break;
@@ -1117,7 +1271,7 @@ void OSInit(void) {
         ClearArena();
         OSEnableInterrupts();
 
-        if (!__OSInIPL) {
+        if (__OSInIPL == FALSE) {
             DVDInit();
 
             if (__OSIsGcam) {
@@ -1125,7 +1279,7 @@ void OSInit(void) {
                 return;
             }
 
-            DCInvalidateRange(&DriveInfo_803FB4A0, sizeof(DVDDriveInfo));
+            DCInvalidateRange(&DriveInfo_803FB4A0, sizeof(DriveInfo_803FB4A0));
             DVDInquiryAsync(&DriveBlock_803FB4C0, &DriveInfo_803FB4A0,
                             InquiryCallback);
         }
@@ -1138,8 +1292,6 @@ static u32 __OSExceptionLocations[] = {
     0x00000D00, 0x00000F00, 0x00001300, 0x00001400, 0x00001700,
 };
 
-#pragma push
-#pragma peephole off
 static void OSExceptionInit(void) {
     u8 exception;
     u32* destAddr;
@@ -1156,10 +1308,10 @@ static void OSExceptionInit(void) {
     destAddr = (u32*)0x80000060;
     if (*destAddr == 0) {
         DBPrintf("Installing OSDBIntegrator\n");
-        memcpy(destAddr, __OSDBINTSTART, (u32)(__OSDBINTEND - __OSDBINTSTART));
-        DCFlushRangeNoSync(destAddr, (u32)(__OSDBINTEND - __OSDBINTSTART));
+        memcpy(destAddr, (u8*)__OSDBINTSTART, (u32)((u8*)__OSDBINTEND - (u8*)__OSDBINTSTART));
+        DCFlushRangeNoSync(destAddr, (u32)((u8*)__OSDBINTEND - (u8*)__OSDBINTSTART));
         __sync();
-        ICInvalidateRange(destAddr, (u32)(__OSDBINTEND - __OSDBINTSTART));
+        ICInvalidateRange(destAddr, (u32)((u8*)__OSDBINTEND - (u8*)__OSDBINTSTART));
     }
 
     for (exception = 0; exception < OS_EXCEPTION_MAX; exception++) {
@@ -1173,12 +1325,12 @@ static void OSExceptionInit(void) {
 
         if (__DBIsExceptionMarked(exception)) {
             DBPrintf(">>> OSINIT: exception %d vectored to debugger\n", exception);
-            memcpy(__DBVECTOR, __OSDBINTEND, (u32)(__OSDBJUMPEND - __OSDBINTEND));
+            memcpy(__DBVECTOR, (u8*)__OSDBINTEND, (u32)((u8*)__OSDBJUMPEND - (u8*)__OSDBINTEND));
         } else {
             u32* ops = __DBVECTOR;
             int cb;
 
-            for (cb = 0; cb < (u32)(__OSDBJUMPEND - __OSDBINTEND); cb += sizeof(u32)) {
+            for (cb = 0; cb < (u32)((u8*)__OSDBJUMPEND - (u8*)__OSDBINTEND); cb += sizeof(u32)) {
                 *ops++ = 0x60000000;
             }
         }
@@ -1199,9 +1351,31 @@ static void OSExceptionInit(void) {
     *opCodeAddr = oldOpCode;
     DBPrintf("Exceptions initialized...\n");
 }
-#pragma pop
 
-#pragma peephole off
+/* OS.c. Hand-written Dolphin SDK asm (the debugger integrator and its jump,
+   copied by OSExceptionInit); evidence: docs/asm_evidence/os_primitives.md */
+asm void __OSDBIntegrator(void) {
+    nofralloc
+entry __OSDBINTSTART
+    li      r5, 0x40
+    mflr    r3
+    stw     r3, 0xC(r5)
+    lwz     r3, 0x8(r5)
+    oris    r3, r3, 0x8000
+    mtlr    r3
+    li      r3, 0x30
+    mtmsr   r3
+    blr
+entry __OSDBINTEND
+}
+
+/* OS.c's __OSDBJump; evidence: docs/asm_evidence/os_primitives.md */
+asm void fn_8009A0C0(void) {
+    nofralloc
+    bla     0x60
+entry __OSDBJUMPEND
+}
+
 OSExceptionHandler __OSSetExceptionHandler(u8 exception, OSExceptionHandler handler) {
     OSExceptionHandler* entry = &OSExceptionTable_8047A6C4[exception];
     OSExceptionHandler old = *entry;
@@ -1209,20 +1383,5 @@ OSExceptionHandler __OSSetExceptionHandler(u8 exception, OSExceptionHandler hand
     *entry = handler;
     return old;
 }
-#pragma peephole reset
 #endif
 
-#ifndef SDK_EXI_PREFIX_ONLY
-/* 0x8009A09C | size: 0x24 */
-#pragma push
-#pragma optimization_level 0
-#pragma optimizewithasm off
-
-
-#pragma optimization_level 0
-void fn_8009A0C0(void) {
-    extern void __OSDBINTEND(void);
-    __OSDBINTEND();
-}
-#pragma pop
-#endif

@@ -10,8 +10,8 @@ extern u32 strlen(const char* string);
 typedef struct TRKBuffer {
     s32 mutex;
     s32 inUse;
-    u32 position;
     u32 length;
+    u32 position;
     u8 data[0x880];
 } TRKBuffer;
 
@@ -28,15 +28,16 @@ typedef struct TRKReply {
 } TRKReply;
 
 extern s32 TRKGetFreeBuffer(s32* id, TRKBuffer** buffer);
-extern TRKBuffer* TRKGetBuffer(s32 id);
+extern TRKBuffer* TRKGetBuffer(int id);
 extern s32 TRKReleaseBuffer(s32 id);
 extern s32 TRKAppendBuffer_ui8(TRKBuffer* buffer, const void* data, u32 length);
 extern s32 TRKReadBuffer_ui8(TRKBuffer* buffer, void* data, u32 length);
 extern void TRKSetBufferPosition(TRKBuffer* buffer, u32 position);
 extern s32 MessageSend(TRKBuffer* buffer);
-extern s32 TRKTestForPacket(void);
+extern int TRKTestForPacket(void);
 extern void TRKProcessInput(s32 bufferId);
 
+#if !defined(TRK_REQUEST_SEND_ONLY) && !defined(TRK_SUPP_ACCESS_FILE_ONLY)
 void OutputData(void* data, s32 length)
 {
     s32 i;
@@ -51,7 +52,13 @@ void OutputData(void* data, s32 length)
     MWTRACE(8, lbl_8026FA3C);
 }
 
-s32 TRKRequestSend(TRKBuffer* message, s32* bufferId, u32 retries,
+#else
+extern void OutputData(void* data, s32 length);
+#endif /* !TRK_REQUEST_SEND_ONLY && !TRK_SUPP_ACCESS_FILE_ONLY */
+
+#if !defined(TRK_SUPP_ACCESS_FILE_ONLY)
+
+s32 TRKRequestSend(TRKBuffer* message, int* bufferId, u32 retries,
                    u32 attempts, s32 wait)
 {
     s32 error = 0;
@@ -66,7 +73,7 @@ s32 TRKRequestSend(TRKBuffer* message, s32* bufferId, u32 retries,
     for (count = attempts + 1;
          count != 0 && *bufferId == -1 && error == 0; count--)
     {
-        MWTRACE(1, lbl_8026FA40);
+        MWTRACE(1, "Calling MessageSend\n");
         error = MessageSend(message);
         if (error == 0) {
             if (wait != 0) {
@@ -88,7 +95,7 @@ s32 TRKRequestSend(TRKBuffer* message, s32* bufferId, u32 retries,
                 TRKSetBufferPosition(buffer, 0);
                 OutputData(buffer->data, buffer->length);
                 command = buffer->data[4];
-                MWTRACE(1, lbl_8026FA40 + 0x18, command, command);
+                MWTRACE(1, "msg_command : 0x%02x hdr->cmdID 0x%02x\n", command, command);
                 if (command >= 0x80) {
                     break;
                 }
@@ -102,12 +109,12 @@ s32 TRKRequestSend(TRKBuffer* message, s32* bufferId, u32 retries,
                 }
                 if (error == 0 && !badReply) {
                     replyError = buffer->data[8];
-                    MWTRACE(1, lbl_8026FA40 + 0x40, replyError);
+                    MWTRACE(1, "msg_error : 0x%02x\n", replyError);
                 }
                 if (error == 0 && !badReply &&
-                    (command != 0x80 || replyError != 0))
+                    ((s32)command != 0x80 || replyError != 0))
                 {
-                    MWTRACE(8, lbl_8026FA40 + 0x54, command, replyError);
+                    MWTRACE(8, "RequestSend : Bad ack or non ack received msg_command : 0x%02x msg_error 0x%02x\n", command, replyError);
                     badReply = TRUE;
                 }
                 if (error != 0 || badReply) {
@@ -123,11 +130,14 @@ s32 TRKRequestSend(TRKBuffer* message, s32* bufferId, u32 retries,
     return error;
 }
 
+#endif /* !TRK_SUPP_ACCESS_FILE_ONLY */
+
+#if !defined(TRK_REQUEST_SEND_ONLY) && !defined(TRK_SUPP_ACCESS_FILE_ONLY)
 s32 HandlePositionFileSupportRequest(u32 replyError, u32* position,
                                      u8 mode, u32* ioResult)
 {
     s32 error;
-    s32 replyBufferId;
+    int replyBufferId;
     s32 bufferId;
     TRKBuffer* buffer;
     TRKBuffer* replyBuffer;
@@ -163,7 +173,7 @@ s32 HandlePositionFileSupportRequest(u32 replyError, u32* position,
 s32 HandleCloseFileSupportRequest(s32 fileHandle, u32* ioResult)
 {
     s32 error;
-    s32 replyBufferId;
+    int replyBufferId;
     s32 bufferId;
     TRKBuffer* buffer;
     TRKBuffer* replyBuffer;
@@ -196,7 +206,7 @@ s32 HandleOpenFileSupportRequest(const char* path, u8 replyError,
                                  u32* fileHandle, u32* ioResult)
 {
     s32 error;
-    s32 replyBufferId;
+    int replyBufferId;
     s32 bufferId;
     TRKBuffer* buffer;
     TRKBuffer* replyBuffer;
@@ -227,20 +237,27 @@ s32 HandleOpenFileSupportRequest(const char* path, u8 replyError,
     return error;
 }
 
+#endif /* !TRK_REQUEST_SEND_ONLY && !TRK_SUPP_ACCESS_FILE_ONLY */
+
+#if !defined(TRK_REQUEST_SEND_ONLY)
+#if defined(TRK_SUPP_ACCESS_FILE_ONLY)
+extern s32 TRKRequestSend(TRKBuffer* message, int* bufferId, u32 retries, u32 attempts, s32 wait);
+#endif
 s32 TRKSuppAccessFile(u32 fileHandle, u8* data, u32* count,
-                      u32* ioResult, BOOL needReply, BOOL read)
+                      int* ioResult, BOOL needReply, BOOL read)
 {
-    s32 error;
-    s32 replyBufferId;
     TRKBuffer* replyBuffer;
+    int replyBufferId;
     u32 length;
+    u32 i;
     s32 bufferId;
     TRKBuffer* buffer;
-    u32 i;
+    BOOL done;
+    s32 error;
     u8 replyIOResult;
     u32 replyLength;
-    BOOL done;
     TRKReply reply;
+    u8 command;
 
     if (data == NULL || *count == 0) {
         return 2;
@@ -251,9 +268,21 @@ s32 TRKSuppAccessFile(u32 fileHandle, u8* data, u32* count,
     error = 0;
     while (!done && i < *count && error == 0 && *ioResult == 0) {
         memset(&reply, 0, sizeof(reply));
-        length = *count - i <= 0x800 ? *count - i : 0x800;
-        reply.command = read ? 0xD1 : 0xD0;
-        reply.length = read ? 0x40 : length + 0x40;
+        if (*count - i <= 0x800) {
+            length = *count - i;
+        } else {
+            length = 0x800;
+        }
+        command = 0xD0;
+        if (read) {
+            command = 0xD1;
+        }
+        reply.command = command;
+        if (read) {
+            reply.length = 0x40;
+        } else {
+            reply.length = length + 0x40;
+        }
         reply.error.word = fileHandle;
         *(u16*) &reply.pad_0C[0] = length;
         TRKGetFreeBuffer(&bufferId, &buffer);
@@ -265,7 +294,7 @@ s32 TRKSuppAccessFile(u32 fileHandle, u8* data, u32* count,
             if (needReply) {
                 BOOL wait = read && fileHandle == 0;
 
-                error = TRKRequestSend(buffer, &replyBufferId, 5, 3, !wait);
+                error = TRKRequestSend(buffer, &replyBufferId, read ? 5 : 5, 3, !wait);
                 if (error == 0) {
                     replyBuffer = TRKGetBuffer(replyBufferId);
                 }
@@ -295,3 +324,5 @@ s32 TRKSuppAccessFile(u32 fileHandle, u8* data, u32* count,
     *count = i;
     return error;
 }
+
+#endif /* !TRK_REQUEST_SEND_ONLY */
