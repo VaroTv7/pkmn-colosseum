@@ -83,7 +83,7 @@ static inline s32 menuNameEntryGetDakuonMode(u16 letter)
 }
 s32 menuNameEntryCursor(void* window)
 {
-    extern void fn_80166A28(u32 se);
+    extern void soundStartSE(u32 se);
     u16* keys;
     u16* letters;
     s32 row;
@@ -108,7 +108,7 @@ s32 menuNameEntryCursor(void* window)
             row = 0;
         }
         *rowp = row;
-        fn_80166A28(0x27);
+        soundStartSE(0x27);
         return 0;
     }
     if (keys[2] & 0x10) {
@@ -130,7 +130,7 @@ s32 menuNameEntryCursor(void* window)
     }
     if (keys[2] & 0x20) {
         if (menuNameEntryDeleteLetter(arg)) {
-            fn_80166A28(0x25);
+            soundStartSE(0x25);
         }
         return 0;
     }
@@ -150,7 +150,7 @@ s32 menuNameEntryCursor(void* window)
             } while (converted == 0);
             name[offset] = converted;
         }
-        fn_80166A28(0x24);
+        soundStartSE(0x24);
         return 0;
     }
     if (keys[2] & 0x800) {
@@ -162,7 +162,7 @@ s32 menuNameEntryCursor(void* window)
         if (value >= 0x10) {
             value = 0xf;
         } else {
-            fn_80166A28(0x23);
+            soundStartSE(0x23);
         }
         *arg->letter = value;
     }
@@ -171,7 +171,7 @@ s32 menuNameEntryCursor(void* window)
         if (value < 0) {
             value = 0;
         } else {
-            fn_80166A28(0x23);
+            soundStartSE(0x23);
         }
         *arg->letter = value;
     }
@@ -189,7 +189,7 @@ s32 menuNameEntryCursor(void* window)
         if (value >= 4) {
             value = 3;
         } else {
-            fn_80166A28(0x23);
+            soundStartSE(0x23);
         }
         *arg->column = value;
     }
@@ -207,7 +207,7 @@ s32 menuNameEntryCursor(void* window)
         if (value < 0) {
             value = 0;
         } else {
-            fn_80166A28(0x23);
+            soundStartSE(0x23);
         }
         *arg->column = value;
     }

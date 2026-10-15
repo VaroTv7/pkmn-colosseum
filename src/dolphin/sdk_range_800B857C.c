@@ -152,7 +152,7 @@ typedef enum GXTexGenSrc_800B857C {
 extern void __GXSetMatrixIndex(u32 attr);
 
 #if !defined(GX_EXACT_800B884C_800B8AE8)
-void fn_800B857C(GXTexCoordID_800B857C dst_coord,
+void GXSetTexCoordGen2(GXTexCoordID_800B857C dst_coord,
                  GXTexGenType_800B857C func,
                  GXTexGenSrc_800B857C src_param, u32 mtx, u8 normalize,
                  u32 pt_texmtx)
@@ -943,7 +943,7 @@ typedef struct GXColor_800B9BDC {
     u8 a;
 } GXColor_800B9BDC;
 
-void fn_800B9BDC(GXColor_800B9BDC color, u32 clearZ) {
+void GXSetCopyClear(GXColor_800B9BDC color, u32 clearZ) {
     u32 reg;
     GXData_800B857C* p = gx;
 

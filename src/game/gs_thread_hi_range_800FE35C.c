@@ -48,12 +48,12 @@ extern void fn_800E0218(f32* mtx, f32* eye, f32* up, f32* target);
 extern void fn_800D9BD0(f32 fovy, f32 aspect, f32 nearZ, f32 farZ);
 extern void fn_800D834C(void);
 extern void fn_800D7FE4(f32* mtx);
-extern void fn_800DA4C4(s32 a, s32 b, s32 c);
-extern void fn_800D888C(u32 mask);
-extern void fn_800DA2BC(s32 a, s32 b, s32 c);
+extern void gfxSetBlendMode(s32 a, s32 b, s32 c);
+extern void gfxClearFlags(u32 mask);
+extern void gfxSetUpdates(s32 a, s32 b, s32 c);
 extern void fn_800DA100(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f);
-extern void fn_800DA1E8(s32 a, s32 b, s32 c);
-extern void fn_800DA028(s32 a);
+extern void gfxSetZMode(s32 a, s32 b, s32 c);
+extern void gfxSetCullMode(s32 a);
 extern void fn_800D9D68(u16 left, u16 top, u16 right, u16 bottom);
 
 void fn_800FE35C(void) {
@@ -115,12 +115,12 @@ void spriteSetEnv(void) {
     fn_800D9BD0(30.0f, -(width / height), 0.1f, 30000.0f);
     fn_800D834C();
     fn_800D7FE4(mtx);
-    fn_800DA4C4(1, 6, 7);
-    fn_800D888C(0x80000000);
-    fn_800DA2BC(2, 2, 1);
+    gfxSetBlendMode(1, 6, 7);
+    gfxClearFlags(0x80000000);
+    gfxSetUpdates(2, 2, 1);
     fn_800DA100(0, 7, 0, 1, 7, 0);
-    fn_800DA1E8(0, 2, 0);
-    fn_800DA028(0);
+    gfxSetZMode(0, 2, 0);
+    gfxSetCullMode(0);
 }
 
 void fn_800FE6A0(f32 x, f32 y) {

@@ -18,16 +18,16 @@ extern f32 lbl_8047BC94;
 extern f32 lbl_8047BCBC;
 
 extern u32 menuModelRender();
-extern u32 fn_800D59B8();
+extern u32 gfxVtxTexCoord();
 extern u32 fn_800D5CB8();
 extern u32 fn_800D61E4();
-extern u32 fn_800D6728();
-extern u32 fn_800D67BC();
-extern u32 fn_800D6A00();
-extern u32 fn_800D7820();
-extern u32 fn_800D85D4();
-extern u32 fn_800D888C();
-extern u32 fn_800D88DC();
+extern u32 gfxEnd();
+extern u32 gfxBegin();
+extern u32 gfxSetPrimitive();
+extern u32 gfxSetVtxDesc();
+extern u32 gfxLoadTexture();
+extern u32 gfxClearFlags();
+extern u32 gfxSetFlags();
 
 /* RULE-EXCEPTION(user-approved): local compiler-control pragma (peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma peephole off
@@ -76,36 +76,36 @@ void fn_800492CC(u8* context, PdaSprite* sprite)
     }
     alpha = lbl_8047BCA0 * *(f32*)((u8*)&lbl_803A6818 + 0x5C);
     if (firstTexture != 0) {
-        fn_800D88DC(3);
-        fn_800D888C(4);
-        fn_800D6A00(7);
-        fn_800D7820(lbl_80314F98);
-        fn_800D85D4(0, firstTexture);
-        fn_800D67BC(2);
+        gfxSetFlags(3);
+        gfxClearFlags(4);
+        gfxSetPrimitive(7);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxLoadTexture(0, firstTexture);
+        gfxBegin(2);
         fn_800D61E4(lbl_804788C8[0], lbl_804788C8[1]);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-        fn_800D59B8(0, lbl_8047BC94, lbl_8047BC94);
+        gfxVtxTexCoord(0, lbl_8047BC94, lbl_8047BC94);
         fn_800D61E4((s16)(lbl_804788C8[0] + (s16)sprite->x),
                      (s16)(lbl_804788C8[1] + (s16)sprite->y));
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-        fn_800D59B8(0, lbl_8047BCBC, lbl_8047BCBC);
-        fn_800D6728();
+        gfxVtxTexCoord(0, lbl_8047BCBC, lbl_8047BCBC);
+        gfxEnd();
     }
     if (secondTexture != 0) {
-        fn_800D88DC(3);
-        fn_800D888C(4);
-        fn_800D6A00(7);
-        fn_800D7820(lbl_80314F98);
-        fn_800D85D4(0, secondTexture);
-        fn_800D67BC(2);
+        gfxSetFlags(3);
+        gfxClearFlags(4);
+        gfxSetPrimitive(7);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxLoadTexture(0, secondTexture);
+        gfxBegin(2);
         fn_800D61E4(lbl_804788C8[0], lbl_804788C8[1]);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-        fn_800D59B8(0, lbl_8047BC94, lbl_8047BC94);
+        gfxVtxTexCoord(0, lbl_8047BC94, lbl_8047BC94);
         fn_800D61E4((s16)(lbl_804788C8[0] + (s16)sprite->x),
                      (s16)(lbl_804788C8[1] + (s16)sprite->y));
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-        fn_800D59B8(0, lbl_8047BCBC, lbl_8047BCBC);
-        fn_800D6728();
+        gfxVtxTexCoord(0, lbl_8047BCBC, lbl_8047BCBC);
+        gfxEnd();
     }
 }
 #pragma peephole reset

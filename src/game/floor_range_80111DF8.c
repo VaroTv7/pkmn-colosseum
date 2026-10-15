@@ -209,6 +209,6 @@ void fn_8011207C(u8* state, u32 stateSize) {
 }
 
 /* 0x80112260 | 0x120: XD floorMapSetDisp (0x8011E374) */
-void fn_80112260(u8 visible) {
+void floorSetMapVisibility(u8 visible) {
     floorMapResourceDataIterate(floorMapSetDispCB, (void*)visible);
 }

@@ -234,13 +234,13 @@ void floorCheckFade(void) {
 
 /* 0x80112780 | 0x3C */
 void fn_80112780(void) {
-    extern void fn_800F7434(void* callback, s32 arg, ...);
+    extern void cmsRunSync(void* callback, s32 arg, ...);
     GSFieldColqueryState* state = (GSFieldColqueryState*)lbl_80408378;
     void* callback;
 
     callback = (void*)state->transitionBeginCallback;
     if (callback != NULL) {
-        fn_800F7434(callback, 0);
+        cmsRunSync(callback, 0);
     }
 }
 
@@ -275,13 +275,13 @@ void fn_801127BC(void) {
 
 /* 0x80112844 | 0x48 */
 void fn_80112844(void) {
-    extern void fn_800F7434(void* callback, s32 arg, ...);
+    extern void cmsRunSync(void* callback, s32 arg, ...);
     GSFieldColqueryState* state = (GSFieldColqueryState*)lbl_80408378;
     void* callback;
 
     callback = (void*)state->transitionPollCallback;
     if (callback != NULL) {
-        fn_800F7434(callback, 0);
+        cmsRunSync(callback, 0);
         fn_800FF0A0(fn_80112844);
     }
 }
@@ -399,8 +399,8 @@ extern void GSmodelSetVisibility(void*, u32);
 extern void* GSmodelGetPart(void*, u32);
 extern void GSpartGetTransform(void*, void*, void*, void*);
 extern void GSpartFree(void*);
-extern void fn_801ED640(u32);
-extern void fn_801ED648(void*);
+extern void flareSetEnable(u32);
+extern void flareSetSunPos(void*);
 extern void msgctrlInitValue(void);
 extern void fn_801CBA84(void);
 
@@ -504,14 +504,14 @@ static inline void floorInitScene(FloorData* floor) {
         }
     }
 
-    fn_801ED640(0);
+    flareSetEnable(0);
     resId = floorDataBiosGetSunResID(floor);
     if (resId != 0) {
         part = GSmodelGetPart(GSresGetResource(floorGetCurrentGroupID(), resId), 0);
         if (part != NULL) {
             GSpartGetTransform(part, sunTransform, NULL, NULL);
-            fn_801ED648(sunTransform);
-            fn_801ED640(1);
+            flareSetSunPos(sunTransform);
+            flareSetEnable(1);
             GSpartFree(part);
         }
     }
@@ -519,12 +519,12 @@ static inline void floorInitScene(FloorData* floor) {
 
 /* 0x801129CC | 0x5C0 */
 void floorResolveEntryPosition(FloorData* floor) {
-    extern void fn_80117E58(FloorData*);
+    extern void tvInitFloor(FloorData*);
     extern void GSmodelSetShadowBoundExpansion(u32, u32);
     extern void GSmaterialSetDistanceThreshold(f32);
     extern void GSmodelSetShadowTextureSize(u32, u32);
     extern void* fn_80115960(FloorData*);
-    extern void fn_800F7434(void* callback, s32 arg, ...);
+    extern void cmsRunSync(void* callback, s32 arg, ...);
     extern u32 floorGetCurrentContext(void);
     extern u32 fn_801158D0(FloorData*);
     extern u32 fn_80115918(FloorData*);
@@ -555,7 +555,7 @@ void floorResolveEntryPosition(FloorData* floor) {
 
     floorEnterReset();
     floorInitScene(floor);
-    fn_80117E58(floor);
+    tvInitFloor(floor);
 
     switch (floorDataBiosGetFloorKind(floor)) {
     case 1:
@@ -586,7 +586,7 @@ void floorResolveEntryPosition(FloorData* floor) {
     }
 
     if ((script = fn_80115960(floor)) != NULL) {
-        fn_800F7434(script, 0);
+        cmsRunSync(script, 0);
     }
     task = floorGetCurrentContext();
     if (fn_800FF548() == 0) {
@@ -669,7 +669,7 @@ void fn_80112FEC(FloorData* floor)
     } FloorObjectEntry;
     extern u8 fn_800FF548(void);
     extern void* peopleOpen(u32, u32, u32);
-    extern void* fn_8018D998(u32, u32);
+    extern void* peopleIsInGroup(u32, u32);
     extern void set__5GSvecFfff(void*, f32, f32, f32);
     extern void peopleSetPositionByIndex(u32, u32, void*);
     extern void peopleSetRotation(u32, u32, void*);
@@ -678,7 +678,7 @@ void fn_80112FEC(FloorData* floor)
     extern void peopleSetVisible(u32, u32, s32);
     extern void* GSresGetResource(u32, u32);
     extern void GSmodelClearShadowFlags(void*, u32);
-    extern u8 fn_801902E0(u16);
+    extern u8 std081_flagCheckTrue(u16);
     extern void floorEventCtrlTresure(u32, u32, u32);
     extern void fn_801837D8(u32, u32, s32, u32, s32);
     extern u32* lbl_80478EB8;
@@ -719,7 +719,7 @@ void fn_80112FEC(FloorData* floor)
         if (fn_800FF548() == 0) {
             object = peopleOpen(group, resourceId, peopleInfo);
         } else {
-            object = fn_8018D998(group, resourceId);
+            object = peopleIsInGroup(group, resourceId);
         }
         if (object == NULL || fn_800FF548() == 1) {
             continue;
@@ -740,12 +740,12 @@ void fn_80112FEC(FloorData* floor)
             }
         }
         if (entry->eventFlag != 0) {
-            if (fn_801902E0(entry->eventFlag)) {
+            if (std081_flagCheckTrue(entry->eventFlag)) {
                 floorEventCtrlTresure(group, resourceId, 0);
             } else {
                 floorEventCtrlTresure(group, resourceId, 1);
                 if (entry->hideFlag != 0) {
-                    if (!fn_801902E0(entry->hideFlag)) {
+                    if (!std081_flagCheckTrue(entry->hideFlag)) {
                         peopleSetVisible(group, resourceId, 0);
                     }
                     fn_801837D8(group, resourceId, 0x0596000A,
@@ -759,12 +759,12 @@ void fn_80112FEC(FloorData* floor)
 /* 0x80113248 | 0x29C */
 void _floorInitCharacters__FP11GSfloor_dd_(FloorData* floor) {
     extern u32 floorDataBiosGetCharNum(FloorData* floor);
-    extern u8* fn_8011711C(u32 i);
+    extern u8* floorCharacterBiosGetByIndex(u32 i);
     extern void* floorCharacterBiosGetPeopleInfoPtr(u8* obj);
     extern u32 fn_8018F6B4(void* info);
     extern u8 fn_800FF548(void);
     extern u32 peopleOpen(u32 model, u32 i, s32 x);
-    extern u32 fn_8018D998(u32 model, u32 i);
+    extern u32 peopleIsInGroup(u32 model, u32 i);
     extern s32 fn_80183958(u32 model, u32 i);
     extern void fn_801837D8(u32 model, u32 i, s32 a, u32 b, s32 c);
     extern void peopleSetFlagsByIndex(u32 model, u32 i, s32 flag);
@@ -776,14 +776,14 @@ void _floorInitCharacters__FP11GSfloor_dd_(FloorData* floor) {
     extern s32 floorCharacterBiosGetVisibility(u8* obj);
     extern void peopleSetVisible(u32 model, u32 i, s32 x);
     extern s32 floorCharacterBiosGetLoadInit(u8* obj);
-    extern void fn_8018CA20(u32 model, u32 i, s32 x);
+    extern void std151_characterFaceDirection(u32 model, u32 i, s32 x);
     extern u8 floorCharacterBiosGetMoveType(u8* obj);
     extern void fn_80183B44(u32 model, u32 i, f32 x);
     extern void fn_801839A0(u32 model, u32 i, f32 x, f32 y);
     extern u8 floorCharacterBiosGetTalkStartType(u8* obj);
     extern u8 floorCharacterBiosGetTalkEndType(u8* obj);
     extern void peopleClearFlagsByIndex(u32 model, u32 i, s32 flag);
-    extern void fn_80188F78(u32 model, u32 i);
+    extern void std065_characterLookAtPlayer(u32 model, u32 i);
     extern const char lbl_8035B888[];
     u32 model;
     u32 count;
@@ -796,12 +796,12 @@ void _floorInitCharacters__FP11GSfloor_dd_(FloorData* floor) {
     model = floorDataBiosGetGroupID(floor);
     count = floorDataBiosGetCharNum(floor);
     for (i = 0; i < count; i++) {
-        obj = fn_8011711C(i);
+        obj = floorCharacterBiosGetByIndex(i);
         result = fn_8018F6B4(floorCharacterBiosGetPeopleInfoPtr(obj));
         if (fn_800FF548() == 0) {
             result = peopleOpen(model, i, result);
         } else {
-            result = fn_8018D998(model, i);
+            result = peopleIsInGroup(model, i);
         }
         if (result == 0) {
             GSlogWrite("Error! [%s] 人の初期化に失敗\n", lbl_8035B888);
@@ -820,7 +820,7 @@ void _floorInitCharacters__FP11GSfloor_dd_(FloorData* floor) {
             peopleSetRotation(model, i, v8);
             fn_8018CB5C(model, i);
             peopleSetVisible(model, i, floorCharacterBiosGetVisibility(obj));
-            fn_8018CA20(model, i, floorCharacterBiosGetLoadInit(obj));
+            std151_characterFaceDirection(model, i, floorCharacterBiosGetLoadInit(obj));
             switch (floorCharacterBiosGetMoveType(obj)) {
             case 0:
             case 1:
@@ -851,7 +851,7 @@ void _floorInitCharacters__FP11GSfloor_dd_(FloorData* floor) {
                 break;
             }
             if (((u32)((*obj >> 5) & 1)) != 0U) {
-                fn_80188F78(model, i);
+                std065_characterLookAtPlayer(model, i);
             }
         }
     }
@@ -871,7 +871,7 @@ void floorInitMap(u32 group, u32 floorId)
     extern u32 _floorUnloadModel__FPvUlUl(u32);
     extern void GSmodelSetVisibility(void*, u32);
     extern s32 fn_800057A0(void);
-    extern u32 fn_800FF56C(void);
+    extern u32 std092_getCurrentRoomID(void);
     extern u8 GSmodelCanAnimate(void*);
     extern void GSmodelLinkTexAnimToAnim(void*, u32);
     extern void GSmodelSetTexAnimRate(void*, f32);
@@ -881,7 +881,7 @@ void floorInitMap(u32 group, u32 floorId)
     extern void GSlightSetAnimRate(void*, f32);
     extern void GSlightStartAnimation(void*);
     extern void cameraSetGScamera(void*);
-    extern void fn_800D2B90(void*);
+    extern void gfxSetFog(void*);
     extern const char lbl_8035B878[];
     u32 resourceId;
     void* object;
@@ -920,7 +920,7 @@ void floorInitMap(u32 group, u32 floorId)
             GSmodelSetVisibility(object, 0);
 
             if (fn_800057A0() == 1) {
-                switch (fn_800FF56C()) {
+                switch (std092_getCurrentRoomID()) {
                 case 3:
                 case 0xB:
                 case 0xC:
@@ -967,12 +967,12 @@ void floorInitMap(u32 group, u32 floorId)
         cameraSetGScamera(camera);
     }
     fogId = floorReadMakeFogResID(floorId);
-    fn_800D2B90(GSresGetResource(group, fogId));
+    gfxSetFog(GSresGetResource(group, fogId));
 }
 
 /* 0x80113778 | 0xB0 */
 void floorChangePos(u32 floorId, s16 direction, f32 x, f32 y, f32 z) {
-    extern u32 fn_800FF56C(void);
+    extern u32 std092_getCurrentRoomID(void);
     extern void floorRequestChange(u32);
     if (floorId == 0) {
         return;
@@ -980,7 +980,7 @@ void floorChangePos(u32 floorId, s16 direction, f32 x, f32 y, f32 z) {
     set__5GSvecFfff((void*)(lbl_80408378 + 0x10), x, y, z);
     set__5GSvecFfff((void*)(lbl_80408378 + 0x1C), 0.0f,
                     0.017453292f * direction, 0.0f);
-    *(u32*)(lbl_80408378 + 0x0) = fn_800FF56C();
+    *(u32*)(lbl_80408378 + 0x0) = std092_getCurrentRoomID();
     *(u32*)(lbl_80408378 + 0x4) = floorId;
     *(u8*)(lbl_80408378 + 0x8) = 0;
     floorRequestChange(floorId);
@@ -988,11 +988,11 @@ void floorChangePos(u32 floorId, s16 direction, f32 x, f32 y, f32 z) {
 
 /* 0x80113828 | 0x64 */
 void floorLink(u32 arg0, s32 arg1) {
-    extern u32 fn_800FF56C(void);
+    extern u32 std092_getCurrentRoomID(void);
     extern void floorRequestChange(s32);
 
     if (arg0 != 0) {
-        *(u32*)(lbl_80408378 + 0x0) = fn_800FF56C();
+        *(u32*)(lbl_80408378 + 0x0) = std092_getCurrentRoomID();
         *(s32*)(lbl_80408378 + 0x4) = arg0;
         *(u8*)(lbl_80408378 + 0x8) = 1;
         *(s32*)(lbl_80408378 + 0xC) = arg1;
@@ -1003,15 +1003,15 @@ void floorLink(u32 arg0, s32 arg1) {
 /* 0x8011388C | 0xA0 */
 void floorLinkWithSE(void* a, void* b, s32 c) {
     extern u8 lbl_80408378[];
-    extern u32 fn_800FF56C(void);
-    extern void fn_80166A28(u32);
+    extern u32 std092_getCurrentRoomID(void);
+    extern void soundStartSE(u32);
     extern void floorRequestChange(void*);
     u32 sndId;
 
     if (a == NULL) {
         return;
     }
-    *(u32*)(lbl_80408378 + 0x0) = fn_800FF56C();
+    *(u32*)(lbl_80408378 + 0x0) = std092_getCurrentRoomID();
     *(void**)(lbl_80408378 + 0x4) = a;
     *(u8*)(lbl_80408378 + 0x8) = 1;
     *(void**)(lbl_80408378 + 0xC) = b;
@@ -1025,7 +1025,7 @@ void floorLinkWithSE(void* a, void* b, s32 c) {
         break;
     }
     if (sndId != 0) {
-        fn_80166A28(sndId);
+        soundStartSE(sndId);
     }
     floorRequestChange(a);
 }
@@ -1070,11 +1070,11 @@ s32 fn_8011396C(s32 param) {
 
 /* 0x801139BC | 0x50 */
 void fn_801139BC(void) {
-    extern void fn_8018B76C(s32, s32, s32, s32, s32);
+    extern void std051_characterSetAnimation(s32, s32, s32, s32, s32);
     extern void fn_80117154(void);
 
-    fn_8018B76C(0, 0x64, 1, 0, 1);
-    fn_8018B76C(0, 0x65, 1, 0, 1);
+    std051_characterSetAnimation(0, 0x64, 1, 0, 1);
+    std051_characterSetAnimation(0, 0x65, 1, 0, 1);
     fn_80117154();
 }
 
@@ -1087,7 +1087,7 @@ void _floorUpdate__FUi14FloorEnterMode(u32 floorId, s32 enterMode) {
     } FloorEventLog;
     extern u8* GSresGetResource(u32, u32);
     extern void fn_801171C8(void);
-    extern void fn_80117D14(void);
+    extern void tvRender(void);
     extern void cameraUpdate(void);
     extern void fn_8010D8D4(s32);
     extern void fn_800D9ED8(s32);
@@ -1100,7 +1100,7 @@ void _floorUpdate__FUi14FloorEnterMode(u32 floorId, s32 enterMode) {
     FloorEventLog* entry;
 
     fn_801171C8();
-    fn_80117D14();
+    tvRender();
     cameraUpdate();
     /* Debug overlay: resource (0, 2) holds the on/off flag. */
     debug = GSresGetResource(0, 2);
@@ -1140,7 +1140,7 @@ typedef struct FloorDoorEntry {
     /* 0x10 */ u8 pad10[8];
 } FloorDoorEntry;
 
-extern u8 fn_801902E0(u16);
+extern u8 std081_flagCheckTrue(u16);
 extern void floorEventCtrlDoor(u32, u32, u32);
 extern FloorDoorEntry* lbl_80478ECC;
 extern u32* lbl_80478EC8;
@@ -1169,7 +1169,7 @@ static inline void floorInitDoors(FloorData* floor) {
         switch (door->type) {
         case 1:
         case 3:
-            if (fn_801902E0(door->openFlag)) {
+            if (std081_flagCheckTrue(door->openFlag)) {
                 floorEventCtrlDoor(floor->floorId, i, 1);
             } else {
                 floorEventCtrlDoor(floor->floorId, i, 3);
@@ -1307,7 +1307,7 @@ void* floorOpenObject(u32 modelIndex) {
 }
 
 /* 0x80113F48 | 0x24 */
-u32 fn_80113F48(void) {
+u32 std093_getCurrentGroupID(void) {
     return floorDataBiosGetGroupID(floorDataBiosGetCurrentPtr());
 }
 
@@ -1338,7 +1338,7 @@ u32 fn_80113FB4(u32 key) {
 void fn_80113FE8(void) {
     extern u8 lbl_80408378[];
     extern u32 gamedatasaveGetStatus(s32, s32);
-    extern u32 fn_800FF56C(void);
+    extern u32 std092_getCurrentRoomID(void);
     extern void floorRequestChange(u32);
     u8* state = lbl_80408378;
     u32 a;
@@ -1355,7 +1355,7 @@ void fn_80113FE8(void) {
         c = (u8)gamedatasaveGetStatus(0, 8);
     }
     if (a != 0) {
-        *(u32*)(lbl_80408378 + 0x0) = fn_800FF56C();
+        *(u32*)(lbl_80408378 + 0x0) = std092_getCurrentRoomID();
         *(u32*)(lbl_80408378 + 0x4) = a;
         *(u8*)(lbl_80408378 + 0x8) = 1;
         *(u32*)(lbl_80408378 + 0xC) = c;
@@ -1366,6 +1366,6 @@ void fn_80113FE8(void) {
 }
 
 /* 0x801140C8 | 0x14 */
-void fn_801140C8(void) {
+void std162_fieldClearPending(void) {
     *(u8*)(lbl_80408378 + 0x51) = 0;
 }

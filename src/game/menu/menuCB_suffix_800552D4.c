@@ -164,22 +164,22 @@ extern void* heroGetStatus(void* hero, s32 selector, u16 index);
 extern u8 pokemonCheckValid(void* pokemon);
 extern s32 fn_80057DE8(void* pokemon);
 extern void* fn_80057F94(void* pokemon);
-extern void fn_800D88DC(u32 flags);
+extern void gfxSetFlags(u32 flags);
 extern void fn_800DC0D4(s32, s32, s32, s32, s32);
 extern void fn_800DC14C(s32, s32, s32, s32, s32, s32);
 extern void fn_800DBFD4(s32, s32, s32, s32, s32);
 extern void fn_800DC04C(s32, s32, s32, s32, s32, s32);
 extern u16 GStextureGetXsize(void* texture);
 extern u16 GStextureGetYsize(void* texture);
-extern void fn_800D7820(void* resource);
-extern void fn_800D85D4(s32 slot, void* texture);
-extern void fn_800D6A00(s32 mode);
-extern void fn_800D67BC(s32 mode);
+extern void gfxSetVtxDesc(void* resource);
+extern void gfxLoadTexture(s32 slot, void* texture);
+extern void gfxSetPrimitive(s32 mode);
+extern void gfxBegin(s32 mode);
 extern void fn_800D61E4(s16 x, s16 y);
 extern void fn_800D5CB8(s32, s32, s32, s32, s32);
-extern void fn_800D59B8(s32 slot, f32 xScale, f32 yScale);
-extern void fn_800D6728(void);
-extern void fn_800D888C(u32 flags);
+extern void gfxVtxTexCoord(s32 slot, f32 xScale, f32 yScale);
+extern void gfxEnd(void);
+extern void gfxClearFlags(u32 flags);
 extern void* menuSpriteBiosGetPtr(s32 id);
 extern void windowDrawSprite2(s32, s32, s16, s16, s32, void*, s32, s32);
 s32 fn_800576B4(void);
@@ -489,7 +489,7 @@ static inline void fn_800558B8_rebuild(void) {
 
 void fn_800558B8(void)
 {
-    extern void fn_80166A50(s32, s32, s32, s32);
+    extern void soundStart(s32, s32, s32, s32);
     extern s32 fn_800576B4(void);
     extern void fn_80058804(void*, s32);
     extern s32 fn_8005D3D0(s32);
@@ -519,7 +519,7 @@ void fn_800558B8(void)
     selectedSlot = 0;
     selectedSlotPtr = &selectedSlot;
     lbl_8047A560 = 0;
-    fn_80166A50(0x27, 0, 0xFF, 0);
+    soundStart(0x27, 0, 0xFF, 0);
 
     for (;;) {
         selection = menuOpenCustom(0x93, 0x10E, (s32)selectedSlotPtr, 0, 1, 0);
@@ -586,7 +586,7 @@ void fn_800558B8(void)
         }
     }
 
-    fn_80166A50(0x28, 0, 0xFF, 0);
+    soundStart(0x28, 0, 0xFF, 0);
     menuCloseCustom(0x93, 2, 0);
     menuCloseSync(0x93, 1);
 }

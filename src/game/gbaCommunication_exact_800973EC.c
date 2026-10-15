@@ -262,7 +262,7 @@ s32 fn_80097A38(u32 arg0, u16 arg1) {
     *(u32*)(lbl_803FB380 + 0x10) = 0;
     *(u32*)(lbl_803FB380 + 0x14) = 0;
     *(s32*)(lbl_803FB380 + 0x4) = -1;
-    fn_800FF730(0x39d);
+    std098_mapWarpToMenuRoom(0x39d);
     if (lbl_803FB380[0] & 8) {
         floorSetFadeScript(0, 0);
     }
@@ -323,7 +323,7 @@ s32 fn_80097BBC(u8 chan) {
     *(u32*)(lbl_803FB380 + 0x10) = 0;
     *(u32*)(lbl_803FB380 + 0x14) = 0;
     *(u32*)(lbl_803FB380 + 0x4) = -1;
-    fn_800FF730(0x39d);
+    std098_mapWarpToMenuRoom(0x39d);
     if (lbl_803FB380[0] & 8) {
         floorSetFadeScript(0, 0);
     }
@@ -417,8 +417,8 @@ void fn_80097FCC(void) {
 
 /* 0x80097FD0 | size: 0x28 */
 void fn_80097FD0(void) {
-    extern int fn_80113F48();
-    GSresGetResource(fn_80113F48(), 0x12670000);
+    extern int std093_getCurrentGroupID();
+    GSresGetResource(std093_getCurrentGroupID(), 0x12670000);
 }
 
 /* 0x80097FF8 | size: 0x4 */

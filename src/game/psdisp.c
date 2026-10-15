@@ -66,8 +66,8 @@
 
 typedef enum GXAttnFn { GX_AF_SPEC = 0, GX_AF_SPOT = 1, GX_AF_NONE = 2 } GXAttnFn;
 
-extern void fn_800BA4C8(s32 chan, GXColor color); /* GXSetChanAmbColor */
-extern void fn_800BA5BC(s32 chan, GXColor color); /* GXSetChanMatColor */
+extern void GXSetChanAmbColor(s32 chan, GXColor color); /* GXSetChanAmbColor */
+extern void GXSetChanMatColor(s32 chan, GXColor color); /* GXSetChanMatColor */
 extern void fn_800BC2F8(s32 reg, GXColor color);  /* GXSetTevColor */
 extern void HSD_MulColor(GXColor* a, GXColor* b, GXColor* dst);
 extern void fn_800B7D3C(void);                              /* GXClearVtxDesc */
@@ -115,11 +115,11 @@ extern void fn_800B94F0(s32 mode);                           /* GXSetCullMode */
 extern void fn_800B84E0(s32 attr, void* base, u8 stride);    /* GXSetArray */
 extern void fn_800B7D74(s32 fmt, s32 attr, s32 cnt, s32 type, u8 frac); /* GXSetVtxAttrFmt */
 extern void fn_800BC618(s32 comp0, u8 ref0, s32 op, s32 comp1, u8 ref1); /* GXSetAlphaCompare */
-extern void fn_800BA6B0(u8 num);                             /* GXSetNumChans */
-extern void fn_800BA6F4(s32 chan, u8 enable, s32 amb_src, s32 mat_src,
+extern void GXSetNumChans(u8 num);                             /* GXSetNumChans */
+extern void GXSetChanCtrl(s32 chan, u8 enable, s32 amb_src, s32 mat_src,
                         u32 light_mask, s32 diff_fn, GXAttnFn attn_fn); /* GXSetChanCtrl */
 extern void fn_800BCEBC(u8 before_tex);                      /* GXSetZCompLoc */
-extern void fn_800B857C(u32 dst_coord, u32 func, u32 src_param, u32 mtx,
+extern void GXSetTexCoordGen2(u32 dst_coord, u32 func, u32 src_param, u32 mtx,
                         u8 normalize, u32 pt_texmtx);        /* GXSetTexCoordGen2 */
 extern void fn_800BA9E4(GXTexObj* obj, void* image, u16 width, u16 height,
                         u32 format, u32 wrap_s, u32 wrap_t, u8 mipmap); /* GXInitTexObj */
@@ -138,10 +138,7 @@ extern void fn_801B25C4(u32 state);                          /* HSD_StateInvalid
 #define GXSetArray fn_800B84E0
 #define GXSetVtxAttrFmt fn_800B7D74
 #define GXSetAlphaCompare fn_800BC618
-#define GXSetNumChans fn_800BA6B0
-#define GXSetChanCtrl fn_800BA6F4
 #define GXSetZCompLoc fn_800BCEBC
-#define GXSetTexCoordGen2 fn_800B857C
 #define GXInitTexObj fn_800BA9E4
 #define GXInitTexObjLOD fn_800BACA0
 #define GXInitTlutObj fn_800BB050
@@ -158,8 +155,6 @@ extern HSD_PSTexGroup** lbl_804529C8[PS_NUM_BANK];  /* particle.c: texture group
 #define GXSetCurrentMtx fn_800BD554
 #define GXSetPointSize fn_800B944C
 
-#define GXSetChanAmbColor fn_800BA4C8
-#define GXSetChanMatColor fn_800BA5BC
 #define GXSetTevColor fn_800BC2F8
 
 #define GX_COLOR0 0
@@ -1289,7 +1284,7 @@ static inline void psSetupVtxFormat(s32 fmt, BOOL has_color, BOOL has_texture,
 }
 
 /* psDispParticles */
-void fn_8016AB94(u32 target_link, u32 sw)
+void psDispMain(u32 target_link, u32 sw)
 {
     u32 prev_zmode;
     HSD_Particle* pp;

@@ -23,8 +23,8 @@ extern void fn_801EF8F4();
 
 /* Sound functions */
 extern void soundStop();     /* Stop sound */
-extern void fn_80165A20();     /* Fade out music */
-extern void fn_801659FC();     /* Start BGM */
+extern void std104_soundSetBackgroundMusic();     /* Fade out music */
+extern void std105_soundPlayEffect();     /* Start BGM */
 
 /* SDA2 float constants used by asm wrappers */
 extern f32 lbl_8047E678;
@@ -83,7 +83,7 @@ u32 _fightMenuFightTrainerGcHeroOpenMenuSubBallSelectTargetPokemon__FP15FightOut
     extern int menuFightOpenTarget();
     extern int winMsgCloseFight();
     extern int winMsgOpenFight();
-    extern int fn_801906A0();
+    extern int std082_flagGetValue();
     extern int fightMainWaitFrame();
   u16 uVar4;
   u32 uVar1;
@@ -185,7 +185,7 @@ LAB_00261ccc:
       fightOutPokemonGetPokemonPtr(uVar1);
       cVar6 = pokemonIsDarkPokemon();
       if (cVar6 == '\0') {
-        uVar3 = fn_801906A0(0x99f);
+        uVar3 = std082_flagGetValue(0x99f);
         if (uVar3 == 0) {
           winMsgOpenFight(0x7716,1,1);
         }

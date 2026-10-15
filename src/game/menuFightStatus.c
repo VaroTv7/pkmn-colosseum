@@ -51,7 +51,7 @@ extern void  winMsgClose(s32 slot);                   /* Close message box */
 extern u8    fn_801F18DC(s32 controller);             /* Check input ready */
 extern u8    fightFloorIsUseFightTimerCommand(s32 controller);             /* Check button pressed */
 extern u8    fightTimerCommandIsOver(void);                       /* Check A button */
-extern u16   fn_801EF634(void);                       /* Get input state */
+extern u16   std103_battleGetResult(void);                       /* Get input state */
 extern void  _threadSwitch(void);                       /* Frame advance */
 extern u32   fn_800F7AF0(s32 slot);                   /* Get render flags */
 extern u32   fn_800F7BC4(s32 slot);                   /* Get VSync flags */
@@ -87,7 +87,7 @@ u32 menuFightStatusWaitAnimeEXP(u32 arg1, u8 arg2) {
 
 /* 0x80011BC4 | 0xB4 */
 extern u8* windowGetAllocPtr();
-extern void fn_80166A28(u32 val);
+extern void soundStartSE(u32 val);
 #if 0
 asm void menuFightStatusStartAnimEXP(void) {
 #include "src/game/gs_npc_interact_fn_80011BC4.inc"
@@ -114,7 +114,7 @@ void menuFightStatusStartAnimEXP(u32 arg1, u32 target) {
     *(u32*)(data + 0x8) = *(u32*)(state + 0x20);
     *(u32*)(state + 0x20) = target;
     *(s16*)(data + 0xe) = 0;
-    fn_80166A28(0x4d0);
+    soundStartSE(0x4d0);
 }
 #endif
 

@@ -4,7 +4,7 @@
  */
 #include "game/gs_range_801653CC_shared.h"
 
-void fn_80166D48(u32 volume, u32 fade, u32 includeBgm, u32 includeSe)
+void soundMasterVolume(u32 volume, u32 fade, u32 includeBgm, u32 includeSe)
 {
     extern u8 _sndSetVolumeWork(u32, u8);
     u32 offset;

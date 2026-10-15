@@ -10,7 +10,7 @@ typedef struct MenuCBEntryPort {
     s32 enabled;
 } MenuCBEntryPort;
 
-extern void fn_80165A20(s32, s32, s32);
+extern void std104_soundSetBackgroundMusic(s32, s32, s32);
 extern void* memcpy(void*, const void*, u32);
 extern MenuCBEntryPort* fn_8006B09C(s32);
 extern void* fn_8006A814(MenuCBEntryPort*);
@@ -148,7 +148,7 @@ s32 fn_80063D14(void* work)
     void* command;
 
     keepRunning = 1;
-    fn_80165A20(0x1E, 0, 0xFF);
+    std104_soundSetBackgroundMusic(0x1E, 0, 0xFF);
     memcpy(((MenuCBEntryWork*)lbl_803A9F08)->copy, work, 0xCC2C);
 
     battleType = toolentryTaisenGetBattleType();

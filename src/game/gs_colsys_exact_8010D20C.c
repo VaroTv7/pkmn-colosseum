@@ -81,21 +81,21 @@ typedef struct ColDrawScene {
 
 
 extern ColDrawScene* fn_8010CBC0(void);
-extern void fn_800DA028(s32);
-extern void fn_800D7820(void*);
-extern void fn_800D88DC(s32);
-extern void fn_800D888C(s32);
-extern void fn_800DA4C4(s32, s32, s32);
-extern void fn_800DA1E8(s32, s32, s32);
+extern void gfxSetCullMode(s32);
+extern void gfxSetVtxDesc(void*);
+extern void gfxSetFlags(s32);
+extern void gfxClearFlags(s32);
+extern void gfxSetBlendMode(s32, s32, s32);
+extern void gfxSetZMode(s32, s32, s32);
 extern void fn_800D9ED8(s32);
 extern void fn_8010CA30(ColMtx out, u32 index);
 extern void fn_8010C8D0(ColMtx out, u32 index);
 extern void PSMTXMultVec(ColMtx, const f32*, f32*);
-extern void fn_800D6A00(s32);
-extern void fn_800D67BC(s32);
-extern void fn_800D6680(f32, f32, f32);
+extern void gfxSetPrimitive(s32);
+extern void gfxBegin(s32);
+extern void gfxVtxPos(f32, f32, f32);
 extern void fn_800D5CB8(s32, s32, s32, s32, s32);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 extern void* GScolsys2Draw(void);
 extern void GSgfxDLDraw(void*);
 extern void fn_800D30AC(void);
@@ -119,7 +119,7 @@ void fn_8010D20C(ColTriGroup* group, ColMtx matrix, ColMtx normalMatrix)
     GXColor color;
     Vec3f pos;
 
-    fn_800D6A00(3);
+    gfxSetPrimitive(3);
     tri = group->tris;
     for (i = 0; i < group->count; i++, tri++) {
         memset(&color, 0, sizeof(color));
@@ -137,13 +137,13 @@ void fn_8010D20C(ColTriGroup* group, ColMtx matrix, ColMtx normalMatrix)
             color.r = layer * 4 + 0xC0;
         }
 
-        fn_800D67BC(3);
+        gfxBegin(3);
         for (v = 0; v < 3; v++) {
             PSMTXMultVec(matrix, &tri->verts[v].x, &pos.x);
-            fn_800D6680(pos.x, pos.y, pos.z);
+            gfxVtxPos(pos.x, pos.y, pos.z);
             fn_800D5CB8(0, color.r, color.g, color.b, color.a);
         }
-        fn_800D6728();
+        gfxEnd();
     }
 }
 
@@ -165,20 +165,20 @@ static inline void drawHitMdl(ColDrawGroup* head, ColMtx matrix)
             PSMTXMultVec(matrix, *(ColVec3*)(element + vertex * 12),
                          transformed[vertex]);
         }
-        fn_800D6A00(1);
+        gfxSetPrimitive(1);
         for (vertex = 0; vertex < 3; vertex++) {
             next = vertex + 1;
             if (next >= 3) {
                 next = 0;
             }
-            fn_800D67BC(2);
-            fn_800D6680(transformed[vertex][0], transformed[vertex][1],
+            gfxBegin(2);
+            gfxVtxPos(transformed[vertex][0], transformed[vertex][1],
                         transformed[vertex][2]);
             fn_800D5CB8(0, color.r, color.g, color.b, color.a);
-            fn_800D6680(transformed[next][0], transformed[next][1],
+            gfxVtxPos(transformed[next][0], transformed[next][1],
                         transformed[next][2]);
             fn_800D5CB8(0, color.r, color.g, color.b, color.a);
-            fn_800D6728();
+            gfxEnd();
         }
     }
 }
@@ -193,16 +193,16 @@ static inline void drawSunMdl(ColDrawGroup* head, ColMtx matrix)
 
     color = lbl_8047CEBC;
     element = head->data;
-    fn_800D6A00(3);
+    gfxSetPrimitive(3);
     for (i = 0; i < head->count; i++, element += 0x34) {
-        fn_800D67BC(3);
+        gfxBegin(3);
         for (vertex = 0; vertex < 3; vertex++) {
             PSMTXMultVec(matrix, *(ColVec3*)(element + vertex * 12),
                          transformed);
-            fn_800D6680(transformed[0], transformed[1], transformed[2]);
+            gfxVtxPos(transformed[0], transformed[1], transformed[2]);
             fn_800D5CB8(0, color.r, color.g, color.b, color.a);
         }
-        fn_800D6728();
+        gfxEnd();
     }
 }
 
@@ -216,16 +216,16 @@ static inline void drawCheckMdl(ColDrawGroup* head, ColMtx matrix)
 
     color = lbl_8047CEC0;
     element = head->data;
-    fn_800D6A00(3);
+    gfxSetPrimitive(3);
     for (i = 0; i < head->count; i++, element += 0x34) {
-        fn_800D67BC(3);
+        gfxBegin(3);
         for (vertex = 0; vertex < 3; vertex++) {
             PSMTXMultVec(matrix, *(ColVec3*)(element + vertex * 12),
                          transformed);
-            fn_800D6680(transformed[0], transformed[1], transformed[2]);
+            gfxVtxPos(transformed[0], transformed[1], transformed[2]);
             fn_800D5CB8(0, color.r, color.g, color.b, color.a);
         }
-        fn_800D6728();
+        gfxEnd();
     }
 }
 
@@ -239,16 +239,16 @@ static inline void drawThruMdl(ColDrawGroup* head, ColMtx matrix)
 
     color = lbl_8047CEC4;
     element = head->data;
-    fn_800D6A00(3);
+    gfxSetPrimitive(3);
     for (i = 0; i < head->count; i++, element += 0x30) {
-        fn_800D67BC(3);
+        gfxBegin(3);
         for (vertex = 0; vertex < 3; vertex++) {
             PSMTXMultVec(matrix, *(ColVec3*)(element + vertex * 12),
                          transformed);
-            fn_800D6680(transformed[0], transformed[1], transformed[2]);
+            gfxVtxPos(transformed[0], transformed[1], transformed[2]);
             fn_800D5CB8(0, color.r, color.g, color.b, color.a);
         }
-        fn_800D6728();
+        gfxEnd();
     }
 }
 
@@ -270,12 +270,12 @@ void* GScolsys2Draw(void)
         return NULL;
     }
 
-    fn_800DA028(1);
-    fn_800D7820(*(void**)((u8*)&lbl_80404C68 + 0x3708));
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800DA4C4(1, 6, 7);
-    fn_800DA1E8(1, 2, 1);
+    gfxSetCullMode(1);
+    gfxSetVtxDesc(*(void**)((u8*)&lbl_80404C68 + 0x3708));
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetBlendMode(1, 6, 7);
+    gfxSetZMode(1, 2, 1);
     fn_800D9ED8(0);
 
     if (GSgfxDLBegin(*(void**)((u8*)&lbl_80404C68 + 0x3708), 0x80000) == 0) {
@@ -329,12 +329,12 @@ void fn_8010D8D4(void)
         return;
     }
 
-    fn_800DA028(1);
-    fn_800D7820((void*)lbl_80404C68.gfxRenderHandle);
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800DA4C4(1, 6, 7);
-    fn_800DA1E8(1, 2, 1);
+    gfxSetCullMode(1);
+    gfxSetVtxDesc((void*)lbl_80404C68.gfxRenderHandle);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetBlendMode(1, 6, 7);
+    gfxSetZMode(1, 2, 1);
     fn_800D9ED8(0);
 
     object = scene->objects;

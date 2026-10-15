@@ -24,32 +24,32 @@ extern void* memset(void* dst, int val, u32 size);
 extern void DCFlushRange(void* addr, u32 size);
 extern u64 OSGetTime(void);
 extern void fn_800D3EC4(s32, f32, f32, f32, f32, f32, f32);
-extern void fn_800D4F98(u32, u32, ...);
-extern void fn_800D67BC(u16);
-extern void fn_800D892C(u32);
+extern void gfxRecordCommand(u32, u32, ...);
+extern void gfxBegin(u16);
+extern void gfxSetupChannelsTev(u32);
 extern u32 OSGetTick(void);
 extern void fn_801E17A8(void);
 extern void fn_801B25C4(u32);
 extern s32 HSD_CObjSetCurrent(void*);
 extern void GSlightSetupLights(void*);
 extern void GSmodelDrawAll(u32, u32);
-extern void fn_80118104(u32, u32);
+extern void gsParticleDraw(u32, u32);
 extern void fn_80195A48(void);
 extern void fn_800D87AC(s32);
-extern u32* fn_800D461C(u32*);
-extern void fn_800DA2BC(u32, u32, u32);
-extern void fn_800DA1E8(u32, u32, u32);
+extern u32* gfxPlayCommands(u32*);
+extern void gfxSetUpdates(u32, u32, u32);
+extern void gfxSetZMode(u32, u32, u32);
 extern void fn_800DA100(u32, u32, u8, u32, u32, u8);
-extern void fn_800D88DC(u32);
-extern void fn_800D888C(u32);
-extern void fn_800D9B58(f32, f32, f32, f32);
+extern void gfxSetFlags(u32);
+extern void gfxClearFlags(u32);
+extern void gfxSetOrtho(f32, f32, f32, f32);
 extern void fn_800D9FB4(u32);
-extern void fn_800DA028(u32);
-extern void fn_800D7820(u32);
-extern void fn_800D6A00(u32);
+extern void gfxSetCullMode(u32);
+extern void gfxSetVtxDesc(u32);
+extern void gfxSetPrimitive(u32);
 extern void fn_800D65CC(u16, u16, u16);
 extern void fn_800D5CB8(u32, u8, u8, u8, u8);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 
 /* GSmem */
 extern u16   _toolentryAlloc__FUl(u32 size);                    /* GSmemAllocRaw */
@@ -130,7 +130,7 @@ extern void fn_800D75AC(void);
 extern void fn_800D7650(u8*);
 extern void fn_800D7868(u8*, u32, u32, u32, u32, u8, u32, u8);
 extern void fn_800D7940(u32, u16);
-extern void fn_800D7A70(u32);
+extern void gfxLoadVtxDesc(u32);
 extern void fn_800DB098(void);
 extern void fn_800DB758(u16);
 extern void lightGetFrameCount__FP9_HSD_AObj(u8*);
@@ -200,7 +200,7 @@ extern u8 lbl_80400948[];
 extern u32 lbl_8047AAC4;
 extern u32 lbl_8047AABC;
 extern u16 lbl_8047AAB8;
-extern void fn_800B857C(u32, u32, u32, u32, u32, u32);
+extern void GXSetTexCoordGen2(u32, u32, u32, u32, u32, u32);
 extern void GXLoadTexMtxImm(void*, u32, u32);
 extern u8 lbl_80314404[];
 extern u8 lbl_80314454[];
@@ -217,20 +217,20 @@ extern u8 lbl_80314510[];
 extern u8 lbl_803144F0[];
 extern void fn_800BBC34(u32);
 extern void fn_800BBC0C(u32);
-extern void fn_800BA6B0();
-extern void fn_800BA6F4();
+extern void GXSetNumChans();
+extern void GXSetChanCtrl();
 extern void fn_800B884C();
 extern void fn_800BC8C8();
 extern void fn_800BBAF8();
 extern void fn_800BB97C();
 extern void fn_800BB81C();
-extern void fn_800BC6F0();
-extern void fn_800BC228();
-extern void fn_800BC290();
-extern void fn_800BC1A0();
-extern void fn_800BC1E4();
-extern void fn_800BC454();
-extern void fn_800BC4C0();
+extern void GXSetTevOrder();
+extern void GXSetTevColorOp();
+extern void GXSetTevAlphaOp();
+extern void GXSetTevColorIn();
+extern void GXSetTevAlphaIn();
+extern void GXSetTevKColorSel();
+extern void GXSetTevKAlphaSel();
 extern void fn_800BB780();
 extern void fn_800BBC7C();
 extern void fn_800BBCE0();
@@ -238,7 +238,7 @@ extern void fn_800BBE8C();
 extern void fn_800BBF98();
 extern void fn_800BBFDC();
 extern void fn_800BC3E0();
-extern void fn_800BC580();
+extern void GXSetTevSwapModeTable();
 extern void fn_800BD2E0(void*, u32);
 extern f32 lbl_8047CA50;
 extern f32 lbl_8047CA54;
@@ -366,11 +366,11 @@ extern u8 lbl_8036CB30[];
 extern void HSD_TExpGetType();
 extern void fn_801B6DC0();
 extern void HSD_TExpCnst();
-extern void fn_801B707C();
-extern void fn_801B6E74();
-extern void fn_801B64EC();
-extern void fn_801B6CD8();
-extern void fn_801B5F08();
+extern void HSD_TExpTev();
+extern void HSD_TExpColorOp();
+extern void HSD_TExpColorIn();
+extern void HSD_TExpAlphaOp();
+extern void HSD_TExpAlphaIn();
 extern void HSD_ImageDescRemove(void);
 extern void HSD_TObjLoadDesc(void);
 extern void HSD_MObjGetTObj(void);
@@ -413,7 +413,7 @@ extern u32 lbl_8047CB00;
 extern u32 lbl_8047CAF8;
 extern u32 lbl_8047CB08;
 extern u32 lbl_8047CAFC;
-extern f32 fn_801ADC7C(void);
+extern f32 HSD_Randf(void);
 extern f32 lbl_8047CB10;
 extern u32 fn_801ADCD8(void);
 extern u32 lbl_80478C94;
@@ -475,7 +475,7 @@ static inline void gfxSetupLayerCamera(u32 layer, u8 pass) {
         if (HSD_CObjSetCurrent(*(void**)(camera + 0x0C)) != 0) {
             GSlightSetupLights(*(void**)(camera + 0x0C));
             GSmodelDrawAll(layer, pass);
-            fn_80118104(layer, pass);
+            gsParticleDraw(layer, pass);
             HSD_FogSet(lbl_8047AA8C);
             fn_80195A48();
         }
@@ -487,7 +487,7 @@ static inline void gfxRunQueue(void) {
     u32 cursor = *(u32*)((u8*)lbl_8047AA80 + 0x490);
 
     while (cursor < *(u32*)((u8*)lbl_8047AA80 + 0x494)) {
-        cursor = (u32)fn_800D461C((u32*)cursor);
+        cursor = (u32)gfxPlayCommands((u32*)cursor);
     }
 }
 
@@ -560,17 +560,17 @@ void fn_800D3FA4(u32 flags, u8 setupCamera, u8 resetQueue) {
     *(u32*)((u8*)lbl_8047AA80 + 0x04) = -1;
     oldAlpha = ((u8*)lbl_8047AA80)[0x1A];
     ((u8*)lbl_8047AA80)[0x1A] = ((u8*)lbl_8047AA80)[0x1B];
-    fn_800DA2BC(((u8*)lbl_8047AA80)[0x49C], 0, 1);
-    fn_800DA1E8(1, 7, 2);
+    gfxSetUpdates(((u8*)lbl_8047AA80)[0x49C], 0, 1);
+    gfxSetZMode(1, 7, 2);
     fn_800DA100(0, 7, 0, 1, 7, 0);
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D9B58(0.0f, 0.0f, 640.0f, 480.0f);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetOrtho(0.0f, 0.0f, 640.0f, 480.0f);
     fn_800D9FB4(0);
-    fn_800DA028(0);
-    fn_800D7820((u32)lbl_803147C8);
-    fn_800D6A00(4);
-    fn_800D67BC(4);
+    gfxSetCullMode(0);
+    gfxSetVtxDesc((u32)lbl_803147C8);
+    gfxSetPrimitive(4);
+    gfxBegin(4);
     fn_800D65CC(0, 0, 0x752F);
     fn_800D5CB8(0, 0, 0, 0, 0xC4);
     fn_800D65CC(0x280, 0, 0x752F);
@@ -579,17 +579,17 @@ void fn_800D3FA4(u32 flags, u8 setupCamera, u8 resetQueue) {
     fn_800D5CB8(0, 0, 0, 0, 0xC4);
     fn_800D65CC(0x280, 0x1E0, 0x752F);
     fn_800D5CB8(0, 0, 0, 0, 0xC4);
-    fn_800D6728();
+    gfxEnd();
     ((u8*)lbl_8047AA80)[0x1A] = oldAlpha;
-    fn_800DA2BC(1, 1, 1);
-    fn_800DA1E8(1, 7, 2);
+    gfxSetUpdates(1, 1, 1);
+    gfxSetZMode(1, 7, 2);
     fn_800D9FB4(1);
 
     gfxRenderPass(flags, setupCamera, 1);
 
     ((u8*)lbl_8047AA80)[0x1B] = 0;
-    fn_800DA2BC(1, 1, 1);
-    fn_800DA1E8(1, 2, 2);
+    gfxSetUpdates(1, 1, 1);
+    gfxSetZMode(1, 2, 2);
     *(u32*)((u8*)lbl_8047AA80 + 0x00) = oldMode;
     *(u32*)((u8*)lbl_8047AA80 + 0x04) = oldMask;
     if (resetQueue != 0) {
@@ -609,12 +609,12 @@ extern void fn_800D579C(u32, u16);
 extern void fn_800D5814(u32, u8, u8);
 extern void fn_800D58A0(u32, s16, s16);
 extern void fn_800D592C(u32, u16, u16);
-extern void fn_800D59B8(u32, f32, f32);
+extern void gfxVtxTexCoord(u32, f32, f32);
 extern void fn_800D5A38(u32, u8);
 extern void fn_800D5AB0(u32, u16);
 extern void fn_800D5B28(u32, u16);
 extern void fn_800D5BA0(u32, u32);
-extern void fn_800D5C18(u32, u8, u8, u8);
+extern void gfxVtxColor(u32, u8, u8, u8);
 extern void fn_800D5D6C(u8);
 extern void fn_800D5DD0(u16);
 extern void fn_800D5E34(s8, s8, s8);
@@ -630,7 +630,7 @@ extern void fn_800D631C(f32, f32);
 extern void fn_800D63B0(s8, s8, s8);
 extern void fn_800D6464(u8, u8, u8);
 extern void fn_800D6518(s16, s16, s16);
-extern void fn_800D6680(f32, f32, f32);
+extern void gfxVtxPos(f32, f32, f32);
 extern void fn_800D76A8(u32, u16);
 extern void fn_800D7C74(void);
 extern void fn_800D7D10(u8, u32);
@@ -644,7 +644,7 @@ extern void fn_800D81EC(f32, f32, f32);
 extern void fn_800D8284(f32, f32, f32);
 extern void fn_800D834C(void);
 extern void fn_800D848C(u32, u32, u32, void*);
-extern void fn_800D85D4(u32, u32);
+extern void gfxLoadTexture(u32, u32);
 extern void GSgfxDLDraw(u32);
 extern void fn_800D9BD0(f32, f32, f32, f32);
 extern void fn_800D9C24(u16, u16, u16, u16);
@@ -655,7 +655,7 @@ extern void fn_800D9F40(u32);
 extern void fn_800DA08C(u32);
 extern void fn_800DA3B0(u32, u8);
 extern void fn_800DA428(u32);
-extern void fn_800DA4C4(u32, u32, u32);
+extern void gfxSetBlendMode(u32, u32, u32);
 extern void fn_800DB900(u32, void*, s8);
 extern void fn_800DB988(u32, u32, u32);
 extern void fn_800DB9F0(u32, u32, u32);
@@ -675,7 +675,7 @@ extern void fn_800DC04C(u32, u32, u32, u32, u8, u32);
 extern void fn_800DC0D4(u32, u32, u32, u32, u32);
 extern void fn_800DC14C(u32, u32, u32, u32, u8, u32);
 extern void fn_800DC1D4(u8);
-extern void fn_800DC224(u32, u32, u32, u32, u32);
+extern void gfxSetTevStage(u32, u32, u32, u32, u32);
 
 #if !defined(GS_GFX_RANGE_SPLIT) || \
     defined(GS_GFX_RANGE_800D461C_800D55D0)
@@ -689,7 +689,7 @@ extern void fn_800DC224(u32, u32, u32, u32, u32);
  * cursor before passing it); case 91 is a documented title-path exception
  * (see docs/RULE_EXCEPTIONS.md).
  * ================================================================== */
-u32* fn_800D461C(u32* command)
+u32* gfxPlayCommands(u32* command)
 {
     u32* p = command + 1;
     GXColor copied;
@@ -698,17 +698,17 @@ u32* fn_800D461C(u32* command)
     switch (command[0]) {
     case 1:
         p += 1;
-        fn_800D6A00(p[-1]); break;
+        gfxSetPrimitive(p[-1]); break;
     case 2:
         p += 1;
-        fn_800D67BC((u16)p[-1]); break;
+        gfxBegin((u16)p[-1]); break;
     case 3:
-        fn_800D6728(); break;
+        gfxEnd(); break;
     case 4:
         fn_800D30AC(); break;
     case 5:
         p += 3;
-        fn_800D6680(((f32*)p)[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
+        gfxVtxPos(((f32*)p)[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
     case 6:
         p += 3;
         fn_800D65CC((u16)p[-3], (u16)p[-2], (u16)p[-1]); break;
@@ -762,7 +762,7 @@ u32* fn_800D461C(u32* command)
         fn_800D5CB8(p[-5], (u8)p[-4], (u8)p[-3], (u8)p[-2], (u8)p[-1]); break;
     case 23:
         p += 4;
-        fn_800D5C18(p[-4], (u8)p[-3], (u8)p[-2], (u8)p[-1]); break;
+        gfxVtxColor(p[-4], (u8)p[-3], (u8)p[-2], (u8)p[-1]); break;
     case 24:
         p += 2;
         fn_800D5BA0(p[-2], p[-1]); break;
@@ -777,7 +777,7 @@ u32* fn_800D461C(u32* command)
         fn_800D5A38(p[-2], (u8)p[-1]); break;
     case 28:
         p += 3;
-        fn_800D59B8(p[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
+        gfxVtxTexCoord(p[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
     case 29:
         p += 3;
         fn_800D592C(p[-3], (u16)p[-2], (u16)p[-1]); break;
@@ -807,7 +807,7 @@ u32* fn_800D461C(u32* command)
         fn_800D55D0(((f32*)p)[-1]); break;
     case 38:
         p += 2;
-        fn_800D85D4(p[-2], p[-1]); break;
+        gfxLoadTexture(p[-2], p[-1]); break;
     case 39:
         {
             u32 a = *p++;
@@ -820,16 +820,16 @@ u32* fn_800D461C(u32* command)
         break;
     case 40:
         p += 1;
-        fn_800D88DC(p[-1]); break;
+        gfxSetFlags(p[-1]); break;
     case 41:
         p += 1;
-        fn_800D888C(p[-1]); break;
+        gfxClearFlags(p[-1]); break;
     case 42:
         p += 1;
         GSgfxDLDraw(p[-1]); break;
     case 43:
         p += 3;
-        fn_800DA4C4(p[-3], p[-2], p[-1]); break;
+        gfxSetBlendMode(p[-3], p[-2], p[-1]); break;
     case 44:
         p += 1;
         fn_800DA428(p[-1]); break;
@@ -838,10 +838,10 @@ u32* fn_800D461C(u32* command)
         fn_800DA3B0(p[-2], (u8)p[-1]); break;
     case 46:
         p += 3;
-        fn_800DA2BC(p[-3], p[-2], p[-1]); break;
+        gfxSetUpdates(p[-3], p[-2], p[-1]); break;
     case 47:
         p += 3;
-        fn_800DA1E8(p[-3], p[-2], p[-1]); break;
+        gfxSetZMode(p[-3], p[-2], p[-1]); break;
     case 48:
         p += 6;
         fn_800DA100(p[-6], p[-5], (u8)p[-4], p[-3], p[-2], (u8)p[-1]); break;
@@ -850,7 +850,7 @@ u32* fn_800D461C(u32* command)
         fn_800DA08C(p[-1]); break;
     case 50:
         p += 1;
-        fn_800DA028(p[-1]); break;
+        gfxSetCullMode(p[-1]); break;
     case 51:
         p += 1;
         fn_800D9FB4(p[-1]); break;
@@ -874,7 +874,7 @@ u32* fn_800D461C(u32* command)
         fn_800D9BD0(((f32*)p)[-4], ((f32*)p)[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
     case 58:
         p += 4;
-        fn_800D9B58(((f32*)p)[-4], ((f32*)p)[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
+        gfxSetOrtho(((f32*)p)[-4], ((f32*)p)[-3], ((f32*)p)[-2], ((f32*)p)[-1]); break;
     case 59:
         fn_800D834C(); break;
     case 60:
@@ -903,13 +903,13 @@ u32* fn_800D461C(u32* command)
         fn_800D7C74(); break;
     case 70:
         p += 1;
-        fn_800D7820(p[-1]); break;
+        gfxSetVtxDesc(p[-1]); break;
     case 71:
         p += 2;
         fn_800D76A8(p[-2], (u16)p[-1]); break;
     case 72:
         p += 5;
-        fn_800DC224(p[-5], p[-4], p[-3], p[-2], p[-1]); break;
+        gfxSetTevStage(p[-5], p[-4], p[-3], p[-2], p[-1]); break;
     case 73:
         p += 1;
         fn_800DC1D4((u8)p[-1]); break;
@@ -1032,7 +1032,7 @@ asm void fn_800D55D0(void) {
 #else
 void fn_800D55D0(f32 val) {
     if (val < 0.0f || val > 42.5f) return;
-    if (*(s32*)lbl_8047AA80 == 1) { fn_800D4F98(0x25, 0xb, val); }
+    if (*(s32*)lbl_8047AA80 == 1) { gfxRecordCommand(0x25, 0xb, val); }
     else {
         u32 tmp;
         tmp = (u32)(s32)(6.0f * val);
@@ -1048,7 +1048,7 @@ asm void fn_800D5648(void) {
 #else
 void fn_800D5648(f32 val) {
     if (val < 0.0f || val > 42.5f) return;
-    if (*(s32*)lbl_8047AA80 == 1) { fn_800D4F98(0x24, 0xb, val); }
+    if (*(s32*)lbl_8047AA80 == 1) { gfxRecordCommand(0x24, 0xb, val); }
     else {
         u32 tmp;
         tmp = (u32)(s32)(6.0f * val);
@@ -1067,7 +1067,7 @@ asm void fn_800D56C0(void) {
 #else
 void fn_800D56C0(u8 val) {
     if (!*(u8*)(lbl_8047AA80 + 0x47e) && *(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x23, 1, (u8)val);
+        gfxRecordCommand(0x23, 1, (u8)val);
     } else {
         *(u32*)(lbl_8047AA80 + 0x4a0) = (u32)fn_800D7230;
         *(u8*)(lbl_8047AA80 + 0x4a4) = val;
@@ -1082,7 +1082,7 @@ asm void fn_800D5724(void) {
 #else
 void fn_800D5724(u32 idx, u8 val) {
     if (!*(u8*)(lbl_8047AA80 + 0x47e) && *(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x22, 2, idx, (u32)val);
+        gfxRecordCommand(0x22, 2, idx, (u32)val);
     } else {
         *(u32*)(lbl_8047AA80 + 0x500 + idx * 4) = (u32)fn_800D724C;
         *(u8*)(lbl_8047AA80 + 0x520 + idx * 16) = val;
@@ -1097,7 +1097,7 @@ asm void fn_800D579C(void) {
 #else
 void fn_800D579C(u32 idx, u16 val) {
     if (!*(u8*)(lbl_8047AA80 + 0x47e) && *(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x21, 2, idx, (u32)val);
+        gfxRecordCommand(0x21, 2, idx, (u32)val);
     } else {
         *(u32*)(lbl_8047AA80 + 0x500 + idx * 4) = (u32)fn_800D7268;
         *(u16*)(lbl_8047AA80 + 0x522 + idx * 16) = val;
@@ -1112,7 +1112,7 @@ asm void fn_800D5814(void) {
 #else
 void fn_800D5814(u32 idx, u8 a, u8 b) {
     u32 state = lbl_8047AA80;
-    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { fn_800D4F98(0x1f, 3, idx, (u32)a, (u32)b); }
+    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { gfxRecordCommand(0x1f, 3, idx, (u32)a, (u32)b); }
     else {
         *(s32*)(state + 0x500 + idx * 4) = (u32)fn_800D72A4;
         *(u8*)(lbl_8047AA80 + 0x520 + idx * 16) = a;
@@ -1128,7 +1128,7 @@ asm void fn_800D58A0(void) {
 #else
 void fn_800D58A0(u32 idx, s16 a, s16 b) {
     u32 state = lbl_8047AA80;
-    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { fn_800D4F98(0x1e, 3, idx, (s32)a, (s32)b); }
+    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { gfxRecordCommand(0x1e, 3, idx, (s32)a, (s32)b); }
     else {
         *(s32*)(state + 0x500 + idx * 4) = (u32)fn_800D72C4;
         *(u16*)(lbl_8047AA80 + 0x522 + idx * 16) = a;
@@ -1144,7 +1144,7 @@ asm void fn_800D592C(void) {
 #else
 void fn_800D592C(u32 idx, u16 a, u16 b) {
     u32 state = lbl_8047AA80;
-    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { fn_800D4F98(0x1d, 3, idx, (u32)a, (u32)b); }
+    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { gfxRecordCommand(0x1d, 3, idx, (u32)a, (u32)b); }
     else {
         *(s32*)(state + 0x500 + idx * 4) = (u32)fn_800D72E4;
         *(u16*)(lbl_8047AA80 + 0x522 + idx * 16) = a;
@@ -1158,9 +1158,9 @@ asm void fn_800D59B8(void) {
 #include "src/game/gs_render_fn_800D59B8.inc"
 }
 #else
-void fn_800D59B8(u32 idx, f32 x, f32 y) {
+void gfxVtxTexCoord(u32 idx, f32 x, f32 y) {
     u32 state = lbl_8047AA80;
-    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { fn_800D4F98(0x1c, 0xf, idx, x, y); }
+    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { gfxRecordCommand(0x1c, 0xf, idx, x, y); }
     else {
         *(u32*)(state + 0x500 + idx * 4) = (u32)fn_800D7304;
         *(f32*)(lbl_8047AA80 + 0x528 + idx * 16) = x;
@@ -1176,7 +1176,7 @@ asm void fn_800D5A38(void) {
 #else
 void fn_800D5A38(u32 idx, u8 val) {
     if (!*(u8*)(lbl_8047AA80 + 0x47e) && *(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x1b, 2, idx, (u32)val);
+        gfxRecordCommand(0x1b, 2, idx, (u32)val);
     } else {
         *(u32*)(lbl_8047AA80 + 0x4e0 + idx * 4) = (u32)fn_800D7328;
         *(u8*)(lbl_8047AA80 + 0x4e8 + idx * 12) = val;
@@ -1191,7 +1191,7 @@ asm void fn_800D5AB0(void) {
 #else
 void fn_800D5AB0(u32 idx, u16 val) {
     if (!*(u8*)(lbl_8047AA80 + 0x47e) && *(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x1a, 2, idx, (u32)val);
+        gfxRecordCommand(0x1a, 2, idx, (u32)val);
     } else {
         *(u32*)(lbl_8047AA80 + 0x4e0 + idx * 4) = (u32)fn_800D7344;
         *(u16*)(lbl_8047AA80 + 0x4ec + idx * 12) = val;
@@ -1206,7 +1206,7 @@ asm void fn_800D5B28(void) {
 #else
 void fn_800D5B28(u32 idx, u16 val) {
     if (!*(u8*)(lbl_8047AA80 + 0x47e) && *(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x19, 2, idx, (u32)val);
+        gfxRecordCommand(0x19, 2, idx, (u32)val);
     } else {
         *(u32*)(lbl_8047AA80 + 0x4e0 + idx * 4) = (u32)fn_800D7360;
         *(u16*)(lbl_8047AA80 + 0x4ec + idx * 12) = val;
@@ -1221,7 +1221,7 @@ asm void fn_800D5BA0(void) {
 #else
 void fn_800D5BA0(u32 idx, u32 val) {
     if (!*(u8*)(lbl_8047AA80 + 0x47e) && *(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x18, 2, idx, val);
+        gfxRecordCommand(0x18, 2, idx, val);
     } else {
         *(u32*)(lbl_8047AA80 + 0x4e0 + idx * 4) = (u32)fn_800D737C;
         *(u32*)(lbl_8047AA80 + 0x4f0 + idx * 12) = val;
@@ -1234,11 +1234,11 @@ asm void fn_800D5C18(void) {
 #include "src/game/gs_render_fn_800D5C18.inc"
 }
 #else
-void fn_800D5C18(u32 idx, u8 a, u8 b, u8 c) {
+void gfxVtxColor(u32 idx, u8 a, u8 b, u8 c) {
     u32 state = lbl_8047AA80;
     u32 off;
     if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) {
-        fn_800D4F98(0x17, 4, idx, (u32)a, (u32)b, (u32)c);
+        gfxRecordCommand(0x17, 4, idx, (u32)a, (u32)b, (u32)c);
     } else {
         off = idx * 0xc;
         {
@@ -1270,7 +1270,7 @@ void fn_800D5CB8(u32 idx, u8 a, u8 b, u8 c, u8 d) {
     u32 state = lbl_8047AA80;
     u32 off;
     if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) {
-        fn_800D4F98(0x16, 5, idx, (u32)a, (u32)b, (u32)c, (u32)d);
+        gfxRecordCommand(0x16, 5, idx, (u32)a, (u32)b, (u32)c, (u32)d);
     } else {
         off = idx * 0xc;
         {
@@ -1304,7 +1304,7 @@ asm void fn_800D5D6C(void) {
 #else
 void fn_800D5D6C(u8 val) {
     if (!*(u8*)(lbl_8047AA80 + 0x47e) && *(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x15, 1, (u8)val);
+        gfxRecordCommand(0x15, 1, (u8)val);
     } else {
         *(s32*)(lbl_8047AA80 + 0x4c4) = (u32)fn_800D73F8;
         *(u8*)(lbl_8047AA80 + 0x4c8) = val;
@@ -1319,7 +1319,7 @@ asm void fn_800D5DD0(void) {
 #else
 void fn_800D5DD0(u16 val) {
     if (!*(u8*)(lbl_8047AA80 + 0x47e) && *(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x14, 1, (u16)val);
+        gfxRecordCommand(0x14, 1, (u16)val);
     } else {
         *(s32*)(lbl_8047AA80 + 0x4c4) = (u32)fn_800D740C;
         *(u16*)(lbl_8047AA80 + 0x4cc) = val;
@@ -1334,7 +1334,7 @@ asm void fn_800D5E34(void) {
 #else
 void fn_800D5E34(s8 a, s8 b, s8 c) {
     u32 state = lbl_8047AA80;
-    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { fn_800D4F98(0x13, 3, (s32)a, (s32)b, (s32)c); }
+    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { gfxRecordCommand(0x13, 3, (s32)a, (s32)b, (s32)c); }
     else {
         *(s32*)(state + 0x4c4) = (u32)fn_800D7420;
         *(u8*)(lbl_8047AA80 + 0x4c8) = a;
@@ -1351,7 +1351,7 @@ asm void fn_800D5EB4(void) {
 #else
 void fn_800D5EB4(s16 a, s16 b, s16 c) {
     u32 state = lbl_8047AA80;
-    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { fn_800D4F98(0x12, 3, (s32)a, (s32)b, (s32)c); }
+    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { gfxRecordCommand(0x12, 3, (s32)a, (s32)b, (s32)c); }
     else {
         *(s32*)(state + 0x4c4) = (u32)fn_800D7444;
         *(u16*)(lbl_8047AA80 + 0x4cc) = a;
@@ -1368,7 +1368,7 @@ asm void fn_800D5F34(void) {
 #else
 void fn_800D5F34(f32 x, f32 y, f32 z) {
     if (!*(u8*)(lbl_8047AA80 + 0x47e) && *(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x11, 0xd, x, y, z);
+        gfxRecordCommand(0x11, 0xd, x, y, z);
     } else {
         *(s32*)(lbl_8047AA80 + 0x4c4) = (u32)fn_800D7468;
         *(f32*)(lbl_8047AA80 + 0x4d4) = x;
@@ -1385,7 +1385,7 @@ asm void fn_800D5FA4(void) {
 #else
 void fn_800D5FA4(u8 val) {
     u32 state = lbl_8047AA80;
-    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { fn_800D4F98(0x10, 1, (u32)val); }
+    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { gfxRecordCommand(0x10, 1, (u32)val); }
     else {
         fn_800D6B00();
         *(u32*)(lbl_8047AA80 + 0x4a8) = (u32)fn_800D748C;
@@ -1402,7 +1402,7 @@ asm void fn_800D6028(void) {
 #else
 void fn_800D6028(u16 val) {
     u32 state = lbl_8047AA80;
-    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { fn_800D4F98(0xf, 1, (u32)val); }
+    if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) { gfxRecordCommand(0xf, 1, (u32)val); }
     else {
         fn_800D6B00();
         *(u32*)(lbl_8047AA80 + 0x4a8) = (u32)fn_800D74A0;
@@ -1420,7 +1420,7 @@ asm void fn_800D60AC(void) {
 void fn_800D60AC(s8 a, s8 b) {
     u32 state = lbl_8047AA80;
     if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) {
-        fn_800D4F98(0xe, 2, (s32)a, (s32)b);
+        gfxRecordCommand(0xe, 2, (s32)a, (s32)b);
     } else {
         fn_800D6B00();
         *(u32*)(lbl_8047AA80 + 0x4a8) = (u32)fn_800D74B4;
@@ -1439,7 +1439,7 @@ asm void fn_800D6148(void) {
 void fn_800D6148(u8 a, u8 b) {
     u32 state = lbl_8047AA80;
     if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) {
-        fn_800D4F98(0xd, 2, (u32)a, (u32)b);
+        gfxRecordCommand(0xd, 2, (u32)a, (u32)b);
     } else {
         fn_800D6B00();
         *(u32*)(lbl_8047AA80 + 0x4a8) = (u32)fn_800D74D0;
@@ -1458,7 +1458,7 @@ asm void fn_800D61E4(void) {
 void fn_800D61E4(s16 a, s16 b) {
     u32 state = lbl_8047AA80;
     if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) {
-        fn_800D4F98(0xc, 2, (s32)a, (s32)b);
+        gfxRecordCommand(0xc, 2, (s32)a, (s32)b);
     } else {
         fn_800D6B00();
         *(u32*)(lbl_8047AA80 + 0x4a8) = (u32)fn_800D74EC;
@@ -1477,7 +1477,7 @@ asm void fn_800D6280(void) {
 void fn_800D6280(u16 a, u16 b) {
     u32 state = lbl_8047AA80;
     if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) {
-        fn_800D4F98(0xb, 2, (u32)a, (u32)b);
+        gfxRecordCommand(0xb, 2, (u32)a, (u32)b);
     } else {
         fn_800D6B00();
         *(u32*)(lbl_8047AA80 + 0x4a8) = (u32)fn_800D7508;
@@ -1496,7 +1496,7 @@ asm void fn_800D631C(void) {
 void fn_800D631C(f32 a, f32 b) {
     u32 state = lbl_8047AA80;
     if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) {
-        fn_800D4F98(0xa, 0xc, a, b);
+        gfxRecordCommand(0xa, 0xc, a, b);
     } else {
         fn_800D6B00();
         *(u32*)(lbl_8047AA80 + 0x4a8) = (u32)fn_800D7524;
@@ -1515,7 +1515,7 @@ asm void fn_800D63B0(void) {
 void fn_800D63B0(s8 a, s8 b, s8 c) {
     u32 state = lbl_8047AA80;
     if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) {
-        fn_800D4F98(9, 3, (s32)a, (s32)b, (s32)c);
+        gfxRecordCommand(9, 3, (s32)a, (s32)b, (s32)c);
     } else {
         fn_800D6B00();
         *(u32*)(lbl_8047AA80 + 0x4a8) = (u32)fn_800D7540;
@@ -1535,7 +1535,7 @@ asm void fn_800D6464(void) {
 void fn_800D6464(u8 a, u8 b, u8 c) {
     u32 state = lbl_8047AA80;
     if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) {
-        fn_800D4F98(8, 3, (u32)a, (u32)b, (u32)c);
+        gfxRecordCommand(8, 3, (u32)a, (u32)b, (u32)c);
     } else {
         fn_800D6B00();
         *(u32*)(lbl_8047AA80 + 0x4a8) = (u32)fn_800D7564;
@@ -1555,7 +1555,7 @@ asm void fn_800D6518(void) {
 void fn_800D6518(s16 a, s16 b, s16 c) {
     u32 state = lbl_8047AA80;
     if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) {
-        fn_800D4F98(7, 3, (s32)a, (s32)b, (s32)c);
+        gfxRecordCommand(7, 3, (s32)a, (s32)b, (s32)c);
     } else {
         fn_800D6B00();
         *(u32*)(lbl_8047AA80 + 0x4a8) = (u32)fn_800D7588;
@@ -1575,7 +1575,7 @@ asm void fn_800D65CC(void) {
 void fn_800D65CC(u16 a, u16 b, u16 c) {
     u32 state = lbl_8047AA80;
     if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) {
-        fn_800D4F98(6, 3, (u32)a, (u32)b, (u32)c);
+        gfxRecordCommand(6, 3, (u32)a, (u32)b, (u32)c);
     } else {
         fn_800D6B00();
         *(u32*)(lbl_8047AA80 + 0x4a8) = (u32)fn_800D75AC;
@@ -1592,10 +1592,10 @@ asm void fn_800D6680(void) {
 #include "src/game/gs_render_fn_800D6680.inc"
 }
 #else
-void fn_800D6680(f32 a, f32 b, f32 c) {
+void gfxVtxPos(f32 a, f32 b, f32 c) {
     u32 state = lbl_8047AA80;
     if (!*(u8*)(state + 0x47e) && *(s32*)state == 1) {
-        fn_800D4F98(5, 0xd, a, b, c);
+        gfxRecordCommand(5, 0xd, a, b, c);
     } else {
         fn_800D6B00();
         *(u32*)(lbl_8047AA80 + 0x4a8) = (u32)fn_800D75D0;
@@ -1612,14 +1612,14 @@ asm void fn_800D6728(void) {
 #include "src/game/gs_render_fn_800D6728.inc"
 }
 #else
-void fn_800D6728(void) {
+void gfxEnd(void) {
     u32 state = lbl_8047AA80;
     if (*(u8*)(state + 0x47e) == 1) {
         fn_800D6B00();
         return;
     }
     if (*(s32*)state == 1) {
-        fn_800D4F98(3, 0);
+        gfxRecordCommand(3, 0);
         return;
     }
     fn_800D6B00();
@@ -1645,13 +1645,13 @@ asm void fn_800D67BC(void) {
 }
 #else
 /* Linked owner: gs_gfx_candidate_800D67BC.c (standalone carve). */
-void fn_800D67BC(u16 vertCount) {
+void gfxBegin(u16 vertCount) {
     if (*(u8*)(lbl_8047AA80 + 0x47e) == 1) {
         fn_800DB758(vertCount);
         return;
     }
     if (*(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(2, 1, vertCount);
+        gfxRecordCommand(2, 1, vertCount);
         return;
     }
     if (*(u8*)(lbl_8047AA80 + 0x1b) != *(u8*)(lbl_8047AA80 + 0x1a)) {
@@ -1680,8 +1680,8 @@ void fn_800D67BC(u16 vertCount) {
         vertCount = (vertCount & 0x7fff) << 1;
     }
 
-    fn_800D7A70(*(u32*)(lbl_8047AA80 + 0x24));
-    fn_800D892C(*(u32*)(lbl_8047AA80 + 0x24));
+    gfxLoadVtxDesc(*(u32*)(lbl_8047AA80 + 0x24));
+    gfxSetupChannelsTev(*(u32*)(lbl_8047AA80 + 0x24));
     fn_800B928C(lbl_80314350[*(u32*)(lbl_8047AA80 + 0x14)],
                 *(u32*)(*(u32*)(lbl_8047AA80 + 0x24) + 0x4), vertCount);
     fn_800D6A80(vertCount, *(s32*)(lbl_8047AA80 + 0x14),
@@ -1697,9 +1697,9 @@ asm void fn_800D6A00(void) {
 #include "src/game/gs_render_fn_800D6A00.inc"
 }
 #else
-void fn_800D6A00(u32 val) {
+void gfxSetPrimitive(u32 val) {
     if (*(u8*)(lbl_8047AA80 + 0x47e) == 1) { *(s32*)(lbl_8047AA80 + 0x488) = val; }
-    else if (*(s32*)lbl_8047AA80 == 1) { fn_800D4F98(0x1, 1, val); }
+    else if (*(s32*)lbl_8047AA80 == 1) { gfxRecordCommand(0x1, 1, val); }
     else { *(s32*)(lbl_8047AA80 + 0x14) = val; }
 }
 #endif

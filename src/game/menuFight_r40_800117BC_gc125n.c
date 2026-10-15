@@ -16,7 +16,7 @@ extern void winSeqSetMenu(void* ctx, s32 state);
 extern u8 fn_801F18DC(s32 controller);
 extern u8 fightFloorIsUseFightTimerCommand(s32 controller);
 extern u8 fightTimerCommandIsOver(void);
-extern u16 fn_801EF634(void);
+extern u16 std103_battleGetResult(void);
 extern void _threadSwitch(void);
 extern u32 fn_800F7AF0(s32 slot);
 extern u32 fn_800F7BC4(s32 slot);
@@ -32,7 +32,7 @@ static inline u8 menuFightIsTimeUp(void)
         if (fightFloorIsUseFightTimerCommand(0) == 1 && fightTimerCommandIsOver() == 1) {
             return 1;
         }
-        if (fn_801EF634() == 1) {
+        if (std103_battleGetResult() == 1) {
             return 1;
         }
     }

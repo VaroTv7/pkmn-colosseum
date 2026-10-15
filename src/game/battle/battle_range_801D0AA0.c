@@ -57,7 +57,7 @@ u16 fn_801D0AFC(s32 mode)
     return lbl_8047B3D8;
 }
 
-void fn_801D0BD0(s32 arg0, s32 arg1, s32 mode)
+void std083_unk_801d0bd0(s32 arg0, s32 arg1, s32 mode)
 {
     extern void fn_801D0C30(void);
     extern void fn_801D0DB0(s32, s32);
@@ -84,9 +84,9 @@ void fn_801D0C30(void)
     extern void _threadSwitch(void);
     extern void fadeSet(f32 duration, s32 mode);
     extern s8 fadeCheck(s32 wait);
-    extern u32 fn_8016557C(void);
-    extern void fn_80165548(u32 handle);
-    extern void fn_801653CC(s32 id, s32 fade, s32 volume);
+    extern u32 soundPauseMusic(void);
+    extern void soundResumeMusic(u32 handle);
+    extern void soundPlayFanfare(s32 id, s32 fade, s32 volume);
     s32 running;
     s32 state;
     s32 timer;
@@ -105,7 +105,7 @@ void fn_801D0C30(void)
         case 10:
             fadeSet(lbl_8047E184, 3);
             state = 12;
-            handle = fn_8016557C();
+            handle = soundPauseMusic();
             break;
         case 12:
             if (fadeCheck(0) == 0) {
@@ -118,7 +118,7 @@ void fn_801D0C30(void)
             timer++;
             if (timer >= 10) {
                 state = 8;
-                fn_801653CC(0x19, 2000, 0xFF);
+                soundPlayFanfare(0x19, 2000, 0xFF);
                 timer = 0;
             } else {
                 _threadSwitch();
@@ -133,7 +133,7 @@ void fn_801D0C30(void)
             }
             break;
         case 9:
-            fn_80165548(handle);
+            soundResumeMusic(handle);
             fadeSet(lbl_8047E184, 2);
             state = 11;
             break;

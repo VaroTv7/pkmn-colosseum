@@ -80,7 +80,7 @@ u8 wazaSequenceEntryStop(void* entry, BOOL immediate) {
                 GSmodelGetRotation(model, rotation);
                 GSmodelGetScale(model, scale);
                 GSmodelGetPosition(ownerModel, ownerPosition);
-                fn_800E0168(ownerPosition, ownerPosition, position);
+                GSvecSub(ownerPosition, ownerPosition, position);
                 if (*(s32*)(node + 0xA0) != 0) {
                     GSmodelDetachFromGSpart(ownerModel, 0);
                 }
@@ -93,7 +93,7 @@ u8 wazaSequenceEntryStop(void* entry, BOOL immediate) {
                     GSlerpGetLinearInterpolationVector(
                         boundCenter, (u8*)bound + 0x10, (u8*)bound + 0x1C,
                         lbl_8047E348);
-                    fn_800E0168(position, position, boundCenter);
+                    GSvecSub(position, position, boundCenter);
                     GSmodelSetPosition(ownerModel, position);
                     GSmodelRemoveNull(ownerModel);
                 }
@@ -137,7 +137,7 @@ u8 wazaSequenceEntryStop(void* entry, BOOL immediate) {
                     f32 position[3];
 
                     GSmodelGetPosition(ownerModel, position);
-                    fn_800E0168(position, position, effect + 0x48);
+                    GSvecSub(position, position, effect + 0x48);
                     GSmodelSetPosition(ownerModel, position);
                 }
                 break;
@@ -159,7 +159,7 @@ u8 wazaSequenceEntryStop(void* entry, BOOL immediate) {
         if ((*(s32*)(node + 0x7C) & 1) == 1) {
             lbl_8047B408 = 0;
         }
-        fn_80166B18(*(u32*)(node + 0x78));
+        soundKill(*(u32*)(node + 0x78));
         break;
 
     default:
@@ -190,8 +190,8 @@ u8 wazaSequenceEntryStop(void* entry, BOOL immediate) {
 /* RULE-EXCEPTION(title-path): single-use sound-status inline helper;
  * see docs/RULE_EXCEPTIONS.md. */
 static inline u8 wazaEntrySoundRunning(u32 id) {
-    extern s32 fn_801666BC(u32 id);
-    s32 status = fn_801666BC(id);
+    extern s32 soundGetStatus(u32 id);
+    s32 status = soundGetStatus(id);
     return status == 2 || status == 3;
 }
 
@@ -370,7 +370,7 @@ u8 wazaSequenceEntryUpdate(void* entry, s32 elapsed) {
  */
 u8 wazaSequenceEntryStart(void* entry) {
     extern void GSthreadSetArgs(void* thread, s32 priority, ...);
-    extern void fn_80165668(u32 id, void* buffer, u32 size);
+    extern void std130_soundUnk_801653cc(u32 id, void* buffer, u32 size);
     extern s32 lbl_8047B408;
     /* RULE-EXCEPTION(title-path): shared log-pool stand-ins;
      * see docs/RULE_EXCEPTIONS.md. */
@@ -428,7 +428,7 @@ u8 wazaSequenceEntryStart(void* entry) {
         if ((s32)(node->runtimeFlags & 1) == 1) {
             if ((u32)lbl_8047B408 == 0) {
                 lbl_8047B408 = (s32)GSthreadCreate(0x15, 0x4E20, 0x2000,
-                                                    1, 1, fn_80165668);
+                                                    1, 1, std130_soundUnk_801653cc);
                 if ((u32)lbl_8047B408 != 0) {
                     GSthreadSetArgs((void*)lbl_8047B408, 3,
                                     node->resourceId, 0, 0xFF);
@@ -436,7 +436,7 @@ u8 wazaSequenceEntryStart(void* entry) {
                 }
             }
         } else {
-            started = fn_80166AB8(node->resourceId, 0, 0);
+            started = soundStartRaw(node->resourceId, 0, 0);
         }
         if (!(u8)started) {
             if (fn_800057A8() == 2) {
@@ -529,7 +529,7 @@ u8 _wazaSequenceEffectEntryStart(void* entry) {
     extern BOOL GSeffect(u32 effectId);
     extern void* fn_8013151C(u32 arg);
     extern void* GSresGetResource(u32 group, u32 resource);
-    extern u32 fn_80113F48(void);
+    extern u32 std093_getCurrentGroupID(void);
     extern void* floorDataBiosGetCurrentPtr(void);
     extern u32 floorReadMakeModelResID(u32 value);
     extern void* HSD_ArchiveGetPublicAddress(void* archive, const char* symbols);
@@ -583,10 +583,10 @@ u8 _wazaSequenceEffectEntryStart(void* entry) {
 
             case 1: {
                 floor = floorDataBiosGetCurrentPtr();
-                group = fn_80113F48();
+                group = std093_getCurrentGroupID();
                 index = 0;
                 count = 0;
-                archive = GSresGetResource(fn_80113F48(), *(u32*)((u8*)floor + 0x08));
+                archive = GSresGetResource(std093_getCurrentGroupID(), *(u32*)((u8*)floor + 0x08));
 
                 if (archive != NULL) {
                     list = HSD_ArchiveGetPublicAddress(archive, (char*)lbl_8027964C);
@@ -790,7 +790,7 @@ u8 _wazaSequenceParticleEntryStart(WazaSequenceNode* node) {
     }
 
     *(void**)((u8*) node + 0x8C) =
-        fn_801190DC(node->resource, node->field_80,
+        gsParticleCreate(node->resource, node->field_80,
                     (u32) node->animationMode & 1);
     *(u32*)((u8*) node + 0x90) = 0;
 
@@ -1286,7 +1286,7 @@ void fn_801D9950(void* owner, f32* scale, s32 selector) {
         u16 field_2C;
         u16 field_2E;
     } WazaSequenceScaleCtx;
-    extern void fn_800E013C(void* dst, void* src, f32 scaleValue);
+    extern void vecScale(void* dst, void* src, f32 scaleValue);
     extern f32 lbl_8047E348;
     extern const f32 lbl_8047E354;
     extern const f32 lbl_8047E358;
@@ -1326,64 +1326,64 @@ void fn_801D9950(void* owner, f32* scale, s32 selector) {
     switch (ctx->field_2C) {
     case 0x8F:
         if (ctx->field_2E == 2) {
-            fn_800E013C(scale, scale, lbl_8047E364);
+            vecScale(scale, scale, lbl_8047E364);
         }
         return;
     case 0xB1:
-        fn_800E013C(scale, scale, lbl_8047E348);
+        vecScale(scale, scale, lbl_8047E348);
         return;
     case 0xC4:
         variant = ctx->field_2E;
         if (variant == 1) {
-            fn_800E013C(scale, scale, lbl_8047E368);
+            vecScale(scale, scale, lbl_8047E368);
             return;
         }
         if (variant == 2) {
-            fn_800E013C(scale, scale, lbl_8047E348);
+            vecScale(scale, scale, lbl_8047E348);
             return;
         }
         break;
     case 0xFA:
         variant = ctx->field_2E;
         if (variant == 1) {
-            fn_800E013C(scale, scale, lbl_8047E36C);
+            vecScale(scale, scale, lbl_8047E36C);
             return;
         }
         if (variant == 2) {
-            fn_800E013C(scale, scale, lbl_8047E370);
+            vecScale(scale, scale, lbl_8047E370);
             return;
         }
         break;
     case 0x119:
-        fn_800E013C(scale, scale, lbl_8047E374);
+        vecScale(scale, scale, lbl_8047E374);
         return;
     case 0x133:
         if (ctx->field_2E == 2) {
-            fn_800E013C(scale, scale, lbl_8047E374);
+            vecScale(scale, scale, lbl_8047E374);
             return;
         }
         break;
     case 0x13B:
         if (ctx->field_2E == 2) {
-            fn_800E013C(scale, scale, lbl_8047E374);
+            vecScale(scale, scale, lbl_8047E374);
             return;
         }
         break;
     case 0x143:
         if (ctx->field_2E == 2) {
-            fn_800E013C(scale, scale, lbl_8047E378);
+            vecScale(scale, scale, lbl_8047E378);
             return;
         }
         break;
     case 0x149:
         if (ctx->field_2E == 2) {
-            fn_800E013C(scale, scale, lbl_8047E37C);
+            vecScale(scale, scale, lbl_8047E37C);
             return;
         }
         break;
     case 0x162:
         if (ctx->field_2E == 2) {
-            fn_800E013C(scale, scale, lbl_8047E37C);
+            vecScale(scale, scale, lbl_8047E37C);
         }
         break;
     }

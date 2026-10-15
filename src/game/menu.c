@@ -137,18 +137,18 @@ double atan2(double y, double x);
 void GSlogWrite(const char* fmt, ...);
 u32 GSthreadGetCurrentThread(void);
 void _threadSwitch(void);
-u32 fn_800D3088(void);
+u32 msgGetCharsPerFrame(void);
 void fn_800D9E4C(s32);
 void fn_800D9ED8(s32);
-void fn_800DA4C4(s32, s32, s32);
+void gfxSetBlendMode(s32, s32, s32);
 void fn_801D2404(void);
 void fadeDaemon(void);
 void fn_800FE6D0(s32 x, s32 y);
 void fn_800FE35C(void);
 void spriteSetEnv(void);
 u16 fn_8005D798(void*, s32);
-void fn_800F7434(void*, u32, ...);
-int fn_80166A28(u16);
+void cmsRunSync(void*, u32, ...);
+int soundStartSE(u16);
 u8 fn_8008ABA0(s32);
 s32 fn_8008AB8C(s32);
 u8 fn_800F7EF8(s32 pad_id);
@@ -522,7 +522,7 @@ void menuSetPosition(u32 id, s16 x, s16 y) {
         if (sound != NULL) {                                                \
             u32 se = fn_8005D798(sound, (event));                           \
             if (se != 0) {                                                  \
-                fn_80166A28(se);                                            \
+                soundStartSE(se);                                            \
             }                                                               \
         }                                                                   \
     } while (0)
@@ -601,7 +601,7 @@ void menuDaemon(void) {
                         }
                         break;
                     case 3:
-                        fn_800F7434(data->buttonCallback, 0);
+                        cmsRunSync(data->buttonCallback, 0);
                         break;
                     case 4:
                         data->buttonCallback(node);
@@ -654,7 +654,7 @@ void menuDaemon(void) {
                             menuCursorNormal(node);
                             break;
                         case 3:
-                            fn_800F7434(data->cursorCallback, 0);
+                            cmsRunSync(data->cursorCallback, 0);
                             break;
                         case 4:
                             data->cursorCallback(node);
@@ -681,7 +681,7 @@ void menuDaemon(void) {
         if ((node->flags & 4) != 0) {
             winSeqMoveMenu(node);
             if (data->tickCallback != NULL) {
-                for (i = 0; i < fn_800D3088(); i++) {
+                for (i = 0; i < msgGetCharsPerFrame(); i++) {
                     data->tickCallback(node);
                 }
             }
@@ -720,7 +720,7 @@ void menuDaemon(void) {
 
     fn_800FE6D0(0, 0);
     fn_800FE35C();
-    fn_800DA4C4(1, 6, 7);
+    gfxSetBlendMode(1, 6, 7);
     if (doFade != 0) {
         fadeDaemon();
     }
@@ -1028,7 +1028,7 @@ void menuPlaySe(u32 id, s32 event) {
     if (sound != NULL) {
         u32 se = fn_8005D798(sound, event);
         if (se != 0) {
-            fn_80166A28(se);
+            soundStartSE(se);
         }
     }
 }
@@ -1191,7 +1191,7 @@ void _menuUpdateKeyInfo__FP15WINDOW_SYS_WORK(MenuSystem* work) {
                 keyInfo->repeatTimer[i] = 15;
                 repeat |= bit;
             } else if (keys & bit) {
-                keyInfo->repeatTimer[i] -= fn_800D3088();
+                keyInfo->repeatTimer[i] -= msgGetCharsPerFrame();
                 if (keyInfo->repeatTimer[i] <= 0) {
                     keyInfo->repeatTimer[i] = 5;
                     repeat |= bit;

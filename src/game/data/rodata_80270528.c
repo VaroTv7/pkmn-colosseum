@@ -74,7 +74,7 @@ extern u8 fn_80111DF8[];
 extern u8 fn_80111F2C[];
 extern u8 fn_8011207C[];
 extern u8 fn_80118068[];
-extern u8 fn_80118070[];
+extern u8 tvRelease2[];
 extern u8 fn_80118100[];
 extern u8 _cameraGetStateSize[];
 extern u8 _cameraMakeStateData[];
@@ -1184,7 +1184,7 @@ const u8 lbl_802727B8[16] = {
 
 const void* lbl_802727C8[4] = {
     (void*)fn_80118100,
-    (void*)fn_80118070,
+    (void*)tvRelease2,
     (void*)fn_80118068,
     (void*)0x00000000,
 };

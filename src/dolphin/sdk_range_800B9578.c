@@ -250,7 +250,7 @@ u32 fn_800B9B14(f32 scale)
     return __GXGetNumXfbLines(height, integerScale);
 }
 
-void fn_800B9BDC(GXColor_800B9BDC color, u32 clearZ)
+void GXSetCopyClear(GXColor_800B9BDC color, u32 clearZ)
 {
     u32 reg;
 

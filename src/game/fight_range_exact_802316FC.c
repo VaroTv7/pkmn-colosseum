@@ -63,7 +63,7 @@ u8 fn_802316FC(void* ctx) {
 /* RULE-EXCEPTION(user-approved): opt_propagation off for fn_802317E4 only; the unit builds with -O4,s — see docs/RULE_EXCEPTIONS.md */
 #pragma opt_propagation off
 void fn_802317E4(void) {
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern u8 fightOutPokemonCheckFightOut();
     extern u8 fightSideIsJoutaiDataId();
     extern u8 fightFloorIsJoutaiDataId();
@@ -78,7 +78,7 @@ void fn_802317E4(void) {
     u8* msg;
     u8 i;
 
-    if (fn_801EF634() != 0) {
+    if (std103_battleGetResult() != 0) {
         return;
     }
 
@@ -202,7 +202,7 @@ void fn_802317E4(void) {
     }
 
     fn_801DA7AC();
-    if (fn_801EF634() != 0) {
+    if (std103_battleGetResult() != 0) {
         return;
     }
 
@@ -228,7 +228,7 @@ void fn_802317E4(void) {
     }
 
     fn_801DA7AC();
-    if (fn_801EF634() != 0) {
+    if (std103_battleGetResult() != 0) {
         return;
     }
 
@@ -251,7 +251,7 @@ void fn_802317E4(void) {
     }
 
     fn_801DA7AC();
-    if (fn_801EF634() != 0) {
+    if (std103_battleGetResult() != 0) {
         return;
     }
 
@@ -273,7 +273,7 @@ void fn_802317E4(void) {
     }
 
     fn_801DA7AC();
-    if (fn_801EF634() != 0) {
+    if (std103_battleGetResult() != 0) {
         return;
     }
 }

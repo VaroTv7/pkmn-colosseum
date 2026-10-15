@@ -19,7 +19,7 @@ extern void fn_8003480C(s32);
 extern void fn_8006B8F0();
 extern void fn_8006E0CC();
 extern void floorRequestChange(s32);
-extern void fn_80166A28();
+extern void soundStartSE();
 extern void* savedataGetStatus();
 extern void menuSetPosition();
 extern void winMsgOpen();
@@ -61,7 +61,7 @@ void fn_8005CF2C(void* hero, s32 result) {
         __assert(lbl_802678D8, 0x1BB, lbl_80267A20);
     }
 
-    fn_80166A28(0x26);
+    soundStartSE(0x26);
     winMsgOpen(7, (u16)messageId, 1, 0);
     switch (result) {
     case 0:

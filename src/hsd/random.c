@@ -33,7 +33,7 @@ s32 fn_801ADCD8(void)
 }
 
 /* HSD_Randf */
-f32 fn_801ADC7C(void)
+f32 HSD_Randf(void)
 {
     *lbl_80478C94 = *lbl_80478C94 * 214013 + 2531011;
     return (f32) (*lbl_80478C94 >> 0x10) / (1 << 16);

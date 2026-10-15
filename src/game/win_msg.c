@@ -24,7 +24,7 @@
 
 extern void fn_800FE6D0(s16 x, s16 y);
 extern void spriteSetEnv(void);
-extern void fn_8001EC08(s32, s32, s32, s32, u8, s32);
+extern void msgWinDrawBackground(s32, s32, s32, s32, u8, s32);
 extern void winMsgDrawMessage(void* message, u32 state, u8 flag);
 extern void* windowGetFreeWork(void* window);
 
@@ -61,10 +61,10 @@ s32 winMsgDraw(u8* window, const WinMsgItem* item)
     case 0x40:
     case 0x50:
     case 0x51:
-        fn_8001EC08(0, 2, width, height, window[0x8B], 1);
+        msgWinDrawBackground(0, 2, width, height, window[0x8B], 1);
         break;
     case 0x10C:
-        fn_8001EC08(0, 2, width, height, window[0x8B], 0);
+        msgWinDrawBackground(0, 2, width, height, window[0x8B], 0);
         break;
     }
 

@@ -30,9 +30,9 @@ extern void GSmodelSetRotation(void*, void*);
 extern int peopleOpenSub(void* entry, u32 groupId, u32 indexId, s32 objectId);
 extern void fn_8018F08C(void* entry, u32 motionIndex);
 extern void fn_801848D0(void* model, s32 group, s32 id, s32 part);
-extern void fn_80188AF4(u32 groupId, u32 index);
-extern void fn_80188FA0(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex);
-extern void fn_80188CA0(u32 groupId, u32 index, u32 x, u32 y, u32 z);
+extern void std067_characterStopLookAt(u32 groupId, u32 index);
+extern void std181_characterTurnHeadTowardsCharacter(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex);
+extern void std066_characterLookAtPosition(u32 groupId, u32 index, u32 x, u32 y, u32 z);
 extern void fn_801812C4(void* entry);
 
 extern s32 lbl_8047B1F8;          /* maximum people count */
@@ -197,14 +197,14 @@ void peopleBiosPopData(u8* src, u32 size) {
 
         switch (((u8*)entry)[0x96]) {
         case 0:
-            fn_80188AF4(entry->groupId, entry->index);
+            std067_characterStopLookAt(entry->groupId, entry->index);
             break;
         case 1:
-            fn_80188FA0(entry->groupId, entry->index, *(u32*)((u8*)entry + 0xC0),
+            std181_characterTurnHeadTowardsCharacter(entry->groupId, entry->index, *(u32*)((u8*)entry + 0xC0),
                         *(u32*)((u8*)entry + 0xC4));
             break;
         case 2:
-            fn_80188CA0(entry->groupId, entry->index, (s32)*(f32*)((u8*)entry + 0xA8),
+            std066_characterLookAtPosition(entry->groupId, entry->index, (s32)*(f32*)((u8*)entry + 0xA8),
                         (s32)*(f32*)((u8*)entry + 0xAC), (s32)*(f32*)((u8*)entry + 0xB0));
             break;
         }

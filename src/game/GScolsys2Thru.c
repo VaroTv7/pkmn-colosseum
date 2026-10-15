@@ -265,7 +265,7 @@ static inline s32 getFixedMdlEventListPass(GScolsys2Vec3* start, GScolsys2Vec3* 
 }
 
 /* XD GScolsys2ThruPassEventID (0x3B0 + getMdlEventListPass 0x200). */
-s32 fn_801101B4(GScolsys2Vec3* start, GScolsys2Vec3* end,
+s32 colsysPassGetEventID(GScolsys2Vec3* start, GScolsys2Vec3* end,
                 GSfieldQueryTriangle* out)
 {
     GSfieldQueryTriangle temp[4];

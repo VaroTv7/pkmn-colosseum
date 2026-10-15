@@ -19,7 +19,7 @@
 extern u8 lbl_80408378[];
 
 /* 0x801140DC | 0x90 */
-void fn_801140DC(u32 material, u32 palette, u8 slot) {
+void std246_saveSetStatus578(u32 material, u32 palette, u8 slot) {
     extern u32 fn_80128E24(void);
     extern void* fn_80128E04(void);
     extern void gamedatasaveSetStatus(void*, u32, u32);
@@ -36,7 +36,7 @@ void fn_801140DC(u32 material, u32 palette, u8 slot) {
 }
 
 /* 0x8011416C | 0x20 */
-void fn_8011416C(u32 material, u32 palette, u8 materialSlot) {
+void std161_fieldSetPending(u32 material, u32 palette, u8 materialSlot) {
     u8* state = lbl_80408378;
 
     *(u32*)(state + 0x48) = material;
@@ -59,7 +59,7 @@ void fn_8011418C(u32* texture, u32* palette, u8* textureSlot) {
 }
 
 /* 0x801141D8 | 0x20 */
-void fn_801141D8(u32 texture, u32 palette, u8 textureSlot) {
+void std128_mapSetReturnMap(u32 texture, u32 palette, u8 textureSlot) {
     u8* state = lbl_80408378;
 
     *(u32*)(state + 0x3C) = texture;
@@ -86,7 +86,7 @@ void EvlogSet__FScUl(s8 event, u32 value) {
 }
 
 /* 0x80114254 | 0x60 */
-s32 fn_80114254(s32 param1, s32 param2, s32 param3) {
+s32 floorReadRelModulePostFunc(s32 param1, s32 param2, s32 param3) {
     extern s32 GSresGetResource(s32);
     extern void fn_8017F484(s32, s32, s32);
     s32 result = GSresGetResource(param1);
@@ -96,7 +96,7 @@ s32 fn_80114254(s32 param1, s32 param2, s32 param3) {
 }
 
 /* 0x801142B4 | 0x44 */
-void* fn_801142B4(void* group, void* model, u32 size) {
+void* floorReadRelModulePreFunc(void* group, void* model, u32 size) {
     extern void* GSresAllocResourceAlign(u32 size, u32 alignment, void* group, void* model, u32 flags);
     void* result;
 
@@ -110,10 +110,10 @@ void* fn_801142B4(void* group, void* model, u32 size) {
 /* 0x801142F8 | 0x34 */
 void* floorReadGFLPostFunc(u32 group, u32 modelId) {
     extern void* GSresGetResource(u32, u32);
-    extern void fn_801ED680(void*);
+    extern void flareInit(void*);
     void* model;
 
     model = GSresGetResource(group, modelId);
-    fn_801ED680(model);
+    flareInit(model);
     return model;
 }

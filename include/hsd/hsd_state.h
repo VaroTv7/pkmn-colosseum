@@ -84,7 +84,7 @@ void fn_801B278C(int enable);
 void fn_801B27DC(int enable, int func, int update);
 void fn_801B2878(int mode);
 void fn_801B28B8(f32 shininess);
-void fn_801B28C8(GXColor ambient, GXColor diffuse, GXColor specular,
+void HSD_SetMaterialColor(GXColor ambient, GXColor diffuse, GXColor specular,
                  f32 alpha);
 
 #endif /* HSD_STATE_H */

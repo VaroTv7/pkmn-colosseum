@@ -189,7 +189,7 @@ void GSflagSet(s32 flagID);
  * @param flagID  The flag index to read.
  * @return        0 if the flag is clear, 1 if set.
  */
-u8 fn_801902E0(s32 flagID);
+u8 std081_flagCheckTrue(s32 flagID);
 
 /**
  * GSflagSet16 -- Set a flag to 0 (clear).
@@ -211,7 +211,7 @@ void GSflagSet16(s32 flagID);
  *
  * @param flagID  The flag index to set.
  */
-void fn_80190528(s32 flagID);
+void std078_flagSetFalse(s32 flagID);
 
 /**
  * GSflagGet16 -- Read a boolean flag value.

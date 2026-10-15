@@ -28,7 +28,7 @@ extern void* GSmsgFontOpen(void* font);
 extern s32 GSmsgFontClose(void* font);
 extern void GSmsgOpen(void* msg);
 extern s32 GSmsgClose(void* msg);
-extern void fn_801ED674(void);
+extern void flareRelease(void);
 extern void fn_801193BC(void* bank);
 extern void fn_800D2738(void* camera);
 extern void GSlightFree(void* light);
@@ -146,7 +146,7 @@ void* floorReadNormalPreFunc(u32 group, u32 id, u32 size) {
 }
 
 u32 _unloadFlare__FPvUlUl(void* data, u32 group, u32 id) {
-    fn_801ED674();
+    flareRelease();
     return 1;
 }
 

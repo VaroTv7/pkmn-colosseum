@@ -19,8 +19,8 @@
 extern void GSlogWrite(const void* fmt, ...);
 extern u32 floorGetCurrentContext(void);
 extern void GSthreadSetArgs(void* thread, s32 count, ...);
-extern u8* fn_800F6D18(u32 script, u32 argc, va_list args);
-extern u32 fn_800F6BC4(void* entry);
+extern u8* cms_ScriptCreateThread(u32 script, u32 argc, va_list args);
+extern u32 cms_ScriptExecute(void* entry);
 
 extern u8 lbl_80271294[];                /* "[%s] failed to create thread" (SJIS) */
 extern u8 lbl_80315668[];                /* "_vmThreadCreate", this function's name */
@@ -41,12 +41,12 @@ u16 fn_800F7318(u32 affinity, u32 script, u32 stackSize, u32 autoStart,
     GSThread* thread;
 
     va_start(args, argc);
-    entry = fn_800F6D18(script, argc, args);
+    entry = cms_ScriptCreateThread(script, argc, args);
     priority = floorGetCurrentContext();
     if (entry == NULL) {
         return 0;
     }
-    thread = GSthreadCreate(affinity, priority, stackSize, 1, autoStart, fn_800F6BC4);
+    thread = GSthreadCreate(affinity, priority, stackSize, 1, autoStart, cms_ScriptExecute);
     if (thread != NULL) {
         *(GSThread**)(entry + 0xC) = thread;
         *(void**)(entry + 0x10) = done;

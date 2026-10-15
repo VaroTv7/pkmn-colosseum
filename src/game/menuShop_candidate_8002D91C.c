@@ -40,7 +40,7 @@ extern void mailMainReceiveTerminate(void);
 extern u32 fn_800D37CC(void);
 extern void menuCreateOffScreen(f32 duration);
 extern void _flagSet(s32 flag, s32 value);
-extern void fn_800FF730(s32 event);
+extern void std098_mapWarpToMenuRoom(s32 event);
 extern void _threadSwitch(void);
 extern void menuReleaseOffScreen(f32 duration);
 extern f32 lbl_8047B9CC;
@@ -198,7 +198,7 @@ void menuShopOpen(u32 flag)
     state->location = flag;
     state->active = 1;
     _flagSet(1, 2);
-    fn_800FF730(0x38F);
+    std098_mapWarpToMenuRoom(0x38F);
     floorSetFadeScript(0, 0);
     _threadSwitch();
     duration = (f32)(s32)fn_800D37CC();

@@ -50,7 +50,7 @@ static const FadeColor sFadeBlack = { 0x00, 0x00, 0x00, 0xFF };
 
 extern void _threadSwitch(void);
 extern void fadeEffectHookFunction_Doku_Init(void);
-extern void fn_80166A28(s32 arg0);
+extern void soundStartSE(s32 arg0);
 extern u8 menuOffScreenIsDoing(void);
 extern GStexture* menuOffScreenGetPtr(void);
 extern GStexture* GStextureCreate(u32 arg0, u32 arg1, u32 format, u32 arg3, u32 arg4);
@@ -58,21 +58,21 @@ extern void GStextureFree(GStexture* texture);
 extern void GSgfxBeginBackFBCapture(GStexture* texture, void* callback, void* userData);
 extern void fn_801C6928(void);
 extern s32 fn_800D37CC(void);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern void fn_800D9ED8(u32 arg0);
-extern void fn_800D88DC(u32 arg0);
-extern void fn_800D888C(u32 arg0);
-extern void fn_800D9B58(f32 left, f32 top, f32 right, f32 bottom);
-extern void fn_800DA4C4(u32 arg0, u32 arg1, u32 arg2);
-extern void fn_800DA2BC(u32 arg0, u32 arg1, u32 arg2);
-extern void fn_800DA1E8(u32 arg0, u32 arg1, u32 arg2);
-extern void fn_800DA028(u32 arg0);
-extern void fn_800D6A00(u32 arg0);
-extern void fn_800D7820(u32 arg0);
-extern void fn_800D67BC(u32 arg0);
-extern void fn_800D6680(f32 x, f32 y, f32 z);
+extern void gfxSetFlags(u32 arg0);
+extern void gfxClearFlags(u32 arg0);
+extern void gfxSetOrtho(f32 left, f32 top, f32 right, f32 bottom);
+extern void gfxSetBlendMode(u32 arg0, u32 arg1, u32 arg2);
+extern void gfxSetUpdates(u32 arg0, u32 arg1, u32 arg2);
+extern void gfxSetZMode(u32 arg0, u32 arg1, u32 arg2);
+extern void gfxSetCullMode(u32 arg0);
+extern void gfxSetPrimitive(u32 arg0);
+extern void gfxSetVtxDesc(u32 arg0);
+extern void gfxBegin(u32 arg0);
+extern void gfxVtxPos(f32 x, f32 y, f32 z);
 extern void fn_800D5CB8(u32 arg0, u8 r, u8 g, u8 b, u8 a);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 
 FadeHook fadeSetEX(u16 type, void (*init)(void), u8 snapshot, f32 duration, f32 hookDuration);
 void fadeSet(u16 type, f32 duration);
@@ -92,7 +92,7 @@ void fadeEffectDokuStop(void) {
 void fadeEffectDokuStart(void) {
     if (lbl_80466E30.mode == 0) {
         fadeSetEX(9, fadeEffectHookFunction_Doku_Init, 0, 1.0f, 0.5f);
-        fn_80166A28(0x54);
+        soundStartSE(0x54);
     }
 }
 
@@ -225,7 +225,7 @@ void fadeDaemon(void) {
         case 2:
         case 3:
             fps = fn_800D37CC();
-            lbl_80466E30.elapsed += (f32)fn_800D3088() / fps;
+            lbl_80466E30.elapsed += (f32)msgGetCharsPerFrame() / fps;
             if (lbl_80466E30.elapsed >= lbl_80466E30.duration) {
                 lbl_80466E30.elapsed = lbl_80466E30.duration;
                 lbl_80466E30.pending = 0;
@@ -241,7 +241,7 @@ void fadeDaemon(void) {
 
     if (lbl_80466E30.hook != NULL) {
         fps = fn_800D37CC();
-        lbl_80466E30.hookElapsed += (f32)fn_800D3088() / fps;
+        lbl_80466E30.hookElapsed += (f32)msgGetCharsPerFrame() / fps;
         if (lbl_80466E30.hookElapsed >= lbl_80466E30.hookDuration) {
             lbl_80466E30.hookElapsed = lbl_80466E30.hookDuration;
         }
@@ -280,21 +280,21 @@ void fadeDaemon(void) {
         }
 
         fn_800D9ED8(1);
-        fn_800D88DC(1);
-        fn_800D888C(6);
-        fn_800D9B58(0.0f, 0.0f, 640.0f, 480.0f);
-        fn_800DA4C4(1, 6, 7);
-        fn_800DA2BC(1, 1, 0);
-        fn_800DA1E8(0, 1, 1);
-        fn_800DA028(0);
-        fn_800D6A00(7);
-        fn_800D7820(0);
-        fn_800D67BC(2);
-        fn_800D6680(0.0f, 0.0f, 0.0f);
+        gfxSetFlags(1);
+        gfxClearFlags(6);
+        gfxSetOrtho(0.0f, 0.0f, 640.0f, 480.0f);
+        gfxSetBlendMode(1, 6, 7);
+        gfxSetUpdates(1, 1, 0);
+        gfxSetZMode(0, 1, 1);
+        gfxSetCullMode(0);
+        gfxSetPrimitive(7);
+        gfxSetVtxDesc(0);
+        gfxBegin(2);
+        gfxVtxPos(0.0f, 0.0f, 0.0f);
         fn_800D5CB8(0, color.r, color.g, color.b, alpha);
-        fn_800D6680(640.0f, 480.0f, 0.0f);
+        gfxVtxPos(640.0f, 480.0f, 0.0f);
         fn_800D5CB8(0, color.r, color.g, color.b, alpha);
-        fn_800D6728();
+        gfxEnd();
         fn_800D9ED8(0);
         break;
     case 3:

@@ -163,7 +163,7 @@ extern void* memset(void* dst, int val, u32 size);
 extern void* fn_801A6928(u32 size);             /* HSD_MemAlloc */
 extern void fn_801A6960(void* p);               /* HSD_Free */
 extern HSD_SList* fn_801A3E64(HSD_SList* list); /* HSD_SListRemove */
-extern f32 fn_801ADC7C(void);                   /* HSD_Randf */
+extern f32 HSD_Randf(void);                   /* HSD_Randf */
 
 extern void PSMTXIdentity(Mtx m);
 extern void PSMTXConcat(const Mtx a, const Mtx b, Mtx ab);
@@ -578,7 +578,7 @@ f32 generateParticle_8017424C(psGenerator* gen)
         case 3:
         case 4: {
             f32 min_a = gen->aux.cone.minAngle;
-            f32 rnd = fn_801ADC7C();
+            f32 rnd = HSD_Randf();
             f32 step = (gen->aux.cone.maxAngle - min_a) / (f32) (s32) gen->count;
 
             angle_step = step;
@@ -588,7 +588,7 @@ f32 generateParticle_8017424C(psGenerator* gen)
         case 6:
         case 7: {
             f32 min_a = gen->aux.cone.minAngle;
-            f32 rnd = fn_801ADC7C();
+            f32 rnd = HSD_Randf();
             f32 step = (gen->aux.cone.maxAngle - min_a) / (f32) (s32) gen->count;
 
             angle_step = step;
@@ -596,7 +596,7 @@ f32 generateParticle_8017424C(psGenerator* gen)
             break;
         }
         default:
-            cur_angle = (f32) (2.0 * (M_PI * fn_801ADC7C()));
+            cur_angle = (f32) (2.0 * (M_PI * HSD_Randf()));
             angle_step = (f32) ((2.0 * M_PI) / (s32) gen->count);
             break;
         }
@@ -613,7 +613,7 @@ f32 generateParticle_8017424C(psGenerator* gen)
                 dist = -gen->radius;
                 radius = 1.0f;
             } else {
-                radius = fn_801ADC7C();
+                radius = HSD_Randf();
                 if ((gen->type & 0xF) == 3 || (gen->type & 0xF) == 4) {
                     radius = sqrtf(radius);
                 }
@@ -639,7 +639,7 @@ f32 generateParticle_8017424C(psGenerator* gen)
                     f32 min_angle = gen->aux.cone.minAngle;
 
                     cur_angle = (gen->aux.cone.maxAngle - min_angle) *
-                                    fn_801ADC7C() +
+                                    HSD_Randf() +
                                 min_angle;
                     if (fabs(dist) < FLT_MIN) {
                         if (gen->aux.cone.height >= 0.0f) {
@@ -662,7 +662,7 @@ f32 generateParticle_8017424C(psGenerator* gen)
                 } else {
                     cur_angle = gen->aux.cone.minAngle;
                     cur_angle = (gen->aux.cone.maxAngle - cur_angle) *
-                                    fn_801ADC7C() +
+                                    HSD_Randf() +
                                 cur_angle;
                     cone_angle = (f32) (M_PI_2 + gen->angle);
                 }
@@ -675,7 +675,7 @@ f32 generateParticle_8017424C(psGenerator* gen)
                 } else {
                     cur_angle = gen->aux.cone.minAngle;
                     cur_angle = (gen->aux.cone.maxAngle - cur_angle) *
-                                    fn_801ADC7C() +
+                                    HSD_Randf() +
                                 cur_angle;
                     cone_angle = radius * gen->angle;
                 }
@@ -686,7 +686,7 @@ f32 generateParticle_8017424C(psGenerator* gen)
             emit_pos.y = dist * sinf(cur_angle);
 
             if ((gen->type & 0xF) == 6 || (gen->type & 0xF) == 7) {
-                emit_pos.z = fn_801ADC7C();
+                emit_pos.z = HSD_Randf();
                 if ((gen->type & 0xF) == 6) {
                     emit_pos.x *= 1.0f - emit_pos.z;
                     emit_pos.y *= 1.0f - emit_pos.z;
@@ -725,7 +725,7 @@ f32 generateParticle_8017424C(psGenerator* gen)
             break;
 
         case 1: {
-            f32 rnd = fn_801ADC7C();
+            f32 rnd = HSD_Randf();
 
             emit_pos.x = rnd * gen->aux.line.x2;
             emit_pos.y = rnd * gen->aux.line.y2;
@@ -750,12 +750,12 @@ f32 generateParticle_8017424C(psGenerator* gen)
             if (gen->radius < 0.0f) {
                 dist = 1.0f;
             } else {
-                dist = fn_801ADC7C();
+                dist = HSD_Randf();
             }
             if (gen->angle < 0.0f) {
                 cur_angle += angle_step;
             } else {
-                cur_angle = (f32) (2.0 * (M_PI * fn_801ADC7C()));
+                cur_angle = (f32) (2.0 * (M_PI * HSD_Randf()));
             }
             gen->aux.line.x2 = elevation;
             psGenerateParticle(gen->linkNo, gen->bank, 0, gen->kind | 4,
@@ -765,9 +765,9 @@ f32 generateParticle_8017424C(psGenerator* gen)
             break;
 
         case 5:
-            emit_pos.x = fn_801ADC7C();
-            emit_pos.y = fn_801ADC7C();
-            emit_pos.z = fn_801ADC7C();
+            emit_pos.x = HSD_Randf();
+            emit_pos.y = HSD_Randf();
+            emit_pos.z = HSD_Randf();
 
             switch (gen->aux.rect.flag) {
             case 0:
@@ -779,7 +779,7 @@ f32 generateParticle_8017424C(psGenerator* gen)
                 emit_pos.y = emit_pos.y > 0.5f ? 1.0f : 0.0f;
                 break;
             case 3: {
-                f32 rnd = fn_801ADC7C();
+                f32 rnd = HSD_Randf();
                 f32 a2 = gen->aux.rect.x;
 
                 if (rnd > a2 / (a2 + gen->aux.rect.y)) {
@@ -793,7 +793,7 @@ f32 generateParticle_8017424C(psGenerator* gen)
                 emit_pos.z = emit_pos.z > 0.5f ? 1.0f : 0.0f;
                 break;
             case 5: {
-                f32 rnd = fn_801ADC7C();
+                f32 rnd = HSD_Randf();
                 f32 a2 = gen->aux.rect.x;
 
                 if (rnd > a2 / (a2 + gen->aux.rect.z)) {
@@ -804,7 +804,7 @@ f32 generateParticle_8017424C(psGenerator* gen)
                 break;
             }
             case 6: {
-                f32 rnd = fn_801ADC7C();
+                f32 rnd = HSD_Randf();
                 f32 a2 = gen->aux.rect.y;
 
                 if (rnd > a2 / (a2 + gen->aux.rect.z)) {
@@ -815,7 +815,7 @@ f32 generateParticle_8017424C(psGenerator* gen)
                 break;
             }
             case 7: {
-                f32 rnd = fn_801ADC7C();
+                f32 rnd = HSD_Randf();
                 f32 a2 = gen->aux.rect.z;
                 f32 b2 = gen->aux.rect.y;
                 f32 c2 = gen->aux.rect.x;
@@ -877,18 +877,18 @@ f32 generateParticle_8017424C(psGenerator* gen)
             f32 lon;
 
             if (0.0f == gen->aux.sphere.latRange) {
-                lat = (f32) (M_PI * fn_801ADC7C());
+                lat = (f32) (M_PI * HSD_Randf());
             } else {
-                lat = gen->aux.sphere.latRange * fn_801ADC7C();
+                lat = gen->aux.sphere.latRange * HSD_Randf();
             }
-            lon = (f32) (2.0 * (M_PI * fn_801ADC7C()));
+            lon = (f32) (2.0 * (M_PI * HSD_Randf()));
             {
                 f32 r2 = gen->radius;
 
                 if (r2 < 0.0f) {
                     dist = -r2;
                 } else {
-                    dist = r2 * fn_801ADC7C();
+                    dist = r2 * HSD_Randf();
                 }
             }
 
@@ -962,7 +962,7 @@ void psExecGenerator(u32 mask)
         if (gen->random < 0.0f) {
             gen->count -= gen->random;
         } else {
-            gen->count += gen->random * fn_801ADC7C();
+            gen->count += gen->random * HSD_Randf();
         }
         if (gen->count >= 1.0f) {
             gen->count = generateParticle_8017424C(gen);
@@ -1077,7 +1077,7 @@ psGenerator* psCreateGeneratorID(s32 linkNo, s32 bank, s32 idx)
         } else if (gen->random < 0.0f) {
             gen->count = 0.0f;
         } else {
-            gen->count = fn_801ADC7C();
+            gen->count = HSD_Randf();
         }
 
         {

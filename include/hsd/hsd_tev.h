@@ -80,7 +80,7 @@ void fn_801B3884(void);
 int fn_801B387C(void);
 int HSD_StateAssignTev(void);
 void fn_801B3770(void);
-void fn_801B3638(HSD_TevDesc* desc);
+void HSD_SetupTevStage(HSD_TevDesc* desc);
 void fn_801B3408(HSD_TevDesc* desc);
 int HSD_Index2TevStage(int idx);
 void fn_801B3258(void);

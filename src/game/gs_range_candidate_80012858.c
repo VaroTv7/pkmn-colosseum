@@ -10,7 +10,7 @@ extern void* windowAllocMemory(void*, s32);
 extern void* windowGetAllocPtr(void*);
 extern void* windowSearchID(s32);
 extern void fn_80103F74(void*, s32, s32);
-extern void fn_801669BC(s32);
+extern void soundStopSE(s32);
 
 s32 fn_800129A8(u8* ctx)
 {
@@ -81,7 +81,7 @@ s32 fn_800129A8(u8* ctx)
         (*(s16*)(work + 0xE))++;
         if (*(s16*)(work + 0xE) > *(s16*)(work + 0xC)) {
             *(s16*)(work + 0xC) = 0;
-            fn_801669BC(0x4D0);
+            soundStopSE(0x4D0);
         }
     }
     (*(u16*)(work + 6))++;

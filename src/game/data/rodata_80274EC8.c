@@ -74,7 +74,7 @@ extern u8 fn_80111DF8[];
 extern u8 fn_80111F2C[];
 extern u8 fn_8011207C[];
 extern u8 fn_80118068[];
-extern u8 fn_80118070[];
+extern u8 tvRelease2[];
 extern u8 fn_80118100[];
 extern u8 _cameraGetStateSize[];
 extern u8 _cameraMakeStateData[];

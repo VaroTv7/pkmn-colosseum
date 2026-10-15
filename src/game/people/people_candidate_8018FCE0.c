@@ -20,7 +20,7 @@ extern PeopleEntry* lbl_8047B200; /* people array (heap-allocated) */
  * it active with its self-pointer, no shadow and the default move speed.
  * Returns NULL when every slot is in use.
  */
-PeopleEntry* fn_8018FCE0(void)
+PeopleEntry* peopleCreate(void)
 {
     PeopleEntry* entry;
     s32 maxCount;

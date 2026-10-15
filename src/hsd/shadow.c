@@ -106,7 +106,7 @@ void HSD_ClearVtxDesc(void);
 /* HSD_StateSetCullMode */
 void fn_801B2878(int mode);
 /* HSD_SetupPEMode */
-void fn_801B29E4(u32 flags, HSD_PEDesc* pe);
+void HSD_SetupPEMode(u32 flags, HSD_PEDesc* pe);
 /* HSD_SetupTevStageAll */
 void fn_801B3408(void* tevdesc);
 /* HSD_StateInitTev */
@@ -394,7 +394,7 @@ void fn_801B0EB8(HSD_Shadow* shadow)
 
             fn_801B3890();
 
-            fn_801B29E4(0, &pedesc);
+            HSD_SetupPEMode(0, &pedesc);
 
             chan.mat_color.r = 255;
             chan.mat_color.g = 255;

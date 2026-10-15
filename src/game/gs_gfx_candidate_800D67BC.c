@@ -17,11 +17,11 @@
 #include "dolphin/types.h"
 
 extern void fn_800DB758(u16 vertCount);
-extern void fn_800D4F98(u32, u32, ...);
+extern void gfxRecordCommand(u32, u32, ...);
 extern void fn_800D7650(u8*);
 extern void fn_800D7868(u8*, u32, u32, u32, u32, u8, u32, u8);
-extern void fn_800D7A70(u32);
-extern void fn_800D892C(u32);
+extern void gfxLoadVtxDesc(u32);
+extern void gfxSetupChannelsTev(u32);
 extern void fn_800B928C(u32, u32, u16);
 
 extern u32 lbl_8047AA80;
@@ -39,13 +39,13 @@ inline void fn_800D6A80(u16 vertCount, s32 type, u32* totalVerts, u32* totalPrim
     }
 }
 
-void fn_800D67BC(u16 vertCount) {
+void gfxBegin(u16 vertCount) {
     if (*(u8*)(lbl_8047AA80 + 0x47e) == 1) {
         fn_800DB758(vertCount);
         return;
     }
     if (*(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(2, 1, vertCount);
+        gfxRecordCommand(2, 1, vertCount);
         return;
     }
     if (*(u8*)(lbl_8047AA80 + 0x1b) != *(u8*)(lbl_8047AA80 + 0x1a)) {
@@ -74,8 +74,8 @@ void fn_800D67BC(u16 vertCount) {
         vertCount = (vertCount & 0x7fff) << 1;
     }
 
-    fn_800D7A70(*(u32*)(lbl_8047AA80 + 0x24));
-    fn_800D892C(*(u32*)(lbl_8047AA80 + 0x24));
+    gfxLoadVtxDesc(*(u32*)(lbl_8047AA80 + 0x24));
+    gfxSetupChannelsTev(*(u32*)(lbl_8047AA80 + 0x24));
     fn_800B928C(lbl_80314350[*(u32*)(lbl_8047AA80 + 0x14)],
                 *(u32*)(*(u32*)(lbl_8047AA80 + 0x24) + 0x4), vertCount);
     fn_800D6A80(vertCount, *(s32*)(lbl_8047AA80 + 0x14),

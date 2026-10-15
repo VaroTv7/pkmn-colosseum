@@ -5,7 +5,7 @@ typedef struct FieldCameraList {
     u32 count;
 } FieldCameraList;
 
-extern void* fn_800FF56C(void);
+extern void* std092_getCurrentRoomID(void);
 extern void* floorDataBiosGetPtr(u32 key);
 extern void* floorDataBiosGetCharInfo(void* floorData, u32 index);
 extern FieldCameraList* floorDataBiosGetFieldCameraListPtr(void);
@@ -18,10 +18,10 @@ extern f32 lbl_8047AD78;
 extern f32 lbl_8047AD7C;
 extern f32 lbl_8047CFD0;
 
-void* fn_8011711C(u32 index)
+void* floorCharacterBiosGetByIndex(u32 index)
 {
     return floorDataBiosGetCharInfo(
-        floorDataBiosGetPtr((u32)fn_800FF56C()), index);
+        floorDataBiosGetPtr((u32)std092_getCurrentRoomID()), index);
 }
 
 void fn_80117154(void)

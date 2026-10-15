@@ -218,7 +218,7 @@ static inline void wazaViewerPollCommand(const char* messages) {
         }
         *(s32*)(lbl_804673F8 + 0x870) = 0x3C;
     } else {
-        *(s32*)(lbl_804673F8 + 0x870) -= fn_800D3088();
+        *(s32*)(lbl_804673F8 + 0x870) -= msgGetCharsPerFrame();
     }
 }
 
@@ -1035,7 +1035,7 @@ void fn_801D6E58(void* effect) {
     extern f32 lbl_8047E2F0;
     extern u8 lbl_80314958[];
     extern void* floorDataBiosGetCurrentPtr(void);
-    extern u32 fn_80113F48(void);
+    extern u32 std093_getCurrentGroupID(void);
     extern void* GSresGetResource(u32 group, u32 resId);
     extern void* HSD_ArchiveGetPublicAddress(void* archive, const char* symbol);
     extern u32 floorReadMakeModelResID(u32 id);
@@ -1044,26 +1044,26 @@ void fn_801D6E58(void* effect) {
     extern void _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID(void);
     extern void GScameraGetPosition(void* camera, WazaViewerVec* position);
     extern void GScameraGetLookAt(void* camera, WazaViewerVec* up, WazaViewerVec* at);
-    extern void fn_800E0168(WazaViewerVec* dst, const WazaViewerVec* a, const WazaViewerVec* b);
+    extern void GSvecSub(WazaViewerVec* dst, const WazaViewerVec* a, const WazaViewerVec* b);
     extern void ObjInfoInit(void* bound, WazaViewerVec* extent);
-    extern f32 fn_800E008C(const WazaViewerVec* v);
+    extern f32 vecMag(const WazaViewerVec* v);
     extern void fn_800E0060(WazaViewerVec* dst, const WazaViewerVec* src);
-    extern void fn_800E013C(WazaViewerVec* dst, const WazaViewerVec* src, f32 scale);
+    extern void vecScale(WazaViewerVec* dst, const WazaViewerVec* src, f32 scale);
     extern void GSvecAdd(WazaViewerVec* dst, const WazaViewerVec* a, const WazaViewerVec* b);
     extern void fn_800DFFCC(WazaViewerVec* dst, const WazaViewerVec* a, const WazaViewerVec* b);
-    extern void fn_800DA4C4(u32 a, u32 b, u32 c);
-    extern void fn_800DA2BC(u32 a, u32 b, u32 c);
-    extern void fn_800DA1E8(u32 a, u32 b, u32 c);
+    extern void gfxSetBlendMode(u32 a, u32 b, u32 c);
+    extern void gfxSetUpdates(u32 a, u32 b, u32 c);
+    extern void gfxSetZMode(u32 a, u32 b, u32 c);
     extern void fn_800D9ED8(u32 a);
-    extern void fn_800DA028(u32 a);
-    extern void fn_800D88DC(u32 a);
-    extern void fn_800D888C(u32 a);
-    extern void fn_800D7820(u32 a);
-    extern void fn_800D6A00(u32 a);
-    extern void fn_800D67BC(u32 a);
-    extern void fn_800D6680(f32 x, f32 y, f32 z);
-    extern void fn_800D5C18(u32 a, u32 r, u32 g, u32 b);
-    extern void fn_800D6728(void);
+    extern void gfxSetCullMode(u32 a);
+    extern void gfxSetFlags(u32 a);
+    extern void gfxClearFlags(u32 a);
+    extern void gfxSetVtxDesc(u32 a);
+    extern void gfxSetPrimitive(u32 a);
+    extern void gfxBegin(u32 a);
+    extern void gfxVtxPos(f32 x, f32 y, f32 z);
+    extern void gfxVtxColor(u32 a, u32 r, u32 g, u32 b);
+    extern void gfxEnd(void);
 
     void* floorData;
     u32 group;
@@ -1085,11 +1085,11 @@ void fn_801D6E58(void* effect) {
     WazaViewerVec extent;
 
     floorData = floorDataBiosGetCurrentPtr();
-    group = fn_80113F48();
+    group = std093_getCurrentGroupID();
     index = 0;
     if (lbl_8047B400 != ((WazaViewerCtrl*)(lbl_804673F8 + 0x08))->bounds) {
         sceneData = HSD_ArchiveGetPublicAddress(
-            GSresGetResource(fn_80113F48(), *(u32*)((u8*)floorData + 0x08)),
+            GSresGetResource(std093_getCurrentGroupID(), *(u32*)((u8*)floorData + 0x08)),
             (const char*)lbl_8027947C);
         if (sceneData == NULL) {
             return;
@@ -1124,47 +1124,47 @@ void fn_801D6E58(void* effect) {
     _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
     GScameraGetPosition(camera, &eye);
     GScameraGetLookAt(camera, &forward, &at);
-    fn_800E0168(&axisX, &at, &eye);
+    GSvecSub(&axisX, &at, &eye);
     ObjInfoInit(bound, &extent);
-    extentLength = fn_800E008C(&axisX);
+    extentLength = vecMag(&axisX);
     {
-        f32 length = fn_800E008C(&extent);
+        f32 length = vecMag(&extent);
         extentLength = length + extentLength;
     }
     fn_800E0060(&axisX, &axisX);
-    fn_800E013C(&centre, &axisX, extentLength);
+    vecScale(&centre, &axisX, extentLength);
     GSvecAdd(&centre, &centre, &at);
     fn_800E0060(&forward, &forward);
     fn_800DFFCC(&axisY, &axisX, &forward);
     fn_800E0060(&axisY, &axisY);
     fn_800DFFCC(&forward, &axisY, &axisX);
-    fn_800E013C(&axisY, &axisY, lbl_8047E2F0 * extentLength);
-    fn_800E013C(&forward, &forward, extentLength);
-    fn_800DA4C4(0, 1, 0);
-    fn_800DA2BC(1, 0, 1);
-    fn_800DA1E8(1, 2, 1);
+    vecScale(&axisY, &axisY, lbl_8047E2F0 * extentLength);
+    vecScale(&forward, &forward, extentLength);
+    gfxSetBlendMode(0, 1, 0);
+    gfxSetUpdates(1, 0, 1);
+    gfxSetZMode(1, 2, 1);
     fn_800D9ED8(0);
-    fn_800DA028(0);
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D7820((u32)lbl_80314958);
-    fn_800D6A00(6);
-    fn_800D67BC(4);
-    fn_800D6680(forward.x + (centre.x + axisY.x), forward.y + (centre.y + axisY.y),
+    gfxSetCullMode(0);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetVtxDesc((u32)lbl_80314958);
+    gfxSetPrimitive(6);
+    gfxBegin(4);
+    gfxVtxPos(forward.x + (centre.x + axisY.x), forward.y + (centre.y + axisY.y),
                 forward.z + (centre.z + axisY.z));
     green = color[1];
     blue = color[2];
-    fn_800D5C18(0, color[0], green, blue);
-    fn_800D6680(forward.x + (centre.x - axisY.x), forward.y + (centre.y - axisY.y),
+    gfxVtxColor(0, color[0], green, blue);
+    gfxVtxPos(forward.x + (centre.x - axisY.x), forward.y + (centre.y - axisY.y),
                 forward.z + (centre.z - axisY.z));
-    fn_800D5C18(0, color[0], green, blue);
-    fn_800D6680((centre.x - axisY.x) - forward.x, (centre.y - axisY.y) - forward.y,
+    gfxVtxColor(0, color[0], green, blue);
+    gfxVtxPos((centre.x - axisY.x) - forward.x, (centre.y - axisY.y) - forward.y,
                 (centre.z - axisY.z) - forward.z);
-    fn_800D5C18(0, color[0], green, blue);
-    fn_800D6680((centre.x + axisY.x) - forward.x, (centre.y + axisY.y) - forward.y,
+    gfxVtxColor(0, color[0], green, blue);
+    gfxVtxPos((centre.x + axisY.x) - forward.x, (centre.y + axisY.y) - forward.y,
                 (centre.z + axisY.z) - forward.z);
-    fn_800D5C18(0, color[0], green, blue);
-    fn_800D6728();
+    gfxVtxColor(0, color[0], green, blue);
+    gfxEnd();
 }
 
 /**
@@ -1277,13 +1277,13 @@ void fn_801D7464(void) {
     extern void GSscene_SetCameraPositionVector(WazaViewerVec* src);
     extern void GSscene_SetCameraViewVector(WazaViewerVec* src);
     extern u8 GSscene_GetMode(void);
-    extern void fn_800E0168(WazaViewerVec* dst, const WazaViewerVec* a,
+    extern void GSvecSub(WazaViewerVec* dst, const WazaViewerVec* a,
                             const WazaViewerVec* b);
-    extern f32 fn_800E008C(const WazaViewerVec* v);
+    extern f32 vecMag(const WazaViewerVec* v);
     extern void fn_800E0060(WazaViewerVec* dst, const WazaViewerVec* src);
     extern void fn_800DFFCC(WazaViewerVec* dst, const WazaViewerVec* a,
                             const WazaViewerVec* b);
-    extern void fn_800E013C(WazaViewerVec* dst, const WazaViewerVec* src,
+    extern void vecScale(WazaViewerVec* dst, const WazaViewerVec* src,
                             f32 scale);
     extern void fn_800E0718(void* out, const void* axis, f32 angle);
     extern void GSvecTransformQuat(void* out, const void* quat, const void* vec);
@@ -1291,7 +1291,7 @@ void fn_801D7464(void) {
                          const WazaViewerVec* b);
     extern void set__5GSvecFfff(f32* vec, f32 x, f32 y, f32 z);
     extern u32 fn_800F7AF0(s32 pad);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern u32 fn_800F7BC4(s32 pad);
     extern s8 fn_800F7A7C(s32 pad, s32 mode);
     extern s8 fn_800F7A08(s32 pad, s32 mode);
@@ -1349,12 +1349,12 @@ void fn_801D7464(void) {
     if (*(s32*)lbl_804673F8 == 0) {
         if (GSscene_GetMode() == 2) {
             forward = *(const WazaViewerVec*)lbl_80279338;
-            angleStep = lbl_8047E318 * (f32)fn_800D3088();
+            angleStep = lbl_8047E318 * (f32)msgGetCharsPerFrame();
             GSscene_GetCameraDirectionVector(&direction);
             GSscene_GetCameraPositionVector(&position);
             GSscene_GetCameraViewVector(&view);
             GSvecAdd(&target, &position, &view);
-            fn_800E0168(&target, &target, &direction);
+            GSvecSub(&target, &target, &direction);
             fn_800E0060(&target, &target);
             fn_800DFFCC(&axisX, &forward, &target);
             fn_800E0060(&axisX, &axisX);
@@ -1380,29 +1380,29 @@ void fn_801D7464(void) {
             }
 
             if (lbl_8047B3FC != 0) {
-                fn_800E013C(&step, &forward, angleStep);
+                vecScale(&step, &forward, angleStep);
                 GSvecAdd(&view, &view, &forward);
                 if ((fn_800F7B5C(1) & fn_800F7AF0(1) & 0x08) != 0) {
                     lbl_8047B3FC = 0;
                 }
             }
             if (lbl_8047B3FD != 0) {
-                fn_800E013C(&step, &forward, angleStep);
-                fn_800E0168(&view, &view, &step);
+                vecScale(&step, &forward, angleStep);
+                GSvecSub(&view, &view, &step);
                 if ((fn_800F7B5C(1) & fn_800F7AF0(1) & 0x04) != 0) {
                     lbl_8047B3FD = 0;
                 }
             }
             if (lbl_8047B3FE != 0) {
-                fn_800E013C(&step, &axisX, angleStep);
+                vecScale(&step, &axisX, angleStep);
                 GSvecAdd(&view, &view, &step);
                 if ((fn_800F7B5C(1) & fn_800F7AF0(1) & 0x01) != 0) {
                     lbl_8047B3FE = 0;
                 }
             }
             if (lbl_8047B3FF != 0) {
-                fn_800E013C(&step, &axisX, angleStep);
-                fn_800E0168(&view, &view, &step);
+                vecScale(&step, &axisX, angleStep);
+                GSvecSub(&view, &view, &step);
                 if ((fn_800F7B5C(1) & fn_800F7AF0(1) & 0x02) != 0) {
                     lbl_8047B3FF = 0;
                 }
@@ -1410,7 +1410,7 @@ void fn_801D7464(void) {
 
             if (stickX != 0 || stickY != 0 || substickX != 0 || substickY != 0) {
                 GSvecAdd(&eye, &position, &view);
-                fn_800E0168(&direction, &direction, &eye);
+                GSvecSub(&direction, &direction, &eye);
                 if (stickX != 0) {
                     set__5GSvecFfff((f32*)&axis, lbl_8047E2E4, lbl_8047E30C, lbl_8047E2E4);
                     fn_800E0718(rotation, &axis, lbl_8047E31C * (stickX > 0 ? angleStep : -angleStep));
@@ -1420,7 +1420,7 @@ void fn_801D7464(void) {
                     set__5GSvecFfff((f32*)&axis, lbl_8047E2E4, lbl_8047E30C, lbl_8047E2E4);
                     fn_800E0060(&dirNorm, &direction);
                     fn_800DFFCC(&axis, &axis, &dirNorm);
-                    if (stickY > 0 || fn_800E008C(&axis) > lbl_8047E320) {
+                    if (stickY > 0 || vecMag(&axis) > lbl_8047E320) {
                         fn_800E0060(&axis, &axis);
                         fn_800E0718(rotation, &axis, lbl_8047E31C * (stickY > 0 ? angleStep : -angleStep));
                         GSvecTransformQuat(&direction, rotation, &direction);
@@ -1429,7 +1429,7 @@ void fn_801D7464(void) {
                 if (substickY != 0) {
                     GSvecCopy(&zoom, &direction);
                     fn_800E0060(&zoom, &zoom);
-                    fn_800E013C(&zoom, &zoom, substickY > 0 ? angleStep : -angleStep);
+                    vecScale(&zoom, &zoom, substickY > 0 ? angleStep : -angleStep);
                     GSvecAdd(&direction, &direction, &zoom);
                 }
                 GSvecAdd(&direction, &direction, &eye);
@@ -1507,23 +1507,23 @@ void fn_801D7B94(void* effect) {
     extern void GScameraGetPosition(void*, WazaViewerVec*);
     extern void GScameraGetPerspective(
         void*, f32*, f32*, f32*, f32*);
-    extern void fn_800DA4C4(s32, s32, s32);
-    extern void fn_800DA2BC(s32, s32, s32);
-    extern void fn_800DA1E8(s32, s32, s32);
-    extern void fn_800DA028(s32);
-    extern f32 fn_800E008C(WazaViewerVec*);
+    extern void gfxSetBlendMode(s32, s32, s32);
+    extern void gfxSetUpdates(s32, s32, s32);
+    extern void gfxSetZMode(s32, s32, s32);
+    extern void gfxSetCullMode(s32);
+    extern f32 vecMag(WazaViewerVec*);
     extern void fn_800B944C(s32, s32);
-    extern void fn_800D88DC(s32);
-    extern void fn_800D888C(s32);
-    extern void fn_800D7820(void*);
-    extern void fn_800D6A00(s32);
-    extern void fn_800D67BC(s32);
+    extern void gfxSetFlags(s32);
+    extern void gfxClearFlags(s32);
+    extern void gfxSetVtxDesc(void*);
+    extern void gfxSetPrimitive(s32);
+    extern void gfxBegin(s32);
     extern void GSpartGetTransform(
         GSpart*, WazaViewerVec*, void*, void*);
     extern void clear__5GSvecFv(WazaViewerVec*);
-    extern void fn_800D6680(f32, f32, f32);
+    extern void gfxVtxPos(f32, f32, f32);
     extern void fn_800D5CB8(s32, s32, s32, s32, s32);
-    extern void fn_800D6728(void);
+    extern void gfxEnd(void);
     u8* data;
     u8* entry;
     struct GSmodel* model;
@@ -1567,24 +1567,24 @@ void fn_801D7B94(void* effect) {
         break;
     }
 
-    fn_800DA4C4(1, 6, 1);
-    fn_800DA2BC(1, 1, 1);
-    fn_800DA1E8(0, 7, 0);
-    fn_800DA028(0);
+    gfxSetBlendMode(1, 6, 1);
+    gfxSetUpdates(1, 1, 1);
+    gfxSetZMode(0, 7, 0);
+    gfxSetCullMode(0);
     scale = lbl_8047E340 * aspect /
-            (fov * fn_800E008C(&cameraPosition));
+            (fov * vecMag(&cameraPosition));
     if (scale > lbl_8047E30C) {
         scale = lbl_8047E30C;
     }
     fn_800B944C((s32)(lbl_8047E344 * scale), 5);
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D7820(lbl_80314638);
-    fn_800D6A00(0);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetVtxDesc(lbl_80314638);
+    gfxSetPrimitive(0);
 
     partIndex = *(s32*)(lbl_804673F8 + 0x18);
     if (partIndex < 0) {
-        fn_800D67BC(0x10);
+        gfxBegin(0x10);
         for (i = 0; i < 0x10; i++) {
             part = GSmodelGetPart(
                 model, *(s32*)(entry + 0x4C + i * 4));
@@ -1595,12 +1595,12 @@ void fn_801D7B94(void* effect) {
                 clear__5GSvecFv(&transform);
                 *(u32*)(lbl_804673F8 + 0x0C) |= 2;
             }
-            fn_800D6680(transform.x, transform.y, transform.z);
+            gfxVtxPos(transform.x, transform.y, transform.z);
             fn_800D5CB8(0, 0xFF, 0, 0, 0xDC);
         }
-        fn_800D6728();
+        gfxEnd();
     } else {
-        fn_800D67BC(1);
+        gfxBegin(1);
         part = GSmodelGetPart(
             model, *(s32*)(entry + 0x4C + partIndex * 4));
         if (part != NULL) {
@@ -1610,9 +1610,9 @@ void fn_801D7B94(void* effect) {
             clear__5GSvecFv(&transform);
             *(u32*)(lbl_804673F8 + 0x0C) |= 2;
         }
-        fn_800D6680(transform.x, transform.y, transform.z);
+        gfxVtxPos(transform.x, transform.y, transform.z);
         fn_800D5CB8(0, 0xFF, 0, 0, 0xDC);
-        fn_800D6728();
+        gfxEnd();
     }
 }
 

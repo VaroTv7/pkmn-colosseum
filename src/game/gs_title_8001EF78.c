@@ -63,14 +63,14 @@ extern f32 lbl_8047A348;
 extern u8 lbl_8047A34C;
 
 extern s32 fn_800D37CC(void);
-extern u32 fn_800D3088(void);
-extern s32 fn_801666BC(s32 id);
+extern u32 msgGetCharsPerFrame(void);
+extern s32 soundGetStatus(s32 id);
 extern u32 fn_800F7AF0(s32 pad);
 extern u32 fn_800F7BC4(s32 pad);
 extern u8* windowGetKeyInfo(void);
 extern void dbgMenuSetEnable(s32 enable);
-extern void fn_801669E4(s32 id, s32 a, s32 b);
-extern void fn_80166AB8(s32 id, s32 a, s32 b);
+extern void soundStopRaw(s32 id, s32 a, s32 b);
+extern void soundStartRaw(s32 id, s32 a, s32 b);
 extern void* menuDataBiosGetPtr(u32 id);
 extern f64 sin(f64);
 extern GSmodel* fn_800F92D4(u32 resourceId);
@@ -87,9 +87,9 @@ extern void cameraStartAnimation(void);
 extern void cameraStopAnimation(void);
 extern void cameraPlayAnime(u32 groupId, u32 animationId, s32 frame, u8 loop);
 extern void fn_801662E8(s32 a, s32 b);
-extern void fn_80165A20(s32 id, s32 a, s32 volume);
-extern void fn_80165548(void);
-extern void fn_8016557C(void);
+extern void std104_soundSetBackgroundMusic(s32 id, s32 a, s32 volume);
+extern void soundResumeMusic(void);
+extern void soundPauseMusic(void);
 extern s32 fn_8017B1AC(void);
 extern void _threadSwitch(void);
 extern s32 menuOpen(s32 id, s32 arg);
@@ -161,7 +161,7 @@ void fn_8001EF78(void)
     TitleMenuWork* work;
 
     rate = fn_800D37CC();
-    lbl_8047A344 = fn_800D3088() / rate;
+    lbl_8047A344 = msgGetCharsPerFrame() / rate;
     lbl_8047A338 += lbl_8047A344 / 2.0f;
     if (lbl_8047A338 >= 1.0f) {
         lbl_8047A338 = 0.0f;
@@ -173,7 +173,7 @@ void fn_8001EF78(void)
         return;
     }
     lbl_8047A334 += lbl_8047A344;
-    if (fn_801666BC(0x46A) == 0) {
+    if (soundGetStatus(0x46A) == 0) {
         lbl_8047A334 = 0.0f;
         if (lbl_8047A31C != 0x3E8) {
             lbl_8047A31C = 0x28;
@@ -207,14 +207,14 @@ void fn_8001F1E8(u8* arg)
         b = fn_800F7BC4(1);
         if ((b & a) & 0x1100) {
             lbl_8047A31C = 4;
-            fn_801669E4(0x46e, 0, 0);
+            soundStopRaw(0x46e, 0, 0);
             lbl_8047A328 = 1;
         }
         a = fn_800F7AF0(1);
         b = fn_800F7BC4(1);
         if (((b & a) & 0x200) == 0) return;
         lbl_8047A31C = 4;
-        fn_801669E4(0x46e, 0, 0);
+        soundStopRaw(0x46e, 0, 0);
         lbl_8047A328 = 1;
         return;
     }
@@ -224,7 +224,7 @@ void fn_8001F1E8(u8* arg)
     obj = windowGetKeyInfo();
     if ((*(u16*)(obj + 0x4) & 0x810) == 0) return;
     *(u8*)(arg + 0x98) = 1;
-    fn_80166AB8(0x4c2, 0, 0);
+    soundStartRaw(0x4c2, 0, 0);
 }
 
 /* fn_8001F304 (0x8001F304 - 0x8001FD48): title menu item draw callback.
@@ -354,7 +354,7 @@ static inline void modelWaitAnimation(GSmodel* model)
     }
 }
 
-void fn_8001FD48(void)
+void std021_newGameIntroSequence(void)
 {
     s32 running;
     GSmodel* model;
@@ -369,7 +369,7 @@ void fn_8001FD48(void)
     lbl_8047A33C = 0;
     lbl_8047A328 = 0;
     fn_801662E8(0, 0x406);
-    fn_80165A20(0x46A, 0, 0xFF);
+    std104_soundSetBackgroundMusic(0x46A, 0, 0xFF);
 
     if (lbl_8047A310 == 1) {
         lbl_8047A31C = 7;
@@ -387,7 +387,7 @@ void fn_8001FD48(void)
             if (lbl_8047A318 == 0) {
                 GSmodelAllPauseAnimation();
                 cameraStopAnimation();
-                fn_8016557C();
+                soundPauseMusic();
                 lbl_8047A318 = 1;
             }
             _threadSwitch();
@@ -396,7 +396,7 @@ void fn_8001FD48(void)
         if (lbl_8047A318 == 1) {
             cameraStartAnimation();
             fn_801662E8(0, 0x406);
-            fn_80165548();
+            soundResumeMusic();
             GSmodelAllUnpauseAnimation();
             lbl_8047A318 = 0;
         }
@@ -405,7 +405,7 @@ void fn_8001FD48(void)
             if (lbl_8047A314 == 0) {
                 GSmodelAllPauseAnimation();
                 cameraStopAnimation();
-                fn_8016557C();
+                soundPauseMusic();
                 lbl_8047A314 = 1;
             }
             _threadSwitch();
@@ -414,7 +414,7 @@ void fn_8001FD48(void)
         if (lbl_8047A314 == 1) {
             cameraStartAnimation();
             fn_801662E8(0, 0x406);
-            fn_80165548();
+            soundResumeMusic();
             GSmodelAllUnpauseAnimation();
             lbl_8047A314 = 0;
         }
@@ -580,9 +580,9 @@ void fn_800203B4(void)
                 threshold = *(f32*)&frames[phase];
                 if (GSmodelGetAnimFrame(lbl_8047A324) >= threshold) {
                     if (lbl_8047A33C == 0) {
-                        fn_80166AB8(0x46e, 0, 0);
+                        soundStartRaw(0x46e, 0, 0);
                     } else {
-                        fn_801669E4(0x46e, 0, 0);
+                        soundStopRaw(0x46e, 0, 0);
                     }
                     lbl_8047A33C++;
                 }

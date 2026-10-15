@@ -35,7 +35,7 @@ extern u8 fn_8001E3E0(u32 index, u32* out);
 extern void floorLink(u32 floorId, u32 arg);
 
 extern u8 fn_800FF52C(void);
-extern void fn_80166A28(u32 id);
+extern void soundStartSE(u32 id);
 extern void fn_800FAEF8(u32 x, u32 y, s32 color, ...);
 extern void _threadSwitch(void);
 
@@ -72,19 +72,19 @@ extern void winMsgOpenField(u32 msgId, u32 a, u32 b);
 extern void menuSubKeyWait(void);
 extern void winMsgCloseField(u32 id);
 
-extern u32 fn_800FF56C(void);
+extern u32 std092_getCurrentRoomID(void);
 extern FloorDebugData* floorDataBiosGetPtr(u32 id);
 extern u8 fn_801174C4(void);
 extern void fn_80117500(void);
 extern void fn_800FEC34(u32 id);
-extern void fn_801174F4(void);
+extern void std136_fieldClearFlag_8047ad71(void);
 extern void fn_800FECB8(u32 id);
 
 extern void fn_80166D18(u32 a, u32 b, u32 c, u32 d);
-extern s32 fn_801666BC(u16 entry);
-extern void fn_80166B18(u16 entry);
-extern void fn_801659FC(u16 entry, u32 a, u32 b);
-extern void fn_80165A20(u16 entry, u32 a, u32 b);
+extern s32 soundGetStatus(u16 entry);
+extern void soundKill(u16 entry);
+extern void std105_soundPlayEffect(u16 entry, u32 a, u32 b);
+extern void std104_soundSetBackgroundMusic(u16 entry, u32 a, u32 b);
 
 /* Retail retains this otherwise-unreferenced debug-menu entry-point group. */
 #pragma force_active on
@@ -137,7 +137,7 @@ s32 fn_8000BFA0(void) {
     s32 i;
 
     if (fn_800FF52C() != 0) {
-        fn_80166A28(0x26);
+        soundStartSE(0x26);
         i = 0;
         do {
             fn_800FAEF8(0xC8, 0xF0, -1, lbl_802666B0);
@@ -336,7 +336,7 @@ s32 fn_8000C518(void) {
 s32 fn_8000C588(void) {
     FloorDebugData* data;
 
-    data = floorDataBiosGetPtr(fn_800FF56C());
+    data = floorDataBiosGetPtr(std092_getCurrentRoomID());
 
     if (menuIsCheck(0xA) != 0) {
         if (fn_801174C4() != 0) {
@@ -346,7 +346,7 @@ s32 fn_8000C588(void) {
         menuClose(0xA);
         fn_800FEC34(data->field_34);
     } else {
-        fn_801174F4();
+        std136_fieldClearFlag_8047ad71();
         menuOpenCustom(0xA, 0, 0, 0, 0, 0);
         fn_800FECB8(data->field_34);
     }
@@ -392,7 +392,7 @@ loop_body:
     }
 
     entry = lbl_80478E1C[selected];
-    status = fn_801666BC(entry);
+    status = soundGetStatus(entry);
     if (status == 0) {
         goto use_default;
     }
@@ -403,10 +403,10 @@ loop_body:
         goto use_default;
     }
 
-    fn_80166B18(entry);
+    soundKill(entry);
     goto loop_check;
 use_default:
-    fn_801659FC(entry, 0, 0x7F);
+    std105_soundPlayEffect(entry, 0, 0x7F);
 loop_check:
     selected = menuOpen(2, 1);
     if (selected != -1) {
@@ -429,7 +429,7 @@ loop_body:
     }
 
     entry = lbl_80478E14[selected];
-    status = fn_801666BC(entry);
+    status = soundGetStatus(entry);
     if (status == 0) {
         goto use_default;
     }
@@ -440,10 +440,10 @@ loop_body:
         goto use_default;
     }
 
-    fn_80166B18(entry);
+    soundKill(entry);
     goto loop_check;
 use_default:
-    fn_801659FC(entry, 0, 0x7F);
+    std105_soundPlayEffect(entry, 0, 0x7F);
 loop_check:
     selected = menuOpen(2, 1);
     if (selected != -1) {
@@ -474,7 +474,7 @@ inner_body:
     if (selected == (s32)i) {
         goto inner_next;
     }
-    status = fn_801666BC(*(u16*)((u8*)lbl_80478E24 + offset));
+    status = soundGetStatus(*(u16*)((u8*)lbl_80478E24 + offset));
     switch (status) {
     case 1:
     case 2:
@@ -484,7 +484,7 @@ inner_body:
         goto inner_next;
     }
 call_inner:
-    fn_80166B18(*(u16*)((u8*)lbl_80478E24 + offset));
+    soundKill(*(u16*)((u8*)lbl_80478E24 + offset));
 inner_next:
     offset += sizeof(u16);
     i++;
@@ -494,7 +494,7 @@ inner_check:
     }
 
     entry = lbl_80478E24[selected];
-    status = fn_801666BC(entry);
+    status = soundGetStatus(entry);
     if (status == 0) {
         goto use_default;
     }
@@ -505,10 +505,10 @@ inner_check:
         goto use_default;
     }
 
-    fn_80166B18(entry);
+    soundKill(entry);
     goto loop_check;
 use_default:
-    fn_801659FC(entry, 0, 0x7F);
+    std105_soundPlayEffect(entry, 0, 0x7F);
 loop_check:
     selected = menuOpen(2, 1);
     if (selected != -1) {
@@ -539,7 +539,7 @@ inner_body:
     if (selected == (s32)i) {
         goto inner_next;
     }
-    status = fn_801666BC(*(u16*)((u8*)lbl_80478E2C + offset));
+    status = soundGetStatus(*(u16*)((u8*)lbl_80478E2C + offset));
     switch (status) {
     case 1:
     case 2:
@@ -549,7 +549,7 @@ inner_body:
         goto inner_next;
     }
 call_inner:
-    fn_80166B18(*(u16*)((u8*)lbl_80478E2C + offset));
+    soundKill(*(u16*)((u8*)lbl_80478E2C + offset));
 inner_next:
     offset += sizeof(u16);
     i++;
@@ -559,7 +559,7 @@ inner_check:
     }
 
     entry = lbl_80478E2C[selected];
-    status = fn_801666BC(entry);
+    status = soundGetStatus(entry);
     if (status == 0) {
         goto use_default;
     }
@@ -570,10 +570,10 @@ inner_check:
         goto use_default;
     }
 
-    fn_80166B18(entry);
+    soundKill(entry);
     goto loop_check;
 use_default:
-    fn_80165A20(entry, 0, 0x7F);
+    std104_soundSetBackgroundMusic(entry, 0, 0x7F);
 loop_check:
     selected = menuOpen(2, 1);
     if (selected != -1) {

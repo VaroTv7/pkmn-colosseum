@@ -411,16 +411,16 @@ extern f32 lbl_8047BAC0;
 extern f32 lbl_8047BDAC;
 extern f32 lbl_8047BDF0;
 
-extern u32 fn_800D59B8();
+extern u32 gfxVtxTexCoord();
 extern u32 fn_800D5CB8();
 extern u32 fn_800D61E4();
-extern u32 fn_800D6728();
-extern u32 fn_800D67BC();
-extern u32 fn_800D6A00();
-extern u32 fn_800D7820();
-extern u32 fn_800D85D4();
-extern u32 fn_800D888C();
-extern u32 fn_800D88DC();
+extern u32 gfxEnd();
+extern u32 gfxBegin();
+extern u32 gfxSetPrimitive();
+extern u32 gfxSetVtxDesc();
+extern u32 gfxLoadTexture();
+extern u32 gfxClearFlags();
+extern u32 gfxSetFlags();
 extern u32 fn_800E202C();
 extern u32 fn_800E209C();
 extern u32 fn_800E24B0();
@@ -440,7 +440,7 @@ extern u32 fn_8011DFE0();
 extern u32 pokemonGetSex();
 extern u32 fn_801240C4();
 extern u32 fn_80132A38();
-extern u32 fn_80166AB8(u32, u32, u32);
+extern u32 soundStartRaw(u32, u32, u32);
 extern u32 fn_8017B1CC();
 extern s32 fn_8017B2CC();
 extern u32 fn_8017B3E4();
@@ -468,19 +468,19 @@ static inline void pdaDrawModelTexture(PdaSprite* sprite, u8* model)
 {
     u32 texture = menuModelRender(model);
     if (texture != 0) {
-        fn_800D88DC(3);
-        fn_800D888C(4);
-        fn_800D6A00(7);
-        fn_800D7820(lbl_80314F98);
-        fn_800D85D4(0, texture);
-        fn_800D67BC(2);
+        gfxSetFlags(3);
+        gfxClearFlags(4);
+        gfxSetPrimitive(7);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxLoadTexture(0, texture);
+        gfxBegin(2);
         fn_800D61E4(0, 0);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D59B8(0, lbl_8047BAC4, lbl_8047BAC4);
+        gfxVtxTexCoord(0, lbl_8047BAC4, lbl_8047BAC4);
         fn_800D61E4(sprite->x, sprite->y);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D59B8(0, lbl_8047BAC8, lbl_8047BAC8);
-        fn_800D6728();
+        gfxVtxTexCoord(0, lbl_8047BAC8, lbl_8047BAC8);
+        gfxEnd();
     }
 }
 

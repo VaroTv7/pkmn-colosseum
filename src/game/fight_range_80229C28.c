@@ -152,7 +152,7 @@ void WS_HITCHECK(void)
     extern void wazaSetStatus();
     extern u32 wazaGetStatus();
     extern s8 pokemonSearchWazaDataId();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern u32 fightTargetGetPtrAsNowFightType();
     extern void fightFloorLoopValidFightOutPokemon();
     extern void fightFloorSetStatus();
@@ -211,7 +211,7 @@ void WS_HITCHECK(void)
   iVar2 = fightTargetGetPtrAsNowFightType(0x11,0);
   uVar3 = fightOutPokemonGetPokemonPtr();
   iVar4 = fightTargetGetPtrAsNowFightType(0x12,0);
-  floorState = fn_801EF634();
+  floorState = std103_battleGetResult();
   if (floorState != 0) {
     lbl_8047B614 = 2;
   }

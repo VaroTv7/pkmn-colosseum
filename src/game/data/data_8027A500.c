@@ -40,42 +40,42 @@ extern u8 menuFightButtonSecretMain[];
 extern u8 menuFightDrawBall[];
 extern u8 fn_80011EA4[];
 extern u8 fn_8001329C[];
-extern u8 fn_80018F30[];
-extern u8 fn_800190D8[];
+extern u8 std016_menuUnk_80018a68[];
+extern u8 std017_menuQueueAdd[];
 extern u8 menuPokemonMain[];
-extern u8 fn_8001E00C[];
-extern u8 fn_8001E184[];
-extern u8 fn_8001FD48[];
+extern u8 std158_menuOpenCustom43[];
+extern u8 std011_dialogDisplayYesNoMenu[];
+extern u8 std021_newGameIntroSequence[];
 extern u8 fn_80021B14[];
-extern u8 fn_80022B3C[];
-extern u8 fn_80023E5C[];
+extern u8 std163_useCologne[];
+extern u8 std018_nop18[];
 extern u8 menuNameEntry[];
 extern u8 menuNameEntryOpen[];
 extern u8 fn_8002CE6C[];
-extern u8 fn_8002D5D4[];
+extern u8 std026_unkMenuSequence26[];
 extern u8 menuShopOpen[];
-extern u8 fn_80032564[];
-extern u8 fn_80035D70[];
+extern u8 std198_menuEnterTradingMenu[];
+extern u8 std202_warpToMenuRoom393[];
 extern u8 fn_80035DA0[];
-extern u8 fn_8003842C[];
+extern u8 std024_dialogDisplayPCBoxMenu[];
 extern u8 fn_8003F464[];
-extern u8 fn_8004B7EC[];
+extern u8 std027_unkMenuSequence27[];
 extern u8 fn_80088428[];
-extern u8 fn_800896E8[];
-extern u8 fn_80089B8C[];
-extern u8 fn_80089C10[];
-extern u8 fn_80089C54[];
+extern u8 std215_battleStartTrainerWithPrompt[];
+extern u8 std213_gbaGetLinkedGameId[];
+extern u8 std212_gbaIsLinkActive[];
+extern u8 std220_gbaUnk_80083bf8[];
 extern u8 fn_8008F91C[];
 extern u8 fn_80097BBC[];
 extern u8 fn_800AFFE0[];
 extern u8 GSmodelGetRotation[];
 extern u8 GSmodelSetRotation[];
-extern u8 fn_800FB43C[];
+extern u8 std001_messageFormatLookup[];
 extern u8 fn_800FEE68[];
 extern u8 fn_800FEF8C[];
-extern u8 fn_800FF56C[];
+extern u8 std092_getCurrentRoomID[];
 extern u8 fn_800FF660[];
-extern u8 fn_800FF730[];
+extern u8 std098_mapWarpToMenuRoom[];
 extern u8 menuSetCursor[];
 extern u8 menuGetCursor[];
 extern u8 menuClose[];
@@ -90,17 +90,17 @@ extern u8 floorLinkWithSE[];
 extern u8 floorGetNextPosIndex[];
 extern u8 floorGetNextFloorID[];
 extern u8 floorGetPrevFloorID[];
-extern u8 fn_80113F48[];
-extern u8 fn_801140C8[];
-extern u8 fn_801140DC[];
-extern u8 fn_8011416C[];
-extern u8 fn_801141D8[];
+extern u8 std093_getCurrentGroupID[];
+extern u8 std162_fieldClearPending[];
+extern u8 std246_saveSetStatus578[];
+extern u8 std161_fieldSetPending[];
+extern u8 std128_mapSetReturnMap[];
 extern u8 floorEventCtrlElevator[];
 extern u8 floorEventCtrlDoor[];
 extern u8 fn_80117330[];
-extern u8 fn_801174F4[];
+extern u8 std136_fieldClearFlag_8047ad71[];
 extern u8 fn_80117500[];
-extern u8 fn_80117AE4[];
+extern u8 std171_mapSetTextureChange[];
 extern u8 heroMoveAddAutoEvent[];
 extern u8 heroMoveTermEvent[];
 extern u8 heroMoveInitEvent[];
@@ -108,20 +108,20 @@ extern u8 heroMoveMain[];
 extern u8 heroMoveSetNeckMode[];
 extern u8 heroMoveInit[];
 extern u8 msgctrlSetValue[];
-extern u8 fn_801653C4[];
-extern u8 fn_80165668[];
-extern u8 fn_801656F8[];
-extern u8 fn_80165718[];
-extern u8 fn_80165744[];
+extern u8 std228_soundGetCurrentBackgroundMusic[];
+extern u8 std130_soundUnk_801653cc[];
+extern u8 std137_soundStopAll[];
+extern u8 std109_soundPlayEffectVariant[];
+extern u8 std108_soundIsAnyPlaying[];
 extern u8 fn_80165788[];
 extern u8 fn_801658FC[];
-extern u8 fn_8016597C[];
-extern u8 fn_801659FC[];
-extern u8 fn_80165A20[];
+extern u8 std138_soundPlayEffectEx[];
+extern u8 std105_soundPlayEffect[];
+extern u8 std104_soundSetBackgroundMusic[];
 extern u8 cameraSetRotY[];
 extern u8 cameraSetDistance[];
 extern u8 cameraSetHeight[];
-extern u8 fn_80176948[];
+extern u8 std040_cameraSetPosition[];
 extern u8 cameraSetTargetPosXYZ[];
 extern u8 cameraSetTargetOfsXYZ[];
 extern u8 cameraPlayAnime[];
@@ -133,105 +133,105 @@ extern u8 cameraMoveTargetXYZ[];
 extern u8 cameraMoveTarget[];
 extern u8 cameraSetTarget[];
 extern u8 cameraUpdate[];
-extern u8 fn_80181478[];
-extern u8 fn_80181EB0[];
-extern u8 fn_801821B8[];
-extern u8 fn_80183018[];
-extern u8 fn_80183350[];
-extern u8 fn_80183CE0[];
+extern u8 std231_characterSetPathPaused[];
+extern u8 std131_characterSurpriseAnimation[];
+extern u8 std178_characterPlayAnimationAndWait[];
+extern u8 std077_characterEventFlagsSet[];
+extern u8 std076_characterEventFlagsClear[];
+extern u8 std075_characterAllocPathAlt[];
 extern u8 peopleStartWalkList[];
 extern u8 peopleReserveWalkList[];
-extern u8 fn_80184450[];
-extern u8 fn_80184470[];
-extern u8 fn_801845E4[];
+extern u8 std071_threadYield[];
+extern u8 std168_characterDetachFromCharacter[];
+extern u8 std070_characterAttachToCharacter[];
 extern u8 peopleSetWalkSpeed[];
-extern u8 fn_80185EE8[];
+extern u8 std061_characterMoveToPosition[];
 extern u8 peopleSetRotationDeg[];
-extern u8 fn_801860F8[];
-extern u8 fn_80186620[];
-extern u8 fn_801874BC[];
-extern u8 fn_80187A60[];
+extern u8 std059_characterSetPosition[];
+extern u8 std170_cameraFocusOnCharacter[];
+extern u8 std058_characterCheckWithinBounds[];
+extern u8 std165_characterFaceCharacter[];
 extern u8 peopleTurnToPoint[];
-extern u8 fn_80188984[];
-extern u8 fn_80188AF4[];
-extern u8 fn_80188CA0[];
-extern u8 fn_80188F78[];
-extern u8 fn_80188FA0[];
-extern u8 fn_80189490[];
-extern u8 fn_80189990[];
-extern u8 fn_8018A44C[];
-extern u8 fn_8018A700[];
+extern u8 std155_characterWaitForLookAt[];
+extern u8 std067_characterStopLookAt[];
+extern u8 std066_characterLookAtPosition[];
+extern u8 std065_characterLookAtPlayer[];
+extern u8 std181_characterTurnHeadTowardsCharacter[];
+extern u8 std055_characterEndSpeech[];
+extern u8 std054_characterTalk[];
+extern u8 std068_characterTurnToAngle[];
+extern u8 std177_characterMoveToCharacter[];
 extern u8 fn_8018B220[];
-extern u8 fn_8018B368[];
+extern u8 std154_characterPlayAnimation[];
 extern u8 fn_8018B558[];
-extern u8 fn_8018B76C[];
+extern u8 std051_characterSetAnimation[];
 extern u8 peopleGetPositionByIndex[];
-extern u8 fn_8018BDF4[];
+extern u8 std172_characterGetPosition[];
 extern u8 peopleSetVisible[];
 extern u8 peopleClearFlagsByIndex[];
 extern u8 peopleSetFlagsByIndex[];
-extern u8 fn_8018CA20[];
+extern u8 std151_characterFaceDirection[];
 extern u8 fn_8018DB68[];
 extern u8 peopleOpen[];
-extern u8 fn_801902E0[];
-extern u8 fn_801903B0[];
-extern u8 fn_80190528[];
-extern u8 fn_801906A0[];
-extern u8 fn_801C766C[];
-extern u8 fn_801C7730[];
-extern u8 fn_801C852C[];
-extern u8 fn_801C8628[];
-extern u8 fn_801C8688[];
-extern u8 fn_801C8804[];
-extern u8 fn_801C8834[];
-extern u8 fn_801C89F8[];
-extern u8 fn_801C8DD0[];
+extern u8 std081_flagCheckTrue[];
+extern u8 std079_flagSetTrue[];
+extern u8 std078_flagSetFalse[];
+extern u8 std082_flagGetValue[];
+extern u8 std235_menuShowSaveMenu[];
+extern u8 std232_characterApproachPlayer[];
+extern u8 std216_partyStatusUpdate_8ae[];
+extern u8 std208_promptDNASampleSelection[];
+extern u8 std204_promptDNAKeyCode[];
+extern u8 std207_gbaUnk_80075638[];
+extern u8 std205_getDNASampleSepcies[];
+extern u8 std200_gbaConnectEvent[];
+extern u8 std199_menuDisplayCustomMenu[];
 extern u8 fn_801C9B6C[];
 extern u8 fn_801C9C9C[];
-extern u8 fn_801C9CDC[];
-extern u8 fn_801C9DC4[];
-extern u8 fn_801C9E7C[];
-extern u8 fn_801C9F00[];
-extern u8 fn_801C9F5C[];
-extern u8 fn_801CA358[];
-extern u8 fn_801CA4F8[];
+extern u8 std193_lightWaitForAnimation[];
+extern u8 std191_mapTransformElement[];
+extern u8 std190_lightSetActive[];
+extern u8 std035_setPartnerFollowing[];
+extern u8 std182_tvNewsEvent[];
+extern u8 std211_tvSetChannelByStory[];
+extern u8 std157_sleep[];
 extern u8 fieldStartEncount[];
-extern u8 fn_801CA708[];
+extern u8 std239_playerGetCouponsEarnedInLastArea[];
 extern u8 fn_801CA728[];
 extern u8 fn_801CA7AC[];
-extern u8 fn_801CA7CC[];
+extern u8 std236_playerGetCouponsEarnedOnCurrentRun[];
 extern u8 fn_801CA858[];
 extern u8 fn_801CA884[];
 extern u8 fn_801CADA0[];
-extern u8 fn_801CADA8[];
+extern u8 std217_playerReceiveGiftPokemon[];
 extern u8 fn_801CB1C4[];
-extern u8 fn_801CB394[];
-extern u8 fn_801CB3B8[];
+extern u8 std005_threadIsRunning[];
+extern u8 std006_threadWaitForCompletion[];
 extern u8 fn_801CB3DC[];
-extern u8 fn_801CB4A8[];
+extern u8 std209_threadRunScriptMode4[];
 extern u8 fn_801CB4E8[];
-extern u8 fn_801CB530[];
+extern u8 std221_mapObjectLinkParticles[];
 extern u8 fn_801CB59C[];
-extern u8 fn_801CB61C[];
-extern u8 fn_801CB7C4[];
-extern u8 fn_801CB834[];
-extern u8 fn_801CB954[];
-extern u8 fn_801CB9D8[];
-extern u8 fn_801CBA0C[];
-extern u8 fn_801CBA90[];
-extern u8 fn_801CBAB8[];
-extern u8 fn_801D0BD0[];
+extern u8 std166_mapObjectAttachToObject[];
+extern u8 std116_mapObjectStopAnimation[];
+extern u8 std115_mapObjectPlayAnimation[];
+extern u8 std114_mapObjectSetVisibility[];
+extern u8 std113_mapObjectUnk_8018db68[];
+extern u8 std112_modelGetResourceID[];
+extern u8 std229_mapLoad395[];
+extern u8 std223_askYesNoThenWarp395[];
+extern u8 std083_unk_801d0bd0[];
 extern u8 mailMainSendByScrpt[];
-extern u8 fn_801DF474[];
-extern u8 fn_801DF790[];
-extern u8 fn_801DFC30[];
-extern u8 fn_801E03D4[];
-extern u8 fn_801EE67C[];
-extern u8 fn_801EF634[];
+extern u8 std087_sequenceUnk87[];
+extern u8 std086_sequenceJump86[];
+extern u8 std085_sequenceJump85[];
+extern u8 std084_sequenceJump84[];
+extern u8 std243_shadowPokemonSetState[];
+extern u8 std103_battleGetResult[];
 extern u8 fn_801EF6FC[];
 extern u8 fn_801EF758[];
 extern u8 fightStartEncount[];
-extern u8 fn_8025E1BC[];
+extern u8 std244_spawnEffectAtPosition[];
 extern u8 preReliveDisplayHokoraParticle[];
 extern u8 reliveMain[];
 extern u8 preReliveSetParameter[];
@@ -93797,7 +93797,7 @@ void* lbl_802E1CF0[742] = {
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_800FB43C),
+    (void*)((u8*)std001_messageFormatLookup),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)((u8*)fadeEffectGetRandom),
@@ -93809,10 +93809,10 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)fn_801CB3DC),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CB394),
+    (void*)((u8*)std005_threadIsRunning),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CB3B8),
+    (void*)((u8*)std006_threadWaitForCompletion),
     (void*)0x01000000,
     (void*)0x00000000,
     (void*)((u8*)winMsgOpenField),
@@ -93827,7 +93827,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)winMsgCloseFight),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_8001E184),
+    (void*)((u8*)std011_dialogDisplayYesNoMenu),
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)((u8*)menuOpen),
@@ -93842,13 +93842,13 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)menuSetCursor),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80018F30),
+    (void*)((u8*)std016_menuUnk_80018a68),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_800190D8),
+    (void*)((u8*)std017_menuQueueAdd),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80023E5C),
+    (void*)((u8*)std018_nop18),
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)((u8*)menuPokemonOpen),
@@ -93857,7 +93857,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)menuPokemonMain),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_8001FD48),
+    (void*)((u8*)std021_newGameIntroSequence),
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)((u8*)menuNameEntryOpen),
@@ -93866,16 +93866,16 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)menuNameEntry),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_8003842C),
+    (void*)((u8*)std024_dialogDisplayPCBoxMenu),
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)((u8*)menuShopOpen),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_8002D5D4),
+    (void*)((u8*)std026_unkMenuSequence26),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_8004B7EC),
+    (void*)((u8*)std027_unkMenuSequence27),
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)((u8*)fadeSet),
@@ -93899,7 +93899,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)heroMoveAddAutoEvent),
     (void*)0x01010101,
     (void*)0x01000000,
-    (void*)((u8*)fn_801C9F00),
+    (void*)((u8*)std035_setPartnerFollowing),
     (void*)0x01000000,
     (void*)0x00000000,
     (void*)((u8*)GSscene_SetMode),
@@ -93914,7 +93914,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)cameraSetTargetOfsXYZ),
     (void*)0x02020200,
     (void*)0x00000000,
-    (void*)((u8*)fn_80176948),
+    (void*)((u8*)std040_cameraSetPosition),
     (void*)0x02020200,
     (void*)0x00000000,
     (void*)((u8*)cameraSetRotation),
@@ -93947,7 +93947,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)peopleSetVisible),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_8018B76C),
+    (void*)((u8*)std051_characterSetAnimation),
     (void*)0x01010101,
     (void*)0x01000000,
     (void*)((u8*)fn_8018B220),
@@ -93956,10 +93956,10 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)peopleWaitSyncMotion),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_80189990),
+    (void*)((u8*)std054_characterTalk),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_80189490),
+    (void*)((u8*)std055_characterEndSpeech),
     (void*)0x01010000,
     (void*)0x00000000,
     (void*)((u8*)peopleOpen),
@@ -93968,16 +93968,16 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)fn_8018DB68),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801874BC),
+    (void*)((u8*)std058_characterCheckWithinBounds),
     (void*)0x01010202,
     (void*)0x02020000,
-    (void*)((u8*)fn_801860F8),
+    (void*)((u8*)std059_characterSetPosition),
     (void*)0x01010202,
     (void*)0x02000000,
     (void*)((u8*)peopleSetRotationDeg),
     (void*)0x01010202,
     (void*)0x02000000,
-    (void*)((u8*)fn_80185EE8),
+    (void*)((u8*)std061_characterMoveToPosition),
     (void*)0x01010102,
     (void*)0x02020000,
     (void*)((u8*)peopleMoveCheck),
@@ -93989,25 +93989,25 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)peopleClearFlagsByIndex),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_80188F78),
+    (void*)((u8*)std065_characterLookAtPlayer),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80188CA0),
+    (void*)((u8*)std066_characterLookAtPosition),
     (void*)0x01010101,
     (void*)0x01000000,
-    (void*)((u8*)fn_80188AF4),
+    (void*)((u8*)std067_characterStopLookAt),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_8018A44C),
+    (void*)((u8*)std068_characterTurnToAngle),
     (void*)0x01010200,
     (void*)0x00000000,
     (void*)((u8*)peopleSetWalkSpeed),
     (void*)0x01010200,
     (void*)0x00000000,
-    (void*)((u8*)fn_801845E4),
+    (void*)((u8*)std070_characterAttachToCharacter),
     (void*)0x01010101,
     (void*)0x01000000,
-    (void*)((u8*)fn_80184450),
+    (void*)((u8*)std071_threadYield),
     (void*)0x01010000,
     (void*)0x00000000,
     (void*)((u8*)peopleReserveWalkList),
@@ -94019,43 +94019,43 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)peopleStartWalkList),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_80183CE0),
+    (void*)((u8*)std075_characterAllocPathAlt),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80183350),
+    (void*)((u8*)std076_characterEventFlagsClear),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80183018),
+    (void*)((u8*)std077_characterEventFlagsSet),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80190528),
+    (void*)((u8*)std078_flagSetFalse),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801903B0),
+    (void*)((u8*)std079_flagSetTrue),
     (void*)0x01000000,
     (void*)0x00000000,
     (void*)((u8*)_flagSet),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801902E0),
+    (void*)((u8*)std081_flagCheckTrue),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801906A0),
+    (void*)((u8*)std082_flagGetValue),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801D0BD0),
+    (void*)((u8*)std083_unk_801d0bd0),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_801E03D4),
+    (void*)((u8*)std084_sequenceJump84),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801DFC30),
+    (void*)((u8*)std085_sequenceJump85),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801DF790),
+    (void*)((u8*)std086_sequenceJump86),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801DF474),
+    (void*)((u8*)std087_sequenceUnk87),
     (void*)0x01010000,
     (void*)0x00000000,
     (void*)((u8*)fn_800FEE68),
@@ -94070,10 +94070,10 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)GSmodelSetRotation),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_800FF56C),
+    (void*)((u8*)std092_getCurrentRoomID),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80113F48),
+    (void*)((u8*)std093_getCurrentGroupID),
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)((u8*)floorGetPrevFloorID),
@@ -94088,7 +94088,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)floorEventCtrlElevator),
     (void*)0x01010101,
     (void*)0x01000000,
-    (void*)((u8*)fn_800FF730),
+    (void*)((u8*)std098_mapWarpToMenuRoom),
     (void*)0x01000000,
     (void*)0x00000000,
     (void*)((u8*)fn_800FF660),
@@ -94103,13 +94103,13 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)fightStartEncount),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801EF634),
+    (void*)((u8*)std103_battleGetResult),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80165A20),
+    (void*)((u8*)std104_soundSetBackgroundMusic),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_801659FC),
+    (void*)((u8*)std105_soundPlayEffect),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)((u8*)soundStop),
@@ -94118,10 +94118,10 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)fn_80165788),
     (void*)0x01020202,
     (void*)0x00000000,
-    (void*)((u8*)fn_80165744),
+    (void*)((u8*)std108_soundIsAnyPlaying),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80165718),
+    (void*)((u8*)std109_soundPlayEffectVariant),
     (void*)0x01010000,
     (void*)0x00000000,
     (void*)((u8*)fn_801CB1C4),
@@ -94130,19 +94130,19 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)scriptIsMoveButtonPush),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CBA0C),
+    (void*)((u8*)std112_modelGetResourceID),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CB9D8),
+    (void*)((u8*)std113_mapObjectUnk_8018db68),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CB954),
+    (void*)((u8*)std114_mapObjectSetVisibility),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CB834),
+    (void*)((u8*)std115_mapObjectPlayAnimation),
     (void*)0x01010101,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CB7C4),
+    (void*)((u8*)std116_mapObjectStopAnimation),
     (void*)0x01000000,
     (void*)0x00000000,
     (void*)((u8*)scriptWaitSyncMotion),
@@ -94178,16 +94178,16 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)cameraSetFloorDefault),
     (void*)0x02020200,
     (void*)0x00000000,
-    (void*)((u8*)fn_801141D8),
+    (void*)((u8*)std128_mapSetReturnMap),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)((u8*)scriptIsTrigerPush),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80165668),
+    (void*)((u8*)std130_soundUnk_801653cc),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_80181EB0),
+    (void*)((u8*)std131_characterSurpriseAnimation),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)((u8*)msgctrlSetValue),
@@ -94202,13 +94202,13 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)fn_80117500),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801174F4),
+    (void*)((u8*)std136_fieldClearFlag_8047ad71),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801656F8),
+    (void*)((u8*)std137_soundStopAll),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_8016597C),
+    (void*)((u8*)std138_soundPlayEffectEx),
     (void*)0x01010101,
     (void*)0x00000000,
     (void*)((u8*)fn_801658FC),
@@ -94247,7 +94247,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)cameraSetFov),
     (void*)0x02000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_8018CA20),
+    (void*)((u8*)std151_characterFaceDirection),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)((u8*)fieldStartEncount),
@@ -94256,19 +94256,19 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)scriptSoundStop),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_8018B368),
+    (void*)((u8*)std154_characterPlayAnimation),
     (void*)0x01010101,
     (void*)0x01000000,
-    (void*)((u8*)fn_80188984),
+    (void*)((u8*)std155_characterWaitForLookAt),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)((u8*)cameraMoveTargetXYZ),
     (void*)0x01020202,
     (void*)0x02000000,
-    (void*)((u8*)fn_801CA4F8),
+    (void*)((u8*)std157_sleep),
     (void*)0x02000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_8001E00C),
+    (void*)((u8*)std158_menuOpenCustom43),
     (void*)0x01000000,
     (void*)0x00000000,
     (void*)((u8*)scriptGetPokemonNickName),
@@ -94277,40 +94277,40 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)cameraMoveEndCheck),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_8011416C),
+    (void*)((u8*)std161_fieldSetPending),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_801140C8),
+    (void*)((u8*)std162_fieldClearPending),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80022B3C),
+    (void*)((u8*)std163_useCologne),
     (void*)0x01010000,
     (void*)0x00000000,
     (void*)((u8*)peopleTurnToPoint),
     (void*)0x01010202,
     (void*)0x02020000,
-    (void*)((u8*)fn_80187A60),
+    (void*)((u8*)std165_characterFaceCharacter),
     (void*)0x01010101,
     (void*)0x02000000,
-    (void*)((u8*)fn_801CB61C),
+    (void*)((u8*)std166_mapObjectAttachToObject),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)((u8*)fn_801CB59C),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80184470),
+    (void*)((u8*)std168_characterDetachFromCharacter),
     (void*)0x01010000,
     (void*)0x00000000,
     (void*)((u8*)peopleGazeHeroCheck),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80186620),
+    (void*)((u8*)std170_cameraFocusOnCharacter),
     (void*)0x01010202,
     (void*)0x02020201,
-    (void*)((u8*)fn_80117AE4),
+    (void*)((u8*)std171_mapSetTextureChange),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_8018BDF4),
+    (void*)((u8*)std172_characterGetPosition),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)((u8*)mailMainSendByScrpt),
@@ -94325,10 +94325,10 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)peopleWaitSyncMotionBlend),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_8018A700),
+    (void*)((u8*)std177_characterMoveToCharacter),
     (void*)0x01010101,
     (void*)0x02010000,
-    (void*)((u8*)fn_801821B8),
+    (void*)((u8*)std178_characterPlayAnimationAndWait),
     (void*)0x01010200,
     (void*)0x00000000,
     (void*)((u8*)cameraReturn),
@@ -94337,10 +94337,10 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)floorGetNextFloorID),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80188FA0),
+    (void*)((u8*)std181_characterTurnHeadTowardsCharacter),
     (void*)0x01010101,
     (void*)0x00000000,
-    (void*)((u8*)fn_801C9F5C),
+    (void*)((u8*)std182_tvNewsEvent),
     (void*)0x01000000,
     (void*)0x00000000,
     (void*)((u8*)scriptAddPremium),
@@ -94364,16 +94364,16 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)scriptSetMemoFlag),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801C9E7C),
+    (void*)((u8*)std190_lightSetActive),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801C9DC4),
+    (void*)((u8*)std191_mapTransformElement),
     (void*)0x01010101,
     (void*)0x00000000,
     (void*)((u8*)scriptLightStopMotion),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801C9CDC),
+    (void*)((u8*)std193_lightWaitForAnimation),
     (void*)0x01010000,
     (void*)0x00000000,
     (void*)((u8*)preReliveSetParameter),
@@ -94388,64 +94388,64 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)fn_801C9B6C),
     (void*)0x01010101,
     (void*)0x00000000,
-    (void*)((u8*)fn_80032564),
+    (void*)((u8*)std198_menuEnterTradingMenu),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801C8DD0),
+    (void*)((u8*)std199_menuDisplayCustomMenu),
     (void*)0x01010101,
     (void*)0x01000000,
-    (void*)((u8*)fn_801C89F8),
+    (void*)((u8*)std200_gbaConnectEvent),
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)((u8*)fn_80035DA0),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80035D70),
+    (void*)((u8*)std202_warpToMenuRoom393),
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)((u8*)floorEventChangeTresure),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_801C8688),
+    (void*)((u8*)std204_promptDNAKeyCode),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_801C8834),
+    (void*)((u8*)std205_getDNASampleSepcies),
     (void*)0x01000000,
     (void*)0x00000000,
     (void*)((u8*)fn_80088428),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801C8804),
+    (void*)((u8*)std207_gbaUnk_80075638),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801C8628),
+    (void*)((u8*)std208_promptDNASampleSelection),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CB4A8),
+    (void*)((u8*)std209_threadRunScriptMode4),
     (void*)0x01010101,
     (void*)0x01000000,
     (void*)((u8*)peopleGetPositionByIndex),
     (void*)0x01010101,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CA358),
+    (void*)((u8*)std211_tvSetChannelByStory),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80089C10),
+    (void*)((u8*)std212_gbaIsLinkActive),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80089B8C),
+    (void*)((u8*)std213_gbaGetLinkedGameId),
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)((u8*)floorEventSetTresureDisp),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_800896E8),
+    (void*)((u8*)std215_battleStartTrainerWithPrompt),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801C852C),
+    (void*)((u8*)std216_partyStatusUpdate_8ae),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CADA8),
+    (void*)((u8*)std217_playerReceiveGiftPokemon),
     (void*)0x01000000,
     (void*)0x00000000,
     (void*)((u8*)scriptSetPokemonNakigoe),
@@ -94454,16 +94454,16 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)scriptAddItem),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80089C54),
+    (void*)((u8*)std220_gbaUnk_80083bf8),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CB530),
+    (void*)((u8*)std221_mapObjectLinkParticles),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)((u8*)fn_801CB4E8),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CBAB8),
+    (void*)((u8*)std223_askYesNoThenWarp395),
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)((u8*)winMsgOpenFieldWithSE),
@@ -94478,19 +94478,19 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)reliveMain),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801653C4),
+    (void*)((u8*)std228_soundGetCurrentBackgroundMusic),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CBA90),
+    (void*)((u8*)std229_mapLoad395),
     (void*)0x01000000,
     (void*)0x00000000,
     (void*)((u8*)fn_80266250),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_80181478),
+    (void*)((u8*)std231_characterSetPathPaused),
     (void*)0x01010100,
     (void*)0x00000000,
-    (void*)((u8*)fn_801C7730),
+    (void*)((u8*)std232_characterApproachPlayer),
     (void*)0x01010000,
     (void*)0x00000000,
     (void*)((u8*)fn_801CADA0),
@@ -94499,10 +94499,10 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)scriptGetEarthRibbon),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801C766C),
+    (void*)((u8*)std235_menuShowSaveMenu),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CA7CC),
+    (void*)((u8*)std236_playerGetCouponsEarnedOnCurrentRun),
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)((u8*)fn_801CA7AC),
@@ -94511,7 +94511,7 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)fn_801CA728),
     (void*)0x01000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801CA708),
+    (void*)((u8*)std239_playerGetCouponsEarnedInLastArea),
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)((u8*)menuPokemonStatus),
@@ -94523,16 +94523,16 @@ void* lbl_802E1CF0[742] = {
     (void*)((u8*)scriptGetDarkPointZeroPokemonNum),
     (void*)0x00000000,
     (void*)0x00000000,
-    (void*)((u8*)fn_801EE67C),
+    (void*)((u8*)std243_shadowPokemonSetState),
     (void*)0x01010000,
     (void*)0x00000000,
-    (void*)((u8*)fn_8025E1BC),
+    (void*)((u8*)std244_spawnEffectAtPosition),
     (void*)0x02020202,
     (void*)0x02020000,
     (void*)((u8*)menuSubOpenYesNo),
     (void*)0x01010101,
     (void*)0x00000000,
-    (void*)((u8*)fn_801140DC),
+    (void*)((u8*)std246_saveSetStatus578),
     (void*)0x01010100,
     (void*)0x00000000,
     (void*)0x00000000,

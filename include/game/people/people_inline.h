@@ -21,7 +21,7 @@
 #include "game/people/people.h"
 
 extern void GSlogWrite(const char* fmt, ...);
-extern f32 fn_800E008C(void* vector);
+extern f32 vecMag(void* vector);
 extern u8 GSmodelHasAnimationEnded(void* model);
 extern u8 GSmodelIsAnimating(void* model);
 extern void GSmodelGetAnimIndex(void* model, s32* current, s32* secondary);
@@ -35,7 +35,7 @@ extern void GSmodelSetTexAnimRate(void* model, f32 rate);
 extern void GSmodelStartAnimation(void* model);
 extern void fn_8018F4C8(void* info, u8 motion, s32* outAnim, u8* outLoop);
 extern void* peopleInfoBiosGetPtr(void* scriptObj);
-extern void fn_8018FC2C(PeopleEntry* entry, void* rotation);
+extern void peopleGetRotation(PeopleEntry* entry, void* rotation);
 
 /* "Warining: people[%d,%d] group is different!!\n" */
 extern const char lbl_80273FD8[];
@@ -89,7 +89,7 @@ static inline void peopleStartTurn(u32 groupId, u32 index, f32 yaw, f32 speed)
 
     entry = peopleFindBySelf(peopleFindSelf(groupId, index));
     if (entry != NULL) {
-        fn_8018FC2C(entry, rotation);
+        peopleGetRotation(entry, rotation);
         yaw += 6.2831855f * (s32)(rotation[1] / 6.2831855f);
         entry->pad22 = 1;
         entry->field_40 = yaw;
@@ -112,7 +112,7 @@ static inline f32 peopleCalcRange(u32 groupId, u32 index, void* delta)
     if (entry == NULL) {
         return 0.0f;
     }
-    t = fn_800E008C(delta);
+    t = vecMag(delta);
     if (entry->field_38 <= t) {
         result = 2.0f;
     } else if (entry->field_34 <= t) {

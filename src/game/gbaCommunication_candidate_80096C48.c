@@ -90,7 +90,7 @@ void fn_80096C48(u32 unused, u8* dst) {
 /* Handle confirm/cancel input for the linked-Pokemon status menu. */
 void fn_80096D54(u8* menu)
 {
-    extern void fn_80166A28(s32 id);
+    extern void soundStartSE(s32 id);
     extern void pokemonWazaReplace();
 
     u16* keys;
@@ -118,7 +118,7 @@ void fn_80096D54(u8* menu)
             pokemon = work->pokemon;
             if (pokemon != NULL) {
                 if ((s32)pokemonGetStatus(pokemon, 0, 0xC2, 0) != 0) {
-                    fn_80166A28(0x26);
+                    soundStartSE(0x26);
                 } else if (lbl_803FB380[0] & 2) {
                     work->state = 4;
                     lbl_803FB380[3] = lbl_803FB380[2];

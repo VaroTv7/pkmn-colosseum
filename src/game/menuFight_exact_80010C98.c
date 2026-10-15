@@ -8,7 +8,7 @@ extern void winMsgClose(s32);
 extern u8 fn_801F18DC(s32);
 extern u8 fightFloorIsUseFightTimerCommand(s32);
 extern u8 fightTimerCommandIsOver(void);
-extern u16 fn_801EF634(void);
+extern u16 std103_battleGetResult(void);
 extern void _threadSwitch(void);
 extern u32 fn_800F7AF0(s32);
 extern u32 fn_800F7BC4(s32);
@@ -36,7 +36,7 @@ waitLabel: \
         if ((fightFloorIsUseFightTimerCommand(0) == 1) && (fightTimerCommandIsOver() == 1)) { \
             advance = 1; \
             goto haveLabel; \
-        } else if (fn_801EF634() == 1) { \
+        } else if (std103_battleGetResult() == 1) { \
             advance = 1; \
             goto haveLabel; \
         } \

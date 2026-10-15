@@ -334,25 +334,25 @@ HSD_TExp* HSD_TExpCnst(void* val, HSD_TEInput comp, HSD_TEType type,
  *   fn_801B7BD4 HSD_TExpRef       fn_801B750C HSD_TExpUnref
  *   fn_801B6DC0 (swap-table setter, no Melee counterpart)
  */
-HSD_TExp* fn_801B707C(HSD_TExp** list);
-void fn_801B5E40(HSD_TExp* texp, HSD_TObj* tex, GXChannelID chan);
-void fn_801B6E74(HSD_TExp* texp, GXTevOp op, GXTevBias bias,
+HSD_TExp* HSD_TExpTev(HSD_TExp** list);
+void HSD_TExpOrder(HSD_TExp* texp, HSD_TObj* tex, GXChannelID chan);
+void HSD_TExpColorOp(HSD_TExp* texp, GXTevOp op, GXTevBias bias,
                  GXTevScale scale, u8 clamp);
 void fn_801B6DC0(HSD_TExp* texp, GXTevColorChan red, GXTevColorChan green,
                  GXTevColorChan blue, GXTevColorChan alpha);
-void fn_801B64EC(HSD_TExp* texp, HSD_TEInput sel_a, HSD_TExp* exp_a,
+void HSD_TExpColorIn(HSD_TExp* texp, HSD_TEInput sel_a, HSD_TExp* exp_a,
                  HSD_TEInput sel_b, HSD_TExp* exp_b, HSD_TEInput sel_c,
                  HSD_TExp* exp_c, HSD_TEInput sel_d, HSD_TExp* exp_d);
-void fn_801B6CD8(HSD_TExp* texp, GXTevOp op, GXTevBias bias,
+void HSD_TExpAlphaOp(HSD_TExp* texp, GXTevOp op, GXTevBias bias,
                  GXTevScale scale, u8 clamp);
-void fn_801B5F08(HSD_TExp* texp, HSD_TEInput sel_a, HSD_TExp* exp_a,
+void HSD_TExpAlphaIn(HSD_TExp* texp, HSD_TEInput sel_a, HSD_TExp* exp_a,
                  HSD_TEInput sel_b, HSD_TExp* exp_b, HSD_TEInput sel_c,
                  HSD_TExp* exp_c, HSD_TEInput sel_d, HSD_TExp* exp_d);
 void HSD_TExpFreeTevDesc(HSD_TExpTevDesc* tdesc);
 HSD_TExp* fn_801B7178(HSD_TExp* texp_list, HSD_TExpType type, s32 all);
 int HSD_TExpCompile(HSD_TExp* texp, HSD_TExpTevDesc** tevdesc,
                     HSD_TExp** texp_list);
-void fn_801B45A4(HSD_TExpTevDesc* tevdesc, HSD_TExp* texp);
+void HSD_TExpSetupTev(HSD_TExpTevDesc* tevdesc, HSD_TExp* texp);
 void fn_801B7BD4(HSD_TExp* texp, u8 sel);
 void fn_801B750C(HSD_TExp* texp, u8 sel);
 void HSD_TExpSetReg(HSD_TExp* texp);

@@ -23,7 +23,7 @@ extern void fn_801081F8();
 extern void winSpriteGetDisp();
 extern void winSpriteSetDisp();
 extern void msgctrlSetValue();
-extern void fn_80166A28();
+extern void soundStartSE();
 extern void __assert();
 extern void* memset(void* dst, int val, u32 size);
 
@@ -1068,10 +1068,10 @@ static inline u32 menuCardELerpColor(u32 to, u32 from, f32 t) {
 }
 
 static inline void menuCardEBuzz(MenuCardEMatrixWork* work) {
-    extern void fn_80166A28(s32 id);
+    extern void soundStartSE(s32 id);
 
     if (work->buzzed == 0) {
-        fn_80166A28(0x26);
+        soundStartSE(0x26);
     }
     work->buzzed = 1;
 }
@@ -1109,7 +1109,7 @@ void fn_8007D978(MenuCardEWindow* window) {
     extern MenuCardEMatrixWork* fn_8007FDBC(void* window, void* title);
     extern void fn_801081F8(void* window, s32 itemId, s32 arg);
     extern void winSpriteSetDisp(MenuCardESprite* sprite, s32 disp);
-    extern void fn_80166A28(s32 id);
+    extern void soundStartSE(s32 id);
     extern u8 fn_80082A88(MenuCardEEntry* entry, s8 layer);
     extern u8* fn_80082FE4(MenuCardEEntry* entry, s8 layer);
     extern u8* fn_80082EA4(MenuCardEEntry* entry, s8 layer, s8 row, s8 column);
@@ -1250,7 +1250,7 @@ void fn_8007D978(MenuCardEWindow* window) {
                 if (work->entryIndex[1] == 0) {
                     menuCardEBuzz(work);
                 } else {
-                    fn_80166A28(0x3C5);
+                    soundStartSE(0x3C5);
                     work->entryIndex[1]--;
                     work->transitionActive = 1;
                 }
@@ -1258,7 +1258,7 @@ void fn_8007D978(MenuCardEWindow* window) {
                 if (work->entryIndex[1] == work->entryCount - 1) {
                     menuCardEBuzz(work);
                 } else {
-                    fn_80166A28(0x3C5);
+                    soundStartSE(0x3C5);
                     work->entryIndex[1]++;
                     work->transitionActive = 1;
                 }
@@ -1266,7 +1266,7 @@ void fn_8007D978(MenuCardEWindow* window) {
                 if (work->subIndex[1] == 0) {
                     menuCardEBuzz(work);
                 } else {
-                    fn_80166A28(0x3C5);
+                    soundStartSE(0x3C5);
                     work->subIndex[1]--;
                     work->transitionActive = 1;
                 }
@@ -1278,7 +1278,7 @@ void fn_8007D978(MenuCardEWindow* window) {
                     fn_80082A88(entries[1], work->subIndex[1] + 1) == 0) {
                     menuCardEBuzz(work);
                 } else {
-                    fn_80166A28(0x3C5);
+                    soundStartSE(0x3C5);
                     work->subIndex[1]++;
                     work->transitionActive = 1;
                 }

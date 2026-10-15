@@ -37,7 +37,7 @@ typedef union ColosseumBitMasks {
 } ColosseumBitMasks;
 
 extern u8* windowGetKeyInfo(void);
-extern void fn_80166A50(s32, s32, s32, s32);
+extern void soundStart(s32, s32, s32, s32);
 extern void menuButtonNormal(void*);
 extern s32 menuOpen(s32, s32);
 extern void menuClose();
@@ -58,7 +58,7 @@ void fn_8005D6A8(MenuWindow* window) {
     masks.word = lbl_8047BF40.word;
     if (cursor >= 0 && cursor <= 3 && (keys->buttons & 0x10) != 0) {
         lbl_8047A5A8 ^= masks.bytes[cursor];
-        fn_80166A50(0x3C6, 0, 0xFF, 0);
+        soundStart(0x3C6, 0, 0xFF, 0);
     } else {
         menuButtonNormal(window);
     }

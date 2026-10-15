@@ -5,7 +5,7 @@ extern void* heroGetStatus(s32, s32, u32);
 extern u8 pokemonCheckValid(void);
 extern void menuNameEntry(void);
 extern void GScharCpy(void*, u8*);
-extern void fn_800FF730(s32);
+extern void std098_mapWarpToMenuRoom(s32);
 extern void floorSetFadeScript(s32, u32);
 extern void _threadSwitch(void);
 extern u8 lbl_803A2068[];
@@ -89,7 +89,7 @@ s32 menuNameEntryOpenNoFade(s32 r3, s32 r4) {
     *(s32*)(ctx + 0x20) = 0;
     *(s32*)(ctx + 0x24) = 0;
     *(s32*)(ctx + 0x28) = 1;
-    fn_800FF730(0x390);
+    std098_mapWarpToMenuRoom(0x390);
     floorSetFadeScript(0, 0x05960008);
     _threadSwitch();
     return *(s32*)(ctx + 0x20);
@@ -131,7 +131,7 @@ s32 menuNameEntryOpen(s32 r3, s32 r4) {
     *(s32*)(ctx + 0x20) = 0;
     *(s32*)(ctx + 0x24) = 1;
     *(s32*)(ctx + 0x28) = 1;
-    fn_800FF730(0x390);
+    std098_mapWarpToMenuRoom(0x390);
     _threadSwitch();
     return *(s32*)(ctx + 0x20);
 }

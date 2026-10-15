@@ -40,6 +40,6 @@ u32 fn_801653BC(void) {
 }
 
 /* 0x801653C4 | 0x8 | sda_getter */
-u32 fn_801653C4(void) {
+u32 std228_soundGetCurrentBackgroundMusic(void) {
     return lbl_8047B0AC;
 }

@@ -12,12 +12,12 @@
 
 extern void heroAddPokedoru(u8* ptr, u32 offset);
 extern s32 heroItemAddItemDataId(u8* ptr, u32 arg2, u32 arg3, u32 arg4);
-extern void fn_801653CC(u32, u32, u32);
+extern void soundPlayFanfare(u32, u32, u32);
 extern void msgctrlSetValue(u32, u32);
 extern void winMsgOpen(u32, u32, u32, u32);
 extern void winMsgClose(u32);
 extern u16 pcboxDelItem(u8*, u16, u16);
-extern s8 fn_8001E184(void);
+extern s8 std011_dialogDisplayYesNoMenu(void);
 
 s32 floorEventGetTresure(u8 type, u32 item, s32 count)
 {
@@ -27,7 +27,7 @@ s32 floorEventGetTresure(u8 type, u32 item, s32 count)
     s32 result;
     u32 message = 0;
 
-    fn_801653CC(0x3CA, 0, 0xFF);
+    soundPlayFanfare(0x3CA, 0, 0xFF);
 
     switch (type) {
     case 2:
@@ -103,7 +103,7 @@ s32 floorEventGetTresure(u8 type, u32 item, s32 count)
         }
 
         winMsgOpen(3, message, 1, 0);
-        result = fn_8001E184();
+        result = std011_dialogDisplayYesNoMenu();
         winMsgClose(1);
         if (result != 0) {
             return 0;

@@ -12,7 +12,7 @@
 #include "dolphin/types.h"
 #include "game/gs_vm.h"
 
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern void _threadSwitch(void);
 
 /* 0x800F13D0 | 0x2F0 */
@@ -21,7 +21,7 @@ extern void _threadSwitch(void);
  * per-resume deltas from fn_800D3088 add up to argument 0.  The VM state byte
  * (+0x04) is 2 while waiting; an abort request (4 -> 3) leaves early with 0.
  */
-s32 fn_800F13D0(GSVMCtx* ctx)
+s32 cms_op36_yield(GSVMCtx* ctx)
 {
     s32 wait;
     s32 elapsed;
@@ -31,7 +31,7 @@ s32 fn_800F13D0(GSVMCtx* ctx)
     args = &ctx->stack[ctx->frame];
     wait = args[0].s;
     ctx->status = 2;
-    for (elapsed = 0; elapsed < wait; elapsed += fn_800D3088()) {
+    for (elapsed = 0; elapsed < wait; elapsed += msgGetCharsPerFrame()) {
         if (ctx->status == 4) {
             ctx->status = 3;
         }

@@ -147,8 +147,8 @@ extern void fightMenuAllFightTrainerCloseStatusMenu();
 extern void fightMenuAllFightOutPokemonCloseStatusMenu();
 extern u8   lbl_8037889D[0x23];
 extern void fn_80132A38();
-extern void fn_80165668(s32, s32, s32);
-extern void fn_80166A50(s32, s32, s32, s32);
+extern void std130_soundUnk_801653cc(s32, s32, s32);
+extern void soundStart(s32, s32, s32, s32);
 extern void fn_801F22D8(u32 obj);
 extern u32  fn_80262308(void);
 extern u8   lbl_8047B642;
@@ -687,7 +687,7 @@ void fightCheckRuiShadowSense(u32 r3, u8 r4)
     extern void _threadSwitch();
     extern void fn_8011F910();
     extern u8 fn_8011FC74();
-    extern int fn_801906A0();
+    extern int std082_flagGetValue();
     extern void fn_801C3430();
     extern void battleGridReplaceTrainer();
     extern void fn_801DA4E8();
@@ -813,7 +813,7 @@ void fightCheckRuiShadowSense(u32 r3, u8 r4)
               fn_80208404(r3,0,uVar10,4);
             }
             else {
-              uVar3 = fn_801906A0(0x9a0);
+              uVar3 = std082_flagGetValue(0x9a0);
               if (uVar3 == 0) {
                 fn_802624CC(0x7717);
               }

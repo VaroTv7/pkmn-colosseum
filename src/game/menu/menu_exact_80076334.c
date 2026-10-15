@@ -112,7 +112,7 @@ typedef struct MenuRankSprite {
 
 #define SET_EXDISC_VISIBILITY(id_, visible_)                       \
     do {                                                           \
-        void* model_ = GSresGetResource(fn_80113F48(), (id_));      \
+        void* model_ = GSresGetResource(std093_getCurrentGroupID(), (id_));      \
         if (model_ != 0) {                                         \
             GSmodelSetVisibility(model_, (visible_));              \
         }                                                          \
@@ -122,11 +122,11 @@ typedef struct MenuRankSprite {
     do {                                                           \
         fadeSet(3, lbl_8047C108);                                  \
         fadeCheck(1);                                              \
-        fn_801CB9D8((u32)(handle_));                               \
+        std113_mapObjectUnk_8018db68((u32)(handle_));                               \
         SET_EXDISC_VISIBILITY(0x104E1000, 1);                      \
         SET_EXDISC_VISIBILITY(0x104E1001, 1);                      \
         SET_EXDISC_VISIBILITY(0x104E1002, 1);                      \
-        cameraPlayAnime((s32)fn_80113F48(), 0x10941800, 0, 0);    \
+        cameraPlayAnime((s32)std093_getCurrentGroupID(), 0x10941800, 0, 0);    \
         fadeSet(2, lbl_8047C108);                                  \
         fadeCheck(1);                                              \
     } while (0)
@@ -174,14 +174,14 @@ extern void _threadSwitch(void);
  * later than the first call sites. */
 static inline void MenuWaitMotionInterval(void)
 {
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern s32 fn_800D37CC(void);
     f32 elapsed;
 
     elapsed = lbl_8047C0E0;
     while (elapsed < lbl_8047C0E4) {
         _threadSwitch();
-        elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+        elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
 }
 extern void winMsgOpenField(s32, s32, s32);
@@ -197,14 +197,14 @@ extern void fn_8007C23C(u8*);
 extern u32 lbl_803FAEF8[256];
 extern void* heroBiosGetNamePtr(void*);
 extern void* heroBiosGetPokemonPtr(void*, u16);
-extern void* fn_80113F48(void);
+extern void* std093_getCurrentGroupID(void);
 extern void* GSresGetResource(void*, u32);
 extern void GSmodelSetVisibility(void*, u32);
-extern void* fn_801CBA0C(u32);
+extern void* std112_modelGetResourceID(u32);
 extern void cameraPlayAnime(s32, u32, s32, s32);
 extern void fadeSet(s32, f32);
 extern s32 fadeCheck(s32);
-extern void fn_801CB9D8(u32);
+extern void std113_mapObjectUnk_8018db68(u32);
 extern void GSscene_SetMode(s32);
 extern u8 fn_80079EF4(s32, u32);
 extern void gbaCommandSetKeyState(s32 mode, s32 flag);

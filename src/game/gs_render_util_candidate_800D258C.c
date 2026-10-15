@@ -15,7 +15,7 @@ extern void* HSD_CObjGetViewingMtxPtr(void* cobj);
 extern void HSD_CObjGetEyePosition(void* cobj, void* data);
 extern void HSD_CObjGetUpVector(void* cobj, void* data);
 extern void HSD_CObjGetInterest(void* cobj, void* data);
-extern void fn_800E0168(void* dst, void* src1, void* src2);
+extern void GSvecSub(void* dst, void* src1, void* src2);
 extern void fn_800E0218(void* mtx, void* eye, void* up, void* interest);
 extern void GSmtxMakeXRotation(void* mtx, f32 angle);
 extern void GSmtxMakeYRotation(void* mtx, f32 angle);
@@ -33,7 +33,7 @@ void fn_800D258C(void* obj) {
         HSD_CObjGetInterest(c->cobj, &c->interest);
     } else if (c->useLookAt == 1) {
         f32 tmp[3];
-        fn_800E0168(tmp, &c->eye, &c->interest);
+        GSvecSub(tmp, &c->eye, &c->interest);
         {
             f32 ax = tmp[0];
             ax = ax > lbl_8047C998 ? ax : -ax;

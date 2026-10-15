@@ -63,7 +63,7 @@ static inline u32 _flagGet(u32* buffer, FlagDefinition* definitions, s32 flagId)
     return (buffer[wordIndex] >> bitPosition) & 1;
 }
 
-u8 fn_801902E0(s32 flagId)
+u8 std081_flagCheckTrue(s32 flagId)
 {
     extern FlagDefinition* lbl_80478F9C;
     extern FlagStateEntry* lbl_80478EEC;

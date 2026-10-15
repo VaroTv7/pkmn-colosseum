@@ -59,7 +59,7 @@ extern void* menuItemBiosGetPtr(s16 idx); /* node by index */
 extern void* menuSeBiosGetPtr(s32);
 extern u16   fn_8005D798(void*, s32);
 extern void* menuSpriteBiosGetPtr(s32);
-extern int   fn_80166A28(u16);
+extern int   soundStartSE(u16);
 extern s32   GSthreadGetCurrentThread(void);    /* poll/yield -- 0 if pending */
 extern void  _threadSwitch(void);    /* yield */
 extern u32   fn_800BE31C(void);    /* rand or tick */
@@ -120,19 +120,19 @@ extern u8  lbl_8035B3F0[];  /* module name string */
 /* Additional external functions (not already declared above) */
 extern void fn_800BF74C(void);
 extern void fn_800D9ED8(s32);
-extern void fn_800D88DC(s32);
-extern void fn_800D888C(s32);
-extern void fn_800D9B58(f32, f32, f32, f32);
-extern void fn_800DA4C4(s32, s32, s32);
-extern void fn_800DA2BC(s32, s32, s32);
-extern void fn_800DA1E8(s32, s32, s32);
-extern void fn_800DA028(s32);
-extern void fn_800D6A00(s32);
-extern void fn_800D7820(s32);
-extern void fn_800D67BC(s32);
-extern void fn_800D6680(f32);
+extern void gfxSetFlags(s32);
+extern void gfxClearFlags(s32);
+extern void gfxSetOrtho(f32, f32, f32, f32);
+extern void gfxSetBlendMode(s32, s32, s32);
+extern void gfxSetUpdates(s32, s32, s32);
+extern void gfxSetZMode(s32, s32, s32);
+extern void gfxSetCullMode(s32);
+extern void gfxSetPrimitive(s32);
+extern void gfxSetVtxDesc(s32);
+extern void gfxBegin(s32);
+extern void gfxVtxPos(f32);
 extern void fn_800D5CB8(s32, s32, s32, s32, s32);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 extern u32 fn_801DAC3C(u32 sequence);
 extern void fn_800EC134(u32 model);
 extern void GSmodelSetPEdescr(u32 model, void* descriptor);
@@ -178,7 +178,7 @@ extern void* windowSearchItemID(void* head, s32 key);
 extern void  menuOpenCustom(void* p, u32 r4, s32 r5, s32 r6, void* r7, s32 r8, ...);
 extern u8    menuOffScreenSetPriority(u8 val);
 extern u8    menuOffScreenSetDisp(u8 val);
-extern u32   fn_800D3088(void);
+extern u32   msgGetCharsPerFrame(void);
 extern u8    lbl_80404B68[];  /* scratch table for fn_80107F38, fn_801081F8 */
 extern u8    lbl_80404B8C[];  /* scratch table for winSeqSetMenu */
 extern u8    lbl_8047AD10;     /* resource request gate byte (sda21) - authoritative decl, use as-is */

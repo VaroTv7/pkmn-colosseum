@@ -173,12 +173,12 @@ extern void fn_801B0040(HSD_RObj* robj);
 /* displayfunc.c */
 extern void fn_80197344(HSD_JObj* jobj, MtxPtr vmtx, u32 flags,
                         u32 rendermode);
-extern void fn_80197998(HSD_JObj* jobj, MtxPtr vmtx, MtxPtr pmtx,
+extern void HSD_JObjDispDObj(HSD_JObj* jobj, MtxPtr vmtx, MtxPtr pmtx,
                         HSD_TrspMask trsp_mask, u32 rendermode);
 extern void HSD_JObjMakePositionMtx(HSD_JObj* jobj, MtxPtr vmtx,
                                     MtxPtr pmtx);
 #define HSD_JObjDisp fn_80197344
-#define HSD_JObjDispSub fn_80197998
+#define HSD_JObjDispSub HSD_JObjDispDObj
 
 /* mtx.c */
 extern void* HSD_VecAlloc(void);
@@ -255,7 +255,7 @@ void HSD_JObjResolveRefsAll(HSD_JObj* jobj, HSD_Joint* joint);
 void HSD_JObjWalkTree0(HSD_JObj* jobj, HSD_JObjWalkTreeCallback cb,
                        void* cb_args);
 HSD_JObj* HSD_JObjGetPrev(HSD_JObj* jobj);
-void fn_801A20C8(void* obj, u32 type, HSD_ObjData* val); /* JObjUpdateFunc */
+void HSD_JObjAnimCallback(void* obj, u32 type, HSD_ObjData* val); /* JObjUpdateFunc */
 s32 JObjLoad(HSD_JObj* jobj, HSD_Joint* joint, HSD_JObj* parent);
 void JObjReleaseChild(HSD_JObj* jobj);
 
@@ -492,7 +492,7 @@ void fn_801A2B5C(HSD_JObj* jobj, HSD_AnimJoint* ajoint,
 }
 
 /* JObjUpdateFunc */
-void fn_801A20C8(void* obj, u32 type, HSD_ObjData* val)
+void HSD_JObjAnimCallback(void* obj, u32 type, HSD_ObjData* val)
 {
     HSD_JObj* jobj = obj;
     Vec3 p;
@@ -1690,7 +1690,7 @@ void fn_8019D620(HSD_JObj* jobj)
 }
 
 /* HSD_JObjSetDPtclCallback */
-void fn_8019D618(DPCtlCallback cb)
+void HSD_JObjSetPtclCallback(DPCtlCallback cb)
 {
     dptcl_callback = cb;
 }
@@ -1789,5 +1789,5 @@ void fn_8019CE50(void)
     HSD_JOBJ_INFO(&hsdJObj)->disp = HSD_JObjDispSub;
     HSD_JOBJ_INFO(&hsdJObj)->load = JObjLoad;
     HSD_JOBJ_INFO(&hsdJObj)->release_child = JObjReleaseChild;
-    HSD_JOBJ_INFO(&hsdJObj)->update = fn_801A20C8;
+    HSD_JOBJ_INFO(&hsdJObj)->update = HSD_JObjAnimCallback;
 }

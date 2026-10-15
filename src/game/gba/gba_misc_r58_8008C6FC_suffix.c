@@ -123,8 +123,8 @@ typedef struct GbaPokemon {
  * Source-level names only: the macros preserve the original fn_* linker
  * symbols for objdiff while documenting the recovered behavior.
  */
-#define GbaMisc_GetMappedContextByte fn_80089B8C
-#define GbaMisc_HasActiveContextState fn_80089C10
+#define GbaMisc_GetMappedContextByte std213_gbaGetLinkedGameId
+#define GbaMisc_HasActiveContextState std212_gbaIsLinkActive
 #define GbaMisc_PollEntryStatusA fn_80089CA8
 #define GbaMisc_ResetEntryStatusA fn_80089D30
 #define GbaMisc_GetEntryStatus fn_8008A9E4
@@ -152,7 +152,7 @@ typedef struct GbaPokemon {
     GbaMisc_EntryCounterBAtHalfOffset(GBA_MISC_ENTRY_HALF_OFFSET(idx))
 
 /* ===== External function declarations ===== */
-extern void fn_8001E184();
+extern void std011_dialogDisplayYesNoMenu();
 extern void fn_80071700();
 extern void fn_800719A8();
 extern s32 fn_80071AE4();
@@ -174,7 +174,7 @@ extern void fn_80083D30();
 extern void fn_80083ECC();
 extern void __cvt_fp2unsigned();
 extern void memmove();
-extern void fn_800D3088();
+extern void msgGetCharsPerFrame();
 extern void fn_800D37CC();
 extern void GSmodelSetGSparticleLinkAttachMode();
 extern void GSmodelLinkToGSparticleBank();
@@ -193,7 +193,7 @@ extern void fn_800F9AEC();
 extern void fn_800F9C04();
 extern void floorRequestChange();
 extern void floorSetFadeScript();
-extern void fn_80113F48();
+extern void std093_getCurrentGroupID();
 extern void fn_80118874();
 extern void pokemonBiosSetEventGetFlag();
 extern void pokemonBiosSetFightTrainerPokemonDataId();
@@ -249,11 +249,11 @@ u32 fn_800896C8(void);
 void fn_800896D0(u32 v);
 void fn_800896D8(u32 v);
 void fn_800896E0(u32 v);
-void fn_800896E8(void);
+void std215_battleStartTrainerWithPrompt(void);
 void fn_80089978(void);
 u8 GbaMisc_GetMappedContextByte(void);
 s32 GbaMisc_HasActiveContextState(void);
-s32 fn_80089C54(void);
+s32 std220_gbaUnk_80083bf8(void);
 void fn_80089C84(s32 param);
 s32 GbaMisc_PollEntryStatusA(s32 r31);
 s32 GbaMisc_ResetEntryStatusA(s32 param);
@@ -324,8 +324,8 @@ void fn_8008C6FC(void) {
 #pragma push
 #pragma peephole off
 void GbaMisc_RunFlagDispatch(void) {
-    extern s32 fn_80113F48(void);
-    extern s32 fn_801906A0(s32);
+    extern s32 std093_getCurrentGroupID(void);
+    extern s32 std082_flagGetValue(s32);
     extern void _flagSet(s32, s32);
     s32 arg;
     u32 state;
@@ -336,8 +336,8 @@ void GbaMisc_RunFlagDispatch(void) {
     *(u32*)&lbl_8047A694 = 0;
     *(u32*)((u8*)&lbl_8047A694 + 0x4) = 0;
     *(u32*)&lbl_8047A690 = 0;
-    arg = fn_80113F48();
-    state = fn_801906A0(0xb5d);
+    arg = std093_getCurrentGroupID();
+    state = std082_flagGetValue(0xb5d);
     offset = state << 2;
     handler = *(void (**)(s32))((u8*)lbl_802EEC70 + offset);
     handler(arg);
@@ -354,8 +354,8 @@ void GbaMisc_RunFlagDispatch(void) {
 #pragma push
 #pragma scheduling off
 s32 fn_8008C78C(void) {
-    extern s32 fn_801906A0(s32);
-    return fn_801906A0(0xb5d);
+    extern s32 std082_flagGetValue(s32);
+    return std082_flagGetValue(0xb5d);
 }
 #pragma pop
 

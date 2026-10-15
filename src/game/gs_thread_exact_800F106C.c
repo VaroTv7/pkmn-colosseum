@@ -19,7 +19,7 @@ extern u32 lbl_8047AC3C;
 extern u32 lbl_8047AC40;
 
 /* First-party assembly; evidence: docs/asm_evidence/gs_thread.md */
-asm void fn_800F106C(void) {
+asm void cms_CallStdTrampoline(void) {
     nofralloc
     stwu r1, -0x10(r1)
     stw r0, 0x8(r1)

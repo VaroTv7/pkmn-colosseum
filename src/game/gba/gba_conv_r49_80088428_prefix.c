@@ -31,7 +31,7 @@ extern void fn_800934E4();
 extern void fn_80093610();
 extern void fn_80093698();
 extern void fn_800D0F44();
-extern void fn_800D3088();
+extern void msgGetCharsPerFrame();
 extern void fn_800D37CC();
 extern void fn_800E202C();
 extern void fn_800E209C();
@@ -48,9 +48,9 @@ extern void _threadSwitch();
 extern void fn_800F92D4();
 extern void fn_800F9AEC();
 extern void GSmsgGetGSchar();
-extern void fn_800FF56C();
+extern void std092_getCurrentRoomID();
 extern void fn_800FF660();
-extern void fn_800FF730();
+extern void std098_mapWarpToMenuRoom();
 extern void menuClose();
 extern void menuCloseCustom();
 extern void menuIsCheck();
@@ -139,18 +139,18 @@ void fn_80088428(void) {
     /* RULE-EXCEPTION(user-approved): local compiler-control pragma (peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
     #pragma peephole off
     extern u32 fn_80087C64(void* p);
-    extern void fn_80166A28(s32);
+    extern void soundStartSE(s32);
     extern void cameraWaitSyncAnime(s32);
     extern void cameraPlayAnime(s32, s32, s32, s32);
     extern void fn_800FF660(void);
     GbaConvChannelState* state = (GbaConvChannelState*)&lbl_803FB2F8;
     u32 r31;
 
-    fn_80166A28(0x27);
+    soundStartSE(0x27);
     cameraPlayAnime(0x62d, 0x107C1800, 0, 0);
     cameraWaitSyncAnime(1);
     r31 = fn_80087C64(&lbl_803FB2F8);
-    fn_80166A28(0x28);
+    soundStartSE(0x28);
     cameraPlayAnime(0x62d, 0x107D1800, 0, 0);
     cameraWaitSyncAnime(1);
     fn_800FF660();

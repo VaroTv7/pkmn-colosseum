@@ -73,12 +73,12 @@ void GXLoadTexObj(GXTexObj* obj, int id);
 /* GXSetNumTexGens */
 void fn_800B884C(u8 nTexGens);
 /* GXSetTexCoordGen2 */
-void fn_800B857C(int dst, int func, int src, u32 mtx, u8 normalize,
+void GXSetTexCoordGen2(int dst, int func, int src, u32 mtx, u8 normalize,
                  u32 postmtx);
 /* GXSetNumTevStages */
 void fn_800BC8C8(u8 nStages);
 /* GXSetTevOrder */
-void fn_800BC6F0(int stage, int coord, int map, int color);
+void GXSetTevOrder(int stage, int coord, int map, int color);
 void GXSetTevOp(int id, int mode);
 /* GXSetZTexture */
 void fn_800BC66C(int op, int fmt, u32 bias);
@@ -95,9 +95,9 @@ void fn_800BCE30(u8 update_enable);
 /* GXSetAlphaUpdate */
 void fn_800BCE5C(u8 update_enable);
 /* GXSetNumChans */
-void fn_800BA6B0(u8 nChans);
+void GXSetNumChans(u8 nChans);
 /* GXSetChanCtrl */
-void fn_800BA6F4(int chan, u8 enable, int amb_src, int mat_src, u32 light_mask,
+void GXSetChanCtrl(int chan, u8 enable, int amb_src, int mat_src, u32 light_mask,
                  int diff_fn, int attn_fn);
 /* GXClearVtxDesc */
 void fn_800B7D3C(void);
@@ -120,7 +120,7 @@ HSD_CObj* HSD_CObjGetCurrent(void);
 void fn_8019F024(HSD_JObj* jobj);
 void HSD_DObjSetCurrent(HSD_DObj* dobj);
 /* HSD_LObjSetupSpecularInit */
-void fn_801A5DCC(MtxPtr pmtx);
+void HSD_LObjSetupSpecularInit(MtxPtr pmtx);
 /* HSD_PObjClearMtxMark */
 void fn_801AB63C(void* obj, u32 mark);
 f32* HSD_MtxAlloc(void);
@@ -405,7 +405,7 @@ MtxPtr _HSD_mkEnvelopeModelNodeMtx(HSD_JObj* m, MtxPtr mtx)
 }
 
 /* HSD_JObjDispSub */
-void fn_80197998(HSD_JObj* jobj, MtxPtr vmtx, MtxPtr pmtx,
+void HSD_JObjDispDObj(HSD_JObj* jobj, MtxPtr vmtx, MtxPtr pmtx,
                  HSD_TrspMask trsp_mask, u32 rendermode)
 {
     HSD_DObj* dobj;
@@ -417,7 +417,7 @@ void fn_80197998(HSD_JObj* jobj, MtxPtr vmtx, MtxPtr pmtx,
 
     if (!(rendermode & RENDER_SHADOW)) {
         if (jobj->flags & JOBJ_SPECULAR) {
-            fn_801A5DCC(pmtx);
+            HSD_LObjSetupSpecularInit(pmtx);
         }
     }
 
@@ -634,7 +634,7 @@ void fn_80197344(HSD_JObj* jobj, MtxPtr vmtx, HSD_TrspMask trsp_mask,
 }
 
 /* HSD_JObjSetSPtclCallback */
-void fn_8019733C(void (*func)(s32, s32, s32, HSD_JObj*))
+void HSD_JObjSetSPtclCallback(void (*func)(s32, s32, s32, HSD_JObj*))
 {
     sptcl_callback = func;
 }
@@ -674,15 +674,15 @@ void HSD_EraseRect(f32 top, f32 bottom, f32 left, f32 right, f32 z,
         fn_800BA9E4(&texobj, depth_image, 4, 4, 0x11, 1, 1, 0);
         GXLoadTexObj(&texobj, 0);
         fn_800B884C(1);
-        fn_800B857C(0, 1, 4, 60, 0, 125);
+        GXSetTexCoordGen2(0, 1, 4, 60, 0, 125);
         fn_800BC8C8(1);
-        fn_800BC6F0(0, 0, 0, 4);
+        GXSetTevOrder(0, 0, 0, 4);
         GXSetTevOp(0, 4);
         fn_800BC66C(2, 0x11, 0);
     } else {
         fn_800B884C(0);
         fn_800BC8C8(1);
-        fn_800BC6F0(0, 0xFF, 0xFF, 4);
+        GXSetTevOrder(0, 0xFF, 0xFF, 4);
         GXSetTevOp(0, 4);
     }
 
@@ -695,8 +695,8 @@ void HSD_EraseRect(f32 top, f32 bottom, f32 left, f32 right, f32 z,
     fn_800BCE30(enable_color ? 1 : 0);
     fn_800BCE5C(enable_alpha ? 1 : 0);
 
-    fn_800BA6B0(1);
-    fn_800BA6F4(4, 0, 0, 1, 0, 0, 2);
+    GXSetNumChans(1);
+    GXSetChanCtrl(4, 0, 0, 1, 0, 0, 2);
 
     fn_800B7D3C();
     fn_800B7D74(0, 9, 1, 4, 0);

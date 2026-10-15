@@ -83,20 +83,20 @@ extern void  fn_8013139C(void* obj, u32 flag);
 
 /* ===== GS immediate-mode render API (used by tracefxUpdate) ===== */
 extern void  _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID(void);
-extern void  fn_800DA4C4(s32 a, s32 b, s32 c);
-extern void  fn_800DA2BC(s32 a, s32 b, s32 c);
-extern void  fn_800DA1E8(s32 a, s32 b, s32 c);
-extern void  fn_800DA028(s32 a);
-extern void  fn_800D88DC(s32 a);
-extern void  fn_800D888C(s32 a);
-extern void  fn_800D7820(void* p);
-extern void  fn_800D85D4(s32 a, void* p);
-extern void  fn_800D6A00(s32 a);
-extern void  fn_800D67BC(s32 a);
-extern void  fn_800D6680(f32 x, f32 y, f32 z);
+extern void  gfxSetBlendMode(s32 a, s32 b, s32 c);
+extern void  gfxSetUpdates(s32 a, s32 b, s32 c);
+extern void  gfxSetZMode(s32 a, s32 b, s32 c);
+extern void  gfxSetCullMode(s32 a);
+extern void  gfxSetFlags(s32 a);
+extern void  gfxClearFlags(s32 a);
+extern void  gfxSetVtxDesc(void* p);
+extern void  gfxLoadTexture(s32 a, void* p);
+extern void  gfxSetPrimitive(s32 a);
+extern void  gfxBegin(s32 a);
+extern void  gfxVtxPos(f32 x, f32 y, f32 z);
 extern void  fn_800D5CB8(s32 a, u8 r, u8 g, u8 b, u8 al);
-extern void  fn_800D59B8(s32 a, f32 s, f32 t);
-extern void  fn_800D6728(void);
+extern void  gfxVtxTexCoord(s32 a, f32 s, f32 t);
+extern void  gfxEnd(void);
 
 /* ===== Forward declarations (vtable callbacks) ===== */
 u8*   fn_80137114(u8* work, u8* params, s32 frames);
@@ -994,30 +994,30 @@ int fn_80137F58(u8* w) {
     if (count2 <= 1) goto ret0;
 
     _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
-    fn_800DA4C4(1, 6, 7);
-    fn_800DA2BC(1, 1, 0);
-    fn_800DA1E8(1, 2, 1);
-    fn_800DA028(0);
-    fn_800D88DC(3);
-    fn_800D888C(4);
-    fn_800D7820(*(void**)(w + 0x10));
-    fn_800D85D4(0, *(void**)(w + 0x14));
-    fn_800D6A00(4);
-    fn_800D67BC((count2 & 0x7FFF) << 1);
+    gfxSetBlendMode(1, 6, 7);
+    gfxSetUpdates(1, 1, 0);
+    gfxSetZMode(1, 2, 1);
+    gfxSetCullMode(0);
+    gfxSetFlags(3);
+    gfxClearFlags(4);
+    gfxSetVtxDesc(*(void**)(w + 0x10));
+    gfxLoadTexture(0, *(void**)(w + 0x14));
+    gfxSetPrimitive(4);
+    gfxBegin((count2 & 0x7FFF) << 1);
 
     node = *(u8**)(w + 0x00);
     weight = *(u8**)(w + 0x08) + (*(u16*)(w + 0x22) - count2) * 16;
     for (i = 0; (u16)i < count2; i++) {
-        fn_800D6680(*(f32*)(node + 0x00), *(f32*)(node + 0x04), *(f32*)(node + 0x08));
+        gfxVtxPos(*(f32*)(node + 0x00), *(f32*)(node + 0x04), *(f32*)(node + 0x08));
         fn_800D5CB8(0, w[0x18], w[0x19], w[0x1A], w[0x1B]);
-        fn_800D59B8(0, *(f32*)(weight + 0x00), *(f32*)(weight + 0x04));
-        fn_800D6680(*(f32*)(node + 0x0C), *(f32*)(node + 0x10), *(f32*)(node + 0x14));
+        gfxVtxTexCoord(0, *(f32*)(weight + 0x00), *(f32*)(weight + 0x04));
+        gfxVtxPos(*(f32*)(node + 0x0C), *(f32*)(node + 0x10), *(f32*)(node + 0x14));
         fn_800D5CB8(0, w[0x18], w[0x19], w[0x1A], w[0x1B]);
-        fn_800D59B8(0, *(f32*)(weight + 0x08), *(f32*)(weight + 0x0C));
+        gfxVtxTexCoord(0, *(f32*)(weight + 0x08), *(f32*)(weight + 0x0C));
         node = *(u8**)(node + 0x1C);
         weight += 0x10;
     }
-    fn_800D6728();
+    gfxEnd();
     return 1;
 ret0:
     return 0;

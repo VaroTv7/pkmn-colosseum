@@ -41,7 +41,7 @@ extern GSgfxState* lbl_8047AA80;
  * 17 word + matrix, 18 word + 0x18 bytes (0x60-byte slot) + word,
  * 19 three words + matrix, 20 word + GXColor.
  */
-void fn_800D4F98(u32 command, u32 format, ...)
+void gfxRecordCommand(u32 command, u32 format, ...)
 {
     va_list ap;
     f32 value;

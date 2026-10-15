@@ -58,7 +58,7 @@ extern void* menuItemBiosGetPtr(s16 idx); /* node by index */
 extern void* menuSeBiosGetPtr(s32);
 extern u16   fn_8005D798(void*, s32);
 extern void* menuSpriteBiosGetPtr(s32);
-extern int   fn_80166A28(u16);
+extern int   soundStartSE(u16);
 extern u32   GSthreadGetCurrentThread(void);    /* poll/yield -- 0 if pending */
 extern void  _threadSwitch(void);    /* yield */
 extern u32   fn_800BE31C(void);    /* rand or tick */
@@ -132,19 +132,19 @@ extern u8  lbl_80314E08[];
 /* Additional external functions (not already declared above) */
 extern void fn_800BF74C(void);
 extern void fn_800D9ED8(s32);
-extern void fn_800D88DC(s32);
-extern void fn_800D888C(s32);
-extern void fn_800D9B58(f32, f32, f32, f32);
-extern void fn_800DA4C4(s32, s32, s32);
-extern void fn_800DA2BC(s32, s32, s32);
-extern void fn_800DA1E8(s32, s32, s32);
-extern void fn_800DA028(s32);
-extern void fn_800D6A00(s32);
-extern void fn_800D7820(s32);
-extern void fn_800D67BC(s32);
-extern void fn_800D6680(f32);
+extern void gfxSetFlags(s32);
+extern void gfxClearFlags(s32);
+extern void gfxSetOrtho(f32, f32, f32, f32);
+extern void gfxSetBlendMode(s32, s32, s32);
+extern void gfxSetUpdates(s32, s32, s32);
+extern void gfxSetZMode(s32, s32, s32);
+extern void gfxSetCullMode(s32);
+extern void gfxSetPrimitive(s32);
+extern void gfxSetVtxDesc(s32);
+extern void gfxBegin(s32);
+extern void gfxVtxPos(f32);
 extern void fn_800D5CB8(s32, s32, s32, s32, s32);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 extern void fn_800D61E4(s16 x, s16 y);
 extern void fn_800D5BA0(s32 index, u32 color);
 extern void fn_800D5648(f32 value);
@@ -176,7 +176,7 @@ extern void* windowSearchItemID(void* head, s32 key);
 extern void  menuOpenCustom(void* p, u32 r4, s32 r5, s32 r6, void* r7, s32 r8, ...);
 extern u8    menuOffScreenSetPriority(u8 val);
 extern u8    menuOffScreenSetDisp(u8 val);
-extern u32   fn_800D3088(void);
+extern u32   msgGetCharsPerFrame(void);
 extern u8    lbl_80404B68[];  /* scratch table for fn_80107F38, fn_801081F8 */
 extern u8    lbl_80404B8C[];  /* scratch table for winSeqSetMenu */
 extern u8    lbl_8047AD10;     /* resource request gate byte (sda21) - authoritative decl, use as-is */
@@ -390,11 +390,11 @@ s32 fn_80105634(u8* window, u8* sprite) {
     case 0x82:
         ((u8*)colors)[3] = (u8)(((u32)((u8*)colors)[3] * alpha));
         ((u8*)colors)[7] = (u8)(((u32)((u8*)colors)[7] * alpha));
-        fn_800D88DC(1);
-        fn_800D888C(6);
-        fn_800D6A00(6);
-        fn_800D7820((s32)lbl_80314E08);
-        fn_800D67BC(4);
+        gfxSetFlags(1);
+        gfxClearFlags(6);
+        gfxSetPrimitive(6);
+        gfxSetVtxDesc((s32)lbl_80314E08);
+        gfxBegin(4);
         fn_800D61E4(0, 0);
         fn_800D5BA0(0, colors[0]);
         fn_800D61E4(*(s16*)(sprite + 0x54), 0);
@@ -403,7 +403,7 @@ s32 fn_80105634(u8* window, u8* sprite) {
         fn_800D5BA0(0, colors[1]);
         fn_800D61E4(0, *(s16*)(sprite + 0x56));
         fn_800D5BA0(0, colors[1]);
-        fn_800D6728();
+        gfxEnd();
         fn_800FE38C(0, 0, *(s16*)(sprite + 0x54),
                     *(s16*)(sprite + 0x56));
         break;
@@ -412,22 +412,22 @@ s32 fn_80105634(u8* window, u8* sprite) {
     case 0x83: {
         s16 y;
 
-        fn_800D88DC(1);
-        fn_800D888C(6);
+        gfxSetFlags(1);
+        gfxClearFlags(6);
         fn_800D5648(lbl_8047CDF8);
-        fn_800D6A00(1);
-        fn_800D7820((s32)lbl_80314E08);
+        gfxSetPrimitive(1);
+        gfxSetVtxDesc((s32)lbl_80314E08);
         ((u8*)colors)[0] = 0xFF;
         ((u8*)colors)[1] = 0xFF;
         ((u8*)colors)[2] = 0xFF;
         ((u8*)colors)[3] = (u8)(lbl_8047CDFC * alpha);
         for (y = 0; y < *(s16*)(sprite + 0x56); y += 4) {
-            fn_800D67BC(2);
+            gfxBegin(2);
             fn_800D61E4(0, y);
             fn_800D5BA0(0, colors[0]);
             fn_800D61E4(*(s16*)(sprite + 0x54), y);
             fn_800D5BA0(0, colors[0]);
-            fn_800D6728();
+            gfxEnd();
         }
         fn_800FE35C();
         break;

@@ -76,7 +76,7 @@ static inline u32 shopMemoryAlloc(void)
     return _toolentryAlloc__FUl(0x7198);
 }
 
-void fn_8002D5D4(void)
+void std026_unkMenuSequence26(void)
 {
     ShopLocationEntry* location_entry;
     u32 location_offset;

@@ -422,7 +422,7 @@ u8 fightSideGetDoFightTrainerCount(u32 param_1) {
 
 /* 0x801F7404 | size: 0x7C | small */
 u32 fightSideCheckValid(u32 param_1) {
-    extern u16 fn_801EF634(void);
+    extern u16 std103_battleGetResult(void);
     extern u16 fightSideBiosGetFightSideDataId(u32);
     u16 sVar2;
     u32 uVar1;
@@ -430,7 +430,7 @@ u32 fightSideCheckValid(u32 param_1) {
     if (param_1 == 0) {
         return 0;
     }
-    if ((u16)fn_801EF634() == 1) {
+    if ((u16)std103_battleGetResult() == 1) {
         return 0;
     }
     if (param_1 == 0) {

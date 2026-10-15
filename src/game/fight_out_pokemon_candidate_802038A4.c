@@ -67,7 +67,7 @@ u8 fightOutPokemonIsHinsi(int r3)
 
 {
     extern s8 pokemonCheckValid();
-    extern short fn_801EF634();
+    extern short std103_battleGetResult();
   u8 bVar1;
   u16 sVar4;
   u32 iVar2;
@@ -79,7 +79,7 @@ u8 fightOutPokemonIsHinsi(int r3)
     bVar1 = 0;
   }
   else {
-    sVar4 = fn_801EF634();
+    sVar4 = std103_battleGetResult();
     if (sVar4 == 1) {
       bVar1 = 0;
     }
@@ -93,7 +93,7 @@ u8 fightOutPokemonIsHinsi(int r3)
           bVar1 = 0;
         }
         else {
-        sVar4 = fn_801EF634();
+        sVar4 = std103_battleGetResult();
         if (sVar4 == 1) {
           bVar1 = 0;
         }

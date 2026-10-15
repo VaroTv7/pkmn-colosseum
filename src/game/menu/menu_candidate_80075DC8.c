@@ -10,12 +10,12 @@
  */
 #include "dolphin/types.h"
 
-extern void* fn_80113F48(void);
+extern void* std093_getCurrentGroupID(void);
 extern void cameraPlayAnime(s32, u32, s32, s32);
 extern s32 fn_800D37CC(void);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern void _threadSwitch(void);
-extern void fn_801CB834(u32 object, s32 arg1, s32 arg2, s32 arg3);
+extern void std115_mapObjectPlayAnimation(u32 object, s32 arg1, s32 arg2, s32 arg3);
 extern s32 menuOpenCustom(s32, ...);
 extern s32 fadeCheck(s32);
 extern void fadeSet(s32, f32);
@@ -31,7 +31,7 @@ void fn_80075DC8(void)
     u32 waitTicks;
     s32 destination;
 
-    cameraPlayAnime((s32)fn_80113F48(), 0x0B561800, 0, 0);
+    cameraPlayAnime((s32)std093_getCurrentGroupID(), 0x0B561800, 0, 0);
     waitTicks = 1;
     if (fn_800D37CC() == 0x32) {
         waitTicks = (u32)lbl_8047C0C0;
@@ -42,10 +42,10 @@ void fn_80075DC8(void)
     elapsed = 0;
     while (elapsed < waitTicks) {
         _threadSwitch();
-        elapsed += fn_800D3088();
+        elapsed += msgGetCharsPerFrame();
     }
 
-    fn_801CB834(0x0B541000, 2, 0, 1);
+    std115_mapObjectPlayAnimation(0x0B541000, 2, 0, 1);
     switch (menuOpenCustom(0xE2, 0, 0, 0x10, 1, 0)) {
     case 0:
         destination = 0x321;

@@ -45,30 +45,30 @@ extern LensFlareElement* lbl_8047B5C8;
 extern void* GScameraGetActiveCamera(void);
 extern void GScameraGetPosition(void* camera, Vec* position);
 extern s32 GScolsys2Sun(Vec* sun, Vec* eye);
-extern s32 fn_800D2F34(Vec* world, Vec* screen);
-extern f32 fn_800E008C(Vec* v);
-extern void fn_800E00AC(Vec* src, Vec* dst, f32 length);
-extern void fn_800E013C(Vec* dst, Vec* src, f32 scale);
+extern s32 gfxWorldToScreen(Vec* world, Vec* screen);
+extern f32 vecMag(Vec* v);
+extern void vecNormalize(Vec* src, Vec* dst, f32 length);
+extern void vecScale(Vec* dst, Vec* src, f32 scale);
 extern u16 GStextureGetXsize(void* texture);
 extern u16 GStextureGetYsize(void* texture);
-extern void fn_800D88DC(s32);
-extern void fn_800D888C(s32);
-extern void fn_800D9B58(f32 left, f32 top, f32 right, f32 bottom);
-extern void fn_800DA4C4(s32, s32, s32);
-extern void fn_800DA2BC(s32, s32, s32);
-extern void fn_800DA1E8(s32, s32, s32);
-extern void fn_800DA028(s32);
+extern void gfxSetFlags(s32);
+extern void gfxClearFlags(s32);
+extern void gfxSetOrtho(f32 left, f32 top, f32 right, f32 bottom);
+extern void gfxSetBlendMode(s32, s32, s32);
+extern void gfxSetUpdates(s32, s32, s32);
+extern void gfxSetZMode(s32, s32, s32);
+extern void gfxSetCullMode(s32);
 extern void fn_800D9ED8(s32);
-extern void fn_800D85D4(s32 map, void* texture);
-extern void fn_800D67BC(s32 primitive);
-extern void fn_800D6680(f32 x, f32 y, f32 z);
-extern void fn_800D5C18(s32 index, u8 r, u8 g, u8 b);
-extern void fn_800D59B8(s32 index, f32 s, f32 t);
-extern void fn_800D6728(void);
-extern void fn_800D6A00(s32);
-extern void fn_800D7820(void* data);
+extern void gfxLoadTexture(s32 map, void* texture);
+extern void gfxBegin(s32 primitive);
+extern void gfxVtxPos(f32 x, f32 y, f32 z);
+extern void gfxVtxColor(s32 index, u8 r, u8 g, u8 b);
+extern void gfxVtxTexCoord(s32 index, f32 s, f32 t);
+extern void gfxEnd(void);
+extern void gfxSetPrimitive(s32);
+extern void gfxSetVtxDesc(void* data);
 
-void fn_801ED780(void)
+void flareDraw(void)
 {
     Vec screen;
     Vec dir;
@@ -101,7 +101,7 @@ void fn_801ED780(void)
     if (GScolsys2Sun(&lbl_80375230, &eye) == 1) {
         return;
     }
-    mode = fn_800D2F34(&lbl_80375230, &screen);
+    mode = gfxWorldToScreen(&lbl_80375230, &screen);
     if (mode == 0) {
         return;
     }
@@ -109,22 +109,22 @@ void fn_801ED780(void)
     dir.x = centerX - screen.x;
     dir.y = centerY - screen.y;
     dir.z = 0.0f;
-    dist = fn_800E008C(&dir);
+    dist = vecMag(&dir);
     if ((dist > 0.0f ? dist : -dist) < 0.001f || dist > lbl_8047B5C4->farDistance) {
         return;
     }
 
-    fn_800D88DC(3);
-    fn_800D888C(4);
-    fn_800D9B58(0.0f, 0.0f, 640.0f, 480.0f);
-    fn_800DA4C4(1, 1, 1);
-    fn_800DA2BC(1, 1, 0);
-    fn_800DA1E8(0, 1, 1);
-    fn_800DA028(0);
+    gfxSetFlags(3);
+    gfxClearFlags(4);
+    gfxSetOrtho(0.0f, 0.0f, 640.0f, 480.0f);
+    gfxSetBlendMode(1, 1, 1);
+    gfxSetUpdates(1, 1, 0);
+    gfxSetZMode(0, 1, 1);
+    gfxSetCullMode(0);
     fn_800D9ED8(1);
 
     if (mode == 2) {
-        fn_800E00AC(&dir, &dir, dist);
+        vecNormalize(&dir, &dir, dist);
 
         if (dist < lbl_8047B5C4->midDistance) {
             ratio = 1.0f;
@@ -140,8 +140,8 @@ void fn_801ED780(void)
         }
         alpha = 255.0f * ratio;
 
-        fn_800D6A00(4);
-        fn_800D7820(lbl_80314C78);
+        gfxSetPrimitive(4);
+        gfxSetVtxDesc(lbl_80314C78);
 
         elem = lbl_8047B5C8;
         count = lbl_8047B5C4->elementCount;
@@ -153,28 +153,28 @@ void fn_801ED780(void)
                 x1 = screen.x + elem->scale * (GStextureGetXsize(texture) >> 1);
                 y1 = screen.y + elem->scale * (GStextureGetYsize(texture) >> 1);
             } else {
-                fn_800E013C(&offset, &dir, (1.0f / 3.0f) * elem->position * dist);
+                vecScale(&offset, &dir, (1.0f / 3.0f) * elem->position * dist);
                 x0 = (offset.x + centerX) - elem->scale * (GStextureGetXsize(texture) >> 1);
                 y0 = (offset.y + centerY) - elem->scale * (GStextureGetYsize(texture) >> 1);
                 x1 = (offset.x + centerX) + elem->scale * (GStextureGetXsize(texture) >> 1);
                 y1 = (offset.y + centerY) + elem->scale * (GStextureGetYsize(texture) >> 1);
             }
 
-            fn_800D85D4(0, texture);
-            fn_800D67BC(4);
-            fn_800D6680(x0, y0, 0.0f);
-            fn_800D5C18(0, alpha, alpha, alpha);
-            fn_800D59B8(0, 0.0f, 0.0f);
-            fn_800D6680(x1, y0, 0.0f);
-            fn_800D5C18(0, alpha, alpha, alpha);
-            fn_800D59B8(0, 1.0f, 0.0f);
-            fn_800D6680(x0, y1, 0.0f);
-            fn_800D5C18(0, alpha, alpha, alpha);
-            fn_800D59B8(0, 0.0f, 1.0f);
-            fn_800D6680(x1, y1, 0.0f);
-            fn_800D5C18(0, alpha, alpha, alpha);
-            fn_800D59B8(0, 1.0f, 1.0f);
-            fn_800D6728();
+            gfxLoadTexture(0, texture);
+            gfxBegin(4);
+            gfxVtxPos(x0, y0, 0.0f);
+            gfxVtxColor(0, alpha, alpha, alpha);
+            gfxVtxTexCoord(0, 0.0f, 0.0f);
+            gfxVtxPos(x1, y0, 0.0f);
+            gfxVtxColor(0, alpha, alpha, alpha);
+            gfxVtxTexCoord(0, 1.0f, 0.0f);
+            gfxVtxPos(x0, y1, 0.0f);
+            gfxVtxColor(0, alpha, alpha, alpha);
+            gfxVtxTexCoord(0, 0.0f, 1.0f);
+            gfxVtxPos(x1, y1, 0.0f);
+            gfxVtxColor(0, alpha, alpha, alpha);
+            gfxVtxTexCoord(0, 1.0f, 1.0f);
+            gfxEnd();
             elem++;
         }
 
@@ -193,22 +193,22 @@ void fn_801ED780(void)
                 }
             }
             alpha = 255.0f * ratio;
-            fn_800D888C(2);
-            fn_800D6A00(4);
-            fn_800D7820(lbl_80314958);
-            fn_800D67BC(4);
-            fn_800D6680(0.0f, 0.0f, 0.0f);
-            fn_800D5C18(0, alpha, alpha, alpha);
-            fn_800D6680(640.0f, 0.0f, 0.0f);
-            fn_800D5C18(0, alpha, alpha, alpha);
-            fn_800D6680(0.0f, 480.0f, 0.0f);
-            fn_800D5C18(0, alpha, alpha, alpha);
-            fn_800D6680(640.0f, 480.0f, 0.0f);
-            fn_800D5C18(0, alpha, alpha, alpha);
-            fn_800D6728();
+            gfxClearFlags(2);
+            gfxSetPrimitive(4);
+            gfxSetVtxDesc(lbl_80314958);
+            gfxBegin(4);
+            gfxVtxPos(0.0f, 0.0f, 0.0f);
+            gfxVtxColor(0, alpha, alpha, alpha);
+            gfxVtxPos(640.0f, 0.0f, 0.0f);
+            gfxVtxColor(0, alpha, alpha, alpha);
+            gfxVtxPos(0.0f, 480.0f, 0.0f);
+            gfxVtxColor(0, alpha, alpha, alpha);
+            gfxVtxPos(640.0f, 480.0f, 0.0f);
+            gfxVtxColor(0, alpha, alpha, alpha);
+            gfxEnd();
         }
     } else {
-        fn_800DA4C4(2, 1, 1);
+        gfxSetBlendMode(2, 1, 1);
         if (dist < lbl_8047B5C4->midDistance) {
             if (dist < lbl_8047B5C4->nearDistance) {
                 ratio = lbl_8047B5C4->glareScale[1];
@@ -224,19 +224,19 @@ void fn_801ED780(void)
                 }
             }
             alpha = 255.0f * ratio;
-            fn_800D888C(2);
-            fn_800D6A00(4);
-            fn_800D7820(lbl_80314958);
-            fn_800D67BC(4);
-            fn_800D6680(0.0f, 0.0f, 0.0f);
-            fn_800D5C18(0, alpha, alpha, alpha);
-            fn_800D6680(640.0f, 0.0f, 0.0f);
-            fn_800D5C18(0, alpha, alpha, alpha);
-            fn_800D6680(0.0f, 480.0f, 0.0f);
-            fn_800D5C18(0, alpha, alpha, alpha);
-            fn_800D6680(640.0f, 480.0f, 0.0f);
-            fn_800D5C18(0, alpha, alpha, alpha);
-            fn_800D6728();
+            gfxClearFlags(2);
+            gfxSetPrimitive(4);
+            gfxSetVtxDesc(lbl_80314958);
+            gfxBegin(4);
+            gfxVtxPos(0.0f, 0.0f, 0.0f);
+            gfxVtxColor(0, alpha, alpha, alpha);
+            gfxVtxPos(640.0f, 0.0f, 0.0f);
+            gfxVtxColor(0, alpha, alpha, alpha);
+            gfxVtxPos(0.0f, 480.0f, 0.0f);
+            gfxVtxColor(0, alpha, alpha, alpha);
+            gfxVtxPos(640.0f, 480.0f, 0.0f);
+            gfxVtxColor(0, alpha, alpha, alpha);
+            gfxEnd();
         }
     }
 }

@@ -45,31 +45,31 @@ extern void C_MTXOrtho(f32 mtx[4][4], f32 t, f32 b, f32 l, f32 r, f32 n, f32 f);
 extern void fn_800B7874(u32 attr, u32 type);                       /* GXSetVtxDesc */
 extern void fn_800B7D3C(void);                                     /* GXClearVtxDesc */
 extern void fn_800B7D74(u32 fmt, u32 attr, u32 cnt, u32 type, u8 frac); /* GXSetVtxAttrFmt */
-extern void fn_800B857C(u32 dst, u32 func, u32 src, u32 mtx, u8 normalize,
+extern void GXSetTexCoordGen2(u32 dst, u32 func, u32 src, u32 mtx, u8 normalize,
                         u32 postMtx);                              /* GXSetTexCoordGen2 */
 extern void fn_800B884C(u8 nTexGens);                              /* GXSetNumTexGens */
 extern void fn_800B928C(u8 type, u8 fmt, u16 nverts);              /* GXBegin */
 extern void fn_800B9E6C(u8 nChans);                                /* GXSetDispCopyGamma */
-extern void fn_800BA6B0(u8 nChans);                                /* GXSetNumChans */
+extern void GXSetNumChans(u8 nChans);                                /* GXSetNumChans */
 extern void fn_800BA9E4(GXTexObj* obj, void* image, u16 width, u16 height,
                         u32 format, u32 wrapS, u32 wrapT, u8 mipmap); /* GXInitTexObj */
 extern void fn_800BACA0(GXTexObj* obj, u32 minFilt, u32 magFilt, f32 minLOD,
                         f32 maxLOD, f32 lodBias, u8 biasClamp, u8 doEdgeLOD,
                         u32 maxAniso);                             /* GXInitTexObjLOD */
 extern void GXSetTevOp(u32 stage, u32 mode);
-extern void fn_800BC1A0(u32 stage, u32 a, u32 b, u32 c, u32 d);    /* GXSetTevColorIn */
-extern void fn_800BC1E4(u32 stage, u32 a, u32 b, u32 c, u32 d);    /* GXSetTevAlphaIn */
-extern void fn_800BC228(u32 stage, u32 op, u32 bias, u32 scale, u8 clamp,
+extern void GXSetTevColorIn(u32 stage, u32 a, u32 b, u32 c, u32 d);    /* GXSetTevColorIn */
+extern void GXSetTevAlphaIn(u32 stage, u32 a, u32 b, u32 c, u32 d);    /* GXSetTevAlphaIn */
+extern void GXSetTevColorOp(u32 stage, u32 op, u32 bias, u32 scale, u8 clamp,
                         u32 outReg);                               /* GXSetTevColorOp */
-extern void fn_800BC290(u32 stage, u32 op, u32 bias, u32 scale, u8 clamp,
+extern void GXSetTevAlphaOp(u32 stage, u32 op, u32 bias, u32 scale, u8 clamp,
                         u32 outReg);                               /* GXSetTevAlphaOp */
 extern void fn_800BC36C(u32 id, GXColorS10 color);                 /* GXSetTevColorS10 */
 extern void fn_800BC3E0(u32 id, GXColor color);                    /* GXSetTevKColor */
-extern void fn_800BC454(u32 stage, u32 sel);                       /* GXSetTevKColorSel */
-extern void fn_800BC4C0(u32 stage, u32 sel);                       /* GXSetTevKAlphaSel */
-extern void fn_800BC52C(u32 stage, u32 rasSel, u32 texSel);        /* GXSetTevSwapMode */
-extern void fn_800BC580(u32 table, u32 red, u32 green, u32 blue, u32 alpha); /* GXSetTevSwapModeTable */
-extern void fn_800BC6F0(u32 stage, u32 coord, u32 map, u32 color); /* GXSetTevOrder */
+extern void GXSetTevKColorSel(u32 stage, u32 sel);                       /* GXSetTevKColorSel */
+extern void GXSetTevKAlphaSel(u32 stage, u32 sel);                       /* GXSetTevKAlphaSel */
+extern void GXSetTevSwapMode(u32 stage, u32 rasSel, u32 texSel);        /* GXSetTevSwapMode */
+extern void GXSetTevSwapModeTable(u32 table, u32 red, u32 green, u32 blue, u32 alpha); /* GXSetTevSwapModeTable */
+extern void GXSetTevOrder(u32 stage, u32 coord, u32 map, u32 color); /* GXSetTevOrder */
 extern void fn_800BC8C8(u8 nStages);                               /* GXSetNumTevStages */
 extern void fn_800BCE30(u8 enable);                                /* GXSetColorUpdate */
 extern void fn_800BCE5C(u8 enable);                                /* GXSetAlphaUpdate */
@@ -84,18 +84,18 @@ void fn_801E24B0(void)
     GXSetZMode(1, 7, 0);
     GXSetBlendMode(0, 1, 0, 0xF);
     fn_800B884C(1);
-    fn_800BA6B0(0);
+    GXSetNumChans(0);
     fn_800BC8C8(1);
-    fn_800BC6F0(0, 0, 0, 0xFF);
+    GXSetTevOrder(0, 0, 0, 0xFF);
     GXSetTevOp(0, 3);
-    fn_800BC52C(0, 0, 0);
-    fn_800BC52C(1, 0, 0);
-    fn_800BC52C(2, 0, 0);
-    fn_800BC52C(3, 0, 0);
-    fn_800BC580(0, 0, 1, 2, 3);
-    fn_800BC580(1, 0, 0, 0, 3);
-    fn_800BC580(2, 1, 1, 1, 3);
-    fn_800BC580(3, 2, 2, 2, 3);
+    GXSetTevSwapMode(0, 0, 0);
+    GXSetTevSwapMode(1, 0, 0);
+    GXSetTevSwapMode(2, 0, 0);
+    GXSetTevSwapMode(3, 0, 0);
+    GXSetTevSwapModeTable(0, 0, 1, 2, 3);
+    GXSetTevSwapModeTable(1, 0, 0, 0, 3);
+    GXSetTevSwapModeTable(2, 1, 1, 1, 3);
+    GXSetTevSwapModeTable(3, 2, 2, 2, 3);
 }
 
 void fn_801E1FF8(GXRenderModeObj* rmode)
@@ -124,11 +124,11 @@ void fn_801E1FF8(GXRenderModeObj* rmode)
     fn_800BCE30(1);
     fn_800BCE5C(0);
     fn_800B9E6C(0);
-    fn_800BA6B0(0);
+    GXSetNumChans(0);
 
     fn_800B884C(2);
-    fn_800B857C(0, 1, 4, 60, 0, 125);
-    fn_800B857C(1, 1, 4, 60, 0, 125);
+    GXSetTexCoordGen2(0, 1, 4, 60, 0, 125);
+    GXSetTexCoordGen2(1, 1, 4, 60, 0, 125);
     GXInvalidateTexAll();
 
     fn_800B7D3C();
@@ -138,44 +138,44 @@ void fn_801E1FF8(GXRenderModeObj* rmode)
     fn_800B7D74(7, 13, 1, 2, 0);
 
     fn_800BC8C8(4);
-    fn_800BC6F0(0, 1, 1, 0xFF);
-    fn_800BC1A0(0, 15, 8, 14, 2);
-    fn_800BC228(0, 0, 0, 0, 0, 0);
-    fn_800BC1E4(0, 7, 4, 6, 1);
-    fn_800BC290(0, 1, 0, 0, 0, 0);
-    fn_800BC454(0, 12);
-    fn_800BC4C0(0, 28);
-    fn_800BC52C(0, 0, 0);
+    GXSetTevOrder(0, 1, 1, 0xFF);
+    GXSetTevColorIn(0, 15, 8, 14, 2);
+    GXSetTevColorOp(0, 0, 0, 0, 0, 0);
+    GXSetTevAlphaIn(0, 7, 4, 6, 1);
+    GXSetTevAlphaOp(0, 1, 0, 0, 0, 0);
+    GXSetTevKColorSel(0, 12);
+    GXSetTevKAlphaSel(0, 28);
+    GXSetTevSwapMode(0, 0, 0);
 
-    fn_800BC6F0(1, 1, 2, 0xFF);
-    fn_800BC1A0(1, 15, 8, 14, 0);
-    fn_800BC228(1, 0, 0, 1, 0, 0);
-    fn_800BC1E4(1, 7, 4, 6, 0);
-    fn_800BC290(1, 1, 0, 0, 0, 0);
-    fn_800BC454(1, 13);
-    fn_800BC4C0(1, 29);
-    fn_800BC52C(1, 0, 0);
+    GXSetTevOrder(1, 1, 2, 0xFF);
+    GXSetTevColorIn(1, 15, 8, 14, 0);
+    GXSetTevColorOp(1, 0, 0, 1, 0, 0);
+    GXSetTevAlphaIn(1, 7, 4, 6, 0);
+    GXSetTevAlphaOp(1, 1, 0, 0, 0, 0);
+    GXSetTevKColorSel(1, 13);
+    GXSetTevKAlphaSel(1, 29);
+    GXSetTevSwapMode(1, 0, 0);
 
-    fn_800BC6F0(2, 0, 0, 0xFF);
-    fn_800BC1A0(2, 15, 8, 12, 0);
-    fn_800BC228(2, 0, 0, 0, 1, 0);
-    fn_800BC1E4(2, 4, 7, 7, 0);
-    fn_800BC290(2, 0, 0, 0, 1, 0);
-    fn_800BC52C(2, 0, 0);
+    GXSetTevOrder(2, 0, 0, 0xFF);
+    GXSetTevColorIn(2, 15, 8, 12, 0);
+    GXSetTevColorOp(2, 0, 0, 0, 1, 0);
+    GXSetTevAlphaIn(2, 4, 7, 7, 0);
+    GXSetTevAlphaOp(2, 0, 0, 0, 1, 0);
+    GXSetTevSwapMode(2, 0, 0);
 
-    fn_800BC6F0(3, 0xFF, 0xFF, 0xFF);
-    fn_800BC1A0(3, 1, 0, 14, 15);
-    fn_800BC228(3, 0, 0, 0, 1, 0);
-    fn_800BC1E4(3, 7, 7, 7, 7);
-    fn_800BC290(3, 0, 0, 0, 1, 0);
-    fn_800BC52C(3, 0, 0);
-    fn_800BC454(3, 14);
+    GXSetTevOrder(3, 0xFF, 0xFF, 0xFF);
+    GXSetTevColorIn(3, 1, 0, 14, 15);
+    GXSetTevColorOp(3, 0, 0, 0, 1, 0);
+    GXSetTevAlphaIn(3, 7, 7, 7, 7);
+    GXSetTevAlphaOp(3, 0, 0, 0, 1, 0);
+    GXSetTevSwapMode(3, 0, 0);
+    GXSetTevKColorSel(3, 14);
 
     fn_800BC36C(1, (GXColorS10){ -90, 0, -114, 135 });
     fn_800BC3E0(0, (GXColor){ 0, 0, 226, 88 });
     fn_800BC3E0(1, (GXColor){ 179, 0, 0, 182 });
     fn_800BC3E0(2, (GXColor){ 255, 0, 255, 128 });
-    fn_800BC580(0, 0, 1, 2, 3);
+    GXSetTevSwapModeTable(0, 0, 1, 2, 3);
 }
 
 void fn_801E1E1C(u8* y_data, u8* u_data, u8* v_data, s16 x, s16 y,

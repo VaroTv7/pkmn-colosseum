@@ -425,7 +425,7 @@ s32 fn_8003A7F0(PdaNumberWork* work)
 {
     extern PdaKeyInfo* windowGetKeyInfo(void);
     extern s32 lbl_8047A4C8;
-    extern void fn_80166A50(s32 id, s32 a, s32 b, s32 c);
+    extern void soundStart(s32 id, s32 a, s32 b, s32 c);
     PdaKeyInfo* keyInfo;
     PdaNumberRange* range;
     s32 step;
@@ -450,7 +450,7 @@ s32 fn_8003A7F0(PdaNumberWork* work)
                 if (value > range->max) {
                     lbl_8047A4C8 = range->min;
                 }
-                fn_80166A50(0x3c5, 0, 0xff, 0);
+                soundStart(0x3c5, 0, 0xff, 0);
             } else {
                 cur = lbl_8047A4C8;
                 digit = (cur / step) % 10;
@@ -468,7 +468,7 @@ s32 fn_8003A7F0(PdaNumberWork* work)
                 if (lbl_8047A4C8 < range->min) {
                     lbl_8047A4C8 = range->min;
                 } else {
-                    fn_80166A50(0x3c5, 0, 0xff, 0);
+                    soundStart(0x3c5, 0, 0xff, 0);
                 }
             }
         }
@@ -479,7 +479,7 @@ s32 fn_8003A7F0(PdaNumberWork* work)
                 if (value < range->min) {
                     lbl_8047A4C8 = range->max;
                 }
-                fn_80166A50(0x3c5, 0, 0xff, 0);
+                soundStart(0x3c5, 0, 0xff, 0);
             } else {
                 cur = lbl_8047A4C8;
                 digit = (cur / step) % 10;
@@ -497,7 +497,7 @@ s32 fn_8003A7F0(PdaNumberWork* work)
                 if (lbl_8047A4C8 < range->min) {
                     lbl_8047A4C8 = range->min;
                 } else {
-                    fn_80166A50(0x3c5, 0, 0xff, 0);
+                    soundStart(0x3c5, 0, 0xff, 0);
                 }
             }
         }

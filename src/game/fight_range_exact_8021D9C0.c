@@ -707,17 +707,17 @@ void fn_8021EE48(void) {
     extern u32 fightTargetGetPtrAsNowFightType();
     extern int fightOutPokemonGetVoiceSndId();
     u32 ctx = fightTargetGetPtrAsNowFightType(*(u8*)(lbl_8047B610 + 1), 0);
-    fn_80166A50((u16)fightOutPokemonGetVoiceSndId(ctx), 0, 0xff, 0);
+    soundStart((u16)fightOutPokemonGetVoiceSndId(ctx), 0, 0xff, 0);
     lbl_8047B610 = lbl_8047B610 + 2;
 }
 
 void fn_8021EE98(void) {
-    fn_80165668(*(u16*)(lbl_8047B610 + 1), 0, 0xff);
+    std130_soundUnk_801653cc(*(u16*)(lbl_8047B610 + 1), 0, 0xff);
     lbl_8047B610 = lbl_8047B610 + 3;
 }
 
 void fn_8021EED4(void) {
-    fn_80166A50(*(u16*)(lbl_8047B610 + 1), 0, 0xff, 0);
+    soundStart(*(u16*)(lbl_8047B610 + 1), 0, 0xff, 0);
     lbl_8047B610 = lbl_8047B610 + 3;
 }
 

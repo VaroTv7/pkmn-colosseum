@@ -31,7 +31,7 @@ extern void* heroBiosGetPokemonPtr(void* status, u16 idx);
 extern void* savedataGetStatus(u32 side, u32 slotType);
 
 /* ===== Flag helpers ===== */
-extern s32 fn_801906A0(u32 flag);
+extern s32 std082_flagGetValue(u32 flag);
 extern s32  _flagSet(u32 flag, s32 value);
 
 /* ===== Pokemon helpers ===== */
@@ -56,7 +56,7 @@ extern u32 floorEventGetTresure(s32 a, s32 b, s32 c);
 
 /* ===== Collision / character ===== */
 extern s32 GScolsys2SetObjEnable(s32 triIndex, s32 visible);
-extern u8* fn_8011711C();
+extern u8* floorCharacterBiosGetByIndex();
 extern void  set__5GSvecFfff(f32* out, f32 x, f32 y, f32 z);
 extern void  floorCharacterBiosSetPos(void* bios, f32* pos);
 extern void  floorCharacterBiosSetVisibility();
@@ -116,7 +116,7 @@ s32 scriptAddPremium(s32 delta)
 {
     s32 newVal;
 
-    newVal = fn_801906A0(0xa9e);
+    newVal = std082_flagGetValue(0xa9e);
     newVal += delta;
     _flagSet(0xa9e, newVal);
     return newVal;
@@ -141,7 +141,7 @@ s32 scriptSetPremium(s32 value)
 #endif
 s32 scriptGetPremium(void)
 {
-    return fn_801906A0(0xa9e);
+    return std082_flagGetValue(0xa9e);
 }
 #if !defined(NO_LOCAL_PRAGMAS_FIELD_RANGE_801CA7EC_PREFIX)
 #endif
@@ -344,7 +344,7 @@ u32 fn_801CADA0(void)
 
 #if !defined(PR424_FIELD_PREFIX_SPLIT) || \
     defined(PR424_FIELD_801CADA8_801CAE80)
-void* fn_801CADA8(u8 kind)
+void* std217_playerReceiveGiftPokemon(u8 kind)
 {
     void* result = NULL;
     void* status = savedataGetStatus(0, 2);
@@ -464,7 +464,7 @@ u32 floorCharacterSetPos(u32 id, f32 x, f32 y, f32 z)
     void* bios;
 
     set__5GSvecFfff(pos, x, y, z);
-    bios = fn_8011711C(id);
+    bios = floorCharacterBiosGetByIndex(id);
     floorCharacterBiosSetPos(bios, pos);
     return 1;
 }
@@ -474,10 +474,10 @@ u32 floorCharacterSetPos(u32 id, f32 x, f32 y, f32 z)
 #pragma push
 #pragma peephole off
 s32 scriptFloorCharSetDisp(u32 a0, u32 a1) {
-    extern u8* fn_8011711C();
+    extern u8* floorCharacterBiosGetByIndex();
     extern void floorCharacterBiosSetVisibility();
 
-    floorCharacterBiosSetVisibility((u8*)fn_8011711C(a0), (u8)a1);
+    floorCharacterBiosSetVisibility((u8*)floorCharacterBiosGetByIndex(a0), (u8)a1);
     return 1;
 }
 #pragma pop

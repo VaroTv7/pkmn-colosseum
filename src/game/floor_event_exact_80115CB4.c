@@ -12,8 +12,8 @@
 #include "dolphin/types.h"
 
 extern void GSlogWrite(const char* fmt, ...);
-extern void* fn_800FF56C(void);
-extern void* fn_80113F48(void);
+extern void* std092_getCurrentRoomID(void);
+extern void* std093_getCurrentGroupID(void);
 extern void peopleSetVisible(void*, u32, u32);
 
 extern u32 lbl_80478EBC; /* treasure table */
@@ -45,7 +45,7 @@ void* floorEventGetTresureList(u32 param)
     target = param & 0x1FF;
     for (index = 0; index < *(u32*)lbl_80478EB8; index++) {
         entry = (u8*)lbl_80478EBC + index * 0x1C;
-        if (*(u16*)(entry + 4) == (u32)fn_800FF56C()) {
+        if (*(u16*)(entry + 4) == (u32)std092_getCurrentRoomID()) {
             if (target == found++) {
                 break;
             }
@@ -68,7 +68,7 @@ void floorEventSetTresureDisp(u32 rawIndex, u32 display)
 
     for (index = 0; index < *(u32*)lbl_80478EB8; index++) {
         entry = (u8*)lbl_80478EBC + index * 0x1C;
-        if (*(u16*)(entry + 4) == (u32)fn_800FF56C()) {
+        if (*(u16*)(entry + 4) == (u32)std092_getCurrentRoomID()) {
             if (index == rawIndex) {
                 encoded = found | 0x7FFF0000;
                 break;
@@ -78,7 +78,7 @@ void floorEventSetTresureDisp(u32 rawIndex, u32 display)
     }
 
     if (index != *(u32*)lbl_80478EB8) {
-        peopleSetVisible(fn_80113F48(), encoded, display);
+        peopleSetVisible(std093_getCurrentGroupID(), encoded, display);
     }
 }
 

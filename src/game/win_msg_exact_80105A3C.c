@@ -40,7 +40,7 @@
  */
 #include "dolphin/types.h"
 
-extern void fn_800FBD88(void* message);
+extern void GSmsgFree(void* message);
 extern u32 GSmsgGetRect(void* message);
 extern void GSmsgExec(void* message, u8 a, u8 b);
 extern s32 GSmsgIsCheck(void* message);
@@ -157,7 +157,7 @@ s32 winMsgCtrl(u8* window)
     switch ((s8)window[1]) {
     case 0:
         if (*(void**)work != NULL) {
-            fn_800FBD88(*(void**)work);
+            GSmsgFree(*(void**)work);
         }
         *(u32*)work = windowGetParam(window, 0);
         work[4] = (u8)windowGetParam(window, 1);
@@ -205,7 +205,7 @@ s32 winMsgCtrl(u8* window)
         }
         break;
     case 5:
-        fn_800FBD88(*(void**)work);
+        GSmsgFree(*(void**)work);
         *(void**)work = NULL;
         break;
     }

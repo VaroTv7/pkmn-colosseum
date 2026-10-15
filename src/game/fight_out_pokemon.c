@@ -104,13 +104,13 @@ static inline u8 fightPokemonCheckJoutaiInline(void* fp, u16 id)
 static inline u8 fightPokemonCheckValidInline(void* fp)
 {
     extern u8 pokemonCheckValid(void*);
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     void* p;
 
     if (fp == NULL) {
         return 0;
     }
-    if (fn_801EF634() == 1) {
+    if (std103_battleGetResult() == 1) {
         return 0;
     }
     p = pokemonGetStatus(fp, 0, 0xcb, 0);
@@ -160,13 +160,13 @@ static inline u8 fightPokemonCheckFightOutInline(void* fp)
 }
 
 static inline u8 fightOutPokemonCheckValidInline(void* p1) {
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     void* fp;
 
     if (p1 == NULL) {
         return 0;
     }
-    if (fn_801EF634() == 1) {
+    if (std103_battleGetResult() == 1) {
         return 0;
     }
     fp = pokemonGetStatus(p1, 0, 0xd6, 0);
@@ -930,7 +930,7 @@ u32 fightOutPokemonCheckMeetEnemyFightPokemon(void* r3, void* r4)
 
 {
     extern u8 pokemonCheckValid();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
   u8 bVar1;
   u32 iVar2;
   u8 cVar5;
@@ -947,7 +947,7 @@ u32 fightOutPokemonCheckMeetEnemyFightPokemon(void* r3, void* r4)
       bVar1 = 0;
     }
     else {
-      flag = fn_801EF634();
+      flag = std103_battleGetResult();
       if (flag == 1) {
         bVar1 = 0;
       }
@@ -1147,7 +1147,7 @@ u32 fightPokemonCheckFightOut(void* r3)
 {
     extern u8 pokemonCheckFightOut(void*);
     extern u8 pokemonCheckValid();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
   u16 sVar2;
   void* iVar1;
   u8 cVar3;
@@ -1160,7 +1160,7 @@ u32 fightPokemonCheckFightOut(void* r3)
     bVar4 = 0;
   }
   else {
-    sVar2 = fn_801EF634();
+    sVar2 = std103_battleGetResult();
     if (sVar2 == 1) {
       bVar4 = 0;
     }
@@ -1224,13 +1224,13 @@ u32 fightPokemonCheckFightOut(void* r3)
 
 /* Address: 0x80206780 | Size: 0x148 | Ghidra import */
 u32 fightOutPokemonCheckValid(void* p1) {
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     void* fp;
 
     if (p1 == NULL) {
         return 0;
     }
-    if (fn_801EF634() == 1) {
+    if (std103_battleGetResult() == 1) {
         return 0;
     }
     fp = pokemonGetStatus(p1, 0, 0xd6, 0);

@@ -53,21 +53,21 @@ extern u8* fn_800A7BCC(void);
 extern u32 GSgappCreate(s32 state, u8 priority, u32 parameter,
                        void (*callback)(void));
 extern void _gsdvdErrorTask_801879AC(void);
-extern void fn_800D88DC(u32 enable);
-extern void fn_800D888C(u32 value);
-extern void fn_800D9B58(f32 red, f32 green, f32 blue, f32 alpha);
-extern void fn_800DA4C4(u32, u32, u32);
-extern void fn_800DA2BC(u32, u32, u32);
+extern void gfxSetFlags(u32 enable);
+extern void gfxClearFlags(u32 value);
+extern void gfxSetOrtho(f32 red, f32 green, f32 blue, f32 alpha);
+extern void gfxSetBlendMode(u32, u32, u32);
+extern void gfxSetUpdates(u32, u32, u32);
 extern void fn_800DA100(u32, u32, u32, u32, u32, u32);
-extern void fn_800DA1E8(u32, u32, u32);
+extern void gfxSetZMode(u32, u32, u32);
 extern void fn_800D9ED8(u32);
-extern void fn_800DA028(u32);
-extern void fn_800D7820(u32);
-extern void fn_800D6A00(u32);
-extern void fn_800D67BC(u32);
+extern void gfxSetCullMode(u32);
+extern void gfxSetVtxDesc(u32);
+extern void gfxSetPrimitive(u32);
+extern void gfxBegin(u32);
 extern void fn_800D5FA4(u32);
 extern void fn_800D5A38(u32, u32);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 
 extern GSDVDWork* lbl_8047B0F4;
 extern u32 lbl_8047B0F8;
@@ -211,19 +211,19 @@ void fn_80168284(void)
         if (lbl_804526E0.drawingCount != 0) {
             capacity = lbl_804526E0.capacity;
             filter = lbl_804526E0.filters;
-            fn_800D88DC(1);
-            fn_800D888C(6);
-            fn_800D9B58(lbl_8047D5A0, lbl_8047D5A0, lbl_8047D5A4,
+            gfxSetFlags(1);
+            gfxClearFlags(6);
+            gfxSetOrtho(lbl_8047D5A0, lbl_8047D5A0, lbl_8047D5A4,
                         lbl_8047D5A8);
-            fn_800DA4C4(1, 6, 7);
-            fn_800DA2BC(1, 1, 0);
+            gfxSetBlendMode(1, 6, 7);
+            gfxSetUpdates(1, 1, 0);
             fn_800DA100(0, 7, 0, 0, 7, 0);
-            fn_800DA1E8(1, 1, 1);
+            gfxSetZMode(1, 1, 1);
             fn_800D9ED8(1);
-            fn_800DA028(0);
-            fn_800D7820(lbl_804526E0.renderState);
-            fn_800D6A00(6);
-            fn_800D67BC((u16)(lbl_804526E0.drawingCount * 4));
+            gfxSetCullMode(0);
+            gfxSetVtxDesc(lbl_804526E0.renderState);
+            gfxSetPrimitive(6);
+            gfxBegin((u16)(lbl_804526E0.drawingCount * 4));
             for (index = 0; (u8)index < capacity; index++, filter++) {
                 if (filter->drawing != 0) {
                     fn_800D5FA4(0);
@@ -236,7 +236,7 @@ void fn_80168284(void)
                     fn_800D5A38(0, index);
                 }
             }
-            fn_800D6728();
+            gfxEnd();
             fn_800D9ED8(0);
         }
     }

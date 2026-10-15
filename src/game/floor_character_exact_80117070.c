@@ -17,7 +17,7 @@
 #include "dolphin/types.h"
 
 extern void* peopleInfoBiosGetPtrFromIndex(u16 index);
-extern void* fn_800FF56C(void);
+extern void* std092_getCurrentRoomID(void);
 extern void* floorDataBiosGetPtr(void* floor);
 extern u8* floorDataBiosGetGroupID(void* floorData);
 extern u32 floorDataBiosGetCharInfo(void* floorData, u32 index);
@@ -37,7 +37,7 @@ u32 fn_801170A4(u8* group, u32 index)
     if (group == NULL) {
         return 0;
     }
-    floorData = floorDataBiosGetPtr(fn_800FF56C());
+    floorData = floorDataBiosGetPtr(std092_getCurrentRoomID());
     if (group != floorDataBiosGetGroupID(floorData)) {
         return 0;
     }

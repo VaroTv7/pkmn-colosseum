@@ -44,7 +44,7 @@ extern void fn_800F915C(s32);
 extern void fn_8017B3E4(s32);
 extern s32 fn_8017B2CC(s32);
 extern void fn_8017B1CC(s32);
-extern void fn_80190528(s32);
+extern void std078_flagSetFalse(s32);
 
 extern void* lbl_8047A590;
 extern const ColosseumUnownMenuIds lbl_802676F0[28];
@@ -216,6 +216,6 @@ void fn_80058150(void) {
     fn_8017B1CC(0x70B);
     fn_800F915C(0x70B);
     if (scriptCheckTemochiPokemon(0) != 0) {
-        fn_80190528(0xDDE);
+        std078_flagSetFalse(0xDDE);
     }
 }

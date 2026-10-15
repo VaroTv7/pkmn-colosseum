@@ -94,11 +94,11 @@ void VIWaitForRetrace(void);
 
 void fn_800B856C(void);                                  /* GXInvalidateVtxCache */
 void GXInvalidateTexAll(void);
-void fn_800BA198(GXLightObj* lt, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1,
+void GXInitLightAttn(GXLightObj* lt, f32 a0, f32 a1, f32 a2, f32 k0, f32 k1,
                  f32 k2);                                /* GXInitLightAttn */
-void fn_800BA414(GXLightObj* lt, f32 x, f32 y, f32 z);   /* GXInitLightPos */
-void fn_800BA424(GXLightObj* lt, f32 nx, f32 ny, f32 nz); /* GXInitLightDir */
-void fn_800BA440(GXLightObj* lt, GXColor color);         /* GXInitLightColor */
+void GXInitLightPos(GXLightObj* lt, f32 x, f32 y, f32 z);   /* GXInitLightPos */
+void GXInitLightDir(GXLightObj* lt, f32 nx, f32 ny, f32 nz); /* GXInitLightDir */
+void GXInitLightColor(GXLightObj* lt, GXColor color);         /* GXInitLightColor */
 void GXLoadLightObjImm(GXLightObj* lt, u32 light);
 void fn_800BCEF4(u32 pix_fmt, u32 z_fmt);                /* GXSetPixelFmt */
 void fn_800BD07C(u8 field_mode, u8 half_aspect_ratio);   /* GXSetFieldMode */
@@ -182,7 +182,7 @@ GXFifoObj* HSD_AllocateFifo(u32 size);
 void HSD_GXSetFifoObj(GXFifoObj* fifo);
 
 /* HAL: HSD_InitComponent */
-void fn_8019CB70(void)
+void HSD_GXInit(void)
 {
     HSD_DVDInit();
     HSD_AllocateXFB(iparam_xfb_max_num, rmode);
@@ -203,7 +203,7 @@ void fn_8019CB70(void)
         vi_status.update_alpha = TRUE;
         vi_status.update_z = TRUE;
 
-        fn_801BF1F0(&vi_status, FrameBuffer[0], FrameBuffer[1],
+        HSD_VIInit(&vi_status, FrameBuffer[0], FrameBuffer[1],
                     FrameBuffer[2]);
     }
 
@@ -262,10 +262,10 @@ static void HSD_GXInit(void)
     GXLightObj lightobj;
     int i;
 
-    fn_800BA414(&lightobj, 1.0F, 0.0F, 0.0F);
-    fn_800BA424(&lightobj, 1.0F, 0.0F, 0.0F);
-    fn_800BA198(&lightobj, 1.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F);
-    fn_800BA440(&lightobj, HSD_Init_804D5E1C);
+    GXInitLightPos(&lightobj, 1.0F, 0.0F, 0.0F);
+    GXInitLightDir(&lightobj, 1.0F, 0.0F, 0.0F);
+    GXInitLightAttn(&lightobj, 1.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F);
+    GXInitLightColor(&lightobj, HSD_Init_804D5E1C);
 
     for (i = 0; i < 8; i++) {
         GXLoadLightObjImm(&lightobj, HSD_Index2LightID(i));

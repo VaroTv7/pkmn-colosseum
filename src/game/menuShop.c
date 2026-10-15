@@ -685,7 +685,7 @@ s32 fn_8002A618(u8* self)
         u32 unused;
         s32* value;
     } ShopNumberContext;
-    extern void fn_80166A50(u32, u32, u32, u32);
+    extern void soundStart(u32, u32, u32, u32);
 
     ShopNumberContext* context;
     u16* keyInfo;
@@ -738,7 +738,7 @@ s32 fn_8002A618(u8* self)
             }
         }
         if (oldValue != *context->value) {
-            fn_80166A50(0x23, 0, 0xFF, 0);
+            soundStart(0x23, 0, 0xFF, 0);
         }
     }
 
@@ -774,7 +774,7 @@ s32 fn_8002A618(u8* self)
             }
         }
         if (oldValue != *context->value) {
-            fn_80166A50(0x23, 0, 0xFF, 0);
+            soundStart(0x23, 0, 0xFF, 0);
         }
     }
 
@@ -2224,7 +2224,7 @@ void fn_8002C284(u32 loc_idx, u8 mode)
 extern void savedataGetStatus(void);
 extern void pcboxGetItemCapacity(void);
 extern void heroItemCheckAddItemDataId(void);
-extern void fn_80166AB8(void);
+extern void soundStartRaw(void);
 extern void fn_80093574(void);
 extern void fn_80092C90(void);
 extern void fn_80093610(void);
@@ -2314,7 +2314,7 @@ void fn_8002C408(s32 mapIdx, u32 mode)
     extern void  menuCloseSync(s32 slot, s32 flag);
     extern void  winMsgClose(s32 slot);
     extern void  menuCloseCustom(s32 a, s32 b, s32 c);
-    extern void  fn_80166AB8(s32 soundId, s32 p2, s32 p3);
+    extern void  soundStartRaw(s32 soundId, s32 p2, s32 p3);
     extern s32   fn_801D0748(u32 a, u32 b, u32 c);
     extern void  fn_80093574(s32 a);
     extern void  fn_80092C90(s32 a, void* list, s32 c);
@@ -2522,7 +2522,7 @@ void fn_8002C408(s32 mapIdx, u32 mode)
         }
         fn_8002A1C4((u8*)mapIdx, 6, -1);
         fn_80029EF4((void*)total, done, qty, mode, work);
-        fn_80166AB8(0x3cc, 0, 0);
+        soundStartRaw(0x3cc, 0, 0);
         if ((u8)mode != 4) {
             continue;
         }
@@ -2611,7 +2611,7 @@ void fn_8002C408(s32 mapIdx, u32 mode)
 #endif /* guard split */
 #if !defined(MENUSHOP_ISLAND_ONLY) || defined(MENUSHOP_ISLAND_8002CE6C_ONLY)
 /* fn_8002CE6C - 0x8002CE6C | size: 0x2e8 */
-extern void fn_800D3088(void);
+extern void msgGetCharsPerFrame(void);
 extern void heroDecPokedoru(void);
 extern u32 lbl_804788A8;
 extern u32 lbl_80478E54;
@@ -2637,14 +2637,14 @@ void fn_8002CE6C(u8* loc, u8 mode)
     extern u32  menuCloseCustom(u32 a, u32 b, u32 c);
     extern void fn_8002A2CC(u8* obj, s32 msgId, s32 arg2, ...);
     extern void _threadSwitch(void);
-    extern s32  fn_800D3088(void);
+    extern s32  msgGetCharsPerFrame(void);
     extern u32  heroGetStatus(u8* ptr, u32 sel, u32 idx);
     extern u32  windowGetActiveID(void);
     extern s32  menuOpenCustom(u32 sceneId, u32 a, u32 b, u32 c, u32 d, u32 e, ...);
     extern void itemDataBiosGetPtr(u32 itemId);
     extern u32  itemDataBiosGetPrice(void);
     extern s32  heroItemCheckAddItemDataId(u8* ptr, u32 itemId);
-    extern void fn_80166AB8(u32 soundId, u32 a, u32 b);
+    extern void soundStartRaw(u32 soundId, u32 a, u32 b);
     extern void heroDecPokedoru(u8* ptr, u32 amount);
     extern s32  heroItemAddItemDataId(u8* ptr, u32 itemId, u32 qty, u32 flags);
     extern u8   lbl_802E4F68[];
@@ -2672,7 +2672,7 @@ loop:
     frames = 0;
     while (frames < 0x1e) {
         _threadSwitch();
-        frames += fn_800D3088();
+        frames += msgGetCharsPerFrame();
     }
     if ((s32)lbl_804788A8 != 0) {
         for (i = 0; i < 5; i++) {
@@ -2701,7 +2701,7 @@ loop:
         } else if (heroItemCheckAddItemDataId(NULL, item) < 1) {
             fn_8002A2CC(loc, 6, -1);
         } else {
-            fn_80166AB8(0x3cb, 0, 0);
+            soundStartRaw(0x3cb, 0, 0);
             heroDecPokedoru(NULL, cost);
             heroItemAddItemDataId(NULL, item, 1, -1);
             fn_8002A2CC(loc, 4, 0x2d, item & 0xffff, -1);
@@ -2778,7 +2778,7 @@ void fn_8002D154(s32 mapIndex, u8 colorIndex)
     extern s32  heroItemCheckAddItemDataId(s32 a, u32 item);
     extern void heroDecPokedoru(s32 a, s32 amount);
     extern void heroItemAddItemDataId(s32 a, s32 item, u16 qty, s32 d);
-    extern void fn_80166AB8(s32 sfx, s32 b, s32 c);
+    extern void soundStartRaw(s32 sfx, s32 b, s32 c);
     extern void winMsgOpenWithSE(s32 a, u32 b, s32 c, s32 d, u8 e);
     extern u32  fn_8002A0B8(u8* buf, s32 idx, s32 a, s32 b, ...);
     extern void fn_8002A2CC(u8* idx, s32 a, s32 b, ...);
@@ -2875,7 +2875,7 @@ void fn_8002D154(s32 mapIndex, u8 colorIndex)
             fn_8002A2CC((u8*)mapIndex, 6, -1);
             continue;
         }
-        fn_80166AB8(0x3cb, 0, 0);
+        soundStartRaw(0x3cb, 0, 0);
         heroDecPokedoru(0, price);
         heroItemAddItemDataId(0, item, n, -1);
         fn_8002A2CC((u8*)mapIndex, 4, -1);
@@ -2971,7 +2971,7 @@ static inline u32 shopMemoryAlloc(void)
  *   fn_800E24B0 / GSmemLock     : (u16 handle)
  *   fn_800E209C / GSmemFree     : (u16 handle)
  */
-void fn_8002D5D4(void)
+void std026_unkMenuSequence26(void)
 {
     ShopLocationEntry* location_entry;
     u32 location_offset;
@@ -3213,7 +3213,7 @@ void menuShopOpen(u32 flag)
     extern u32  fn_800D37CC(void);
     extern void menuCreateOffScreen(f32);
     extern void _flagSet(s32, s32);
-    extern void fn_800FF730(s32);
+    extern void std098_mapWarpToMenuRoom(s32);
     extern void floorSetFadeScript(s32, u32);
     extern void _threadSwitch(void);
     extern void menuReleaseOffScreen(f32);
@@ -3240,7 +3240,7 @@ void menuShopOpen(u32 flag)
     state->active = 1;
 
     _flagSet(1, 2);
-    fn_800FF730(0x38f);
+    std098_mapWarpToMenuRoom(0x38f);
     floorSetFadeScript(0, 0);
     _threadSwitch();   /* GSthreadYield / vsync yield */
 

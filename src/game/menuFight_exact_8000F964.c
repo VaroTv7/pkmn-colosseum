@@ -43,7 +43,7 @@ extern void  winMsgClose(s32 slot);                   /* Close message box */
 extern u8    fn_801F18DC(s32 controller);             /* Check input ready */
 extern u8    fightFloorIsUseFightTimerCommand(s32 controller);             /* Check button pressed */
 extern u8    fightTimerCommandIsOver(void);                       /* Check A button */
-extern u16   fn_801EF634(void);                       /* Get input state */
+extern u16   std103_battleGetResult(void);                       /* Get input state */
 extern void  _threadSwitch(void);                       /* Frame advance */
 extern u32   fn_800F7AF0(s32 slot);                   /* Get render flags */
 extern u32   fn_800F7BC4(s32 slot);                   /* Get VSync flags */
@@ -169,7 +169,7 @@ void menuFightButtonSecretWazaTop(u8* ctx) {
             pressed = 1;
             goto check_pressed;
         }
-        if ((u16)fn_801EF634() == 1) {
+        if ((u16)std103_battleGetResult() == 1) {
             pressed = 1;
             goto check_pressed;
         }
@@ -221,7 +221,7 @@ void menuFightButtonSecretMain(u8* arg1) {
     extern u8 fn_801F18DC(s32 a);
     extern u8 fightFloorIsUseFightTimerCommand(s32 a);
     extern u8 fightTimerCommandIsOver(void);
-    extern u16 fn_801EF634(void);
+    extern u16 std103_battleGetResult(void);
     void* data;
     u16 flags;
     s32 flag_val;
@@ -251,7 +251,7 @@ void menuFightButtonSecretMain(u8* arg1) {
                 goto got_flag;
             }
         }
-        if ((u16)fn_801EF634() == 1) {
+        if ((u16)std103_battleGetResult() == 1) {
             flag = 1;
             goto got_flag;
         }

@@ -44,7 +44,7 @@ void menuNameEntry(void) {
     extern void fadeCheck(s32 v);
     extern u32  windowGetActiveID(void);                         /* returns context handle    */
     extern s32  menuOpenCustom(s32 id, u32 ctx, s32 a, s32 b, s32 c, s32 d, ...);
-    extern u32  fn_80166A28(s32 size);
+    extern u32  soundStartSE(s32 size);
     extern void msgctrlSetValue(s32 id, u32 name);
     extern void winMsgOpen(s32 a, s32 b, s32 c, s32 d);
     extern s8   menuSubOpenYesNo(s32 a, s32 b, s32 c, s32 d);
@@ -198,7 +198,7 @@ void menuNameEntry(void) {
                 listArg[1] = count;
                 pick = menuOpenCustom(0x70, windowGetActiveID(), 0, 0, 1, 1, listp);
                 if (pick == 0) {
-                    fn_80166A28(0x24);
+                    soundStartSE(0x24);
                     accepted = 0;
                     break;
                 }
@@ -208,7 +208,7 @@ void menuNameEntry(void) {
                 choiceName = (u32)GSmsgGetGSchar((u32)listPtr[pick - 1]);
                 {
                     s32 yes;
-                    fn_80166A28(0x440);
+                    soundStartSE(0x440);
                     msgctrlSetValue(0x4d, choiceName);
                     winMsgOpen(2, 0x2ef6, 1, 0);
                     ans = menuSubOpenYesNo(0, -1, -1, 0);

@@ -26,7 +26,7 @@ extern const u8 lbl_8047CCB8[2];         /* "\n" (.sdata2) */
  * A %-conversion cut off by the end of the string adds whatever len held
  * before, as retail does.
  */
-s32 fn_800F16C0(GSVMCtx* ctx)
+s32 cms_op35_printf(GSVMCtx* ctx)
 {
     s32 len;
     s32 argIdx;

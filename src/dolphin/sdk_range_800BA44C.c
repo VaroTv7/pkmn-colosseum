@@ -163,7 +163,7 @@ void GXLoadLightObjImm(GXLightObj_800BA44C* light, u32 lightID) {
                 ((u32)(value) << (shift));                                     \
     } while (0)
 
-void fn_800BA4C8(GXChannelID_800BA4C8 chan, GXColor_800BA4C8 ambColor) {
+void GXSetChanAmbColor(GXChannelID_800BA4C8 chan, GXColor_800BA4C8 ambColor) {
     u32 reg;
     u32 colorIndex;
 
@@ -207,7 +207,7 @@ void fn_800BA4C8(GXChannelID_800BA4C8 chan, GXColor_800BA4C8 ambColor) {
     gx->ambColor[colorIndex] = reg;
 }
 
-void fn_800BA5BC(GXChannelID_800BA4C8 chan, GXColor_800BA4C8 matColor) {
+void GXSetChanMatColor(GXChannelID_800BA4C8 chan, GXColor_800BA4C8 matColor) {
     u32 reg;
     u32 colorIndex;
 
@@ -251,7 +251,7 @@ void fn_800BA5BC(GXChannelID_800BA4C8 chan, GXColor_800BA4C8 matColor) {
     gx->matColor[colorIndex] = reg;
 }
 
-void fn_800BA6B0(u8 numChans) {
+void GXSetNumChans(u8 numChans) {
     gx->genMode = (gx->genMode & ~0x70u) | ((u32)numChans << 4);
     GXWGFifo_800BA5BC.u8 = 0x10;
     GXWGFifo_800BA5BC.u32 = 0x1009;
@@ -259,7 +259,7 @@ void fn_800BA6B0(u8 numChans) {
     gx->dirtyState |= 4;
 }
 
-void fn_800BA6F4(GXChannelID_800BA4C8 chan, u8 enable,
+void GXSetChanCtrl(GXChannelID_800BA4C8 chan, u8 enable,
                  GXColorSrc_800BA6F4 ambSrc, GXColorSrc_800BA6F4 matSrc,
                  u32 lightMask, GXDiffuseFn_800BA6F4 diffFn,
                  GXAttnFn_800BA6F4 attnFn) {

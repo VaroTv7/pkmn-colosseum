@@ -20,7 +20,7 @@
  */
 #include "game/gs_gfx_layer.h"
 
-void fn_800D963C(u32 stage, s32 mode) {
+void gfxSetTevOp(u32 stage, s32 mode) {
     switch (mode) {
     case 0:
         GSgfxSetTevColorOp(stage, 0, 0, 0, 1, 0);

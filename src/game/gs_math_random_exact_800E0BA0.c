@@ -7,18 +7,18 @@
 
 #include "dolphin/types.h"
 
-extern f32 fn_801ADC7C(void);
+extern f32 HSD_Randf(void);
 extern f32 lbl_8047CB10;
 
 f32 fn_800E0BA0(void)
 {
-    f32 a = fn_801ADC7C();
-    f32 b = fn_801ADC7C();
+    f32 a = HSD_Randf();
+    f32 b = HSD_Randf();
 
     return b + a - lbl_8047CB10;
 }
 
 f32 fn_800E0BE4(void)
 {
-    return fn_801ADC7C();
+    return HSD_Randf();
 }

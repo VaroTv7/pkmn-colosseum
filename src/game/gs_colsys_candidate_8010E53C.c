@@ -172,7 +172,7 @@ static inline s32 getCpPointPoint(Vec3f* out, Vec3f* point, f32 radiusSq,
 }
 
 /* 0x8010E53C | 0x5EC: XD checkHitFixedMdl__FP5GSvecfP15CCD_HITMDL_HEADP5GSvec. */
-s32 fn_8010E53C(Vec3f* point, void* data, f32 radius, Vec3f* result) {
+s32 colsysWallSphere(Vec3f* point, void* data, f32 radius, Vec3f* result) {
     GSFieldFixedMdlEventList* head = (GSFieldFixedMdlEventList*)data;
     Vec3f hitPoint;
     GSFieldFixedMdlCell* cell;
@@ -382,7 +382,7 @@ extern s32 fn_8010CA30(ColMtx out, u32 index);
 extern s32 fn_8010C8D0(ColMtx out, u32 index);
 
 /* 0x8010EFE4 | 0x1A4 */
-s32 fn_8010EFE4(Vec3f* segStart, Vec3f* segEnd, f32 radius,
+s32 colsysWallAll(Vec3f* segStart, Vec3f* segEnd, f32 radius,
                 Vec3f* result, s32 useAlternate)
 {
     ColDrawScene* scene;
@@ -428,7 +428,7 @@ s32 fn_8010EFE4(Vec3f* segStart, Vec3f* segEnd, f32 radius,
                 collided = fn_8010EB28(&current, group, inverse, forward,
                                        radius, hitPointPtr);
             } else {
-                collided = fn_8010E53C(&current, group, radius, hitPointPtr);
+                collided = colsysWallSphere(&current, group, radius, hitPointPtr);
             }
             if (collided != 0) {
                 if (result == NULL) {
@@ -491,7 +491,7 @@ s32 fn_8010F188(Vec3f* start, Vec3f* end, f32 radius, Vec3f* result)
         PSVECAdd(&segmentStart, start, &segmentStart);
         PSVECScale(&direction, &segmentEnd, next);
         PSVECAdd(&segmentEnd, start, &segmentEnd);
-        if (fn_8010EFE4(&segmentStart, &segmentEnd, radius, result, 1)) {
+        if (colsysWallAll(&segmentStart, &segmentEnd, radius, result, 1)) {
             return 1;
         }
         if (step <= 0.0f) {
@@ -503,7 +503,7 @@ s32 fn_8010F188(Vec3f* start, Vec3f* end, f32 radius, Vec3f* result)
 }
 
 /* 0x8010F320 | 0x198 */
-s32 fn_8010F320(Vec3f* start, Vec3f* end, f32 radius, Vec3f* result)
+s32 colsysWallSweep(Vec3f* start, Vec3f* end, f32 radius, Vec3f* result)
 {
     extern f32 PSVECDistance(const Vec3f*, const Vec3f*);
     extern void PSVECSubtract(const Vec3f*, const Vec3f*, Vec3f*);
@@ -541,7 +541,7 @@ s32 fn_8010F320(Vec3f* start, Vec3f* end, f32 radius, Vec3f* result)
         PSVECAdd(&segmentStart, start, &segmentStart);
         PSVECScale(&direction, &segmentEnd, next);
         PSVECAdd(&segmentEnd, start, &segmentEnd);
-        if (fn_8010EFE4(&segmentStart, &segmentEnd, radius, result, 0)) {
+        if (colsysWallAll(&segmentStart, &segmentEnd, radius, result, 0)) {
             return 1;
         }
         if (step <= 0.0f) {

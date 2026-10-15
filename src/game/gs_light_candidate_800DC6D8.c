@@ -14,7 +14,7 @@ extern f32 lbl_8047CA78;
 extern void HSD_LObjReqAnimAll(void* lobj, f32 frame);
 extern void HSD_LObjAnimAll(void* lobj);
 
-void fn_800DC6D8(u32 delta) {
+void GSlightUpdate(u32 delta) {
     u32 offset;
     u32 i;
     u8* obj;

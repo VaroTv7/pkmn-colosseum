@@ -85,7 +85,7 @@ void fn_801BF4C4(BOOL black)
 }
 
 /* HAL: HSD_VIInit */
-void fn_801BF1F0(HSD_VIStatus* vi, void* xfb0, void* xfb1, void* xfb2)
+void HSD_VIInit(HSD_VIStatus* vi, void* xfb0, void* xfb1, void* xfb2)
 {
     int i, fbnum, idx;
 
@@ -132,5 +132,5 @@ void fn_801BF1F0(HSD_VIStatus* vi, void* xfb0, void* xfb1, void* xfb2)
     VIFlush();
 
     idx = HSD_VISearchXFBByStatus(HSD_VI_XFB_FREE);
-    fn_801BFA1C(HSD_VIGetVIStatus(), HSD_VIGetXFBPtr(idx), HSD_RP_SCREEN);
+    HSD_VICopyEFB2XFB(HSD_VIGetVIStatus(), HSD_VIGetXFBPtr(idx), HSD_RP_SCREEN);
 }

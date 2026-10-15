@@ -15,7 +15,7 @@ extern u8 lbl_8047A633;
 extern u8 lbl_8047A634;
 extern u8 lbl_8047A635;
 extern u32 lbl_8047A638;
-extern s32 fn_8001E184(void);
+extern s32 std011_dialogDisplayYesNoMenu(void);
 extern s32 fn_80075A9C(void);
 extern u8 fn_80075AC0(void);
 extern s32 fn_80075AE4(void);
@@ -125,7 +125,7 @@ party_capacity_done:
     }
 
     winMsgOpenField(0x43C5, 1, 0);
-    choice = (s8)fn_8001E184();
+    choice = (s8)std011_dialogDisplayYesNoMenu();
     if (choice != 0) {
         if (choice < 0) {
             if (choice >= -1) {

@@ -176,7 +176,7 @@ typedef struct MenuPendingEvent {
 s32 fn_8000D710(u8 mode)
 {
     extern s32 heroMoveCheckEvent(MenuPendingEvent* events);
-    extern void fn_80116D30(s8 kind, u32 eventId);
+    extern void heroDispatchEvent(s8 kind, u32 eventId);
     extern void heroMoveInitEvent(void);
     extern void mailMainReceiveTerminate(void);
     extern void _threadSwitch(void);
@@ -185,9 +185,9 @@ s32 fn_8000D710(u8 mode)
     extern s32 fn_800D37CC(void);
     extern void menuCreateOffScreen(f32 rate);
     extern u8 menuGetOffScreenFlag(void);
-    extern void fn_801661D0(s32, s32, s32, s32);
+    extern void soundDuck(s32, s32, s32, s32);
     extern void fn_800D3074(s32);
-    extern u32 fn_801906A0(u32 flag);
+    extern u32 std082_flagGetValue(u32 flag);
     extern void* floorGetCurrentContext(void);
     extern u32 fn_80130CD8(void);
     extern void GSgappBlock(u32 task);
@@ -203,9 +203,9 @@ s32 fn_8000D710(u8 mode)
     extern u32 fn_80019070(u16 handle);
     extern void heroMoveAddAutoEvent(u32 eventId, u32 handle, u32 value,
                                      s32, s32);
-    extern s32 fn_801CBAB8(void);
+    extern s32 std223_askYesNoThenWarp395(void);
     extern void menuOffScreenRelease(void);
-    extern void fn_801660D8(s32, s32, s32);
+    extern void soundUnduck(s32, s32, s32);
     extern void menuReleaseOffScreen(f32 rate);
     extern void menuCloseSync(s32 menuId, s32 wait);
     extern void heroMoveTermEvent(void);
@@ -225,7 +225,7 @@ s32 fn_8000D710(u8 mode)
 
     eventCount = heroMoveCheckEvent(events);
     for (i = 0; i < eventCount; i++) {
-        fn_80116D30(4, events[i].eventId);
+        heroDispatchEvent(4, events[i].eventId);
     }
     heroMoveInitEvent();
     mailMainReceiveTerminate();
@@ -237,9 +237,9 @@ s32 fn_8000D710(u8 mode)
         _threadSwitch();
     }
 
-    fn_801661D0(0x55, 0x1F4, 1, 1);
+    soundDuck(0x55, 0x1F4, 1, 1);
     fn_800D3074(1);
-    if (fn_801906A0(0x8AE) == 0) {
+    if (std082_flagGetValue(0x8AE) == 0) {
         menuId = 0x41;
     } else {
         menuId = 0x109;
@@ -247,7 +247,7 @@ s32 fn_8000D710(u8 mode)
 
     switch (mode) {
     case 0:
-        if (fn_801906A0(0x8AE) == 0) {
+        if (std082_flagGetValue(0x8AE) == 0) {
             for (;;) {
                 fn_800D3074(1);
                 lbl_8047A2A4 = menuId;
@@ -304,7 +304,7 @@ s32 fn_8000D710(u8 mode)
                     menuClose(menuId);
                     menuPokemonOpen(1, 0, 0);
                 } else if (lbl_8047A2B0 == 1) {
-                    if (fn_801CBAB8() == 1) {
+                    if (std223_askYesNoThenWarp395() == 1) {
                         menuOffScreenRelease();
                         lbl_8047A2A0 = 0;
                         _threadSwitch();
@@ -330,7 +330,7 @@ s32 fn_8000D710(u8 mode)
     }
 
     fn_80019070(selectionHandle);
-    fn_801660D8(0x1F4, 1, 1);
+    soundUnduck(0x1F4, 1, 1);
     menuClose(menuId);
     menuReleaseOffScreen(lbl_8047B6F0 / (f32)fn_800D37CC());
     menuCloseSync(menuId, 1);

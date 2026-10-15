@@ -211,13 +211,13 @@ static inline void* fightPokemonGetPokemonPtrInline(void* fp)
 static inline u8 fightPokemonCheckValidInline(void* fp)
 {
     extern u8 pokemonCheckValid(void*);
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     void* p;
 
     if (fp == NULL) {
         return 0;
     }
-    if (fn_801EF634() == 1) {
+    if (std103_battleGetResult() == 1) {
         return 0;
     }
     p = pokemonGetStatus(fp, 0, 0xcb, 0);
@@ -266,13 +266,13 @@ static inline u8 fightPokemonCheckFightOutInline(void* fp)
 
 static inline u8 fightOutPokemonCheckValidInline(void* fo)
 {
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     void* fp;
 
     if (fo == NULL) {
         return 0;
     }
-    if (fn_801EF634() == 1) {
+    if (std103_battleGetResult() == 1) {
         return 0;
     }
     fp = pokemonGetStatus(fo, 0, 0xd6, 0);

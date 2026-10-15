@@ -248,7 +248,7 @@ extern void clear__5GSvecFv(void* vector);
 extern void* GSmodelGetPart(void* model, s32 partIndex);
 extern void GSpartGetTransform(void* part, void* transform, u32 arg2, u32 arg3);
 extern void GSpartFree(void* part);
-extern void fn_800E0168(void* dst, void* lhs, void* rhs);
+extern void GSvecSub(void* dst, void* lhs, void* rhs);
 extern void GSlerpGetLinearInterpolationVector(void* dst, const void* start,
                                                const void* end, f32 t);
 extern u8 fn_801174C4(void);
@@ -256,7 +256,7 @@ extern u8 fn_801174EC(void);
 extern void fn_80117500(void);
 extern void fn_80117330(f32 duration);
 extern s32 fn_800D37CC(void);
-extern s32 fn_800D3088(void);
+extern s32 msgGetCharsPerFrame(void);
 extern u8 dbgMenuIsOpen(void);
 extern u32 fn_800F7AF0(s32 pad);
 extern u32 fn_800F7BC4(s32 pad);
@@ -473,7 +473,7 @@ void cameraInit(void) {
 void cameraSetFloorDefault(f32 height, f32 distance, f32 rotationY) {
     CameraFloorEntry* floorEntry;
 
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry == NULL) {
         return;
     }
@@ -494,7 +494,7 @@ void cameraSetFloorDefault(f32 height, f32 distance, f32 rotationY) {
 void fn_80179748(f32 height, f32 distance, f32 rotationY, f32 fov) {
     CameraFloorEntry* floorEntry;
 
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != 0) {
         if (floorEntry->initialized != 0) {
             height = floorEntry->height;
@@ -532,7 +532,7 @@ void cameraResetFloor(void) {
         GSscene_SetMode(0);
     }
 
-    defaults = cameraFindFloorEntry(fn_800FF56C());
+    defaults = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (defaults == NULL) {
         return;
     }
@@ -584,7 +584,7 @@ void _cameraPadMoveUpdate__FP9_GScamera(void* camera) {
     f32 rotateY;
     f32 movementDivisor;
 
-    frameDelta = fn_800D3088();
+    frameDelta = msgGetCharsPerFrame();
     movementDivisor = 64.0f;
     if (dbgMenuIsOpen()) {
         return;
@@ -660,8 +660,8 @@ void _cameraPadRotateUpdate__FP9_GScamera(void* camera) {
         return;
     }
 
-    rotateX = fn_800F7994(1, 1) * fn_800D3088();
-    rotateY = fn_800F7920(1, 1) * fn_800D3088();
+    rotateX = fn_800F7994(1, 1) * msgGetCharsPerFrame();
+    rotateY = fn_800F7920(1, 1) * msgGetCharsPerFrame();
 
     angle = atan2f(((CameraPadState*)lbl_80478C40)->height,
                    ((CameraPadState*)lbl_80478C40)->distance);
@@ -780,9 +780,9 @@ void _cameraOffsetAnimeUpdate__FP9_GScamera(GSRenderCamera* camera) {
     GScameraLookAt(camera, &up, &interest);
 
     GSvecCopy(&((CameraPadState*)lbl_80478C40)->direction, &eye);
-    fn_800E0168(&((CameraPadState*)lbl_80478C40)->position, &interest,
+    GSvecSub(&((CameraPadState*)lbl_80478C40)->position, &interest,
                  &((CameraPadState*)lbl_80478C40)->view);
-    fn_800E0168(&eye, &eye,
+    GSvecSub(&eye, &eye,
                  &((CameraPadState*)lbl_80478C40)->position);
     ((CameraPadState*)lbl_80478C40)->height = eye.y;
     ((CameraPadState*)lbl_80478C40)->distance = sqrtf(eye.x * eye.x + eye.z * eye.z);
@@ -810,7 +810,7 @@ void cameraRefreshTargetPos(void)
             if (part != 0) {
                 GSpartGetTransform(
                     part, &((CameraPadState*)lbl_80478C40)->view, 0, 0);
-                fn_800E0168(
+                GSvecSub(
                     &((CameraPadState*)lbl_80478C40)->view,
                     &((CameraPadState*)lbl_80478C40)->view,
                     &((CameraPadState*)lbl_80478C40)->position);
@@ -869,7 +869,7 @@ static inline void _cameraLookAtUpdate(GSRenderCamera* camera)
                         &((CameraPadState*)lbl_80478C40)->direction);
     GScameraLookAt(camera, (const GSRenderVec3*)&lbl_8036C248,
                    (const GSRenderVec3*)&interest);
-    fn_800E0168(&eye, &((CameraPadState*)lbl_80478C40)->direction,
+    GSvecSub(&eye, &((CameraPadState*)lbl_80478C40)->direction,
                 &interest);
     ((CameraPadState*)lbl_80478C40)->height = eye.y;
     ((CameraPadState*)lbl_80478C40)->distance =
@@ -895,7 +895,7 @@ static inline void _cameraFreeUpdate(GSRenderCamera* camera)
         (const GSRenderVec3*)&((CameraPadState*)lbl_80478C40)->rotation);
     GScameraGetLookAt(camera, (GSRenderVec3*)&up,
                       (GSRenderVec3*)&interest);
-    fn_800E0168(&((CameraPadState*)lbl_80478C40)->position, &interest,
+    GSvecSub(&((CameraPadState*)lbl_80478C40)->position, &interest,
                 &((CameraPadState*)lbl_80478C40)->view);
     _cameraUpdateFov(camera);
 }
@@ -936,7 +936,7 @@ void cameraUpdate(u32 captureIndex) {
     if (((CameraPadState*)lbl_80478C40)->flags[0] == 1) {
         if (((CameraPadState*)lbl_80478C40)->targetMoveActive != 0) {
             ((CameraPadState*)lbl_80478C40)->targetMoveTime +=
-                (f32)(u32)fn_800D3088() / (f32)fn_800D37CC();
+                (f32)(u32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
             if (((CameraPadState*)lbl_80478C40)->targetMoveTime >=
                 ((CameraPadState*)lbl_80478C40)->targetMoveDuration) {
                 GSvecCopy(&((CameraPadState*)lbl_80478C40)->position,
@@ -954,7 +954,7 @@ void cameraUpdate(u32 captureIndex) {
         }
         if (((CameraPadState*)lbl_80478C40)->targetOffsetMoveActive != 0) {
             ((CameraPadState*)lbl_80478C40)->targetOffsetMoveTime +=
-                (f32)(u32)fn_800D3088() / (f32)fn_800D37CC();
+                (f32)(u32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
             if (((CameraPadState*)lbl_80478C40)->targetOffsetMoveTime >=
                 ((CameraPadState*)lbl_80478C40)->targetOffsetMoveDuration) {
                 GSvecCopy(
@@ -975,7 +975,7 @@ void cameraUpdate(u32 captureIndex) {
         }
         if (((CameraPadState*)lbl_80478C40)->positionMoveActive != 0) {
             ((CameraPadState*)lbl_80478C40)->positionMoveTime +=
-                (f32)(u32)fn_800D3088() / (f32)fn_800D37CC();
+                (f32)(u32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
             if (((CameraPadState*)lbl_80478C40)->positionMoveTime >=
                 ((CameraPadState*)lbl_80478C40)->positionMoveDuration) {
                 GSvecCopy(&((CameraPadState*)lbl_80478C40)->direction,
@@ -994,7 +994,7 @@ void cameraUpdate(u32 captureIndex) {
         }
         if (((CameraPadState*)lbl_80478C40)->rotationMoveActive != 0) {
             ((CameraPadState*)lbl_80478C40)->rotationMoveTime +=
-                (f32)(u32)fn_800D3088() / (f32)fn_800D37CC();
+                (f32)(u32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
             if (((CameraPadState*)lbl_80478C40)->rotationMoveTime >=
                 ((CameraPadState*)lbl_80478C40)->rotationMoveDuration) {
                 GSvecCopy(&((CameraPadState*)lbl_80478C40)->rotation,
@@ -1020,7 +1020,7 @@ void cameraUpdate(u32 captureIndex) {
                 GSvecAdd(&moveVec,
                          &((CameraPadState*)lbl_80478C40)->position,
                          &((CameraPadState*)lbl_80478C40)->view);
-                fn_800E0168(&moveVec,
+                GSvecSub(&moveVec,
                             &((CameraPadState*)lbl_80478C40)->direction,
                             &moveVec);
                 ((CameraPadState*)lbl_80478C40)->height = moveVec.y;
@@ -1029,7 +1029,7 @@ void cameraUpdate(u32 captureIndex) {
             }
             break;
         case 7:
-            fn_800E0168(&moveVec,
+            GSvecSub(&moveVec,
                         &((CameraPadState*)lbl_80478C40)->direction,
                         &((CameraPadState*)lbl_80478C40)->position);
             ((CameraPadState*)lbl_80478C40)->height = moveVec.y;
@@ -1291,7 +1291,7 @@ void cameraReturn(u8 wait, f32 duration)
         fn_80117500();
         fn_80117330(duration);
     } else {
-        defaults = cameraFindFloorEntry(fn_800FF56C());
+        defaults = cameraFindFloorEntry(std092_getCurrentRoomID());
         if (defaults != NULL) {
             cameraSetHeight(defaults->defaultHeight);
             cameraSetDistance(defaults->defaultDistance);
@@ -1560,7 +1560,7 @@ void cameraSetTargetPosXYZ(f32 x, f32 y, f32 z)
     GSscene_SetCameraPositionVector(&position);
 }
 
-void fn_80176948(f32 x, f32 y, f32 z)
+void std040_cameraSetPosition(f32 x, f32 y, f32 z)
 {
     GSSceneVec3 direction;
 
@@ -1580,7 +1580,7 @@ void cameraSetHeight(f32 height)
 {
     CameraFloorEntry* floorEntry;
 
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->height = height;
     }
@@ -1591,7 +1591,7 @@ void cameraSetDistance(f32 distance)
 {
     CameraFloorEntry* floorEntry;
 
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->distance = distance;
     }
@@ -1602,7 +1602,7 @@ void cameraSetRotY(f32 angle)
 {
     CameraFloorEntry* floorEntry;
 
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->rotationY = angle;
     }
@@ -1620,7 +1620,7 @@ void cameraSetFov(f32 fov)
         fov = 120.0f;
     }
 
-    floorEntry = cameraFindFloorEntry(fn_800FF56C());
+    floorEntry = cameraFindFloorEntry(std092_getCurrentRoomID());
     if (floorEntry != NULL) {
         floorEntry->fov = fov;
     }

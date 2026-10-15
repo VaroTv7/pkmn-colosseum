@@ -8,9 +8,9 @@ extern u8 lbl_803143A8[];
 extern u8 lbl_803143B4[];
 extern u8 lbl_803143D8[];
 
-extern void fn_800D4F98(u32, ...);
+extern void gfxRecordCommand(u32, ...);
 extern void fn_800D7940(u8*, u16);
-extern void fn_800D892C(u32);
+extern void gfxSetupChannelsTev(u32);
 extern void fn_800B7D74(u32, u32, u32, u32, u8);
 extern void fn_800B7D3C(void);
 extern void fn_800B7874(u32, u32);
@@ -64,11 +64,11 @@ void fn_800D76A8(u32 obj, u16 vertCount) {
     }
 
     if (*(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x47, 2, obj, (u32)vertCount);
+        gfxRecordCommand(0x47, 2, obj, (u32)vertCount);
         return;
     }
 
     GSgfxLoadVtxDesc(obj);
-    fn_800D892C(obj);
+    gfxSetupChannelsTev(obj);
     fn_800D7940((u8*)obj, vertCount);
 }

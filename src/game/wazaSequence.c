@@ -25,7 +25,7 @@ s32 wazaSequenceUpdate(void* sequence) {
     WazaSequence* obj = sequence;
     WazaSequenceNode* node = obj->firstNode;
     WazaSequenceOwner* owner;
-    s32 elapsed = fn_800D3088();
+    s32 elapsed = msgGetCharsPerFrame();
     s32 running = 0;
     s32 pending = 0;
 
@@ -794,7 +794,7 @@ void* _wazaSequenceParticleEntryLoad(void* sequence, u8* entry,
                                      u8* data) {
     extern void loadParticle(void*, u32, u32, s32);
     extern void* GSresGetResource(s32, s32);
-    extern void* fn_801195AC(void*);
+    extern void* gsParticleBankLoad(void*);
     u8* header = data;
     u8* current;
     void* resource;
@@ -832,7 +832,7 @@ void* _wazaSequenceParticleEntryLoad(void* sequence, u8* entry,
         data += (*(u32*)(header + 8) + 0x1F) & ~0x1F;
         resource = GSresGetResource(0x4E20, *(s32*)(entry + 0x7C));
         if (resource != NULL) {
-            *(void**)(entry + 0x88) = fn_801195AC(resource);
+            *(void**)(entry + 0x88) = gsParticleBankLoad(resource);
         } else {
             *(void**)(entry + 0x88) = NULL;
         }

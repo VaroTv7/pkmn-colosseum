@@ -39,7 +39,7 @@ extern void  winMsgClose(s32 slot);                   /* Close message box */
 extern u8    fn_801F18DC(s32 controller);             /* Check input ready */
 extern u8    fightFloorIsUseFightTimerCommand(s32 controller);             /* Check button pressed */
 extern u8    fightTimerCommandIsOver(void);                       /* Check A button */
-extern u16   fn_801EF634(void);                       /* Get input state */
+extern u16   std103_battleGetResult(void);                       /* Get input state */
 extern void  _threadSwitch(void);                       /* Frame advance */
 extern u32   fn_800F7AF0(s32 slot);                   /* Get render flags */
 extern u32   fn_800F7BC4(s32 slot);                   /* Get VSync flags */

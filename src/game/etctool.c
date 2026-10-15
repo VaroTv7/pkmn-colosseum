@@ -12,13 +12,13 @@
 
 /* One file-level prototype each for the callees all parts of the TU share
  * (peopleMoveCheck as in game/people/people.h). */
-extern void fn_8018805C(s32 groupId, s32 index, f32 yaw, f32 speed);
+extern void peopleStartTurn(s32 groupId, s32 index, f32 yaw, f32 speed);
 extern BOOL peopleMoveCheck(u32 groupId, u32 index, u8 waitFlag);
 extern void msgctrlSetValue(s32 id, void* value);
 extern void* sodateyaGetPokemonPtr(s32 slot);
 void fn_801E075C(s32 partyIndex);
 void fn_801E09E0(s32 unused);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern s32 fn_800D37CC(void);
 extern void _threadSwitch(void);
 extern void GSvecCopy(void*, const void*);
@@ -30,18 +30,18 @@ extern void GSmodelSetScale(void*, const void*);
 extern void GSmodelSetVisibility(void*, s32);
 extern void GSmodelFree(void*);
 extern void* fn_800F92D4(u32);
-extern void* fn_800FF56C(void);
+extern void* std092_getCurrentRoomID(void);
 extern void floorEventCtrlDoor(void*, u32, u32);
 extern void* floorOpenObject(u32);
 extern u8 pokemonBiosGetCatchBallId(void*);
 extern u16 pokemonBiosGetPokemonDataId(void*);
 extern void* pokemonDataBiosGetPtr(u16);
 extern u16 pokemonDataBiosGetVoice(void*);
-extern void fn_80166AB8(u32, u32, u32);
-extern void fn_80183018(u32, u32);
-extern void fn_80183350(u32, u32);
-extern void fn_80185EE8(u32, u32, u32, f32, f32, f32);
-extern void fn_8018BDF4(u32, u32, void*);
+extern void soundStartRaw(u32, u32, u32);
+extern void std077_characterEventFlagsSet(u32, u32);
+extern void std076_characterEventFlagsClear(u32, u32);
+extern void std061_characterMoveToPosition(u32, u32, u32, f32, f32, f32);
+extern void std172_characterGetPosition(u32, u32, void*);
 
 typedef struct EtcToolVec {
     f32 x;
@@ -71,24 +71,24 @@ extern u32* lbl_80478EB0;
 extern AbilityItemWeight* lbl_80478EB4;
 
 extern u16 GSrand(void);
-extern void* fn_8018D998(s32, s32);
+extern void* peopleIsInGroup(s32, s32);
 extern void* peopleSearchID(void*);
 extern void* peopleGetPosition(void*);
 extern void heroMoveGetHeroPos(void*);
-extern void* fn_8018FCBC(void*);
-extern void fn_800E0168(void*, void*, void*);
+extern void* peopleGetPositionPtr(void*);
+extern void GSvecSub(void*, void*, void*);
 extern f64 atan2(f64, f64);
-extern u32 fn_801906A0(u32);
+extern u32 std082_flagGetValue(u32);
 extern void _flagSet(u32, s32);
-extern u8 fn_801902E0(u32);
+extern u8 std081_flagCheckTrue(u32);
 extern void winMsgOpenFieldWithSE(s32, s32, s32, s32);
-extern void fn_80165668(s32, s32, s32);
+extern void std130_soundUnk_801653cc(s32, s32, s32);
 
 extern void winMsgOpen(s32, s32, s32, s32);
 extern s32 heroItemAddItemDataId(void*, u32, u32, s32);
 extern void pcboxDelItem(s32, u32, u32);
 
-void fn_801DF474(s32 slot, s32 abilityID) {
+void std087_sequenceUnk87(s32 slot, s32 abilityID) {
     AbilityItemWeight* weights;
     AbilityVec direction;
     AbilityVec heroPosition;
@@ -131,23 +131,23 @@ void fn_801DF474(s32 slot, s32 abilityID) {
     do {
         switch (state) {
         case 0:
-            person = peopleSearchID(fn_8018D998(slot, abilityID));
+            person = peopleSearchID(peopleIsInGroup(slot, abilityID));
             if (person != NULL) {
                 peopleGetPosition(person);
                 heroMoveGetHeroPos(&heroPosition);
-                fn_800E0168(&direction, &heroPosition,
-                            fn_8018FCBC(person));
-                fn_8018805C(slot, abilityID,
+                GSvecSub(&direction, &heroPosition,
+                            peopleGetPositionPtr(person));
+                peopleStartTurn(slot, abilityID,
                             (f32)atan2(direction.x, direction.z),
                             2.0f);
                 peopleMoveCheck(slot, abilityID, 1);
             }
 
-            if (fn_801906A0(0xD0) != 0) {
-                if (fn_801906A0(0xD1) >= 500) {
+            if (std082_flagGetValue(0xD0) != 0) {
+                if (std082_flagGetValue(0xD1) >= 500) {
                     _flagSet(0xD1, 0);
                     result = 1;
-                } else if (fn_801902E0(0xAFE) != 0) {
+                } else if (std081_flagCheckTrue(0xAFE) != 0) {
                     _flagSet(0xAFE, 0);
                     result = -1;
                 } else {
@@ -171,7 +171,7 @@ void fn_801DF474(s32 slot, s32 abilityID) {
             state = 2;
             break;
         case 2:
-            fn_80165668(0x3CA, 0, 0xFF);
+            std130_soundUnk_801653cc(0x3CA, 0, 0xFF);
             msgctrlSetValue(0x2D, (void*)(u32)selectedItem);
             winMsgOpen(3, 0x3CB8, 1, 0);
             result = heroItemAddItemDataId(NULL, selectedData, 1, -1);
@@ -201,7 +201,7 @@ void fn_801DF474(s32 slot, s32 abilityID) {
 }
 
 extern void winMsgOpenFieldWithSE(s32 messageID, s32 windowID, s32 arg2, s32 arg3);
-extern s32 fn_8001E184(void);
+extern s32 std011_dialogDisplayYesNoMenu(void);
 extern s32 menuPokemonOpen(s32 mode, s32 arg1, s32 arg2);
 extern void* savedataGetStatus(s32 side, s32 slotType);
 extern void* heroBiosGetPokemonPtr(void* status, u16 slot);
@@ -213,7 +213,7 @@ extern void* pokemonBiosGetNicknamePtr(void* pokemon);
 extern u8 pokemonWazaCheckValid(void* pokemon, u16 slot);
 extern s32 fn_80097BBC(u8 chan);
 extern u16 pokemonBiosGetPokemonWazaDataId(void* pokemon, u16 slot);
-extern void fn_80166AB8(u32 sndId, u32 fadeTime, u32 volume);
+extern void soundStartRaw(u32 sndId, u32 fadeTime, u32 volume);
 extern void pokemonWazaInit(void* pokemon, u32 slot);
 extern u32* pokemonBiosGetPokemonWazaPtr(void* pokemon, u16 slot, u8 mode);
 extern void pokemonWazaBiosCopy(u32* dst, u32* src);
@@ -302,7 +302,7 @@ static inline void pokemonWazaForget(void* pokemon, u16 slot)
  * fn_801DF790 - Waza item effect handler.
  * Address: 0x801DF790 | Size: 0x4A0
  */
-void fn_801DF790(s32 slot, s32 itemID) {
+void std086_sequenceJump86(s32 slot, s32 itemID) {
     s32 selection;
     s32 moveSlot;
     u32 wazaId;
@@ -324,7 +324,7 @@ void fn_801DF790(s32 slot, s32 itemID) {
             state = 1;
             break;
         case 1:
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 2;
             } else {
                 state = 12;
@@ -381,14 +381,14 @@ void fn_801DF790(s32 slot, s32 itemID) {
             state = 9;
             break;
         case 9:
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 10;
             } else {
                 state = 6;
             }
             break;
         case 10:
-            fn_80166AB8(0x48, 0, 0);
+            soundStartRaw(0x48, 0, 0);
             state = 11;
             break;
         case 11:
@@ -397,7 +397,7 @@ void fn_801DF790(s32 slot, s32 itemID) {
                 heroBiosGetPokemonPtr(savedataGetStatus(0, 2), (u16)selection)));
             msgctrlSetValue(0x39, (void*)(u32)wazaId);
             winMsgOpenFieldWithSE(0x3B2C, 1, 0, 1);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 7;
             } else {
                 state = 12;
@@ -409,7 +409,7 @@ void fn_801DF790(s32 slot, s32 itemID) {
             break;
         case 13:
             winMsgOpenFieldWithSE(0x3B2E, 1, 0, 1);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 2;
             } else {
                 state = 12;
@@ -421,7 +421,7 @@ void fn_801DF790(s32 slot, s32 itemID) {
                 pokemonBiosGetNicknamePtr(
                     heroBiosGetPokemonPtr(savedataGetStatus(0, 2), (u16)selection)));
             winMsgOpenFieldWithSE(0x44AA, 1, 0, 1);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 2;
             } else {
                 state = 12;
@@ -555,19 +555,19 @@ static inline s32 fieldFindEmptySlot(void)
  * This is likely the top-level function called from the battle state machine
  * to drive a complete move execution's visual presentation.
  */
-void fn_801DFC30(void) {
+void std085_sequenceJump85(void) {
     extern u8 fn_801ED218(s32);
     extern u8 fn_801ED0CC(s32, void*);
     extern u32 heroGetStatus(s32, s32, s32);
     extern void heroDecPokedoru(void*, u32);
     extern void winMsgOpenField(u32, s32, s32);
-    extern void fn_80183350(u32, u32);
+    extern void std076_characterEventFlagsClear(u32, u32);
     extern void peopleClearFlagsByIndex(u32, u32, u32);
-    extern void fn_8018B76C(u32, u32, u32, u32, u32);
-    extern void fn_80183018(u32, u32);
+    extern void std051_characterSetAnimation(u32, u32, u32, u32, u32);
+    extern void std077_characterEventFlagsSet(u32, u32);
     extern void fn_801ECFE0(s32, void*);
     extern s32 fn_800D37CC(void);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern void _threadSwitch(void);
 
     s32 i;
@@ -597,7 +597,7 @@ void fn_801DFC30(void) {
             break;
         case 1:
             winMsgOpenFieldWithSE(0x3B11, 1, 0, 2);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 2;
             } else {
                 state = 8;
@@ -679,7 +679,7 @@ void fn_801DFC30(void) {
         }
         case 12:
             winMsgOpenFieldWithSE(0x3B1E, 1, 0, 2);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 13;
             } else {
                 state = 4;
@@ -700,7 +700,7 @@ void fn_801DFC30(void) {
             msgctrlSetValue(0x32, pokemonBiosGetNicknamePtr(sodateyaGetPokemonPtr(0)));
             msgctrlSetValue(0x4B, (void*)sodateyaCalcPrice(levels));
             winMsgOpenFieldWithSE(0x3B14, 1, 0, 2);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 16;
             } else {
                 state = 4;
@@ -710,10 +710,10 @@ void fn_801DFC30(void) {
             price = sodateyaCalcPrice(levels);
             if ((s32)heroGetStatus(0, 0xC, 0) >= price) {
                 heroDecPokedoru(savedataGetStatus(0, 2), price);
-                fn_80166AB8(0x3CB, 0, 0);
+                soundStartRaw(0x3CB, 0, 0);
                 timer = 0.0f;
                 while (timer < 0.7f) {
-                    timer += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                    timer += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                     _threadSwitch();
                 }
                 state = 17;
@@ -739,10 +739,10 @@ void fn_801DFC30(void) {
             winMsgOpenField(0x3B1A, 1, 0);
             state = 8;
             fn_801ECFE0(0, heroBiosGetPokemonPtr(savedataGetStatus(0, 2), (u16)fieldFindEmptySlot()));
-            fn_80183350(0x4D, 1);
+            std076_characterEventFlagsClear(0x4D, 1);
             peopleClearFlagsByIndex(0x4D, 1, 8);
-            fn_8018B76C(0x4D, 1, 5, 0, 1);
-            fn_80183018(0x4D, 1);
+            std051_characterSetAnimation(0x4D, 1, 5, 0, 1);
+            std077_characterEventFlagsSet(0x4D, 1);
             break;
         case 21:
             winMsgClose(1);
@@ -756,7 +756,7 @@ void fn_801DFC30(void) {
  * fn_801E03D4 - Party Pokemon nickname flow.
  * Address: 0x801E03D4 | Size: 0x388
  */
-void fn_801E03D4(void) {
+void std084_sequenceJump84(void) {
     s32 running = 1;
     s32 selection;
     s32 state = 0;
@@ -765,7 +765,7 @@ void fn_801E03D4(void) {
         switch (state) {
         case 0:
             winMsgOpenFieldWithSE(0x3B21, 1, 0, 1);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 2;
             } else {
                 state = 1;
@@ -833,7 +833,7 @@ void fn_801E03D4(void) {
                 0x32, pokemonBiosGetNicknamePtr(
                           heroBiosGetPokemonPtr(savedataGetStatus(0, 2), (u16)selection)));
             winMsgOpenFieldWithSE(0x3B25, 1, 0, 1);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 7;
             } else {
                 state = 1;
@@ -859,7 +859,7 @@ void fn_801E03D4(void) {
                 0x32, pokemonBiosGetNicknamePtr(
                           heroBiosGetPokemonPtr(savedataGetStatus(0, 2), (u16)selection)));
             winMsgOpenFieldWithSE(0x3B1F, 1, 0, 1);
-            if ((s8)fn_8001E184() == 0) {
+            if ((s8)std011_dialogDisplayYesNoMenu() == 0) {
                 state = 10;
             } else {
                 state = 7;
@@ -958,7 +958,7 @@ void fn_801E075C(s32 partyIndex)
                 void* pokemonData = pokemonDataBiosGetPtr(species);
 
                 if (pokemonData != NULL) {
-                    fn_80166AB8(pokemonDataBiosGetVoice(pokemonData), 0, 0);
+                    soundStartRaw(pokemonDataBiosGetVoice(pokemonData), 0, 0);
                 }
             }
             GSmodelSetPosition(model, &position);
@@ -971,7 +971,7 @@ void fn_801E075C(s32 partyIndex)
             f32 endTime = 1.5f;
 
             while (timer < endTime) {
-                timer += (f32)fn_800D3088() / (f32)fn_800D37CC();
+                timer += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                 _threadSwitch();
             }
             state = 100;
@@ -993,7 +993,7 @@ void fn_801E075C(s32 partyIndex)
         f32 elapsed = 0.0f;                                        \
         f32 limit = (duration);                                            \
         while (elapsed < limit) {                                          \
-            elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();            \
+            elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();            \
             _threadSwitch();                                               \
         }                                                                  \
     } while (0)
@@ -1020,18 +1020,18 @@ void fn_801E09E0(s32 unused)
     object = NULL;
     state = 0;
     running = TRUE;
-    resource = fn_800FF56C();
+    resource = std092_getCurrentRoomID();
 
     do {
         switch (state) {
         case 0:
-            fn_8018BDF4(0x4D, 1, &savedPosition);
-            fn_80183350(0x4D, 1);
+            std172_characterGetPosition(0x4D, 1, &savedPosition);
+            std076_characterEventFlagsClear(0x4D, 1);
             part = GSmodelGetPart(fn_800F92D4(0x01DA1002), 0);
             GSpartGetTransform(part, &position, 0, 0);
             GSpartFree(part);
             GSvecCopy(&position, &etcDoorPosition);
-            fn_80185EE8(0x4D, 1, 1, position.x, position.y, position.z);
+            std061_characterMoveToPosition(0x4D, 1, 1, position.x, position.y, position.z);
             peopleMoveCheck(0x4D, 1, 1);
             floorEventCtrlDoor(resource, 0x2C, 0);
             ETCTOOL_WAIT(0.6f);
@@ -1040,26 +1040,26 @@ void fn_801E09E0(s32 unused)
 
         case 1:
             GSvecCopy(&position, &etcOutsidePosition);
-            fn_80185EE8(0x4D, 1, 1, position.x, position.y, position.z);
+            std061_characterMoveToPosition(0x4D, 1, 1, position.x, position.y, position.z);
             peopleMoveCheck(0x4D, 1, 1);
             floorEventCtrlDoor(resource, 0x2C, 2);
             ETCTOOL_WAIT(2.0f);
 
-            fn_80185EE8(0x4D, 1, 1, position.x, position.y,
+            std061_characterMoveToPosition(0x4D, 1, 1, position.x, position.y,
                         position.z + 1.0f);
             peopleMoveCheck(0x4D, 1, 1);
             floorEventCtrlDoor(resource, 0x2C, 0);
 
             GSvecCopy(&position, &etcDoorPosition);
-            fn_80185EE8(0x4D, 1, 1, position.x, position.y, position.z);
+            std061_characterMoveToPosition(0x4D, 1, 1, position.x, position.y, position.z);
             peopleMoveCheck(0x4D, 1, 1);
             floorEventCtrlDoor(resource, 0x2C, 2);
             ETCTOOL_WAIT(0.5f);
 
-            fn_80185EE8(0x4D, 1, 1, savedPosition.x, savedPosition.y,
+            std061_characterMoveToPosition(0x4D, 1, 1, savedPosition.x, savedPosition.y,
                         savedPosition.z);
             peopleMoveCheck(0x4D, 1, 1);
-            fn_8018805C(0x4D, 1, 0.0f, 1.0f);
+            peopleStartTurn(0x4D, 1, 0.0f, 1.0f);
             state = 10;
             ETCTOOL_WAIT(0.8f);
             break;
@@ -1088,7 +1088,7 @@ void fn_801E09E0(s32 unused)
                 pokemonData = pokemonDataBiosGetPtr(
                     pokemonBiosGetPokemonDataId(pokemon));
                 if (pokemonData != NULL) {
-                    fn_80166AB8(pokemonDataBiosGetVoice(pokemonData), 0, 0);
+                    soundStartRaw(pokemonDataBiosGetVoice(pokemonData), 0, 0);
                 }
             }
 
@@ -1104,7 +1104,7 @@ void fn_801E09E0(s32 unused)
 
         case 100:
             running = FALSE;
-            fn_80183018(0x4D, 1);
+            std077_characterEventFlagsSet(0x4D, 1);
             GSmodelSetVisibility(object, 0);
             GSmodelFree(object);
             object = NULL;
@@ -1122,11 +1122,11 @@ void etctoolSetPokemonNakigoe(void)
      * Retail calls pokemonDataBiosGetPtr here without setting r3. */
     extern void *pokemonDataBiosGetPtr(void);
     extern u16 pokemonDataBiosGetVoice(void *);
-    extern void fn_80166AB8(u32, u32, u32);
+    extern void soundStartRaw(u32, u32, u32);
 
     pokemonData = pokemonDataBiosGetPtr();
     if (pokemonData != NULL) {
         voice = pokemonDataBiosGetVoice(pokemonData);
-        fn_80166AB8((u32)voice, 0, 0);
+        soundStartRaw((u32)voice, 0, 0);
     }
 }

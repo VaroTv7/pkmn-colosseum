@@ -446,7 +446,7 @@ void GXSetTevOp(s32 stage, u32 mode) {
     gx->field_002 = 0;
 }
 
-void fn_800BC1A0(u32 stage, u32 a, u32 b, u32 c, u32 d) {
+void GXSetTevColorIn(u32 stage, u32 a, u32 b, u32 c, u32 d) {
     GXData_800BB30C* p = gx;
     u32 reg = p->tevColorEnv[stage];
 
@@ -459,7 +459,7 @@ void fn_800BC1A0(u32 stage, u32 a, u32 b, u32 c, u32 d) {
     p->field_002 = 0;
 }
 
-void fn_800BC1E4(u32 stage, GXTevAlphaArg_800BB30C a,
+void GXSetTevAlphaIn(u32 stage, GXTevAlphaArg_800BB30C a,
                  GXTevAlphaArg_800BB30C b, GXTevAlphaArg_800BB30C c,
                  GXTevAlphaArg_800BB30C d) {
     GXData_800BB30C* p = gx;
@@ -474,7 +474,7 @@ void fn_800BC1E4(u32 stage, GXTevAlphaArg_800BB30C a,
     p->field_002 = 0;
 }
 
-void fn_800BC228(u32 stage, s32 op, u32 bias, u32 scale, u32 clamp,
+void GXSetTevColorOp(u32 stage, s32 op, u32 bias, u32 scale, u32 clamp,
                  u32 outReg) {
     u32 reg;
 
@@ -494,7 +494,7 @@ void fn_800BC228(u32 stage, s32 op, u32 bias, u32 scale, u32 clamp,
     gx->field_002 = 0;
 }
 
-void fn_800BC290(u32 stage, s32 op, u32 bias, u32 scale, u32 clamp,
+void GXSetTevAlphaOp(u32 stage, s32 op, u32 bias, u32 scale, u32 clamp,
                  u32 outReg) {
     u32 reg;
 
@@ -598,7 +598,7 @@ void fn_800BC3E0(u32 id, GXColor_800BC2F8 color) {
     gx->field_002 = 0;
 }
 
-void fn_800BC454(s32 stage, u32 value) {
+void GXSetTevKColorSel(s32 stage, u32 value) {
     GXData_800BB30C* p = gx;
     u32* reg = &p->field_1B0[stage >> 1];
 
@@ -612,7 +612,7 @@ void fn_800BC454(s32 stage, u32 value) {
     gx->field_002 = 0;
 }
 
-void fn_800BC4C0(s32 stage, u32 value) {
+void GXSetTevKAlphaSel(s32 stage, u32 value) {
     GXData_800BB30C* p = gx;
     u32* reg = &p->field_1B0[stage >> 1];
 
@@ -626,7 +626,7 @@ void fn_800BC4C0(s32 stage, u32 value) {
     gx->field_002 = 0;
 }
 
-void fn_800BC52C(u32 stage, u32 rasSel, u32 texSel) {
+void GXSetTevSwapMode(u32 stage, u32 rasSel, u32 texSel) {
     GXData_800BB30C* p = gx;
     u32* reg = &p->tevAlphaEnv[stage];
 
@@ -638,7 +638,7 @@ void fn_800BC52C(u32 stage, u32 rasSel, u32 texSel) {
 #endif
 
 #if defined(SDK_EXACT_800BC580)
-void fn_800BC580(u32 table, u32 red, u32 green, u32 blue, u32 alpha) {
+void GXSetTevSwapModeTable(u32 table, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 index = table * 2;
     GXData_800BB30C* p = gx;
     u32* reg0 = &p->field_1B0[index];

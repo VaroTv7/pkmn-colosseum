@@ -160,14 +160,14 @@ void fn_80011EA4(u8* window, WindowSprite* sprite)
     extern u32 GSmsgGetRect(s32);
     extern s32 GSmsgGetGSchar(u32);
     extern void windowDrawSprite2(s32, s32, s32, s32, u32, void*, u16, s32);
-    extern void fn_800D88DC(s32);
-    extern void fn_800D888C(s32);
-    extern void fn_800D6A00(s32);
-    extern void fn_800D7820(void*);
-    extern void fn_800D67BC(s32);
+    extern void gfxSetFlags(s32);
+    extern void gfxClearFlags(s32);
+    extern void gfxSetPrimitive(s32);
+    extern void gfxSetVtxDesc(void*);
+    extern void gfxBegin(s32);
     extern void fn_800D61E4(s32, s32);
     extern void fn_800D5BA0(s32, u32);
-    extern void fn_800D6728(void);
+    extern void gfxEnd(void);
     extern u32 __cvt_fp2unsigned(f32);
     extern u8 winSpriteGetDisp(WindowSprite*);
     WindowDisplayWork* work;
@@ -293,16 +293,16 @@ void fn_80011EA4(u8* window, WindowSprite* sprite)
             }
             bar |= window[0x8B];
             x = ((max - 1.0f) + (f32)(start * sprite->x)) / max;
-            fn_800D88DC(1);
-            fn_800D888C(6);
-            fn_800D6A00(7);
-            fn_800D7820(lbl_80314E08);
-            fn_800D67BC(2);
+            gfxSetFlags(1);
+            gfxClearFlags(6);
+            gfxSetPrimitive(7);
+            gfxSetVtxDesc(lbl_80314E08);
+            gfxBegin(2);
             fn_800D61E4(0, 0);
             fn_800D5BA0(0, bar);
             fn_800D61E4(x, sprite->y);
             fn_800D5BA0(0, bar);
-            fn_800D6728();
+            gfxEnd();
         }
         if (current <= 0.0f) {
             id = 0;

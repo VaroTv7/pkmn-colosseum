@@ -13,7 +13,7 @@ extern void OSLoadContext(void* context);
 extern void OSEnableScheduler(void);
 extern void GSthreadExecuteAll(void);
 extern u8 fn_8000DAA8(void);
-extern void fn_80181850(u32 a, u32 b);
+extern void peopleMain(u32 a, u32 b);
 extern u8 fn_800F7EF8(u32 padIdx);
 extern void fn_8008AC34(u32 padIdx);
 extern u8 fn_8008ABA0(u32 padIdx);
@@ -76,7 +76,7 @@ void fn_80005FA8(u32 a, u32 b)
 {
     GSthreadExecuteAll();
     if (fn_8000DAA8() == 0) {
-        fn_80181850(a, b);
+        peopleMain(a, b);
     }
 }
 

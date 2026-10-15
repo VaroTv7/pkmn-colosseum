@@ -87,8 +87,8 @@ extern BattleRangeIndexedEntry* lbl_80478F7C;
 extern void GSvecCopy(void* dst, void* src);
 extern void* GStextureLoad(void* data);
 extern u32 GSgappCreate(s32 state, u8 priority, u32 param, void* func);
-extern u8 fn_801902E0(u16 flag);
-extern u8 fn_801906A0(u16 flag);
+extern u8 std081_flagCheckTrue(u16 flag);
+extern u8 std082_flagGetValue(u16 flag);
 extern void _flagSet(u16 flag, s32 value);
 
 #if defined(BATTLE_RANGE_EXACT_801EE034)
@@ -272,7 +272,7 @@ u8 fn_801EE398(void)
         }
         if (def != NULL) {
             if (def->flag14 != 0) {
-                value = fn_801902E0(def->flag14);
+                value = std081_flagCheckTrue(def->flag14);
             } else {
                 value = 0;
             }
@@ -351,7 +351,7 @@ u32 fn_801EE544(u16 id, u8* variant)
                 break;
             }
             if (entry->flag != 0) {
-                flagValue = fn_801906A0(entry->flag);
+                flagValue = std082_flagGetValue(entry->flag);
                 if (flagValue == entry->value) {
                     result = entry->result;
                     if (variant != NULL) {
@@ -380,14 +380,14 @@ s32 fn_801EE614(u16 id)
     }
     if (def != NULL) {
         if (def->flag1C != 0) {
-            return (s8)fn_801906A0(def->flag1C);
+            return (s8)std082_flagGetValue(def->flag1C);
         }
         return 0;
     }
     return 0;
 }
 
-void fn_801EE67C(u32 id, u32 value)
+void std243_shadowPokemonSetState(u32 id, u32 value)
 {
     extern u8* fn_801EF1E4(u32 data);
     BattleRangeDef* def;
@@ -475,7 +475,7 @@ s32 fn_801EE824(u16 id, u16 index)
         u16 flag = def->indexedFlags[index];
 
         if (flag != 0) {
-            return (s8)fn_801906A0(flag);
+            return (s8)std082_flagGetValue(flag);
         }
         return 0;
     }
@@ -507,7 +507,7 @@ u8 fn_801EE8F4(u16 id)
     }
     if (def != NULL) {
         if (def->flag16 != 0) {
-            return fn_801902E0(def->flag16);
+            return std081_flagCheckTrue(def->flag16);
         }
         return 0;
     }
@@ -535,7 +535,7 @@ static inline u8 battleRangeCheckFlag16Inline(u16 id)
 
     if (def != NULL) {
         if (def->flag16 != 0) {
-            return fn_801902E0(def->flag16);
+            return std081_flagCheckTrue(def->flag16);
         }
         return 0;
     }
@@ -665,7 +665,7 @@ u8 fn_801EEAD0(u16 id)
     }
     if (def != NULL) {
         if (def->flag12 != 0) {
-            return fn_801902E0(def->flag12);
+            return std081_flagCheckTrue(def->flag12);
         }
         return 0;
     }
@@ -681,7 +681,7 @@ u8 fn_801EEC74(u16 id)
     }
     if (def != NULL) {
         if (def->flag14 != 0) {
-            return fn_801902E0(def->flag14);
+            return std081_flagCheckTrue(def->flag14);
         }
         return 0;
     }
@@ -721,7 +721,7 @@ u8 fn_801EED88(u16 id)
     }
     if (def != NULL) {
         if (def->flag0C != 0) {
-            return fn_801902E0(def->flag0C);
+            return std081_flagCheckTrue(def->flag0C);
         }
         return 0;
     }

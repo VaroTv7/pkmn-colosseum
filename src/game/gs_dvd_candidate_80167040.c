@@ -86,10 +86,10 @@ typedef struct GSsndStartParams {
 
 extern void GSlogWrite(const char* fmt, ...);
 extern void* GSresGetResource(void* ptr, u32 param);
-extern void fn_801669E4(u32 a, u32 b, u32 c);
-extern void fn_801666BC(u32 index);
-extern u32 fn_80166B3C(u32 id, u32 arg1, u32 arg2);
-extern void fn_80166C34(u32 reverb);
+extern void soundStopRaw(u32 a, u32 b, u32 c);
+extern void soundGetStatus(u32 index);
+extern u32 soundAttachWork(u32 id, u32 arg1, u32 arg2);
+extern void soundApplyReverb(u32 reverb);
 extern BOOL OSDisableInterrupts(void);
 extern BOOL OSRestoreInterrupts(BOOL level);
 extern u32 fn_800E2C04(u32 size, u32 align);
@@ -183,7 +183,7 @@ u8 fn_80167070(u32 index, u32 stop)
         return 0;
     }
     if ((u8)stop == 1) {
-        fn_801669E4(index, 0, 0);
+        soundStopRaw(index, 0, 0);
     }
     _sndInitParms(entry, work);
     fn_8016782C((u8*)work);
@@ -192,7 +192,7 @@ u8 fn_80167070(u32 index, u32 stop)
     return 1;
 }
 
-u8 fn_80167118(u32 slot, u32 stream, const char* path, u32 offset,
+u8 soundPushWave(u32 slot, u32 stream, const char* path, u32 offset,
                void* resourceOwner, u32 resourceId3, u32 resourceId1,
                u32 resourceId2)
 {
@@ -276,7 +276,7 @@ void _sndCheckSndWorkALL(void)
 
     GSlogWrite(lbl_80273748);
     for (i = 0; i < lbl_8047B0E8; i++) {
-        fn_801666BC(i);
+        soundGetStatus(i);
     }
     GSlogWrite(lbl_80273764);
 }
@@ -308,7 +308,7 @@ u8 _sndSetVolumeWork(u32 id, u32 volume)
 
     if (((GSsndFlagBits*)&entry->flags)->active != 1) {
         if (((GSsndFlagBits*)&entry->flags)->isSe == 1) {
-            fn_80166B3C(id, 0, 0);
+            soundAttachWork(id, 0, 0);
         } else {
             return 0;
         }
@@ -359,12 +359,12 @@ u32 _sndStopBGM(GSsndEntry* entry, u32 fade, u32 arg2)
     return 1;
 }
 
-u32 fn_8016758C(GSsndEntry* entry, u32 id)
+u32 soundStartFX(GSsndEntry* entry, u32 id)
 {
     GSsndWork* work;
 
     if (((GSsndFlagBits*)&entry->flags)->active != 1) {
-        fn_80166B3C(id, 0, 0);
+        soundAttachWork(id, 0, 0);
     }
     work = entry->work;
     if (work != NULL) {
@@ -395,7 +395,7 @@ u32 fn_8016761C(GSsndEntry* entry, u16 value)
     if (resource == NULL) {
         return 0;
     }
-    fn_80166C34(entry->reverb);
+    soundApplyReverb(entry->reverb);
     params.unk00 = 4;
     params.unk04 = 0;
     params.unk08 = 0;
@@ -425,7 +425,7 @@ u32 fn_80167720(u32 handle)
     return 0;
 }
 
-u32 fn_80167768(u32 unkC, u32 unk10)
+u32 soundFindOwner(u32 unkC, u32 unk10)
 {
     int i;
 

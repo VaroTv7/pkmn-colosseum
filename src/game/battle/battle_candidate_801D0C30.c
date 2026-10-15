@@ -22,9 +22,9 @@ void fn_801D0C30(void)
     extern void _threadSwitch(void);
     extern void fadeSet(f32 duration, s32 mode);
     extern s8 fadeCheck(s32 wait);
-    extern u32 fn_8016557C(void);
-    extern void fn_80165548(u32 handle);
-    extern void fn_801653CC(s32 id, s32 fade, s32 volume);
+    extern u32 soundPauseMusic(void);
+    extern void soundResumeMusic(u32 handle);
+    extern void soundPlayFanfare(s32 id, s32 fade, s32 volume);
     s32 running;
     s32 state;
     s32 timer;
@@ -43,7 +43,7 @@ void fn_801D0C30(void)
         case 10:
             fadeSet(1.5f, 3);
             state = 12;
-            handle = fn_8016557C();
+            handle = soundPauseMusic();
             break;
         case 12:
             if (fadeCheck(0) == 0) {
@@ -56,7 +56,7 @@ void fn_801D0C30(void)
             timer++;
             if (timer >= 10) {
                 state = 8;
-                fn_801653CC(0x19, 2000, 0xFF);
+                soundPlayFanfare(0x19, 2000, 0xFF);
                 timer = 0;
             } else {
                 _threadSwitch();
@@ -71,7 +71,7 @@ void fn_801D0C30(void)
             }
             break;
         case 9:
-            fn_80165548(handle);
+            soundResumeMusic(handle);
             fadeSet(1.5f, 2);
             state = 11;
             break;
@@ -126,14 +126,14 @@ extern f32 lbl_8047B3E0;
 extern BattleIntroVec lbl_80279320;
 extern BattleIntroVec lbl_8027932C;
 
-extern s32 fn_80113F48(void);
+extern s32 std093_getCurrentGroupID(void);
 extern void* fn_800F92D4(u32 id);
-extern void* fn_8018D998(s32 group, s32 id);
+extern void* peopleIsInGroup(s32 group, s32 id);
 extern void* peopleSearchID(void* id);
 extern BattleIntroVec* peopleGetPosition(void* person);
-extern void* fn_8018FCBC(void* person);
-extern void fn_800E0168(BattleIntroVec* dst, BattleIntroVec* a, void* b);
-extern void fn_8018805C(s32 group, s32 id, f32 angle, f32 speed);
+extern void* peopleGetPositionPtr(void* person);
+extern void GSvecSub(BattleIntroVec* dst, BattleIntroVec* a, void* b);
+extern void peopleStartTurn(s32 group, s32 id, f32 angle, f32 speed);
 extern double atan2(double y, double x);
 extern void peopleMoveCheck(s32 group, s32 id, s32 wait);
 extern void* GSmodelGetPart(void* model, u32 part);
@@ -153,12 +153,12 @@ extern u8 GSmodelIsAnimating(void* model);
 extern void GSmodelSetVisibility(void* model, s32 visible);
 extern void GSmodelFree(void* model);
 extern u32 fn_801662E8(u32 arg0, u32 arg1);
-extern void fn_801668DC(u32 handle, u32 volume, u32 arg2);
-extern void fn_80165548(u32 handle);
-extern void fn_801653CC(s32 id, s32 fade, s32 volume);
-extern void fn_80166AB8(s32 id, s32 pan, s32 volume);
+extern void soundPauseSong(u32 handle, u32 volume, u32 arg2);
+extern void soundResumeMusic(u32 handle);
+extern void soundPlayFanfare(s32 id, s32 fade, s32 volume);
+extern void soundStartRaw(s32 id, s32 pan, s32 volume);
 extern s32 fn_800D37CC(void);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern void _threadSwitch(void);
 
 static inline u32 battleIntroFindModel(s32 fieldId, BattleIntroModelMap* map)
@@ -204,20 +204,20 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
         switch (state) {
         case 0:
             i = 0;
-            model = fn_800F92D4(battleIntroFindModel(fn_80113F48(), battleIntroModels));
+            model = fn_800F92D4(battleIntroFindModel(std093_getCurrentGroupID(), battleIntroModels));
             count = fn_801D0AFC(0);
             for (j = 0; j < 6; j++) {
                 lbl_80467378[j] = NULL;
             }
-            person = peopleSearchID(fn_8018D998(peopleGroup, peopleId));
+            person = peopleSearchID(peopleIsInGroup(peopleGroup, peopleId));
             if (person != NULL) {
                 hadPerson = 1;
                 part = GSmodelGetPart(model, 0xE);
                 GSpartGetTransform(part, &pos, NULL, NULL);
                 GSpartFree(part);
                 personPos = *peopleGetPosition(person);
-                fn_800E0168(&delta, &pos, fn_8018FCBC(person));
-                fn_8018805C(peopleGroup, peopleId, atan2(delta.x, delta.z),
+                GSvecSub(&delta, &pos, peopleGetPositionPtr(person));
+                peopleStartTurn(peopleGroup, peopleId, atan2(delta.x, delta.z),
                             2.0f);
                 state = 1;
             } else {
@@ -234,7 +234,7 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
                 u32 se = fn_801662E8(0, 0x406);
 
                 if (se != -1) {
-                    fn_801668DC(se, 0x1068, 0);
+                    soundPauseSong(se, 0x1068, 0);
                 }
                 handle = se;
             }
@@ -246,11 +246,11 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
             GSmodelSetPosition(lbl_80467378[i], &pos);
             GSmodelSetScale(lbl_80467378[i], &scale);
             GSmodelEnableModulation(lbl_80467378[i], &color);
-            fn_80166AB8(0x3C3, 0, 0);
+            soundStartRaw(0x3C3, 0, 0);
             state = 4;
             break;
         case 4:
-            frameDelta = (f32)fn_800D3088() / (f32)fn_800D37CC();
+            frameDelta = (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
             timer += frameDelta;
             lbl_8047B3E0 = frameDelta;
             if (timer >= 0.5f) {
@@ -273,7 +273,7 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
                 GSmodelSetAnimType(model, 0);
                 GSmodelStartAnimation(model);
             }
-            fn_801653CC(0x19, 2000, 0xFF);
+            soundPlayFanfare(0x19, 2000, 0xFF);
             state = 6;
             break;
         case 6:
@@ -282,7 +282,7 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
             }
             timer = 0.0f;
             while (timer < 0.7f) {
-                frameDelta = (f32)fn_800D3088() / (f32)fn_800D37CC();
+                frameDelta = (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                 timer += frameDelta;
                 lbl_8047B3E0 = frameDelta;
                 _threadSwitch();
@@ -298,18 +298,18 @@ void fn_801D0DB0(s32 peopleGroup, s32 peopleId)
             }
             timer = 0.0f;
             while (timer < 0.7f) {
-                frameDelta = (f32)fn_800D3088() / (f32)fn_800D37CC();
+                frameDelta = (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
                 timer += frameDelta;
                 lbl_8047B3E0 = frameDelta;
                 _threadSwitch();
             }
-            fn_80165548(handle);
+            soundResumeMusic(handle);
             state = 8;
             break;
         case 8:
             if (hadPerson) {
-                peopleSearchID(fn_8018D998(peopleGroup, peopleId));
-                fn_8018805C(peopleGroup, peopleId, personPos.y, 2.0f);
+                peopleSearchID(peopleIsInGroup(peopleGroup, peopleId));
+                peopleStartTurn(peopleGroup, peopleId, personPos.y, 2.0f);
                 state = 2;
             } else {
                 state = 1000;

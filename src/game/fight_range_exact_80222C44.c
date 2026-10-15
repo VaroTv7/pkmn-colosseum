@@ -144,8 +144,8 @@ extern void fightMenuAllFightTrainerCloseStatusMenu();
 extern void fightMenuAllFightOutPokemonCloseStatusMenu();
 extern u8   lbl_8037889D[0x23];
 extern void fn_80132A38();
-extern void fn_80165668(s32, s32, s32);
-extern void fn_80166A50(s32, s32, s32, s32);
+extern void std130_soundUnk_801653cc(s32, s32, s32);
+extern void soundStart(s32, s32, s32, s32);
 extern void fn_801F22D8(u32 obj);
 extern u32  fn_80262308(void);
 extern u8   lbl_8047B642;
@@ -251,7 +251,7 @@ void fn_80222C44(void) {
     extern u32 fn_801F54A4();
     extern u32 fn_801F7174(u32, u16, u16);
     extern u8  fn_801F3984();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern u32 fn_80077AF4();
     extern u32 fn_8011BEB4();
     extern u8  fn_801F32B0();
@@ -302,7 +302,7 @@ void fn_80222C44(void) {
         fn_801F3984(0, 3);
     }
 
-    if ((u16)fn_801EF634() == 0) goto opByteCheck;
+    if ((u16)std103_battleGetResult() == 0) goto opByteCheck;
 
     a34 = (u8)fn_801F54A4(0, 0, 0x34, 0);
     val77AF4 = fn_80077AF4();
@@ -315,7 +315,7 @@ void fn_80222C44(void) {
     }
 
     if (flag != 1) goto advance;
-    if ((u16)fn_801EF634() != 7) goto advance;
+    if ((u16)std103_battleGetResult() != 7) goto advance;
 
     fn_801F3984(0, 0);
     ctx4 = fn_801F025C(2, ctx1);
@@ -332,7 +332,7 @@ opByteCheck:
     if ((u8)fn_801F32B0(0) == 0) goto msgAdvance;
 
     fn_801EF95C();
-    if ((u16)fn_801EF634() != 0) {
+    if ((u16)std103_battleGetResult() != 0) {
         lbl_8047B610 = lbl_8047B610 + 5;
         return;
     }
@@ -356,7 +356,7 @@ opByteCheck:
         fn_802659A4();
         fn_802658C8();
     }
-    if ((u16)fn_801EF634() == 0) goto msgAdvance;
+    if ((u16)std103_battleGetResult() == 0) goto msgAdvance;
     lbl_8047B610 = lbl_8047B610 + 5;
     return;
 

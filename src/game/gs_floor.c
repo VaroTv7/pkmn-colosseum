@@ -102,7 +102,7 @@ extern u8    fn_80100B24(GSFloorContext* ctx);
 extern void  floorTerminateScriptThreads(u16 handle);
 extern u8    floorCheckFightKind(s32 floorIndex);
 extern void  floorCheckFade(void);
-extern void  fn_80117C84(void);
+extern void  tvRelease(void);
 extern void  fn_8018DB04(s32 arg);
 extern void  fn_800F716C(u32 groupId);
 extern void  fn_800F915C(u32 groupId);
@@ -112,7 +112,7 @@ extern void  GSthreadUnblock(void* thread);
 extern void  GSthreadBlockGroup(u32 groupId);
 extern void  GSthreadUnblockGroup(u32 groupId);
 extern void  menuCloseFloor(void);
-extern void  fn_800D2B90(s32 arg);
+extern void  gfxSetFog(s32 arg);
 extern void  psRemoveParticle(void);
 extern void  psRemoveGenerator(void);
 extern void  psRemoveAppSRT(void);
@@ -256,14 +256,14 @@ static inline void floorUnloadData(void* entry, s32 release) {
     if (!floorCheckFightKind(lbl_80478B18)) {
         floorCheckFade();
     }
-    fn_80117C84();
+    tvRelease();
     fn_8018DB04(release);
     if (release) {
         fn_800F716C(lbl_8047ACC8->floorId);
         GSthreadTerminateGroup(lbl_8047ACC8->floorId);
     }
     menuCloseFloor();
-    fn_800D2B90(0);
+    gfxSetFog(0);
     fn_8017B1CC(floorDataBiosGetFileGroupID(entry));
     fn_800F915C(floorDataBiosGetGroupID(entry));
 }

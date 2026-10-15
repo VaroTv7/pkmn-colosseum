@@ -192,13 +192,13 @@ void fn_801D2D28(void)
     extern u8 lbl_8047B3F4;
     extern u32 lbl_8047B3E8;
     extern f32 lbl_80478CDC;
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern void* GSmodelGetPart(void*, u32);
     extern void GSpartGetTransform(void*, Vec*, void*, void*);
     extern void GSpartFree(void*);
     extern void GSmodelGetPosition(void*, Vec*);
     extern void GSscene_GetCameraPositionVector(Vec*);
-    extern void fn_800E0168(Vec*, Vec*, Vec*);
+    extern void GSvecSub(Vec*, Vec*, Vec*);
     extern void cameraMoveTargetOfs(s32, Vec*, f32);
     extern f32 GSlerpGetLinearInterpolationFloat(f32, f32, f32);
     extern void cameraSetFov(f32);
@@ -217,7 +217,7 @@ void fn_801D2D28(void)
     if (lbl_8047B3F4 != 0 && lbl_8047B3EC != NULL &&
         (lbl_8047B3F0 == NULL || *(u32*)((u8*)lbl_8047B3F0 + 0x18) == 0 ||
          *(u32*)((u8*)lbl_8047B3F0 + 0x20) == 0)) {
-        frame = fn_800D3088();
+        frame = msgGetCharsPerFrame();
         move = &((WazaCameraSequence*)lbl_8047B3EC)->moves[
             ((WazaCameraSequence*)lbl_8047B3EC)->moveIndex];
         model = ((WazaCameraSequence*)lbl_8047B3EC)->model;
@@ -236,7 +236,7 @@ void fn_801D2D28(void)
             } else {
                 GSmodelGetPosition(*(void**)((u8*)lbl_8047B3EC + 0x24), &origin);
             }
-            fn_800E0168(&target, &target, &origin);
+            GSvecSub(&target, &target, &origin);
             cameraMoveTargetOfs(7, &target, 0.2f);
             GSpartFree(part);
         }
@@ -837,8 +837,8 @@ void _wazaSequenceCameraDoDollyPosition__FP21TemplateExpFileHeaderP24wazaSequenc
     extern void cameraUpdate(void);
     extern void GSscene_GetCameraDirectionVector(Vec*);
     extern void GSscene_GetCameraPositionVector(Vec*);
-    extern void fn_800E0168(Vec*, Vec*, Vec*);
-    extern void fn_800E013C(Vec*, Vec*, f32);
+    extern void GSvecSub(Vec*, Vec*, Vec*);
+    extern void vecScale(Vec*, Vec*, f32);
     extern void GSvecAdd(Vec*, Vec*, Vec*);
     extern s32 fn_800D37CC(void);
     extern void cameraMovePosition(s32, Vec*, f32);
@@ -933,9 +933,9 @@ void _wazaSequenceCameraDoDollyPosition__FP21TemplateExpFileHeaderP24wazaSequenc
     cameraUpdate();
     GSscene_GetCameraDirectionVector(&direction);
     GSscene_GetCameraPositionVector(&position);
-    fn_800E0168(&direction, &direction, &position);
+    GSvecSub(&direction, &direction, &position);
     direction.y = 0.0f;
-    fn_800E013C(&direction, &direction, farDistance / nearDistance);
+    vecScale(&direction, &direction, farDistance / nearDistance);
     direction.y = height;
     GSvecAdd(&direction, &direction, &position);
     delay = duration - randomDelay;
@@ -1433,7 +1433,7 @@ void _wazaSequenceCameraCalculateParams__FP13ModelSequenceiP24wazaSequenceCamera
     } WazaCameraBound;
     extern void* GSmodelGetBound(void*);
     extern void GSmodelGetRotation(void*, Vec*);
-    extern f32 fn_800E008C(Vec*);
+    extern f32 vecMag(Vec*);
     u8* sequence = modelSequence;
     WazaSequenceCameraParams* params = cameraParams;
     void* model = *(void**)(sequence + 0x24);
@@ -1537,7 +1537,7 @@ void _wazaSequenceCameraCalculateParams__FP13ModelSequenceiP24wazaSequenceCamera
     params->distanceMax *= distanceScale;
     /* RULE-EXCEPTION(user-approved): size and height read into block temporaries before the stores, so extent->y loads before the size store as in retail - see docs/RULE_EXCEPTIONS.md */
     {
-        f32 size = 0.57735026f * fn_800E008C(extent);
+        f32 size = 0.57735026f * vecMag(extent);
         f32 height = extent->y;
         params->size = size;
         params->height = height;

@@ -27,7 +27,7 @@ extern void fn_800932F0();
 extern void fn_800934E4();
 extern void fn_80093610();
 extern void fn_80093698();
-extern void fn_800D3088();
+extern void msgGetCharsPerFrame();
 extern void fn_800D37CC();
 extern void menuCloseCustom();
 extern s32 menuIsCheck();
@@ -86,8 +86,8 @@ extern void fn_800EC9DC(void*, f32);
 extern void fn_800EC990(void*);
 extern void fn_800ECB74(void*, u32);
 extern u8 fn_800EC960(void*);
-extern void fn_80166A28();
-extern s32 fn_801666BC();
+extern void soundStartSE();
+extern s32 soundGetStatus();
 
 extern void GScharLenCpy(void*, const void*, u32);
 extern u16 fn_800E2C04(u32, u32);
@@ -3402,7 +3402,7 @@ s32 fn_800849B4(s32 mode, s32 command, void* input, void* output)
 #define CardE_msgOpen(a, id, b, c) ((void (*)(s32, s32, s32, s32))winMsgOpen)(a, id, b, c)
 
 extern void msgctrlSetValue(s32 id, s32 value);
-extern void fn_80166A28(s32 se);
+extern void soundStartSE(s32 se);
 extern s32 fn_80087AE8();
 #define CardE_step(work, flags) \
     ((u8 (*)(CardEStatusWork*, s32))fn_80087AE8)(work, flags)
@@ -3444,7 +3444,7 @@ static inline u8 CardEReportDisconnect(CardEStatusWork* work)
         }
         CardE_threadSwitch();
     }
-    fn_80166A28(0x26);
+    soundStartSE(0x26);
     for (n = 0; n < 4; n++) {
         if (work->state[n] == 7) {
             break;
@@ -3528,7 +3528,7 @@ static inline void CardEWaitSecond(void)
 
     while (t < 1.0f) {
         CardE_threadSwitch();
-        t += (f32)((u32 (*)(void))fn_800D3088)() /
+        t += (f32)((u32 (*)(void))msgGetCharsPerFrame)() /
              (f32)((s32 (*)(void))fn_800D37CC)();
     }
 }
@@ -3812,7 +3812,7 @@ u8 fn_80084A8C(s32 mode, u32 command, void* input, void* output)
         }
 
         CardE_portClose((s8)port);
-        fn_80166A28(0x3CC);
+        soundStartSE(0x3CC);
         work->state[(s8)port] = 5;
         CardE_menuSetEnablePort(CardE_menuGetEnablePort() |
                                 lbl_80478950[(s8)port]);
@@ -4096,21 +4096,21 @@ u32 fn_80087C64(const u16* expected)
 
                 if (count >= 3) {
                     if (cardGridCountMatches(data->tiles, occupied, expected) < 3) {
-                        fn_80166A28(0x26);
-                        while (fn_801666BC(0x26) == 2) {
+                        soundStartSE(0x26);
+                        while (soundGetStatus(0x26) == 2) {
                             _threadSwitch();
                         }
                         cardGridResetAll(data, occupied);
                         count = 0;
                         cardGridShowCount(count);
                     } else {
-                        fn_80166A28(0x4A1);
-                        while (fn_801666BC(0x4A1) == 2) {
+                        soundStartSE(0x4A1);
+                        while (soundGetStatus(0x4A1) == 2) {
                             _threadSwitch();
                         }
                     }
                 } else {
-                    fn_80166A28(0x3C6);
+                    soundStartSE(0x3C6);
                 }
             }
             handled = TRUE;
@@ -4123,7 +4123,7 @@ u32 fn_80087C64(const u16* expected)
             if (count < 0) {
                 break;
             }
-            fn_80166A28(0x3C7);
+            soundStartSE(0x3C7);
             choice = &choices[count];
             cardGridResetCell(data->cells, choice->x, choice->y);
             cardGridShowCount(count);

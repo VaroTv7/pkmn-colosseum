@@ -33,7 +33,7 @@ s32 inputName__FPUsPUsiii(u16* name, u16* defaultName, s32 kind, s32 index, s32 
     extern void dbgMenuSetEnable(s32 enable);
     extern u32 windowGetActiveID(void);
     extern void menuOpenCustom(s32 menuId, u32 parentId, s32, s32, s32, s32, ...);
-    extern void fn_80166A28(u32 se);
+    extern void soundStartSE(u32 se);
     extern void winMsgOpen(s32 slot, s32 msgId, s32, s32);
     extern s8 menuSubOpenYesNo(s32, s32, s32, s32);
     extern void winMsgClose(s32 slot);
@@ -103,7 +103,7 @@ s32 inputName__FPUsPUsiii(u16* name, u16* defaultName, s32 kind, s32 index, s32 
             result = arg.buffer;
         }
 
-        fn_80166A28(0x440);
+        soundStartSE(0x440);
         msgctrlSetValue(0x4d, result);
         winMsgOpen(2, 0x2ef6, 1, 0);
         answer = menuSubOpenYesNo(0, -1, -1, 0);

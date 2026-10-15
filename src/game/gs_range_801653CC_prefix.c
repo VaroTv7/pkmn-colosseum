@@ -4,7 +4,7 @@
  */
 #include "game/gs_range_801653CC_shared.h"
 
-u32 fn_801653CC(u32 id, void* buffer, u32 size)
+u32 soundPlayFanfare(u32 id, void* buffer, u32 size)
 {
     GSsndEntry* entry;
     void* resource;
@@ -24,17 +24,17 @@ u32 fn_801653CC(u32 id, void* buffer, u32 size)
             wave = lbl_80478E34[waveIndex].data;
             if (wave != 0) {
                 fn_80165EE0(wave, resource, 0x10000);
-                fn_80166B3C(id, 0, 0x408);
-                fn_80166A50(id, (u32)buffer, size, 0);
+                soundAttachWork(id, 0, 0x408);
+                soundStart(id, (u32)buffer, size, 0);
                 /* Retail emits fn_801666BC before _threadSwitch, i.e. the
                  * bottom-test rotation. */
                 for (;;) {
-                    if (fn_801666BC(id) != 2) {
+                    if (soundGetStatus(id) != 2) {
                         break;
                     }
                     _threadSwitch();
                 }
-                fn_80166B18(id);
+                soundKill(id);
             }
             fn_800F9210(0, 0x408);
         }

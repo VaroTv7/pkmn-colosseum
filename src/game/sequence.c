@@ -443,7 +443,7 @@ BOOL sequenceLoad(void* effect, void* data) {
     extern void* GSresGetResource(u32, u32);
     extern u32 fn_801DF160(void*);
     extern void fn_800EB268(void*, u32);
-    extern void* fn_801195AC(void*);
+    extern void* gsParticleBankLoad(void*);
     extern void GSmodelLinkToGSparticleBank(void*, void*);
     extern void GSmodelLinkTexAnimToAnim(void*, s32);
     extern void GSmodelSetAnimEndedCallback(void*, void*, void*);
@@ -477,7 +477,7 @@ BOOL sequenceLoad(void* effect, void* data) {
         fn_800EB268(model, fn_801DF160(sequence));
         if (*(u32*)(sequence + 0xC) != 0) {
             *(void**)(sequence + 0x28) =
-                fn_801195AC(GSresGetResource(
+                gsParticleBankLoad(GSresGetResource(
                     *(u32*)(sequence + 0), *(u32*)(sequence + 0xC)));
             GSmodelLinkToGSparticleBank(model, *(void**)(sequence + 0x28));
         }

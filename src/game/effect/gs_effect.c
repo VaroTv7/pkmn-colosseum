@@ -55,7 +55,7 @@
 extern void  GSlogWrite(const char* fmt, ...);          /* OSReport / GSlog */
 extern void  fn_800E24B0(u16 handle);                    /* GSmemLock (raw) */
 extern void  fn_800E209C(u16 handle);                    /* GSmemFree (raw) */
-extern u32   fn_800D3088(void);                          /* GSgfxGetTickCount */
+extern u32   msgGetCharsPerFrame(void);                          /* GSgfxGetTickCount */
 extern s32   GSvtrRegisterGSgapp(u32 taskId);            /* battle VFX registration */
 extern void  memset(void* dst, u32 val, u32 size);
 extern void  memcpy(void* dst, void* src, u32 size);
@@ -165,7 +165,7 @@ void fn_80130F68(void) {
     u32 tick;
 
     cur = ((GSEffectGlobals*)(void*)lbl_803635C0)->activeListHead;
-    tick = fn_800D3088();
+    tick = msgGetCharsPerFrame();
 
     while (cur != NULL) {
         if (cur->updateFunc != NULL && cur->state == GSEFFECT_STATE_ACTIVE) {

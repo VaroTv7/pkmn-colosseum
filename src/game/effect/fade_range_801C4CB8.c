@@ -88,20 +88,20 @@ extern void* fn_800D7894(void);
 extern void fn_800D7868(void* object, u32 arg1, u32 arg2, u32 arg3, u32 arg4,
                         u32 arg5, u32 arg6, u32 arg7);
 extern void fn_800D9ED8(u32 enable);
-extern void fn_800D88DC(u32 mask);
-extern void fn_800D888C(u32 mask);
-extern void fn_800D9B58(f32 left, f32 top, f32 right, f32 bottom);
-extern void fn_800DA4C4(u32 arg0, u32 arg1, u32 arg2);
-extern void fn_800DA2BC(u32 arg0, u32 arg1, u32 arg2);
-extern void fn_800DA1E8(u32 arg0, u32 arg1, u32 arg2);
+extern void gfxSetFlags(u32 mask);
+extern void gfxClearFlags(u32 mask);
+extern void gfxSetOrtho(f32 left, f32 top, f32 right, f32 bottom);
+extern void gfxSetBlendMode(u32 arg0, u32 arg1, u32 arg2);
+extern void gfxSetUpdates(u32 arg0, u32 arg1, u32 arg2);
+extern void gfxSetZMode(u32 arg0, u32 arg1, u32 arg2);
 extern void fn_800DA100(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u32 arg4, u32 arg5);
-extern void fn_800DA028(u32 arg0);
-extern void fn_800D6A00(u32 arg0);
-extern void fn_800D7820(void* ptr);
-extern void fn_800D85D4(u32 arg0, void* ptr);
+extern void gfxSetCullMode(u32 arg0);
+extern void gfxSetPrimitive(u32 arg0);
+extern void gfxSetVtxDesc(void* ptr);
+extern void gfxLoadTexture(u32 arg0, void* ptr);
 extern void fn_800D848C(u32 arg0, u32 arg1, u32 arg2, void* ptr);
 extern void fn_800DC1D4(u32 arg0);
-extern void fn_800DC224(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u32 arg4);
+extern void gfxSetTevStage(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u32 arg4);
 extern void fn_800DC14C(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u32 arg4, u32 arg5);
 extern void fn_800DC0D4(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u32 arg4);
 extern void fn_800DC04C(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u32 arg4, u32 arg5);
@@ -110,14 +110,14 @@ extern void fn_800E042C(void* mtx, GSvec* scale);
 extern void fn_800E02E8(void* mtx, f32 angle);
 extern void fn_800E03B4(void* mtx, GSvec* trans);
 extern void GSvecTransform(GSvec* dst, void* mtx, GSvec* src);
-extern void fn_800D67BC(u32 arg0);
-extern void fn_800D6680(f32 x, f32 y, f32 z);
+extern void gfxBegin(u32 arg0);
+extern void gfxVtxPos(f32 x, f32 y, f32 z);
 #ifndef FADE_EFFECT_TU
 extern void fn_800D5CB8(u32 arg0, u8 r, u8 g, u8 b, u8 a);
 #endif
-extern void fn_800D59B8(u32 arg0, f32 s, f32 t);
+extern void gfxVtxTexCoord(u32 arg0, f32 s, f32 t);
 extern void fn_800D5F34(f32 x, f32 y, f32 z);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 extern void spriteSetEnv(void);
 #ifndef FADE_EFFECT_TU
 extern void GSlerpGetLinearInterpolationVector(GSvec* out, GSvec* from,
@@ -271,31 +271,31 @@ u32 fn_801C4CB8(u32 finish, void* texture, f32 frame, f32 duration)
 
     if (lbl_8047B3B4 != NULL) {
         fn_800D9ED8(1);
-        fn_800D88DC(0x80000003);
-        fn_800D888C(4);
-        fn_800D9B58(0.0f, 0.0f, 640.0f, 480.0f);
-        fn_800DA4C4(1, 6, 7);
-        fn_800DA2BC(1, 1, 0);
-        fn_800DA1E8(0, 1, 1);
+        gfxSetFlags(0x80000003);
+        gfxClearFlags(4);
+        gfxSetOrtho(0.0f, 0.0f, 640.0f, 480.0f);
+        gfxSetBlendMode(1, 6, 7);
+        gfxSetUpdates(1, 1, 0);
+        gfxSetZMode(0, 1, 1);
         fn_800DA100(0, 7, 0, 1, 7, 0);
-        fn_800DA028(0);
+        gfxSetCullMode(0);
         fn_800D848C(0, 0, 4, textureMatrix);
         fn_800D848C(1, 0, 5, textureMatrix);
         fn_800DC1D4(2);
-        fn_800D85D4(0, ((FadeCameraWork*)lbl_80467030)->tex1);
-        fn_800DC224(0, 0, 0, 0, 0);
+        gfxLoadTexture(0, ((FadeCameraWork*)lbl_80467030)->tex1);
+        gfxSetTevStage(0, 0, 0, 0, 0);
         fn_800DC14C(0, 8, 0, 0, 0, 1);
         fn_800DC0D4(0, 9, 13, 12, 15);
         fn_800DC04C(0, 0, 0, 0, 0, 1);
         fn_800DBFD4(0, 7, 4, 5, 7);
-        fn_800D85D4(1, texture);
-        fn_800DC224(1, 0, 1, 1, 0);
+        gfxLoadTexture(1, texture);
+        gfxSetTevStage(1, 0, 1, 1, 0);
         fn_800DC14C(1, 0, 0, 0, 0, 0);
         fn_800DC0D4(1, 15, 8, 2, 15);
         fn_800DC04C(1, 0, 0, 0, 0, 0);
         fn_800DBFD4(1, 7, 7, 7, 1);
-        fn_800D7820(lbl_8047B3B4);
-        fn_800D6A00(4);
+        gfxSetVtxDesc(lbl_8047B3B4);
+        gfxSetPrimitive(4);
 
         position.x = 320.0f;
         position.y = 240.0f;
@@ -319,46 +319,46 @@ u32 fn_801C4CB8(u32 finish, void* texture, f32 frame, f32 duration)
         right = (320.0f + transformed.x) / 640.0f;
         top = (240.0f - transformed.y) / 480.0f;
         bottom = (240.0f + transformed.y) / 480.0f;
-        fn_800D67BC(4);
+        gfxBegin(4);
 
         point.x = (-128.0f);
         point.y = (-128.0f);
         point.z = 0.0f;
         GSvecTransform(&transformed, matrix, &point);
-        fn_800D6680(transformed.x, transformed.y, transformed.z);
+        gfxVtxPos(transformed.x, transformed.y, transformed.z);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, (u8)progress);
-        fn_800D59B8(0, 0.0f, 0.0f);
-        fn_800D59B8(1, left, top);
+        gfxVtxTexCoord(0, 0.0f, 0.0f);
+        gfxVtxTexCoord(1, left, top);
 
         point.x = 128.0f;
         point.y = (-128.0f);
         point.z = 0.0f;
         GSvecTransform(&transformed, matrix, &point);
-        fn_800D6680(transformed.x, transformed.y, transformed.z);
+        gfxVtxPos(transformed.x, transformed.y, transformed.z);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, (u8)progress);
-        fn_800D59B8(0, 1.0f, 0.0f);
-        fn_800D59B8(1, right, top);
+        gfxVtxTexCoord(0, 1.0f, 0.0f);
+        gfxVtxTexCoord(1, right, top);
 
         point.x = (-128.0f);
         point.y = 128.0f;
         point.z = 0.0f;
         GSvecTransform(&transformed, matrix, &point);
-        fn_800D6680(transformed.x, transformed.y, transformed.z);
+        gfxVtxPos(transformed.x, transformed.y, transformed.z);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, (u8)progress);
-        fn_800D59B8(0, 0.0f, 1.0f);
-        fn_800D59B8(1, left, bottom);
+        gfxVtxTexCoord(0, 0.0f, 1.0f);
+        gfxVtxTexCoord(1, left, bottom);
 
         point.x = 128.0f;
         point.y = 128.0f;
         point.z = 0.0f;
         GSvecTransform(&transformed, matrix, &point);
-        fn_800D6680(transformed.x, transformed.y, transformed.z);
+        gfxVtxPos(transformed.x, transformed.y, transformed.z);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, (u8)progress);
-        fn_800D59B8(0, 1.0f, 1.0f);
-        fn_800D59B8(1, right, bottom);
-        fn_800D6728();
+        gfxVtxTexCoord(0, 1.0f, 1.0f);
+        gfxVtxTexCoord(1, right, bottom);
+        gfxEnd();
         fn_800DC1D4(1);
-        fn_800D888C(0x80000000);
+        gfxClearFlags(0x80000000);
         fn_800D9ED8(0);
     }
 
@@ -633,40 +633,40 @@ void fn_801C5B60(FadeTrailPoint* position, s32 alpha, f32 scale, f32 angle)
     fn_800E042C(matrix, &point);
     fn_800E02E8(matrix, 0.017453292f * angle);
     fn_800E03B4(matrix, (GSvec*)position);
-    fn_800D67BC(4);
+    gfxBegin(4);
 
     point.x = (-128.0f);
     point.y = (-128.0f);
     point.z = 0.0f;
     GSvecTransform(&transformed, matrix, &point);
-    fn_800D6680(transformed.x, transformed.y, transformed.z);
+    gfxVtxPos(transformed.x, transformed.y, transformed.z);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-    fn_800D59B8(0, 0.0f, 0.0f);
+    gfxVtxTexCoord(0, 0.0f, 0.0f);
 
     point.x = 128.0f;
     point.y = (-128.0f);
     point.z = 0.0f;
     GSvecTransform(&transformed, matrix, &point);
-    fn_800D6680(transformed.x, transformed.y, transformed.z);
+    gfxVtxPos(transformed.x, transformed.y, transformed.z);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-    fn_800D59B8(0, 1.0f, 0.0f);
+    gfxVtxTexCoord(0, 1.0f, 0.0f);
 
     point.x = (-128.0f);
     point.y = 128.0f;
     point.z = 0.0f;
     GSvecTransform(&transformed, matrix, &point);
-    fn_800D6680(transformed.x, transformed.y, transformed.z);
+    gfxVtxPos(transformed.x, transformed.y, transformed.z);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-    fn_800D59B8(0, 0.0f, 1.0f);
+    gfxVtxTexCoord(0, 0.0f, 1.0f);
 
     point.x = 128.0f;
     point.y = 128.0f;
     point.z = 0.0f;
     GSvecTransform(&transformed, matrix, &point);
-    fn_800D6680(transformed.x, transformed.y, transformed.z);
+    gfxVtxPos(transformed.x, transformed.y, transformed.z);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-    fn_800D59B8(0, 1.0f, 1.0f);
-    fn_800D6728();
+    gfxVtxTexCoord(0, 1.0f, 1.0f);
+    gfxEnd();
 }
 
 void fn_801C5D60(void)
@@ -887,40 +887,40 @@ void fn_801C63C0(void* texture, GSvec* position, f32 scale, f32 angle,
     fn_800E042C(matrix, &vec);
     fn_800E02E8(matrix, 0.017453292f * angle);
     fn_800E03B4(matrix, position);
-    fn_800D67BC(4);
+    gfxBegin(4);
 
     vec.x = (-320.0f);
     vec.y = (-240.0f);
     vec.z = 0.0f;
     GSvecTransform(&out, matrix, &vec);
-    fn_800D6680(out.x, out.y, out.z);
+    gfxVtxPos(out.x, out.y, out.z);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, (u8)alpha);
-    fn_800D59B8(0, 0.0f, 0.0f);
+    gfxVtxTexCoord(0, 0.0f, 0.0f);
 
     vec.x = 321.0f;
     vec.y = (-240.0f);
     vec.z = 0.0f;
     GSvecTransform(&out, matrix, &vec);
-    fn_800D6680(out.x, out.y, out.z);
+    gfxVtxPos(out.x, out.y, out.z);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, (u8)alpha);
-    fn_800D59B8(0, 1.0f, 0.0f);
+    gfxVtxTexCoord(0, 1.0f, 0.0f);
 
     vec.x = (-320.0f);
     vec.y = 241.0f;
     vec.z = 0.0f;
     GSvecTransform(&out, matrix, &vec);
-    fn_800D6680(out.x, out.y, out.z);
+    gfxVtxPos(out.x, out.y, out.z);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, (u8)alpha);
-    fn_800D59B8(0, 0.0f, 1.0f);
+    gfxVtxTexCoord(0, 0.0f, 1.0f);
 
     vec.x = 321.0f;
     vec.y = 241.0f;
     vec.z = 0.0f;
     GSvecTransform(&out, matrix, &vec);
-    fn_800D6680(out.x, out.y, out.z);
+    gfxVtxPos(out.x, out.y, out.z);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, (u8)alpha);
-    fn_800D59B8(0, 1.0f, 1.0f);
-    fn_800D6728();
+    gfxVtxTexCoord(0, 1.0f, 1.0f);
+    gfxEnd();
     fn_801C673C();
 }
 
@@ -931,12 +931,12 @@ void fn_801C6688(f32 t) {
 
     fn_801C6760();
     alpha = 0xFF - (s32)(255.0f * t);
-    fn_800D67BC(2);
-    fn_800D6680(0.0f, 0.0f, 0.0f);
+    gfxBegin(2);
+    gfxVtxPos(0.0f, 0.0f, 0.0f);
     fn_800D5CB8(0, 0, 0, 0, alpha);
-    fn_800D6680(640.0f, 480.0f, 0.0f);
+    gfxVtxPos(640.0f, 480.0f, 0.0f);
     fn_800D5CB8(0, 0, 0, 0, alpha);
-    fn_800D6728();
+    gfxEnd();
     fn_801C673C();
 }
 
@@ -946,31 +946,31 @@ void fn_801C673C(void) {
 
 void fn_801C6760(void) {
     fn_800D9ED8(1);
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D9B58(0.0f, 0.0f, 640.0f, 480.0f);
-    fn_800DA4C4(1, 6, 7);
-    fn_800DA2BC(1, 1, 0);
-    fn_800DA1E8(0, 1, 1);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetOrtho(0.0f, 0.0f, 640.0f, 480.0f);
+    gfxSetBlendMode(1, 6, 7);
+    gfxSetUpdates(1, 1, 0);
+    gfxSetZMode(0, 1, 1);
     fn_800DA100(0, 7, 0, 1, 7, 0);
-    fn_800DA028(0);
-    fn_800D6A00(7);
-    fn_800D7820(NULL);
+    gfxSetCullMode(0);
+    gfxSetPrimitive(7);
+    gfxSetVtxDesc(NULL);
 }
 
 void fn_801C680C(void* texture) {
     fn_800D9ED8(1);
-    fn_800D88DC(3);
-    fn_800D888C(4);
-    fn_800D9B58(0.0f, 0.0f, 640.0f, 480.0f);
-    fn_800DA4C4(1, 6, 7);
-    fn_800DA2BC(1, 1, 0);
-    fn_800DA1E8(0, 1, 1);
+    gfxSetFlags(3);
+    gfxClearFlags(4);
+    gfxSetOrtho(0.0f, 0.0f, 640.0f, 480.0f);
+    gfxSetBlendMode(1, 6, 7);
+    gfxSetUpdates(1, 1, 0);
+    gfxSetZMode(0, 1, 1);
     fn_800DA100(0, 7, 0, 1, 7, 0);
-    fn_800DA028(0);
-    fn_800D6A00(4);
-    fn_800D7820(lbl_80314AE8);
-    fn_800D85D4(0, texture);
+    gfxSetCullMode(0);
+    gfxSetPrimitive(4);
+    gfxSetVtxDesc(lbl_80314AE8);
+    gfxLoadTexture(0, texture);
 }
 
 void _fadeEffect_AdjustParms__Fv(void) {
@@ -1014,17 +1014,17 @@ void fn_801C6934(void* texture, f32 progress, f32 blend)
     alpha = (s32)((f32)alpha * (1.0f - progress));
 
     fn_800D9ED8(1);
-    fn_800D88DC(3);
-    fn_800D888C(4);
+    gfxSetFlags(3);
+    gfxClearFlags(4);
     spriteSetEnv();
-    fn_800DA4C4(1, 6, 7);
-    fn_800DA2BC(1, 1, 0);
-    fn_800DA1E8(0, 1, 1);
+    gfxSetBlendMode(1, 6, 7);
+    gfxSetUpdates(1, 1, 0);
+    gfxSetZMode(0, 1, 1);
     fn_800DA100(0, 7, 0, 1, 7, 0);
-    fn_800DA028(0);
-    fn_800D6A00(4);
-    fn_800D7820(lbl_80315128);
-    fn_800D85D4(0, texture);
+    gfxSetCullMode(0);
+    gfxSetPrimitive(4);
+    gfxSetVtxDesc(lbl_80315128);
+    gfxLoadTexture(0, texture);
     fluid = (FadeFluidWork*)lbl_80467050;
 
     for (y = 0; y < fluid->rows; y++) {
@@ -1050,7 +1050,7 @@ void fn_801C6AE8(u32 x, u32 y, u8 alpha) {
 
     dimensions = (FadeFluidWork*)&lbl_80467050;
     stride = dimensions->columns + 1;
-    fn_800D67BC(4);
+    gfxBegin(4);
 
     fluid = (FadeFluidWork*)&lbl_80467050;
     xScale = fluid->xScale;
@@ -1060,11 +1060,11 @@ void fn_801C6AE8(u32 x, u32 y, u8 alpha) {
     position = &heightPage[lbl_8047B3B8][index];
     velocity = &fluid->velocityX[index];
     texCoord = &fluid->texCoord[index];
-    fn_800D6680(position->x * xScale,
+    gfxVtxPos(position->x * xScale,
                 position->y * yScale,
                 position->z * xScale);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-    fn_800D59B8(0, texCoord->x, texCoord->y);
+    gfxVtxTexCoord(0, texCoord->x, texCoord->y);
     fn_800D5F34(velocity->x, velocity->y, velocity->z);
 
     nextX = x + 1;
@@ -1072,11 +1072,11 @@ void fn_801C6AE8(u32 x, u32 y, u8 alpha) {
     position = &heightPage[lbl_8047B3B8][index];
     velocity = &fluid->velocityX[index];
     texCoord = &fluid->texCoord[index];
-    fn_800D6680(position->x * xScale,
+    gfxVtxPos(position->x * xScale,
                 position->y * yScale,
                 position->z * xScale);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-    fn_800D59B8(0, texCoord->x, texCoord->y);
+    gfxVtxTexCoord(0, texCoord->x, texCoord->y);
     fn_800D5F34(velocity->x, velocity->y, velocity->z);
 
     {
@@ -1087,26 +1087,26 @@ void fn_801C6AE8(u32 x, u32 y, u8 alpha) {
         velocity = &fluid->velocityX[x + nextY * stride];
         index = x + nextY * stride;
         texCoord = &fluid->texCoord[index];
-        fn_800D6680(cornerPosition->x * xScale,
+        gfxVtxPos(cornerPosition->x * xScale,
                     cornerPosition->y * yScale,
                     cornerPosition->z * xScale);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-        fn_800D59B8(0, texCoord->x, texCoord->y);
+        gfxVtxTexCoord(0, texCoord->x, texCoord->y);
         fn_800D5F34(velocity->x, velocity->y, velocity->z);
 
         index = nextX + nextY * stride;
         position = &heightPage[lbl_8047B3B8][index];
         velocity = &fluid->velocityX[index];
         texCoord = &fluid->texCoord[index];
-        fn_800D6680(position->x * xScale,
+        gfxVtxPos(position->x * xScale,
                     position->y * yScale,
                     position->z * xScale);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-        fn_800D59B8(0, texCoord->x, texCoord->y);
+        gfxVtxTexCoord(0, texCoord->x, texCoord->y);
         fn_800D5F34(velocity->x, velocity->y, velocity->z);
     }
 
-    fn_800D6728();
+    gfxEnd();
 }
 
 void _fadeFluidSetShockSub__FUlUlf(u32 x, u32 y, f32 strength);

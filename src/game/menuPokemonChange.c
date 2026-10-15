@@ -32,13 +32,13 @@ typedef struct { u8 data[0x1DFD0]; } SaveDataImage;
 static inline void menuPokemonChangeWait(f32 seconds) {
     extern const f32 lbl_8047B9D4;
     extern void _threadSwitch(void);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern s32 fn_800D37CC(void);
     f32 elapsed = lbl_8047B9D4;
 
     while (elapsed < seconds) {
         _threadSwitch();
-        elapsed += (f32)fn_800D3088() / (f32)fn_800D37CC();
+        elapsed += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
 }
 
@@ -77,9 +77,9 @@ static inline void menuPokemonChangeClearMessage(s32 windowId, s32 itemId) {
 /* Shows `msgId` in the change menu (0xD9) with a buzzer for 1.5 s. */
 static inline void menuPokemonChangeAlert(u32 msgId) {
     extern const f32 lbl_8047B9DC;
-    extern void fn_80166AB8(s32 se, s32 a, s32 b);
+    extern void soundStartRaw(s32 se, s32 a, s32 b);
     menuPokemonChangeSetMessage(0xD9, 0x10B2, msgId);
-    fn_80166AB8(0x26, 0, 0);
+    soundStartRaw(0x26, 0, 0);
     menuPokemonChangeWait(lbl_8047B9DC);
     menuPokemonChangeClearMessage(0xD9, 0x10B2);
 }
@@ -230,15 +230,15 @@ void stateFunctionEvolution(void) {
     extern void fadeCheck(s32 flag);
     extern void menuClose(s32 id);
     extern void fn_8010A420(void* model);
-    extern void fn_801CB9D8(u32 handle);
-    extern void fn_80112260(s32 flag);
+    extern void std113_mapObjectUnk_8018db68(u32 handle);
+    extern void floorSetMapVisibility(s32 flag);
     extern void _threadSwitch(void);
     extern s32 pokemonEvolutionAll(void* pokemon, u16 species, u16 arg, u32* type, void* team, s32 a5, s32 a6, s32 a7);
     extern void menuModelInit(void* model, s32 w, s32 h);
     extern void fn_80109C88(void* model, void* pokemon);
     extern void cameraPlayAnime(s32 id, u32 color, s32 a, s32 b);
-    extern u32 fn_80113F48(void);
-    extern u32 fn_801CBA0C(u32 color);
+    extern u32 std093_getCurrentGroupID(void);
+    extern u32 std112_modelGetResourceID(u32 color);
     extern void* GSresGetResource(u32 group, u32 id);
     extern void GSscene_SetMode(s32 mode);
     extern void GSmodelSetVisibility(void* obj, s32 flag);
@@ -277,8 +277,8 @@ void stateFunctionEvolution(void) {
         menuClose(0xDE);
         fn_8010A420(work->modelA);
         fn_8010A420(work->modelB);
-        fn_801CB9D8(lbl_8047A418);
-        fn_80112260(0);
+        std113_mapObjectUnk_8018db68(lbl_8047A418);
+        floorSetMapVisibility(0);
         _threadSwitch();
         fadeSet(lbl_8047B9D4, 2);
         fadeCheck(1);
@@ -307,13 +307,13 @@ void stateFunctionEvolution(void) {
         fn_80109C88(work->modelA, pokemonA);
         fn_80109C88(work->modelB, pokemonB);
         cameraPlayAnime(0x37C, 0x0FFF1800, 0, 1);
-        resource = fn_80113F48();
-        lbl_8047A418 = fn_801CBA0C(0x0FFE1000);
+        resource = std093_getCurrentGroupID();
+        lbl_8047A418 = std112_modelGetResourceID(0x0FFE1000);
         lbl_8047A414 = (u32)GSresGetResource(resource, lbl_8047A418);
         cameraPlayAnime(0x37C, 0x0FFF1800, 0, 1);
         GSscene_SetMode(4);
         GSmodelSetVisibility((void*)lbl_8047A414, 1);
-        fn_80112260(0);
+        floorSetMapVisibility(0);
         menuOpen(0xDE, 1);
         fadeSet(lbl_8047B9D0, 2);
         fadeCheck(1);
@@ -350,12 +350,12 @@ void stateFunctionExChangeMain(void) {
     extern void fadeSet(f32 vol, s32 mode);
     extern void fadeCheck(s32 flag);
     extern void fn_801024E8(s32 flag);
-    extern u32 fn_80113F48(void);
+    extern u32 std093_getCurrentGroupID(void);
     extern void cameraPlayAnime(s32 id, u32 color, s32 a, s32 b);
     extern void _threadSwitch(void);
-    extern void fn_80166AB8(s32 a, s32 b, s32 c);
-    extern void fn_80112260(s32 flag);
-    extern void fn_801CB834(u32 color, s32 a, s32 b, s32 c);
+    extern void soundStartRaw(s32 a, s32 b, s32 c);
+    extern void floorSetMapVisibility(s32 flag);
+    extern void std115_mapObjectPlayAnimation(u32 color, s32 a, s32 b, s32 c);
     extern void cameraWaitSyncAnime(s32 flag);
     extern void menuModelInit(void* model, s32 w, s32 h);
     extern void fn_80109C88(void* model, void* pokemon);
@@ -379,17 +379,17 @@ void stateFunctionExChangeMain(void) {
     fadeSet(lbl_8047B9D0, 3);
     fadeCheck(1);
     fn_801024E8(1);
-    cameraPlayAnime(fn_80113F48(), 0x10B61800, 0, 0);
+    cameraPlayAnime(std093_getCurrentGroupID(), 0x10B61800, 0, 0);
     _threadSwitch();
-    fn_80166AB8(0x4C8, 0, 0);
-    fn_80112260(1);
-    fn_801CB834(0x10B11000, 0, 0, 0);
+    soundStartRaw(0x4C8, 0, 0);
+    floorSetMapVisibility(1);
+    std115_mapObjectPlayAnimation(0x10B11000, 0, 0, 0);
     fadeSet(lbl_8047B9D0, 2);
     fadeCheck(1);
     cameraWaitSyncAnime(1);
     fadeSet(lbl_8047B9D8, 3);
     fadeCheck(1);
-    fn_80112260(0);
+    floorSetMapVisibility(0);
     menuModelInit(work->modelA, 0xE8, 0x11C);
     menuModelInit(work->modelB, 0xE8, 0x11C);
     fn_80109C88(work->modelA, pokemonA);
@@ -578,7 +578,7 @@ void fn_8002E460(void* dst) {
     extern u8* windowGetKeyInfo(void);
     extern s32 fn_80073A44(s32 mode, u16* flags);
     extern s32 fn_8017B1AC(void);
-    extern void fn_80166AB8(s32 se, s32 a, s32 b);
+    extern void soundStartRaw(s32 se, s32 a, s32 b);
     extern void winMsgOpen(s32 slot, s32 msgId, s32 p3, s32 p4);
     extern void _threadSwitch(void);
     extern void* savedataGetStatus(s32 side, s32 slotType);
@@ -629,30 +629,30 @@ void fn_8002E460(void* dst) {
             prev = flags;
             if (held & 0x10) {
                 if (!readyA) {
-                    fn_80166AB8(0x24, 0, 0);
+                    soundStartRaw(0x24, 0, 0);
                 }
                 readyA = 1;
             } else if (held & 0x20) {
                 if (readyA) {
-                    fn_80166AB8(0x25, 0, 0);
+                    soundStartRaw(0x25, 0, 0);
                     readyA = 0;
                 } else {
-                    fn_80166AB8(0x25, 0, 0);
+                    soundStartRaw(0x25, 0, 0);
                     readyA = 0;
                     break;
                 }
             }
             if (pressed & 1) {
                 if (!readyB) {
-                    fn_80166AB8(0x24, 0, 0);
+                    soundStartRaw(0x24, 0, 0);
                 }
                 readyB = 1;
             } else if (pressed & 2) {
                 if (readyB) {
-                    fn_80166AB8(0x25, 0, 0);
+                    soundStartRaw(0x25, 0, 0);
                     readyB = 0;
                 } else {
-                    fn_80166AB8(0x25, 0, 0);
+                    soundStartRaw(0x25, 0, 0);
                     readyB = 0;
                     break;
                 }

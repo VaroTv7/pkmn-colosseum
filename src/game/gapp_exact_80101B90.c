@@ -26,19 +26,19 @@ extern u32 OSGetTick(void);
 extern void fn_800B8C58(s32);
 extern void fn_800BE30C(void);
 extern void fn_800D9ED8(s32);
-extern void fn_800D88DC(s32);
-extern void fn_800D888C(s32);
-extern void fn_800D9B58(f32, f32, f32, f32);
-extern void fn_800DA4C4(s32, s32, s32);
-extern void fn_800DA2BC(s32, s32, s32);
-extern void fn_800DA1E8(s32, s32, s32);
-extern void fn_800DA028(s32);
-extern void fn_800D6A00(s32);
-extern void fn_800D7820(s32);
-extern void fn_800D67BC(s32);
-extern void fn_800D6680(f32, f32, f32);
+extern void gfxSetFlags(s32);
+extern void gfxClearFlags(s32);
+extern void gfxSetOrtho(f32, f32, f32, f32);
+extern void gfxSetBlendMode(s32, s32, s32);
+extern void gfxSetUpdates(s32, s32, s32);
+extern void gfxSetZMode(s32, s32, s32);
+extern void gfxSetCullMode(s32);
+extern void gfxSetPrimitive(s32);
+extern void gfxSetVtxDesc(s32);
+extern void gfxBegin(s32);
+extern void gfxVtxPos(f32, f32, f32);
 extern void fn_800D5CB8(u32, u8, u8, u8, u8);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 
 void fn_80101B90(u32 color) {
     u32 tick;
@@ -49,29 +49,29 @@ void fn_80101B90(u32 color) {
     if ((s32)lbl_8047ACF0 != 0) {
         tick = OSGetTick();
         fn_800D9ED8(1);
-        fn_800D88DC(1);
-        fn_800D888C(6);
-        fn_800D9B58(0.0f, 0.0f, 640.0f, 480.0f);
-        fn_800DA4C4(1, 6, 7);
-        fn_800DA2BC(2, 1, 0);
-        fn_800DA1E8(1, 1, 1);
-        fn_800DA028(0);
-        fn_800D6A00(7);
-        fn_800D7820(0);
+        gfxSetFlags(1);
+        gfxClearFlags(6);
+        gfxSetOrtho(0.0f, 0.0f, 640.0f, 480.0f);
+        gfxSetBlendMode(1, 6, 7);
+        gfxSetUpdates(2, 1, 0);
+        gfxSetZMode(1, 1, 1);
+        gfxSetCullMode(0);
+        gfxSetPrimitive(7);
+        gfxSetVtxDesc(0);
 
         red = (color >> 16) & 0xFF;
         green = (color >> 8) & 0xFF;
         blue = color & 0xFF;
-        fn_800D67BC(2);
-        fn_800D6680(640.0f * (((f32)(lbl_8047ACEC - lbl_8047ACE8) / (f32)lbl_80478B28) /
+        gfxBegin(2);
+        gfxVtxPos(640.0f * (((f32)(lbl_8047ACEC - lbl_8047ACE8) / (f32)lbl_80478B28) /
                                     685000.0f),
                     450.0f, 0.0f);
         fn_800D5CB8(0, red, green, blue, 0xFF);
-        fn_800D6680(640.0f * (((f32)(tick - lbl_8047ACE8) / (f32)lbl_80478B28) /
+        gfxVtxPos(640.0f * (((f32)(tick - lbl_8047ACE8) / (f32)lbl_80478B28) /
                                     685000.0f),
                     452.0f, 0.0f);
         fn_800D5CB8(0, red, green, blue, 0xFF);
-        fn_800D6728();
+        gfxEnd();
         lbl_8047ACEC = tick;
     }
 }
@@ -93,36 +93,36 @@ void fn_80101D8C(void)
         return;
     }
 
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D9B58(0.0f, 0.0f, 640.0f, 480.0f);
-    fn_800DA4C4(1, 6, 7);
-    fn_800DA2BC(2, 1, 0);
-    fn_800DA1E8(1, 1, 1);
-    fn_800DA028(0);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetOrtho(0.0f, 0.0f, 640.0f, 480.0f);
+    gfxSetBlendMode(1, 6, 7);
+    gfxSetUpdates(2, 1, 0);
+    gfxSetZMode(1, 1, 1);
+    gfxSetCullMode(0);
 
     x = 640.0f * (((f32)lbl_8047ACF8 / 2740000.0f) / (f32)lbl_80478B28);
-    fn_800D6A00(7);
-    fn_800D7820(0);
-    fn_800D67BC(2);
-    fn_800D6680(0.0f, 454.0f, 0.0f);
+    gfxSetPrimitive(7);
+    gfxSetVtxDesc(0);
+    gfxBegin(2);
+    gfxVtxPos(0.0f, 454.0f, 0.0f);
     fn_800D5CB8(0, 0, 0xFF, 0, 0xFF);
-    fn_800D6680(x, 456.0f, 0.0f);
+    gfxVtxPos(x, 456.0f, 0.0f);
     fn_800D5CB8(0, 0, 0xFF, 0, 0xFF);
-    fn_800D6728();
+    gfxEnd();
 
-    fn_800D6A00(1);
-    fn_800D7820(0);
+    gfxSetPrimitive(1);
+    gfxSetVtxDesc(0);
     line = 0;
     offset = 0;
     for (; line <= lbl_80478B28; line++) {
         x = (f32)(offset / lbl_80478B28);
-        fn_800D67BC(2);
-        fn_800D6680(x, 448.0f, 0.0f);
+        gfxBegin(2);
+        gfxVtxPos(x, 448.0f, 0.0f);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D6680(x, 458.0f, 0.0f);
+        gfxVtxPos(x, 458.0f, 0.0f);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D6728();
+        gfxEnd();
         offset += 0x280;
     }
 

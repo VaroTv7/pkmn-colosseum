@@ -40,7 +40,7 @@ extern void fn_80166CC0(u32 mode);
 extern void fn_80167040(void);
 extern void sndSetReceiveMessageCallback(void* callback);
 
-u32 fn_80166E88(u32 stackCount, u32 workSize, u32 extraStackCount,
+u32 soundInit(u32 stackCount, u32 workSize, u32 extraStackCount,
                 u32 emitterCount, u32 emitter3dCount)
 {
     GSsndHooks hooks = { fn_80167BB0, fn_80167B70 };
@@ -85,8 +85,8 @@ u32 fn_80166E88(u32 stackCount, u32 workSize, u32 extraStackCount,
     sndAuxCallbackPrepareReverbHI(lbl_80452500);
     sndSetAuxProcessingCallbacks(0, sndAuxCallbackReverbHI, lbl_80452500,
                                  0xFF, 0, 0, 0, 0xFF, 0);
-    fn_80166D48(0x7F, 0, 1, 0);
-    fn_80166D48(0x64, 0, 0, 1);
+    soundMasterVolume(0x7F, 0, 1, 0);
+    soundMasterVolume(0x64, 0, 0, 1);
     fn_80166CC0(GSsndGetOutputMode());
     sndSetReceiveMessageCallback(fn_80167040);
     return 1;

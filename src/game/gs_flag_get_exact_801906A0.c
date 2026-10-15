@@ -71,7 +71,7 @@ static inline u32 _flagGet(u32* buffer, FlagDefinition* definitions, s32 flagId)
     return (buffer[wordIndex] >> bitPosition) & 1;
 }
 
-u32 fn_801906A0(s32 flagId)
+u32 std082_flagGetValue(s32 flagId)
 {
     return _flagGet(lbl_80478EEC[(lbl_80478F9C[flagId].typeAndWidth & 0xC0) >> 6].buffer,
                     lbl_80478F9C, flagId);

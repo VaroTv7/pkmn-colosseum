@@ -60,7 +60,7 @@ typedef struct GSgfxState {
 
 extern GSgfxState* lbl_8047AA80;
 
-u32 fn_800D3088(void);
+u32 msgGetCharsPerFrame(void);
 
 /* -----------------------------------------------------------------------
  * TV standards taken by GSgfxInit / fn_800D37D4; each selects one row of

@@ -22,21 +22,21 @@
 #include "dolphin/gx/GX.h"
 
 extern void _threadSwitch(void);
-extern void fn_800D88DC(u32 mode);
-extern void fn_800D888C(u32 mode);
-extern void fn_800D6A00(s32 primitive);
-extern void fn_800D7820(void* desc);
-extern void fn_800D67BC(s32 count);
+extern void gfxSetFlags(u32 mode);
+extern void gfxClearFlags(u32 mode);
+extern void gfxSetPrimitive(s32 primitive);
+extern void gfxSetVtxDesc(void* desc);
+extern void gfxBegin(s32 count);
 extern void fn_800D61E4(s16 x, s16 y);
 extern void fn_800D5CB8(s32 index, u8 r, u8 g, u8 b, u8 a);
-extern void fn_800D59B8(s32 index, f32 s, f32 t);
-extern void fn_800D6728(void);
+extern void gfxVtxTexCoord(s32 index, f32 s, f32 t);
+extern void gfxEnd(void);
 extern void fn_800D5BA0(s32 index, u32 color);
 extern void fn_800D5648(f32 width);
-extern void fn_800D85D4(s32 map, void* texture);
+extern void gfxLoadTexture(s32 map, void* texture);
 extern void fn_800D848C(s32 id, s32 type, s32 src, void* mtx);
 extern void fn_800DC1D4(s32 count);
-extern void fn_800DC224(s32 stage, s32 coord, s32 map, s32 color, s32 a);
+extern void gfxSetTevStage(s32 stage, s32 coord, s32 map, s32 color, s32 a);
 extern void fn_800DC14C(s32 stage, s32 a, s32 b, s32 c, s32 d, s32 e);
 extern void fn_800DC0D4(s32 stage, s32 a, s32 b, s32 c, s32 d);
 extern void fn_800DC04C(s32 stage, s32 a, s32 b, s32 c, s32 d, s32 e);
@@ -46,12 +46,12 @@ extern u8 lbl_80314E08[];
 /* 0x8001D718 | 0xCC */
 void fn_8001D718(f32 target) {
     extern s32 fn_800D37CC(void);
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     f32 progress = 0.0f;
 
     while (progress < target) {
         _threadSwitch();
-        progress += (f32)fn_800D3088() / (f32)fn_800D37CC();
+        progress += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
 }
 
@@ -204,51 +204,51 @@ s32 fn_8001DACC(void* context, MenuSubSprite* sprite, f32 shift) {
         v0 = (f32)sprite->cropY / (f32)GStextureGetYsize(texture);
         v1 = (f32)(sprite->cropY + sprite->cropHeight) / (f32)GStextureGetYsize(texture);
 
-        fn_800D88DC(0x80000003);
-        fn_800D888C(4);
+        gfxSetFlags(0x80000003);
+        gfxClearFlags(4);
         GStextureSetWrap(pattern, 1, 1);
         fn_800D848C(0, 0, 4, mtx);
         fn_800D848C(1, 0, 5, mtx);
         fn_800D848C(2, 0, 6, mtx);
         fn_800DC1D4(3);
 
-        fn_800D85D4(0, texture);
-        fn_800DC224(0, 0, 0, 0, 0);
+        gfxLoadTexture(0, texture);
+        gfxSetTevStage(0, 0, 0, 0, 0);
         fn_800DC14C(0, 0, 0, 0, 0, 1);
         fn_800DC0D4(0, 0xF, 8, 0xA, 0xF);
         fn_800DC04C(0, 0, 0, 0, 0, 1);
         fn_800DBFD4(0, 7, 4, 5, 7);
 
-        fn_800D85D4(1, pattern);
-        fn_800DC224(1, 0, 1, 1, 0);
+        gfxLoadTexture(1, pattern);
+        gfxSetTevStage(1, 0, 1, 1, 0);
         fn_800DC14C(1, 1, 0, 0, 1, 0);
         fn_800DC0D4(1, 0xF, 8, 0xD, 2);
         fn_800DC04C(1, 0, 0, 0, 1, 0);
         fn_800DBFD4(1, 7, 7, 7, 1);
 
-        fn_800D85D4(2, pattern);
-        fn_800DC224(2, 0, 2, 2, 0);
+        gfxLoadTexture(2, pattern);
+        gfxSetTevStage(2, 0, 2, 2, 0);
         fn_800DC14C(2, 1, 0, 0, 1, 0);
         fn_800DC0D4(2, 0xF, 8, 0xD, 2);
         fn_800DC04C(2, 0, 0, 0, 1, 0);
         fn_800DBFD4(2, 7, 7, 7, 1);
 
-        fn_800D7820(lbl_8047AD00);
-        fn_800D6A00(7);
-        fn_800D67BC(2);
+        gfxSetVtxDesc(lbl_8047AD00);
+        gfxSetPrimitive(7);
+        gfxBegin(2);
         fn_800D61E4(0, 0);
         fn_800D5CB8(0, 0xFF, 0x40, 0x40, 0xFF);
-        fn_800D59B8(0, u0, v0);
-        fn_800D59B8(1, shift + u0, shift + v0);
-        fn_800D59B8(2, (1.0f - shift) + u0, shift + v0);
+        gfxVtxTexCoord(0, u0, v0);
+        gfxVtxTexCoord(1, shift + u0, shift + v0);
+        gfxVtxTexCoord(2, (1.0f - shift) + u0, shift + v0);
         fn_800D61E4(sprite->width, sprite->height);
         fn_800D5CB8(0, 0xFF, 0x40, 0x40, 0xFF);
-        fn_800D59B8(0, u1, v1);
-        fn_800D59B8(1, shift + u1, shift + v1);
-        fn_800D59B8(2, (1.0f - shift) + u1, shift + v1);
-        fn_800D6728();
+        gfxVtxTexCoord(0, u1, v1);
+        gfxVtxTexCoord(1, shift + u1, shift + v1);
+        gfxVtxTexCoord(2, (1.0f - shift) + u1, shift + v1);
+        gfxEnd();
         fn_800DC1D4(1);
-        fn_800D888C(0x80000000);
+        gfxClearFlags(0x80000000);
     }
     return 0;
 }
@@ -268,7 +268,7 @@ s32 fn_8001DFA8(u32 arg1, u8* arg2) {
     return 0;
 }
 
-s32 fn_8001E00C(u32 sp8) {
+s32 std158_menuOpenCustom43(u32 sp8) {
     extern void* windowGetActiveID();
     extern s32 menuOpenCustom(s32, ...);
     extern void menuCloseCustom(s32, s32, s32);
@@ -311,7 +311,7 @@ s8 menuSubOpenYesNo(u8 menuType, s16 x, s16 y, s32 initialValue) {
     return result;
 }
 
-s32 fn_8001E184(void) {
+s32 std011_dialogDisplayYesNoMenu(void) {
     extern void* windowGetActiveID();
     extern void menuOpenCustom(s32, ...);
     extern void windowCheckCursor();
@@ -417,34 +417,34 @@ s32 fn_8001E3E0(void* a, u32* b) {
 
 /* 0x8001E4B4 | 0xD8 */
 void fn_8001E4B4(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f) {
-    fn_800D88DC(0x1);
-    fn_800D888C(0x6);
-    fn_800D6A00(0x3);
-    fn_800D7820(lbl_80314E08);
-    fn_800D67BC(0x3);
+    gfxSetFlags(0x1);
+    gfxClearFlags(0x6);
+    gfxSetPrimitive(0x3);
+    gfxSetVtxDesc(lbl_80314E08);
+    gfxBegin(0x3);
     fn_800D61E4((s16)a, (s16)b);
     fn_800D5CB8(0x0, 0xff, 0xff, 0xff, 0xff);
     fn_800D61E4((s16)c, (s16)d);
     fn_800D5CB8(0x0, 0xff, 0xff, 0xff, 0xff);
     fn_800D61E4((s16)e, (s16)f);
     fn_800D5CB8(0x0, 0xff, 0xff, 0xff, 0xff);
-    fn_800D6728();
+    gfxEnd();
 }
 
 /* 0x8001E58C | 0xB8 */
 void fn_8001E58C(s32 x, s32 y, s32 width, s32 height, u8* color) {
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D6A00(7);
-    fn_800D7820(lbl_80314E08);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetPrimitive(7);
+    gfxSetVtxDesc(lbl_80314E08);
     width += x;
     height += y;
-    fn_800D67BC(2);
+    gfxBegin(2);
     fn_800D61E4(x, y);
     fn_800D5CB8(0, color[0], color[1], color[2], color[3]);
     fn_800D61E4(width, height);
     fn_800D5CB8(0, color[0], color[1], color[2], color[3]);
-    fn_800D6728();
+    gfxEnd();
 }
 
 /* 0x8001E644 | 0x454: frame with a translucent box, corner sprites and
@@ -494,13 +494,13 @@ void fn_8001E644(s32 x, s32 y, s32 width, s32 height, u8 alpha) {
     ((u8*)colors)[7] = ((u8*)colors)[7] * scale;
     ((u8*)colors)[11] = ((u8*)colors)[11] * scale;
 
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D6A00(6);
-    fn_800D7820(lbl_80314E08);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetPrimitive(6);
+    gfxSetVtxDesc(lbl_80314E08);
     left = x - 10;
     top = y - 10;
-    fn_800D67BC(4);
+    gfxBegin(4);
     fn_800D61E4(left, top);
     fn_800D5BA0(0, colors[0]);
     right = left + (s16)(width + 20);
@@ -512,18 +512,18 @@ void fn_8001E644(s32 x, s32 y, s32 width, s32 height, u8 alpha) {
     fn_800D5BA0(0, colors[1]);
     fn_800D61E4(left, bottom);
     fn_800D5BA0(0, colors[1]);
-    fn_800D6728();
+    gfxEnd();
 
-    fn_800D6A00(1);
-    fn_800D7820(lbl_80314E08);
+    gfxSetPrimitive(1);
+    gfxSetVtxDesc(lbl_80314E08);
     fn_800D5648(1.0f);
     for (i = 0; i < boxHeight; i += 4) {
-        fn_800D67BC(2);
+        gfxBegin(2);
         fn_800D61E4(left, top + i);
         fn_800D5BA0(0, colors[2]);
         fn_800D61E4(right, top + i);
         fn_800D5BA0(0, colors[2]);
-        fn_800D6728();
+        gfxEnd();
     }
 
     sprite = menuSpriteBiosGetPtr(0xBB);
@@ -566,22 +566,22 @@ void fn_8001EA98(s32 x, s32 y, s32 width, s32 height) {
     s32 right;
     s32 bottom;
 
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D6A00(7);
-    fn_800D7820(lbl_80314E08);
-    fn_800D67BC(2);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetPrimitive(7);
+    gfxSetVtxDesc(lbl_80314E08);
+    gfxBegin(2);
     fn_800D61E4(x - 10, y - 10);
     fn_800D5BA0(0, 0xC0);
     right = x + width + 10;
     bottom = y + height + 10;
     fn_800D61E4(right, bottom);
     fn_800D5BA0(0, 0xC0);
-    fn_800D6728();
+    gfxEnd();
 
     fn_800D5648(1.0f);
-    fn_800D6A00(2);
-    fn_800D67BC(5);
+    gfxSetPrimitive(2);
+    gfxBegin(5);
     fn_800D61E4(x - 10, y - 10);
     fn_800D5BA0(0, -1);
     fn_800D61E4(right, y - 10);
@@ -592,7 +592,7 @@ void fn_8001EA98(s32 x, s32 y, s32 width, s32 height) {
     fn_800D5BA0(0, -1);
     fn_800D61E4(x - 10, y - 10);
     fn_800D5BA0(0, -1);
-    fn_800D6728();
+    gfxEnd();
 }
 
 typedef struct PCBoxVertex {
@@ -621,7 +621,7 @@ static void menuSubRingClear(void) {
     sOuter[0].color = 0;
 }
 
-void fn_8001EC08(s32 x, s32 y, s32 width, s32 height, u8 color, u8 dimColor) {
+void msgWinDrawBackground(s32 x, s32 y, s32 width, s32 height, u8 color, u8 dimColor) {
     s32 i;
 
     if (dimColor != 0) {
@@ -654,11 +654,11 @@ void fn_8001EC08(s32 x, s32 y, s32 width, s32 height, u8 color, u8 dimColor) {
         sInner[i].y += sCorners[i / 8].y;
     }
 
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D6A00(4);
-    fn_800D7820(lbl_80314E08);
-    fn_800D67BC(0x42);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetPrimitive(4);
+    gfxSetVtxDesc(lbl_80314E08);
+    gfxBegin(0x42);
     for (i = 0; i < 32; i++) {
         fn_800D61E4(sOuter[i].x, sOuter[i].y);
         fn_800D5BA0(0, sOuter[i].color);
@@ -669,10 +669,10 @@ void fn_8001EC08(s32 x, s32 y, s32 width, s32 height, u8 color, u8 dimColor) {
     fn_800D5BA0(0, sOuter[0].color);
     fn_800D61E4(sInner[0].x, sInner[0].y);
     fn_800D5BA0(0, sInner[0].color);
-    fn_800D6728();
+    gfxEnd();
 
-    fn_800D6A00(5);
-    fn_800D67BC(0x22);
+    gfxSetPrimitive(5);
+    gfxBegin(0x22);
     fn_800D61E4(sCorners[4].x, sCorners[4].y);
     fn_800D5BA0(0, sCorners[4].color);
     for (i = 0; i < 32; i++) {
@@ -681,5 +681,5 @@ void fn_8001EC08(s32 x, s32 y, s32 width, s32 height, u8 color, u8 dimColor) {
     }
     fn_800D61E4(sInner[0].x, sInner[0].y);
     fn_800D5BA0(0, sInner[0].color);
-    fn_800D6728();
+    gfxEnd();
 }

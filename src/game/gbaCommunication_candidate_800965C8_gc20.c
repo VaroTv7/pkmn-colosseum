@@ -45,16 +45,16 @@ extern u32 GSmsgGetRect(u32 id);
 extern void msgctrlSetValue(u32 id, u32 value);
 extern void windowDrawSprite(s32 x, s32 y, void* win, u32 sprite, u32 data);
 extern void* menuModelRender(void* data);
-extern void fn_800D88DC(u32 arg);
-extern void fn_800D888C(u32 arg);
-extern void fn_800D6A00(u32 arg);
-extern void fn_800D7820(void* arg);
-extern void fn_800D85D4(u32 arg0, void* arg1);
-extern void fn_800D67BC(u32 arg);
+extern void gfxSetFlags(u32 arg);
+extern void gfxClearFlags(u32 arg);
+extern void gfxSetPrimitive(u32 arg);
+extern void gfxSetVtxDesc(void* arg);
+extern void gfxLoadTexture(u32 arg0, void* arg1);
+extern void gfxBegin(u32 arg);
 extern void fn_800D61E4(s32 x, s32 y);
 extern void fn_800D5CB8(u32 arg0, u32 r, u32 g, u32 b, u32 a);
-extern void fn_800D59B8(u32 arg0, f32 s, f32 t);
-extern void fn_800D6728(void);
+extern void gfxVtxTexCoord(u32 arg0, f32 s, f32 t);
+extern void gfxEnd(void);
 extern u32 fn_8001D624(void* pokemon, u32 arg);
 extern u8 menuSubGetPokemonSexForDisp(void* pokemon);
 extern u32 pokemonGetStatus();
@@ -88,19 +88,19 @@ void fn_800965C8(void* window, u8* sprite) {
         if (texture == NULL) {
             return;
         }
-        fn_800D88DC(3);
-        fn_800D888C(4);
-        fn_800D6A00(7);
-        fn_800D7820(lbl_80314F98);
-        fn_800D85D4(0, texture);
-        fn_800D67BC(2);
+        gfxSetFlags(3);
+        gfxClearFlags(4);
+        gfxSetPrimitive(7);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxLoadTexture(0, texture);
+        gfxBegin(2);
         fn_800D61E4(0, 0);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D59B8(0, lbl_8047C230, lbl_8047C230);
+        gfxVtxTexCoord(0, lbl_8047C230, lbl_8047C230);
         fn_800D61E4(*(s16*)(sprite + 0x54), *(s16*)(sprite + 0x56));
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D59B8(0, lbl_8047C208, lbl_8047C208);
-        fn_800D6728();
+        gfxVtxTexCoord(0, lbl_8047C208, lbl_8047C208);
+        gfxEnd();
         break;
     }
     case 0x107:

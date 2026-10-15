@@ -53,7 +53,7 @@ void fn_800B96BC(u16 wd, u16 ht);               /* GXSetDispCopyDst */
 void fn_800B9874(u32 clamp);                    /* GXSetCopyClamp */
 f32 GXGetYScaleFactor(u16 efbHeight, u16 xfbHeight);
 u32 fn_800B9B14(f32 vscale);                    /* GXSetDispCopyYScale */
-void fn_800B9BDC(GXColor clear_clr, u32 clear_z); /* GXSetCopyClear */
+void GXSetCopyClear(GXColor clear_clr, u32 clear_z); /* GXSetCopyClear */
 void fn_800B9C44(GXBool aa, u8 sample_pattern[12][2], GXBool vf,
                  u8 vfilter[7]);                /* GXSetCopyFilter */
 void fn_800B9E6C(s32 gamma);                    /* GXSetDispCopyGamma */
@@ -190,7 +190,7 @@ void fn_801BFD10(u32 retraceCount)
             _p->xfb[idx].status = HSD_VI_XFB_NEXT;
         }
     } else if ((idx = HSD_VISearchXFBByStatus(HSD_VI_XFB_COPYEFB)) != -1) {
-        fn_801BFA1C(&_p->efb.vi_all.vi, _p->xfb[idx].buffer, HSD_RP_SCREEN);
+        HSD_VICopyEFB2XFB(&_p->efb.vi_all.vi, _p->xfb[idx].buffer, HSD_RP_SCREEN);
         _p->xfb[idx].status = HSD_VI_XFB_DISPLAY;
         _p->efb.status = HSD_VI_EFB_FREE;
     }
@@ -268,7 +268,7 @@ static void HSD_VICopyEFB2XFBHiResoAA(GXRenderModeObj* rmode)
 }
 
 /* HAL: HSD_VICopyEFB2XFBPtr */
-void fn_801BFA1C(HSD_VIStatus* vi, void* buffer, HSD_RenderPass rpass)
+void HSD_VICopyEFB2XFB(HSD_VIStatus* vi, void* buffer, HSD_RenderPass rpass)
 {
     GXRenderModeObj* rmode = &vi->rmode;
     int n_xfb_lines;
@@ -282,7 +282,7 @@ void fn_801BFA1C(HSD_VIStatus* vi, void* buffer, HSD_RenderPass rpass)
     fn_801B273C(vi->update_alpha);
     fn_801B27DC(vi->update_z, GX_LEQUAL, GX_TRUE);
 
-    fn_800B9BDC(vi->clear_clr, vi->clear_z);
+    GXSetCopyClear(vi->clear_clr, vi->clear_z);
 
     switch (rpass) {
     case HSD_RP_SCREEN:
@@ -375,7 +375,7 @@ void fn_801BF8A0(HSD_RenderPass rpass)
     }
 
     idx = HSD_VIWaitXFBDrawEnable();
-    fn_801BFA1C(HSD_VIGetVIStatus(), HSD_VIGetXFBPtr(idx), rpass);
+    HSD_VICopyEFB2XFB(HSD_VIGetVIStatus(), HSD_VIGetXFBPtr(idx), rpass);
 
     HSD_VIGXSetDrawDone(idx);
 }
@@ -489,7 +489,7 @@ void fn_801BF4C4(BOOL black)
 }
 
 /* HAL: HSD_VIInit */
-void fn_801BF1F0(HSD_VIStatus* vi, void* xfb0, void* xfb1, void* xfb2)
+void HSD_VIInit(HSD_VIStatus* vi, void* xfb0, void* xfb1, void* xfb2)
 {
     int i, fbnum, idx;
 
@@ -536,5 +536,5 @@ void fn_801BF1F0(HSD_VIStatus* vi, void* xfb0, void* xfb1, void* xfb2)
     VIFlush();
 
     idx = HSD_VISearchXFBByStatus(HSD_VI_XFB_FREE);
-    fn_801BFA1C(HSD_VIGetVIStatus(), HSD_VIGetXFBPtr(idx), HSD_RP_SCREEN);
+    HSD_VICopyEFB2XFB(HSD_VIGetVIStatus(), HSD_VIGetXFBPtr(idx), HSD_RP_SCREEN);
 }

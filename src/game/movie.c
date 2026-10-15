@@ -46,17 +46,17 @@ extern void GSmovieClose(void);
 
 /* ===== GS Engine external functions ===== */
 extern void _threadSwitch(void);                        /* GSthread yield / step */
-extern void fn_80165A20(u32 sndId, u32 fade, u32 vol); /* sndPlay (BGM start) */
-extern void fn_8016597C(u32, u32, u32, u32);
-extern void fn_80166A28(u32 soundId);
+extern void std104_soundSetBackgroundMusic(u32 sndId, u32 fade, u32 vol); /* sndPlay (BGM start) */
+extern void std138_soundPlayEffectEx(u32, u32, u32, u32);
+extern void soundStartSE(u32 soundId);
 extern void fn_80165F40(void);
 extern void fn_80165F84(void);
 extern void fn_801655D4(u32 index);
-extern void fn_80166E88(u32 a, u32 b, u32 c, u32 d, u32 e);
+extern void soundInit(u32 a, u32 b, u32 c, u32 d, u32 e);
 extern void fadeSet(u32 mode, f32 speed);
 extern void fadeCheck(u32 enable);
-extern void fn_80190528(u32 flagId);                   /* GSflagSet */
-extern u32  fn_801902E0(u32 flagId);                   /* GSflagGet */
+extern void std078_flagSetFalse(u32 flagId);                   /* GSflagSet */
+extern u32  std081_flagCheckTrue(u32 flagId);                   /* GSflagGet */
 extern void floorLink(u32 a, u32 b);
 extern void floorSetFadeScript(u32 a, u32 b);
 extern u32  floorGetPrevFloorID(void);
@@ -78,7 +78,7 @@ extern u32  menuOpen(u32 sceneId, u32 arg);
 extern void menuClose(u32 sceneId);
 extern void fn_8017B370(u32 arg);
 extern s32  fn_8017B2CC(u32 arg);
-extern u32  fn_800D3088(void);                         /* frames since the last call */
+extern u32  msgGetCharsPerFrame(void);                         /* frames since the last call */
 extern s32  fn_800D37CC(void);                         /* frames per second */
 extern void fn_800A0FC8(u32 mode);                     /* OSSetProgressiveMode */
 extern void fn_800D37D4(u32 a, u32 b, u32 c, u32 d, u32 e, u16 size);
@@ -161,10 +161,10 @@ static inline u32 moviePlayCues(const MovieCue* cues, u32 count, u32 index)
     }
     if (frame >= cues[index].frame) {
         if (cues[index].sound0 != 0) {
-            fn_80166A28(cues[index].sound0);
+            soundStartSE(cues[index].sound0);
         }
         if (cues[index].sound1 != 0) {
-            fn_80166A28(cues[index].sound1);
+            soundStartSE(cues[index].sound1);
         }
         next++;
     }
@@ -291,7 +291,7 @@ void bootWaitLogo(void)
         _threadSwitch();
     }
 
-    fn_80166E88(2, 1, 0x20, 1, 0x10);
+    soundInit(2, 1, 0x20, 1, 0x10);
     fn_80165F84();
 
     lbl_8047A460++;
@@ -401,7 +401,7 @@ static s8 movieSelectProgressive(void)
             lastCursor = cursor;
         }
         _threadSwitch();
-        time += (f32)fn_800D3088() / (f32)fn_800D37CC();
+        time += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
     if (time >= 10.0f) {
         answer = windowSearchID(0x11)->cursor;
@@ -418,7 +418,7 @@ static void movieWait(void)
     time = 0.0f;
     while (time < 2.0f) {
         _threadSwitch();
-        time += (f32)fn_800D3088() / (f32)fn_800D37CC();
+        time += (f32)msgGetCharsPerFrame() / (f32)fn_800D37CC();
     }
 }
 
@@ -480,7 +480,7 @@ void movieGsLogoStart(void)
     fadeSet(2, 0.0f);
     fadeCheck(1);
     GSmovieOpen("movie/gs_logo.thp", 0);
-    fn_80165A20(0x04D1, 0, 0x7F);
+    std104_soundSetBackgroundMusic(0x04D1, 0, 0x7F);
     memset((void*)0x80001805, 0, 0x17FB);
 }
 
@@ -529,7 +529,7 @@ void movieStartAttract(void)
     fadeSet(2, 0.0f);
     fadeCheck(1);
     GSmovieOpen("movie/autodemo01.thp", 0);
-    fn_80165A20(0x0494, 0, 0x7F);
+    std104_soundSetBackgroundMusic(0x0494, 0, 0x7F);
 }
 
 /* autodemo01: play, stopped early by A/B/Start (0x1300) */
@@ -566,7 +566,7 @@ void fn_80036240(void)
         cueIndex = moviePlayCues(cues, 0x21, cueIndex);
         _threadSwitch();
     }
-    fn_8016597C(1, 1000, 0, 0x7F);
+    std138_soundPlayEffectEx(1, 1000, 0, 0x7F);
     floorRequestChange(0x384);
     floorSetFadeScript(0, 0x5960008);
 }
@@ -584,7 +584,7 @@ void fn_800361C0(void)
     fadeSet(2, 0.0f);
     fadeCheck(1);
     GSmovieOpen("movie/staffroll.thp", 0);
-    fn_80165A20(0x04C9, 0, 0x7F);
+    std104_soundSetBackgroundMusic(0x04C9, 0, 0x7F);
 }
 
 /*
@@ -604,10 +604,10 @@ void fn_80035F64(void)
     while ((u8)GSmovieIsActive() == 1) {
         _threadSwitch();
     }
-    fn_80165A20(1, 0, 0x7F);
+    std104_soundSetBackgroundMusic(1, 0, 0x7F);
 
-    if (floorGetPrevFloorID() == 0x76 && (u8)fn_801902E0(0x476) == 1) {
-        fn_80190528(0x478);
+    if (floorGetPrevFloorID() == 0x76 && (u8)std081_flagCheckTrue(0x476) == 1) {
+        std078_flagSetFalse(0x478);
         status = savedataGetStatus(NULL, 1);
         gamedatasaveSetStatus(status, 5, 2);
         gamedatasaveSetStatus(status, 7, 1);
@@ -651,7 +651,7 @@ void movieOpeningStart(void)
     fadeSet(2, 0.0f);
     fadeCheck(1);
     GSmovieOpen("movie/openingdemo.thp", 0);
-    fn_80165A20(0x0495, 0, 0x7F);
+    std104_soundSetBackgroundMusic(0x0495, 0, 0x7F);
 }
 
 /* openingdemo: play */
@@ -668,8 +668,8 @@ void fn_80035E04(void)
         _threadSwitch();
     }
 
-    fn_80165A20(1, 0, 0x7F);
-    fn_80190528(0x08D0);
+    std104_soundSetBackgroundMusic(1, 0, 0x7F);
+    std078_flagSetFalse(0x08D0);
     floorLink(1, 0);
     floorSetFadeScript(0, 0x05960008);
 }

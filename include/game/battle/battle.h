@@ -415,26 +415,26 @@ typedef struct GStexture GStexture;
                                        f32 timeStep);                 /* updateAnimations 0x43C */
 /* fn_801C75EC */ void fn_801C75EC(s32 slot);
 /* fn_801C7630 */ f32  fn_801C7630(s32 slot);
-/* fn_801C766C */ void fn_801C766C(s32 slot, f32 frame);
+/* fn_801C766C */ void std235_menuShowSaveMenu(s32 slot, f32 frame);
 
 /* Pokemon model placement & animation */
-/* fn_801C7730 */ s32  fn_801C7730(s32 side, s32 slot);          /* PlacePokemon 0xDCC */
+/* fn_801C7730 */ s32  std232_characterApproachPlayer(s32 side, s32 slot);          /* PlacePokemon 0xDCC */
 /* _fnDistanceSortFunc__FPCvPCv */ s32  _fnDistanceSortFunc__FPCvPCv(s32 slot);
-/* fn_801C852C */ f32  fn_801C852C(s32 species);
-/* fn_801C8628 */ void fn_801C8628(s32 slot);
-/* fn_801C8688 */ void fn_801C8688(s32 slot, s32 animIdx);
-/* fn_801C8804 */ s32  fn_801C8804(s32 slot);
-/* fn_801C8834 */ void fn_801C8834(s32 slot);
-/* fn_801C89F8 */ void fn_801C89F8(s32 side, s32 slot);          /* EncounterSequence 0x3D8 */
-/* fn_801C8DD0 */ s32  fn_801C8DD0(s32 slot);
+/* fn_801C852C */ f32  std216_partyStatusUpdate_8ae(s32 species);
+/* fn_801C8628 */ void std208_promptDNASampleSelection(s32 slot);
+/* fn_801C8688 */ void std204_promptDNAKeyCode(s32 slot, s32 animIdx);
+/* fn_801C8804 */ s32  std207_gbaUnk_80075638(s32 slot);
+/* fn_801C8834 */ void std205_getDNASampleSepcies(s32 slot);
+/* fn_801C89F8 */ void std200_gbaConnectEvent(s32 side, s32 slot);          /* EncounterSequence 0x3D8 */
+/* fn_801C8DD0 */ s32  std199_menuDisplayCustomMenu(s32 slot);
 /* fn_801C8E14 */ s32  fn_801C8E14(s32 pokemonID, s32 animIdx, u16 moveID, u8 animType);
 
 /* Scene state & effects */
 /* fn_801C9910 */ void fn_801C9910(void);
 /* fn_801C9B6C */ void fn_801C9B6C(s32 transitionType);
 /* fn_801C9C9C */ s32  fn_801C9C9C(void);
-/* fn_801C9F5C */ void fn_801C9F5C(void);
-/* fn_801CA358 */ u8   fn_801CA358(void);
+/* fn_801C9F5C */ void std182_tvNewsEvent(void);
+/* fn_801CA358 */ u8   std211_tvSetChannelByStory(void);
 /* fn_801CA5C4 */ void fieldStartEncount(s32 effectID, f32 x, f32 y, f32 z);
 
 /* Scene transitions & mega-functions */
@@ -488,7 +488,7 @@ typedef struct GStexture GStexture;
 /* fn_801DB088 */ void fn_801DB088(void);                        /* waza system reset */
 
 /* Waza extended functions */
-/* fn_801DFC30 */ void fn_801DFC30(void);                        /* waza master controller 0x7A4 */
+/* fn_801DFC30 */ void std085_sequenceJump85(void);                        /* waza master controller 0x7A4 */
 
 /* =========================================================================
  * Battle Core / Fight Flow (0x801EF02C - 0x801F000C)

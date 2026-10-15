@@ -80,9 +80,9 @@ static inline f32 GScolsys2HumanSqrt(f32 value)
     return value;
 }
 
-extern void* fn_8018D998(s32, s32);
+extern void* peopleIsInGroup(s32, s32);
 extern void* peopleSearchID(void*);
-extern GScolsys2Vec3* fn_8018FCBC(void*);
+extern GScolsys2Vec3* peopleGetPositionPtr(void*);
 
 /*
  * XD checkCollisionHeadToHead__FP15GSCOLSYS2_HUMANP15GSCOLSYS2_HUMANP5GSvecP5GSvec
@@ -100,11 +100,11 @@ static inline s32 checkCollisionHeadToHead(GSColFloorEvent* self,
     f32 radius;
     f32 scale;
 
-    person = peopleSearchID(fn_8018D998(other->key0, other->key1));
+    person = peopleSearchID(peopleIsInGroup(other->key0, other->key1));
     if (person == NULL) {
         return 0;
     }
-    otherPos = fn_8018FCBC(person);
+    otherPos = peopleGetPositionPtr(person);
     if (otherPos == NULL) {
         return 0;
     }

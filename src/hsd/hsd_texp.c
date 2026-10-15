@@ -510,12 +510,12 @@ struct HSD_TevDesc {
 
 s32 fn_801B387C(void);
 s32 HSD_StateAssignTev(void);
-void fn_801B3638(HSD_TevDesc* desc);
+void HSD_SetupTevStage(HSD_TevDesc* desc);
 void fn_801B3258(void);
 void fn_801B3770(void);
 void fn_801B3890(void);
-void fn_801B2F1C(u32 flags);
-void fn_801B29E4(u32 flags, HSD_PEDesc* pe);
+void HSD_SetupChannelMode(u32 flags);
+void HSD_SetupPEMode(u32 flags, HSD_PEDesc* pe);
 
 #pragma push
 #pragma optimization_level 1
@@ -529,22 +529,22 @@ static void setupTevMode_last(void)
         desc.map = GX_TEXMAP_NULL;
         desc.color = GX_COLOR0A0;
         desc.color_op = 4;
-        fn_801B3638(&desc);
+        HSD_SetupTevStage(&desc);
     }
 }
 
-void fn_801B294C(u32 flags, HSD_PEDesc* pe)
+void HSD_SetupRenderModeWithCustomPE(u32 flags, HSD_PEDesc* pe)
 {
     setupTevMode_last();
-    fn_801B29E4(flags, pe);
+    HSD_SetupPEMode(flags, pe);
     fn_801B3258();
     fn_801B3770();
     fn_801B3890();
-    fn_801B2F1C(flags);
+    HSD_SetupChannelMode(flags);
 }
 #pragma pop
 
-void fn_801B29E4(u32 flags, HSD_PEDesc* pe)
+void HSD_SetupPEMode(u32 flags, HSD_PEDesc* pe)
 {
     s32 blendType;
     u8 zUpdate;
@@ -625,14 +625,14 @@ extern HSD_MaterialState lbl_80465710;
 extern HsdChanColor lbl_80478C98;
 extern s32 lbl_8047B360[2];
 extern s32 lbl_8047B368[2];
-extern void fn_800BA4C8(s32 chan, HsdChanColor color);
-extern void fn_800BA5BC(s32 chan, HsdChanColor color);
-extern void fn_800BA6F4(s32 chan, u8 enable, s32 ambSrc, s32 matSrc,
+extern void GXSetChanAmbColor(s32 chan, HsdChanColor color);
+extern void GXSetChanMatColor(s32 chan, HsdChanColor color);
+extern void GXSetChanCtrl(s32 chan, u8 enable, s32 ambSrc, s32 matSrc,
                         s32 lightMask, s32 diffFn, s32 attnFn);
 extern void HSD_MulColor(HsdChanColor* color0, HsdChanColor* color1,
                          HsdChanColor* result);
 
-void fn_801B28C8(HsdChanColor* ambient, HsdChanColor* diffuse,
+void HSD_SetMaterialColor(HsdChanColor* ambient, HsdChanColor* diffuse,
                  HsdChanColor* specular, f32 alpha)
 {
     lbl_80465710.ambient = *ambient;
@@ -653,7 +653,7 @@ void HSD_StateSetNumChans(s32 n);
 
 #pragma push
 #pragma optimization_level 2
-void fn_801B2F1C(u32 rendermode)
+void HSD_SetupChannelMode(u32 rendermode)
 {
     HSD_Chan* const channels = lbl_8036CE88.channels;
     u32 color_mode = rendermode & 3;
@@ -682,7 +682,7 @@ void fn_801B2F1C(u32 rendermode)
         for (i = 0; i < max; i++) {
             light = HSD_LObjGetActiveByIndex(i);
             if (light != NULL) {
-                fn_801A6098(light, light->color, lbl_80465710.shininess);
+                HSD_LObjSetupSpecular(light, light->color, lbl_80465710.shininess);
             }
         }
     }
@@ -774,7 +774,7 @@ void fn_801B3D1C(HSD_Chan* ch)
     if (ch->enable != 0 && ch->amb_src == 0) {
         if (lbl_8047B368[no] != 0) {
             lbl_8047B368[no] = 0;
-            fn_800BA4C8(no + 4, ch->amb_color);
+            GXSetChanAmbColor(no + 4, ch->amb_color);
             lbl_8036D018[no].amb_color = ch->amb_color;
         } else if (chan == 4 || chan == 5) {
             if (ColCompareRGBA(&ch->amb_color,
@@ -791,14 +791,14 @@ void fn_801B3D1C(HSD_Chan* ch)
         } else if (ch->amb_color.a != lbl_8036D018[no].amb_color.a) {
             lbl_8036D018[no].amb_color.a = ch->amb_color.a;
         set_amb:
-            fn_800BA4C8(chan, ch->amb_color);
+            GXSetChanAmbColor(chan, ch->amb_color);
         }
     }
 
     if (ch->mat_src == 0) {
         if (lbl_8047B360[no] != 0) {
             lbl_8047B360[no] = 0;
-            fn_800BA5BC(no + 4, ch->mat_color);
+            GXSetChanMatColor(no + 4, ch->mat_color);
             lbl_8036D018[no].mat_color = ch->mat_color;
         } else if (chan == 4 || chan == 5) {
             if (ColCompareRGBA(&ch->mat_color,
@@ -815,7 +815,7 @@ void fn_801B3D1C(HSD_Chan* ch)
         } else if (ch->mat_color.a != lbl_8036D018[no].mat_color.a) {
             lbl_8036D018[no].mat_color.a = ch->mat_color.a;
         set_mat:
-            fn_800BA5BC(chan, ch->mat_color);
+            GXSetChanMatColor(chan, ch->mat_color);
         }
     }
 
@@ -825,7 +825,7 @@ void fn_801B3D1C(HSD_Chan* ch)
         ch->light_mask != lbl_8036D018[idx].light_mask ||
         ch->diff_fn != lbl_8036D018[idx].diff_fn ||
         ch->attn_fn != lbl_8036D018[idx].attn_fn) {
-        fn_800BA6F4(chan, ch->enable, ch->amb_src, ch->mat_src,
+        GXSetChanCtrl(chan, ch->enable, ch->amb_src, ch->mat_src,
                     ch->light_mask, ch->diff_fn, ch->attn_fn);
         lbl_8036D018[idx].enable = ch->enable;
         lbl_8036D018[idx].amb_src = ch->amb_src;
@@ -964,49 +964,49 @@ void HSD_TExpCompile(u8* root, u32* tex_count, u32* ras_count) {
     if (ras_count) *ras_count = r_count;
 }
 
-void fn_800BC6F0();
-void fn_800BC228();
-void fn_800BC290();
-void fn_800BC1A0();
-void fn_800BC1E4();
-void fn_800BC454();
-void fn_800BC4C0();
-void fn_800BC52C();
-void fn_800BC580(u32, u32, u32, u32, u32);
+void GXSetTevOrder();
+void GXSetTevColorOp();
+void GXSetTevAlphaOp();
+void GXSetTevColorIn();
+void GXSetTevAlphaIn();
+void GXSetTevKColorSel();
+void GXSetTevKAlphaSel();
+void GXSetTevSwapMode();
+void GXSetTevSwapModeTable(u32, u32, u32, u32, u32);
 void GXSetTevOp(u32 id, u32 op);
 
 /*
  * HSD_SetupTevStage - 0x801B3638 | Size: 0x138
  */
 #pragma optimization_level 1
-void fn_801B3638(HSD_TevDesc* desc) {
-    fn_800BC6F0(desc->stage, desc->coord, desc->map, desc->color);
+void HSD_SetupTevStage(HSD_TevDesc* desc) {
+    GXSetTevOrder(desc->stage, desc->coord, desc->map, desc->color);
     if (desc->flag == 0) {
         GXSetTevOp(desc->stage, desc->color_op);
-        fn_800BC52C(desc->stage, 0, 0);
+        GXSetTevSwapMode(desc->stage, 0, 0);
         return;
     }
-    fn_800BC228(desc->stage, desc->color_op, desc->color_bias,
+    GXSetTevColorOp(desc->stage, desc->color_op, desc->color_bias,
                 desc->color_scale, desc->color_clamp, desc->color_tevreg);
-    fn_800BC1A0(desc->stage, desc->color_a, desc->color_b, desc->color_c,
+    GXSetTevColorIn(desc->stage, desc->color_a, desc->color_b, desc->color_c,
                 desc->color_d);
-    fn_800BC290(desc->stage, desc->alpha_op, desc->alpha_bias,
+    GXSetTevAlphaOp(desc->stage, desc->alpha_op, desc->alpha_bias,
                 desc->alpha_scale, desc->alpha_clamp, desc->alpha_tevreg);
-    fn_800BC1E4(desc->stage, desc->alpha_a, desc->alpha_b, desc->alpha_c,
+    GXSetTevAlphaIn(desc->stage, desc->alpha_a, desc->alpha_b, desc->alpha_c,
                 desc->alpha_d);
-    fn_800BC580(desc->kcolor0, desc->kr, desc->kg, desc->kb, desc->ka);
+    GXSetTevSwapModeTable(desc->kcolor0, desc->kr, desc->kg, desc->kb, desc->ka);
     if (desc->kcolor1 != desc->kcolor0) {
-        fn_800BC580(desc->kcolor1, desc->kr, desc->kg, desc->kb, desc->ka);
+        GXSetTevSwapModeTable(desc->kcolor1, desc->kr, desc->kg, desc->kb, desc->ka);
     }
-    fn_800BC52C(desc->stage, desc->kcolor0, desc->kcolor1);
-    fn_800BC454(desc->stage, desc->swap0);
-    fn_800BC4C0(desc->stage, desc->swap1);
+    GXSetTevSwapMode(desc->stage, desc->kcolor0, desc->kcolor1);
+    GXSetTevKColorSel(desc->stage, desc->swap0);
+    GXSetTevKAlphaSel(desc->stage, desc->swap1);
 }
 #pragma optimization_level 4
 
 extern s32 lbl_8047B35C;
 extern u32 lbl_8047B370;
-void fn_800BA6B0(u8);
+void GXSetNumChans(u8);
 
 typedef struct KColorEntry {
     /* 0x0 */ u32 color0;
@@ -1115,7 +1115,7 @@ void fn_801B3408(HSD_TevDesc* desc)
         if (stageCount > num) {
             num = stageCount;
         }
-        fn_801B3638(td);
+        HSD_SetupTevStage(td);
     }
     lbl_8047B370 = num;
     fn_800BC8C8((u8)lbl_8047B370);
@@ -1128,7 +1128,7 @@ void fn_801B3408(HSD_TevDesc* desc)
 /* Address: 0x801B3AA8 | Size: 0x40 */
 void HSD_StateSetNumChans(s32 n) {
     if (lbl_8047B35C != n) {
-        fn_800BA6B0((u8)n);
+        GXSetNumChans((u8)n);
         lbl_8047B35C = n;
     }
 }
@@ -1204,7 +1204,7 @@ void fn_801B3AE8(s32 chan)
             lbl_8036D018[idx + 2].mat_src = mat_src;
             lbl_8036D018[idx + 2].diff_fn = diff_fn;
             lbl_8036D018[idx + 2].attn_fn = attn_fn;
-            fn_800BA6F4(chan, 0, amb_src, mat_src, 0, diff_fn, attn_fn);
+            GXSetChanCtrl(chan, 0, amb_src, mat_src, 0, diff_fn, attn_fn);
         }
         break;
     default:
@@ -1215,7 +1215,7 @@ void fn_801B3AE8(s32 chan)
             mat_src = lbl_8036D018[idx].mat_src;
             diff_fn = lbl_8036D018[idx].diff_fn;
             attn_fn = lbl_8036D018[idx].attn_fn;
-            fn_800BA6F4(chan, 0, amb_src, mat_src, 0, diff_fn, attn_fn);
+            GXSetChanCtrl(chan, 0, amb_src, mat_src, 0, diff_fn, attn_fn);
         }
         break;
     }
@@ -1332,7 +1332,7 @@ extern void fn_801B25C4(u32 flags);
 void HSD_TExpSetReg(HSD_TExp* texp);
 
 /* HSD_TExpSetupTev - 0x801B45A4 | Size: 0x70 */
-void fn_801B45A4(HSD_TExpTevDesc* tevdesc, HSD_TExp* texp) {
+void HSD_TExpSetupTev(HSD_TExpTevDesc* tevdesc, HSD_TExp* texp) {
     HSD_TExpSetReg(texp);
     while (tevdesc != NULL) {
         if (tevdesc->tobj != NULL) {
@@ -1340,7 +1340,7 @@ void fn_801B45A4(HSD_TExpTevDesc* tevdesc, HSD_TExp* texp) {
             tevdesc->desc.coord = tevdesc->tobj->coord;
         }
         HSD_StateAssignTev();
-        fn_801B3638(&tevdesc->desc);
+        HSD_SetupTevStage(&tevdesc->desc);
         tevdesc = (HSD_TExpTevDesc*)tevdesc->desc.next;
     }
 }
@@ -1904,7 +1904,7 @@ s32 fn_801B5C94(ColTExpNode* tev, s32 idx, ColTExpRes* res)
  * Configure texture LOD (level of detail) and filter settings.
  */
 #pragma optimization_level 1
-void fn_801B5E40(u8* exp, u32 value, s32 index) {
+void HSD_TExpOrder(u8* exp, u32 value, s32 index) {
     s32 type;
 
     if (exp == NULL) {
@@ -1941,7 +1941,7 @@ type_done:
 void fn_801B600C(ColTExpNode* tev, u32 sel, ColTExpNode* exp, s32 idx);
 
 /* HSD_TExpAlphaIn */
-void fn_801B5F08(ColTExpNode* texp, u32 sel_a, ColTExpNode* exp_a,
+void HSD_TExpAlphaIn(ColTExpNode* texp, u32 sel_a, ColTExpNode* exp_a,
                  u32 sel_b, ColTExpNode* exp_b, u32 sel_c,
                  ColTExpNode* exp_c, u32 sel_d, ColTExpNode* exp_d) {
     if (texp == NULL) {
@@ -2084,7 +2084,7 @@ void fn_801B600C(ColTExpNode* tev, u32 sel, ColTExpNode* exp, s32 idx)
 /* HSD_TExpColorIn */
 void fn_801B65F0(ColTExpNode* tev, u32 sel, ColTExpNode* exp, s32 idx);
 
-void fn_801B64EC(ColTExpNode* texp, u32 sel_a, ColTExpNode* exp_a,
+void HSD_TExpColorIn(ColTExpNode* texp, u32 sel_a, ColTExpNode* exp_a,
                  u32 sel_b, ColTExpNode* exp_b, u32 sel_c,
                  ColTExpNode* exp_c, u32 sel_d, ColTExpNode* exp_d) {
     if (texp == NULL) {
@@ -2282,7 +2282,7 @@ void fn_801B65F0(ColTExpNode* tev, u32 sel, ColTExpNode* exp, s32 idx)
 /* ========================================================================= */
 
 /* HSD_TExpAlphaOp */
-void fn_801B6CD8(ColTExpNode* texp, s32 op, u32 bias, u32 scale, u8 clamp) {
+void HSD_TExpAlphaOp(ColTExpNode* texp, s32 op, u32 bias, u32 scale, u8 clamp) {
     if (texp == NULL) {
         __assert(&lbl_8047DE70, 0x1D3, &lbl_8047DE90);
     }
@@ -2317,7 +2317,7 @@ void fn_801B6DC0(ColTExpNode* texp, u32 input_a, u32 input_b,
 }
 
 /* HSD_TExpColorOp */
-void fn_801B6E74(ColTExpNode* texp, s32 op, u32 bias, u32 scale, u8 clamp) {
+void HSD_TExpColorOp(ColTExpNode* texp, s32 op, u32 bias, u32 scale, u8 clamp) {
     if (texp == NULL) {
         __assert(&lbl_8047DE70, 0x1A3, &lbl_8047DE90);
     }
@@ -2378,7 +2378,7 @@ ColTExpNode* HSD_TExpCnst(void* value, s32 component, s32 type,
 }
 
 /* HSD_TExpTev */
-ColTExpNode* fn_801B707C(ColTExpNode** list) {
+ColTExpNode* HSD_TExpTev(ColTExpNode** list) {
     ColTExpNode* texp;
     s32 i;
 

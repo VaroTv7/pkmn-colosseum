@@ -68,9 +68,9 @@ typedef struct FlagInitState {
     u32* buffer3;
 } FlagInitState;
 
-void fn_801903B0(s32 flagId);
+void std079_flagSetTrue(s32 flagId);
 void _flagSet(s32 flagId, u32 value);
-extern u32 fn_800FF56C(void);
+extern u32 std092_getCurrentRoomID(void);
 extern void* savedataGetStatus(u8* data, u16 index);
 extern s32 heroItemDecItemDataId(u8* ptr, u32 itemId, u32 count, s32 arg4);
 extern s32 heroItemAddItemDataId(u8* ptr, u32 itemId, u32 count, s32 arg4);
@@ -153,14 +153,14 @@ extern FlagDefinition* lbl_80478F9C;
 extern FlagStateEntry* lbl_80478EEC;
 
 #if !defined(GS_RANGE_8018FE30_SUFFIX_8019075C_ONLY)
-void fn_801903B0(s32 flagId)
+void std079_flagSetTrue(s32 flagId)
 {
     flagSetValue(
         lbl_80478EEC[(lbl_80478F9C[flagId].typeAndWidth & 0xC0) >> 6].buffer,
         lbl_80478F9C, flagId, 0);
 }
 
-void fn_80190528(s32 flagId)
+void std078_flagSetFalse(s32 flagId)
 {
     flagSetValue(
         lbl_80478EEC[(lbl_80478F9C[flagId].typeAndWidth & 0xC0) >> 6].buffer,
@@ -210,7 +210,7 @@ void fn_8018FE30(int flagId)
     for (current = flagId; current != -1;
          current = lbl_80478F9C[current].next) {
         if (lbl_80478F9C[current].initialValue != 0) {
-            fn_801903B0(current);
+            std079_flagSetTrue(current);
         }
     }
 
@@ -251,7 +251,7 @@ void fn_8018FE30(int flagId)
         heroBiosSetPokedoru(savedataGetStatus(0, 2), lbl_80478EFC[event].pokedoru);
         floorId = lbl_80478EFC[event].floorId;
         if (floorId == 0) {
-            floorId = fn_800FF56C();
+            floorId = std092_getCurrentRoomID();
         }
         floorChangePos(floorId, 0, lbl_80478EFC[event].posX,
                        lbl_80478EFC[event].posY, lbl_80478EFC[event].posZ);

@@ -31,7 +31,7 @@ extern void fn_800934E4();
 extern void fn_80093610();
 extern void fn_80093698();
 extern void fn_800D0F44();
-extern void fn_800D3088();
+extern void msgGetCharsPerFrame();
 extern void fn_800D37CC();
 extern void fn_800E202C();
 extern void fn_800E209C();
@@ -48,9 +48,9 @@ extern void _threadSwitch();
 extern void fn_800F92D4();
 extern void fn_800F9AEC();
 extern void GSmsgGetGSchar();
-extern void fn_800FF56C();
+extern void std092_getCurrentRoomID();
 extern void fn_800FF660();
-extern void fn_800FF730();
+extern void std098_mapWarpToMenuRoom();
 extern void menuClose();
 extern void menuCloseCustom();
 extern void menuIsCheck();
@@ -1238,7 +1238,7 @@ void fn_80084A8C(void) {
     extern void msgctrlSetValue();
     extern void gamedataAttestBiosGetLangareaId();
     extern void gamedataBiosGetGamedataAtttestPtr();
-    extern void fn_80166A28();
+    extern void soundStartSE();
     extern void __assert();
     extern u8 jumptable_802EEB78[];
     u8 sp[0xCD0];
@@ -1405,7 +1405,7 @@ void fn_80084A8C(void) {
                 ((void(*)(void))fn_800D37CC)();
                 *(u32*)(sp + 0xC14) = tmp;
                 f30 = f0 - f31;
-                ((void(*)(void))fn_800D3088)();
+                ((void(*)(void))msgGetCharsPerFrame)();
                 f0 = f0 - f29;
                 f0 = f0 / f30;
                 f27 = f27 + f0;
@@ -1539,7 +1539,7 @@ void fn_80084A8C(void) {
                     if ((s32)r15 < 0xf) goto L_80084EB4;
                 }
                 r3 = 0x26;
-                fn_80166A28();
+                soundStartSE();
                 r15 = 0x0;
                 tmp = *(u32*)((u8*)r24 + 0x0);
                 if ((s32)tmp != 7) {
@@ -1711,7 +1711,7 @@ void fn_80084A8C(void) {
                     if ((s32)r15 < 0xf) goto L_80085150;
                 }
                 r3 = 0x26;
-                fn_80166A28();
+                soundStartSE();
                 r15 = 0x0;
                 tmp = *(u32*)((u8*)r24 + 0x0);
                 if ((s32)tmp != 7) {
@@ -1885,7 +1885,7 @@ void fn_80084A8C(void) {
                 if ((s32)r15 < 0xf) goto L_800853EC;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r15 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -2004,7 +2004,7 @@ void fn_80084A8C(void) {
                 if ((s32)r20 < 0xf) goto L_800855B8;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r16 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -2147,7 +2147,7 @@ void fn_80084A8C(void) {
                 ((void(*)(void))fn_800D37CC)();
                 *(u32*)(sp + 0xC1C) = tmp;
                 f29 = f0 - f28;
-                ((void(*)(void))fn_800D3088)();
+                ((void(*)(void))msgGetCharsPerFrame)();
                 f0 = f0 - f30;
                 f0 = f0 / f29;
                 f27 = f27 + f0;
@@ -2246,7 +2246,7 @@ void fn_80084A8C(void) {
             if ((s32)r15 < 0xf) goto L_80085978;
         }
         r3 = 0x26;
-        fn_80166A28();
+        soundStartSE();
         r15 = 0x0;
         tmp = *(u32*)((u8*)r24 + 0x0);
         if ((s32)tmp != 7) {
@@ -2367,7 +2367,7 @@ void fn_80084A8C(void) {
                 if ((s32)r20 < 0xf) goto L_80085B54;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r16 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -2545,7 +2545,7 @@ void fn_80084A8C(void) {
                 if ((s32)r20 < 0xf) goto L_80085E2C;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r16 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -2695,7 +2695,7 @@ void fn_80084A8C(void) {
             if ((s32)r20 < 0xf) goto L_80086074;
         }
         r3 = 0x26;
-        fn_80166A28();
+        soundStartSE();
         r16 = 0x0;
         tmp = *(u32*)((u8*)r24 + 0x0);
         if ((s32)tmp != 7) {
@@ -2857,7 +2857,7 @@ void fn_80084A8C(void) {
                 if ((s32)r20 < 0xf) goto L_800862EC;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r16 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -3005,7 +3005,7 @@ void fn_80084A8C(void) {
                     if ((s32)r20 < 0xf) goto L_80086530;
                 }
                 r3 = 0x26;
-                fn_80166A28();
+                soundStartSE();
                 r16 = 0x0;
                 tmp = *(u32*)((u8*)r24 + 0x0);
                 if ((s32)tmp != 7) {
@@ -3299,7 +3299,7 @@ void fn_80084A8C(void) {
             if ((s32)r15 < 0xf) goto L_800869C8;
         }
         r3 = 0x26;
-        fn_80166A28();
+        soundStartSE();
         r15 = 0x0;
         tmp = *(u32*)((u8*)r24 + 0x0);
         if ((s32)tmp != 7) {
@@ -3418,7 +3418,7 @@ void fn_80084A8C(void) {
             if ((s32)r20 < 0xf) goto L_80086B94;
         }
         r3 = 0x26;
-        fn_80166A28();
+        soundStartSE();
         r16 = 0x0;
         tmp = *(u32*)((u8*)r24 + 0x0);
         if ((s32)tmp != 7) {
@@ -3567,7 +3567,7 @@ void fn_80084A8C(void) {
                 if ((s32)r20 < 0xf) goto L_80086DD8;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r16 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -3685,7 +3685,7 @@ void fn_80084A8C(void) {
         r3 = r28;
         ((void(*)(void))fn_80093698)();
         r3 = 0x3cc;
-        fn_80166A28();
+        soundStartSE();
         tmp = 0x5;
         *(u32*)(r24 + r27) = tmp;
         ((void(*)(void))menuGetEnablePort)();
@@ -3762,7 +3762,7 @@ void fn_80084A8C(void) {
                     if ((s32)r15 < 0xf) goto L_800870D4;
                 }
                 r3 = 0x26;
-                fn_80166A28();
+                soundStartSE();
                 r15 = 0x0;
                 tmp = *(u32*)((u8*)r24 + 0x0);
                 if ((s32)tmp != 7) {
@@ -3893,7 +3893,7 @@ void fn_80084A8C(void) {
                 if ((s32)r15 < 0xf) goto L_800872D4;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r15 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -4024,7 +4024,7 @@ void fn_80084A8C(void) {
             if ((s32)r15 < 0xf) goto L_800874D4;
         }
         r3 = 0x26;
-        fn_80166A28();
+        soundStartSE();
         r15 = 0x0;
         tmp = *(u32*)((u8*)r24 + 0x0);
         if ((s32)tmp != 7) {
@@ -4155,7 +4155,7 @@ void fn_80084A8C(void) {
                 if ((s32)r15 < 0xf) goto L_800876D4;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r15 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -4284,7 +4284,7 @@ void fn_80084A8C(void) {
                 if ((s32)r15 < 0xf) goto L_800878CC;
             }
             r3 = 0x26;
-            fn_80166A28();
+            soundStartSE();
             r15 = 0x0;
             tmp = *(u32*)((u8*)r24 + 0x0);
             if ((s32)tmp != 7) {
@@ -4475,8 +4475,8 @@ L_80087B3C:
 
 /* 0x80087C64 | size: 0x7C4 */
 void fn_80087C64(void) {
-    extern void fn_801666BC();
-    extern void fn_80166A28();
+    extern void soundGetStatus();
+    extern void soundStartSE();
     u8 sp[0x1C0];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -4694,10 +4694,10 @@ void fn_80087C64(void) {
                     } while ((s32)r8 < 3);
                     if ((s32)r7 < 3) {
                         r3 = 0x26;
-                        fn_80166A28();
+                        soundStartSE();
                         while (1) {
                             r3 = 0x26;
-                            fn_801666BC();
+                            soundGetStatus();
                             if ((s32)r3 != 2) break;
                             ((void(*)(void))_threadSwitch)();
 
@@ -4786,10 +4786,10 @@ void fn_80087C64(void) {
                     goto L_80088120;
                     }
                 r3 = 0x4a1;
-                fn_80166A28();
+                soundStartSE();
                 while (1) {
                     r3 = 0x4a1;
-                    fn_801666BC();
+                    soundGetStatus();
                     if ((s32)r3 != 2) break;
                     ((void(*)(void))_threadSwitch)();
 
@@ -4798,7 +4798,7 @@ void fn_80087C64(void) {
                 goto L_80088120;
                 }
             r3 = 0x3c6;
-            fn_80166A28();
+            soundStartSE();
         L_80088120:
             r6 = 0x1;
         }
@@ -4808,7 +4808,7 @@ void fn_80087C64(void) {
 
             if ((s32)r26 < 0) break;
             r3 = 0x3c7;
-            fn_80166A28();
+            soundStartSE();
             tmp = r26 << 3;
             r20 = (u32)sp + 0x70;
             r20 = r20 + tmp;
@@ -5001,9 +5001,9 @@ static inline void gbaConvResetSlotIds(void) {
 static inline void gbaConvCaptureMemo(GbaConvPlayerMemo* memo) {
     extern void heroMoveGetHeroRot(f32*);
     extern void heroMoveGetHeroPos(f32*);
-    extern u32 fn_800FF56C(void);
+    extern u32 std092_getCurrentRoomID(void);
     extern u32 floorGetPrevFloorID(void);
-    extern u32 fn_801906A0(s32);
+    extern u32 std082_flagGetValue(s32);
     f32 a[3];
     f32 b[3];
 
@@ -5015,13 +5015,13 @@ static inline void gbaConvCaptureMemo(GbaConvPlayerMemo* memo) {
     memo->rotX = b[0];
     memo->rotY = b[1];
     memo->rotZ = b[2];
-    memo->unk04 = fn_800FF56C();
+    memo->unk04 = std092_getCurrentRoomID();
     memo->prevFloorId = floorGetPrevFloorID();
     memo->valid = 1;
-    memo->flagAfc = fn_801906A0(0xafc);
-    memo->flagAfd = fn_801906A0(0xafd);
-    memo->flagB11 = fn_801906A0(0xb11);
-    memo->flagDe1 = fn_801906A0(0xde1);
+    memo->flagAfc = std082_flagGetValue(0xafc);
+    memo->flagAfd = std082_flagGetValue(0xafd);
+    memo->flagB11 = std082_flagGetValue(0xb11);
+    memo->flagDe1 = std082_flagGetValue(0xde1);
 }
 
 /* Snapshot the save image, renumber the slots, run link mode 6 and restore. */
@@ -5090,18 +5090,18 @@ static inline s32 gbaConvGridHas(GbaConvSpeciesGrid grid, u16 id) {
 void fn_80088428(void) {
     #pragma peephole off
     extern u32 fn_80087C64(void* p);
-    extern void fn_80166A28(s32);
+    extern void soundStartSE(s32);
     extern void cameraWaitSyncAnime(s32);
     extern void cameraPlayAnime(s32, s32, s32, s32);
     extern void fn_800FF660(void);
     GbaConvChannelState* state = (GbaConvChannelState*)&lbl_803FB2F8;
     u32 r31;
 
-    fn_80166A28(0x27);
+    soundStartSE(0x27);
     cameraPlayAnime(0x62d, 0x107C1800, 0, 0);
     cameraWaitSyncAnime(1);
     r31 = fn_80087C64(&lbl_803FB2F8);
-    fn_80166A28(0x28);
+    soundStartSE(0x28);
     cameraPlayAnime(0x62d, 0x107D1800, 0, 0);
     cameraWaitSyncAnime(1);
     fn_800FF660();
@@ -5111,7 +5111,7 @@ void fn_80088428(void) {
 #if !defined(GBA_CONV_800889E4_ONLY)
 /* 0x800884BC | size: 0x214 */
 u32 fn_800884BC(u16 a, u16 b, u16 c) {
-    extern void fn_800FF730(s32 id);
+    extern void std098_mapWarpToMenuRoom(s32 id);
     extern void _threadSwitch(void);
     GbaConvChannelState* state = (GbaConvChannelState*)lbl_803FB2F8;
     s32 i;
@@ -5127,7 +5127,7 @@ u32 fn_800884BC(u16 a, u16 b, u16 c) {
             return 2;
         }
     }
-    fn_800FF730(0x387);
+    std098_mapWarpToMenuRoom(0x387);
     _threadSwitch();
     return ((GbaConvChannelState*)lbl_803FB2F8)->result;
 }
@@ -5140,16 +5140,16 @@ s32 fn_800886D0(void) {
     extern u8 fn_8006A76C(void);
     extern s32 fn_8006AE18(void);
     extern u8 fn_801EE398(void);
-    extern u8 fn_801902E0(s32 id);
+    extern u8 std081_flagCheckTrue(s32 id);
     extern void* fn_80071104(u32 size);
     extern void fn_8007109C(void* p);
     extern void* fn_80128E24(void);
-    extern s16 fn_801CADA8(s32 kind);
+    extern s16 std217_playerReceiveGiftPokemon(s32 kind);
     extern void d2presentOpen(s32 mode);
     extern s32 fn_8006ADEC(void);
     extern void fn_8006ADB4(s32 value);
     extern void heroAddPokecoupon(s32 hero, s32 amount);
-    extern void fn_80190528(s32 id);
+    extern void std078_flagSetFalse(s32 id);
     extern void winMsgOpen(s32 a, s32 msg, s32 c, s32 d);
     extern s8 menuSubOpenYesNo(s32 a, s32 b, s32 c, s32 d);
     extern u8* savedataGetStatus(s32 side, s32 slotType);
@@ -5169,15 +5169,15 @@ s32 fn_800886D0(void) {
     if (fn_801EE398() == 0) {
         return 0;
     }
-    if (fn_801902E0(0x478) == 0) {
+    if (std081_flagCheckTrue(0x478) == 0) {
         return 0;
     }
-    if (fn_801902E0(0xAFD) != 0) {
+    if (std081_flagCheckTrue(0xAFD) != 0) {
         return 0;
     }
     buf = fn_80071104(0x1DFD0);
     memcpy(buf, fn_80128E24(), 0x1DFD0);
-    switch (fn_801CADA8(4)) {
+    switch (std217_playerReceiveGiftPokemon(4)) {
     case -1:
         mode = 1;
         break;
@@ -5197,7 +5197,7 @@ s32 fn_800886D0(void) {
     coupons = fn_8006ADEC();
     fn_8006ADB4(0);
     heroAddPokecoupon(0, coupons);
-    fn_80190528(0xAFD);
+    std078_flagSetFalse(0xAFD);
     for (;;) {
         winMsgOpen(2, 0x3C37, 1, 0);
         if (menuSubOpenYesNo(0, -1, -1, 0) == 0) {
@@ -5334,9 +5334,9 @@ s32 fn_80088D84(void) {
 void fn_80088EA8(u8* p) {
     extern void heroMoveGetHeroRot(f32*);
     extern void heroMoveGetHeroPos(f32*);
-    extern u32 fn_800FF56C(void);
+    extern u32 std092_getCurrentRoomID(void);
     extern u32 floorGetPrevFloorID(void);
-    extern u32 fn_801906A0(s32);
+    extern u32 std082_flagGetValue(s32);
     GbaConvPlayerMemo* memo = (GbaConvPlayerMemo*)p;
     f32 a[3];
     f32 b[3];
@@ -5349,13 +5349,13 @@ void fn_80088EA8(u8* p) {
     memo->rotX = b[0];
     memo->rotY = b[1];
     memo->rotZ = b[2];
-    memo->unk04 = fn_800FF56C();
+    memo->unk04 = std092_getCurrentRoomID();
     memo->prevFloorId = floorGetPrevFloorID();
     memo->valid = 1;
-    memo->flagAfc = fn_801906A0(0xafc);
-    memo->flagAfd = fn_801906A0(0xafd);
-    memo->flagB11 = fn_801906A0(0xb11);
-    memo->flagDe1 = fn_801906A0(0xde1);
+    memo->flagAfc = std082_flagGetValue(0xafc);
+    memo->flagAfd = std082_flagGetValue(0xafd);
+    memo->flagB11 = std082_flagGetValue(0xb11);
+    memo->flagDe1 = std082_flagGetValue(0xde1);
 }
 
 /* 0x80088F58 | size: 0x1C */

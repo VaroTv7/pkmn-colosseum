@@ -36,7 +36,7 @@ extern void msgctrlSetValue(s32 slot, void* value);
 extern s32 mailGetNbMailInMailbox(void);
 extern u8* windowGetKeyInfo(void);
 extern void menuButtonNormal(void* window);
-extern void fn_80166A50(s32 id, s32 arg1, s32 arg2, s32 arg3);
+extern void soundStart(s32 id, s32 arg1, s32 arg2, s32 arg3);
 extern s32 fn_801D1B78(s32 mailId);
 extern void fn_801D1C20(s32 mailId);
 extern void fn_801D228C(u16 mailId);
@@ -101,7 +101,7 @@ s32 fn_8004D7D0(PdaMailWindow* window)
         }
     }
     if (index != current) {
-        fn_80166A50(0x23, 0, 0xFF, 0);
+        soundStart(0x23, 0, 0xFF, 0);
         **field = index;
     }
     mailId = pdaMailGetMailID(index);

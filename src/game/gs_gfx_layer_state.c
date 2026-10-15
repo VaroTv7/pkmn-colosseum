@@ -23,9 +23,9 @@ extern void* memset(void* dst, int val, u32 size);
 extern void DCFlushRange(void* addr, u32 size);
 extern u64 OSGetTime(void);
 extern void fn_800D3EC4(s32, f32, f32, f32, f32, f32, f32);
-extern void fn_800D4F98(u32, ...);
-extern void fn_800D67BC(u16);
-extern void fn_800D892C(u32);
+extern void gfxRecordCommand(u32, ...);
+extern void gfxBegin(u16);
+extern void gfxSetupChannelsTev(u32);
 
 /* GSmem */
 extern u16   _toolentryAlloc__FUl(u32 size);                    /* GSmemAllocRaw */
@@ -90,9 +90,9 @@ extern void fn_800D75AC(void);
 extern void fn_800D7650(u8*);
 extern void fn_800D7868(u8*, u32, u32, u32, u32, u8, u32, u8);
 extern void fn_800D7940(u8*, u16);
-extern void fn_800D7A70(u32);
+extern void gfxLoadVtxDesc(u32);
 extern void fn_800D923C(void);
-extern void fn_800D963C(u32, s32);
+extern void gfxSetTevOp(u32, s32);
 extern void fn_800DB098(void);
 extern void fn_800DB758(u16);
 extern void lightGetFrameCount__FP9_HSD_AObj(u8*);
@@ -162,7 +162,7 @@ extern u8 lbl_80400948[];
 extern u32 lbl_8047AAC4;
 extern u32 lbl_8047AABC;
 extern u16 lbl_8047AAB8;
-extern void fn_800B857C(u32, u32, u32, u32, u32, u32);
+extern void GXSetTexCoordGen2(u32, u32, u32, u32, u32, u32);
 extern void GXLoadTexMtxImm(void*, u32, u32);
 extern u8 lbl_80314404[];
 extern u8 lbl_80314454[];
@@ -180,20 +180,20 @@ extern u8 lbl_803144F0[];
 extern u32 lbl_80478AE0[];
 extern void fn_800BBC34(u32);
 extern void fn_800BBC0C(u32);
-extern void fn_800BA6B0();
-extern void fn_800BA6F4();
+extern void GXSetNumChans();
+extern void GXSetChanCtrl();
 extern void fn_800B884C();
 extern void fn_800BC8C8();
 extern void fn_800BBAF8();
 extern void fn_800BB97C();
 extern void fn_800BB81C();
-extern void fn_800BC6F0();
-extern void fn_800BC228();
-extern void fn_800BC290();
-extern void fn_800BC1A0();
-extern void fn_800BC1E4();
-extern void fn_800BC454();
-extern void fn_800BC4C0();
+extern void GXSetTevOrder();
+extern void GXSetTevColorOp();
+extern void GXSetTevAlphaOp();
+extern void GXSetTevColorIn();
+extern void GXSetTevAlphaIn();
+extern void GXSetTevKColorSel();
+extern void GXSetTevKAlphaSel();
 extern void fn_800BB780();
 extern void fn_800BBC7C();
 extern void fn_800BBCE0();
@@ -201,7 +201,7 @@ extern void fn_800BBE8C();
 extern void fn_800BBF98();
 extern void fn_800BBFDC();
 extern void fn_800BC3E0();
-extern void fn_800BC580();
+extern void GXSetTevSwapModeTable();
 extern void fn_800BD2E0(void*, u32);
 extern f32 lbl_8047CA50;
 extern f32 lbl_8047CA54;
@@ -329,11 +329,11 @@ extern u8 lbl_8036CB30[];
 extern void HSD_TExpGetType();
 extern void fn_801B6DC0();
 extern void HSD_TExpCnst();
-extern void fn_801B707C();
-extern void fn_801B6E74();
-extern void fn_801B64EC();
-extern void fn_801B6CD8();
-extern void fn_801B5F08();
+extern void HSD_TExpTev();
+extern void HSD_TExpColorOp();
+extern void HSD_TExpColorIn();
+extern void HSD_TExpAlphaOp();
+extern void HSD_TExpAlphaIn();
 extern void HSD_ImageDescRemove(void);
 extern void HSD_TObjLoadDesc(void);
 extern void HSD_MObjGetTObj(void);
@@ -376,7 +376,7 @@ extern u32 lbl_8047CB00;
 extern u32 lbl_8047CAF8;
 extern u32 lbl_8047CB08;
 extern u32 lbl_8047CAFC;
-extern f32 fn_801ADC7C(void);
+extern f32 HSD_Randf(void);
 extern f32 lbl_8047CB10;
 extern u32 fn_801ADCD8(void);
 extern u32 lbl_80478C94;
@@ -919,12 +919,12 @@ void fn_800D76A8(u32 obj, u16 vertCount) {
     }
 
     if (*(s32*)state == 1) {
-        fn_800D4F98(0x47, 2, obj, (u32)vertCount);
+        gfxRecordCommand(0x47, 2, obj, (u32)vertCount);
         return;
     }
 
-    fn_800D7A70(obj);
-    fn_800D892C(obj);
+    gfxLoadVtxDesc(obj);
+    gfxSetupChannelsTev(obj);
     fn_800D7940((u8*)obj, vertCount);
 }
 #endif
@@ -936,8 +936,8 @@ asm void fn_800D7820(void) {
 #include "src/game/gs_render_fn_800D7820.inc"
 }
 #else
-void fn_800D7820(u32 val) {
-    if (*(s32*)lbl_8047AA80 == 1) { fn_800D4F98(0x46, 1, val); }
+void gfxSetVtxDesc(u32 val) {
+    if (*(s32*)lbl_8047AA80 == 1) { gfxRecordCommand(0x46, 1, val); }
     else { *(s32*)(lbl_8047AA80 + 0x24) = val; }
 }
 #endif
@@ -1020,7 +1020,7 @@ extern void fn_800D5AB0(u32, u16);
 extern void fn_800D5A38(u32, u8);
 extern void fn_800D579C(u32, u16);
 extern void fn_800D5724(u32, u8);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 
 void fn_800D7940(u8* obj, u16 vertCount) {
     u16 vertex;
@@ -1028,7 +1028,7 @@ void fn_800D7940(u8* obj, u16 vertCount) {
     u32 layer;
     u8* entry;
 
-    fn_800D67BC(vertCount);
+    gfxBegin(vertCount);
     for (vertex = 0; vertex < vertCount; vertex++) {
         if (*(s32*)(obj + 0x28) == 2) {
             fn_800D6028(vertex);
@@ -1068,7 +1068,7 @@ void fn_800D7940(u8* obj, u16 vertCount) {
             }
         }
     }
-    fn_800D6728();
+    gfxEnd();
 }
 #endif
 #endif
@@ -1079,7 +1079,7 @@ asm void fn_800D7A70(u32) {
 #include "src/game/gs_render_fn_800D7A70.inc"
 }
 #else
-void fn_800D7A70(u32 obj) {
+void gfxLoadVtxDesc(u32 obj) {
     u32 i;
     u8* entry;
     u32 attr;
@@ -1143,7 +1143,7 @@ asm void fn_800D7BF8(void) {
 #include "src/game/gs_render_fn_800D7BF8.inc"
 }
 #else
-u32 fn_800D7BF8(s32 mode) {
+u32 gfxGetCameraMatrix(s32 mode) {
     if (!GScameraGetActiveCamera()) return 0;
     switch (mode) {
         case 0: return fn_800D1D00();
@@ -1167,7 +1167,7 @@ void fn_800D7C74(void) {
     u32 state = lbl_8047AA80;
     u32 mtx;
     if (*(s32*)state == 1) {
-        fn_800D4F98(0x45, 0);
+        gfxRecordCommand(0x45, 0);
     } else if (lbl_8047AAC8) {
         mtx = *(u32*)(lbl_80314610 + 0x24);
         GXLoadPosMtxImm(lbl_8047AAC0, mtx);
@@ -1185,7 +1185,7 @@ asm void fn_800D7D10(void) {
 }
 #else
 void fn_800D7D10(u8 idx, void* src) {
-    if (*(s32*)lbl_8047AA80 == 1) { fn_800D4F98(0x44, 2, (u32)idx, src); }
+    if (*(s32*)lbl_8047AA80 == 1) { gfxRecordCommand(0x44, 2, (u32)idx, src); }
     else if (idx > 9) { GSlogWrite(lbl_80270440); }
     else { fn_800E0628(src, &lbl_80400948[idx * 0x30]); }
 }
@@ -1201,7 +1201,7 @@ asm void fn_800D7D90(void) {
 #else
 void fn_800D7D90(u8 idx, void* src) {
     if (*(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x43, 0x11, (u32)idx, src);
+        gfxRecordCommand(0x43, 0x11, (u32)idx, src);
     } else if (idx > 9) {
         GSlogWrite(lbl_80270440);
     } else {
@@ -1228,7 +1228,7 @@ void fn_800D7E5C(void) {
     u32 state = lbl_8047AA80;
     u32 mtx;
     if (*(s32*)state == 1) {
-        fn_800D4F98(0x42, 0);
+        gfxRecordCommand(0x42, 0);
     } else if (lbl_8047AAC0 >= lbl_8047AAC4) {
         GSlogWrite(lbl_80270460);
     } else {
@@ -1255,7 +1255,7 @@ void fn_800D7F14(void* src) {
     u32 state = lbl_8047AA80;
     u32 mtx;
     if (*(s32*)state == 1) {
-        fn_800D4F98(0x41, 0x10, src);
+        gfxRecordCommand(0x41, 0x10, src);
     } else if (lbl_8047AAC0 <= lbl_8047AABC) {
         GSlogWrite(lbl_80270480);
     } else {
@@ -1282,7 +1282,7 @@ void fn_800D7FE4(void* param) {
     u32 state = lbl_8047AA80;
     u32 mtx;
     if (*(s32*)state == 1) {
-        fn_800D4F98(0x40, 0x10, param);
+        gfxRecordCommand(0x40, 0x10, param);
     } else {
         fn_800E0290((void*)lbl_8047AAC0, (void*)lbl_8047AAC0, param);
         mtx = *(u32*)(lbl_80314610 + 0x24);
@@ -1307,7 +1307,7 @@ void fn_800D8088(void* src) {
     u32 state = lbl_8047AA80;
     u32 mtx;
     if (*(s32*)state == 1) {
-        fn_800D4F98(0x3f, 0x10, src);
+        gfxRecordCommand(0x3f, 0x10, src);
     } else if (lbl_8047AAC0 <= lbl_8047AABC) {
         GSlogWrite(lbl_80270480);
     } else {
@@ -1334,7 +1334,7 @@ void fn_800D8154(f32 a, f32 b, f32 c) {
     u32 state = lbl_8047AA80;
     u32 mtx;
     if (*(s32*)state == 1) {
-        fn_800D4F98(0x3e, 0xd, a, b, c);
+        gfxRecordCommand(0x3e, 0xd, a, b, c);
     } else {
         fn_800E02C4((void*)lbl_8047AAC0);
         mtx = *(u32*)(lbl_80314610 + 0x24);
@@ -1358,7 +1358,7 @@ void fn_800D81EC(f32 a, f32 b, f32 c) {
     u32 state = lbl_8047AA80;
     u32 mtx;
     if (*(s32*)state == 1) {
-        fn_800D4F98(0x3d, 0xd, a, b, c);
+        gfxRecordCommand(0x3d, 0xd, a, b, c);
     } else {
         fn_800E03E8((void*)lbl_8047AAC0, a, b, c);
         mtx = *(u32*)(lbl_80314610 + 0x24);
@@ -1385,7 +1385,7 @@ void fn_800D8284(f32 a, f32 b, f32 c) {
     y = b;
     z = c;
     if (*(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x3c, 0xd, a, y, z);
+        gfxRecordCommand(0x3c, 0xd, a, y, z);
     } else {
         fn_800E0370((void*)lbl_8047AAC0, a);
         fn_800E032C((void*)lbl_8047AAC0, y);
@@ -1411,7 +1411,7 @@ void fn_800D834C(void) {
     u32 state = lbl_8047AA80;
     u32 mtx;
     if (*(s32*)state == 1) {
-        fn_800D4F98(0x3b, 0);
+        gfxRecordCommand(0x3b, 0);
     } else {
         fn_800E064C((void*)lbl_8047AAC0);
         mtx = *(u32*)(lbl_80314610 + 0x24);
@@ -1470,17 +1470,17 @@ asm void fn_800D848C(void) {
 #else
 void fn_800D848C(u32 idx, s32 mode, u32 arg, void* mtx) {
     if (*(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x27, 0x13, idx, mode, arg, mtx);
+        gfxRecordCommand(0x27, 0x13, idx, mode, arg, mtx);
     } else {
         if (mode == 0) {
-            fn_800B857C(((u32*)lbl_80314404)[idx], 1, ((u32*)lbl_80314454)[arg], 0x3c, 0, 0x7d);
+            GXSetTexCoordGen2(((u32*)lbl_80314404)[idx], 1, ((u32*)lbl_80314454)[arg], 0x3c, 0, 0x7d);
         } else {
             if (mode == 1) {
                 GXLoadTexMtxImm(mtx, ((u32*)lbl_803144A8)[idx], 0);
             } else if (mode == 2) {
                 GXLoadTexMtxImm(mtx, ((u32*)lbl_803144A8)[idx], 1);
             }
-            fn_800B857C(((u32*)lbl_80314404)[idx], ((u32*)lbl_80314424)[mode], ((u32*)lbl_80314454)[arg], ((u32*)lbl_803144A8)[idx], 0, 0x7d);
+            GXSetTexCoordGen2(((u32*)lbl_80314404)[idx], ((u32*)lbl_80314424)[mode], ((u32*)lbl_80314454)[arg], ((u32*)lbl_803144A8)[idx], 0, 0x7d);
         }
     }
 }
@@ -1498,7 +1498,7 @@ asm void fn_800D85D4(void) {
 #include "src/game/gs_render_fn_800D85D4.inc"
 }
 #else
-void fn_800D85D4(s32 slot, void* model) {
+void gfxLoadTexture(s32 slot, void* model) {
     u32 state;
     u8* obj;
     s32 mode;
@@ -1510,7 +1510,7 @@ void fn_800D85D4(s32 slot, void* model) {
     state = lbl_8047AA80;
     obj = (u8*)model;
     if (*(s32*)state == 1) {
-        fn_800D4F98(0x26, 2, slot, model);
+        gfxRecordCommand(0x26, 2, slot, model);
         return;
     }
     if (*(void**)(state + 0x28 + slot * 4) == model) {
@@ -1561,7 +1561,7 @@ void fn_800D87AC(u32 mask) {
     if (mask & 2) {
         for (i = 0; i < 8; i++) {
             ((u32*)lbl_8047AA80)[i + 10] = 0;
-            fn_800B857C(((u32*)lbl_80314404)[i], 1, i + 4, 0x3c, 0, 0x7d);
+            GXSetTexCoordGen2(((u32*)lbl_80314404)[i], 1, i + 4, 0x3c, 0, 0x7d);
         }
     }
     if (mask & 4) {
@@ -1583,8 +1583,8 @@ asm void fn_800D888C(void) {
 #include "src/game/gs_render_fn_800D888C.inc"
 }
 #else
-void fn_800D888C(u32 mask) {
-    if (*(s32*)lbl_8047AA80 == 1) { fn_800D4F98(0x29, 1, mask); }
+void gfxClearFlags(u32 mask) {
+    if (*(s32*)lbl_8047AA80 == 1) { gfxRecordCommand(0x29, 1, mask); }
     else { *(s32*)(lbl_8047AA80 + 0x10) &= ~mask; }
 }
 #endif
@@ -1594,8 +1594,8 @@ asm void fn_800D88DC(void) {
 #include "src/game/gs_render_fn_800D88DC.inc"
 }
 #else
-void fn_800D88DC(u32 mask) {
-    if (*(s32*)lbl_8047AA80 == 1) { fn_800D4F98(0x28, 1, mask); }
+void gfxSetFlags(u32 mask) {
+    if (*(s32*)lbl_8047AA80 == 1) { gfxRecordCommand(0x28, 1, mask); }
     else { *(s32*)(lbl_8047AA80 + 0x10) |= mask; }
 }
 #endif

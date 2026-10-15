@@ -60,7 +60,7 @@
 #define M_PI 3.14159265358979323846
 #define M_PI_2 1.57079632679489661923
 
-extern f32 fn_801ADC7C(void);          /* HSD_Randf */
+extern f32 HSD_Randf(void);          /* HSD_Randf */
 extern HSD_JObj* fn_8019F718(void);    /* HSD_JObjAlloc */
 extern void fn_801A05EC(HSD_JObj* jobj); /* HSD_JObjUnref */
 extern void HSD_MtxSRT(Mtx m, Vec* scale, Vec* rot, Vec* trans, Vec* scale2);
@@ -161,7 +161,7 @@ void modifyDirGenBase(HSD_Particle* pp, f32 angle, f32 x, f32 y, f32 z)
     cy = cosf(ry);
     len = sqrtf(pp->vel.x * pp->vel.x + pp->vel.y * pp->vel.y +
                 pp->vel.z * pp->vel.z);
-    rnd = 2.0 * (M_PI * fn_801ADC7C());
+    rnd = 2.0 * (M_PI * HSD_Randf());
     r = len * sinf(angle);
     vx = r * cosf(rnd);
     vy = r * sinf(rnd);
@@ -208,7 +208,7 @@ void modifyDir(HSD_Particle* pp, f32 angle)
     sy = sinf(ry);
     cy = cosf(ry);
     len = sqrtf(vx * vx + vy * vy + vz * vz);
-    rnd = 2.0 * (M_PI * fn_801ADC7C());
+    rnd = 2.0 * (M_PI * HSD_Randf());
     r = len * sinf(angle);
     vx = r * cosf(rnd);
     vy = r * sinf(rnd);
@@ -906,13 +906,13 @@ HSD_Particle* psInterpretParticle0(HSD_Particle* pp, HSD_Particle* prev)
                     base += *cmdList++;
                     range = *cmdList++ << 8;
                     range += *cmdList++;
-                    pp->life = base + (s32) (range * fn_801ADC7C());
+                    pp->life = base + (s32) (range * HSD_Randf());
                     break;
                 }
                 case 0xA7: {
                     s32 rate = *cmdList++;
 
-                    if (rate >= (s32) (100.0f * fn_801ADC7C())) {
+                    if (rate >= (s32) (100.0f * HSD_Randf())) {
                         pp->life = 1;
                         goto exit;
                     }
@@ -922,11 +922,11 @@ HSD_Particle* psInterpretParticle0(HSD_Particle* pp, HSD_Particle* prev)
                     Vec ofs;
 
                     cmdList = getFloat(cmdList, &val);
-                    ofs.x = 2.0f * val * fn_801ADC7C() - val;
+                    ofs.x = 2.0f * val * HSD_Randf() - val;
                     cmdList = getFloat(cmdList, &val);
-                    ofs.y = 2.0f * val * fn_801ADC7C() - val;
+                    ofs.y = 2.0f * val * HSD_Randf() - val;
                     cmdList = getFloat(cmdList, &val);
-                    ofs.z = 2.0f * val * fn_801ADC7C() - val;
+                    ofs.z = 2.0f * val * HSD_Randf() - val;
                     psApplyOffsetLocalRotation(pp, &ofs);
                     pp->pos.x += ofs.x;
                     pp->pos.y += ofs.y;
@@ -982,7 +982,7 @@ HSD_Particle* psInterpretParticle0(HSD_Particle* pp, HSD_Particle* prev)
                     id += *cmdList++;
                     range = *cmdList++ << 8;
                     range += *cmdList++;
-                    id += (s32) (range * fn_801ADC7C());
+                    id += (s32) (range * HSD_Randf());
                     if (psBankRef[pp->bank] != NULL) {
                         id = psBankRef[pp->bank][id];
                     }
@@ -1022,7 +1022,7 @@ HSD_Particle* psInterpretParticle0(HSD_Particle* pp, HSD_Particle* prev)
                     cmdList = getTime(cmdList, &pp->sizeCount);
                     cmdList = getFloat(cmdList, &pp->sizeTarget);
                     cmdList = getFloat(cmdList, &val);
-                    pp->sizeTarget += val * fn_801ADC7C();
+                    pp->sizeTarget += val * HSD_Randf();
                     if (pp->sizeCount == 0) {
                         pp->size = pp->sizeTarget;
                     }
@@ -1208,13 +1208,13 @@ HSD_Particle* psInterpretParticle0(HSD_Particle* pp, HSD_Particle* prev)
                 case 0xBA:
                     PS_FREEZE_COLOR(pp->primCol, pp->primColTarget,
                                     pp->primColRemain, pp->primColCount);
-                    val = (s8) *cmdList++ * 2 * fn_801ADC7C();
+                    val = (s8) *cmdList++ * 2 * HSD_Randf();
                     pp->primColTarget.r = U8ClampAdd(pp->primColTarget.r, val);
-                    val = (s8) *cmdList++ * 2 * fn_801ADC7C();
+                    val = (s8) *cmdList++ * 2 * HSD_Randf();
                     pp->primColTarget.g = U8ClampAdd(pp->primColTarget.g, val);
-                    val = (s8) *cmdList++ * 2 * fn_801ADC7C();
+                    val = (s8) *cmdList++ * 2 * HSD_Randf();
                     pp->primColTarget.b = U8ClampAdd(pp->primColTarget.b, val);
-                    val = (s8) *cmdList++ * 2 * fn_801ADC7C();
+                    val = (s8) *cmdList++ * 2 * HSD_Randf();
                     pp->primColTarget.a = U8ClampAdd(pp->primColTarget.a, val);
                     if (pp->primColCount == 0) {
                         pp->primCol = pp->primColTarget;
@@ -1225,13 +1225,13 @@ HSD_Particle* psInterpretParticle0(HSD_Particle* pp, HSD_Particle* prev)
                 case 0xBB:
                     PS_FREEZE_COLOR(pp->envCol, pp->envColTarget,
                                     pp->envColRemain, pp->envColCount);
-                    val = (s8) *cmdList++ * 2 * fn_801ADC7C();
+                    val = (s8) *cmdList++ * 2 * HSD_Randf();
                     pp->envColTarget.r = U8ClampAdd(pp->envColTarget.r, val);
-                    val = (s8) *cmdList++ * 2 * fn_801ADC7C();
+                    val = (s8) *cmdList++ * 2 * HSD_Randf();
                     pp->envColTarget.g = U8ClampAdd(pp->envColTarget.g, val);
-                    val = (s8) *cmdList++ * 2 * fn_801ADC7C();
+                    val = (s8) *cmdList++ * 2 * HSD_Randf();
                     pp->envColTarget.b = U8ClampAdd(pp->envColTarget.b, val);
-                    val = (s8) *cmdList++ * 2 * fn_801ADC7C();
+                    val = (s8) *cmdList++ * 2 * HSD_Randf();
                     pp->envColTarget.a = U8ClampAdd(pp->envColTarget.a, val);
                     if (pp->envColCount == 0) {
                         pp->envCol = pp->envColTarget;
@@ -1243,7 +1243,7 @@ HSD_Particle* psInterpretParticle0(HSD_Particle* pp, HSD_Particle* prev)
                     pp->poseNum = cmdList[0];
                     val = cmdList[1];
                     cmdList += 2;
-                    pp->poseNum += val * fn_801ADC7C();
+                    pp->poseNum += val * HSD_Randf();
                     tg = psTexGroupArray[pp->bank][pp->texGroup];
                     if (tg != NULL && tg->texTable != NULL &&
                         tg->texTable[pp->poseNum] != NULL)
@@ -1261,7 +1261,7 @@ HSD_Particle* psInterpretParticle0(HSD_Particle* pp, HSD_Particle* prev)
                         val *= s;
                         val2 *= s;
                     }
-                    val = val + val2 * fn_801ADC7C();
+                    val = val + val2 * HSD_Randf();
                     val2 = sqrtf(pp->vel.x * pp->vel.x + pp->vel.y * pp->vel.y +
                                  pp->vel.z * pp->vel.z);
                     if (val2 > 1e-10f) {
@@ -1338,16 +1338,16 @@ HSD_Particle* psInterpretParticle0(HSD_Particle* pp, HSD_Particle* prev)
                                     pp->primColRemain, pp->primColCount);
                     PS_FREEZE_COLOR(pp->envCol, pp->envColTarget,
                                     pp->envColRemain, pp->envColCount);
-                    val = (s8) *cmdList++ * 2 * fn_801ADC7C();
+                    val = (s8) *cmdList++ * 2 * HSD_Randf();
                     pp->primColTarget.r = U8ClampAdd(pp->primColTarget.r, val);
                     pp->envColTarget.r = U8ClampAdd(pp->envColTarget.r, val);
-                    val = (s8) *cmdList++ * 2 * fn_801ADC7C();
+                    val = (s8) *cmdList++ * 2 * HSD_Randf();
                     pp->primColTarget.g = U8ClampAdd(pp->primColTarget.g, val);
                     pp->envColTarget.g = U8ClampAdd(pp->envColTarget.g, val);
-                    val = (s8) *cmdList++ * 2 * fn_801ADC7C();
+                    val = (s8) *cmdList++ * 2 * HSD_Randf();
                     pp->primColTarget.b = U8ClampAdd(pp->primColTarget.b, val);
                     pp->envColTarget.b = U8ClampAdd(pp->envColTarget.b, val);
-                    val = (s8) *cmdList++ * 2 * fn_801ADC7C();
+                    val = (s8) *cmdList++ * 2 * HSD_Randf();
                     pp->primColTarget.a = U8ClampAdd(pp->primColTarget.a, val);
                     pp->envColTarget.a = U8ClampAdd(pp->envColTarget.a, val);
                     if (pp->primColCount == 0) {
@@ -1371,10 +1371,10 @@ HSD_Particle* psInterpretParticle0(HSD_Particle* pp, HSD_Particle* prev)
                     flags = cmdList[0];
                     cmdList += 2;
                     if (steps != 0) {
-                        val = (s32) ((steps + 1) * fn_801ADC7C()) /
+                        val = (s32) ((steps + 1) * HSD_Randf()) /
                               (f32) steps;
                     } else {
-                        val = fn_801ADC7C();
+                        val = HSD_Randf();
                     }
                     if (flags & 1) {
                         val2 = val * ((s8) *cmdList++ * 2);
@@ -1412,10 +1412,10 @@ HSD_Particle* psInterpretParticle0(HSD_Particle* pp, HSD_Particle* prev)
                     if (flags & 8) {
                         if (steps != 0) {
                             val = (s8) *cmdList++ * 2 *
-                                  (f32) (s32) ((steps + 1) * fn_801ADC7C()) /
+                                  (f32) (s32) ((steps + 1) * HSD_Randf()) /
                                   steps;
                         } else {
-                            val = (s8) *cmdList++ * 2 * fn_801ADC7C();
+                            val = (s8) *cmdList++ * 2 * HSD_Randf();
                         }
                         if (flags & 0x10) {
                             pp->primColTarget.a =
@@ -1454,7 +1454,7 @@ HSD_Particle* psInterpretParticle0(HSD_Particle* pp, HSD_Particle* prev)
                         pp->kind ^= 0x40000;
                         break;
                     case 3:
-                        if (fn_801ADC7C() < 0.5f) {
+                        if (HSD_Randf() < 0.5f) {
                             pp->kind &= ~0x40000;
                         } else {
                             pp->kind |= 0x40000;
@@ -1474,7 +1474,7 @@ HSD_Particle* psInterpretParticle0(HSD_Particle* pp, HSD_Particle* prev)
                         pp->kind ^= 0x80000;
                         break;
                     case 3:
-                        if (fn_801ADC7C() < 0.5f) {
+                        if (HSD_Randf() < 0.5f) {
                             pp->kind &= ~0x80000;
                         } else {
                             pp->kind |= 0x80000;
@@ -1565,10 +1565,10 @@ HSD_Particle* psInterpretParticle0(HSD_Particle* pp, HSD_Particle* prev)
                     steps = *cmdList++;
                     if (steps != 0) {
                         val = val + val2 *
-                                        (s32) ((steps + 1) * fn_801ADC7C()) /
+                                        (s32) ((steps + 1) * HSD_Randf()) /
                                         (f32) steps;
                     } else {
-                        val = val + val2 * fn_801ADC7C();
+                        val = val + val2 * HSD_Randf();
                     }
                     pp->rotateTarget += val;
                     pp->rotate += val;

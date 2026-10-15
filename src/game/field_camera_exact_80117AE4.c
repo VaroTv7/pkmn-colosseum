@@ -30,7 +30,7 @@ typedef struct FieldCameraTexEntry {
     /* 0x14 */ u32 cameraRes;
 } FieldCameraTexEntry;
 
-extern u32 fn_80113F48(void);
+extern u32 std093_getCurrentGroupID(void);
 extern void* GSresGetResource(u32 group, u32 id);
 extern void GSmodelResetTextureChange(void* model);
 extern void GStextureFree(void* texture);
@@ -66,7 +66,7 @@ extern void* lbl_8047AD8C;                /* render texture */
 extern void* lbl_8047AD90;                /* model */
 extern void* lbl_8047AD94;                /* camera */
 
-u8 fn_80117AE4(u32 id)
+u8 std171_mapSetTextureChange(u32 id)
 {
     u32 count;
     u8 found;
@@ -77,7 +77,7 @@ u8 fn_80117AE4(u32 id)
 
     if (lbl_8047AD88 != NULL) {
         GSmodelResetTextureChange(
-            GSresGetResource(fn_80113F48(), lbl_8047AD88->textureRes));
+            GSresGetResource(std093_getCurrentGroupID(), lbl_8047AD88->textureRes));
         if (lbl_8047AD8C != NULL) {
             GStextureFree(lbl_8047AD8C);
             lbl_8047AD8C = NULL;
@@ -112,26 +112,26 @@ u8 fn_80117AE4(u32 id)
         lbl_8047AD88 = NULL;
         return 0;
     }
-    lbl_8047AD90 = floorOpenModel(fn_80113F48(), lbl_8047AD88->modelRes);
+    lbl_8047AD90 = floorOpenModel(std093_getCurrentGroupID(), lbl_8047AD88->modelRes);
     GSmodelSetVisibility(lbl_8047AD90, 0);
     GSmodelLinkTexAnimToAnim(lbl_8047AD90, 1);
     GSmodelSetAnimIndex(lbl_8047AD90, lbl_8047AD88->animIndex);
     GSmodelStartAnimation(lbl_8047AD90);
-    lbl_8047AD94 = GSresGetResource(fn_80113F48(), lbl_8047AD88->cameraRes);
+    lbl_8047AD94 = GSresGetResource(std093_getCurrentGroupID(), lbl_8047AD88->cameraRes);
     GSmodelSetTextureChange(
-        GSresGetResource(fn_80113F48(), lbl_8047AD88->textureRes),
+        GSresGetResource(std093_getCurrentGroupID(), lbl_8047AD88->textureRes),
         lbl_8047AD8C);
     lbl_80478B40 = id;
     return 1;
 }
 
-void fn_80117C84(void)
+void tvRelease(void)
 {
     FieldCameraTexEntry* entry = lbl_8047AD88;
 
     if (entry != NULL) {
         GSmodelResetTextureChange(
-            GSresGetResource(fn_80113F48(), entry->textureRes));
+            GSresGetResource(std093_getCurrentGroupID(), entry->textureRes));
         if (lbl_8047AD8C != NULL) {
             GStextureFree(lbl_8047AD8C);
             lbl_8047AD8C = NULL;
@@ -148,7 +148,7 @@ void fn_80117C84(void)
     lbl_8047AD84 = 0;
 }
 
-void fn_80117D14(void)
+void tvRender(void)
 {
     u16 viewportX;
     u16 viewportY;

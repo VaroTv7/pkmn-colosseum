@@ -70,19 +70,19 @@ typedef struct WinSpriteVec3 {
 extern void GSlogWrite(const char* fmt, ...);
 extern u16 _toolentryAlloc__FUl(u32 size);
 extern void* fn_800E27B0(u16 handle);
-extern void fn_800D88DC(s32);
-extern void fn_800D888C(s32);
-extern void fn_800DA4C4(s32, s32, s32);
-extern void fn_800D6A00(s32);
-extern void fn_800D7820(s32);
-extern void fn_800D67BC(s32);
+extern void gfxSetFlags(s32);
+extern void gfxClearFlags(s32);
+extern void gfxSetBlendMode(s32, s32, s32);
+extern void gfxSetPrimitive(s32);
+extern void gfxSetVtxDesc(s32);
+extern void gfxBegin(s32);
 extern void fn_800D5CB8(s32, u8, u8, u8, u8);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 extern void* fn_800F92D4(u32);
-extern void fn_800D85D4(s32, void*);
+extern void gfxLoadTexture(s32, void*);
 extern u16 GStextureGetXsize(void*);
 extern u16 GStextureGetYsize(void*);
-extern void fn_800D59B8(s32, f32, f32);
+extern void gfxVtxTexCoord(s32, f32, f32);
 extern void fn_800D61E4(s32, s32);
 extern void fn_800E0718(void*, const void*, f32);
 extern void set__5GSvecFfff(void*, f32, f32, f32);
@@ -209,14 +209,14 @@ void winSpriteDraw(u8* context, WinSpriteDrawNode* sprite)
 
     switch (sprite->kind) {
     case 0:
-        fn_800DA4C4(1, 6, 7);
+        gfxSetBlendMode(1, 6, 7);
         break;
     case 1:
         fn_800DA100(1, 6, 0, 1, 0, 0);
-        fn_800DA4C4(1, 4, 0);
+        gfxSetBlendMode(1, 4, 0);
         break;
     case 2:
-        fn_800DA4C4(1, 6, 1);
+        gfxSetBlendMode(1, 6, 1);
         break;
     }
 
@@ -230,14 +230,14 @@ void winSpriteDraw(u8* context, WinSpriteDrawNode* sprite)
         spriteSetEnv();
         switch (sprite->kind) {
         case 0:
-            fn_800DA4C4(1, 6, 7);
+            gfxSetBlendMode(1, 6, 7);
             break;
         case 1:
             fn_800DA100(1, 6, 0, 1, 0, 0);
-            fn_800DA4C4(1, 4, 0);
+            gfxSetBlendMode(1, 4, 0);
             break;
         case 2:
-            fn_800DA4C4(1, 6, 1);
+            gfxSetBlendMode(1, 6, 1);
             break;
         }
     }
@@ -273,13 +273,13 @@ void winSpriteDraw(u8* context, WinSpriteDrawNode* sprite)
 
     drawFlag = sprite->drawFlags & 2;
     if (drawFlag != 0) {
-        fn_800D88DC(1);
-        fn_800D888C(6);
+        gfxSetFlags(1);
+        gfxClearFlags(6);
         switch (sprite->primitive) {
         case 0x10000:
-            fn_800D6A00(3);
-            fn_800D7820((s32)lbl_80314E08);
-            fn_800D67BC(3);
+            gfxSetPrimitive(3);
+            gfxSetVtxDesc((s32)lbl_80314E08);
+            gfxBegin(3);
             fn_800D61E4(sprite->x, sprite->y);
             fn_800D5CB8(0, red, green, blue, alpha);
             fn_800D61E4((s16)(sprite->x + sprite->crop_x),
@@ -288,7 +288,7 @@ void winSpriteDraw(u8* context, WinSpriteDrawNode* sprite)
             fn_800D61E4((s16)(sprite->x + sprite->width),
                          (s16)(sprite->y + sprite->height));
             fn_800D5CB8(0, red, green, blue, alpha);
-            fn_800D6728();
+            gfxEnd();
             break;
         case 0x10001:
             fn_8001EA98(sprite->x, sprite->y, sprite->width, sprite->height);
@@ -301,29 +301,29 @@ void winSpriteDraw(u8* context, WinSpriteDrawNode* sprite)
             red2 = (u8)(((u16)sprite->crop_x * red) / 255);
             green2 = (u8)(((u16)sprite->crop_y * green) / 255);
             blue2 = (u8)(((u16)sprite->crop_width * blue) / 255);
-            fn_800D6A00(7);
-            fn_800D7820((s32)lbl_80314E08);
-            fn_800D67BC(2);
+            gfxSetPrimitive(7);
+            gfxSetVtxDesc((s32)lbl_80314E08);
+            gfxBegin(2);
             fn_800D61E4(sprite->x, sprite->y);
             fn_800D5CB8(0, red2, green2, blue2, alpha);
             fn_800D61E4((s16)(sprite->x + sprite->width),
                          (s16)(sprite->y + sprite->height));
             fn_800D5CB8(0, red2, green2, blue2, alpha);
-            fn_800D6728();
+            gfxEnd();
             break;
         case 0x10003:
             red2 = (u8)(((u16)sprite->crop_x * red) / 255);
             green2 = (u8)(((u16)sprite->crop_y * green) / 255);
             blue2 = (u8)(((u16)sprite->crop_width * blue) / 255);
             fn_800D5648(1.0f);
-            fn_800D6A00(1);
-            fn_800D7820((s32)lbl_80314E08);
-            fn_800D67BC(2);
+            gfxSetPrimitive(1);
+            gfxSetVtxDesc((s32)lbl_80314E08);
+            gfxBegin(2);
             fn_800D61E4(sprite->x, sprite->y);
             fn_800D5CB8(0, red2, green2, blue2, alpha);
             fn_800D61E4(sprite->width, sprite->height);
             fn_800D5CB8(0, red2, green2, blue2, alpha);
-            fn_800D6728();
+            gfxEnd();
             break;
         }
     }
@@ -358,11 +358,11 @@ void winSpriteDrawTexture(u8* context, WinSpriteDrawNode* sprite)
     blue = (u8)((sprite->color[2] * context[0x8A]) / 255);
     alpha = (u8)((sprite->color[3] * context[0x8B]) / 255);
 
-    fn_800D88DC(3);
-    fn_800D888C(4);
+    gfxSetFlags(3);
+    gfxClearFlags(4);
     texture = fn_800F92D4(sprite->texture_id);
     if (texture != 0) {
-        fn_800D85D4(0, texture);
+        gfxLoadTexture(0, texture);
         if (sprite->crop_width != WIN_ABS(sprite->width)) {
             width = sprite->crop_width - 2;
             left = sprite->crop_x + 1;
@@ -423,15 +423,15 @@ void winSpriteDrawTexture(u8* context, WinSpriteDrawNode* sprite)
         sQuadY[i] = point.z * sprite->scale_y;
     }
 
-    fn_800D6A00(6);
-    fn_800D7820((s32)lbl_80314F98);
-    fn_800D67BC(4);
+    gfxSetPrimitive(6);
+    gfxSetVtxDesc((s32)lbl_80314F98);
+    gfxBegin(4);
     for (i = 0; i < 4; i++) {
         fn_800D61E4((s32)(center_x + sQuadX[i]), (s32)(center_y + sQuadY[i]));
         fn_800D5CB8(0, red, green, blue, alpha);
-        fn_800D59B8(0, sQuadU[i], sQuadV[i]);
+        gfxVtxTexCoord(0, sQuadU[i], sQuadV[i]);
     }
-    fn_800D6728();
+    gfxEnd();
 }
 
 

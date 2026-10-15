@@ -46,11 +46,11 @@ extern void* HSD_FogLoadDesc(void* desc);
 extern void HSD_FogSet(u32 fog);
 extern void fn_8016EA88(void);
 extern void fn_8016EB30(void);
-extern void* fn_800D7BF8(u32 index);
+extern void* gfxGetCameraMatrix(u32 index);
 extern void GSvecTransform(f32* out, GSMtx34 m, const f32* in);
 extern void GXProject(f32 x, f32 y, f32 z, GSMtx34 mtx, const f32* pm,
                       const f32* vp, f32* sx, f32* sy, f32* sz);
-extern void fn_800D4F98(s32 arg0, ...);
+extern void gfxRecordCommand(s32 arg0, ...);
 extern void GXFlush(void);
 extern void GSgfxBackFBDoFrame(void);
 extern void fn_801BF8A0(s32 value);
@@ -67,12 +67,12 @@ extern void OSYieldThread(void);
 extern u32 OSGetTick(void);
 extern void fn_8019C6FC(void);
 extern void fn_800D1070(u32 frames);
-extern void fn_800DC6D8(u32 frames);
+extern void GSlightUpdate(u32 frames);
 extern void fn_800E3884(u32 frames, s32 mode);
 extern void fn_801181B0(s32 frames);
 extern void fn_800D13C4(void* a);
 extern void fn_800DC874(void* a);
-extern void fn_801183EC(void* a);
+extern void gsParticleUpdate(void* a);
 extern void modelShadowRender__FP10GSgfxLayer(void);
 extern void fn_8019C708(s32 a);
 extern void HSD_SetEraseColor(u8 a, u8 b, u8 c, u8 d);
@@ -98,7 +98,7 @@ static inline void gsSetFogColor(GSRenderColor color) {
     }
 }
 
-void fn_800D2B90(void* arg1) {
+void gfxSetFog(void* arg1) {
     GSRenderColor color;
     void* prevLight;
     color = lbl_80270350;
@@ -138,8 +138,8 @@ s32 fn_800D2DE8(f32* points, f32* screen, u32 count)
 
     src = points;
     dst = screen;
-    viewMtx = fn_800D7BF8(0);
-    proj = fn_800D7BF8(2);
+    viewMtx = gfxGetCameraMatrix(0);
+    proj = gfxGetCameraMatrix(2);
     if (viewMtx == NULL || proj == NULL) {
         return 0;
     }
@@ -173,7 +173,7 @@ s32 fn_800D2DE8(f32* points, f32* screen, u32 count)
 }
 
 /* 0x800D2F34 | 0x128 */
-s32 fn_800D2F34(f32* point, f32* screen)
+s32 gfxWorldToScreen(f32* point, f32* screen)
 {
     f32 projection[7];
     f32 viewport[6];
@@ -182,8 +182,8 @@ s32 fn_800D2F34(f32* point, f32* screen)
     GSMtx44* proj;
     f32 far;
 
-    viewMtx = fn_800D7BF8(0);
-    proj = fn_800D7BF8(2);
+    viewMtx = gfxGetCameraMatrix(0);
+    proj = gfxGetCameraMatrix(2);
     if (viewMtx == NULL || proj == NULL) {
         return 0;
     }
@@ -230,7 +230,7 @@ void fn_800D3074(u32 flag)
     lbl_8047AA80->renderEnabled = flag;
 }
 
-u32 fn_800D3088(void)
+u32 msgGetCharsPerFrame(void)
 {
     return lbl_8047AA80->frameDelta;
 }
@@ -248,7 +248,7 @@ void fn_800D30A0(u32 value)
 void fn_800D30AC(void)
 {
     if (lbl_8047AA80->mode == 1) {
-        fn_800D4F98(4, 0);
+        gfxRecordCommand(4, 0);
     } else {
         GXFlush();
     }
@@ -352,7 +352,7 @@ void fn_800D3190(void)
     lbl_804001F0[11] += end - start;
 
     start = OSGetTick();
-    fn_800DC6D8(lbl_8047AA80->frameDelta);
+    GSlightUpdate(lbl_8047AA80->frameDelta);
     end = OSGetTick();
     lbl_804001F0[12] += end - start;
 
@@ -434,7 +434,7 @@ void fn_800D3410(void* arg0, u8 arg1) {
             ((u32*)&lbl_804001F0)[0x34 / 4] = tick - startTick;
 
             startTick = OSGetTick();
-            fn_801183EC((void*)*(u32*)((u8*)lbl_8047AA80 + 0x54));
+            gsParticleUpdate((void*)*(u32*)((u8*)lbl_8047AA80 + 0x54));
             tick = OSGetTick();
             ((u32*)&lbl_804001F0)[0x38 / 4] = tick - startTick;
         }

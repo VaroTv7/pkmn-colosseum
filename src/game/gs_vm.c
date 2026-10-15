@@ -245,8 +245,8 @@ extern s32 sprintf(u8* buf, const char* fmt, ...);
 extern f64 fmod(f64 value, f64 modulus);
 extern void GSlogWrite(const char* fmt, ...);
 extern void GSlogWritef(const char* fmt, ...);
-extern u32 fn_800F106C(void);
-extern u32 fn_800D3088(void);
+extern u32 cms_CallStdTrampoline(void);
+extern u32 msgGetCharsPerFrame(void);
 extern void _threadSwitch(void);
 extern u32 fn_800F0374(GSThread* thread);
 extern void GSthreadTerminate(GSThread* thread);
@@ -325,7 +325,7 @@ static inline GSVMValue GSvmGetOperand(GSVMCtx* ctx, u16 desc)
  * function pointer + 8 argument-type bytes, 2 = float, 0 = end), splits the
  * arguments into the integer/float register images consumed by
  * fn_800F106C, stores the result in the frame's return slot and unwinds. */
-s32 fn_800F10E8(GSVMCtx* ctx)
+s32 cms_op37_callStandard(GSVMCtx* ctx)
 {
     u8* record;
     u32 result;
@@ -360,7 +360,7 @@ s32 fn_800F10E8(GSVMCtx* ctx)
         }
         lbl_8047AC3C = lbl_80401BB8;
         lbl_8047AC40 = lbl_80401BD8;
-        result = fn_800F106C();
+        result = cms_CallStdTrampoline();
     }
 
     ctx->stack[ctx->frame - 1].u = result;
@@ -374,7 +374,7 @@ s32 fn_800F10E8(GSVMCtx* ctx)
  * per-resume deltas from fn_800D3088 add up to argument 0.  The VM state byte
  * (+0x04) is 2 while waiting; an abort request (4 -> 3) leaves early with 0.
  */
-s32 fn_800F13D0(GSVMCtx* ctx)
+s32 cms_op36_yield(GSVMCtx* ctx)
 {
     s32 wait;
     s32 elapsed;
@@ -384,7 +384,7 @@ s32 fn_800F13D0(GSVMCtx* ctx)
     args = &ctx->stack[ctx->frame];
     wait = args[0].s;
     ctx->status = 2;
-    for (elapsed = 0; elapsed < wait; elapsed += fn_800D3088()) {
+    for (elapsed = 0; elapsed < wait; elapsed += msgGetCharsPerFrame()) {
         if (ctx->status == 4) {
             ctx->status = 3;
         }
@@ -408,7 +408,7 @@ s32 fn_800F13D0(GSVMCtx* ctx)
  * A %-conversion cut off by the end of the string adds whatever len held
  * before, as retail does.
  */
-s32 fn_800F16C0(GSVMCtx* ctx)
+s32 cms_op35_printf(GSVMCtx* ctx)
 {
     s32 len;
     s32 argIdx;
@@ -478,7 +478,7 @@ s32 fn_800F16C0(GSVMCtx* ctx)
 /* 0x800F1A0C | 0x42C */
 /* Script VM logical OR: the first descriptor names the right-hand operand
  * (top of stack), the second the left; the result (0/1) is pushed. */
-s32 fn_800F1A0C(GSVMCtx* ctx) {
+s32 cms_op34_orl(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -508,7 +508,7 @@ s32 fn_800F1A0C(GSVMCtx* ctx) {
 
 /* 0x800F1E38 | 0x42C */
 /* Script VM logical AND; same operand handling as fn_800F1A0C. */
-s32 fn_800F1E38(GSVMCtx* ctx) {
+s32 cms_op33_andl(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -542,7 +542,7 @@ s32 fn_800F1E38(GSVMCtx* ctx) {
 /* Script VM struct assignment (_codeStructAssign): copies `count` words
  * from the source variable block (or the top of the stack) to the
  * destination variable block and pushes the copied words. */
-s32 fn_800F2264(GSVMCtx* ctx)
+s32 cms_op32_copyStruct(GSVMCtx* ctx)
 {
     u8 srcDesc;
     u8 dstDesc;
@@ -609,7 +609,7 @@ static inline void setValue(GSVMCtx* ctx, u16 desc, GSVMValue value)
 /* 0x800F24F4 | 0x2E0 */
 /* Script VM assignment (setValue): converts the source operand to the
  * destination's type, stores it and pushes it. */
-s32 fn_800F24F4(GSVMCtx* ctx)
+s32 cms_op31_setVar(GSVMCtx* ctx)
 {
     u8 dstDesc;
     u8 srcDesc;
@@ -631,7 +631,7 @@ s32 fn_800F24F4(GSVMCtx* ctx)
 }
 
 /* 0x800F27D4: script VM "lhs != rhs" (operands as in fn_800F1A0C). */
-s32 fn_800F27D4(GSVMCtx* ctx) {
+s32 cms_op30_notEqual(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -660,7 +660,7 @@ s32 fn_800F27D4(GSVMCtx* ctx) {
 }
 
 /* 0x800F2BE8: script VM "lhs == rhs" (operands as in fn_800F1A0C). */
-s32 fn_800F2BE8(GSVMCtx* ctx) {
+s32 cms_op29_equal(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -689,7 +689,7 @@ s32 fn_800F2BE8(GSVMCtx* ctx) {
 }
 
 /* 0x800F2FF8: script VM "lhs >= rhs" (operands as in fn_800F1A0C). */
-s32 fn_800F2FF8(GSVMCtx* ctx) {
+s32 cms_op28_greaterThanEqual(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -718,7 +718,7 @@ s32 fn_800F2FF8(GSVMCtx* ctx) {
 }
 
 /* 0x800F3418: script VM "lhs > rhs" (operands as in fn_800F1A0C). */
-s32 fn_800F3418(GSVMCtx* ctx) {
+s32 cms_op27_greaterThan(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -747,7 +747,7 @@ s32 fn_800F3418(GSVMCtx* ctx) {
 }
 
 /* 0x800F3830: script VM "lhs <= rhs" (operands as in fn_800F1A0C). */
-s32 fn_800F3830(GSVMCtx* ctx) {
+s32 cms_op26_lessThanEqual(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -776,7 +776,7 @@ s32 fn_800F3830(GSVMCtx* ctx) {
 }
 
 /* 0x800F3C50: script VM "lhs < rhs" (operands as in fn_800F1A0C). */
-s32 fn_800F3C50(GSVMCtx* ctx) {
+s32 cms_op25_lessThan(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -805,7 +805,7 @@ s32 fn_800F3C50(GSVMCtx* ctx) {
 }
 
 /* 0x800F4068: script VM "lhs - rhs" (operands as in fn_800F1A0C). */
-s32 fn_800F4068(GSVMCtx* ctx) {
+s32 cms_op24_subtract(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -834,7 +834,7 @@ s32 fn_800F4068(GSVMCtx* ctx) {
 }
 
 /* 0x800F4440: script VM "lhs + rhs" (operands as in fn_800F1A0C). */
-s32 fn_800F4440(GSVMCtx* ctx) {
+s32 cms_op23_add(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -863,7 +863,7 @@ s32 fn_800F4440(GSVMCtx* ctx) {
 }
 
 /* 0x800F4818: script VM "lhs % (fmod of the integer lhs when a float is involved) rhs" (operands as in fn_800F1A0C). */
-s32 fn_800F4818(GSVMCtx* ctx) {
+s32 cms_op22_mod(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -897,7 +897,7 @@ s32 fn_800F4818(GSVMCtx* ctx) {
 }
 
 /* 0x800F4C38: script VM "lhs / rhs" (operands as in fn_800F1A0C). */
-s32 fn_800F4C38(GSVMCtx* ctx) {
+s32 cms_op21_divide(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -931,7 +931,7 @@ s32 fn_800F4C38(GSVMCtx* ctx) {
 }
 
 /* 0x800F502C: script VM "lhs * rhs" (operands as in fn_800F1A0C). */
-s32 fn_800F502C(GSVMCtx* ctx) {
+s32 cms_op20_multiply(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -961,7 +961,7 @@ s32 fn_800F502C(GSVMCtx* ctx) {
 
 
 /* 0x800F5404 | 0x1D8: push an operand. */
-s32 fn_800F5404(GSVMCtx* ctx)
+s32 cms_op19_pushVar2(GSVMCtx* ctx)
 {
     u8 desc;
     GSVMValue value;
@@ -973,7 +973,7 @@ s32 fn_800F5404(GSVMCtx* ctx)
 }
 
 /* 0x800F55DC | 0x214: "-operand". */
-s32 fn_800F55DC(GSVMCtx* ctx)
+s32 cms_op18_negate(GSVMCtx* ctx)
 {
     u8 desc;
     GSVMValue value;
@@ -991,7 +991,7 @@ s32 fn_800F55DC(GSVMCtx* ctx)
 }
 
 /* 0x800F57F0 | 0x24C: "!operand". */
-s32 fn_800F57F0(GSVMCtx* ctx)
+s32 cms_op17_not(GSVMCtx* ctx)
 {
     u8 desc;
     GSVMValue value;
@@ -1010,7 +1010,7 @@ s32 fn_800F57F0(GSVMCtx* ctx)
 
 /* 0x800F5A3C | 0x264: push `count` consecutive variables, each preceded by
  * its index, starting at the popped index. */
-s32 fn_800F5A3C(GSVMCtx* ctx)
+s32 cms_op16_pushMultiVar(GSVMCtx* ctx)
 {
     GSVMValue start;
     GSVMValue value;
@@ -1039,7 +1039,7 @@ s32 fn_800F5A3C(GSVMCtx* ctx)
 
 /* 0x800F5CA0 | 0x24C: keep the popped index and push the address of the
  * variable it names. */
-s32 fn_800F5CA0(GSVMCtx* ctx)
+s32 cms_op15_pushVarRef(GSVMCtx* ctx)
 {
     u8 desc;
     GSVMValue index;
@@ -1054,7 +1054,7 @@ s32 fn_800F5CA0(GSVMCtx* ctx)
 }
 
 /* 0x800F5EEC: script VM "lhs | (bitwise) rhs" (operands as in fn_800F1A0C). */
-s32 fn_800F5EEC(GSVMCtx* ctx) {
+s32 cms_op14_or(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -1083,7 +1083,7 @@ s32 fn_800F5EEC(GSVMCtx* ctx) {
 }
 
 /* 0x800F62BC: script VM "lhs & (bitwise) rhs" (operands as in fn_800F1A0C). */
-s32 fn_800F62BC(GSVMCtx* ctx) {
+s32 cms_op13_and(GSVMCtx* ctx) {
     u8 lhsDesc;
     u8 rhsDesc;
     GSVMValue lhs;
@@ -1112,7 +1112,7 @@ s32 fn_800F62BC(GSVMCtx* ctx) {
 }
 
 /* 0x800F668C | 0x80: push the immediate word that follows the type byte. */
-s32 fn_800F668C(GSVMCtx* ctx)
+s32 cms_op08_pushImmediate(GSVMCtx* ctx)
 {
     ctx->ip++;
     GSvmPush(ctx, *(u32*)ctx->ip);
@@ -1122,7 +1122,7 @@ s32 fn_800F668C(GSVMCtx* ctx)
 
 /* 0x800F670C | 0xA0: branch to the bank offset that follows when the
  * popped value is zero. */
-s32 fn_800F670C(GSVMCtx* ctx)
+s32 cms_op07_jumpFalse(GSVMCtx* ctx)
 {
     GSVMValue cond;
 
@@ -1136,14 +1136,14 @@ s32 fn_800F670C(GSVMCtx* ctx)
 }
 
 /* 0x800F67AC | 0x1C: branch to the bank offset that follows. */
-s32 fn_800F67AC(GSVMCtx* ctx)
+s32 cms_op06_jump(GSVMCtx* ctx)
 {
     ctx->ip = (u8*)ctx->script + *(u32*)ctx->ip;
     return 1;
 }
 
 /* 0x800F67C8 | 0x184: return from a script function. */
-s32 fn_800F67C8(GSVMCtx* ctx)
+s32 cms_op05_return(GSVMCtx* ctx)
 {
     GSVMValue argc;
     GSVMValue frame;
@@ -1166,7 +1166,7 @@ s32 fn_800F67C8(GSVMCtx* ctx)
 }
 
 /* 0x800F694C | 0x168: call a script function. */
-s32 fn_800F694C(GSVMCtx* ctx)
+s32 cms_op04_call(GSVMCtx* ctx)
 {
     u32 func;
     u16 argc;
@@ -1193,7 +1193,7 @@ s32 fn_800F694C(GSVMCtx* ctx)
 }
 
 /* 0x800F6AB4 | 0xA0: drop `count` stack values. */
-s32 fn_800F6AB4(GSVMCtx* ctx)
+s32 cms_op03_pop(GSVMCtx* ctx)
 {
     u16 count;
     s32 i;
@@ -1208,21 +1208,21 @@ s32 fn_800F6AB4(GSVMCtx* ctx)
 }
 
 /* 0x800F6B54 | 0x58: push -1. */
-s32 fn_800F6B54(GSVMCtx* ctx)
+s32 cms_op02_pushMinus1(GSVMCtx* ctx)
 {
     GSvmPush(ctx, -1);
     return 1;
 }
 
 /* 0x800F6BAC | 0x10: stop the script. */
-s32 fn_800F6BAC(GSVMCtx* ctx)
+s32 cms_op01_exit(GSVMCtx* ctx)
 {
     ctx->status = 3;
     return 0;
 }
 
 /* 0x800F6BBC | 0x8: no operation. */
-s32 fn_800F6BBC(GSVMCtx* ctx)
+s32 cms_op00_nop(GSVMCtx* ctx)
 {
     return 1;
 }
@@ -1230,16 +1230,16 @@ s32 fn_800F6BBC(GSVMCtx* ctx)
 #ifdef GS_VM_WHOLE_UNIT
 /* Opcode handlers, indexed by the opcode byte. */
 s32 (*lbl_803155D0[0x26])(GSVMCtx* ctx) = {
-    fn_800F6BBC, fn_800F6BAC, fn_800F6B54, fn_800F6AB4,
-    fn_800F694C, fn_800F67C8, fn_800F67AC, fn_800F670C,
-    fn_800F668C, NULL,        NULL,        NULL,
-    NULL,        fn_800F62BC, fn_800F5EEC, fn_800F5CA0,
-    fn_800F5A3C, fn_800F57F0, fn_800F55DC, fn_800F5404,
-    fn_800F502C, fn_800F4C38, fn_800F4818, fn_800F4440,
-    fn_800F4068, fn_800F3C50, fn_800F3830, fn_800F3418,
-    fn_800F2FF8, fn_800F2BE8, fn_800F27D4, fn_800F24F4,
-    fn_800F2264, fn_800F1E38, fn_800F1A0C, fn_800F16C0,
-    fn_800F13D0, fn_800F10E8,
+    cms_op00_nop, cms_op01_exit, cms_op02_pushMinus1, cms_op03_pop,
+    cms_op04_call, cms_op05_return, cms_op06_jump, cms_op07_jumpFalse,
+    cms_op08_pushImmediate, NULL,        NULL,        NULL,
+    NULL,        cms_op13_and, cms_op14_or, cms_op15_pushVarRef,
+    cms_op16_pushMultiVar, cms_op17_not, cms_op18_negate, cms_op19_pushVar2,
+    cms_op20_multiply, cms_op21_divide, cms_op22_mod, cms_op23_add,
+    cms_op24_subtract, cms_op25_lessThan, cms_op26_lessThanEqual, cms_op27_greaterThan,
+    cms_op28_greaterThanEqual, cms_op29_equal, cms_op30_notEqual, cms_op31_setVar,
+    cms_op32_copyStruct, cms_op33_andl, cms_op34_orl, cms_op35_printf,
+    cms_op36_yield, cms_op37_callStandard,
 };
 #else
 /* Opcode handlers, indexed by the opcode byte (.data, outside the
@@ -1249,7 +1249,7 @@ extern s32 (*lbl_803155D0[0x26])(GSVMCtx* ctx);
 
 /* 0x800F6BC4 | 0x154: run a script until it stops; returns (and passes
  * to the completion callback) the value left on the stack. */
-u32 fn_800F6BC4(GSVMCtx* ctx)
+u32 cms_ScriptExecute(GSVMCtx* ctx)
 {
     u8 op;
     s32 (*handler)(GSVMCtx*);
@@ -1291,7 +1291,7 @@ u32 fn_800F6BC4(GSVMCtx* ctx)
 
 /* 0x800F6D18 | 0x350: set up a context to run function `scriptId & 0xFFFF`
  * of script `scriptId >> 16` with `argc` arguments. */
-GSVMCtx* fn_800F6D18(u32 scriptId, u32 argc, va_list args)
+GSVMCtx* cms_ScriptCreateThread(u32 scriptId, u32 argc, va_list args)
 {
     GSVMPool* pool;
     GSVMCtx* ctx;
@@ -1471,12 +1471,12 @@ u16 fn_800F7318(u32 affinity, u32 script, u32 stackSize, u32 autoStart,
     GSThread* thread;
 
     va_start(args, argc);
-    ctx = fn_800F6D18(script, argc, args);
+    ctx = cms_ScriptCreateThread(script, argc, args);
     priority = floorGetCurrentContext();
     if (ctx == NULL) {
         return 0;
     }
-    thread = GSthreadCreate(affinity, priority, stackSize, 1, autoStart, fn_800F6BC4);
+    thread = GSthreadCreate(affinity, priority, stackSize, 1, autoStart, cms_ScriptExecute);
     if (thread != NULL) {
         ctx->thread = thread;
         ctx->callback = (void (*)(GSVMCtx*, u32))done;
@@ -1488,17 +1488,17 @@ u16 fn_800F7318(u32 affinity, u32 script, u32 stackSize, u32 autoStart,
 }
 
 /* 0x800F7434 | 0x1C8: run a script to completion on the calling thread. */
-u32 fn_800F7434(u32 script, u32 argc, ...)
+u32 cmsRunSync(u32 script, u32 argc, ...)
 {
     va_list args;
     GSVMCtx* ctx;
 
     va_start(args, argc);
-    ctx = fn_800F6D18(script, argc, args);
+    ctx = cms_ScriptCreateThread(script, argc, args);
     if (ctx == NULL) {
         return 0;
     }
-    return fn_800F6BC4(ctx);
+    return cms_ScriptExecute(ctx);
 }
 
 /* 0x800F75FC | 0x10: install the native-function table. */

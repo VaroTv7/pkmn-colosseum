@@ -177,33 +177,33 @@ extern void* GScameraGetActiveCamera(void);
 extern void  GScameraGetPosition(void* mtx, void* vec);
 extern void  GScameraGetPerspective(void* mtx, void* rx, void* ry, void* rz, void* scale);
 extern f32   GSvecDistance(void* vecA, void* vecB);
-extern void  fn_800E0168(void* dst, void* srcA, void* srcB);
+extern void  GSvecSub(void* dst, void* srcA, void* srcB);
 extern void  fn_800E0060(void* dst, void* src);
-extern void  fn_800E013C(void* dst, void* src, f32 scale);
+extern void  vecScale(void* dst, void* src, f32 scale);
 extern void  fn_800E019C(void* dst, void* a, void* b);
 extern void  fn_800E01D0(void* dst, void* src);
 extern void  fn_800E01F4(void* dst, f32 x, f32 y, f32 z);
 
 /* GX rendering pipeline */
-extern void  fn_800DA4C4(u32 a, u32 b, u32 c);
-extern void  fn_800DA2BC(u32 a, u32 b, u32 c);
-extern void  fn_800DA1E8(u32 a, u32 b, u32 c);
-extern void  fn_800DA028(u32 a);
-extern void  fn_800D88DC(u32 a);
-extern void  fn_800D888C(u32 a);
-extern void  fn_800D7820(void* model);
+extern void  gfxSetBlendMode(u32 a, u32 b, u32 c);
+extern void  gfxSetUpdates(u32 a, u32 b, u32 c);
+extern void  gfxSetZMode(u32 a, u32 b, u32 c);
+extern void  gfxSetCullMode(u32 a);
+extern void  gfxSetFlags(u32 a);
+extern void  gfxClearFlags(u32 a);
+extern void  gfxSetVtxDesc(void* model);
 extern void  fn_800E05C0(void* dst, f32 x, f32 y, f32 z);
 extern void  fn_800E048C(void* mtx, f32 x, f32 y, f32 z);
 extern void  fn_800D7F14(void* mtx);
-extern void  fn_800D6A00(u32 mode);
-extern void  fn_800D67BC(u16 index);
-extern void  fn_800D6680(f32 x, f32 y, f32 z);
+extern void  gfxSetPrimitive(u32 mode);
+extern void  gfxBegin(u16 index);
+extern void  gfxVtxPos(f32 x, f32 y, f32 z);
 extern void  fn_800D5CB8(u32 a, u8 r, u8 g, u8 b, u32 alpha);
 extern void  fn_800B9404(u32 index, u32 param);
 extern void  GXDrawDone(void);
 extern void  fn_800B856C(void);
 extern void  GStextureFree(void* model);
-extern void  fn_800D9B58(f32 a, f32 b, f32 c, f32 d);
+extern void  gfxSetOrtho(f32 a, f32 b, f32 c, f32 d);
 extern void  fn_800D9ED8(u32 param);
 extern void* GSmodelGetPart(void* model, u32 mode);
 extern void  GSpartGetTransform(void* obj, void* a, void* b, void* c);
@@ -358,11 +358,11 @@ extern void  DCFlushRange(void* ptr, u32 size);
 /* Unload__13ModelSequenceFPUc: _billboardTransformHelper */
 /* fn_80140190: _billboardTransformHelper2 (0x11C bytes) */
 /* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl: _billboardTransformMain (0x2DC bytes) */
-extern f32 fn_800E008C(void*);
-extern void fn_800D6728(void);
-extern void fn_800D85D4(u32 a, void* b);
+extern f32 vecMag(void*);
+extern void gfxEnd(void);
+extern void gfxLoadTexture(u32 a, void* b);
 extern f32 fn_800E0BA0(void);
-extern void fn_800D59B8(u32 a, f32 b, f32 c);
+extern void gfxVtxTexCoord(u32 a, f32 b, f32 c);
 extern void fn_800D7E5C(void);
 extern void set__5GSvecFfff(void* dst, f32 x, f32 y, f32 z);
 /* Forward declarations for self-referencing asm blocks */
@@ -521,89 +521,89 @@ u32 _lightningRenderMain(void* ptr) {
         GScameraGetPosition(camera, cameraPos);
         GScameraGetPerspective(camera, &perspective, &unused, &unused, &unused);
         distance = GSvecDistance(cameraPos, modelPos);
-        fn_800DA4C4(1, 6, 1);
-        fn_800DA2BC(1, 1, 1);
-        fn_800DA1E8(1, 1, 1);
-        fn_800DA028(0);
-        scale = *(f32*)&lbl_8047D148 * fn_800E008C(p + 0x28) / (distance * perspective);
+        gfxSetBlendMode(1, 6, 1);
+        gfxSetUpdates(1, 1, 1);
+        gfxSetZMode(1, 1, 1);
+        gfxSetCullMode(0);
+        scale = *(f32*)&lbl_8047D148 * vecMag(p + 0x28) / (distance * perspective);
         if (scale > *(f32*)&lbl_8047D14C) {
             scale = *(f32*)&lbl_8047D14C;
         }
         fn_800B9404((s32)(*(f32*)&lbl_8047D150 * scale), 5);
-        fn_800D88DC(1);
-        fn_800D888C(6);
-        fn_800D7820(*(void**)(p + 0x14));
+        gfxSetFlags(1);
+        gfxClearFlags(6);
+        gfxSetVtxDesc(*(void**)(p + 0x14));
         fn_800E05C0(matrix, modelPos[0], modelPos[1], modelPos[2]);
         fn_800D7F14(matrix);
         fn_800E048C(matrix, *(f32*)(p + 0x28), *(f32*)(p + 0x2C), *(f32*)(p + 0x30));
         fn_800D7F14(matrix);
-        fn_800D6A00(2);
+        gfxSetPrimitive(2);
 
         entry = *(u8**)(p + 0x4);
         for (i = 0; i < count; i++, entry += 0x97C) {
             if (*(u32*)(entry + 0x978) != 0) {
-                fn_800D67BC((u16)(*(u32*)(entry + 0x978) + 1));
-                fn_800D6680(*(f32*)(entry + 0x960), *(f32*)(entry + 0x964), *(f32*)(entry + 0x968));
+                gfxBegin((u16)(*(u32*)(entry + 0x978) + 1));
+                gfxVtxPos(*(f32*)(entry + 0x960), *(f32*)(entry + 0x964), *(f32*)(entry + 0x968));
                 fn_800D5CB8(0, p[0x20], p[0x21], p[0x22], p[0x23]);
                 segments = *(u32*)(entry + 0x978);
                 point = entry;
                 for (j = 0; j < segments; j++, point += 0x18) {
-                    fn_800D6680(*(f32*)(point + 0), *(f32*)(point + 4), *(f32*)(point + 8));
+                    gfxVtxPos(*(f32*)(point + 0), *(f32*)(point + 4), *(f32*)(point + 8));
                     fn_800D5CB8(0, p[0x20], p[0x21], p[0x22], p[0x23]);
                 }
-                fn_800D6728();
+                gfxEnd();
             }
         }
 
         if (*(void**)(p + 0x1C) != NULL) {
-            fn_800DA1E8(1, 2, 1);
-            fn_800DA2BC(1, 1, 0);
-            fn_800D88DC(3);
-            fn_800D888C(4);
-            fn_800D7820(*(void**)(p + 0x18));
-            fn_800D85D4(0, *(void**)(p + 0x1C));
-            fn_800D6A00(6);
-            fn_800D67BC((u16)(count << 3));
+            gfxSetZMode(1, 2, 1);
+            gfxSetUpdates(1, 1, 0);
+            gfxSetFlags(3);
+            gfxClearFlags(4);
+            gfxSetVtxDesc(*(void**)(p + 0x18));
+            gfxLoadTexture(0, *(void**)(p + 0x1C));
+            gfxSetPrimitive(6);
+            gfxBegin((u16)(count << 3));
             entry = *(u8**)(p + 4);
             grow = *(f32*)&lbl_8047D158;
             for (i = 0; i < count; i++, entry += 0x97C) {
                 width = *(f32*)(p + 0x6C) * fn_800E0BA0() + *(f32*)(p + 0x68);
-            fn_800D6680(*(f32*)(entry + 0x960) - width, *(f32*)(entry + 0x964),
+            gfxVtxPos(*(f32*)(entry + 0x960) - width, *(f32*)(entry + 0x964),
                         *(f32*)(entry + 0x968) - width);
             fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            fn_800D59B8(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D154);
-            fn_800D6680(*(f32*)(entry + 0x960) + width, *(f32*)(entry + 0x964),
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D154);
+            gfxVtxPos(*(f32*)(entry + 0x960) + width, *(f32*)(entry + 0x964),
                         *(f32*)(entry + 0x968) - width);
             fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            fn_800D59B8(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D158);
-            fn_800D6680(*(f32*)(entry + 0x960) + width, *(f32*)(entry + 0x964),
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D158);
+            gfxVtxPos(*(f32*)(entry + 0x960) + width, *(f32*)(entry + 0x964),
                         *(f32*)(entry + 0x968) + width);
             fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            fn_800D59B8(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D158);
-            fn_800D6680(*(f32*)(entry + 0x960) - width, *(f32*)(entry + 0x964),
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D158);
+            gfxVtxPos(*(f32*)(entry + 0x960) - width, *(f32*)(entry + 0x964),
                         *(f32*)(entry + 0x968) + width);
             fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            fn_800D59B8(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D154);
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D154);
 
                 outer = width * grow;
-            fn_800D6680(*(f32*)(entry + 0x96C) - outer, *(f32*)(entry + 0x970),
+            gfxVtxPos(*(f32*)(entry + 0x96C) - outer, *(f32*)(entry + 0x970),
                         *(f32*)(entry + 0x974) - outer);
             fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            fn_800D59B8(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D154);
-            fn_800D6680(*(f32*)(entry + 0x96C) + outer, *(f32*)(entry + 0x970),
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D154);
+            gfxVtxPos(*(f32*)(entry + 0x96C) + outer, *(f32*)(entry + 0x970),
                         *(f32*)(entry + 0x974) - outer);
             fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            fn_800D59B8(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D158);
-            fn_800D6680(*(f32*)(entry + 0x96C) + outer, *(f32*)(entry + 0x970),
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D154, *(f32*)&lbl_8047D158);
+            gfxVtxPos(*(f32*)(entry + 0x96C) + outer, *(f32*)(entry + 0x970),
                         *(f32*)(entry + 0x974) + outer);
             fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            fn_800D59B8(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D158);
-            fn_800D6680(*(f32*)(entry + 0x96C) - outer, *(f32*)(entry + 0x970),
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D158);
+            gfxVtxPos(*(f32*)(entry + 0x96C) - outer, *(f32*)(entry + 0x970),
                         *(f32*)(entry + 0x974) + outer);
             fn_800D5CB8(0, p[0x24], p[0x25], p[0x26], p[0x27]);
-            fn_800D59B8(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D154);
+            gfxVtxTexCoord(0, *(f32*)&lbl_8047D158, *(f32*)&lbl_8047D154);
             }
-            fn_800D6728();
+            gfxEnd();
         }
         fn_800D7E5C();
         fn_800D7E5C();
@@ -753,7 +753,7 @@ extern void fn_800E0718(void*, void*, f32);
 extern void GSvecTransformQuat(void* dst, void* quat, void* src);
 extern void GSmtxMakeYRotation(void* mtx, f32 angle);
 extern void GSvecTransform(void* dst, void* matrix, void* vec);
-extern void fn_800E013C(void* dst, void* src, f32 scale);
+extern void vecScale(void* dst, void* src, f32 scale);
 extern void GSvecAdd(void* dst, void* srcA, void* srcB);
 #if 0
 asm void fn_80138838(void* ptr, u32 b) {
@@ -812,14 +812,14 @@ void fn_80138838(void* ptr, u32 b) {
             if (b != 0) {
                 GSvecCopy(current + 0xC, direction);
             } else {
-                fn_800E013C(current + 0xC, current + 0xC,
+                vecScale(current + 0xC, current + 0xC,
                             1.0f - *(f32*)(p + 0x64));
-                fn_800E013C(direction, direction, *(f32*)(p + 0x64));
+                vecScale(direction, direction, *(f32*)(p + 0x64));
                 GSvecAdd(current + 0xC, direction, current + 0xC);
                 fn_800E0060(current + 0xC, current + 0xC);
             }
 
-            fn_800E013C(direction, current + 0xC,
+            vecScale(direction, current + 0xC,
                         *(f32*)(p + 0x60) * fn_800E0BA0() + *(f32*)(p + 0x5C));
             set__5GSvecFfff(noise, *(f32*)(p + 0x40) * fn_800E0BA0(),
                             *(f32*)(p + 0x44) * fn_800E0BA0(),
@@ -1183,11 +1183,11 @@ void fn_80139074(void* entry, u8* leaf) {
     GSvecCopy(leaf, leaf + 0xC);
     vec = (f32*)(leaf + 0x18);
     GSvecCopy(vec, leaf + 0x24);
-    fn_800E0168(vec, vec, leaf + 0xC);
+    GSvecSub(vec, vec, leaf + 0xC);
     fn_800E0060(vec, vec);
     distance0 = farRange * fn_800E0BA0() + farBase;
     distance0 *= *(f32*)(leaf + 0x50);
-    fn_800E013C(vec, vec, -distance0);
+    vecScale(vec, vec, -distance0);
     GSvecAdd(vec, vec, leaf);
 
     vec = (f32*)(leaf + 0xC);
@@ -1200,7 +1200,7 @@ void fn_80139074(void* entry, u8* leaf) {
     cosPitch1 = cos(pitch1);
     cosYaw1 = cos(yaw1);
     set__5GSvecFfff(vec, sinPitch1 * cosYaw1, cosPitch1, sinPitch1 * sinYaw1);
-    fn_800E013C(vec, vec, distance1);
+    vecScale(vec, vec, distance1);
     vec[1] += *(f32*)(config + 0x28);
     GSvecAdd(vec, vec, leaf);
 
@@ -1214,7 +1214,7 @@ void fn_80139074(void* entry, u8* leaf) {
     cosPitch2 = cos(pitch2);
     cosYaw2 = cos(yaw2);
     set__5GSvecFfff(vec, sinPitch2 * cosYaw2, cosPitch2, sinPitch2 * sinYaw2);
-    fn_800E013C(vec, vec, distance2);
+    vecScale(vec, vec, distance2);
     GSvecAdd(vec, vec, leaf + 0xC);
 }
 #endif
@@ -1351,7 +1351,7 @@ u8 _leaffxGenerateLeafData(void* ptr, void* entry) {
     cosPitch2 = cos(pitch2);
     cosYaw2 = cos(yaw2);
     set__5GSvecFfff(vec, sinPitch2 * cosYaw2, cosPitch2, sinPitch2 * sinYaw2);
-    fn_800E013C(vec, vec, radius2);
+    vecScale(vec, vec, radius2);
     GSvecAdd(vec, vec, position);
 
     vec = (f32*)(e + 0x0C);
@@ -1365,7 +1365,7 @@ u8 _leaffxGenerateLeafData(void* ptr, void* entry) {
     cosPitch3 = cos(pitch3);
     cosYaw3 = cos(yaw3);
     set__5GSvecFfff(vec, sinPitch3 * cosYaw3, cosPitch3, sinPitch3 * sinYaw3);
-    fn_800E013C(vec, vec, radius3);
+    vecScale(vec, vec, radius3);
     GSvecAdd(vec, vec, position);
 
     vec = (f32*)(e + 0x24);
@@ -1378,7 +1378,7 @@ u8 _leaffxGenerateLeafData(void* ptr, void* entry) {
     cosPitch4 = cos(pitch4);
     cosYaw4 = cos(yaw4);
     set__5GSvecFfff(vec, sinPitch4 * cosYaw4, cosPitch4, sinPitch4 * sinYaw4);
-    fn_800E013C(vec, vec, radius4);
+    vecScale(vec, vec, radius4);
     GSvecAdd(vec, vec, e + 0x0C);
 
     fn_800E040C(matrix, (u8*)e + 0x30);
@@ -1487,15 +1487,15 @@ u32 fn_80139934(void* ptr) {
             set__5GSvecFfff(pos, *(f32*)&lbl_8047D190, *(f32*)&lbl_8047D190, *(f32*)&lbl_8047D190);
         }
         GScameraGetPosition(camera, cameraPos);
-        fn_800DA4C4(1, 6, 1);
-        fn_800DA2BC(1, 1, 0);
-        fn_800DA1E8(1, 1, 1);
-        fn_800DA028(0);
-        fn_800D88DC(3);
-        fn_800D888C(4);
-        fn_800D7820(*(void**)(p + 0x54));
-        fn_800D85D4(0, *(void**)(p + 0x58));
-        fn_800D6A00(6);
+        gfxSetBlendMode(1, 6, 1);
+        gfxSetUpdates(1, 1, 0);
+        gfxSetZMode(1, 1, 1);
+        gfxSetCullMode(0);
+        gfxSetFlags(3);
+        gfxClearFlags(4);
+        gfxSetVtxDesc(*(void**)(p + 0x54));
+        gfxLoadTexture(0, *(void**)(p + 0x58));
+        gfxSetPrimitive(6);
         i = 0;
         while (i < count) {
             if (*(u16*)(entry + 0x12e0) != 0) {
@@ -1650,7 +1650,7 @@ u32 fn_80139D10(void* ptr) {
 extern void fn_800E0108(void);
 extern void fn_800E0560(void);
 extern void fn_800E042C(void);
-extern void fn_800E00AC(void);
+extern void vecNormalize(void);
 extern u32 lbl_8047D1A0;
 extern const f32 lbl_8047D1A8;
 extern const f32 lbl_8047D190;
@@ -1666,11 +1666,11 @@ void fn_80139E80(u8* e, u8* p, void* cameraPos, void* modelPos) {
     extern void fn_800D7F14(void*);
     extern void fn_800DFFCC(void*, void*, void*);
     extern void fn_800E0060(f32*, f32*);
-    extern f32 fn_800E008C(f32*);
+    extern f32 vecMag(f32*);
     extern void fn_800E0108(f32*, f32*, f32*, u32, u32);
     extern void fn_800E0560(f32 (*)[4], f32*);
     extern void fn_800E042C(f32 (*)[4], f32*);
-    extern void fn_800E00AC(f32*, f32*);
+    extern void vecNormalize(f32*, f32*);
     /* RULE-EXCEPTION(user-approved): store-only carrier for register allocation — see docs/RULE_EXCEPTIONS.md */
     short spanEnd;
     u16 i;
@@ -1693,7 +1693,7 @@ void fn_80139E80(u8* e, u8* p, void* cameraPos, void* modelPos) {
     halfSpan = (u16)(spanEnd = *(u16*)(e + 0x12DE) - start) >> 1;
     fn_800E0108(interpolated, (f32*)(e + 0x12CC), (f32*)(p + 0x20), *(u16*)(p + 0x48) - start,
                 start);
-    fn_800E0168(interpolated, modelPos, interpolated);
+    GSvecSub(interpolated, modelPos, interpolated);
     if (current < halfSpan) {
         threshold = *(f32*)(p + 0x38);
         threshold *= 1.0f - (f32)current / (f32)halfSpan;
@@ -1714,47 +1714,47 @@ void fn_80139E80(u8* e, u8* p, void* cameraPos, void* modelPos) {
     fn_800D7F14(matrix);
     fn_800E042C(matrix, (f32*)(p + 0x20));
     fn_800D7F14(matrix);
-    fn_800D67BC((visible * 4) & 0xFFFC);
+    gfxBegin((visible * 4) & 0xFFFC);
 
     count = *(u16*)(e + 0x12E2);
     pointEntry = e;
     for (i = 0; i < count; i++, pointEntry += 0x18) {
         if (*(f32*)(*(u8**)(pointEntry + 0xC) + 4) > threshold) {
-        fn_800E0168(direction, pointEntry, *(u8**)(pointEntry + 0xC));
+        GSvecSub(direction, pointEntry, *(u8**)(pointEntry + 0xC));
         fn_800E0060(direction, direction);
         GSvecAdd(cameraVector, pointEntry, *(u8**)(pointEntry + 0xC));
-        fn_800E013C(cameraVector, cameraVector, 0.5f);
-        fn_800E0168(cameraVector, cameraPos, cameraVector);
+        vecScale(cameraVector, cameraVector, 0.5f);
+        GSvecSub(cameraVector, cameraPos, cameraVector);
         fn_800E0060(cameraVector, cameraVector);
         fn_800DFFCC(normal, cameraVector, direction);
-        if (fn_800E008C(normal) > 0.001f) {
-            fn_800E00AC(normal, normal);
+        if (vecMag(normal) > 0.001f) {
+            vecNormalize(normal, normal);
         }
 
-        fn_800E013C(direction, normal,
+        vecScale(direction, normal,
                     0.5f * *(f32*)(pointEntry + 0x10));
         GSvecAdd(vertex, *(u8**)(pointEntry + 0xC), direction);
-        fn_800D6680(vertex[0], vertex[1], vertex[2]);
+        gfxVtxPos(vertex[0], vertex[1], vertex[2]);
         fn_800D5CB8(0, e[0x12D8], e[0x12D9], e[0x12DA], e[0x12DB]);
-        fn_800D59B8(0, 0.0f, 0.0f);
-        fn_800E0168(vertex, *(u8**)(pointEntry + 0xC), direction);
-        fn_800D6680(vertex[0], vertex[1], vertex[2]);
+        gfxVtxTexCoord(0, 0.0f, 0.0f);
+        GSvecSub(vertex, *(u8**)(pointEntry + 0xC), direction);
+        gfxVtxPos(vertex[0], vertex[1], vertex[2]);
         fn_800D5CB8(0, e[0x12D8], e[0x12D9], e[0x12DA], e[0x12DB]);
-        fn_800D59B8(0, 1.0f, 0.0f);
+        gfxVtxTexCoord(0, 1.0f, 0.0f);
 
-        fn_800E013C(direction, normal,
+        vecScale(direction, normal,
                     0.5f * *(f32*)(pointEntry + 0x14));
-        fn_800E0168(vertex, pointEntry, direction);
-        fn_800D6680(vertex[0], vertex[1], vertex[2]);
+        GSvecSub(vertex, pointEntry, direction);
+        gfxVtxPos(vertex[0], vertex[1], vertex[2]);
         fn_800D5CB8(0, e[0x12D8], e[0x12D9], e[0x12DA], e[0x12DB]);
-        fn_800D59B8(0, 1.0f, 1.0f);
+        gfxVtxTexCoord(0, 1.0f, 1.0f);
         GSvecAdd(vertex, pointEntry, direction);
-        fn_800D6680(vertex[0], vertex[1], vertex[2]);
+        gfxVtxPos(vertex[0], vertex[1], vertex[2]);
         fn_800D5CB8(0, e[0x12D8], e[0x12D9], e[0x12DA], e[0x12DB]);
-        fn_800D59B8(0, 0.0f, 1.0f);
+        gfxVtxTexCoord(0, 0.0f, 1.0f);
         }
     }
-    fn_800D6728();
+    gfxEnd();
     fn_800D7E5C();
     fn_800D7E5C();
 }
@@ -1992,20 +1992,20 @@ u32 fn_8013A520(void* ptr) {
     GScameraGetPosition(camera, cameraPos);
     GScameraGetPerspective(camera, &perspective, &unused, &unused, &unused);
     distance = GSvecDistance(cameraPos, center);
-    fn_800DA4C4(1, 6, 1);
-    fn_800DA2BC(1, 1, 0);
-    fn_800DA1E8(1, 1, 1);
-    fn_800DA028(0);
+    gfxSetBlendMode(1, 6, 1);
+    gfxSetUpdates(1, 1, 0);
+    gfxSetZMode(1, 1, 1);
+    gfxSetCullMode(0);
     scale = (64.0f * *(f32*)(p + 0x10)) /
             (distance * perspective);
     if (scale > 1.0f) {
         scale = 1.0f;
     }
     fn_800B9404((s32)(255.0f * scale), 5);
-    fn_800D88DC(1);
-    fn_800D888C(6);
-    fn_800D7820(*(void**)(p + 4));
-    fn_800D6A00(2);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetVtxDesc(*(void**)(p + 4));
+    gfxSetPrimitive(2);
 
     for (firstIndex = 1; firstIndex < count; firstIndex++) {
         first = GSmodelGetPart(resource, firstIndex);
@@ -2061,8 +2061,8 @@ u32 fn_8013A520(void* ptr) {
                                        (*(f32*)(p + 0x1C) * fn_800E0BA0() +
                                         *(f32*)(p + 0x18));
                             step = 1.0f / (f32)segments;
-                            fn_800D67BC((u16)(segments + 1));
-                            fn_800D6680(ctrl[0][0], ctrl[0][1], ctrl[0][2]);
+                            gfxBegin((u16)(segments + 1));
+                            gfxVtxPos(ctrl[0][0], ctrl[0][1], ctrl[0][2]);
                             fn_800D5CB8(0, p[0], p[1], p[2], p[3]);
                             t = step;
                             for (segment = 1; segment < segments; segment++) {
@@ -2081,13 +2081,13 @@ u32 fn_8013A520(void* ptr) {
                                                     sinPitchB3 * (lengthB3 * sinYawB3));
                                 }
                                 GSvecAdd(point, point, jitter);
-                                fn_800D6680(point[0], point[1], point[2]);
+                                gfxVtxPos(point[0], point[1], point[2]);
                                 fn_800D5CB8(0, p[0], p[1], p[2], p[3]);
                                 t += step;
                             }
-                            fn_800D6680(ctrl[1][0], ctrl[1][1], ctrl[1][2]);
+                            gfxVtxPos(ctrl[1][0], ctrl[1][1], ctrl[1][2]);
                             fn_800D5CB8(0, p[0], p[1], p[2], p[3]);
-                            fn_800D6728();
+                            gfxEnd();
                         }
                     }
                     GSpartFree(second);
@@ -2619,7 +2619,7 @@ extern void fn_800E0718(void*, void*, f32);
 extern void GSvecTransformQuat(void* dst, void* quat, void* src);
 extern void GSmtxMakeYRotation(void* mtx, f32 angle);
 extern void GSvecTransform(void* dst, void* matrix, void* vec);
-extern void fn_800E013C(void* dst, void* src, f32 scale);
+extern void vecScale(void* dst, void* src, f32 scale);
 extern void GSvecAdd(void* dst, void* srcA, void* srcB);
 #endif
 extern u16 fn_800E2C04(u32 size, u32 alignment);
@@ -2851,12 +2851,12 @@ void fn_8013BA98(void* ptr) {
         points = point;
         vectors += 0xC;
         point += 0xC;
-        fn_800E0168(previousDelta, points, previous);
-        fn_800E0168(nextDelta, point, points);
+        GSvecSub(previousDelta, points, previous);
+        GSvecSub(nextDelta, point, points);
         fn_800DFFCC(previousDelta, previousDelta, lbl_80315540);
         fn_800DFFCC(nextDelta, nextDelta, lbl_80315540);
         GSvecAdd(vectors, nextDelta, previousDelta);
-        fn_800E013C(vectors, vectors, 0.5f);
+        vecScale(vectors, vectors, 0.5f);
         fn_800E0060(vectors, vectors);
         for (row = 0; row < depth; row++) {
             GSvecCopy(vectors + row * width * 0xC, vectors);
@@ -4527,35 +4527,35 @@ u32 fn_8013E258(void* model, void* unused, void* state) {
         ((f32)*(u32*)((u8*)state + 0x1C) / (f32)visual->duration) *
         (visual->end - visual->start);
     alpha = (s32)(*(f32*)&lbl_8047D298 * amount);
-    fn_800D9B58(0.0f, 0.0f,
+    gfxSetOrtho(0.0f, 0.0f,
                 *(f32*)&lbl_8047D29C, *(f32*)&lbl_8047D2A0);
-    fn_800DA4C4(1, 6, 7);
-    fn_800DA1E8(0, 7, 0);
+    gfxSetBlendMode(1, 6, 7);
+    gfxSetZMode(0, 7, 0);
     fn_800D9ED8(1);
-    fn_800DA2BC(1, 1, 0);
-    fn_800DA028(0);
-    fn_800D88DC(3);
-    fn_800D888C(4);
-    fn_800D7820(lbl_80314AE8);
-    fn_800D85D4(0, model);
-    fn_800D6A00(4);
-    fn_800D67BC(4);
-    fn_800D6680(0.0f, 0.0f, 0.0f);
+    gfxSetUpdates(1, 1, 0);
+    gfxSetCullMode(0);
+    gfxSetFlags(3);
+    gfxClearFlags(4);
+    gfxSetVtxDesc(lbl_80314AE8);
+    gfxLoadTexture(0, model);
+    gfxSetPrimitive(4);
+    gfxBegin(4);
+    gfxVtxPos(0.0f, 0.0f, 0.0f);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-    fn_800D59B8(0, 0.0f, 0.0f);
-    fn_800D6680(*(f32*)&lbl_8047D29C, 0.0f,
+    gfxVtxTexCoord(0, 0.0f, 0.0f);
+    gfxVtxPos(*(f32*)&lbl_8047D29C, 0.0f,
                 0.0f);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-    fn_800D59B8(0, 1.0f, 0.0f);
-    fn_800D6680(0.0f, *(f32*)&lbl_8047D2A0,
+    gfxVtxTexCoord(0, 1.0f, 0.0f);
+    gfxVtxPos(0.0f, *(f32*)&lbl_8047D2A0,
                 0.0f);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-    fn_800D59B8(0, 0.0f, 1.0f);
-    fn_800D6680(*(f32*)&lbl_8047D29C, *(f32*)&lbl_8047D2A0,
+    gfxVtxTexCoord(0, 0.0f, 1.0f);
+    gfxVtxPos(*(f32*)&lbl_8047D29C, *(f32*)&lbl_8047D2A0,
                 0.0f);
     fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, alpha);
-    fn_800D59B8(0, 1.0f, 1.0f);
-    fn_800D6728();
+    gfxVtxTexCoord(0, 1.0f, 1.0f);
+    gfxEnd();
     fn_800D9ED8(0);
     return 1;
 
@@ -4703,39 +4703,39 @@ u32 fn_8013E6C4(u8* ptr)
             return 0;
         }
         fn_8013EA44(ptr);
-        fn_800D9B58(*(f32*)&lbl_8047D2AC, *(f32*)&lbl_8047D2AC,
+        gfxSetOrtho(*(f32*)&lbl_8047D2AC, *(f32*)&lbl_8047D2AC,
                     *(f32*)&lbl_8047D2B0, *(f32*)&lbl_8047D2B4);
         if (ptr[0x19] & 4) {
-            fn_800DA4C4(1, 6, 7);
+            gfxSetBlendMode(1, 6, 7);
         } else {
-            fn_800DA4C4(1, 6, 1);
+            gfxSetBlendMode(1, 6, 1);
         }
-        fn_800DA1E8(0, 7, 0);
-        fn_800DA2BC(1, 1, 0);
-        fn_800DA028(0);
-        fn_800D88DC(3);
-        fn_800D888C(4);
-        fn_800D7820(lbl_80314AE8);
-        fn_800D6A00(4);
-        fn_800D85D4(0, model);
-        fn_800D67BC(4);
-        fn_800D6680(*(f32*)&lbl_8047D2AC, *(f32*)&lbl_8047D2AC,
+        gfxSetZMode(0, 7, 0);
+        gfxSetUpdates(1, 1, 0);
+        gfxSetCullMode(0);
+        gfxSetFlags(3);
+        gfxClearFlags(4);
+        gfxSetVtxDesc(lbl_80314AE8);
+        gfxSetPrimitive(4);
+        gfxLoadTexture(0, model);
+        gfxBegin(4);
+        gfxVtxPos(*(f32*)&lbl_8047D2AC, *(f32*)&lbl_8047D2AC,
                     *(f32*)&lbl_8047D2AC);
         fn_800D5CB8(0, ptr[8], ptr[9], ptr[0xA], ptr[0xB]);
-        fn_800D59B8(0, *(f32*)&lbl_8047D2AC, *(f32*)&lbl_8047D2AC);
-        fn_800D6680(*(f32*)&lbl_8047D2B0, *(f32*)&lbl_8047D2AC,
+        gfxVtxTexCoord(0, *(f32*)&lbl_8047D2AC, *(f32*)&lbl_8047D2AC);
+        gfxVtxPos(*(f32*)&lbl_8047D2B0, *(f32*)&lbl_8047D2AC,
                     *(f32*)&lbl_8047D2AC);
         fn_800D5CB8(0, ptr[8], ptr[9], ptr[0xA], ptr[0xB]);
-        fn_800D59B8(0, *(f32*)&lbl_8047D2A8, *(f32*)&lbl_8047D2AC);
-        fn_800D6680(*(f32*)&lbl_8047D2AC, *(f32*)&lbl_8047D2B4,
+        gfxVtxTexCoord(0, *(f32*)&lbl_8047D2A8, *(f32*)&lbl_8047D2AC);
+        gfxVtxPos(*(f32*)&lbl_8047D2AC, *(f32*)&lbl_8047D2B4,
                     *(f32*)&lbl_8047D2AC);
         fn_800D5CB8(0, ptr[8], ptr[9], ptr[0xA], ptr[0xB]);
-        fn_800D59B8(0, *(f32*)&lbl_8047D2AC, *(f32*)&lbl_8047D2A8);
-        fn_800D6680(*(f32*)&lbl_8047D2B0, *(f32*)&lbl_8047D2B4,
+        gfxVtxTexCoord(0, *(f32*)&lbl_8047D2AC, *(f32*)&lbl_8047D2A8);
+        gfxVtxPos(*(f32*)&lbl_8047D2B0, *(f32*)&lbl_8047D2B4,
                     *(f32*)&lbl_8047D2AC);
         fn_800D5CB8(0, ptr[8], ptr[9], ptr[0xA], ptr[0xB]);
-        fn_800D59B8(0, *(f32*)&lbl_8047D2A8, *(f32*)&lbl_8047D2A8);
-        fn_800D6728();
+        gfxVtxTexCoord(0, *(f32*)&lbl_8047D2A8, *(f32*)&lbl_8047D2A8);
+        gfxEnd();
         return 1;
     }
     return 0;
@@ -4948,10 +4948,10 @@ void fn_8013EA44(void* ptr) {
 
     bound = GSmodelGetBound(model);
     GSvecAdd(&mid, (u8*)bound + 0x1C, (u8*)bound + 0x10);
-    fn_800E013C(&mid, &mid, 0.5f);
+    vecScale(&mid, &mid, 0.5f);
     mtx = GSmodelGetMatrixPtr(model);
     GSvecTransform(&mid, mtx, &mid);
-    fn_800E0168(&mid, &mid, &baseTranslate);
+    GSvecSub(&mid, &mid, &baseTranslate);
 
     fn_800D377C(2);
     fn_800D4604(2);
@@ -4973,11 +4973,11 @@ void fn_8013EA44(void* ptr) {
         alpha -= alphaStep;
         layerAlpha += layerAlphaStep;
 
-        fn_800E013C(&scale, &baseScale, alpha);
+        vecScale(&scale, &baseScale, alpha);
         offset.x = mid.x * (scale.x - baseScale.x);
         offset.y = mid.y * (scale.y - baseScale.y);
         offset.z = mid.z * (scale.z - baseScale.z);
-        fn_800E0168(&translate, &baseTranslate, &offset);
+        GSvecSub(&translate, &baseTranslate, &offset);
 
         LAYER_JOBJ_SET_SCALE(part, &scale);
         LAYER_JOBJ_SET_TRANSLATE(part, &translate);
@@ -5202,7 +5202,7 @@ u16 distortionEffectStart(void* ptr) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_8013F410_8013F80C)
 extern u8 GSmodelGetVisibility(void* obj);
-extern void fn_80118104(u32 a, u32 b);
+extern void gsParticleDraw(u32 a, u32 b);
 extern void fn_800D848C(u32 a, u32 b, u32 c, void* d);
 extern void fn_800E064C(void* dst);
 extern void fn_800DC1D4(u32 a);
@@ -5211,12 +5211,12 @@ extern void fn_800DB9F0(u32 a, u32 b, u32 c);
 extern void fn_800DB988(u32 a, u32 b, u32 c);
 extern void fn_800DB900(u32 a, void* b, u32 c);
 extern void fn_800DBCE4(u32 a, u32 b, u32 c, u32 d, u32 e);
-extern void fn_800DC224(u32 a, u32 b, u32 c, u32 d, u32 e);
+extern void gfxSetTevStage(u32 a, u32 b, u32 c, u32 d, u32 e);
 extern void fn_800DC14C(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f);
 extern void fn_800DC0D4(u32 a, u32 b, u32 c, u32 d, u32 e);
 extern void fn_800DC04C(u32 a, u32 b, u32 c, u32 d, u32 e, u32 f);
 extern void fn_800DBFD4(u32 a, u32 b, u32 c, u32 d, u32 e);
-extern void fn_800D5C18(u32 a, u32 r, u32 g, u32 b);
+extern void gfxVtxColor(u32 a, u32 r, u32 g, u32 b);
 extern void fn_800DBE5C(u32 a);
 extern u32 lbl_8047AEE8;
 extern u32 lbl_8047AEF0;
@@ -5252,22 +5252,22 @@ u32 fn_8013F410(void* ptr) {
                     }
                 }
                 if (*(u16*)(p + 0x28) != 0) {
-                    fn_80118104(0x2000, 0);
-                    fn_80118104(0x2000, 1);
+                    gsParticleDraw(0x2000, 0);
+                    gsParticleDraw(0x2000, 1);
                 }
                 fn_800D3190();
                 fn_800D4604(1);
             }
         }
-        fn_800DA1E8(0, 2, 0);
-        fn_800DA028(0);
-        fn_800D88DC(0x80000003);
-        fn_800D888C(4);
-        fn_800DA4C4(0, 6, 7);
+        gfxSetZMode(0, 2, 0);
+        gfxSetCullMode(0);
+        gfxSetFlags(0x80000003);
+        gfxClearFlags(4);
+        gfxSetBlendMode(0, 6, 7);
         fn_800D9ED8(1);
-        fn_800DA2BC(1, 1, 0);
-        fn_800D85D4(0, (void*)lbl_8047AEE8);
-        fn_800D85D4(1, *(void**)(p + 0x4));
+        gfxSetUpdates(1, 1, 0);
+        gfxLoadTexture(0, (void*)lbl_8047AEE8);
+        gfxLoadTexture(1, *(void**)(p + 0x4));
         fn_800D848C(0, 2, 4, p + 0x68);
         fn_800E064C(mtx);
         fn_800D848C(1, 2, 5, mtx);
@@ -5277,42 +5277,42 @@ u32 fn_8013F410(void* ptr) {
         fn_800DB988(0, lbl_8047AEF0, lbl_8047AEF0);
         fn_800DB900(1, p + 0x98, 1);
         fn_800DBCE4(0, 0, 1, 0, 1);
-        fn_800DC224(0, 0, 0, 0, 2);
+        gfxSetTevStage(0, 0, 0, 0, 2);
         fn_800DC14C(0, 0, 0, 0, 1, 0);
         fn_800DC0D4(0, 0xf, 0xf, 0xf, 8);
         fn_800DC04C(0, 0, 0, 0, 1, 0);
         fn_800DBFD4(0, 7, 7, 7, 4);
-        fn_800D7820(*(void**)p);
-        fn_800D6A00(6);
+        gfxSetVtxDesc(*(void**)p);
+        gfxSetPrimitive(6);
         fn_800D7F14(p + 0x38);
-        fn_800D67BC(4);
+        gfxBegin(4);
 
-        fn_800D6680(*(f32*)&lbl_8047D304, *(f32*)&lbl_8047D304, *(f32*)&lbl_8047D300);
-        fn_800D5C18(0, 0xff, 0xff, 0xff);
-        fn_800D59B8(0, *(f32*)&lbl_8047D300, *(f32*)&lbl_8047D300);
-        fn_800D59B8(1, *(f32*)&lbl_8047D300, *(f32*)&lbl_8047D300);
+        gfxVtxPos(*(f32*)&lbl_8047D304, *(f32*)&lbl_8047D304, *(f32*)&lbl_8047D300);
+        gfxVtxColor(0, 0xff, 0xff, 0xff);
+        gfxVtxTexCoord(0, *(f32*)&lbl_8047D300, *(f32*)&lbl_8047D300);
+        gfxVtxTexCoord(1, *(f32*)&lbl_8047D300, *(f32*)&lbl_8047D300);
 
-        fn_800D6680(*(f32*)&lbl_8047D308, *(f32*)&lbl_8047D304, *(f32*)&lbl_8047D300);
-        fn_800D5C18(0, 0xff, 0xff, 0xff);
-        fn_800D59B8(0, *(f32*)&lbl_8047D308, *(f32*)&lbl_8047D300);
-        fn_800D59B8(1, *(f32*)&lbl_8047D308, *(f32*)&lbl_8047D300);
+        gfxVtxPos(*(f32*)&lbl_8047D308, *(f32*)&lbl_8047D304, *(f32*)&lbl_8047D300);
+        gfxVtxColor(0, 0xff, 0xff, 0xff);
+        gfxVtxTexCoord(0, *(f32*)&lbl_8047D308, *(f32*)&lbl_8047D300);
+        gfxVtxTexCoord(1, *(f32*)&lbl_8047D308, *(f32*)&lbl_8047D300);
 
-        fn_800D6680(*(f32*)&lbl_8047D308, *(f32*)&lbl_8047D308, *(f32*)&lbl_8047D300);
-        fn_800D5C18(0, 0xff, 0xff, 0xff);
-        fn_800D59B8(0, *(f32*)&lbl_8047D308, *(f32*)&lbl_8047D308);
-        fn_800D59B8(1, *(f32*)&lbl_8047D308, *(f32*)&lbl_8047D308);
+        gfxVtxPos(*(f32*)&lbl_8047D308, *(f32*)&lbl_8047D308, *(f32*)&lbl_8047D300);
+        gfxVtxColor(0, 0xff, 0xff, 0xff);
+        gfxVtxTexCoord(0, *(f32*)&lbl_8047D308, *(f32*)&lbl_8047D308);
+        gfxVtxTexCoord(1, *(f32*)&lbl_8047D308, *(f32*)&lbl_8047D308);
 
-        fn_800D6680(*(f32*)&lbl_8047D304, *(f32*)&lbl_8047D308, *(f32*)&lbl_8047D300);
-        fn_800D5C18(0, 0xff, 0xff, 0xff);
-        fn_800D59B8(0, *(f32*)&lbl_8047D300, *(f32*)&lbl_8047D308);
-        fn_800D59B8(1, *(f32*)&lbl_8047D300, *(f32*)&lbl_8047D308);
+        gfxVtxPos(*(f32*)&lbl_8047D304, *(f32*)&lbl_8047D308, *(f32*)&lbl_8047D300);
+        gfxVtxColor(0, 0xff, 0xff, 0xff);
+        gfxVtxTexCoord(0, *(f32*)&lbl_8047D300, *(f32*)&lbl_8047D308);
+        gfxVtxTexCoord(1, *(f32*)&lbl_8047D300, *(f32*)&lbl_8047D308);
 
-        fn_800D6728();
+        gfxEnd();
         fn_800D7E5C();
         fn_800D848C(0, 2, 4, mtx);
         fn_800DBE5C(0);
         fn_800DBA54(0);
-        fn_800D888C(0x80000002);
+        gfxClearFlags(0x80000002);
         fn_800D9ED8(0);
         return 1;
     }
@@ -5392,7 +5392,7 @@ u32 fn_8013F80C(void* ptr, u32 delta) {
     return 0;
 }
 #endif
-extern void* fn_800D7BF8(u32 index);
+extern void* gfxGetCameraMatrix(u32 index);
 extern void GScameraGetLookAt(void* mtx, void* lookAt, void* eye);
 extern void fn_800E0628(void* dst, void* src);
 extern void fn_800E0238(void* dst, void* src);
@@ -5433,7 +5433,7 @@ void _distortionEffectUpdateMatrices(void* ptr) {
     camera = GScameraGetActiveCamera();
     matrix = (f32*)((u8*)ptr + 0x38);
     _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
-    cameraMatrix = fn_800D7BF8(0);
+    cameraMatrix = gfxGetCameraMatrix(0);
     fn_800E064C(matrix);
     if (camera != NULL) {
         GScameraGetLookAt(camera, lookAt, eye);
@@ -5525,7 +5525,7 @@ u32 fn_8013FC58(void* ptr) {
     return 1;
 }
 #endif
-extern void* fn_801195AC(void* a);
+extern void* gsParticleBankLoad(void* a);
 #if 0
 asm void fn_8013FCC4(void) {
 #include "src/game/effect/effect_visual_fn_8013FCC4.inc"
@@ -5542,7 +5542,7 @@ u32 fn_8013FCC4(void* ptr) {
         if (*(u32*)((u8*)ptr + 0xc) != 0) {
             res = GSresGetResource(*(u32*)ptr, *(u32*)((u8*)ptr + 0xc));
             if (res != NULL) {
-                *(void**)((u8*)ptr + 0x14) = fn_801195AC(res);
+                *(void**)((u8*)ptr + 0x14) = gsParticleBankLoad(res);
             } else {
                 *(void**)((u8*)ptr + 0x14) = NULL;
             }
@@ -5577,7 +5577,7 @@ u32 fn_8013FD68(void* ptr) {
     return 1;
 }
 #endif
-extern void* fn_801190DC(void* ptr, u16 arg, u32 flag);
+extern void* gsParticleCreate(void* ptr, u16 arg, u32 flag);
 extern void fn_800E3CC8(void* model, u32 flag);
 extern u8 GSmodelCanAnimate(void* model);
 extern void GSmodelSetAnimIndex(void* model, u16 value);
@@ -5604,7 +5604,7 @@ u16 billboardEffectStart(void* ptr) {
     }
 
     if (*(void**)((u8*)ptr + 0x14) != NULL) {
-        *(void**)((u8*)ptr + 0x20) = fn_801190DC(*(void**)((u8*)ptr + 0x14), *(u16*)((u8*)ptr + 0x1e), 1);
+        *(void**)((u8*)ptr + 0x20) = gsParticleCreate(*(void**)((u8*)ptr + 0x14), *(u16*)((u8*)ptr + 0x1e), 1);
     }
 
     if (model != NULL) {
@@ -5686,7 +5686,7 @@ u32 fn_8013FF0C(void* ptr) {
             _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
             GScameraGetPosition(camera, &position);
             GScameraGetLookAt(camera, up, interest);
-            fn_800E0168(up, interest, &position);
+            GSvecSub(up, interest, &position);
             fn_800E0060(up, up);
             GScameraGetPerspective(camera, &fov, &aspect, &nearPlane, &farPlane);
             nearPlane *= *(f32*)&lbl_8047D330;
@@ -5695,7 +5695,7 @@ u32 fn_8013FF0C(void* ptr) {
             billboardScale.y = *(f32*)&lbl_8047D338 * nearPlane * (f32)tan(fov);
             billboardScale.x = billboardScale.y * aspect;
             billboardScale.z = *(f32*)&lbl_8047D32C;
-            fn_800E013C(up, up, nearPlane);
+            vecScale(up, up, nearPlane);
             GSvecAdd(&position, &position, up);
         }
 

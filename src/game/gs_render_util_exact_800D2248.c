@@ -16,7 +16,7 @@ extern void HSD_CObjGetOrtho(void* cobj, f32* top, f32* bottom, f32* left, f32* 
 extern void fn_800D7FE4(void* mtx);
 extern void fn_800D834C(void);
 extern void fn_800D9BD0(f32 fovy, f32 aspect, f32 near, f32 far);
-extern void fn_800D9B58(f32 a, f32 b, f32 c, f32 d);
+extern void gfxSetOrtho(f32 a, f32 b, f32 c, f32 d);
 
 void _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID(void) {
     GSRenderCamera* c = (GSRenderCamera*)lbl_8047AA74;
@@ -64,7 +64,7 @@ void _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID(void) {
         fn_800D7FE4(c->viewMtx);
     } else {
         HSD_CObjGetOrtho(c->cobj, &p1, &p3, &p0, &p2);
-        fn_800D9B58(p0, p1, p2, p3);
+        gfxSetOrtho(p0, p1, p2, p3);
         fn_800D834C();
     }
 }

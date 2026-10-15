@@ -87,7 +87,7 @@ extern GSmodel* GSmodelSearchModelList(void* jobj);
 extern void fn_800E3D14(GSmodel* model, GSshadowVec* out);
 extern void GSvecAdd(GSshadowVec* dst, GSshadowVec* a, GSshadowVec* b);
 extern void set__5GSvecFfff(GSshadowVec* dst, f32 x, f32 y, f32 z);
-extern void fn_800E00AC(GSshadowVec* dst, GSshadowVec* src, f32 scalar);
+extern void vecNormalize(GSshadowVec* dst, GSshadowVec* src, f32 scalar);
 extern int HSD_ViewingRectCheck(GSshadowRect* rect);
 extern void fn_801B019C(GSshadowRect* rect, GSshadowVec* position, f32 top,
                         f32 bottom, f32 left, f32 right);
@@ -291,7 +291,7 @@ void modelShadowRender__FP10GSgfxLayer(void* layer)
             HSD_CObjSetProjectionType(((GSshadowObj*)slot->obj)->camera, 2);
             break;
         }
-        fn_800E00AC(&avg, &avg, count);
+        vecNormalize(&avg, &avg, count);
         HSD_CObjSetInterest(((GSshadowObj*)slot->obj)->camera, &avg);
         fn_801B0A98(slot->obj, slot->light->classObj, 30.0f);
         HSD_CObjSetNear(((GSshadowObj*)slot->obj)->camera, 0.1f);

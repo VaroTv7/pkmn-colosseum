@@ -1001,7 +1001,7 @@ u8 fightOutPokemonCheckFightActionWazaSelect(void* fighter, u8 mode) {
     extern void fn_80121B4C();
     extern void pokemonCheckFightOut();
     extern void pokemonCheckValid();
-    extern void fn_801EF634();
+    extern void std103_battleGetResult();
     extern void fightTargetGetTragetPtrToRelativeHostSideFightTargetId();
     extern void fightActionCreate();
     extern void fightFloorGetStatus();
@@ -1040,7 +1040,7 @@ u8 fightOutPokemonCheckFightActionWazaSelect(void* fighter, u8 mode) {
 
     if (r31 != (u32)0x0) {
 
-    fn_801EF634();
+    std103_battleGetResult();
     r0 = r3 & 0xFFFF;
     if (r0 != (u32)0x1) {
 
@@ -1054,7 +1054,7 @@ u8 fightOutPokemonCheckFightActionWazaSelect(void* fighter, u8 mode) {
 
     if (r0 != (u32)0x1) {
 
-    fn_801EF634();
+    std103_battleGetResult();
     r0 = r3 & 0xFFFF;
     if (r0 != (u32)0x1) {
 
@@ -1128,7 +1128,7 @@ u8 fightOutPokemonCheckFightActionWazaSelect(void* fighter, u8 mode) {
 
             if ((s32)r3 != (s32)0x1) {
 
-            fn_801EF634();
+            std103_battleGetResult();
             r0 = r3 & 0xFFFF;
             if (r0 != (u32)0x1) {
 

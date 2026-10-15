@@ -28,8 +28,8 @@ extern void fn_801EF8F4();
 
 /* Sound functions */
 extern void soundStop();     /* Stop sound */
-extern void fn_80165A20();     /* Fade out music */
-extern void fn_801659FC();     /* Start BGM */
+extern void std104_soundSetBackgroundMusic();     /* Fade out music */
+extern void std105_soundPlayEffect();     /* Start BGM */
 
 /* SDA2 float constants used by asm wrappers */
 extern f32 lbl_8047E678;
@@ -350,13 +350,13 @@ void fightTimerAllTerminate(void)
 /* Address: 0x80265DB0 | Size: 0x84 | Ghidra import (PSQ removed) */
 void fightTimerThreadFunc(ColosseumBattleTimerState *r3)
 {
-    extern u32 fn_800D3088(void);
+    extern u32 msgGetCharsPerFrame(void);
     extern void _threadSwitch(void);
 
   r3->elapsed = 0.0f;
   while (r3->elapsed < 60.0f * r3->limit) {
     _threadSwitch();
-    r3->elapsed = (f32)fn_800D3088() + r3->elapsed;
+    r3->elapsed = (f32)msgGetCharsPerFrame() + r3->elapsed;
   }
   r3->done = 1;
   do {

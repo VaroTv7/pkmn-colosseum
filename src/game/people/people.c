@@ -264,7 +264,7 @@ extern void* memset(void* dst, int val, u32 size);
 extern void _threadSwitch(void);
 extern void GSthreadBlock(void* thread);
 extern void GSthreadUnblock(void* thread);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern s32 fn_800D37CC(void);
 extern f32 fn_800E0BA0(void);
 extern f32 fn_800E0BE4(void);
@@ -273,10 +273,10 @@ extern f32 fn_800E0BE4(void);
 extern void GSvecCopy(void* dst, void* src);
 extern void set__5GSvecFfff(void* vec, f32 x, f32 y, f32 z);
 extern void GSvecAdd(void* dst, void* a, void* b);
-extern void fn_800E0168(void* dst, void* a, void* b);
-extern void fn_800E013C(void* dst, void* src, f32 scale);
-extern f32 fn_800E008C(void* vec);
-extern void fn_800E00AC(void* dst, void* src, f32 length);
+extern void GSvecSub(void* dst, void* a, void* b);
+extern void vecScale(void* dst, void* src, f32 scale);
+extern f32 vecMag(void* vec);
+extern void vecNormalize(void* dst, void* src, f32 length);
 extern f32 fn_800E0000(void* a, void* b);
 extern void fn_800E0060(void* dst, void* src);
 extern void fn_800E0718(void* quat, void* axis, f32 angle);
@@ -348,14 +348,14 @@ extern u16 fn_800F7318(u32 type, u32 scriptId, u32 stackSize, u32 a, u32 b, s32 
 extern void fn_800F9210(u32 groupId, u32 index);
 extern void fn_800FF4D4(void* funcs, u8 typeId);
 extern void fn_80101B90(u32 color);
-extern void fn_80166A28(u32 id);
-extern u8 fn_801902E0(u32 flag);
+extern void soundStartSE(u32 id);
+extern u8 std081_flagCheckTrue(u32 flag);
 extern void msgctrlSetValue(u32 id, u32 value);
 extern void winMsgClose(s32 mode);
 extern s32 winMsgCheckField(void);
 extern void winMsgOpenFieldWithSE(s32 messageId, s32 a, s32 b, s32 value);
-extern u32 fn_801CBA0C(u32 id);
-extern void fn_801CB834(u32 index, u32 a, u32 b, u32 c);
+extern u32 std112_modelGetResourceID(u32 id);
+extern void std115_mapObjectPlayAnimation(u32 index, u32 a, u32 b, u32 c);
 
 /* Camera, hero, floor, collision */
 extern void* cameraGetActive(void);
@@ -378,15 +378,15 @@ extern void* floorDataBiosGetCurrentPtr(void);
 extern u32 floorDataBiosGetShadowReciveNum(void* floor);
 extern u32 floorDataBiosGetShadowReciveID(void* floor, u32 index);
 extern u32 floorDataBiosGetShadowLightID(void* floor);
-extern u32 fn_80113F48(void);
+extern u32 std093_getCurrentGroupID(void);
 extern u8 GScolsys2WalkGetLayer(void* position, u8* layer, u8* subLayer);
 extern s32 GScolsys2ThruGetEventID(void* from, void* to, void* events, f32 radius);
 extern s32 GScolsys2HumanCollision(s32 id, void* from, void* to, void* hit);
 extern s32 fn_8010E138(void* position, PeopleFloorHit* hits);
 extern s32 fn_8010F188(void* from, void* to, void* hit, f32 radius);
-extern s32 fn_8010F320(void* from, void* to, void* hit, f32 radius);
+extern s32 colsysWallSweep(void* from, void* to, void* hit, f32 radius);
 extern s32 fn_80110084(s32* result, void* query);
-extern s32 fn_801101B4(void* from, void* to, void* events);
+extern s32 colsysPassGetEventID(void* from, void* to, void* events);
 extern f32 GScolsy2UtilGetSidePlanePoint(void* normal, void* verts, void* point);
 extern void GScolsy2UtilGetCpPlanePoint(void* out, void* normal, void* verts, void* point);
 extern s32 GScolsy2UtilChkInTri(void* point, void* verts, void* normal);
@@ -394,45 +394,45 @@ extern void GScolsy2UtilGetPointExtentionLine(void* out, void* from, void* to, f
 
 /* Debug drawing */
 extern void fn_800D258C(void);
-extern void fn_800DA028(s32 a);
-extern void fn_800D7820(void* a);
-extern void fn_800D88DC(s32 a);
-extern void fn_800D888C(s32 a);
-extern void fn_800DA4C4(s32 a, s32 b, s32 c);
+extern void gfxSetCullMode(s32 a);
+extern void gfxSetVtxDesc(void* a);
+extern void gfxSetFlags(s32 a);
+extern void gfxClearFlags(s32 a);
+extern void gfxSetBlendMode(s32 a, s32 b, s32 c);
 extern void fn_800D9ED8(s32 a);
-extern void fn_800D6A00(s32 a);
-extern void fn_800D67BC(s32 a);
-extern void fn_800D6680(f32 x, f32 y, f32 z);
+extern void gfxSetPrimitive(s32 a);
+extern void gfxBegin(s32 a);
+extern void gfxVtxPos(f32 x, f32 y, f32 z);
 extern void fn_800D5CB8(s32 a, s32 b, s32 c, s32 d, s32 e);
-extern void fn_800D6728(void);
+extern void gfxEnd(void);
 extern u8 lbl_80314638[];
 
 /* ===== The people core unit (0x8018F470-0x8018FE30) ===== */
 extern u32 fn_8018F490(const PeopleInfoBiosEntry* info);
-extern u32 fn_8018F4AC(const PeopleInfoBiosEntry* info);
+extern u32 characterModelGetTalkSE(const PeopleInfoBiosEntry* info);
 extern void fn_8018F4C8(void* info, u8 motion, s32* outAnim, u8* outLoop);
 extern f32 fn_8018F5B4(const PeopleInfoBiosEntry* info);
 extern f32 fn_8018F5CC(const PeopleInfoBiosEntry* info);
 extern f32 fn_8018F5E4(const PeopleInfoBiosEntry* info);
 
-extern f32 fn_8018F618(const PeopleInfoBiosEntry* info);
-extern f32 fn_8018F638(const PeopleInfoBiosEntry* info);
-extern f32 fn_8018F658(const PeopleInfoBiosEntry* info);
-extern f32 fn_8018F678(const PeopleInfoBiosEntry* info);
-extern s8 fn_8018F698(const PeopleInfoBiosEntry* info);
+extern f32 charModelGetHeadPitchMax(const PeopleInfoBiosEntry* info);
+extern f32 charModelGetHeadPitchMin(const PeopleInfoBiosEntry* info);
+extern f32 charModelGetHeadYawMax(const PeopleInfoBiosEntry* info);
+extern f32 charModelGetHeadYawMin(const PeopleInfoBiosEntry* info);
+extern s8 charModelGetHeadPart(const PeopleInfoBiosEntry* info);
 extern void* peopleInfoBiosGetPtr(void* scriptObj);
 extern void peopleBiosPopData(u8* src, u32 size);
 extern void peopleBiosPushData(u8* dst, u32 size);
 extern u32 peopleBiosGetPushDataSize(void);
-extern void fn_8018FB2C(PeopleEntry* entry, u8 animId);
+extern void peopleSetHumanCollision(PeopleEntry* entry, u8 animId);
 extern void fn_8018FB60(PeopleEntry* entry, u8 animId);
 extern void fn_8018FC08(PeopleEntry* entry, void* rotation);
-extern void fn_8018FC2C(PeopleEntry* entry, void* rotation);
+extern void peopleGetRotation(PeopleEntry* entry, void* rotation);
 extern GSvec* peopleGetPosition(PeopleEntry* entry);
 extern void fn_8018FC74(PeopleEntry* entry, void* position);
 extern void fn_8018FC98(PeopleEntry* entry, void* position);
-extern void* fn_8018FCBC(PeopleEntry* entry);
-extern PeopleEntry* fn_8018FCE0(void);
+extern void* peopleGetPositionPtr(PeopleEntry* entry);
+extern PeopleEntry* peopleCreate(void);
 
 /* ===== This unit ===== */
 void* lbl_8047B1F0[2]; /* the shadow lights: player characters, others */
@@ -462,13 +462,13 @@ void* lbl_8047B1F0[2]; /* the shadow lights: player characters, others */
 
 /* ===== Functions of this unit (retail order is the reverse) ===== */
 void fn_801812C4(PeopleEntry* entry);
-s32 fn_801812E8(u32 groupId, u32 index, u8 doInteract);
-s32 fn_80181478(u32 groupId, u32 index, u8 doSetup);
-void fn_80181850(void);
-void fn_80181EB0(u32 groupId, u32 index);
-void fn_801821B8(u32 groupId, u32 index);
-void fn_80183018(u32 groupId, u32 index);
-void fn_80183350(u32 groupId, u32 index);
+s32 peopleTalkPause(u32 groupId, u32 index, u8 doInteract);
+s32 std231_characterSetPathPaused(u32 groupId, u32 index, u8 doSetup);
+void peopleMain(void);
+void std131_characterSurpriseAnimation(u32 groupId, u32 index);
+void std178_characterPlayAnimationAndWait(u32 groupId, u32 index);
+void std077_characterEventFlagsSet(u32 groupId, u32 index);
+void std076_characterEventFlagsClear(u32 groupId, u32 index);
 s32 fn_80183688(PeopleEntry* self);
 s32 fn_80183730(PeopleEntry* self);
 s32 fn_801837D8(u32 groupId, u32 index, u32 flagId, u32 param1, u32 param2);
@@ -476,58 +476,58 @@ u32 fn_80183958(u32 groupId, u32 index);
 u32 fn_8018397C(u32 groupId, u32 index);
 s32 fn_801839A0(u32 groupId, u32 index, f32 field88, f32 field8C);
 s32 fn_80183B44(u32 groupId, u32 index, f32 field80);
-s32 fn_80183CE0(u32 groupId, u32 index);
+s32 std075_characterAllocPathAlt(u32 groupId, u32 index);
 BOOL peopleStartWalkList(u32 groupId, u32 index, u32 loop);
 s32 peopleAddWalkList(u32 groupId, u32 index, f32 x, f32 y, f32 z);
 u8 peopleReserveWalkList(u32 groupId, u32 index, u16 count);
-void fn_80184450(void);
-void fn_80184470(u32 groupId, u32 index);
-void fn_801845E4(u32 groupId, u32 index, s32 group, s32 id, s32 partIndex);
+void std071_threadYield(void);
+void std168_characterDetachFromCharacter(u32 groupId, u32 index);
+void std070_characterAttachToCharacter(u32 groupId, u32 index, s32 group, s32 id, s32 partIndex);
 void fn_801848D0(void* model, s32 group, s32 id, s32 partIndex);
 void peopleSetWalkSpeed(u32 groupId, u32 index, f32 speed);
-void fn_80184A90(PeopleEntry* entry);
+void peopleTurnUpdate(PeopleEntry* entry);
 void fn_80184D80(PeopleEntry* entry);
 void fn_8018524C(PeopleEntry* entry, u8 loop);
 void fn_801858C4(PeopleEntry* entry);
 s32 fn_80185AAC(PeopleEntry* entry);
 void fn_80185B90(PeopleEntry* entry, f32 speed);
-void fn_80185EE8(u32 groupId, u32 index, u8 keepFacing, f32 x, f32 y, f32 z);
+void std061_characterMoveToPosition(u32 groupId, u32 index, u8 keepFacing, f32 x, f32 y, f32 z);
 void peopleSetRotationDeg(u32 groupId, u32 index, f32 x, f32 y, f32 z);
-void fn_801860F8(u32 groupId, u32 index, f32 x, f32 y, f32 z);
+void std059_characterSetPosition(u32 groupId, u32 index, f32 x, f32 y, f32 z);
 u8 peopleGazeHeroCheck(u32 groupId, u32 index);
 u8 fn_80186284(u32 groupId, u32 index, f32 range, u32 targetGroupId, u32 targetIndex, f32 fov);
-u8 fn_80186620(u32 groupId, u32 index, u8 push, f32 x0, f32 z0, f32 x1, f32 z1);
+u8 std170_cameraFocusOnCharacter(u32 groupId, u32 index, u8 push, f32 x0, f32 z0, f32 x1, f32 z1);
 GSvec fn_80186B5C(u32 groupId, u32 index);
 u8 fn_801870E8(GSvec* position, GSvec* point, GSvec* start, GSvec* end, void* normal, f32 reach);
-u8 fn_801874BC(u32 groupId, u32 index, f32 x0, f32 z0, f32 x1, f32 z1);
-void fn_8018790C(u32 groupId, u32 index);
-void fn_80187A60(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex, f32 speed);
+u8 std058_characterCheckWithinBounds(u32 groupId, u32 index, f32 x0, f32 z0, f32 x1, f32 z1);
+void peopleStopTurn(u32 groupId, u32 index);
+void std165_characterFaceCharacter(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex, f32 speed);
 void peopleTurnToPoint(u32 groupId, u32 index, f32 x, f32 y, f32 z, f32 speed);
-void fn_8018805C(u32 groupId, u32 index, f32 yaw, f32 speed);
-u8 fn_80188214(u32 groupId, u32 index, f32 speed);
-void fn_801885C4(u32 groupId, u32 index, GSvec* offset, u8 face);
-f32 fn_801887D8(u32 groupId, u32 index, void* param3);
-BOOL fn_80188984(u32 groupId, u32 index, u8 wait);
-void fn_80188AF4(u32 groupId, u32 index);
-void fn_80188CA0(u32 groupId, u32 index, s32 x, s32 y, s32 z);
-void fn_80188F78(u32 groupId, u32 index);
-void fn_80188FA0(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex);
+void peopleStartTurn(u32 groupId, u32 index, f32 yaw, f32 speed);
+u8 peopleSetSpeedFromAmount(u32 groupId, u32 index, f32 speed);
+void peopleMoveByVector(u32 groupId, u32 index, GSvec* offset, u8 face);
+f32 peopleAmountFromMove(u32 groupId, u32 index, void* param3);
+BOOL std155_characterWaitForLookAt(u32 groupId, u32 index, u8 wait);
+void std067_characterStopLookAt(u32 groupId, u32 index);
+void std066_characterLookAtPosition(u32 groupId, u32 index, s32 x, s32 y, s32 z);
+void std065_characterLookAtPlayer(u32 groupId, u32 index);
+void std181_characterTurnHeadTowardsCharacter(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex);
 u8 fn_80189328(u32 groupId, u32 index, u8 enable);
-void fn_80189490(u32 groupId, u32 index);
-void fn_80189990(u32 groupId, u32 index, s32 messageId);
+void std055_characterEndSpeech(u32 groupId, u32 index);
+void std054_characterTalk(u32 groupId, u32 index, s32 messageId);
 BOOL peopleMoveCheck(u32 groupId, u32 index, u8 waitFlag);
-void fn_8018A44C(u32 groupId, u32 index, f32 amount);
-void fn_8018A700(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex, u8 keepFacing, f32 distance);
+void std068_characterTurnToAngle(u32 groupId, u32 index, f32 amount);
+void std177_characterMoveToCharacter(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex, u8 keepFacing, f32 distance);
 void fn_8018AACC(u32 groupId, u32 index, u8 keepFacing, GSvec* target);
 u8 peopleWaitSyncMotionBlend(u32 groupId, u32 index, u8 wait);
 BOOL peopleWaitSyncMotion(u32 groupId, u32 index, u8 wait);
 void fn_8018B220(u32 groupId, u32 index);
-void fn_8018B368(u32 groupId, u32 index, s32 animIndex, s32 frame, u8 looping);
+void std154_characterPlayAnimation(u32 groupId, u32 index, s32 animIndex, s32 frame, u8 looping);
 u8 fn_8018B558(u32 groupId, u32 index, s32 blendAnimation, s32 animation, u32 frames);
-u8 fn_8018B76C(u32 groupId, u32 index, s32 animIndex, s32 frame, u8 loop);
+u8 std051_characterSetAnimation(u32 groupId, u32 index, s32 animIndex, s32 frame, u8 loop);
 void fn_8018BA04(u32 groupId, u32 index, GSvec* position);
 void peopleGetPositionByIndex(u32 groupId, u32 index, s32 partIndex, GSvec* position);
-void fn_8018BDF4(u32 groupId, u32 index, GSvec* position);
+void std172_characterGetPosition(u32 groupId, u32 index, GSvec* position);
 void peopleSetRotation(u32 groupId, u32 index, GSvec* rotation);
 void peopleSetPositionByIndex(u32 groupId, u32 index, void* position);
 void peopleSetVisible(u32 groupId, u32 index, u8 visible);
@@ -536,13 +536,13 @@ u32 fn_8018C558(u32 groupId, u32 index);
 void peopleClearFlagsByIndex(u32 groupId, u32 index, u32 mask);
 void peopleSetFlagsByIndex(u32 groupId, u32 index, u32 mask);
 void fn_8018C8F4(u32 groupId, u32 index, u32 flags);
-void fn_8018CA20(u32 groupId, u32 index, u8 visible);
+void std151_characterFaceDirection(u32 groupId, u32 index, u8 visible);
 void fn_8018CB5C(u32 groupId, u32 index);
-PeopleEntry* fn_8018CD08(u32 groupId, u32 index, f32 range, f32 fov);
+PeopleEntry* peopleFindTalkTarget(u32 groupId, u32 index, f32 range, f32 fov);
 u8 fn_8018D680(GSvec* a, GSvec* b, GSvec* point, f32 width);
 u8 fn_8018D7D0(u32 groupId, u32 index);
 PeopleEntry* peopleSearchID(PeopleEntry* self);
-PeopleEntry* fn_8018D998(u32 groupId, u32 index);
+PeopleEntry* peopleIsInGroup(u32 groupId, u32 index);
 void fn_8018DA88(void);
 void fn_8018DB04(u8 releaseWalkList);
 void fn_8018DB68(u32 groupId, u32 index);
@@ -551,7 +551,7 @@ void* peopleOpen(u32 groupId, u32 index, s32 objectId);
 u8 peopleOpenSub(PeopleEntry* entry, u32 groupId, u32 index, s32 objectId);
 void fn_8018E920(u32 maxPeople);
 u8 peopleMoveCommit(PeopleEntry* entry, GSvec* position, GSvec* transform);
-void fn_8018ECEC(PeopleEntry* entry, f32 step);
+void peopleHeadLookUpdate(PeopleEntry* entry, f32 step);
 void fn_8018F08C(PeopleEntry* entry, s32 motionIndex);
 void fn_8018F30C(void);
 /* ===== end prototypes ===== */
@@ -615,7 +615,7 @@ static inline void peopleStartTurn(u32 groupId, u32 index, f32 yaw, f32 speed)
 
     entry = peopleFindBySelf(peopleFindSelf(groupId, index));
     if (entry != NULL) {
-        fn_8018FC2C(entry, &rotation);
+        peopleGetRotation(entry, &rotation);
         yaw += 6.2831855f * (s32)(rotation.y / 6.2831855f);
         entry->pad22 = 1;
         entry->field_40 = yaw;
@@ -639,7 +639,7 @@ static inline f32 peopleCalcRange(u32 groupId, u32 index, void* delta)
     if (entry == NULL) {
         return 0.0f;
     }
-    t = fn_800E008C(delta);
+    t = vecMag(delta);
     if (entry->field_38 <= t) {
         result = 2.0f;
     } else if (entry->field_34 <= t) {
@@ -750,7 +750,7 @@ static inline void peopleSetShadowVisible(u32 groupId, u32 index, u8 visible)
         if (entry->animId == 0) {
             visible = 0;
         }
-        fn_8018FB2C(entry, visible);
+        peopleSetHumanCollision(entry, visible);
     }
 }
 
@@ -772,7 +772,7 @@ static inline void peopleSetLookTarget(u32 groupId, u32 index, void* position)
         if (model != NULL) {
             info = peopleInfoBiosGetPtr(entry->scriptRef);
             if (info != NULL) {
-                partIndex = fn_8018F698(info);
+                partIndex = charModelGetHeadPart(info);
                 if (partIndex >= 0) {
                     entry->threadHandle = position;
                     part = GSmodelGetPart(model, partIndex);
@@ -827,7 +827,7 @@ static inline f32 peopleTurnTo(void* to, void* from, f32 facing)
     GSvec delta;
     f32 angle;
 
-    fn_800E0168(&delta, to, from);
+    GSvecSub(&delta, to, from);
     angle = (f32)atan2(delta.x, delta.z);
     angle = fmod(6.283185307179586 + (angle - facing), 6.283185307179586);
     if (angle > 3.141592653589793) {
@@ -870,9 +870,9 @@ static inline u8 peopleIsBetween(GSvec* a, GSvec* b, GSvec* point, f32 width)
     f32 halfLength;
 
     GSvecAdd(&midpoint, a, b);
-    fn_800E013C(&midpoint, &midpoint, 0.5f);
+    vecScale(&midpoint, &midpoint, 0.5f);
     fn_800E0718(rotation, &lbl_8031554C, peopleTurnTo(b, a, 0.0f));
-    fn_800E0168(point, point, &midpoint);
+    GSvecSub(point, point, &midpoint);
     GSvecTransformQuat(&rotated, rotation, point);
     halfLength = GSvecDistance(&midpoint, b);
     if (width >= fabs(rotated.x) && halfLength >= fabs(rotated.z)) {
@@ -986,7 +986,7 @@ static inline void peopleTurnToModel(u32 groupId, u32 index, u32 targetGroupId, 
         return;
     }
     GSvecCopy(&targetPosition, GSmodelGetPositionPtr(model));
-    fn_800E0168(&delta, &targetPosition, fn_8018FCBC(entry));
+    GSvecSub(&delta, &targetPosition, peopleGetPositionPtr(entry));
     peopleStartTurn(groupId, index, atan2f(delta.x, delta.z), speed);
 }
 
@@ -1114,7 +1114,7 @@ static inline void peopleGetPartPosition(u32 groupId, u32 index, s32 partIndex, 
         GSpartGetTransform(part, position, NULL, NULL);
         GSpartFree(part);
     } else {
-        GSvecCopy(position, fn_8018FCBC(entry));
+        GSvecCopy(position, peopleGetPositionPtr(entry));
     }
 }
 
@@ -1180,9 +1180,9 @@ static inline void peopleGetHeadPosition(u32 groupId, u32 index, GSvec* position
     if (info == NULL) {
         return;
     }
-    partIndex = fn_8018F698(info);
+    partIndex = charModelGetHeadPart(info);
     peopleGetPartPosition(groupId, index, partIndex, position);
-    position->y = ((GSvec*)fn_8018FCBC(entry))->y;
+    position->y = ((GSvec*)peopleGetPositionPtr(entry))->y;
 }
 
 /* Move `*value` toward `target` by `step` without overshooting. */
@@ -1232,7 +1232,7 @@ void fn_8018F30C(void)
             if ((hero != TRUE) != lightIndex) {
                 continue;
             }
-            GSvecCopy(&position, fn_8018FCBC(entry));
+            GSvecCopy(&position, peopleGetPositionPtr(entry));
             break;
         }
         position.y = 0.0f;
@@ -1285,7 +1285,7 @@ void fn_8018F08C(PeopleEntry* entry, s32 motionIndex)
  * repeats the block. Name leads (NXXJ01.map): peopleApproach below is
  * the shape of XD's stripped _peopleUpdateRotation__FPfff (0x48).
  */
-void fn_8018ECEC(PeopleEntry* entry, f32 step)
+void peopleHeadLookUpdate(PeopleEntry* entry, f32 step)
 {
     PeopleInfoBiosEntry* info;
     void* model;
@@ -1314,11 +1314,11 @@ void fn_8018ECEC(PeopleEntry* entry, f32 step)
 
     if (entry->threadHandle != NULL) {
         info = peopleInfoBiosGetPtr(entry->scriptRef);
-        partIndex = fn_8018F698(info);
-        yawMin = fn_8018F678(info);
-        yawMax = fn_8018F658(info);
-        pitchMin = fn_8018F638(info);
-        pitchMax = fn_8018F618(info);
+        partIndex = charModelGetHeadPart(info);
+        yawMin = charModelGetHeadYawMin(info);
+        yawMax = charModelGetHeadYawMax(info);
+        pitchMin = charModelGetHeadPitchMin(info);
+        pitchMax = charModelGetHeadPitchMax(info);
         if (partIndex < 0) {
             return;
         }
@@ -1335,7 +1335,7 @@ void fn_8018ECEC(PeopleEntry* entry, f32 step)
         }
 
         if (look) {
-            fn_8018FC2C(entry, &rotation);
+            peopleGetRotation(entry, &rotation);
             yaw = peopleTurnTo(entry->threadHandle, &partPosition, rotation.y);
             if (yaw < yawMin) {
                 if (peopleTestFlags(entry, 2)) {
@@ -1352,7 +1352,7 @@ void fn_8018ECEC(PeopleEntry* entry, f32 step)
             }
             if (inRange) {
                 entry->headTarget[1] = yaw;
-                fn_800E0168(&lookDelta, entry->threadHandle, &partPosition);
+                GSvecSub(&lookDelta, entry->threadHandle, &partPosition);
                 lookDelta.y += 13.0f;
                 pitch = atan2f((lookDelta.x > 0.0f ? lookDelta.x : -lookDelta.x) +
                                    (lookDelta.z > 0.0f ? lookDelta.z : -lookDelta.z),
@@ -1374,7 +1374,7 @@ void fn_8018ECEC(PeopleEntry* entry, f32 step)
         }
     }
 
-    turn = 0.04f * (f32)fn_800D3088();
+    turn = 0.04f * (f32)msgGetCharsPerFrame();
     peopleApproach(&entry->headRotation[0], entry->headTarget[0], turn);
     peopleApproach(&entry->headRotation[1], entry->headTarget[1], turn);
 }
@@ -1438,14 +1438,14 @@ u8 peopleMoveCommit(PeopleEntry* entry, GSvec* position, GSvec* transform)
         }
 
         if (peopleTestFlags(entry, 0x100)) {
-            if (fn_8010F320(&from, &result, &hit, radius) != 0) {
+            if (colsysWallSweep(&from, &result, &hit, radius) != 0) {
                 PSVECSubtract(&hit, &result, &delta);
                 PSVECAdd(&result, &delta, &result);
             }
         }
 
         if (peopleTestFlags(entry, 0x800)) {
-            count = fn_801101B4(&from, &result, events);
+            count = colsysPassGetEventID(&from, &result, events);
             heroMoveSetEventList(1, events, count);
         }
 
@@ -1591,7 +1591,7 @@ u8 peopleOpenSub(PeopleEntry* entry, u32 groupId, u32 index, s32 objectId)
     floorDataBiosGetCurrentPtr();
     other = peopleIsHero(groupId, index) != TRUE;
     light = (void*)floorDataBiosGetShadowLightID(floorDataBiosGetCurrentPtr());
-    light = light != NULL ? GSresGetResource(fn_80113F48(), (u32)light) : lbl_8047B1F0[other];
+    light = light != NULL ? GSresGetResource(std093_getCurrentGroupID(), (u32)light) : lbl_8047B1F0[other];
     GSmodelSetShadowFlags(model, 1);
     if (!other) {
         GSmodelSetShadowFlags(model, 4);
@@ -1625,7 +1625,7 @@ void* peopleOpen(u32 groupId, u32 index, s32 objectId)
         GSlogWrite("Warning： peopleOpen(%08x,%08x) ２重オープン\n", groupId, index);
         return NULL;
     }
-    entry = fn_8018FCE0();
+    entry = peopleCreate();
     if (entry == NULL) {
         GSlogWrite("エラー： peopleOpen(%08x,%08x) ワークの確保に失敗\n", groupId, index);
         return NULL;
@@ -1703,7 +1703,7 @@ void fn_8018DA88(void)
  * Resolve (groupId, index) to a person's self pointer; if no person of that
  * group has the index, fall back to any group and warn.
  */
-PeopleEntry* fn_8018D998(u32 groupId, u32 index)
+PeopleEntry* peopleIsInGroup(u32 groupId, u32 index)
 {
     s32 i;
     PeopleEntry* entry;
@@ -1765,9 +1765,9 @@ u8 fn_8018D680(GSvec* a, GSvec* b, GSvec* point, f32 width)
     f32 halfLength;
 
     GSvecAdd(&midpoint, a, b);
-    fn_800E013C(&midpoint, &midpoint, 0.5f);
+    vecScale(&midpoint, &midpoint, 0.5f);
     fn_800E0718(rotation, &lbl_8031554C, peopleTurnTo(b, a, 0.0f));
-    fn_800E0168(point, point, &midpoint);
+    GSvecSub(point, point, &midpoint);
     GSvecTransformQuat(&rotated, rotation, point);
     halfLength = GSvecDistance(&midpoint, b);
     if (width >= fabs(rotated.x) && halfLength >= fabs(rotated.z)) {
@@ -1802,7 +1802,7 @@ u8 fn_8018D680(GSvec* a, GSvec* b, GSvec* point, f32 width)
  * is why it still comes first. The width part needed peopleTurnTo's
  * two-statement heading (see there).
  */
-PeopleEntry* fn_8018CD08(u32 groupId, u32 index, f32 range, f32 fov)
+PeopleEntry* peopleFindTalkTarget(u32 groupId, u32 index, f32 range, f32 fov)
 {
     PeopleEntry* source;
     PeopleInfoBiosEntry* candidateInfo;
@@ -1836,7 +1836,7 @@ PeopleEntry* fn_8018CD08(u32 groupId, u32 index, f32 range, f32 fov)
     if (source == NULL) {
         return NULL;
     }
-    GSvecCopy(&sourcePosition, fn_8018FCBC(source));
+    GSvecCopy(&sourcePosition, peopleGetPositionPtr(source));
     info = peopleInfoBiosGetPtr(source->scriptRef);
     if (info != NULL) {
         sourceRadius = fn_8018F5E4(info);
@@ -1886,14 +1886,14 @@ PeopleEntry* fn_8018CD08(u32 groupId, u32 index, f32 range, f32 fov)
         } else {
             treasure = floorEventGetTresureList(candidate->index);
             if (treasure != NULL && (((u32)treasure[0] >> 5) & 7) == 1) {
-                fn_8018FC2C(candidate, &rotation);
+                peopleGetRotation(candidate, &rotation);
                 if (fabs(peopleTurnTo(&sourcePosition, &candidatePosition, rotation.y)) > 1.0471976f) {
                     continue;
                 }
             }
             checkWalls = FALSE;
         }
-        if (checkWalls && fn_8010F320(&sourcePosition, &candidatePosition, NULL, sourceRadius)) {
+        if (checkWalls && colsysWallSweep(&sourcePosition, &candidatePosition, NULL, sourceRadius)) {
             continue;
         }
         if (hasMember && peopleIsBetween(&sourcePosition, &candidatePosition, &memberPosition,
@@ -1960,7 +1960,7 @@ void fn_8018CB5C(u32 groupId, u32 index)
 }
 
 /* Show or hide a person's shadow (peopleSetShadowVisible's body). */
-void fn_8018CA20(u32 groupId, u32 index, u8 visible)
+void std151_characterFaceDirection(u32 groupId, u32 index, u8 visible)
 {
     PeopleEntry* entry;
 
@@ -1969,7 +1969,7 @@ void fn_8018CA20(u32 groupId, u32 index, u8 visible)
         if (entry->animId == 0) {
             visible = 0;
         }
-        fn_8018FB2C(entry, visible);
+        peopleSetHumanCollision(entry, visible);
     }
 }
 
@@ -2061,7 +2061,7 @@ void peopleSetRotation(u32 groupId, u32 index, GSvec* rotation)
 }
 
 /* Copy a person's model position into `position` (if given). */
-void fn_8018BDF4(u32 groupId, u32 index, GSvec* position)
+void std172_characterGetPosition(u32 groupId, u32 index, GSvec* position)
 {
     PeopleEntry* entry;
 
@@ -2092,7 +2092,7 @@ void peopleGetPositionByIndex(u32 groupId, u32 index, s32 partIndex, GSvec* posi
         GSpartGetTransform(part, position, NULL, NULL);
         GSpartFree(part);
     } else {
-        GSvecCopy(position, fn_8018FCBC(entry));
+        GSvecCopy(position, peopleGetPositionPtr(entry));
     }
 }
 
@@ -2114,12 +2114,12 @@ void fn_8018BA04(u32 groupId, u32 index, GSvec* position)
     if (info == NULL) {
         return;
     }
-    partIndex = fn_8018F698(info);
+    partIndex = charModelGetHeadPart(info);
     peopleGetPartPosition(groupId, index, partIndex, position);
-    position->y = ((GSvec*)fn_8018FCBC(entry))->y;
+    position->y = ((GSvec*)peopleGetPositionPtr(entry))->y;
 }
 
-u8 fn_8018B76C(u32 groupId, u32 index, s32 animIndex, s32 frame, u8 loop) {
+u8 std051_characterSetAnimation(u32 groupId, u32 index, s32 animIndex, s32 frame, u8 loop) {
     PeopleEntry* entry;
     void* model;
     s32 current;
@@ -2206,7 +2206,7 @@ u8 fn_8018B558(u32 groupId, u32 index, s32 blendAnimation,
     return 1;
 }
 
-void fn_8018B368(u32 groupId, u32 index, s32 animIndex, s32 frame,
+void std154_characterPlayAnimation(u32 groupId, u32 index, s32 animIndex, s32 frame,
                  u8 looping) {
     PeopleEntry* entry;
     void* model;
@@ -2349,7 +2349,7 @@ void fn_8018AACC(u32 groupId, u32 index, u8 keepFacing, GSvec* target)
     }
     original->moveSpeed = 1.0f;
     original->pad97 = 0;
-    fn_800E0168(&delta, original->field_5C, fn_8018FCBC(original));
+    GSvecSub(&delta, original->field_5C, peopleGetPositionPtr(original));
     angle = (f32)atan2(delta.x, delta.z);
     oldSpeed = original->moveSpeed;
     peopleStartTurn(groupId, index, angle, oldSpeed);
@@ -2362,7 +2362,7 @@ void fn_8018AACC(u32 groupId, u32 index, u8 keepFacing, GSvec* target)
  * Walk a person up to `distance` tenths of a unit short of person
  * (targetGroupId, targetIndex); if it is already that close, stop it.
  */
-void fn_8018A700(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex, u8 keepFacing, f32 distance)
+void std177_characterMoveToCharacter(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex, u8 keepFacing, f32 distance)
 {
     PeopleEntry* entry;
     GSvec delta;
@@ -2374,8 +2374,8 @@ void fn_8018A700(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex, u8 
     distance = 10.0f * distance;
     peopleGetPositionByID(groupId, index, &position);
     peopleGetPositionByID(targetGroupId, targetIndex, &targetPosition);
-    fn_800E0168(&delta, &position, &targetPosition);
-    length = fn_800E008C(&delta);
+    GSvecSub(&delta, &position, &targetPosition);
+    length = vecMag(&delta);
     if (0.0f == length) {
         scale = 1.0f;
     } else {
@@ -2388,13 +2388,13 @@ void fn_8018A700(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex, u8 
             entry->pad22 = 0;
         }
     } else {
-        fn_800E013C(&delta, &delta, scale);
+        vecScale(&delta, &delta, scale);
         GSvecAdd(&targetPosition, &targetPosition, &delta);
         fn_8018AACC(groupId, index, keepFacing, &targetPosition);
     }
 }
 
-void fn_8018A44C(u32 groupId, u32 index, f32 amount) {
+void std068_characterTurnToAngle(u32 groupId, u32 index, f32 amount) {
     PeopleEntry* entry;
     f32 angle;
     f32 oldSpeed;
@@ -2450,7 +2450,7 @@ BOOL peopleMoveCheck(u32 groupId, u32 index, u8 waitFlag)
  * target and making the person talkable), then set the speaker's name and
  * open message `messageId`.
  */
-void fn_80189990(u32 groupId, u32 index, s32 messageId)
+void std054_characterTalk(u32 groupId, u32 index, s32 messageId)
 {
     PeopleEntry* entry;
     PeopleInfoBiosEntry* info;
@@ -2477,20 +2477,20 @@ void fn_80189990(u32 groupId, u32 index, s32 messageId)
                 entry->nextLink = entry->threadHandle;
                 entry->field_94 = 1;
             }
-            fn_80188F78(groupId, index);
+            std065_characterLookAtPlayer(groupId, index);
             entry->isTalkable = peopleSetTalkable(groupId, index, TRUE);
             peopleIsHeadTurning(groupId, index, TRUE);
         }
         info = peopleInfoBiosGetPtr(entry->scriptRef);
         if (info != NULL) {
-            messageValue = fn_8018F4AC(info);
+            messageValue = characterModelGetTalkSE(info);
         }
         nameMessageId = 0xFA3;
         character = fn_801170A4(entry->groupId, entry->index);
         if (character != NULL) {
             nameId = floorCharacterBiosGetNameID(character);
             hearFlag = charNameBiosGetHearFlag(nameId);
-            if (hearFlag == 0 || fn_801902E0(hearFlag) == 1) {
+            if (hearFlag == 0 || std081_flagCheckTrue(hearFlag) == 1) {
                 nameMessageId = charNameBiosGetNameID(nameId);
             }
         }
@@ -2504,7 +2504,7 @@ void fn_80189990(u32 groupId, u32 index, s32 messageId)
  * to the saved facing (flags 0x20 with 0x40) or restore the look target and
  * talkable state (flag 0x10); then wait for the window to close.
  */
-void fn_80189490(u32 groupId, u32 index)
+void std055_characterEndSpeech(u32 groupId, u32 index)
 {
     PeopleEntry* entry;
     u32 flags;
@@ -2550,7 +2550,7 @@ u8 fn_80189328(u32 groupId, u32 index, u8 enable)
 }
 
 /* Make a person walk after another person, looking at it. */
-void fn_80188FA0(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex)
+void std181_characterTurnHeadTowardsCharacter(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex)
 {
     PeopleEntry* entry;
     PeopleEntry* target;
@@ -2563,20 +2563,20 @@ void fn_80188FA0(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex)
     if (target == NULL) {
         return;
     }
-    peopleSetLookTarget(groupId, index, fn_8018FCBC(target));
+    peopleSetLookTarget(groupId, index, peopleGetPositionPtr(target));
     entry->moveType = PEOPLE_MOVE_WALK_PATH;
     entry->walkPathId = targetGroupId;
     entry->walkPathParam = targetIndex;
 }
 
 /* Make a person follow person (0, 100). */
-void fn_80188F78(u32 groupId, u32 index)
+void std065_characterLookAtPlayer(u32 groupId, u32 index)
 {
-    fn_80188FA0(groupId, index, 0, 100);
+    std181_characterTurnHeadTowardsCharacter(groupId, index, 0, 100);
 }
 
 /* Make a person look at the point (x, y, z), kept in targetX..targetZ. */
-void fn_80188CA0(u32 groupId, u32 index, s32 x, s32 y, s32 z)
+void std066_characterLookAtPosition(u32 groupId, u32 index, s32 x, s32 y, s32 z)
 {
     PeopleEntry* entry;
 
@@ -2590,7 +2590,7 @@ void fn_80188CA0(u32 groupId, u32 index, s32 x, s32 y, s32 z)
 }
 
 /* Stop a person looking at anything: reset its head part and look target. */
-void fn_80188AF4(u32 groupId, u32 index)
+void std067_characterStopLookAt(u32 groupId, u32 index)
 {
     PeopleEntry* entry;
     PeopleInfoBiosEntry* info;
@@ -2610,7 +2610,7 @@ void fn_80188AF4(u32 groupId, u32 index)
     if (info == NULL) {
         return;
     }
-    partIndex = fn_8018F698(info);
+    partIndex = charModelGetHeadPart(info);
     if (partIndex < 0) {
         return;
     }
@@ -2626,7 +2626,7 @@ void fn_80188AF4(u32 groupId, u32 index)
  * Report whether a person's head is still turning toward its target. With
  * `wait`, yield until the turn has finished and return FALSE.
  */
-BOOL fn_80188984(u32 groupId, u32 index, u8 wait)
+BOOL std155_characterWaitForLookAt(u32 groupId, u32 index, u8 wait)
 {
     return peopleIsHeadTurning(groupId, index, wait);
 }
@@ -2634,7 +2634,7 @@ BOOL fn_80188984(u32 groupId, u32 index, u8 wait)
 /* fn_801887D8 -- find a people entry by (groupId, index) and compute an
  * animation blend ratio against entry->field_34/field_38 (float time range)
  * for a caller-supplied time-source object (param3, fed to fn_800E008C). */
-f32 fn_801887D8(u32 groupId, u32 index, void* param3) {
+f32 peopleAmountFromMove(u32 groupId, u32 index, void* param3) {
     PeopleEntry* entry;
     f32 result;
     f32 t;
@@ -2646,7 +2646,7 @@ f32 fn_801887D8(u32 groupId, u32 index, void* param3) {
     if (entry == NULL) {
         return 0.0f;
     }
-    t = fn_800E008C(param3);
+    t = vecMag(param3);
     endTime = entry->field_38;
     if (endTime <= t) {
         result = 2.0f;
@@ -2667,7 +2667,7 @@ f32 fn_801887D8(u32 groupId, u32 index, void* param3) {
  * Move a person by `offset` (XZ) through the collision checks and, with
  * `face`, face the direction of the offset.
  */
-void fn_801885C4(u32 groupId, u32 index, GSvec* offset, u8 face)
+void peopleMoveByVector(u32 groupId, u32 index, GSvec* offset, u8 face)
 {
     PeopleEntry* entry;
     GSvec position;
@@ -2756,14 +2756,14 @@ static inline u8 peopleMoveAlongAngle(u32 groupId, u32 index, f32 yaw, f32 speed
     fn_800E0718(rotation, &lbl_8031554C, yaw);
     set__5GSvecFfff(&localStep, 0.0f, 0.0f, speed);
     GSvecTransformQuat(&worldStep, rotation, &localStep);
-    ticks = (f32)fn_800D3088();
+    ticks = (f32)msgGetCharsPerFrame();
     position.x += worldStep.x * ticks;
     position.z += worldStep.z * ticks;
     return peopleMoveCommit(entry, &position, (GSvec*)entry->transform);
 }
 
 /* Step a person along its own facing (XD's peopleMoveForward). */
-u8 fn_80188214(u32 groupId, u32 index, f32 speed)
+u8 peopleSetSpeedFromAmount(u32 groupId, u32 index, f32 speed)
 {
     PeopleEntry* entry;
 
@@ -2776,14 +2776,14 @@ u8 fn_80188214(u32 groupId, u32 index, f32 speed)
 }
 
 /* Start turning a person toward `yaw`, expressed in its model's current revolution. */
-void fn_8018805C(u32 groupId, u32 index, f32 yaw, f32 speed)
+void peopleStartTurn(u32 groupId, u32 index, f32 yaw, f32 speed)
 {
     PeopleEntry* entry;
     GSvec rotation;
 
     entry = peopleFindBySelf(peopleFindSelf(groupId, index));
     if (entry != NULL) {
-        fn_8018FC2C(entry, &rotation);
+        peopleGetRotation(entry, &rotation);
         yaw += 6.2831855f * (s32)(rotation.y / 6.2831855f);
         entry->pad22 = 1;
         entry->field_40 = yaw;
@@ -2803,12 +2803,12 @@ void peopleTurnToPoint(u32 groupId, u32 index, f32 x, f32 y, f32 z, f32 speed)
         return;
     }
     set__5GSvecFfff(&targetPosition, x, y, z);
-    fn_800E0168(&delta, &targetPosition, fn_8018FCBC(entry));
+    GSvecSub(&delta, &targetPosition, peopleGetPositionPtr(entry));
     peopleStartTurn(groupId, index, atan2f(delta.x, delta.z), speed);
 }
 
 /* Turn a person toward the model of resource (targetGroupId, targetIndex). */
-void fn_80187A60(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex, f32 speed)
+void std165_characterFaceCharacter(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex, f32 speed)
 {
     PeopleEntry* entry;
     void* model;
@@ -2824,12 +2824,12 @@ void fn_80187A60(u32 groupId, u32 index, u32 targetGroupId, u32 targetIndex, f32
         return;
     }
     GSvecCopy(&targetPosition, GSmodelGetPositionPtr(model));
-    fn_800E0168(&delta, &targetPosition, fn_8018FCBC(entry));
+    GSvecSub(&delta, &targetPosition, peopleGetPositionPtr(entry));
     peopleStartTurn(groupId, index, atan2f(delta.x, delta.z), speed);
 }
 
 /* Stop a person turning, keeping its current model yaw as its facing. */
-void fn_8018790C(u32 groupId, u32 index)
+void peopleStopTurn(u32 groupId, u32 index)
 {
     PeopleEntry* entry;
     GSvec* position;
@@ -2847,7 +2847,7 @@ void fn_8018790C(u32 groupId, u32 index)
  * (x1, z1). With the debug display on (resource (0, 2)), the rectangle is
  * drawn as a 50-unit-high fence around the person.
  */
-u8 fn_801874BC(u32 groupId, u32 index, f32 x0, f32 z0, f32 x1, f32 z1)
+u8 std058_characterCheckWithinBounds(u32 groupId, u32 index, f32 x0, f32 z0, f32 x1, f32 z1)
 {
     PeopleEntry* entry;
     u8* debug;
@@ -2861,42 +2861,42 @@ u8 fn_801874BC(u32 groupId, u32 index, f32 x0, f32 z0, f32 x1, f32 z1)
     if (entry == NULL) {
         return FALSE;
     }
-    GSvecCopy(&position, fn_8018FCBC(entry));
+    GSvecCopy(&position, peopleGetPositionPtr(entry));
 
     debug = GSresGetResource(0, 2);
     if (debug != NULL && debug[0] != 0) {
         cameraGetActive();
         fn_800D258C();
         _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
-        fn_800DA028(0);
-        fn_800D7820(lbl_80314638);
-        fn_800D88DC(1);
-        fn_800D888C(6);
-        fn_800DA4C4(1, 6, 7);
+        gfxSetCullMode(0);
+        gfxSetVtxDesc(lbl_80314638);
+        gfxSetFlags(1);
+        gfxClearFlags(6);
+        gfxSetBlendMode(1, 6, 7);
         fn_800D9ED8(0);
-        fn_800D6A00(4);
-        fn_800D67BC(10);
-        fn_800D6680(x0, position.y, z0);
+        gfxSetPrimitive(4);
+        gfxBegin(10);
+        gfxVtxPos(x0, position.y, z0);
         fn_800D5CB8(0, 0, 0x80, 0xFF, 0xC0);
-        fn_800D6680(x0, position.y + 50.0f, z0);
+        gfxVtxPos(x0, position.y + 50.0f, z0);
         fn_800D5CB8(0, 0, 0x80, 0xFF, 0xC0);
-        fn_800D6680(x0, position.y, z1);
+        gfxVtxPos(x0, position.y, z1);
         fn_800D5CB8(0, 0, 0x80, 0xFF, 0xC0);
-        fn_800D6680(x0, position.y + 50.0f, z1);
+        gfxVtxPos(x0, position.y + 50.0f, z1);
         fn_800D5CB8(0, 0, 0x80, 0xFF, 0xC0);
-        fn_800D6680(x1, position.y, z1);
+        gfxVtxPos(x1, position.y, z1);
         fn_800D5CB8(0, 0, 0x80, 0xFF, 0xC0);
-        fn_800D6680(x1, position.y + 50.0f, z1);
+        gfxVtxPos(x1, position.y + 50.0f, z1);
         fn_800D5CB8(0, 0, 0x80, 0xFF, 0xC0);
-        fn_800D6680(x1, position.y, z0);
+        gfxVtxPos(x1, position.y, z0);
         fn_800D5CB8(0, 0, 0x80, 0xFF, 0xC0);
-        fn_800D6680(x1, position.y + 50.0f, z0);
+        gfxVtxPos(x1, position.y + 50.0f, z0);
         fn_800D5CB8(0, 0, 0x80, 0xFF, 0xC0);
-        fn_800D6680(x0, position.y, z0);
+        gfxVtxPos(x0, position.y, z0);
         fn_800D5CB8(0, 0, 0x80, 0xFF, 0xC0);
-        fn_800D6680(x0, position.y + 50.0f, z0);
+        gfxVtxPos(x0, position.y + 50.0f, z0);
         fn_800D5CB8(0, 0, 0x80, 0xFF, 0xC0);
-        fn_800D6728();
+        gfxEnd();
     }
 
     if (x0 < x1) {
@@ -3086,7 +3086,7 @@ GSvec fn_80186B5C(u32 groupId, u32 index)
         fn_800E0718(rotation, &lbl_8031554C, angle);
         set__5GSvecFfff(&localStep, 0.0f, 0.0f, speed);
         GSvecTransformQuat(&worldStep, rotation, &localStep);
-        fn_800E013C(&result, &worldStep, (f32)fn_800D3088());
+        vecScale(&result, &worldStep, (f32)msgGetCharsPerFrame());
     }
     return result;
 }
@@ -3098,7 +3098,7 @@ GSvec fn_80186B5C(u32 groupId, u32 index)
  * `push`, the person is stopped at the wall (pushed out of any collision)
  * and the hero's movement is locked for a frame.
  */
-u8 fn_80186620(u32 groupId, u32 index, u8 push, f32 x0, f32 z0, f32 x1, f32 z1)
+u8 std170_cameraFocusOnCharacter(u32 groupId, u32 index, u8 push, f32 x0, f32 z0, f32 x1, f32 z1)
 {
     PeopleEntry* entry;
     PeopleInfoBiosEntry* info;
@@ -3130,14 +3130,14 @@ u8 fn_80186620(u32 groupId, u32 index, u8 push, f32 x0, f32 z0, f32 x1, f32 z1)
     }
     if (peopleTestFlags(entry, 0x40000000)) {
         GSvecCopy(&direction, &entry->collisionX);
-        fn_800E013C(&scaledDirection, &direction, 0.1f);
+        vecScale(&scaledDirection, &direction, 0.1f);
         direction = fn_80186B5C(0, 100);
         GSvecCopy(&transform, peopleGetTransform(entry));
         GSvecAdd(&position, &transform, &direction);
     } else {
-        GSvecCopy(&position, fn_8018FCBC(entry));
+        GSvecCopy(&position, peopleGetPositionPtr(entry));
         GSvecCopy(&transform, peopleGetTransform(entry));
-        fn_800E0168(&direction, &position, &transform);
+        GSvecSub(&direction, &position, &transform);
     }
     set__5GSvecFfff(&lineStart, x0, position.y, z0);
     set__5GSvecFfff(&lineEnd, x1, position.y, z1);
@@ -3147,23 +3147,23 @@ u8 fn_80186620(u32 groupId, u32 index, u8 push, f32 x0, f32 z0, f32 x1, f32 z1)
         cameraGetActive();
         fn_800D258C();
         _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
-        fn_800DA028(0);
-        fn_800D7820(lbl_80314638);
-        fn_800D88DC(1);
-        fn_800D888C(6);
-        fn_800DA4C4(1, 6, 7);
+        gfxSetCullMode(0);
+        gfxSetVtxDesc(lbl_80314638);
+        gfxSetFlags(1);
+        gfxClearFlags(6);
+        gfxSetBlendMode(1, 6, 7);
         fn_800D9ED8(0);
-        fn_800D6A00(4);
-        fn_800D67BC(4);
-        fn_800D6680(x0, position.y - 50.0f, z0);
+        gfxSetPrimitive(4);
+        gfxBegin(4);
+        gfxVtxPos(x0, position.y - 50.0f, z0);
         fn_800D5CB8(0, 0, 0x80, 0xFF, 0xC0);
-        fn_800D6680(x0, position.y + 50.0f, z0);
+        gfxVtxPos(x0, position.y + 50.0f, z0);
         fn_800D5CB8(0, 0, 0x80, 0xFF, 0xC0);
-        fn_800D6680(x1, position.y - 50.0f, z1);
+        gfxVtxPos(x1, position.y - 50.0f, z1);
         fn_800D5CB8(0, 0, 0x80, 0xFF, 0xC0);
-        fn_800D6680(x1, position.y + 50.0f, z1);
+        gfxVtxPos(x1, position.y + 50.0f, z1);
         fn_800D5CB8(0, 0, 0x80, 0xFF, 0xC0);
-        fn_800D6728();
+        gfxEnd();
     }
 
     info = peopleInfoBiosGetPtr(entry->scriptRef);
@@ -3173,7 +3173,7 @@ u8 fn_80186620(u32 groupId, u32 index, u8 push, f32 x0, f32 z0, f32 x1, f32 z1)
         radius = 4.0f;
     }
     reach = radius;
-    length = fn_800E008C(&direction);
+    length = vecMag(&direction);
     if (length > 0.0f) {
         step = radius / length;
         if (step > 1.0f) {
@@ -3183,28 +3183,28 @@ u8 fn_80186620(u32 groupId, u32 index, u8 push, f32 x0, f32 z0, f32 x1, f32 z1)
         step = 1.0f;
     }
 
-    fn_800E0168(&lineDirection, &lineEnd, &lineStart);
-    if (fn_800E008C(&lineDirection) < 0.0001f) {
+    GSvecSub(&lineDirection, &lineEnd, &lineStart);
+    if (vecMag(&lineDirection) < 0.0001f) {
         return FALSE;
     }
     fn_800E0060(&lineDirection, &lineDirection);
-    fn_800E0168(&offset, &transform, &lineStart);
-    fn_800E013C(&offset, &lineDirection, fn_800E0000(&offset, &lineDirection));
+    GSvecSub(&offset, &transform, &lineStart);
+    vecScale(&offset, &lineDirection, fn_800E0000(&offset, &lineDirection));
     GSvecAdd(&projectedStart, &offset, &lineStart);
-    fn_800E0168(&projectedDelta, &transform, &projectedStart);
+    GSvecSub(&projectedDelta, &transform, &projectedStart);
 
     for (t = 0.0f; t < 1.0f; t += step) {
         next = t + step;
         if (next > 1.0f) {
             next = 1.0f;
         }
-        fn_800E013C(&testPoint, &direction, next);
+        vecScale(&testPoint, &direction, next);
         GSvecAdd(&testPoint, &transform, &testPoint);
         if (fn_801870E8(&projectedStart, &testPoint, &lineStart, &lineEnd, &projectedDelta, reach)) {
             if (push) {
                 GScolsy2UtilGetPointExtentionLine(&contact, &projectedStart, &testPoint, reach + 0.0001f);
-                if (fn_8010F320(&transform, &contact, &hit, 4.0f)) {
-                    fn_800E0168(&correction, &hit, &contact);
+                if (colsysWallSweep(&transform, &contact, &hit, 4.0f)) {
+                    GSvecSub(&correction, &hit, &contact);
                     GSvecAdd(&contact, &contact, &correction);
                 }
                 fn_8018FC74(entry, &contact);
@@ -3237,18 +3237,18 @@ u8 fn_80186284(u32 groupId, u32 index, f32 range, u32 targetGroupId, u32 targetI
     if (target == NULL) {
         return FALSE;
     }
-    GSvecCopy(&targetPosition, fn_8018FCBC(target));
+    GSvecCopy(&targetPosition, peopleGetPositionPtr(target));
     entry = peopleFindBySelf(peopleFindSelf(groupId, index));
     if (entry == NULL) {
         return FALSE;
     }
-    GSvecCopy(&position, fn_8018FCBC(entry));
-    fn_800E0168(&delta, &position, &targetPosition);
+    GSvecCopy(&position, peopleGetPositionPtr(entry));
+    GSvecSub(&delta, &position, &targetPosition);
     range = 10.0f * range;
-    if (fn_800E008C(&delta) > range) {
+    if (vecMag(&delta) > range) {
         return FALSE;
     }
-    fn_8018FC2C(entry, &rotation);
+    peopleGetRotation(entry, &rotation);
     angle = peopleTurnTo(&targetPosition, &position, rotation.y);
     fov = 0.5f * (0.017453292f * fov);
     if (fabs(angle) > fov) {
@@ -3271,7 +3271,7 @@ u8 peopleGazeHeroCheck(u32 groupId, u32 index)
 }
 
 /* Place a person at (x, y, z). */
-void fn_801860F8(u32 groupId, u32 index, f32 x, f32 y, f32 z)
+void std059_characterSetPosition(u32 groupId, u32 index, f32 x, f32 y, f32 z)
 {
     GSvec position;
 
@@ -3298,7 +3298,7 @@ void peopleSetRotationDeg(u32 groupId, u32 index, f32 x, f32 y, f32 z) {
 }
 
 /* Walk a person to (x, y, z) (fn_8018AACC). */
-void fn_80185EE8(u32 groupId, u32 index, u8 keepFacing, f32 x, f32 y, f32 z)
+void std061_characterMoveToPosition(u32 groupId, u32 index, u8 keepFacing, f32 x, f32 y, f32 z)
 {
     GSvec target;
 
@@ -3321,7 +3321,7 @@ void fn_80185B90(PeopleEntry* entry, f32 speed)
         return;
     }
     if (0.0f != entry->walkAnimRate) {
-        entry->syncMotion += entry->walkAnimRate * (f32)fn_800D3088();
+        entry->syncMotion += entry->walkAnimRate * (f32)msgGetCharsPerFrame();
         if (entry->syncMotion > 1.0f) {
             entry->syncMotion = 1.0f;
             entry->walkAnimRate = 0.0f;
@@ -3353,15 +3353,15 @@ s32 fn_80185AAC(PeopleEntry* entry)
     GSvec delta;
     f32 oldLength;
 
-    fn_800E0168(&delta, entry->field_5C, fn_8018FCBC(entry));
-    oldLength = fn_800E008C(&delta);
-    if (!fn_80188214(entry->groupId, entry->index, entry->moveSpeed)) {
+    GSvecSub(&delta, entry->field_5C, peopleGetPositionPtr(entry));
+    oldLength = vecMag(&delta);
+    if (!peopleSetSpeedFromAmount(entry->groupId, entry->index, entry->moveSpeed)) {
         return 2;
     }
-    fn_800E0168(&delta, entry->field_5C, fn_8018FCBC(entry));
-    if (fn_800E008C(&delta) > oldLength) {
+    GSvecSub(&delta, entry->field_5C, peopleGetPositionPtr(entry));
+    if (vecMag(&delta) > oldLength) {
         fn_8018FC74(entry, entry->field_5C);
-        peopleMoveCommit(entry, fn_8018FCBC(entry), peopleGetTransform(entry));
+        peopleMoveCommit(entry, peopleGetPositionPtr(entry), peopleGetTransform(entry));
         return 1;
     }
     return 0;
@@ -3383,9 +3383,9 @@ void fn_801858C4(PeopleEntry* entry)
     if (entry == NULL) {
         return;
     }
-    position = fn_8018FCBC(entry);
+    position = peopleGetPositionPtr(entry);
     transform = peopleGetTransform(entry);
-    fn_800E0168(&delta, position, transform);
+    GSvecSub(&delta, position, transform);
     if (__fabs(delta.x) < 0.0001f && __fabs(delta.y) < 0.0001f &&
         __fabs(delta.z) < 0.0001f) {
         entry->pad97++;
@@ -3438,17 +3438,17 @@ void fn_8018524C(PeopleEntry* entry, u8 loop)
         break;
     case 1:
         GSvecCopy(entry->field_5C, &entry->walkList[entry->walkListCount]);
-        angle = peopleTurnTo(entry->field_5C, fn_8018FCBC(entry), 0.0f);
+        angle = peopleTurnTo(entry->field_5C, peopleGetPositionPtr(entry), 0.0f);
         peopleStartTurn(entry->groupId, entry->index, angle, 1.0f);
         entry->subState = 2;
         /* fallthrough */
     case 2:
-        fn_80188214(entry->groupId, entry->index, entry->moveSpeed);
-        fn_800E0168(&delta, entry->transform, fn_8018FCBC(entry));
-        remaining = fn_800E008C(&delta);
+        peopleSetSpeedFromAmount(entry->groupId, entry->index, entry->moveSpeed);
+        GSvecSub(&delta, entry->transform, peopleGetPositionPtr(entry));
+        remaining = vecMag(&delta);
         for (;;) {
-            fn_800E0168(&delta, entry->transform, entry->field_5C);
-            distance = fn_800E008C(&delta);
+            GSvecSub(&delta, entry->transform, entry->field_5C);
+            distance = vecMag(&delta);
             if (!(distance < remaining)) {
                 break;
             }
@@ -3468,8 +3468,8 @@ void fn_8018524C(PeopleEntry* entry, u8 loop)
             peopleStartTurn(entry->groupId, entry->index, angle, 2.0f);
             remaining -= distance;
         }
-        fn_800E0168(&delta, entry->field_5C, entry->transform);
-        fn_800E013C(&delta, &delta, remaining / distance);
+        GSvecSub(&delta, entry->field_5C, entry->transform);
+        vecScale(&delta, &delta, remaining / distance);
         GSvecAdd(&delta, entry->transform, &delta);
         peopleMoveCommit(entry, &delta, (GSvec*)entry->transform);
         break;
@@ -3493,7 +3493,7 @@ void fn_80184D80(PeopleEntry* entry)
     case 0:
         if (entry->animBlendFactor > 0.0f) {
             frameRate = (f32)fn_800D37CC();
-            entry->animBlendFactor -= (f32)fn_800D3088() / frameRate;
+            entry->animBlendFactor -= (f32)msgGetCharsPerFrame() / frameRate;
             if (entry->animBlendFactor < 0.0f) {
                 entry->animBlendFactor = 0.0f;
             }
@@ -3506,7 +3506,7 @@ void fn_80184D80(PeopleEntry* entry)
         offset.x = entry->field_80 * sin(angle);
         offset.z = entry->field_80 * cos(angle);
         GSvecAdd(entry->field_5C, &entry->collisionX, &offset);
-        angle = peopleTurnTo(entry->field_5C, fn_8018FCBC(entry), 0.0f);
+        angle = peopleTurnTo(entry->field_5C, peopleGetPositionPtr(entry), 0.0f);
         peopleStartTurn(entry->groupId, entry->index, angle, 1.0f);
         entry->subState = 2;
         /* fallthrough */
@@ -3529,7 +3529,7 @@ void fn_80184D80(PeopleEntry* entry)
  * tick; a person following a point (flag 0x40000000) eases in, never slower
  * than one degree per tick.
  */
-void fn_80184A90(PeopleEntry* entry)
+void peopleTurnUpdate(PeopleEntry* entry)
 {
     GSvec rotation;
     f32 target;
@@ -3544,7 +3544,7 @@ void fn_80184A90(PeopleEntry* entry)
     if (!turning) {
         return;
     }
-    fn_8018FC2C(entry, &rotation);
+    peopleGetRotation(entry, &rotation);
     if (peopleTestFlags(entry, 0x40000000)) {
         shortest = FALSE;
         if (peopleTestFlags(entry, 8)) {
@@ -3555,7 +3555,7 @@ void fn_80184A90(PeopleEntry* entry)
         rotation.y = peopleNormalizeYaw(rotation.y);
         target = peopleNormalizeYaw(entry->field_40);
         step = 0.15707964f * entry->field_44;
-        for (ticks = fn_800D3088(); ticks != 0; ticks--) {
+        for (ticks = msgGetCharsPerFrame(); ticks != 0; ticks--) {
             difference = target - rotation.y;
             if (fabs(difference) >= 3.141592653589793) {
                 if (difference < 0.0f) {
@@ -3585,7 +3585,7 @@ void fn_80184A90(PeopleEntry* entry)
         if (fabs(step) <= 0.017453292f) {
             step = step < 0.0f ? -0.017453292f : 0.017453292f;
         }
-        rotation.y += step * (f32)fn_800D3088();
+        rotation.y += step * (f32)msgGetCharsPerFrame();
         if (step < 0.0f) {
             if (rotation.y <= entry->field_40) {
                 rotation.y = entry->field_40;
@@ -3628,7 +3628,7 @@ void fn_801848D0(void* model, s32 group, s32 id, s32 partIndex)
  * (group, id), replacing anything it held; the held item is recorded in
  * walk nodes A-C.
  */
-void fn_801845E4(u32 groupId, u32 index, s32 group, s32 id, s32 partIndex)
+void std070_characterAttachToCharacter(u32 groupId, u32 index, s32 group, s32 id, s32 partIndex)
 {
     /*
      * RULE-EXCEPTION(title-path): unused initialised local (invented dead
@@ -3665,7 +3665,7 @@ void fn_801845E4(u32 groupId, u32 index, s32 group, s32 id, s32 partIndex)
 }
 
 /* Detach whatever a person holds (walk nodes A-C) from its model. */
-void fn_80184470(u32 groupId, u32 index)
+void std168_characterDetachFromCharacter(u32 groupId, u32 index)
 {
     PeopleEntry* entry;
     void* model;
@@ -3683,7 +3683,7 @@ void fn_80184470(u32 groupId, u32 index)
     }
 }
 
-void fn_80184450(void) {
+void std071_threadYield(void) {
     _threadSwitch();
 }
 
@@ -3753,7 +3753,7 @@ BOOL peopleStartWalkList(u32 groupId, u32 index, u32 loop)
     return TRUE;
 }
 
-s32 fn_80183CE0(u32 groupId, u32 index) {
+s32 std075_characterAllocPathAlt(u32 groupId, u32 index) {
     PeopleEntry* entry;
 
     entry = peopleFindBySelf(peopleFindSelf(groupId, index));
@@ -3879,7 +3879,7 @@ s32 fn_80183688(PeopleEntry* self)
 }
 
 /* Clear the transient interaction flags and restore the high movement flag. */
-void fn_80183350(u32 groupId, u32 index) {
+void std076_characterEventFlagsClear(u32 groupId, u32 index) {
     PeopleEntry* entry;
 
     entry = peopleFindBySelf(peopleFindSelf(groupId, index));
@@ -3899,7 +3899,7 @@ void fn_80183350(u32 groupId, u32 index) {
 }
 
 /* Set the transient interaction flags and suspend the high movement flag. */
-void fn_80183018(u32 groupId, u32 index) {
+void std077_characterEventFlagsSet(u32 groupId, u32 index) {
     PeopleEntry* entry;
 
     entry = peopleFindBySelf(peopleFindSelf(groupId, index));
@@ -3923,7 +3923,7 @@ void fn_80183018(u32 groupId, u32 index) {
  * fall motion (7) while lowering it by 1.3 units a tick, then the landing
  * motion (8) to its end, then stand (1).
  */
-void fn_801821B8(u32 groupId, u32 index)
+void std178_characterPlayAnimationAndWait(u32 groupId, u32 index)
 {
     PeopleEntry* entry;
     GSvec position;
@@ -3938,10 +3938,10 @@ void fn_801821B8(u32 groupId, u32 index)
     ground = position.y;
     peopleSetVisibleInline(groupId, index, TRUE);
     peopleClearFlags(entry, 8);
-    fn_80166A28(0x49E);
+    soundStartSE(0x49E);
     peopleSetMotionIndex(entry, 7);
     for (;;) {
-        height -= 1.3 * fn_800D3088();
+        height -= 1.3 * msgGetCharsPerFrame();
         if (height < 0.0f) {
             height = 0.0f;
         }
@@ -3957,7 +3957,7 @@ void fn_801821B8(u32 groupId, u32 index)
     peopleSetMotionIndex(entry, 1);
 }
 
-void fn_80181EB0(u32 groupId, u32 index) {
+void std131_characterSurpriseAnimation(u32 groupId, u32 index) {
     PeopleEntry* entry;
     void* model;
     u32 modelGroup;
@@ -3965,22 +3965,22 @@ void fn_80181EB0(u32 groupId, u32 index) {
     s8 attachmentIndex;
 
     attachmentIndex = 0;
-    modelGroup = fn_80113F48();
-    modelIndex = fn_801CBA0C(0x0F850400);
+    modelGroup = std093_getCurrentGroupID();
+    modelIndex = std112_modelGetResourceID(0x0F850400);
 
     entry = peopleFindBySelf(peopleFindSelf(groupId, index));
     if (entry != NULL) {
         PeopleInfoBiosEntry* info = peopleInfoBiosGetPtr(entry->scriptRef);
         if (info != NULL) {
-            attachmentIndex = fn_8018F698(info);
+            attachmentIndex = charModelGetHeadPart(info);
         }
     }
 
     if (attachmentIndex >= 0) {
-        fn_801845E4(modelGroup, modelIndex, groupId, index,
+        std070_characterAttachToCharacter(modelGroup, modelIndex, groupId, index,
                     attachmentIndex);
     } else {
-        fn_801845E4(modelGroup, modelIndex, groupId, index, 0);
+        std070_characterAttachToCharacter(modelGroup, modelIndex, groupId, index, 0);
     }
 
     model = GSresGetResource(modelGroup, modelIndex);
@@ -3989,8 +3989,8 @@ void fn_80181EB0(u32 groupId, u32 index) {
         GSmodelClearShadowFlags(model, 1);
     }
 
-    fn_801CB834(modelIndex, 0, 0, 0);
-    fn_80166A28(0x47);
+    std115_mapObjectPlayAnimation(modelIndex, 0, 0, 0);
+    soundStartSE(0x47);
 
     entry = peopleFindBySelf(peopleFindSelf(modelGroup, modelIndex));
     if (entry != NULL) {
@@ -4023,7 +4023,7 @@ static inline void peopleMoveTypeRandomRot(PeopleEntry* entry)
     case 0:
         if (entry->animBlendFactor > 0.0f) {
             frameCount = (f32)fn_800D37CC();
-            entry->animBlendFactor -= (f32)fn_800D3088() / frameCount;
+            entry->animBlendFactor -= (f32)msgGetCharsPerFrame() / frameCount;
             if (entry->animBlendFactor < 0.0f) {
                 entry->animBlendFactor = 0.0f;
             }
@@ -4060,7 +4060,7 @@ static inline void peopleUpdateShadows(PeopleEntry* entry)
 
     floor = floorDataBiosGetCurrentPtr();
     if (floor != NULL) {
-        group = fn_80113F48();
+        group = std093_getCurrentGroupID();
         fn_8018FC98(entry, &floorPosition);
         if (!GScolsys2WalkGetLayer(&floorPosition, &layer, &subLayer)) {
             layer = 0;
@@ -4082,7 +4082,7 @@ static inline void peopleUpdateShadows(PeopleEntry* entry)
     }
 }
 
-void fn_80181850(void)
+void peopleMain(void)
 {
     /*
      * RULE-EXCEPTION(title-path): block-scope extern used to stop an
@@ -4108,9 +4108,9 @@ void fn_80181850(void)
         }
 
         if (peopleTestFlags(entry, 0x40000000)) {
-            GSvecCopy(&modelPosition, fn_8018FCBC(entry));
+            GSvecCopy(&modelPosition, peopleGetPositionPtr(entry));
             GSvecCopy(&modelRotation, peopleGetTransform(entry));
-            fn_800E0168(&entry->collisionX, &modelPosition, &modelRotation);
+            GSvecSub(&entry->collisionX, &modelPosition, &modelRotation);
         }
 
         fn_8018FC98(entry, &currentPosition);
@@ -4144,17 +4144,17 @@ void fn_80181850(void)
                 break;
             }
 
-            if (fn_800D3088() != 0) {
-                fn_800E0168(&currentPosition, fn_8018FCBC(entry), &currentPosition);
-                fn_800E00AC(&currentPosition, &currentPosition, (f32)fn_800D3088());
+            if (msgGetCharsPerFrame() != 0) {
+                GSvecSub(&currentPosition, peopleGetPositionPtr(entry), &currentPosition);
+                vecNormalize(&currentPosition, &currentPosition, (f32)msgGetCharsPerFrame());
                 entry->talkRange = peopleCalcRange(entry->groupId, entry->index,
                                                    &currentPosition);
             }
         }
 
-        fn_80184A90(entry);
+        peopleTurnUpdate(entry);
         fn_80185B90(entry, entry->talkRange);
-        fn_8018ECEC(entry, 75.0f);
+        peopleHeadLookUpdate(entry, 75.0f);
 
         peopleUpdateShadows(entry);
     }
@@ -4163,7 +4163,7 @@ void fn_80181850(void)
 }
 
 /* Lock a person for talking (playing motion slot 1), or release the lock. */
-s32 fn_80181478(u32 groupId, u32 index, u8 doSetup)
+s32 std231_characterSetPathPaused(u32 groupId, u32 index, u8 doSetup)
 {
     PeopleEntry* entry;
 
@@ -4191,7 +4191,7 @@ s32 fn_80181478(u32 groupId, u32 index, u8 doSetup)
  * Suspend a person's scripted state (4 or 5) for an interaction, or restore
  * it afterwards.
  */
-s32 fn_801812E8(u32 groupId, u32 index, u8 doInteract)
+s32 peopleTalkPause(u32 groupId, u32 index, u8 doInteract)
 {
     PeopleEntry* entry;
 
@@ -4223,5 +4223,5 @@ s32 fn_801812E8(u32 groupId, u32 index, u8 doInteract)
 /* The people movement step (auto-inlined into the per-frame update). */
 void fn_801812C4(PeopleEntry* entry)
 {
-    fn_8018ECEC(entry, 75.0f);
+    peopleHeadLookUpdate(entry, 75.0f);
 }

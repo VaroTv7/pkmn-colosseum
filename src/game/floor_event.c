@@ -52,7 +52,7 @@ extern void psSetParticleVisibility();
 extern void sin();
 extern void statusGetStatus();
 /* GSfloor / GScolsys */
-extern void* fn_800FF56C(void);                             /* GSfloor get active */
+extern void* std092_getCurrentRoomID(void);                             /* GSfloor get active */
 extern void  GScolsys2GetObjEnable(u32 triIdx, void* outFlag);        /* GScolsys query */
 /* ===== Index lookup globals ===== */
 extern u8 lbl_8035BBA8[];  /* NPC table (BSS) */
@@ -64,7 +64,7 @@ extern u32 lbl_80478F94;  /* obj data base (SDA) */
 /* Field subsystems -- forward declarations (defined below) */
 u32  _unloadFlare__FPvUlUl(void);
 u32 floorDataBiosGetFileGroupID(u8* entry);
-void fn_80117C84(void);
+void tvRelease(void);
 void pokemonResetBasisStatus(void* ptr);
 /* ===== String constants (rodata) ===== */
 extern const char lbl_80272770[]; /* "floorUpdateFieldCamera: error updating..." */
@@ -90,7 +90,7 @@ extern u32 lbl_8047ADB8;
 extern u8 lbl_804083D0[0x30];
 extern u32 lbl_8047AD68;
 extern u32 lbl_8047AD6C;
-extern void fn_801ED674(void);
+extern void flareRelease(void);
 void fn_801193BC(void);
 extern s32 pokemonWazaGetMaxPP(u8* ptr, u16 idx);
 extern void wazaGetStatus(void);
@@ -124,8 +124,8 @@ extern void* floorDataBiosGetFieldCameraListPtr();
 extern u32 floorDataBiosGetGroupID();
 extern void* floorDataBiosGetPtr(u32 key);
 extern void fn_8011791C(void);
-extern void fn_80119930(void);
-extern void fn_80119BD0();
+extern void gsParticleKillOldest(void);
+extern void gsParticlePtclHook();
 extern u8 fn_80119D90(u16 idx);
 extern u8 fn_80119DD0(u16 idx);
 extern u16 fn_80119E10(u16 idx);
@@ -167,7 +167,7 @@ extern void heroBiosSetHizukiNamePtr(); /* K&R: typed impl or conflict */
 extern void heroBiosSetNamePtr(); /* K&R: typed impl or conflict */
 extern void heroMoveTermEvent(void);
 extern void heroMoveInitEvent(void);
-extern void fn_8012CA84();
+extern void partnerApplyMove();
 extern void heroPokemonGetEifie(u32 arg1);
 extern void heroPokemonGetBlacky(u32 arg1);
 extern s32 psGetGeneratorChildMaxLife(u32);
@@ -191,21 +191,21 @@ extern void* heroBiosGetItemNormalPtr(u8* ptr, u16 idx);
 extern u32 heroBiosGetNamePtr(void* ptr);
 extern u32 lbl_80478EBC;
 extern u32 lbl_80478EB8;
-extern void* fn_80113F48(void);
+extern void* std093_getCurrentGroupID(void);
 extern void peopleSetVisible(void*, u32, u32);
-extern void fn_801653CC(u32, u32, u32);
+extern void soundPlayFanfare(u32, u32, u32);
 extern void msgctrlSetValue(u32, u32);
 extern void winMsgOpen(u32, u32, u32, u32);
 extern void winMsgClose(u32);
 extern u16 pcboxDelItem(u8*, u16, u16);
-extern s8 fn_8001E184(void);
+extern s8 std011_dialogDisplayYesNoMenu(void);
 s32 floorEventGetTresure(u8, u32, s32);
-extern void fn_8018B76C(void*, u32, u32, u32, u32);
+extern void std051_characterSetAnimation(void*, u32, u32, u32, u32);
 extern void peopleSetFlagsByIndex(void*, u32, u32);
-extern u8 fn_801902E0(u16);
-extern void fn_80166A28(u32);
+extern u8 std081_flagCheckTrue(u16);
+extern void soundStartSE(u32);
 extern void peopleWaitSyncMotion(void*, u32, u32);
-extern void fn_80190528(u16);
+extern void std078_flagSetFalse(u16);
 s32 floorEventCtrlTresure(void*, u32, u8);
 extern void* floorGetResource(void*, u32);
 extern void GSmodelSetAnimIndex(void*, s32);
@@ -220,26 +220,26 @@ extern void GSpartGetTransform(void*, void*, u32, u32);
 extern void GSpartFree(void*);
 extern void fn_8018AACC(u32, u32, u32, void*);
 extern u32 peopleMoveCheck(u32 groupId, u32 index, u8 waitFlag);
-extern void fn_8018805C(u32, u32, f32, f32);
-extern void fn_80184470(u32, u32);
+extern void peopleStartTurn(u32, u32, f32, f32);
+extern void std168_characterDetachFromCharacter(u32, u32);
 extern void peopleSetPositionByIndex(u32, u32, void*);
-extern void fn_801669BC(u32);
+extern void soundStopSE(u32);
 extern u8 GSmodelCanAnimate(void*);
-extern void fn_801845E4(u32, u32, u32, u32, u8);
-extern void fn_801860F8(u32, u32, f32, f32, f32);
+extern void std070_characterAttachToCharacter(u32, u32, u32, u32, u8);
+extern void std059_characterSetPosition(u32, u32, f32, f32, f32);
 extern void GSmodelGetFrameCount(void*, f32*, u32);
 extern s32 fn_800D37CC(void);
 extern u32 lbl_80478EC8;
 extern u32 lbl_80478ECC;
 s32 floorEventCtrlElevator(void*, u32, u16, u32, u32);
 extern void scriptSetCol(s16, u32);
-extern void fn_801903B0(u16);
+extern void std079_flagSetTrue(u16);
 extern u32 fn_8018C558(u32, u32);
 extern void fn_8018C8F4(u32, u32, u32);
 s32 floorEventCtrlDoor(void*, u32, u8);
 extern void EvlogSet__FScUl();
 extern void scriptSetEventColID();
-extern void fn_800F7434();
+extern void cmsRunSync();
 extern u8 lbl_80272708[];
 extern u32 lbl_80478EC4;
 extern u32 lbl_80478EC0;
@@ -306,7 +306,7 @@ extern void fn_800D3190(void);
 extern void fn_800FF4D4(void);
 extern u32 lbl_802727C8[];
 extern void psSetBillboardCamera();
-extern void fn_8016AB94();
+extern void psDispMain();
 extern void psGetParticleChildCount(void* ptr);
 extern void psKillFamily();
 extern void GSmodelSet60fpsAnimFlag();
@@ -323,7 +323,7 @@ extern void psExecGenerator(void);
 extern void fn_800057A0(void);
 extern void jumptable_8035BB88();
 extern u8 lbl_8047ADB0;
-void fn_801183EC(void);
+void gsParticleUpdate(void);
 void fn_80118874(void);
 extern void psSetParticleVisibility(); /* K&R: called with 0 or 1 args */
 extern void psSetGeneratorAngleRadiusScale(void);
@@ -334,16 +334,16 @@ extern void psCreateGeneratorID(void);
 extern void fn_800D3094(void);
 extern u32 lbl_8047ADAC;
 extern u32 lbl_8047ADA8;
-void fn_801190DC(void);
+void gsParticleCreate(void);
 extern void psInitDataBank(void);
 extern void DCFlushRange();
 extern u8 lbl_802727D8[];
-void fn_801195AC(void);
+void gsParticleBankLoad(void);
 extern void fn_8016A01C(void);
 extern void psInitGenerator(void);
 extern void fn_8016AAF4(void);
-extern void fn_8019733C(void);
-extern void fn_8019D618(void);
+extern void HSD_JObjSetSPtclCallback(void);
+extern void HSD_JObjSetPtclCallback(void);
 extern void psSetPointJObjNodup(void);
 extern void fn_8019D610(void);
 extern u16 lbl_8047AD98;
@@ -404,7 +404,7 @@ extern u32 lbl_80478E64;
 extern u32 lbl_80478B60;
 extern u8 lbl_8035E940[];
 extern void _flagSet(u32);
-extern void* fn_801906A0(u32);
+extern void* std082_flagGetValue(u32);
 extern u32 lbl_80478F90;
 extern u32 lbl_80478F94;
 extern u8 lbl_80478B58[4];
@@ -494,7 +494,7 @@ extern void jumptable_80363558();
 extern u8 lbl_80426BD0[];
 extern void fadeEffectDokuStart(void);
 extern void peopleClearFlagsByIndex(void);
-extern void fn_8018CA20(void);
+extern void std151_characterFaceDirection(void);
 extern void winMsgOpenField(void);
 extern void winMsgCloseField(void);
 extern void fn_801D0AFC(void);
@@ -503,11 +503,11 @@ extern f32 lbl_8047D030;
 extern f32 lbl_8047D034;
 extern f32 lbl_8047D038;
 void cbPoison__Fl15FootStepCounterl(void);
-extern void fn_8018D998(void);
+extern void peopleIsInGroup(void);
 extern void peopleSearchID(void);
 extern void peopleInfoBiosGetPtr(void);
 extern void fn_8018F5E4(void);
-extern void fn_8010F320(void);
+extern void colsysWallSweep(void);
 extern void PSVECScale(void);
 extern void PSVECAdd(void);
 extern void GScolsys2HumanCollision(void);
@@ -520,16 +520,16 @@ extern u8 lbl_80478AC0[4];
 extern f32 lbl_8047D060;
 void fn_8012B19C(void);
 void heroMoveChkHinderClear(void);
-extern void fn_800D3088(void);
+extern void msgGetCharsPerFrame(void);
 extern f64 lbl_8047D068;
 void getStep__FP8FOOTSTEPP8_GSmodelPiP8FOOTWORK(void);
-extern void fn_8018CD08(void);
-extern void fn_8018FCBC(void);
+extern void peopleFindTalkTarget(void);
+extern void peopleGetPositionPtr(void);
 extern void fn_8018FC50(void);
 extern void fn_800CE148(void);
 extern void fn_800CDBE0(void);
 extern void GScolsys2CheckGetEventID(void);
-extern void fn_8018790C(void);
+extern void peopleStopTurn(void);
 extern void fn_800F7D38(void);
 extern void fn_800F7C8C(void);
 extern void fn_8018BA04(void);
@@ -537,8 +537,8 @@ extern void peopleTurnToPoint(void);
 extern void fn_8018D7D0(void);
 extern void fn_80183730(void);
 extern void fn_8018397C(void);
-extern void fn_801812E8(void);
-extern void fn_80189490(void);
+extern void peopleTalkPause(void);
+extern void std055_characterEndSpeech(void);
 extern void fn_80183688(void);
 extern f32 lbl_8047D070;
 extern f32 lbl_8047D074;
@@ -557,16 +557,16 @@ extern f32 lbl_8047D088;
 extern f32 lbl_8047D08C;
 extern f32 lbl_8047D090;
 extern f32 lbl_8047D0A8;
-void fn_8012D39C(void);
+void circleLineIntersect(void);
 extern f32 lbl_8047D0AC;
-void fn_8012D7F0(void);
+void partnerGetTarget(void);
 extern void fn_800E3C64(void);
 extern f32 lbl_8047D0B0;
-void fn_8012DE94(void);
+void partnerMove(void);
 extern void fn_800F7A7C(void);
 extern void fn_800F7A08(void);
 extern void fn_800F7BC4(void);
-extern void fn_80188214(void);
+extern void peopleSetSpeedFromAmount(void);
 extern void fn_80166458(void);
 extern f64 lbl_8047D0C8;
 extern f32 lbl_8047D0B4;
@@ -574,9 +574,9 @@ extern f32 lbl_8047D0B8;
 extern f32 lbl_8047D0BC;
 extern f32 lbl_8047D0C0;
 extern f32 lbl_8047D0C4;
-void fn_8012E388(void);
+void heroReadStick(void);
 extern void fn_800F7AF0(void);
-extern void fn_801887D8(void);
+extern void peopleAmountFromMove(void);
 extern void PSVECDistance(void);
 extern f32 lbl_8047D0D0;
 extern f32 lbl_8047D0D4;
@@ -588,8 +588,8 @@ extern void fn_8000D710(void);
 extern u8 lbl_80272A38[];
 extern f32 lbl_8047D064;
 void heroMoveMain(void);
-extern void fn_80188AF4(u32, u32);
-extern void fn_80188F78(u32, u32);
+extern void std067_characterStopLookAt(u32, u32);
+extern void std065_characterLookAtPlayer(u32, u32);
 void fn_8012F1FC(void);
 void fn_8012F40C(void);
 extern void GSmodelGetRotation(void);
@@ -804,10 +804,10 @@ extern void fightOutPokemonBiosGetIrekaeTargetEntryId(void);
 extern void fightOutPokemonBiosGetFightOutPokemonEnemyPtr(void);
 extern void fightOutPokemonCheckFightOut(void);
 extern void jumptable_8035E4B0();
-extern void fn_801885C4(void);
+extern void peopleMoveByVector(void);
 extern void PSVECDotProduct(void);
-extern void fn_8018F678(void);
-extern void fn_8018F658(void);
+extern void charModelGetHeadYawMin(void);
+extern void charModelGetHeadYawMax(void);
 extern f32 lbl_8047D094;
 extern f32 lbl_8047D098;
 extern f32 lbl_8047D09C;
@@ -1046,7 +1046,7 @@ extern u32 floorDataBiosGetFileGroupID(u8* entry);
 extern void* floorDataBiosGetCurrentPtr(void);
 extern void* fn_80115CB4(u32 param);
 extern void fn_80115D64(u32 r25, u32 r26);
-extern void fn_80116D30(u32 kind, u32 arg);
+extern void heroDispatchEvent(u32 kind, u32 arg);
 extern void floorCharacterBiosSetVisibility(u8* ptr, u8 val);
 extern void floorCharacterBiosSetPos(u8* dst, f32* src);
 extern u32 floorCharacterBiosGetTalkSctID(void* ptr);
@@ -1059,23 +1059,23 @@ extern u32 floorCharacterBiosGetMoveType(u8* ptr);
 extern u32 floorCharacterBiosGetLoadInit(u8* ptr);
 extern u32 floorCharacterBiosGetVisibility(u8* ptr);
 extern void* floorCharacterBiosGetPeopleInfoPtr(u8* ptr);
-extern void fn_8011711C(u32 arg);
+extern void floorCharacterBiosGetByIndex(u32 arg);
 extern void fn_80117154(void);
 extern void fn_80117164(void);
 extern void fn_801171C8(void);
 extern void fn_80117330(f32 arg);
 extern u32 fn_801174C4(void);
-extern void fn_801174F4(void);
+extern void std136_fieldClearFlag_8047ad71(void);
 extern void fn_80117500(void);
 extern u32 fn_80117AD4(void);
-extern u8 fn_80117AE4(u32 arg1);
-extern void fn_80117C84(void);
-extern void fn_80117D14(void);
-extern void fn_80117E58(void* arg);
+extern u8 std171_mapSetTextureChange(u32 arg1);
+extern void tvRelease(void);
+extern void tvRender(void);
+extern void tvInitFloor(void* arg);
 extern void fn_80118020(void);
-extern void fn_80118070(void);
+extern void tvRelease2(void);
 extern void fn_80118100(void);
-extern void fn_80118104(u32 a, u8 b);
+extern void gsParticleDraw(u32 a, u8 b);
 extern void fn_80118A68(u8* obj, u32 notify);
 extern void fn_80118C20(u8* arg1, void* arg2, u32 arg3, u32 arg4, u32 arg5);
 extern void fn_80118C88(void* obj);
@@ -1092,7 +1092,7 @@ extern void fn_80118E8C(u8* arg1, f32* arg2, u32 arg3, u32 arg4, u32 arg5);
 extern void fn_80118F04(u8* arg1, f32* arg2, u32 arg3, u32 arg4, u32 arg5);
 extern void fn_80118F7C(u8* obj, void* arg);
 extern void fn_80118FB0(u8* obj, u8* desc, u32 state, u32 byte5, u32 init_from_zero, u32 attach_model);
-extern void fn_80119824(u32 count1, u32 count2);
+extern void gsParticleInit(u32 count1, u32 count2);
 extern void fn_8011A280(u8* arg1, u16 arg2, u32 arg3);
 extern s32 fn_8011A3E4(void* obj, u16 val);
 extern void fn_8011A570(u8* arg1, u16 arg2, u32 arg3);
@@ -1446,7 +1446,7 @@ void* floorEventGetTresureList(u32 param)
     target = param & 0x1FF;
     for (index = 0; index < *(u32*)lbl_80478EB8; index++) {
         entry = (u8*)lbl_80478EBC + index * 0x1C;
-        if (*(u16*)(entry + 4) == (u32)fn_800FF56C()) {
+        if (*(u16*)(entry + 4) == (u32)std092_getCurrentRoomID()) {
             if (target == found++) {
                 break;
             }
@@ -1469,7 +1469,7 @@ void floorEventSetTresureDisp(u32 rawIndex, u32 display)
 
     for (index = 0; index < *(u32*)lbl_80478EB8; index++) {
         entry = (u8*)lbl_80478EBC + index * 0x1C;
-        if (*(u16*)(entry + 4) == (u32)fn_800FF56C()) {
+        if (*(u16*)(entry + 4) == (u32)std092_getCurrentRoomID()) {
             if (index == rawIndex) {
                 encoded = found | 0x7FFF0000;
                 break;
@@ -1479,7 +1479,7 @@ void floorEventSetTresureDisp(u32 rawIndex, u32 display)
     }
 
     if (index != *(u32*)lbl_80478EB8) {
-        peopleSetVisible(fn_80113F48(), encoded, display);
+        peopleSetVisible(std093_getCurrentGroupID(), encoded, display);
     }
 }
 
@@ -1489,7 +1489,7 @@ s32 floorEventGetTresure(u8 type, u32 item, s32 count)
     s32 result;
     u32 message = 0;
 
-    fn_801653CC(0x3CA, 0, 0xFF);
+    soundPlayFanfare(0x3CA, 0, 0xFF);
 
     switch (type) {
     case 2:
@@ -1565,7 +1565,7 @@ s32 floorEventGetTresure(u8 type, u32 item, s32 count)
         }
 
         winMsgOpen(3, message, 1, 0);
-        result = fn_8001E184();
+        result = std011_dialogDisplayYesNoMenu();
         winMsgClose(1);
         if (result != 0) {
             return 0;
@@ -1617,7 +1617,7 @@ static inline void* floorEventFindTresureEntry(u32 param)
     target = param & 0x1FF;
     for (index = 0; index < *(u32*)lbl_80478EB8; index++) {
         entry = (u8*)lbl_80478EBC + index * 0x1C;
-        if (*(u16*)(entry + 4) == (u32)fn_800FF56C()) {
+        if (*(u16*)(entry + 4) == (u32)std092_getCurrentRoomID()) {
             if (target == found++) {
                 break;
             }
@@ -1656,7 +1656,7 @@ s32 floorEventCtrlTresure(void* character, u32 param, u8 mode)
     case 0:
         switch ((entry->flags >> 5) & 7) {
         case 1:
-            fn_8018B76C(character, param, 2, 0, 1);
+            std051_characterSetAnimation(character, param, 2, 0, 1);
             peopleSetFlagsByIndex(character, param, 1);
             break;
         case 2:
@@ -1669,23 +1669,23 @@ s32 floorEventCtrlTresure(void* character, u32 param, u8 mode)
     case 1:
         switch ((entry->flags >> 5) & 7) {
         case 1:
-            fn_8018B76C(character, param, 0, 0, 1);
+            std051_characterSetAnimation(character, param, 0, 0, 1);
         case 2:
         case 3:
-            fn_8018B76C(character, param, 0, 0, 1);
+            std051_characterSetAnimation(character, param, 0, 0, 1);
             break;
         }
         break;
 
     case 2:
-        if (entry->eventFlag != 0 && fn_801902E0(entry->eventFlag) != 0) {
+        if (entry->eventFlag != 0 && std081_flagCheckTrue(entry->eventFlag) != 0) {
             return 0;
         }
 
         switch ((entry->flags >> 5) & 7) {
         case 1:
-            fn_8018B76C(character, param, 1, 0, 0);
-            fn_80166A28(0x3C2);
+            std051_characterSetAnimation(character, param, 1, 0, 0);
+            soundStartSE(0x3C2);
             peopleWaitSyncMotion(character, param, 1);
             break;
         case 2:
@@ -1697,7 +1697,7 @@ s32 floorEventCtrlTresure(void* character, u32 param, u8 mode)
         if (displayEntry != 0) {
             switch ((displayEntry->flags >> 5) & 7) {
             case 1:
-                fn_8018B76C(character, param, 2, 0, 1);
+                std051_characterSetAnimation(character, param, 2, 0, 1);
                 peopleSetFlagsByIndex(character, param, 1);
                 break;
             case 2:
@@ -1707,7 +1707,7 @@ s32 floorEventCtrlTresure(void* character, u32 param, u8 mode)
             }
         }
 
-        fn_80190528(entry->eventFlag);
+        std078_flagSetFalse(entry->eventFlag);
         floorEventGetTresure((entry->flags >> 2) & 7, entry->item, entry->count);
         break;
     }
@@ -1829,7 +1829,7 @@ s32 floorEventCtrlElevator(void* floor, u32 index, u16 command,
             }
         }
         if (command & 0x80) {
-            fn_80166A28(0x44);
+            soundStartSE(0x44);
         }
         floorEventWaitAnim(model);
 
@@ -1839,10 +1839,10 @@ s32 floorEventCtrlElevator(void* floor, u32 index, u16 command,
         if (command & 1) {
             fn_8018AACC(group, person, 1, &position);
             peopleMoveCheck(group, person, 1);
-            fn_8018805C(group, person, 0.0f, 0.5f);
+            peopleStartTurn(group, person, 0.0f, 0.5f);
             peopleMoveCheck(group, person, 1);
         } else {
-            fn_80184470(group, person);
+            std168_characterDetachFromCharacter(group, person);
             part = GSmodelGetPart(model, elevator->partIndex);
             GSpartGetTransform(part, &position, 0, 0);
             GSpartFree(part);
@@ -1860,7 +1860,7 @@ s32 floorEventCtrlElevator(void* floor, u32 index, u16 command,
             }
         }
         if (command & 0x80) {
-            fn_80166A28(0x44);
+            soundStartSE(0x44);
         }
         floorEventWaitAnim(model);
         break;
@@ -1868,8 +1868,8 @@ s32 floorEventCtrlElevator(void* floor, u32 index, u16 command,
     case 0xC0:
         floorEventWaitAnim(model);
         if (command & 0x80) {
-            fn_801669BC(0x45);
-            fn_80166A28(0x46);
+            soundStopSE(0x45);
+            soundStartSE(0x46);
         }
         break;
 
@@ -1887,9 +1887,9 @@ s32 floorEventCtrlElevator(void* floor, u32 index, u16 command,
         }
 
         if (command & 0x20) {
-            fn_801845E4(group, person, floorGroup, elevator->resourceId,
+            std070_characterAttachToCharacter(group, person, floorGroup, elevator->resourceId,
                         elevator->partIndex);
-            fn_801860F8(group, person, 0.0f, 0.0f, 0.0f);
+            std059_characterSetPosition(group, person, 0.0f, 0.0f, 0.0f);
         }
         if (command & 0x10) {
             GSmodelSetAnimIndex(model, animation);
@@ -1902,7 +1902,7 @@ s32 floorEventCtrlElevator(void* floor, u32 index, u16 command,
         if (command & 0x40) {
             floorEventCtrlElevator(floor, index, 0xC0, group, person);
         } else if (command & 0x80) {
-            fn_80166A28(0x45);
+            soundStartSE(0x45);
         }
         break;
     }
@@ -1929,26 +1929,26 @@ s32 floorEventCtrlDoor(void* floor, u32 index, u8 mode)
 
     switch (mode) {
     case 0:
-        if (door->openFlag != 0 && fn_801902E0(door->openFlag) != 0) {
+        if (door->openFlag != 0 && std081_flagCheckTrue(door->openFlag) != 0) {
             return 0;
         }
-        if (door->closeFlag != 0 && fn_801902E0(door->closeFlag) == 0) {
+        if (door->closeFlag != 0 && std081_flagCheckTrue(door->closeFlag) == 0) {
             return 1;
         }
     case 1:
         if (door->openFlag != 0) {
-            fn_80190528(door->openFlag);
+            std078_flagSetFalse(door->openFlag);
         }
         scriptSetCol(door->collisionId, 0);
         break;
 
     case 2:
-        if (door->openFlag != 0 && fn_801902E0(door->openFlag) == 0) {
+        if (door->openFlag != 0 && std081_flagCheckTrue(door->openFlag) == 0) {
             return 0;
         }
     case 3:
         if (door->openFlag != 0) {
-            fn_801903B0(door->openFlag);
+            std079_flagSetTrue(door->openFlag);
         }
         scriptSetCol(door->collisionId, 1);
         break;
@@ -2027,7 +2027,7 @@ s32 floorEventCtrlDoor(void* floor, u32 index, u8 mode)
 
     floorEventStartAnim(model, animation, frame);
     if (sound != 0) {
-        fn_80166A28(sound);
+        soundStartSE(sound);
     }
 
     switch (mode) {

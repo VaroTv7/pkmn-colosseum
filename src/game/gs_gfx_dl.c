@@ -38,11 +38,11 @@ typedef struct GSgfxParseCallbackList {
 
 extern void DCFlushRange(void* addr, u32 size);
 extern void GXCallDisplayList(void* list, u32 size);
-extern void fn_800D4F98(u32, u32, ...);
+extern void gfxRecordCommand(u32, u32, ...);
 extern void fn_800D6A5C(u32 verts, u32 prims);
 extern void fn_800D6A80(u16 vertCount, s32 type, u32* totalVerts, u32* totalPrims);
-extern void fn_800D7A70(GSVtxDesc* desc);
-extern void fn_800D892C(GSVtxDesc* desc);
+extern void gfxLoadVtxDesc(GSVtxDesc* desc);
+extern void gfxSetupChannelsTev(GSVtxDesc* desc);
 extern void fn_800E24B0(u16 handle);
 extern void fn_800E209C(u16 handle);
 extern void* fn_800E27B0(u16 handle);
@@ -493,12 +493,12 @@ void GSgfxDLFree(GSgfxDLCapture* capture) {
 
 void GSgfxDLDraw(GSgfxDLCapture* capture) {
     if (lbl_8047AA80->recordMode == 1) {
-        fn_800D4F98(0x2a, 1, capture);
+        gfxRecordCommand(0x2a, 1, capture);
     } else if (lbl_8047AA80->layerDraw == lbl_8047AA80->layerCur &&
                (lbl_8047AA80->drawMask & lbl_8047AA80->drawEnable) &&
                capture->size != 0) {
-        fn_800D7A70(capture->desc);
-        fn_800D892C(capture->desc);
+        gfxLoadVtxDesc(capture->desc);
+        gfxSetupChannelsTev(capture->desc);
         GXCallDisplayList(capture->data, capture->size);
         fn_800D6A5C(capture->totalVerts, capture->totalPrims);
     }

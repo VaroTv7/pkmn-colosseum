@@ -53,7 +53,7 @@ extern void fn_800E24B0(u32 status);
 extern void fn_800E209C(u32 status);
 extern u32 fn_800A13F8(void);
 extern void OSYieldThread(void);
-extern void fn_800FF730(u32 id);
+extern void std098_mapWarpToMenuRoom(u32 id);
 extern void floorSetFadeScript(u32 a, u32 b);
 extern u32 GSresGetResource(u32 ctx, u32 id);
 
@@ -95,16 +95,16 @@ extern void msgctrlSetValue(u32 id, u32 value);
 extern void windowDrawSprite(s32 x, s32 y, void* win, u32 sprite, u32 data);
 extern void windowDrawSprite2(s32 x, s32 y, s16 w, s16 h, s32 color, s32 data, s32 sprite, s32 arg7);
 extern void* menuModelRender(void* data);
-extern void fn_800D88DC(u32 arg);
-extern void fn_800D888C(u32 arg);
-extern void fn_800D6A00(u32 arg);
-extern void fn_800D7820(void* arg);
-extern void fn_800D85D4(u32 arg0, void* arg1);
-extern void fn_800D67BC(u32 arg);
+extern void gfxSetFlags(u32 arg);
+extern void gfxClearFlags(u32 arg);
+extern void gfxSetPrimitive(u32 arg);
+extern void gfxSetVtxDesc(void* arg);
+extern void gfxLoadTexture(u32 arg0, void* arg1);
+extern void gfxBegin(u32 arg);
 extern void fn_800D61E4(s32 x, s32 y);
 extern void fn_800D5CB8(u32 arg0, u32 r, u32 g, u32 b, u32 a);
-extern void fn_800D59B8(u32 arg0, f32 s, f32 t);
-extern void fn_800D6728(void);
+extern void gfxVtxTexCoord(u32 arg0, f32 s, f32 t);
+extern void gfxEnd(void);
 extern u32 fn_8001D624(void* pokemon, u32 arg);
 extern u8 menuSubGetPokemonSexForDisp(void* pokemon);
 
@@ -817,7 +817,7 @@ static inline u8 menuStatusIsOriginalTrainer(u8* pokemon)
     extern u8 gamedataGetStatus(u32 id, s32 field);
     extern u32 fightFloorGetGcHeroFightTrainerPtr(s32 index);
     extern u32 fightTrainer_GetHeroPtr(u32 trainer);
-    extern u32 fn_801906A0(u32 flag);
+    extern u32 std082_flagGetValue(u32 flag);
     extern void* savedataGetStatus();
     extern u32 fn_8006AEEC(void);
     extern u32 heroBiosGetNamePtr(u32 hero);
@@ -841,7 +841,7 @@ static inline u8 menuStatusIsOriginalTrainer(u8* pokemon)
             return 0;
         }
         hero = fightTrainer_GetHeroPtr(hero);
-    } else if (fn_801906A0(0x8AE) == 0) {
+    } else if (std082_flagGetValue(0x8AE) == 0) {
         hero = (u32)savedataGetStatus(0, 2);
     } else {
         hero = fn_8006AEEC();
@@ -1914,19 +1914,19 @@ void fn_800965C8(void* window, u8* sprite) {
         if (texture == NULL) {
             return;
         }
-        fn_800D88DC(3);
-        fn_800D888C(4);
-        fn_800D6A00(7);
-        fn_800D7820(lbl_80314F98);
-        fn_800D85D4(0, texture);
-        fn_800D67BC(2);
+        gfxSetFlags(3);
+        gfxClearFlags(4);
+        gfxSetPrimitive(7);
+        gfxSetVtxDesc(lbl_80314F98);
+        gfxLoadTexture(0, texture);
+        gfxBegin(2);
         fn_800D61E4(0, 0);
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D59B8(0, lbl_8047C230, lbl_8047C230);
+        gfxVtxTexCoord(0, lbl_8047C230, lbl_8047C230);
         fn_800D61E4(*(s16*)(sprite + 0x54), *(s16*)(sprite + 0x56));
         fn_800D5CB8(0, 0xFF, 0xFF, 0xFF, 0xFF);
-        fn_800D59B8(0, lbl_8047C208, lbl_8047C208);
-        fn_800D6728();
+        gfxVtxTexCoord(0, lbl_8047C208, lbl_8047C208);
+        gfxEnd();
         break;
     }
     case 0x107:
@@ -2154,7 +2154,7 @@ void fn_80096C48(u32 unused, u8* dst) {
 /* Handle confirm/cancel input for the linked-Pokemon status menu. */
 void fn_80096D54(u8* menu)
 {
-    extern void fn_80166A28(s32 id);
+    extern void soundStartSE(s32 id);
     extern void pokemonWazaReplace();
 
     u16* keys;
@@ -2182,7 +2182,7 @@ void fn_80096D54(u8* menu)
             pokemon = work->pokemon;
             if (pokemon != NULL) {
                 if ((s32)pokemonGetStatus(pokemon, 0, 0xC2, 0) != 0) {
-                    fn_80166A28(0x26);
+                    soundStartSE(0x26);
                 } else if (lbl_803FB380[0] & 2) {
                     work->state = 4;
                     lbl_803FB380[3] = lbl_803FB380[2];
@@ -2580,7 +2580,7 @@ s32 fn_80097BBC(u8 chan) {
     *(u32*)(lbl_803FB380 + 0x10) = 0;
     *(u32*)(lbl_803FB380 + 0x14) = 0;
     *(u32*)(lbl_803FB380 + 0x4) = -1;
-    fn_800FF730(0x39d);
+    std098_mapWarpToMenuRoom(0x39d);
     if (lbl_803FB380[0] & 8) {
         floorSetFadeScript(0, 0);
     }
@@ -2731,8 +2731,8 @@ void fn_80097FCC(void) {
 
 /* 0x80097FD0 | size: 0x28 */
 void fn_80097FD0(void) {
-    extern int fn_80113F48();
-    GSresGetResource(fn_80113F48(), 0x12670000);
+    extern int std093_getCurrentGroupID();
+    GSresGetResource(std093_getCurrentGroupID(), 0x12670000);
 }
 
 /* 0x80097FF8 | size: 0x4 */
@@ -2754,7 +2754,7 @@ s32 fn_80097A38(u32 arg0, u16 arg1) {
     *(u32*)(lbl_803FB380 + 0x10) = 0;
     *(u32*)(lbl_803FB380 + 0x14) = 0;
     *(s32*)(lbl_803FB380 + 0x4) = -1;
-    fn_800FF730(0x39d);
+    std098_mapWarpToMenuRoom(0x39d);
     if (lbl_803FB380[0] & 8) {
         floorSetFadeScript(0, 0);
     }

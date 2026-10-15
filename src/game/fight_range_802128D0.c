@@ -16,7 +16,7 @@ void fn_80213270(void)
 {
     extern u32 GSrand();
     extern void fn_801DA7AC();
-    extern u16 fn_801EF634();
+    extern u16 std103_battleGetResult();
     extern void fightFloorInitFightOutPokemonPtrAryFightWazaJoutai();
     extern void fightFloorLoopValidFightOutPokemon();
     extern u32 fightFloorGetValidFightSidePtr();
@@ -83,7 +83,7 @@ void fn_80213270(void)
   for (bVar5 = 0; (bVar5 & 0xff) < 5; bVar5 = bVar5 + 1) {
     lbl_80478D78[(u8)bVar5] = 0;
   }
-  sVar2 = fn_801EF634();
+  sVar2 = std103_battleGetResult();
   if (sVar2 == 0) {
     sVar2 = fightFloorGetStatus(0,0,0xc,0);
     ++sVar2;

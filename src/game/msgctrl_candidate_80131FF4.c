@@ -73,7 +73,7 @@ extern void GSmsgSetColor(EffectUtilCommandObj* obj);
 extern void GSmsgSetFontInfo(EffectUtilCommandObj* obj);
 extern void GSmsgInitRuby(EffectUtilCommandObj* obj);
 extern u8 menuIsCheck(u32 objID);
-extern void fn_80166A28(u32 id);
+extern void soundStartSE(u32 id);
 extern void msgctrlSetValue(u32 id, u32 value);
 extern void* _msgctrlMakeDigit__FPUslUll(void* table, u32 stride, u32 count, u32 type);
 
@@ -273,7 +273,7 @@ s32 msgctrlKeyWait(EffectUtilCommandObj* obj)
             obj->pendingFlag = 0;
             obj->savedStream = obj->stream;
             if ((obj->flags & 2) == 0) {
-                fn_80166A28(0x24);
+                soundStartSE(0x24);
             }
         } else {
             obj->stream -= 3;

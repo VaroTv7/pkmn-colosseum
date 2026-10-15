@@ -73,7 +73,7 @@ static HSD_Chan unlit_alpha_chan = {
 };
 
 /* HSD_SetupChannelMode */
-void fn_801B2F1C(u32 rendermode)
+void HSD_SetupChannelMode(u32 rendermode)
 {
     u32 color_mode;
     u32 alpha_mode;
@@ -101,7 +101,7 @@ void fn_801B2F1C(u32 rendermode)
         for (i = 0; i < max; i++) {
             HSD_LObj* l = HSD_LObjGetActiveByIndex(i);
             if (l != NULL) {
-                fn_801A6098(l, l->color, lbl_80465710.shininess);
+                HSD_LObjSetupSpecular(l, l->color, lbl_80465710.shininess);
             }
         }
     }
@@ -169,7 +169,7 @@ static inline void HSD_StateSetZCompLoc(int before_tex);
 static inline void HSD_StateSetDither(int enable);
 
 /* HSD_SetupPEMode */
-void fn_801B29E4(u32 rendermode, HSD_PEDesc* pe)
+void HSD_SetupPEMode(u32 rendermode, HSD_PEDesc* pe)
 {
 
     if (pe != NULL) {
@@ -212,26 +212,26 @@ static inline void setupTevMode_last(void)
         tevdesc.map = GX_TEXMAP_NULL;
         tevdesc.color = GX_COLOR0A0;
         tevdesc.u.tevop.tevmode = GX_PASSCLR;
-        fn_801B3638(&tevdesc);
+        HSD_SetupTevStage(&tevdesc);
     }
 }
 
 /* HSD_SetupRenderModeWithCustomPE */
-void fn_801B294C(u32 rendermode, HSD_PEDesc* pe)
+void HSD_SetupRenderModeWithCustomPE(u32 rendermode, HSD_PEDesc* pe)
 {
     setupTevMode_last();
-    fn_801B29E4(rendermode, pe);
+    HSD_SetupPEMode(rendermode, pe);
     fn_801B3258();
     fn_801B3770();
     fn_801B3890();
-    fn_801B2F1C(rendermode);
+    HSD_SetupChannelMode(rendermode);
 }
 
 /* 0x801B2878 - 0x801B294C */
 extern void fn_800B94F0(int mode); /* GXSetCullMode */
 
 /* HSD_SetMaterialColor */
-void fn_801B28C8(GXColor ambient, GXColor diffuse, GXColor specular, f32 alpha)
+void HSD_SetMaterialColor(GXColor ambient, GXColor diffuse, GXColor specular, f32 alpha)
 {
     lbl_80465710.ambient = ambient;
     lbl_80465710.diffuse = diffuse;

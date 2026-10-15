@@ -77,7 +77,7 @@ extern u16 _toolentryAlloc__FUl(u32);
 extern void* fn_800E27B0(u16);
 extern void GSlogWrite(const char*, ...);
 extern void fn_8019C3C4(s32, ...);
-extern void fn_8019CB70(void);
+extern void HSD_GXInit(void);
 extern void fn_8019C690(u32, u32);
 extern void fn_801C021C(void*);
 extern void fn_801C01C8(void*);
@@ -93,14 +93,14 @@ extern u32 fn_800D7894(void);
 extern void fn_800D9D68(u16, u16, u16, u16);
 extern void fn_800D9C24(u16, u16, u16, u16);
 extern void fn_800D87AC(s32);
-extern void fn_800DA2BC(u32, u32, u32);
-extern void fn_800DA1E8(u32, u32, u32);
+extern void gfxSetUpdates(u32, u32, u32);
+extern void gfxSetZMode(u32, u32, u32);
 extern void fn_800DA100(u32, u32, u32, u32, u32, u32);
-extern void fn_800DA028(u32);
+extern void gfxSetCullMode(u32);
 extern void fn_800D9F40(u32);
 extern void fn_800DA08C(u32);
 extern void fn_800D9ED8(u32);
-extern void fn_800DC224(u32, u32, u32, u32, u32);
+extern void gfxSetTevStage(u32, u32, u32, u32, u32);
 extern void fn_800D9BD0(f32, f32, f32, f32);
 extern void GSgfxBackFBInit__Fv(void);
 
@@ -334,7 +334,7 @@ void GSgfxInit__FP15_GSgfxInitParms(u32 heapSize, u32 matrixSize,
 
     fn_8019C3C4(1, 2);
     fn_8019C3C4(4, renderMode);
-    fn_8019CB70();
+    HSD_GXInit();
     fn_800D37D4(videoMode, 2, 0, 2, 0, 0);
     fn_801BF4C4(1);
     fn_8019C690(0, 0);
@@ -361,16 +361,16 @@ void GSgfxInit__FP15_GSgfxInitParms(u32 heapSize, u32 matrixSize,
     fn_800D9D68(0, 0, display->fbWidth - 1, display->efbHeight - 1);
     fn_800D9C24(0, 0, display->fbWidth - 1, display->efbHeight - 1);
     fn_800D87AC(-1);
-    fn_800DA2BC(1, 1, 1);
-    fn_800DA1E8(1, 2, 1);
+    gfxSetUpdates(1, 1, 1);
+    gfxSetZMode(1, 2, 1);
     fn_800DA100(0, 7, 0, 1, 7, 0);
-    fn_800DA028(2);
+    gfxSetCullMode(2);
     fn_800D9F40(0);
     fn_800DA08C(1);
     fn_800D9ED8(0);
 
     for (i = 0; i < 0x10; i++) {
-        fn_800DC224(i, 0, i, i, 0);
+        gfxSetTevStage(i, 0, i, i, 0);
     }
     fn_800D9BD0(lbl_8047CA10, lbl_8047CA14, lbl_8047CA18, lbl_8047CA1C);
     state = (u8*)lbl_8047AA80;

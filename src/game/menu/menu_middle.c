@@ -81,12 +81,12 @@ extern void fmod();
 extern void fn_800D5648();
 extern void fn_800D5BA0();
 extern void fn_800D61E4();
-extern void fn_800D6728();
-extern void fn_800D67BC();
-extern void fn_800D6A00();
-extern void fn_800D7820();
-extern void fn_800D888C();
-extern void fn_800D88DC();
+extern void gfxEnd();
+extern void gfxBegin();
+extern void gfxSetPrimitive();
+extern void gfxSetVtxDesc();
+extern void gfxClearFlags();
+extern void gfxSetFlags();
 extern u16 GSrand();
 extern void _threadSwitch();
 extern void GScharMakeFromSJIS();
@@ -95,7 +95,7 @@ extern void GSmsgGetRect();
 extern void fn_800FB680();
 extern void fn_800FE35C();
 extern void fn_800FE38C();
-extern void fn_800FF730();
+extern void std098_mapWarpToMenuRoom();
 extern s32 menuGetCursorFromItemID(s32 id, s32 itemId);
 extern s32 menuGetCursorItemID(s32 id);
 extern void menuSetCursor(s32 id, s32 cursor);
@@ -757,9 +757,9 @@ u16 fn_8006A65C(void) {
     extern void* savedataGetStatus(int, int);
     extern void scriptSoundStop(int);
     extern void fn_80088EA8(void*);
-    extern u32 fn_801906A0(int);
+    extern u32 std082_flagGetValue(int);
     extern s32 fn_80069C0C(struct MenuCBBattle*);
-    extern void fn_800FF730(int);
+    extern void std098_mapWarpToMenuRoom(int);
     extern void _threadSwitch(void);
     void* menuPtr;
     u32 x;
@@ -767,12 +767,12 @@ u16 fn_8006A65C(void) {
     menuPtr = (u8*)savedataGetStatus(0, 0xe) + 0xC9A8;
     scriptSoundStop(0x3e8);
     fn_80088EA8(menuPtr);
-    x = fn_801906A0(0xb59);
+    x = std082_flagGetValue(0xb59);
     MENU_MIDDLE_U32_0014(savedataGetStatus(0, 0xe))->unk_0014 = x;
     MENU_MIDDLE_U32_000C(savedataGetStatus(0, 0xe))->unk_000C = 6;
     MENU_MIDDLE_U32_0000(savedataGetStatus(0, 0xe))->unk_0000 = 1;
     fn_80069C0C(savedataGetStatus(0, 0xe));
-    fn_800FF730(0x397);
+    std098_mapWarpToMenuRoom(0x397);
     _threadSwitch();
     return (u16) * (u32*)((u8*)savedataGetStatus(0, 0xe) + 0x20);
 }
@@ -1120,12 +1120,12 @@ s32 fn_8006ADEC(void) {
 /* 0x8006AE18 | size: 0xD4 */
 s32 fn_8006AE18(void) {
     extern u8* savedataGetStatus(s32 idx, s32 type);
-    extern u32 fn_801906A0(u32 flag);
+    extern u32 std082_flagGetValue(u32 flag);
     extern void __assert(const char* file, s32 line, const char* expr);
     u8* p;
     s32 state;
 
-    if (fn_801906A0(0x8AE) != 0) {
+    if (std082_flagGetValue(0x8AE) != 0) {
         p = savedataGetStatus(0, 0xE) + 0x10000;
         if (MENU_MIDDLE_NEG_U8_C988(p)->unk_C988 != 0) {
             p -= 0x4cd8;
@@ -1610,7 +1610,7 @@ void fn_8006B9B8(void* menu) {
     extern u8* savedataGetStatus(s32 index, s32 type);
     extern s32 fn_80071160(void);
     extern u32 fn_80071208(u32 flags);
-    extern void fn_80166A28(s32 sound);
+    extern void soundStartSE(s32 sound);
     s32 player;
     s32 playerCount;
     u32 flags;
@@ -1644,12 +1644,12 @@ void fn_8006B9B8(void* menu) {
             if ((flags & 0x100) != 0) {
                 if (savedataGetStatus(0, 0xE)[player * 0x1660 + 0x7005] == 0) {
                     savedataGetStatus(0, 0xE)[player * 0x1660 + 0x7005] = 1;
-                    fn_80166A28(0x24);
+                    soundStartSE(0x24);
                 }
             } else if ((flags & 0x200) != 0) {
                 if (savedataGetStatus(0, 0xE)[player * 0x1660 + 0x7005] != 0) {
                     savedataGetStatus(0, 0xE)[player * 0x1660 + 0x7005] = 0;
-                    fn_80166A28(0x25);
+                    soundStartSE(0x25);
                 } else {
                     MENU_MIDDLE_U8_0098(menu)->unk_0098 = 1;
                     MENU_MIDDLE_U8_0099(menu)->unk_0099 = 1;
@@ -1670,7 +1670,7 @@ void fn_8006B9B8(void* menu) {
 #if defined(MENU_MIDDLE_ALL) || defined(MENU_MIDDLE_RESIDUAL_8006B9B8_ONLY) || \
     defined(MENU_MIDDLE_EXACT_8006BB34_ONLY)
 /* 0x8006BB34 | size: 0x4E4 */
-extern void fn_80166A28(s32 sndId);
+extern void soundStartSE(s32 sndId);
 extern void __assert(const void* file, s32 line, const void* expr);
 
 typedef struct CursorArg_8006BB34 {
@@ -1774,17 +1774,17 @@ void fn_8006BB34(void* menu) {
     switch (cur) {
     case 0x9F7:
         if (!pressed) break;
-        if (p->sel11 != dir) fn_80166A28(0x24);
+        if (p->sel11 != dir) soundStartSE(0x24);
         p->sel11 = dir;
         return;
     case 0x9F8:
         if (!pressed) break;
-        if (p->sel12 != dir) fn_80166A28(0x24);
+        if (p->sel12 != dir) soundStartSE(0x24);
         p->sel12 = dir;
         return;
     case 0x9F9:
         if (!pressed) break;
-        if (p->sel13 != dir) fn_80166A28(0x24);
+        if (p->sel13 != dir) soundStartSE(0x24);
         p->sel13 = dir;
         return;
     case 0x9FA:
@@ -1794,7 +1794,7 @@ void fn_8006BB34(void* menu) {
             signOld = (u32)vv >> 31;
             a = ((s32)vv >> 31) ^ vv;
             a = a - ((s32)vv >> 31);
-            if (signOld == dir) fn_80166A28(0x24);
+            if (signOld == dir) soundStartSE(0x24);
             p->val14 = (s16)(dir ? a : -a);
             return;
         }
@@ -1809,7 +1809,7 @@ void fn_8006BB34(void* menu) {
             signOld = (u32)vv >> 31;
             a = ((s32)vv >> 31) ^ vv;
             a = a - ((s32)vv >> 31);
-            if (signOld == dir) fn_80166A28(0x24);
+            if (signOld == dir) soundStartSE(0x24);
             p->val16 = (s16)(dir ? a : -a);
             return;
         }
@@ -1984,7 +1984,7 @@ normal:
 
 /* 0x8006C164 | size: 0x474 */
 void fn_8006C164(void* menu) {
-    extern void fn_80166A28(s32 sound);
+    extern void soundStartSE(s32 sound);
     typedef struct Param_8006C164 {
         s16 min;        /* 0x00 */
         s16 max;        /* 0x02 */
@@ -2120,7 +2120,7 @@ void fn_8006C164(void* menu) {
     case 0x9CC:
         if (horizontal != 0) {
             if (param->flagC != flag) {
-                fn_80166A28(0x24);
+                soundStartSE(0x24);
             }
             param->flagC = flag;
             return;
@@ -2132,7 +2132,7 @@ void fn_8006C164(void* menu) {
             if (param->mode < 0) {
                 param->mode = 0;
             } else {
-                fn_80166A28(0x24);
+                soundStartSE(0x24);
             }
             return;
         }
@@ -2141,7 +2141,7 @@ void fn_8006C164(void* menu) {
             if (param->mode >= 3) {
                 param->mode = 2;
             } else {
-                fn_80166A28(0x24);
+                soundStartSE(0x24);
             }
             return;
         }
@@ -2149,7 +2149,7 @@ void fn_8006C164(void* menu) {
     case 0x9CE:
         if (horizontal != 0) {
             if (param->flagD != flag) {
-                fn_80166A28(0x24);
+                soundStartSE(0x24);
             }
             param->flagD = flag;
             return;
@@ -2158,7 +2158,7 @@ void fn_8006C164(void* menu) {
     case 0x9CF:
         if (horizontal != 0) {
             if (param->flagE != flag) {
-                fn_80166A28(0x24);
+                soundStartSE(0x24);
             }
             param->flagE = flag;
             return;
@@ -2167,7 +2167,7 @@ void fn_8006C164(void* menu) {
     case 0x9D0:
         if (horizontal != 0) {
             if (param->flagF != flag) {
-                fn_80166A28(0x24);
+                soundStartSE(0x24);
             }
             param->flagF = flag;
             return;
@@ -2176,7 +2176,7 @@ void fn_8006C164(void* menu) {
     case 0x9D1:
         if (horizontal != 0) {
             if (param->flag10 != flag) {
-                fn_80166A28(0x24);
+                soundStartSE(0x24);
             }
             param->flag10 = flag;
             return;
@@ -2201,14 +2201,14 @@ void fn_8006C5D8(void* window, void* sprite) {
         MenuMiddleColor c[3];
     } MenuMiddleColors;
     extern void fn_800FE38C(s32 x, s32 y, s32 w, s32 h);
-    extern void fn_800D88DC(s32 a);
-    extern void fn_800D888C(s32 a);
-    extern void fn_800D6A00(s32 a);
-    extern void fn_800D7820(void* a);
-    extern void fn_800D67BC(s32 a);
+    extern void gfxSetFlags(s32 a);
+    extern void gfxClearFlags(s32 a);
+    extern void gfxSetPrimitive(s32 a);
+    extern void gfxSetVtxDesc(void* a);
+    extern void gfxBegin(s32 a);
     extern void fn_800D61E4(s16 x, s16 y);
     extern void fn_800D5BA0(s32 a, u32 color);
-    extern void fn_800D6728(void);
+    extern void gfxEnd(void);
     extern void fn_800D5648(f32 a);
     extern void fn_800FE35C(void);
     MenuMiddleColors colors;
@@ -2216,13 +2216,13 @@ void fn_8006C5D8(void* window, void* sprite) {
 
     colors = *(MenuMiddleColors*)lbl_80268674;
     fn_800FE38C(0, 0, MENU_MIDDLE_S16_0054(sprite)->unk_0054, MENU_MIDDLE_S16_0056(sprite)->unk_0056);
-    fn_800D88DC(1);
-    fn_800D888C(6);
+    gfxSetFlags(1);
+    gfxClearFlags(6);
     colors.c[1].a = colors.c[1].a * MENU_MIDDLE_U8_0067(sprite)->unk_0067 / 255;
     colors.c[2].a = colors.c[2].a * MENU_MIDDLE_U8_0067(sprite)->unk_0067 / 255;
-    fn_800D6A00(6);
-    fn_800D7820(lbl_80314E08);
-    fn_800D67BC(4);
+    gfxSetPrimitive(6);
+    gfxSetVtxDesc(lbl_80314E08);
+    gfxBegin(4);
     fn_800D61E4(0, 0);
     fn_800D5BA0(0, *(u32*)&colors.c[1]);
     fn_800D61E4(MENU_MIDDLE_S16_0054(sprite)->unk_0054, 0);
@@ -2231,21 +2231,21 @@ void fn_8006C5D8(void* window, void* sprite) {
     fn_800D5BA0(0, *(u32*)&colors.c[2]);
     fn_800D61E4(0, MENU_MIDDLE_S16_0056(sprite)->unk_0056);
     fn_800D5BA0(0, *(u32*)&colors.c[2]);
-    fn_800D6728();
+    gfxEnd();
     fn_800D5648(*(f32*)&lbl_8047C060);
-    fn_800D6A00(1);
-    fn_800D7820(lbl_80314E08);
+    gfxSetPrimitive(1);
+    gfxSetVtxDesc(lbl_80314E08);
     colors.c[0].r = 0xFF;
     colors.c[0].g = 0xFF;
     colors.c[0].b = 0xFF;
     colors.c[0].a = MENU_MIDDLE_U8_0067(sprite)->unk_0067 * 0x38 / 255;
     for (y = 0; y < MENU_MIDDLE_S16_0056(sprite)->unk_0056; y += 4) {
-        fn_800D67BC(2);
+        gfxBegin(2);
         fn_800D61E4(0, y);
         fn_800D5BA0(0, *(u32*)&colors.c[0]);
         fn_800D61E4(MENU_MIDDLE_S16_0054(sprite)->unk_0054, y);
         fn_800D5BA0(0, *(u32*)&colors.c[0]);
-        fn_800D6728();
+        gfxEnd();
     }
     fn_800FE35C();
 }
@@ -4499,7 +4499,7 @@ void fn_8006FE3C(u32 r3) {
 #pragma peephole off
 void fn_8006FE64(void* menu) {
     extern u32 fn_8006B3C8(s32 index);
-    extern void fn_80166A28(s32 sndId);
+    extern void soundStartSE(s32 sndId);
     KeyInfo_8006BB34* keyInfo;
     s32 state;
     s32 flag;
@@ -4515,7 +4515,7 @@ void fn_8006FE64(void* menu) {
         if (flag != 0) {
             value = fn_8006B3C8(stateIndex);
             if ((u8)value == 0) {
-                fn_80166A28(0x26);
+                soundStartSE(0x26);
                 return;
             }
         }

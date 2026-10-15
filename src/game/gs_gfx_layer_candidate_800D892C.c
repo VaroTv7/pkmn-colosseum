@@ -51,7 +51,7 @@ extern u32 lbl_80314404[8];
 extern u32 lbl_803144F0[8];
 extern u32 lbl_80478AE0[2];
 
-extern void fn_800D963C(u32 stage, s32 mode);
+extern void gfxSetTevOp(u32 stage, s32 mode);
 extern void fn_800D923C(void);
 
 static inline void gfxSetChanCtrlIdx(s32 chan, u8 enable, u8 ambSrc, u8 matSrc, u8 lightMask, u8 diffFn, u8 attnFn) {
@@ -97,7 +97,7 @@ static inline void gfxSetTevOrderIdx(s32 stage, s32 coord, s32 map, s32 color) {
 
 #pragma push
 #pragma opt_dead_assignments off /* RULE-EXCEPTION(title-path): local compiler-control pragma - see docs/RULE_EXCEPTIONS.md */
-void fn_800D892C(GSVtxDesc* desc) {
+void gfxSetupChannelsTev(GSVtxDesc* desc) {
     s32 mode;
     u32 mask;
     u32 bit;
@@ -139,11 +139,11 @@ void fn_800D892C(GSVtxDesc* desc) {
         if (mode == 1) {
             GSgfxSetNumTevStages(1);
             GSgfxSetTevOrder(0, 0xFF, 0xFF, 4);
-            fn_800D963C(0, 4);
+            gfxSetTevOp(0, 4);
         } else {
             GSgfxSetNumTevStages(2);
             GSgfxSetTevOrder(0, 0xFF, 0xFF, 4);
-            fn_800D963C(0, 4);
+            gfxSetTevOp(0, 4);
             GSgfxSetTevOrder(1, 0xFF, 0xFF, 5);
             GSgfxSetTevColorOp(1, 0, 0, 0, 1, 0);
             GSgfxSetTevColorIn(1, 15, 10, 12, 0);
@@ -238,7 +238,7 @@ void fn_800D892C(GSVtxDesc* desc) {
             GSTevStageSrc* src = &lbl_8047AA80->stageSrc[i];
 
             gfxSetTevOrderIdx(i, lbl_80314404[src->coord], lbl_803144F0[src->map], lbl_80478AE0[src->color]);
-            fn_800D963C(i, src->mode);
+            gfxSetTevOp(i, src->mode);
         }
     }
 

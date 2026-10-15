@@ -14,7 +14,7 @@
 #include "game/gs_vm.h"
 
 extern void* memset(void* dest, int val, u32 n);
-extern u32 fn_800F106C(void);
+extern u32 cms_CallStdTrampoline(void);
 
 /* 0x800F10E8 | 0x2E8 */
 /* Script VM "call native" opcode: builds a call frame from the operand
@@ -22,7 +22,7 @@ extern u32 fn_800F106C(void);
  * function pointer + 8 argument-type bytes, 2 = float, 0 = end), splits the
  * arguments into the integer/float register images consumed by
  * fn_800F106C, stores the result in the frame's return slot and unwinds. */
-s32 fn_800F10E8(GSVMCtx* ctx)
+s32 cms_op37_callStandard(GSVMCtx* ctx)
 {
     u8* record;
     u32 result;
@@ -57,7 +57,7 @@ s32 fn_800F10E8(GSVMCtx* ctx)
         }
         lbl_8047AC3C = lbl_80401BB8;
         lbl_8047AC40 = lbl_80401BD8;
-        result = fn_800F106C();
+        result = cms_CallStdTrampoline();
     }
 
     ctx->stack[ctx->frame - 1].u = result;

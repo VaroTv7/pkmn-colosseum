@@ -6,10 +6,10 @@
 
 extern "C" {
 void GSlogWrite(const char*, ...);
-u32 fn_800FF56C(void);
+u32 std092_getCurrentRoomID(void);
 void EvlogSet__FScUl(s8, u32);
 s32 scriptSetEventColID(s32);
-u32 fn_800F7434(u32, u32, ...);
+u32 cmsRunSync(u32, u32, ...);
 extern u8 lbl_80272708[];
 extern u32 lbl_80478EC4;
 extern u32 lbl_80478EC0;
@@ -28,7 +28,7 @@ template <class T> struct Scalar {
     inline Scalar& operator+=(T v) { value += v; return *this; }
 };
 
-extern "C" void fn_80116D30(s8 eventKind, u32 arg)
+extern "C" void heroDispatchEvent(s8 eventKind, u32 arg)
 {
     Scalar<s32> skind;
     u32 floor;
@@ -55,7 +55,7 @@ extern "C" void fn_80116D30(s8 eventKind, u32 arg)
         break;
     }
 
-    floor = (u32)fn_800FF56C();
+    floor = (u32)std092_getCurrentRoomID();
     kind = 0;
     offset = 0;
     while (kind < *(u32*)lbl_80478EC0) {
@@ -65,7 +65,7 @@ extern "C" void fn_80116D30(s8 eventKind, u32 arg)
             *(u32*)(rec + 4) == arg &&
             *(u32*)(rec + 8) != 0) {
             scriptSetEventColID((u32)arg);
-            fn_800F7434(*(u32*)(rec + 8), 4, *(u32*)(rec + 0xC),
+            cmsRunSync(*(u32*)(rec + 8), 4, *(u32*)(rec + 0xC),
                         *(u32*)(rec + 0x10), *(u32*)(rec + 0x14),
                         *(u32*)(rec + 0x18));
         }

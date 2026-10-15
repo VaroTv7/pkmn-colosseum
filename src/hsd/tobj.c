@@ -94,17 +94,10 @@ extern void fn_801A6960(void* mem);                  /* HSD_Free */
 extern void fn_8019C6EC(u32 mask); /* HSD_StateInvalidate */
 extern void HSD_StateRegisterTexGen(int coord);
 extern int HSD_StateAssignTev(void);
-extern void fn_801B3638(HSD_TevDesc* desc); /* HSD_SetupTevStage */
+extern void HSD_SetupTevStage(HSD_TevDesc* desc); /* HSD_SetupTevStage */
 #define HSD_StateInvalidate fn_8019C6EC
-#define HSD_SetupTevStage fn_801B3638
 
 /* texp.c (declared in hsd_texp.h under their address names) */
-#define HSD_TExpTev fn_801B707C
-#define HSD_TExpOrder fn_801B5E40
-#define HSD_TExpColorOp fn_801B6E74
-#define HSD_TExpAlphaOp fn_801B6CD8
-#define HSD_TExpColorIn fn_801B64EC
-#define HSD_TExpAlphaIn fn_801B5F08
 
 /* aobj.c */
 extern void HSD_AObjRemove(HSD_AObj* aobj);
@@ -130,7 +123,7 @@ extern void C_MTXLightOrtho(Mtx m, f32 t, f32 b, f32 l, f32 r, f32 scaleS,
                             f32 scaleT, f32 transS, f32 transT);
 
 /* Dolphin GX */
-extern void fn_800B857C(u32 dst_coord, u32 func, u32 src_param, u32 mtx,
+extern void GXSetTexCoordGen2(u32 dst_coord, u32 func, u32 src_param, u32 mtx,
                         u8 normalize, u32 pt_texmtx); /* GXSetTexCoordGen2 */
 extern void fn_800BA9E4(GXTexObj* obj, void* image, u16 width, u16 height,
                         u32 format, u32 wrap_s, u32 wrap_t,
@@ -147,7 +140,6 @@ extern void fn_800BB050(GXTlutObj* tlut_obj, void* lut, u32 fmt,
                         u16 n_entries); /* GXInitTlutObj */
 extern void fn_800BB098(GXTlutObj* tlut_obj, u32 tlut_name); /* GXLoadTlut */
 extern void GXLoadTexMtxImm(Mtx mtx, u32 id, u32 type);
-#define GXSetTexCoordGen2 fn_800B857C
 #define GXInitTexObj fn_800BA9E4
 #define GXInitTexObjLOD fn_800BACA0
 #define GXInitTlutObj fn_800BB050
@@ -832,7 +824,7 @@ static void setupTextureCoordGenToon(HSD_TObj* toon)
 }
 
 /* HSD_TObjSetupTextureCoordGen */
-void fn_801BDA58(HSD_TObj* tobj)
+void HSD_TObjSetupTextureCoordGen(HSD_TObj* tobj)
 {
     for (; tobj != NULL; tobj = tobj->next) {
         if (tobj->id == GX_TEXMAP_NULL) {
@@ -907,7 +899,7 @@ static void SetupEmbossBumpTev(HSD_TObj* bump)
 }
 
 /* HSD_TObjSetupVolatileTev */
-void fn_801BD8D0(HSD_TObj* tobj, u32 rendermode)
+void HSD_TObjSetupVolatileTev(HSD_TObj* tobj, u32 rendermode)
 {
     for (; tobj; tobj = tobj->next) {
         if (tobj->id == GX_TEXMAP_NULL) {

@@ -39,10 +39,10 @@ extern u8 _wazaSequenceEffectEntryStart[];
 extern u8 wazaSequenceSysGetWazaTime[];
 extern u8 wazaSequenceLoadData[];
 extern u8 _wazaSequenceEffectEntryLoad[];
-extern u8 fn_801DF474[];
-extern u8 fn_801DF790[];
-extern u8 fn_801DFC30[];
-extern u8 fn_801E03D4[];
+extern u8 std087_sequenceUnk87[];
+extern u8 std086_sequenceJump86[];
+extern u8 std085_sequenceJump85[];
+extern u8 std084_sequenceJump84[];
 
 /* Shared data before/after the entry unit's generated tables at
  * 0x803725C8..0x80372628; the suffix wrapper selects the later objects. */

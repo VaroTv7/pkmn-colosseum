@@ -39,7 +39,7 @@ void fn_800D3074(u32 flag) {
     ((GSgfxState*)lbl_8047AA80)->renderEnabled = flag;
 }
 
-u32 fn_800D3088(void) {
+u32 msgGetCharsPerFrame(void) {
     return lbl_8047AA80->frameDelta;
 }
 
@@ -49,7 +49,7 @@ u32 fn_800D3094(void) {
 void fn_800D30A0(u32 val) {
     *(u32*)((u8*)lbl_8047AA80 + 0x48) = val;
 }
-extern void fn_800D4F98(s32 arg0, ...);
+extern void gfxRecordCommand(s32 arg0, ...);
 extern void GXFlush(void);
 #if 0
 asm void fn_800D30AC(void) {
@@ -60,7 +60,7 @@ void fn_800D30AC(void) {
     u8* state = (u8*)lbl_8047AA80;
 
     if (*(s32*)(state + 0x0) == 1) {
-        fn_800D4F98(4, 0);
+        gfxRecordCommand(4, 0);
     } else {
         GXFlush();
     }
@@ -77,7 +77,7 @@ extern void GStextureConvertFromHW(void* a, s32 b);
 extern void fn_800B8E74(void);
 extern void GXInvalidateTexAll(void);
 extern void fn_800D1070(void* a);
-extern void fn_800DC6D8(void* a);
+extern void GSlightUpdate(void* a);
 extern void fn_800E3884(void* a, s32 b);
 extern void fn_801181B0(s32 a);
 extern u32 OSGetTick(void);
@@ -204,7 +204,7 @@ void fn_800D3190(void) {
     ((u32*)&lbl_804001F0)[0x2C / 4] += tick - startTick;
 
     startTick = OSGetTick();
-    fn_800DC6D8((void*)*(u32*)((u8*)lbl_8047AA80 + 0x54));
+    GSlightUpdate((void*)*(u32*)((u8*)lbl_8047AA80 + 0x54));
     tick = OSGetTick();
     ((u32*)&lbl_804001F0)[0x30 / 4] += tick - startTick;
 
@@ -231,7 +231,7 @@ void fn_800D3190(void) {
 #endif
 extern void fn_800D13C4(void* a);
 extern void fn_800DC874(void* a);
-extern void fn_801183EC(void* a);
+extern void gsParticleUpdate(void* a);
 extern void modelShadowRender__FP10GSgfxLayer(void);
 extern void fn_8019C708(s32 a);
 extern void HSD_SetEraseColor(u8 a, u8 b, u8 c, u8 d);
@@ -306,7 +306,7 @@ void fn_800D3410(void* arg0, u8 arg1) {
         ((u32*)&lbl_804001F0)[0x34 / 4] = tick - startTick;
 
         startTick = OSGetTick();
-        fn_801183EC((void*)*(u32*)((u8*)lbl_8047AA80 + 0x54));
+        gsParticleUpdate((void*)*(u32*)((u8*)lbl_8047AA80 + 0x54));
         tick = OSGetTick();
         ((u32*)&lbl_804001F0)[0x38 / 4] = tick - startTick;
     }

@@ -117,18 +117,18 @@ extern const char lbl_8035B060[];
 extern void GSlogWrite(const char* fmt, ...);
 extern u32 GSthreadGetCurrentThread(void);
 extern void _threadSwitch(void);
-extern u32 fn_800D3088(void);
+extern u32 msgGetCharsPerFrame(void);
 extern void fn_800D9E4C(s32);
 extern void fn_800D9ED8(s32);
-extern void fn_800DA4C4(s32, s32, s32);
+extern void gfxSetBlendMode(s32, s32, s32);
 extern void fn_801D2404(void);
 extern void fadeDaemon(void);
 extern void fn_800FE6D0();
 extern void fn_800FE35C(void);
 extern void spriteSetEnv(void);
 extern u16 fn_8005D798(void*, s32);
-extern void fn_800F7434(void*, u32, ...);
-extern int fn_80166A28(u16);
+extern void cmsRunSync(void*, u32, ...);
+extern int soundStartSE(u16);
 
 extern const MenuData* menuDataBiosGetPtr(u32 id);
 extern const MenuItem* menuItemBiosGetPtr(u32 itemId);
@@ -451,7 +451,7 @@ void menuSetPosition(u32 id, s16 x, s16 y) {
         if (sound != NULL) {                                                \
             u32 se = fn_8005D798(sound, (event));                           \
             if (se != 0) {                                                  \
-                fn_80166A28(se);                                            \
+                soundStartSE(se);                                            \
             }                                                               \
         }                                                                   \
     } while (0)
@@ -530,7 +530,7 @@ void menuDaemon(void) {
                         }
                         break;
                     case 3:
-                        fn_800F7434(data->buttonCallback, 0);
+                        cmsRunSync(data->buttonCallback, 0);
                         break;
                     case 4:
                         data->buttonCallback(node);
@@ -583,7 +583,7 @@ void menuDaemon(void) {
                             menuCursorNormal(node);
                             break;
                         case 3:
-                            fn_800F7434(data->cursorCallback, 0);
+                            cmsRunSync(data->cursorCallback, 0);
                             break;
                         case 4:
                             data->cursorCallback(node);
@@ -610,7 +610,7 @@ void menuDaemon(void) {
         if ((node->flags & 4) != 0) {
             winSeqMoveMenu(node);
             if (data->tickCallback != NULL) {
-                for (i = 0; i < fn_800D3088(); i++) {
+                for (i = 0; i < msgGetCharsPerFrame(); i++) {
                     data->tickCallback(node);
                 }
             }
@@ -649,7 +649,7 @@ void menuDaemon(void) {
 
     fn_800FE6D0(0, 0);
     fn_800FE35C();
-    fn_800DA4C4(1, 6, 7);
+    gfxSetBlendMode(1, 6, 7);
     if (doFade != 0) {
         fadeDaemon();
     }

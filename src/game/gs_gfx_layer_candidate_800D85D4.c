@@ -16,14 +16,14 @@ extern u8 lbl_803144F0[];
 extern u8 lbl_80314510[];
 extern u8 lbl_80314530[];
 
-extern void fn_800D4F98(u32, ...);
+extern void gfxRecordCommand(u32, ...);
 extern void fn_800BAE34(void* texObj, u32 wrapS, u32 wrapT);     /* GXInitTexObjWrapMode */
 extern void fn_800BACA0(void* texObj, u32 minFilt, u32 magFilt, f32 minLod, f32 maxLod,
                         f32 lodBias, u8 biasClamp, u8 edgeLod, u32 maxAniso); /* GXInitTexObjLOD */
 extern void fn_800BB098(void* tlutObj, u32 tlutName);           /* GXLoadTlut */
 extern void GXLoadTexObj(void* texObj, u32 id);
 
-void fn_800D85D4(s32 slot, void* model) {
+void gfxLoadTexture(s32 slot, void* model) {
     u8* obj;
     u32 minFilt;
 
@@ -31,7 +31,7 @@ void fn_800D85D4(s32 slot, void* model) {
         return;
     }
     if (*(s32*)lbl_8047AA80 == 1) {
-        fn_800D4F98(0x26, 2, slot, model);
+        gfxRecordCommand(0x26, 2, slot, model);
         return;
     }
     if (*(void**)(lbl_8047AA80 + 0x28 + slot * 4) == model) {

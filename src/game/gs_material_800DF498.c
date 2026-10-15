@@ -68,12 +68,12 @@ extern void fn_801A6DA0(HSD_MObj* mobj, HSD_TObj* tobj); /* HSD_MObjAddTObj */
 extern s32 HSD_TExpGetType(HSD_TExp* texp);
 extern void fn_801B6DC0(HSD_TExp* texp, u32 r, u32 g, u32 b, u32 a); /* TEV channel swap */
 extern HSD_TExp* HSD_TExpCnst(void* value, u32 comp, u32 type, HSD_TExp** list);
-extern HSD_TExp* fn_801B707C(HSD_TExp** list); /* HSD_TExpTev */
-extern void fn_801B6E74(HSD_TExp* texp, u32 op, u32 bias, u32 scale, u32 clamp);
-extern void fn_801B64EC(HSD_TExp* texp, u32 selA, HSD_TExp* expA, u32 selB, HSD_TExp* expB,
+extern HSD_TExp* HSD_TExpTev(HSD_TExp** list); /* HSD_TExpTev */
+extern void HSD_TExpColorOp(HSD_TExp* texp, u32 op, u32 bias, u32 scale, u32 clamp);
+extern void HSD_TExpColorIn(HSD_TExp* texp, u32 selA, HSD_TExp* expA, u32 selB, HSD_TExp* expB,
                         u32 selC, HSD_TExp* expC, u32 selD, HSD_TExp* expD);
-extern void fn_801B6CD8(HSD_TExp* texp, u32 op, u32 bias, u32 scale, u32 clamp);
-extern void fn_801B5F08(HSD_TExp* texp, u32 selA, HSD_TExp* expA, u32 selB, HSD_TExp* expB,
+extern void HSD_TExpAlphaOp(HSD_TExp* texp, u32 op, u32 bias, u32 scale, u32 clamp);
+extern void HSD_TExpAlphaIn(HSD_TExp* texp, u32 selA, HSD_TExp* expA, u32 selB, HSD_TExp* expB,
                         u32 selC, HSD_TExp* expC, u32 selD, HSD_TExp* expD);
 extern u8 GStextureGetMiplevels(GStextureHandle* tex);
 extern u16 GStextureGetXsize(GStextureHandle* tex);
@@ -317,12 +317,12 @@ HSD_TExp* _matGSmatObjMakeTExp(HSD_MObj* mobj, HSD_TObj* tobj, HSD_TExp** list)
     if (material->extensions & 1) {
         color = HSD_TExpCnst(&material->modulate[0], 1, 0, list);
         alpha = HSD_TExpCnst(&material->modulate[3], 6, 0, list);
-        tev = fn_801B707C(list);
+        tev = HSD_TExpTev(list);
 
-        fn_801B6E74(tev, 0, 0, 1, 1);
-        fn_801B64EC(tev, 0, NULL, 1, color, 1, texp, 0, NULL);
-        fn_801B6CD8(tev, 0, 0, 0, 1);
-        fn_801B5F08(tev, 0, NULL, 5, alpha, 5, texp, 0, NULL);
+        HSD_TExpColorOp(tev, 0, 0, 1, 1);
+        HSD_TExpColorIn(tev, 0, NULL, 1, color, 1, texp, 0, NULL);
+        HSD_TExpAlphaOp(tev, 0, 0, 0, 1);
+        HSD_TExpAlphaIn(tev, 0, NULL, 5, alpha, 5, texp, 0, NULL);
         texp = tev;
     }
     return texp;

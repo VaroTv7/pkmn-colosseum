@@ -28,7 +28,7 @@ u32 msgctrlSndWait(EffectUtilCommandObj* obj) {
         if (handle == 0) {
             return 0;
         }
-        if (fn_801666BC(handle) == 2) {
+        if (soundGetStatus(handle) == 2) {
             obj->stream = obj->stream - 3;
         }
     }
@@ -40,7 +40,7 @@ u32 msgctrlSndPlay(EffectUtilCommandObj* obj) {
     if (obj->activeFlag == 0) {
         u16 handle = lbl_8047AEA4;
         if (handle != 0) {
-            fn_80165A20(handle, 0, 0xFF);
+            std104_soundSetBackgroundMusic(handle, 0, 0xFF);
         }
     }
     return 0;
@@ -986,7 +986,7 @@ s32 msgctrlRubyStart(EffectUtilCommandObj* obj) {
 
 /* 0x80132690 | 0xCC -- effect tick with flag-based logic */
 u32 msgctrlKeyWait(EffectUtilCommandObj* obj) {
-    extern void fn_80166A28(u32);
+    extern void soundStartSE(u32);
     u8* stream;
     u8 done;
 
@@ -1002,7 +1002,7 @@ u32 msgctrlKeyWait(EffectUtilCommandObj* obj) {
             obj->pendingFlag = 0;
             obj->savedStream = obj->stream;
             if ((obj->flags & 0x02) == 0) {
-                fn_80166A28(0x24);
+                soundStartSE(0x24);
             }
         } else {
             stream = obj->stream;

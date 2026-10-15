@@ -2,7 +2,7 @@
 #include "dolphin/types.h"
 
 extern u8 lbl_803A6A60[];
-extern void fn_800FF730(s32 floorId);
+extern void std098_mapWarpToMenuRoom(s32 floorId);
 extern void floorSetFadeScript(s32 a, u32 b);
 extern void _threadSwitch(void);
 extern s32 mailGetNbMailInMailbox(void);
@@ -36,7 +36,7 @@ u8 fn_8004BDFC(void)
 
 void menuPdaOpen(void)
 {
-    fn_800FF730(0x392);
+    std098_mapWarpToMenuRoom(0x392);
     floorSetFadeScript(0, 0);
     _threadSwitch();
 }
