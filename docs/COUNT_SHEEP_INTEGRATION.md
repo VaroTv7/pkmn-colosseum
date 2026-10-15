@@ -6,8 +6,8 @@ PR: https://github.com/dougchansan/pkmn-colosseum/pull/638
 SHA-1 checks and all 26 direct original/rebuilt byte comparisons.** The
 2026-10-12 sections below record the original import. Since then master gained
 PR #637 (304 Ghidra names); its reconciliation and the 2026-10-14 local
-re-validation are recorded at the end. Public CI is now source-only; retail
-validation runs locally (`docs/github_actions.md`).
+re-validation are recorded at the end. Ordinary CI uses the standard
+dtk-template private build image, which now holds all 26 original inputs.
 
 ## Revisions and attribution
 
@@ -164,10 +164,11 @@ keeps its registered evidence under the new name.
 
 ## Local retail validation — 2026-10-14
 
-Base `fd207bc8` (master, DOL-only configuration) and the reconciled head were
-built in separate network-less containers with the pinned toolchain
-`gc-linux-x86_64-20261014` (binutils 2.42-1, compilers_20250812, dtk 1.8.3,
-objdiff-cli 3.6.1, sjiswrap 1.2.2, wibo 1.0.3) at `-j2`:
+Base `fd207bc8` (master, DOL-only configuration) and the reconciled game-source
+tree `35a9a0ef` were built locally in separate network-less containers with
+the private image's compiler/binutils distribution (binutils 2.42-1,
+compilers_20250812) plus dtk 1.8.3, objdiff-cli 3.6.1, sjiswrap 1.2.2 and
+wibo 1.0.3, at `-j2`:
 
 - Every HEAD source unit compiled and all 26 outputs (DOL + 25 RELs) matched
   the unchanged canonical SHA-1s and the originals byte for byte.
@@ -189,6 +190,5 @@ objdiff-cli 3.6.1, sjiswrap 1.2.2, wibo 1.0.3) at `-j2`:
 
 The DOL-only data figure remains 51,619 bytes below master's, as disclosed
 above; the combined data percentage includes `common_rel` and is not
-comparable with the DOL-only one. The binding evidence for the exact PR head
-is its `local-retail/build (GC6E01)` and `local-retail/regression (GC6E01)`
-statuses; any new commit needs a new run.
+comparable with the DOL-only one. The required Build and Regression Guard
+checks on the PR head remain the binding evidence.

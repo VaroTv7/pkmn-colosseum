@@ -1,0 +1,83 @@
+name: Regression Guard
+# Byte-identical fallback reconstruction is not a source-matching measurement.
+# Compare source reports by module/address, including renames and removals.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: regression-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regression:
+    container: ghcr.io/dougchansan/pkmn-colosseum-build:main
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      matrix:
+        version: [GC6E01]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Git config
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Prepare and verify private original inputs
+        run: |
+          mkdir -p orig
+          cp -a /orig/. orig/
+          python3 tools/ci_retail.py \
+              --manifest config/${{ matrix.version }}/build.sha1 \
+              --orig orig/${{ matrix.version }}
+
+      # A separate worktree prevents HEAD from inheriting BASE objects, generated
+      # split configuration, Ninja logs or stale reports. No build cache is used.
+      - name: Build BASE report in an isolated worktree
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          BASE_DIR="$RUNNER_TEMP/regression-base-${{ matrix.version }}"
+          git worktree add --detach "$BASE_DIR" "$BASE_SHA"
+          mkdir -p "$BASE_DIR/orig"
+          cp -a /orig/. "$BASE_DIR/orig/"
+          cd "$BASE_DIR"
+          python configure.py --map --version ${{ matrix.version }} --binutils /binutils --compilers /compilers
+          ninja -j2 all_source build/${{ matrix.version }}/report.json
+          cp build/${{ matrix.version }}/report.json "$RUNNER_TEMP/base_report.json"
+
+      - name: Build HEAD report from all source
+        run: |
+          python configure.py --map --version ${{ matrix.version }} --binutils /binutils --compilers /compilers
+          ninja -j2 all_source build/${{ matrix.version }}/report.json
+          cp build/${{ matrix.version }}/report.json "$RUNNER_TEMP/head_report.json"
+
+      - name: Fail on regression or unexplained function removal
+        run: |
+          python3 tools/audit_report_transition.py \
+              "$RUNNER_TEMP/base_report.json" "$RUNNER_TEMP/head_report.json" \
+              --output "$RUNNER_TEMP/regression-audit.json"
+
+      - name: Fail if the metric double-counts or drifts
+        run: |
+          python3 .github/scripts/check_metric_integrity.py \
+              "$RUNNER_TEMP/head_report.json" orig/${{ matrix.version }}/sys/main.dol
+
+      - name: Upload report-only regression evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.version }}_regression_audit
+          path: |
+            ${{ runner.temp }}/base_report.json
+            ${{ runner.temp }}/head_report.json
+            ${{ runner.temp }}/regression-audit.json
+          if-no-files-found: ignore
+          retention-days: 7

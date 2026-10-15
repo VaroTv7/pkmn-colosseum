@@ -1,51 +1,123 @@
-name: Source checks
+name: Build
 
-# Public, source-only CI. It has no original game files, original-derived
-# objects or proprietary compilers, so it cannot and does not claim a retail
-# build. Full binary and source-regression validation runs locally with
-# tools/local_retail/validate.py and is published separately as the
-# local-retail/* commit statuses (docs/github_actions.md).
 on:
   push:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
+  packages: read
 
 concurrency:
-  group: source-${{ github.event_name }}-${{ github.ref }}
+  group: build-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  source:
-    name: source-only checks (no retail inputs)
+  build:
+    # This container and its original inputs must remain private.
+    container: ghcr.io/dougchansan/pkmn-colosseum-build:main
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [GC6E01]
+
     steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
 
-      - name: Checker and local-validation tests (synthetic fixtures)
-        run: |
-          python3 -m unittest discover -s .github/scripts -p 'test_*.py'
-          python3 -m unittest discover -s tools -p 'test_*.py'
+    - name: Git config
+      run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Canonical manifest is unchanged and complete
-        run: |
-          python3 - <<'PY'
-          import sys
-          sys.path.insert(0, ".")
-          from tools.ci_retail import read_manifest
-          from tools.local_retail.validate import CANONICAL_DOL_SHA1
-          version, entries = read_manifest("config/GC6E01/build.sha1")
-          digests = {relative: digest for relative, _, digest in entries}
-          assert digests["sys/main.dol"] == CANONICAL_DOL_SHA1, "canonical DOL hash changed"
-          print(f"{version}: {len(entries)} canonical outputs, DOL {CANONICAL_DOL_SHA1}")
-          PY
+    - name: Prepare and verify private original inputs
+      run: |
+        mkdir -p orig
+        cp -a /orig/. orig/
+        python3 tools/ci_retail.py \
+            --manifest config/${{ matrix.version }}/build.sha1 \
+            --orig orig/${{ matrix.version }}
 
-      - name: Fail on any live .inc asm wrapper
-        run: python3 .github/scripts/check_asm_wrappers.py src
+    # Do not cache build/: it contains objects extracted from original game
+    # files, and public-repository caches can be read by fork pull requests.
+    # Fresh builds also remove the need for git-restore-mtime, whose old
+    # git-whatchanged invocation is incompatible with the current runner Git.
+    - name: Build all source, full retail outputs and report
+      run: |
+        python configure.py --map --version ${{ matrix.version }} \
+            --binutils /binutils --compilers /compilers
+        ninja -j2 all_source build/${{ matrix.version }}/report.json
+        ninja -j2
+        sha1sum -c config/${{ matrix.version }}/build.sha1
+        python3 tools/ci_retail.py \
+            --manifest config/${{ matrix.version }}/build.sha1 \
+            --orig orig/${{ matrix.version }} --outputs
 
-      - name: Project configuration generates without originals
-        run: python3 configure.py --version GC6E01
+    - name: Require metric and topology integrity
+      run: |
+        python3 .github/scripts/check_metric_integrity.py \
+            build/${{ matrix.version }}/report.json orig/${{ matrix.version }}/sys/main.dol
+        python3 tools/check_object_map_freeze.py \
+            --report build/${{ matrix.version }}/report.json --strict-source-status
+        python3 tools/update_readme_progress.py \
+            --report build/${{ matrix.version }}/report.json --check
+
+    - name: Upload map
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.version }}_maps
+        path: build/${{ matrix.version }}/**/*.MAP
+
+    - name: Upload report
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.version }}_report
+        path: build/${{ matrix.version }}/report.json
+
+    # Chart history contains report measurements only, never original bytes.
+    - name: Render progress chart
+      if: matrix.version == 'GC6E01'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        REMOTE="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}"
+        rm -rf /tmp/chart
+        if ! git clone --quiet --depth 1 --branch progress-chart "$REMOTE" /tmp/chart; then
+          echo "progress-chart branch missing; starting it"
+          git clone --quiet --depth 1 "$REMOTE" /tmp/chart
+          git -C /tmp/chart checkout --quiet --orphan progress-chart
+          git -C /tmp/chart rm -rq --cached .
+          find /tmp/chart -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
+        fi
+        uv run --with matplotlib tools/plot_progress.py \
+            --append build/${{ matrix.version }}/report.json \
+            --history /tmp/chart/progress_history.json \
+            --write-history -o /tmp/chart/progress.png
+
+    - name: Upload chart preview
+      if: github.event_name == 'pull_request' && matrix.version == 'GC6E01'
+      uses: actions/upload-artifact@v4
+      with:
+        name: progress_chart_preview
+        path: /tmp/chart/progress.png
+        if-no-files-found: ignore
+
+    - name: Publish progress chart
+      if: >-
+        github.event_name == 'push'
+        && github.ref == 'refs/heads/master'
+        && matrix.version == 'GC6E01'
+      run: |
+        cd /tmp/chart
+        git add progress.png progress_history.json
+        if git diff --cached --quiet; then
+          echo "progress unchanged; nothing to publish"
+          exit 0
+        fi
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git commit --quiet -m "Update progress chart for ${GITHUB_SHA}"
+        git push --quiet origin progress-chart
