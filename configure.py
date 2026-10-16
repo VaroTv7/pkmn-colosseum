@@ -8326,9 +8326,10 @@ config.libs = [
                 extra_cflags=["-use_lmw_stmw on", "-sdata 8", "-sdata2 8"],
                 progress_category="game",
             ),
-            # menuFight prefix: fn_8000DAA8/fn_8000DAB0 and the timer window
-            # functions (0x8000DC88-0x8000DE24) link as data-free carves; the
-            # rest is scored from the whole-TU candidate wrappers.
+            # menuFight prefix: fn_8000DAA8/fn_8000DAB0, the timer window
+            # functions (0x8000DC88-0x8000DE24) and the target draw callback
+            # (0x8000DEC4-0x8000DFF0) link as data-free carves; the rest is
+            # scored from the whole-TU candidate wrappers.
             *[
                 Object(
                     status,
@@ -8342,7 +8343,8 @@ config.libs = [
                     (Matching, "game/menuFight_r51_8000DAA8_prefix.c"),
                     (Matching, "game/menuFight_exact_8000DC88.c"),
                     (Matching, "game/menuFight_exact_8000DE24.c"),
-                    (CodeCandidate, "game/menuFight_r51_8000DE24.c"),
+                    (Matching, "game/menuFight_exact_8000DEC4.c"),
+                    (CodeCandidate, "game/menuFight_r51_8000DFF0.c"),
                     (Matching, "game/menuFight_exact_8000E204.c"),
                     (CodeCandidate, "game/menuFight_r51_8000E290.c"),
                     (Matching, "game/menuFight_exact_8000F310.c"),

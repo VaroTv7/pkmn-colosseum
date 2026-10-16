@@ -749,12 +749,12 @@ typedef struct MenuFightTargetSprite {
 void menuFightDrawTargetSecret(u8* arg1, u8* arg2) {
     extern void* windowGetParam(u8* a, u32 b);
     extern void winSpriteSetDisp(u8* a, u32 b);
+    s32 value;
     u8* entry;
     s32 i;
     entry = (u8*)windowGetParam(arg1, 0);
-    for (i = 0; i < 2; i++) {
-        s32 value;
-        switch (*(s32*)(entry + 4)) {
+    for (i = 0; i < 4; i++) {
+        switch (*(s32*)(entry + 4 + i * 8)) {
             case 0x45: value = 0x125C; break;
             case 0x46: value = 0x125E; break;
             case 0x47: value = 0x12BE; break;
@@ -765,20 +765,8 @@ void menuFightDrawTargetSecret(u8* arg1, u8* arg2) {
             winSpriteSetDisp(arg2, 1);
             return;
         }
-        switch (*(s32*)(entry + 0xC)) {
-            case 0x45: value = 0x125C; break;
-            case 0x46: value = 0x125E; break;
-            case 0x47: value = 0x12BE; break;
-            case 0x48: value = 0x125D; break;
-            default: value = 0; break;
-        }
-        if (value == *(s16*)(arg2 + 6)) {
-            winSpriteSetDisp(arg2, 1);
-            return;
-        }
-        entry += 0x10;
     }
-    winSpriteSetDisp(arg2, i - 2);
+    winSpriteSetDisp(arg2, 0);
 }
 #endif
 
