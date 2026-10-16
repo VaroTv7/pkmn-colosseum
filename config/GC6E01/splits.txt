@@ -528,7 +528,7 @@ game/menuShop_exact_8002B03C.c:
 game/menuShop_candidate_8002B1A0.c:
 	.text       start:0x8002B1A0 end:0x8002B880
 
-game/menuShop_r40_8002B880_gc125n.c:
+game/menuShop_island_8002B880.c:
 	.text       start:0x8002B880 end:0x8002BCE8
 
 game/menuShop_island_8002BCE8.c:

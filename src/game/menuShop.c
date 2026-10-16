@@ -30,6 +30,7 @@ extern u32 GSmsgGetRect(u32 id);
     defined(MENUSHOP_CANDIDATE_8002AB00_ONLY) || \
     defined(MENUSHOP_CANDIDATE_8002AE9C_ONLY) || \
     defined(MENUSHOP_ISLAND_8002BCE8_ONLY) || \
+    defined(MENUSHOP_ISLAND_8002B880_ONLY) || \
     defined(MENUSHOP_ISLAND_8002CE6C_ONLY) || \
     defined(MENUSHOP_ISLAND_80029850_ONLY) || \
     defined(MENUSHOP_ISLAND_80029EF4_ONLY)
@@ -1562,6 +1563,8 @@ void fn_8002B594(void* ctx, u8* data, u32 sprite_id, u32 color_byte, f32 pos)
 #pragma pop
 #endif
 
+#endif /* guard split */
+#if !defined(MENUSHOP_ISLAND_ONLY) || defined(MENUSHOP_ISLAND_8002B880_ONLY)
 /* fn_8002B880 - 0x8002B880 | size: 0x468 */
 extern void fn_800FE6D0(void);
 extern void spriteSetEnv(void);
@@ -1597,6 +1600,8 @@ asm void fn_8002B880(void) {
 /* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma peephole off
+#pragma push
+#pragma opt_common_subs off
 s32 fn_8002B880(u8* state, u8* entity)
 {
     /* Cross-TU callees (real arg lists inferred from register state at each bl). */
@@ -1621,6 +1626,7 @@ s32 fn_8002B880(u8* state, u8* entity)
 
     u8* ctx = *(u8**)(state + 0x60);
 
+    f32 scaledY;
     f32 phase;
     f32 incr;
     f32 denom;
@@ -1683,7 +1689,8 @@ s32 fn_8002B880(u8* state, u8* entity)
     /* ---- Fixed per-step phase increment ---- */
     fx = (f32)(s16)*(s16*)(entity + 0x54);
     fy = (f32)(s16)*(s16*)(entity + 0x56);
-    denom = lbl_8047B9A4 * (fx + (lbl_8047B98C * fy) * lbl_8047B9A0);
+    scaledY = lbl_8047B98C * fy;
+    denom = lbl_8047B9A4 * (fx + scaledY * lbl_8047B9A0);
     incr = lbl_8047B9A4 / denom;
 
     /* ---- Ring 1: phase starts at the live r13 base ---- */
@@ -1741,6 +1748,7 @@ s32 fn_8002B880(u8* state, u8* entity)
 
     return 0;
 }
+#pragma pop
 #pragma pop
 #endif
 
