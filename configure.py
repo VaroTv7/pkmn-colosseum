@@ -3281,6 +3281,26 @@ config.libs = [
                 extra_cflags=["-use_lmw_stmw on", "-sdata 8", "-sdata2 8"],
                 progress_category="game",
             ),
+            # TEMPORARY constant_import: 2pi and 0.0f are retail's shared
+            # lbl_8047BA60/lbl_8047BA58 (see tools/import_constant_symbol.py).
+            Object(
+                Matching,
+                "game/menu/pda_exact_800379E8.c",
+                constant_import=[
+                    {"symbol": "lbl_8047BA60", "offset": 0, "expected": "40c90fdb"},
+                    {"symbol": "lbl_8047BA58", "offset": 4, "expected": "00000000"},
+                ],
+                mw_version="GC/1.3",
+                extra_cflags=["-use_lmw_stmw on", "-sdata 8", "-sdata2 8"],
+                progress_category="game",
+            ),
+            Object(
+                CodeCandidate,
+                "game/menu/pda_candidate_80037F40.c",
+                mw_version="GC/1.3",
+                extra_cflags=["-use_lmw_stmw on", "-sdata 8", "-sdata2 8"],
+                progress_category="game",
+            ),
             Object(
                 Matching,
                 "game/menu/pda_exact_80038124.c",
@@ -8326,9 +8346,10 @@ config.libs = [
                 extra_cflags=["-use_lmw_stmw on", "-sdata 8", "-sdata2 8"],
                 progress_category="game",
             ),
-            # menuFight prefix: fn_8000DAA8/fn_8000DAB0 and the timer window
-            # functions (0x8000DC88-0x8000DE24) link as data-free carves; the
-            # rest is scored from the whole-TU candidate wrappers.
+            # menuFight prefix: fn_8000DAA8/fn_8000DAB0, the timer window
+            # functions (0x8000DC88-0x8000DE24) and the target draw callback
+            # (0x8000DEC4-0x8000DFF0) link as data-free carves; the rest is
+            # scored from the whole-TU candidate wrappers.
             *[
                 Object(
                     status,
@@ -8342,11 +8363,13 @@ config.libs = [
                     (Matching, "game/menuFight_r51_8000DAA8_prefix.c"),
                     (Matching, "game/menuFight_exact_8000DC88.c"),
                     (Matching, "game/menuFight_exact_8000DE24.c"),
-                    (CodeCandidate, "game/menuFight_r51_8000DE24.c"),
+                    (Matching, "game/menuFight_exact_8000DEC4.c"),
+                    (CodeCandidate, "game/menuFight_r51_8000DFF0.c"),
                     (Matching, "game/menuFight_exact_8000E204.c"),
                     (CodeCandidate, "game/menuFight_r51_8000E290.c"),
                     (Matching, "game/menuFight_exact_8000F310.c"),
-                    (CodeCandidate, "game/menuFight_r51_8000F400.c"),
+                    (Matching, "game/menuFight_exact_8000F400.c"),
+                    (CodeCandidate, "game/menuFight_r51_8000F768.c"),
                     (Matching, "game/menuFight_exact_8000FFA8.c"),
                     (Matching, "game/menuFight_exact_800100C0.c"),
                     (Matching, "game/menuFight_exact_80010294.c"),
@@ -9936,9 +9959,12 @@ config.libs = [
                 extra_cflags=["-use_lmw_stmw on", "-sdata 8", "-sdata2 8"],
                 progress_category="game",
             ),
+            # TEMPORARY constant_import
             Object(
-                CodeCandidate,
-                "game/menuPokemonChange_r41_8002EA5C.c",
+                Matching,
+                "game/menuPokemonChange_exact_8002EA5C.c",
+                constant_import=[{"symbol": "lbl_8047B9E0", "offset": 0, "expected": "4330000080000000"},
+                                 {"symbol": "lbl_8047B9E8", "offset": 8, "expected": "4330000000000000"}],
                 mw_version="GC/1.3",
                 extra_cflags=["-use_lmw_stmw on", "-sdata 8", "-sdata2 8"],
                 progress_category="game",
@@ -11478,11 +11504,6 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/data_802E4B98.c",
-                progress_category="game",
-            ),
-            Object(
-                Matching,
-                "game/data/data_802E4CA8.c",
                 progress_category="game",
             ),
             Object(

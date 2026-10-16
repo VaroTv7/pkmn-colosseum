@@ -749,12 +749,12 @@ typedef struct MenuFightTargetSprite {
 void menuFightDrawTargetSecret(u8* arg1, u8* arg2) {
     extern void* windowGetParam(u8* a, u32 b);
     extern void winSpriteSetDisp(u8* a, u32 b);
+    s32 value;
     u8* entry;
     s32 i;
     entry = (u8*)windowGetParam(arg1, 0);
-    for (i = 0; i < 2; i++) {
-        s32 value;
-        switch (*(s32*)(entry + 4)) {
+    for (i = 0; i < 4; i++) {
+        switch (*(s32*)(entry + 4 + i * 8)) {
             case 0x45: value = 0x125C; break;
             case 0x46: value = 0x125E; break;
             case 0x47: value = 0x12BE; break;
@@ -765,20 +765,8 @@ void menuFightDrawTargetSecret(u8* arg1, u8* arg2) {
             winSpriteSetDisp(arg2, 1);
             return;
         }
-        switch (*(s32*)(entry + 0xC)) {
-            case 0x45: value = 0x125C; break;
-            case 0x46: value = 0x125E; break;
-            case 0x47: value = 0x12BE; break;
-            case 0x48: value = 0x125D; break;
-            default: value = 0; break;
-        }
-        if (value == *(s16*)(arg2 + 6)) {
-            winSpriteSetDisp(arg2, 1);
-            return;
-        }
-        entry += 0x10;
     }
-    winSpriteSetDisp(arg2, i - 2);
+    winSpriteSetDisp(arg2, 0);
 }
 #endif
 
@@ -1535,16 +1523,16 @@ void menuFightDrawSecretWazaDoc(u8* ctx, u8* npc) {
     extern s32 fn_800FBB34(s32 x, s32 y, s16 width, s16 height, s32 color, u32 key);
     extern void fn_800FB8C8();
     extern void fn_800FB680();
+    s16 delta;
     u8* party;
-    u8* state;
-    u32 battle;
-    u16 result;
     s32 id;
-    s32 color;
+    u8* state;
     s32 value;
+    u32 battle;
+    s32 color;
     s16 y0;
     s16 y1;
-    s16 delta;
+    u16 result;
 
     value = -1;
     windowGetParam(ctx, 0);
@@ -1615,14 +1603,14 @@ void menuFightDrawSecretWazaDoc(u8* ctx, u8* npc) {
             fn_800FB8C8(0, 0, *(s16*)(npc + 0x54), *(s16*)(npc + 0x56), color, 0xD2);
         }
         break;
-    case 0x11FE: {
+    case 0x11FF: {
         u8* entry = party + (*(s32*)state * 0xC);
 
         msgctrlSetValue(0x37, *(u32*)(entry + 4));
         fn_800FB680(0, 0, color, 0xCF);
         break;
     }
-    case 0x11FF: {
+    case 0x11FE: {
         u8* entry;
 
         y0 = (s16)(GSmsgGetRect(0x1A4) >> 16);

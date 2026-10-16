@@ -109,8 +109,11 @@ game/menuFight_exact_8000DC88.c:
 game/menuFight_exact_8000DE24.c:
 	.text       start:0x8000DE24 end:0x8000DEC4
 
-game/menuFight_r51_8000DE24.c:
-	.text       start:0x8000DEC4 end:0x8000E204
+game/menuFight_exact_8000DEC4.c:
+	.text       start:0x8000DEC4 end:0x8000DFF0
+
+game/menuFight_r51_8000DFF0.c:
+	.text       start:0x8000DFF0 end:0x8000E204
 
 game/menuFight_exact_8000E204.c:
 	.text       start:0x8000E204 end:0x8000E290
@@ -122,11 +125,12 @@ game/menuFight_exact_8000F310.c:
 	.text       start:0x8000F310 end:0x8000F400
 	.data       start:0x802E4C80 end:0x802E4CA8
 
-game/data/data_802E4CA8.c:
+game/menuFight_exact_8000F400.c:
+	.text       start:0x8000F400 end:0x8000F768
 	.data       start:0x802E4CA8 end:0x802E4CD8
 
-game/menuFight_r51_8000F400.c:
-	.text       start:0x8000F400 end:0x8000F964
+game/menuFight_r51_8000F768.c:
+	.text       start:0x8000F768 end:0x8000F964
 
 game/menuFight_exact_8000F964.c:
 	.text       start:0x8000F964 end:0x8000FFA8
@@ -554,7 +558,7 @@ game/menuPokemonChange_r51_8002DF10_suffix.c:
 game/menuPokemonChange_r41_8002E460_gc125n.c:
 	.text       start:0x8002E460 end:0x8002EA5C
 
-game/menuPokemonChange_r41_8002EA5C.c:
+game/menuPokemonChange_exact_8002EA5C.c:
 	.text       start:0x8002EA5C end:0x8002EE74
 
 game/menuPokemonChange_island_8002EE74.c:
@@ -698,7 +702,13 @@ game/menu/pda_exact_80037174.c:
 	.text       start:0x80037174 end:0x800376F8
 
 game/menu/pda_candidate_800376F8.c:
-	.text       start:0x800376F8 end:0x80038124
+	.text       start:0x800376F8 end:0x800379E8
+
+game/menu/pda_exact_800379E8.c:
+	.text       start:0x800379E8 end:0x80037F40
+
+game/menu/pda_candidate_80037F40.c:
+	.text       start:0x80037F40 end:0x80038124
 
 game/menu/pda_exact_80038124.c:
 	.text       start:0x80038124 end:0x80038170
