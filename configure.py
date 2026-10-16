@@ -8368,7 +8368,8 @@ config.libs = [
                     (Matching, "game/menuFight_exact_8000E204.c"),
                     (CodeCandidate, "game/menuFight_r51_8000E290.c"),
                     (Matching, "game/menuFight_exact_8000F310.c"),
-                    (CodeCandidate, "game/menuFight_r51_8000F400.c"),
+                    (Matching, "game/menuFight_exact_8000F400.c"),
+                    (CodeCandidate, "game/menuFight_r51_8000F768.c"),
                     (Matching, "game/menuFight_exact_8000FFA8.c"),
                     (Matching, "game/menuFight_exact_800100C0.c"),
                     (Matching, "game/menuFight_exact_80010294.c"),
@@ -11500,11 +11501,6 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/data_802E4B98.c",
-                progress_category="game",
-            ),
-            Object(
-                Matching,
-                "game/data/data_802E4CA8.c",
                 progress_category="game",
             ),
             Object(
