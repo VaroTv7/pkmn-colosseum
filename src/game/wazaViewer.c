@@ -354,7 +354,7 @@ void fn_801D56B0(void) {
             }
         }
         memset(lbl_804673F8 + 0x61C, 0, 8);
-        fn_801D5A94(0);
+        wazaViewerLoadSequenceFiles(0);
         break;
     case 1:
         memset(lbl_804673F8 + 0x61C, 0, 8);
@@ -437,10 +437,12 @@ void fn_801D58E4(void) {
 }
 
 /**
- * fn_801D5A94 - Move animation helper: combined effect sequence.
+ * wazaViewerLoadSequenceFiles - load the viewer's waza sequence file (+0x1C)
+ * and optional second file (+0x41C) from the host into a new effect, and
+ * store it in viewer slot `slot`.
  * Address: 0x801D5A94 | Size: 0x30C
  */
-void fn_801D5A94(s32 slot) {
+void wazaViewerLoadSequenceFiles(s32 slot) {
     extern u32 strlen(const char* s);
     extern u16 fn_800E2C04(u32 size, u32 align);
     extern void* fn_800E27B0(u16 block);

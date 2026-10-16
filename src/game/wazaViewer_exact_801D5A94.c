@@ -1,6 +1,6 @@
 /**
  * @file wazaViewer_exact_801D5A94.c
- * @brief fn_801D5A94, 0x801D5A94 - 0x801D5DA0.
+ * @brief wazaViewerLoadSequenceFiles, 0x801D5A94 - 0x801D5DA0.
  *
  * Function-boundary carve of the wazaViewer TU (see wazaViewer.c): load the
  * viewer's effect model and optional animation from the host file system.
@@ -79,7 +79,7 @@ static inline void wazaViewerLoadFile(const char* messages, const char* path, vo
     fn_80167E64(file);
 }
 
-void fn_801D5A94(s32 slot) {
+void wazaViewerLoadSequenceFiles(s32 slot) {
     extern u32 strlen(const char* s);
     extern u16 fn_800E2C04(u32 size, u32 align);
     extern void* fn_800E27B0(u16 block);
