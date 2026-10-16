@@ -31,13 +31,14 @@ uv run --with matplotlib tools/plot_progress.py -o /tmp/progress.png
 | Metric | Value |
 |---|---|
 | Fuzzy match | 99.69% |
-| Function match | 98.36% (8,535 / 8,677 functions) |
-| Code match | 91.81% (2,299,812 / 2,504,940 matched code bytes) |
+| Function match | 98.43% (8,541 / 8,677 functions) |
+| Code match | 91.95% (2,303,400 / 2,504,940 matched code bytes) |
 | Data match | 58.84% (2,098,410 / 3,566,037 matched data bytes) |
-| Source-linked | 1,891 / 2,163 scoring units (90.48% of code) |
+| Source-linked | 1,894 / 2,166 scoring units (90.62% of code) |
 
 These measurements cover the **DOL and all 25 configured REL modules**, from the
-full `build/GC6E01/report.json` built by CI for the PR #638 merge (2026-10-15).
+full `build/GC6E01/report.json` built for the PR #638 merge plus the matches
+linked after it (2026-10-16).
 All 26 rebuilt binaries passed their unchanged canonical hashes and direct byte
 comparisons against the originals in the private build image. This is a
 matching reconstruction with original fallback objects where required, not a
