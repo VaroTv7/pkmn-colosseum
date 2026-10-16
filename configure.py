@@ -9959,9 +9959,12 @@ config.libs = [
                 extra_cflags=["-use_lmw_stmw on", "-sdata 8", "-sdata2 8"],
                 progress_category="game",
             ),
+            # TEMPORARY constant_import
             Object(
-                CodeCandidate,
-                "game/menuPokemonChange_r41_8002EA5C.c",
+                Matching,
+                "game/menuPokemonChange_exact_8002EA5C.c",
+                constant_import=[{"symbol": "lbl_8047B9E0", "offset": 0, "expected": "4330000080000000"},
+                                 {"symbol": "lbl_8047B9E8", "offset": 8, "expected": "4330000000000000"}],
                 mw_version="GC/1.3",
                 extra_cflags=["-use_lmw_stmw on", "-sdata 8", "-sdata2 8"],
                 progress_category="game",

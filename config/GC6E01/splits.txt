@@ -558,7 +558,7 @@ game/menuPokemonChange_r51_8002DF10_suffix.c:
 game/menuPokemonChange_r41_8002E460_gc125n.c:
 	.text       start:0x8002E460 end:0x8002EA5C
 
-game/menuPokemonChange_r41_8002EA5C.c:
+game/menuPokemonChange_exact_8002EA5C.c:
 	.text       start:0x8002EA5C end:0x8002EE74
 
 game/menuPokemonChange_island_8002EE74.c:
