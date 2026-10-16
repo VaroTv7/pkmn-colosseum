@@ -630,7 +630,7 @@ __declspec(section ".sdata2") u32 lbl_8047D15C = 0x40C90FDB; /* 6.2831855f */
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_80138630_801386DC)
 #if 0
-asm void _lightningDestroy(void* ptr) {
+asm void fn_80138630(void* ptr) {
 #include "src/game/effect/effect_visual_fn_80138630.inc"
 }
 #else
@@ -649,7 +649,7 @@ u32 _lightningDestroy(void* ptr) {
 extern void fn_800E24B0(u16 a);
 extern void fn_800E209C(u16 a);
 #if 0
-asm void _lightningStop(void* ptr) {
+asm void fn_80138680(void* ptr) {
 #include "src/game/effect/effect_visual_fn_80138680.inc"
 }
 #else
@@ -677,7 +677,7 @@ u32 _lightningStop(void* ptr) {
     defined(EFFECT_VISUAL_EXACT_801386DC)
 extern u8 lbl_80272B40[];
 #if 0
-asm u32 lightningStartEffect(void* ptr) {
+asm u32 fn_801386DC(void* ptr) {
 #include "src/game/effect/effect_visual_fn_801386DC.inc"
 }
 #else
@@ -716,7 +716,7 @@ u32 lightningStartEffect(void* ptr) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_801387C0_80138838)
 #if 0
-asm void _lightningUpdate(void* ptr, u32 delta) {
+asm void fn_801387C0(void* ptr, u32 delta) {
 #include "src/game/effect/effect_visual_fn_801387C0.inc"
 }
 #else
@@ -756,7 +756,7 @@ extern void GSvecTransform(void* dst, void* matrix, void* vec);
 extern void vecScale(void* dst, void* src, f32 scale);
 extern void GSvecAdd(void* dst, void* srcA, void* srcB);
 #if 0
-asm void _lightningGenerate(void* ptr, u32 b) {
+asm void fn_80138838(void* ptr, u32 b) {
 #include "src/game/effect/effect_visual_fn_80138838.inc"
 }
 #else
@@ -845,7 +845,7 @@ void _lightningGenerate(void* ptr, u32 b) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_80138B00_80138BBC)
 #if 0
-asm void leaffxEffectCreate(void) {
+asm void leaffxStartEffect(void) {
 #include "src/game/effect/effect_visual_leaffxStartEffect.inc"
 }
 #else
@@ -867,7 +867,7 @@ u32 leaffxEffectCreate(void* callbacks) {
 #endif
 extern void fn_800F9210(u32 a, u32 b);
 #if 0
-asm void _leaffxDestroy(void* ptr) {
+asm void fn_80138B74(void* ptr) {
 #include "src/game/effect/effect_visual_fn_80138B74.inc"
 }
 #else
@@ -892,7 +892,7 @@ extern void fn_800DF608(void* handle);
 extern void GSpartFree(void* handle);
 extern u32 lbl_8047D160;
 #if 0
-asm u32 _leaffxStop(void* ptr) {
+asm u32 fn_80138BBC(void* ptr) {
 #include "src/game/effect/effect_visual_fn_80138BBC.inc"
 }
 #else
@@ -951,7 +951,7 @@ u32 _leaffxStop(void* ptr) {
 extern u8 lbl_80272C30[];
 extern u8 lbl_80272C90[];
 #if 0
-asm u32 leaffxStartEffect(void* ptr) {
+asm u32 fn_80138CCC(void* ptr) {
 #include "src/game/effect/effect_visual_fn_80138CCC.inc"
 }
 #else
@@ -1018,7 +1018,7 @@ extern u32 lbl_8047D178;
 extern u32 lbl_8047D160;
 extern const f32 lbl_8047D168;
 #if 0
-asm void _leaffxUpdate(void) {
+asm void fn_80138DE4(void) {
 #include "src/game/effect/effect_visual_fn_80138DE4.inc"
 }
 #else
@@ -1124,7 +1124,7 @@ extern void fn_800E076C(void* dst, void* src);
 extern u32 lbl_8047D180;
 extern u32 lbl_8047D184;
 #if 0
-asm void _leaffxMoveLeaf(void) {
+asm void fn_80139074(void) {
 #include "src/game/effect/effect_visual_fn_80139074.inc"
 }
 #else
@@ -1393,7 +1393,7 @@ u8 _leaffxGenerateLeafData(void* ptr, void* entry) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_80139820_80139AC4)
 #if 0
-asm void boltEffectCreate(void) {
+asm void electronStartEffect(void) {
 #include "src/game/effect/effect_visual_electronStartEffect.inc"
 }
 #else
@@ -1414,7 +1414,7 @@ u32 boltEffectCreate(void* callbacks) {
 }
 #endif
 #if 0
-asm void _boltDestroy(void* ptr) {
+asm void fn_80139898(void* ptr) {
 #include "src/game/effect/effect_visual_fn_80139898.inc"
 }
 #else
@@ -1430,7 +1430,7 @@ u32 _boltDestroy(void* ptr) {
 }
 #endif
 #if 0
-asm void _boltStop(void* ptr) {
+asm void fn_801398E0(void* ptr) {
 #include "src/game/effect/effect_visual_fn_801398E0.inc"
 }
 #else
@@ -1586,7 +1586,7 @@ extern u8 lbl_80272D08[];
 extern const f32 lbl_8047D190;
 extern u8 lbl_80272D54[];
 #if 0
-asm u32 boltStartEffect(void* ptr) {
+asm u32 fn_80139D10(void* ptr) {
 #include "src/game/effect/effect_visual_fn_80139D10.inc"
 }
 #else
@@ -1657,7 +1657,7 @@ extern const f32 lbl_8047D190;
 extern const f32 lbl_8047D1AC;
 extern const f32 lbl_8047D1B0;
 #if 0
-asm void _boltDrawStrip(void* entry, void* parent, void* cameraPos, void* modelPos) {
+asm void fn_80139E80(void* entry, void* parent, void* cameraPos, void* modelPos) {
 #include "src/game/effect/effect_visual_fn_80139E80.inc"
 }
 #else
@@ -1858,7 +1858,7 @@ void _boltSubdivide(u8* entry, u8* parent, ElectronPoint* origin, u32 depth, f32
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_8013A42C_8013A520)
 #if 0
-asm void electronEffectCreate(void) {
+asm void fn_8013A42C(void) {
 #include "src/game/effect/effect_visual_fn_8013A42C.inc"
 }
 #else
@@ -1881,7 +1881,7 @@ u32 electronEffectCreate(void* callbacks) {
 extern u8 lbl_80272D90[];
 extern u8 lbl_80272DF4[];
 #if 0
-asm u32 electronStartEffect(void* ptr) {
+asm u32 fn_8013A49C(void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013A49C.inc"
 }
 #else
@@ -1919,7 +1919,7 @@ extern const f32 lbl_8047D1CC;
 extern const f32 lbl_8047D1D0;
 extern u32 lbl_8047D1D8;
 #if 0
-asm void _electronRender(void) {
+asm void fn_8013A520(void) {
 #include "src/game/effect/effect_visual_fn_8013A520.inc"
 }
 #else
@@ -2106,7 +2106,7 @@ u32 _electronRender(void* ptr) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_8013AA8C_8013AB60)
 #if 0
-asm u32 _electronUpdate(void* ptr, u16 delta) {
+asm u32 fn_8013AA8C(void* ptr, u16 delta) {
 #include "src/game/effect/effect_visual_fn_8013AA8C.inc"
 }
 #else
@@ -2125,7 +2125,7 @@ u32 _electronUpdate(void* ptr, u16 delta) {
 }
 #endif
 #if 0
-asm void filterEffectCreate(void) {
+asm void fn_8013AABC(void) {
 #include "src/game/effect/effect_visual_fn_8013AABC.inc"
 }
 #else
@@ -2146,7 +2146,7 @@ u32 filterEffectCreate(void* callbacks) {
 }
 #endif
 #if 0
-asm u32 filterIsHolding(void* ptr) {
+asm u32 fn_8013AB34(void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013AB34.inc"
 }
 #else
@@ -2170,7 +2170,7 @@ u32 filterIsHolding(void* ptr) {
 extern u32 lbl_8047D1E8;
 extern const f32 lbl_8047D1E0;
 #if 0
-asm u32 filterAddKey(void* ptr, u8* src, u8* dst, u32 alpha) {
+asm u32 fn_8013AB60(void* ptr, u8* src, u8* dst, u32 alpha) {
 #include "src/game/effect/effect_visual_fn_8013AB60.inc"
 }
 #else
@@ -2234,7 +2234,7 @@ u32 filterAddKey(void* ptr, u8* src, u8* dst, u32 alpha) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_8013AD68_8013AD9C)
 #if 0
-asm u32 _filterNextKey(void* ptr) {
+asm u32 fn_8013AD68(void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013AD68.inc"
 }
 #else
@@ -2346,7 +2346,7 @@ done:
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_8013B034_8013B268)
 #if 0
-asm void _filterDestroy(void* ptr) {
+asm void fn_8013B034(void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013B034.inc"
 }
 #else
@@ -2374,7 +2374,7 @@ extern void GSmodelDisableModulation(void* texture);
 extern void GSmodelResetPEdescr(void* texture);
 extern void fn_801684F0(void* texture);
 #if 0
-asm void _filterStop(void) {
+asm void fn_8013B0A0(void) {
 #include "src/game/effect/effect_visual_fn_8013B0A0.inc"
 }
 #else
@@ -2504,7 +2504,7 @@ static inline u8 effectColorMultiply(u8 base, u8 color) {
 }
 
 #if 0
-asm void _filterApplyColor(void* ptr, u8* color) {
+asm void fn_8013B268(void* ptr, u8* color) {
 #include "src/game/effect/effect_visual_fn_8013B268.inc"
 }
 #else
@@ -2544,7 +2544,7 @@ void _filterApplyColor(void* ptr, u8* color) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_8013B490_8013B5E4)
 #if 0
-asm void surfEffectCreate(void) {
+asm void fn_8013B490(void) {
 #include "src/game/effect/effect_visual_fn_8013B490.inc"
 }
 #else
@@ -2565,7 +2565,7 @@ u32 surfEffectCreate(void* callbacks) {
 }
 #endif
 #if 0
-asm u32 _surfDestroy(void* ptr) {
+asm u32 fn_8013B504(void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013B504.inc"
 }
 #else
@@ -2580,7 +2580,7 @@ u32 _surfDestroy(void* ptr) {
 }
 #endif
 #if 0
-asm u32 _surfStop(void* ptr) {
+asm u32 fn_8013B558(void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013B558.inc"
 }
 #else
@@ -2756,7 +2756,7 @@ fail:
 extern void fn_800E09E8(void* dst, void* src, u32 count);
 extern u32 lbl_8047D208;
 #if 0
-asm u32 _surfUpdate(void* ptr, u32 delta) {
+asm u32 fn_8013B85C(void* ptr, u32 delta) {
 #include "src/game/effect/effect_visual_fn_8013B85C.inc"
 }
 #else
@@ -2936,7 +2936,7 @@ extern u32 lbl_8047D228;
 extern const f32 lbl_8047D21C;
 extern u32 lbl_8047D208;
 #if 0
-asm void _surfBuildMesh(void* ptr, void* mtx, u8* color, f32 x, f32 z, f32 scale) {
+asm void fn_8013BE04(void* ptr, void* mtx, u8* color, f32 x, f32 z, f32 scale) {
 #include "src/game/effect/effect_visual_fn_8013BE04.inc"
 }
 #else
@@ -2998,7 +2998,7 @@ extern void HSD_MObjSetFlags(void* mobj, u32 flags);
 extern void HSD_MObjCompileTev(void* mobj);
 #endif
 #if 0
-asm void _surfSetupMaterial(void) {
+asm void fn_8013C074(void) {
 #include "src/game/effect/effect_visual_fn_8013C074.inc"
 }
 #else
@@ -3202,7 +3202,7 @@ u32 _surfSetupMaterial(void* ptr, void* arg) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_8013C5A0_8013C670)
 #if 0
-asm void seaEffectCreate(void) {
+asm void fn_8013C5A0(void) {
 #include "src/game/effect/effect_visual_fn_8013C5A0.inc"
 }
 #else
@@ -3223,7 +3223,7 @@ u32 seaEffectCreate(void* callbacks) {
 }
 #endif
 #if 0
-asm u32 _seaDestroy(void* ptr) {
+asm u32 fn_8013C614(void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013C614.inc"
 }
 #else
@@ -3244,7 +3244,7 @@ u32 _seaDestroy(void* ptr) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE)
 extern void GSmodelStopTexAnimation(void* a);
 #if 0
-asm void _seaStop(void) {
+asm void fn_8013C670(void) {
 #include "src/game/effect/effect_visual_fn_8013C670.inc"
 }
 #else
@@ -3489,7 +3489,7 @@ extern const f32 lbl_8047D240;
 extern const f32 lbl_8047D244;
 extern u32 lbl_8047D250;
 #if 0
-asm u32 _seaUpdate(void* ptr, u32 delta) {
+asm u32 fn_8013CA48(void* ptr, u32 delta) {
 #include "src/game/effect/effect_visual_fn_8013CA48.inc"
 }
 #else
@@ -3550,7 +3550,7 @@ u32 _seaUpdate(void* ptr, u32 delta) {
 extern u32 lbl_8047D250;
 extern u32 lbl_8047D248;
 #if 0
-asm void _seaBuildMesh(void* ptr, void* mtx, u8* color, f32 x, f32 z, f32 scale) {
+asm void fn_8013CBF0(void* ptr, void* mtx, u8* color, f32 x, f32 z, f32 scale) {
 #include "src/game/effect/effect_visual_fn_8013CBF0.inc"
 }
 #else
@@ -3607,7 +3607,7 @@ void _seaBuildMesh(void* ptr, void* mtx, u8* color, f32 x, f32 z, f32 scale) {
 
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE)
 #if 0
-asm u32 _seaResetMaterial(void* inner, void* ptr) {
+asm u32 fn_8013CE58(void* inner, void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013CE58.inc"
 }
 #else
@@ -3728,7 +3728,7 @@ extern void HSD_MObjCompileTev(void* mobj);
 extern u8 lbl_80363CB8[];
 #endif
 #if 0
-asm void _seaSetupMaterial(void) {
+asm void fn_8013D0A8(void) {
 #include "src/game/effect/effect_visual_fn_8013D0A8.inc"
 }
 #else
@@ -3945,7 +3945,7 @@ u32 _seaSetupMaterial(void* ptr, void* arg) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_8013D604_8013D984)
 #if 0
-asm void envMapAddKey(void* ptr, u32 val, f32 f1, f32 f2) {
+asm void fn_8013D604(void* ptr, u32 val, f32 f1, f32 f2) {
 #include "src/game/effect/effect_visual_fn_8013D604.inc"
 }
 #else
@@ -3975,7 +3975,7 @@ u32 envMapAddKey(void* ptr, u32 val, f32 f1, f32 f2) {
 }
 #endif
 #if 0
-asm void envMapEffectCreate(void) {
+asm void fn_8013D6B8(void) {
 #include "src/game/effect/effect_visual_fn_8013D6B8.inc"
 }
 #else
@@ -3998,7 +3998,7 @@ u32 envMapEffectCreate(void* callbacks) {
 extern u32 lbl_8047AEE0;
 extern u16 lbl_8047AEE4;
 #if 0
-asm void _envMapDestroy(void* ptr) {
+asm void fn_8013D730(void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013D730.inc"
 }
 #else
@@ -4031,7 +4031,7 @@ u32 _envMapDestroy(void* ptr) {
 #endif
 extern void GSmodelDisableEnvMap(void* ptr);
 #if 0
-asm u32 _envMapStop(void* ptr) {
+asm u32 fn_8013D7CC(void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013D7CC.inc"
 }
 #else
@@ -4130,7 +4130,7 @@ extern void GSmodelSetEnvMapBlendValue(void* model, f32 value);
 extern u32 lbl_8047AEE0;
 extern u32 lbl_8047D260;
 #if 0
-asm u32 _envMapUpdate(void* ptr, u32 delta) {
+asm u32 fn_8013D984(void* ptr, u32 delta) {
 #include "src/game/effect/effect_visual_fn_8013D984.inc"
 }
 #else
@@ -4204,7 +4204,7 @@ u32 _envMapUpdate(void* ptr, u32 delta) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_8013DB64_8013DE6C)
 #if 0
-asm void blurAddKey(void* ptr, u32 val, f32 f1, f32 f2) {
+asm void fn_8013DB64(void* ptr, u32 val, f32 f1, f32 f2) {
 #include "src/game/effect/effect_visual_fn_8013DB64.inc"
 }
 #else
@@ -4234,7 +4234,7 @@ u32 blurAddKey(void* ptr, u32 val, f32 f1, f32 f2) {
 }
 #endif
 #if 0
-asm void blurEffectCreate(void) {
+asm void fn_8013DC18(void) {
 #include "src/game/effect/effect_visual_fn_8013DC18.inc"
 }
 #else
@@ -4255,7 +4255,7 @@ u32 blurEffectCreate(void* callbacks) {
 }
 #endif
 #if 0
-asm u32 _blurDestroy(void* ptr) {
+asm u32 fn_8013DC94(void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013DC94.inc"
 }
 #else
@@ -4280,7 +4280,7 @@ u32 _blurDestroy(void* ptr) {
 }
 #endif
 #if 0
-asm u32 _blurInit(void* ptr) {
+asm u32 fn_8013DD10(void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013DD10.inc"
 }
 #else
@@ -4299,7 +4299,7 @@ u32 _blurInit(void* ptr) {
 extern void GSgfxEndBackFBCapture(void* a);
 extern void fn_800E5790(void* a);
 #if 0
-asm u32 _blurStop(void* ptr) {
+asm u32 fn_8013DD7C(void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013DD7C.inc"
 }
 #else
@@ -4374,7 +4374,7 @@ extern const f32 lbl_8047D27C;
 extern u8 lbl_80363CC8[];
 extern const f32 lbl_8047D280;
 #if 0
-asm void _blurRender(void) {
+asm void fn_8013DE6C(void) {
 #include "src/game/effect/effect_visual_fn_8013DE6C.inc"
 }
 #else
@@ -4504,7 +4504,7 @@ extern const f32 lbl_8047D2A0;
 extern u8 lbl_80314AE8[];
 extern const f32 lbl_8047D280;
 #if 0
-asm u32 _blurDrawCapture(void* model, void* unused, void* state) {
+asm u32 fn_8013E258(void* model, void* unused, void* state) {
 #include "src/game/effect/effect_visual_fn_8013E258.inc"
 }
 #else
@@ -4568,7 +4568,7 @@ ret0:
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_8013E470_8013E54C)
 #if 0
-asm void _blurUpdate(void) {
+asm void fn_8013E470(void) {
 #include "src/game/effect/effect_visual_fn_8013E470.inc"
 }
 #else
@@ -4596,7 +4596,7 @@ ret0:
 }
 #endif
 #if 0
-asm void auraEffectCreate(void) {
+asm void fn_8013E4D4(void) {
 #include "src/game/effect/effect_visual_fn_8013E4D4.inc"
 }
 #else
@@ -4620,7 +4620,7 @@ u32 auraEffectCreate(void* callbacks) {
 
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE)
 #if 0
-asm void _auraDestroy(void) {
+asm void fn_8013E54C(void) {
 #include "src/game/effect/effect_visual_fn_8013E54C.inc"
 }
 #else
@@ -4643,7 +4643,7 @@ u32 _auraDestroy(void* arg) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_8013E5AC_8013E8A4)
 #if 0
-asm void _auraInit(void) {
+asm void fn_8013E5AC(void) {
 #include "src/game/effect/effect_visual_fn_8013E5AC.inc"
 }
 #else
@@ -4760,7 +4760,7 @@ extern u32 lbl_8047D2C8;
 extern const f32 lbl_8047D2D0;
 extern const f32 lbl_8047D2D4;
 #if 0
-asm u32 _auraUpdate(void* ptr, u32 delta) {
+asm u32 fn_8013E8A4(void* ptr, u32 delta) {
 #include "src/game/effect/effect_visual_fn_8013E8A4.inc"
 }
 #else
@@ -4838,7 +4838,7 @@ extern char lbl_80272FD0[10];
 const char lbl_8047D2F0[6] = "scale";
 extern const f32 lbl_8047D2A8;
 #if 0
-asm void _auraDrawModel(void) {
+asm void fn_8013EA44(void) {
 #include "src/game/effect/effect_visual_fn_8013EA44.inc"
 }
 #else
@@ -5008,7 +5008,7 @@ void _auraDrawModel(void* ptr) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_8013F000_8013F344)
 #if 0
-asm void distortionEffectCreate(void) {
+asm void fn_8013F000(void) {
 #include "src/game/effect/effect_visual_fn_8013F000.inc"
 }
 #else
@@ -5032,7 +5032,7 @@ extern void fn_800D75F4(void* a);
 extern u32 lbl_8047AEE8;
 extern u32 lbl_8047AEEC;
 #if 0
-asm void _distortionDestroy(void) {
+asm void fn_8013F078(void) {
 #include "src/game/effect/effect_visual_fn_8013F078.inc"
 }
 #else
@@ -5354,7 +5354,7 @@ extern u32 lbl_8047D310;
 extern const f32 lbl_8047D300;
 extern const f32 lbl_8047D308;
 #if 0
-asm u32 _distortionUpdate(void* ptr, u32 delta) {
+asm u32 fn_8013F80C(void* ptr, u32 delta) {
 #include "src/game/effect/effect_visual_fn_8013F80C.inc"
 }
 #else
@@ -5487,7 +5487,7 @@ void _distortionEffectUpdateMatrices(void* ptr) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_8013FBE0_8013FF0C)
 #if 0
-asm void billboardEffectCreate(void) {
+asm void patchiruTextureStart(void) {
 #include "src/game/effect/effect_visual_patchiruTextureStart.inc"
 }
 #else
@@ -5508,7 +5508,7 @@ u32 billboardEffectCreate(void* callbacks) {
 }
 #endif
 #if 0
-asm void _billboardDestroy(void) {
+asm void fn_8013FC58(void) {
 #include "src/game/effect/effect_visual_fn_8013FC58.inc"
 }
 #else
@@ -5527,7 +5527,7 @@ u32 _billboardDestroy(void* ptr) {
 #endif
 extern void* gsParticleBankLoad(void* a);
 #if 0
-asm void _billboardInit(void) {
+asm void fn_8013FCC4(void) {
 #include "src/game/effect/effect_visual_fn_8013FCC4.inc"
 }
 #else
@@ -5557,7 +5557,7 @@ u32 _billboardInit(void* ptr) {
 extern void fn_80118874(void* a, u32 b);
 extern void GSmodelStopAnimation(void* a);
 #if 0
-asm u32 _billboardStop(void* ptr) {
+asm u32 fn_8013FD68(void* ptr) {
 #include "src/game/effect/effect_visual_fn_8013FD68.inc"
 }
 #else
@@ -5724,7 +5724,7 @@ u32 _billboardUpdate(void* ptr) {
 #if !defined(EFFECT_VISUAL_BANK_ACTIVE) || \
     defined(EFFECT_VISUAL_EXACT_80140138_801402AC)
 #if 0
-asm void pachiruEffectRelease(void) {
+asm void Unload__13ModelSequenceFPUc(void) {
 #include "src/game/effect/effect_visual_fn_80140138.inc"
 }
 #else
@@ -5743,7 +5743,7 @@ void pachiruEffectRelease(u8* ptr) {
 extern void* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl(void* tex1, void* tex2, u32 arg);
 extern void GSmaterialSetTexture(void* material, void* texture);
 #if 0
-asm void pachiruEffectSetupModel(void) {
+asm void fn_80140190(void) {
 #include "src/game/effect/effect_visual_fn_80140190.inc"
 }
 #else
