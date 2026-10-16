@@ -609,6 +609,9 @@ static inline void pdaUpdateOrbitSprite(PdaSprite* sprite, f32 baseAngle,
             step = -step;
         }
         lbl_8047A48C = step;
+        /* Round-trip through double: retail rounds a separate copy (frsp)
+           for the angle update while the store keeps the original. */
+        step = (f64)step;
         lbl_8047A484 += step;
         if (lbl_8047A484 >= 6.28318548f) {
             lbl_8047A484 -= 6.28318548f;

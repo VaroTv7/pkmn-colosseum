@@ -3281,6 +3281,26 @@ config.libs = [
                 extra_cflags=["-use_lmw_stmw on", "-sdata 8", "-sdata2 8"],
                 progress_category="game",
             ),
+            # TEMPORARY constant_import: 2pi and 0.0f are retail's shared
+            # lbl_8047BA60/lbl_8047BA58 (see tools/import_constant_symbol.py).
+            Object(
+                Matching,
+                "game/menu/pda_exact_800379E8.c",
+                constant_import=[
+                    {"symbol": "lbl_8047BA60", "offset": 0, "expected": "40c90fdb"},
+                    {"symbol": "lbl_8047BA58", "offset": 4, "expected": "00000000"},
+                ],
+                mw_version="GC/1.3",
+                extra_cflags=["-use_lmw_stmw on", "-sdata 8", "-sdata2 8"],
+                progress_category="game",
+            ),
+            Object(
+                CodeCandidate,
+                "game/menu/pda_candidate_80037F40.c",
+                mw_version="GC/1.3",
+                extra_cflags=["-use_lmw_stmw on", "-sdata 8", "-sdata2 8"],
+                progress_category="game",
+            ),
             Object(
                 Matching,
                 "game/menu/pda_exact_80038124.c",
