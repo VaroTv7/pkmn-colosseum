@@ -447,13 +447,15 @@ void fn_801D5A94(s32 slot) {
     extern void GSmodelSetRotation(void* model, WazaViewerVec* rotation);
     extern void GSmodelSetPosition(void* model, WazaViewerVec* position);
 
+    void* modelBuf;
     const u8* viewerData;
     char* modelPath;
     s32 modelSize;
     s32 animSize;
     void* effect;
     char* animPath;
-    int block;
+    u16 block;
+    void* animBuf;
     void* buf;
     WazaViewerVec rotation;
     WazaViewerVec position;
@@ -482,7 +484,8 @@ void fn_801D5A94(s32 slot) {
         return;
     }
     *(u16*)(lbl_804673F8 + 0x660) = block;
-    buf = *(void**)(lbl_804673F8 + 0x65C) = fn_800E27B0(block);
+    modelBuf = fn_800E27B0(block);
+    buf = *(void**)(lbl_804673F8 + 0x65C) = modelBuf;
     wazaViewerLoadFile((const char*)viewerData, modelPath, buf, modelSize, FALSE);
     sequenceLoad(effect, *(void**)(lbl_804673F8 + 0x65C));
     *(s32*)(lbl_804673F8 + 0x04) = 1;
@@ -497,7 +500,8 @@ void fn_801D5A94(s32 slot) {
         block = fn_800E2C04((animSize + 0x1F) & ~0x1F, 0x20);
         if (block != 0) {
             *(u16*)(lbl_804673F8 + 0x668) = block;
-            buf = *(void**)(lbl_804673F8 + 0x664) = fn_800E27B0(block);
+            animBuf = *(void**)(lbl_804673F8 + 0x664) = fn_800E27B0(block);
+            buf = animBuf;
             animPath = (char*)(lbl_804673F8 + 0x41C);
             wazaViewerLoadFile((const char*)viewerData, animPath, buf, animSize, FALSE);
             if ((u8)fn_801DDB4C(effect, *(void**)(lbl_804673F8 + 0x664))) {
