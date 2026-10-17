@@ -3770,7 +3770,7 @@ s32 fn_80022834(u32 arg0, u32* arg1) {
 /* fn_80022B3C - 0x80022B3C | size: 0x318 */
 extern u16 pokemonDataBiosGetVoice(void);
 extern void soundStartSE(s32);
-extern s32 soundGetStatus(s32);
+extern s32 GSsndGetStatus(s32);
 extern void fn_80121B4C(s32, s32);
 extern void pokemonAddDpFormPokemonDpFilterId(s32, s32, s32);
 extern u8 lbl_80266C30[];
@@ -3848,7 +3848,7 @@ s32 std163_useCologne(s32 arg0, s32 arg1) {
         voice = pokemonDataBiosGetVoice(bios);
         soundStartSE(voice);
     }
-    while (soundGetStatus(voice) == 2) {
+    while (GSsndGetStatus(voice) == 2) {
         _threadSwitch();
     }
 

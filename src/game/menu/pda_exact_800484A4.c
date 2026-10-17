@@ -442,7 +442,7 @@ extern u32 lbl_8047A4EC;
 extern f32 lbl_8047BD1C;
 extern u16 pokemonDataBiosGetVoice(void* data);
 extern void* pokemonNakigoeDataBiosGetDataAddress(void* data);
-extern s32 soundGetStatus(u32 voice);
+extern s32 GSsndGetStatus(u32 voice);
 extern u32 fn_800F7AF0(s32 chan);
 extern s32 menuOpen(s32 id, s32 flag);
 extern f32 lbl_8047BDA0;

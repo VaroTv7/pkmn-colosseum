@@ -128,7 +128,7 @@ void fn_80167FA4(void);
  *   lbl_80273764: "_sndCheckSndWorkALL:End"
  * ================================================================== */
 extern u32 lbl_8047B0E8;
-extern void soundGetStatus(u32 index);
+extern void GSsndGetStatus(u32 index);
 
 void _sndCheckSndWorkALL(void)
 {
@@ -136,7 +136,7 @@ void _sndCheckSndWorkALL(void)
 
     GSlogWrite(lbl_80273748);
     for (i = 0; i < lbl_8047B0E8; i++) {
-        soundGetStatus(i);
+        GSsndGetStatus(i);
     }
     GSlogWrite(lbl_80273764);
 }

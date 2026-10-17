@@ -7804,7 +7804,7 @@ extern u32 lbl_8047A4EC;
 extern f32 lbl_8047BD1C;
 extern u16 pokemonDataBiosGetVoice(void* data);
 extern void* pokemonNakigoeDataBiosGetDataAddress(void* data);
-extern s32 soundGetStatus(u32 voice);
+extern s32 GSsndGetStatus(u32 voice);
 extern u32 fn_800F7AF0(s32 chan);
 extern s32 menuOpen(s32 id, s32 flag);
 
@@ -7928,7 +7928,7 @@ void fn_80046168(void)
             playing = 0;
             for (i = 0; i < 8; i++) {
                 if (t->data != NULL) {
-                    switch (soundGetStatus(t->voice)) {
+                    switch (GSsndGetStatus(t->voice)) {
                     case 0:
                         break;
                     case 2:

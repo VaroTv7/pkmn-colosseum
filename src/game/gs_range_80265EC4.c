@@ -75,7 +75,7 @@ void d2presentPlayGiftScene(int r3)
     extern s8 winMsgCheck();
     extern u16 pokemonDataBiosGetVoice();
     extern void* pokemonDataBiosGetPtr();
-    extern int soundGetStatus();
+    extern int GSsndGetStatus();
     extern int soundStartSE();
     extern u16 lbl_8047E6F8;
     extern f32 lbl_8047E6FC;
@@ -119,7 +119,7 @@ void d2presentPlayGiftScene(int r3)
     uVar8 = pokemonDataBiosGetVoice();
     soundStartSE(uVar8);
   }
-  while (iVar4 = soundGetStatus(uVar8), iVar4 == 2) {
+  while (iVar4 = GSsndGetStatus(uVar8), iVar4 == 2) {
     fn_801DB088();
     effectStatus = fn_801DA94C(uVar3,uVar1,4);
     if (effectStatus == '\0') {

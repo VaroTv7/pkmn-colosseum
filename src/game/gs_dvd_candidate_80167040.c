@@ -87,7 +87,7 @@ typedef struct GSsndStartParams {
 extern void GSlogWrite(const char* fmt, ...);
 extern void* GSresGetResource(void* ptr, u32 param);
 extern void soundStopRaw(u32 a, u32 b, u32 c);
-extern void soundGetStatus(u32 index);
+extern void GSsndGetStatus(u32 index);
 extern u32 soundAttachWork(u32 id, u32 arg1, u32 arg2);
 extern void soundApplyReverb(u32 reverb);
 extern BOOL OSDisableInterrupts(void);
@@ -276,7 +276,7 @@ void _sndCheckSndWorkALL(void)
 
     GSlogWrite(lbl_80273748);
     for (i = 0; i < lbl_8047B0E8; i++) {
-        soundGetStatus(i);
+        GSsndGetStatus(i);
     }
     GSlogWrite(lbl_80273764);
 }
