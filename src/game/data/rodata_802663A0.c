@@ -13,7 +13,7 @@ extern void fn_800150E4(void);
 extern void fn_80015374(void);
 extern void fn_800155B0(void);
 extern void fn_800159BC(void);
-extern void fn_80015E3C(void);
+extern void menuPocketDrawItemList(void);
 
 /*
  * .rodata table continuing directly after the previous auto rodata slice,

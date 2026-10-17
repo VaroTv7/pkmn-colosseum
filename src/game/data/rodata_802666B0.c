@@ -13,7 +13,7 @@ extern void fn_800150E4(void);
 extern void fn_80015374(void);
 extern void fn_800155B0(void);
 extern void fn_800159BC(void);
-extern void fn_80015E3C(void);
+extern void menuPocketDrawItemList(void);
 
 /*
  * .rodata table continuing after game/gs_range_800096B4.c's two stat-id
@@ -142,10 +142,10 @@ const BigEntry lbl_80266918[6] = {
     { 0xAED3B200, 0x00000004, 0x00000000, 0x00000206, 0x0000020E, fn_800159BC, fn_8001501C,
       0x00000005, 0x00002AFB, lbl_80266810, 0x00000003, lbl_802668DC, 0x00000001,
       { 0, 0, 0, 0, 0, 0 } },
-    { 0xD3C4AE00, 0x00000001, 0x00000001, 0x00000207, 0x0000020F, fn_80015E3C, fn_8001501C,
+    { 0xD3C4AE00, 0x00000001, 0x00000001, 0x00000207, 0x0000020F, menuPocketDrawItemList, fn_8001501C,
       0x00000004, 0x00002AFA, lbl_802667EC, 0x00000003, lbl_802668C4, 0x00000002,
       { 0, 0, 0, 0, 0, 0 } },
-    { 0xC0C0C000, 0x00000002, 0x00000001, 0x00000208, 0x00000210, fn_80015E3C, fn_8001501C,
+    { 0xC0C0C000, 0x00000002, 0x00000001, 0x00000208, 0x00000210, menuPocketDrawItemList, fn_8001501C,
       0x00000003, 0x00002AF9, lbl_802667B0, 0x00000005, lbl_802668AC, 0x00000002,
       { 0, 0, 0, 0, 0, 0 } },
 };
