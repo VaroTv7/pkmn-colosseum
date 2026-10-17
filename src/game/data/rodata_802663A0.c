@@ -10,7 +10,7 @@ extern void fn_80013DFC(void);
 extern void fn_80013F80(void);
 extern void fn_8001501C(void);
 extern void fn_800150E4(void);
-extern void fn_80015374(void);
+extern void menuPocketDrawNameList(void);
 extern void fn_800155B0(void);
 extern void fn_800159BC(void);
 extern void menuPocketDrawItemList(void);

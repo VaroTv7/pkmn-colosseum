@@ -20,7 +20,7 @@
  *   fn_8001501C  GSpokeSummary_DrawLabel      -- 0x34 bytes, render text label
  *   fn_80015050  GSpokeSummary_DrawHandler     -- 0x94 bytes, invoke page draw handler
  *   fn_800150E4  GSpokeSummary_DrawPage        -- 0x290 bytes, main page renderer
- *   fn_80015374  GSpokeSummary_DrawMovePage     -- 0x23C bytes, move list page
+ *   menuPocketDrawNameList                    -- 0x23C bytes, names-only item-list page (pocket 1)
  *   fn_800155B0  GSpokeSummary_DrawStatsPage    -- 0x40C bytes, stat hexagon page
  *   fn_800159BC  GSpokeSummary_DrawRibbonPage   -- 0x480 bytes, ribbon collection
  *   menuPocketDrawItemList                    -- 0x374 bytes, item-list page draw (pockets 4/5)
@@ -475,7 +475,7 @@ s32 fn_800150E4(s32 x, s32 pageIndex, u16* packedRange) {
 #pragma pop
 #endif
 
-/* fn_80015374 - 0x80015374 | size: 0x23c */
+/* menuPocketDrawNameList - 0x80015374 | size: 0x23c */
 extern void* lbl_8047A2F8;
 extern const f32 lbl_8047B748;
 extern u32 lbl_8047A2D0;
@@ -487,7 +487,7 @@ asm void fn_80015374(void) {
 #else
 #pragma push
 #pragma peephole off
-s32 fn_80015374(s32 x, s32 pageIndex, u16* packedRange) {
+s32 menuPocketDrawNameList(s32 x, s32 pageIndex, u16* packedRange) {
     s32 validCount;
     s32 itemIndex;
     s32 displayLine;
