@@ -22,7 +22,7 @@
  *   fn_800150E4  GSpokeSummary_DrawPage        -- 0x290 bytes, main page renderer
  *   menuPocketDrawNameList                    -- 0x23C bytes, names-only item-list page (pocket 1)
  *   fn_800155B0  GSpokeSummary_DrawStatsPage    -- 0x40C bytes, stat hexagon page
- *   fn_800159BC  GSpokeSummary_DrawRibbonPage   -- 0x480 bytes, ribbon collection
+ *   bagDrawTMList  GSpokeSummary_DrawRibbonPage   -- 0x480 bytes, ribbon collection
  *   menuPocketDrawItemList                    -- 0x374 bytes, item-list page draw (pockets 4/5)
  *   fn_800161B0  GSpokeSummary_PageTransition   -- 0x198 bytes, page flip animation
  *   fn_80016348  GSpokeSummary_UpdateCursor     -- 0x188 bytes, cursor movement
@@ -42,7 +42,7 @@
  *   fn_80017990  GSpokeSummary_AnimateGauge     -- 0x7C bytes, gauge fill animation
  *   fn_80017A0C  GSpokeSummary_DrawPageDots     -- 0x2AC bytes, page indicator dots
  *   fn_80017CB8  GSpokeSummary_DrawBackground   -- 0x1D4 bytes, background gradient
- *   fn_80017E8C  GSpokeSummary_Init             -- 0x338 bytes, full initialization
+ *   bagItemStore  GSpokeSummary_Init             -- 0x338 bytes, full initialization
  *
  * The page drawing system uses a function pointer table at sSummaryPageEntries.
  * Each page entry is 0x4C bytes and contains:
@@ -87,7 +87,7 @@ extern u16   itemDataBiosGetPrice(void);               /* Get display field coun
 /* Text rendering */
 extern void  msgctrlSetValue(s32 paramId, s32 value);
 extern u32   GSmsgGetRect(s32 resourceId);
-extern void  fn_800FB680(s32 x, s32 y, s32 flags, u32 color);
+extern void  GSmsgPrintColor(s32 x, s32 y, s32 flags, u32 color);
 
 /* Math/rendering helpers */
 extern f64   sin(f64);
@@ -130,7 +130,7 @@ asm void fn_8001501C(void) {
 }
 #else
 s32 fn_8001501C(void) {
-    fn_800FB680(0, 0, -1, lbl_8047A2DC);
+    GSmsgPrintColor(0, 0, -1, lbl_8047A2DC);
     return 0;
 }
 #endif
@@ -460,15 +460,15 @@ s32 fn_800150E4(s32 x, s32 pageIndex, u16* packedRange) {
                 textX += (u16)(GSmsgGetRect(0xCA) >> 16);
             }
             msgctrlSetValue(0x34, itemIndex + 1);
-            fn_800FB680(textX, y, -1, 0xCA);
+            GSmsgPrintColor(textX, y, -1, 0xCA);
             textX += (u16)(GSmsgGetRect(0xCA) >> 16);
             itemDataBiosGetPtr((u16)SummaryPageItemId(pageIndex, itemIndex));
-            fn_800FB680(textX + 10, y, -1, itemDataBiosGetName());
+            GSmsgPrintColor(textX + 10, y, -1, itemDataBiosGetName());
         }
     }
 
     if (visibleIndex < 8) {
-        fn_800FB680(x, visibleIndex * 0x1F - scroll, -1, 0x2AFE);
+        GSmsgPrintColor(x, visibleIndex * 0x1F - scroll, -1, 0x2AFE);
     }
     return 0;
 }
@@ -519,13 +519,13 @@ s32 menuPocketDrawNameList(s32 x, s32 pageIndex, u16* packedRange) {
             itemDataBiosGetPtr((u16)SummaryPageItemId(pageIndex, itemIndex));
             name = itemDataBiosGetName();
             if (name != 0) {
-                fn_800FB680(x, y, -1, name);
+                GSmsgPrintColor(x, y, -1, name);
             }
         }
     }
 
     if (visibleIndex < lineLimit) {
-        fn_800FB680(x, visibleIndex * 0x1F - scroll, -1, 0x2AFE);
+        GSmsgPrintColor(x, visibleIndex * 0x1F - scroll, -1, 0x2AFE);
     }
     return 0;
 }
@@ -576,41 +576,41 @@ s32 fn_800155B0(s32 x, s32 pageIndex, u16* packedRange) {
          displayLine++, visibleIndex++, itemIndex++) {
         if (itemIndex >= 0) {
             y = displayLine * 0x1F - scroll;
-            fn_800FB680(x, y, -1, 0x2AFF);
+            GSmsgPrintColor(x, y, -1, 0x2AFF);
             textX = x + (u16)(GSmsgGetRect(0x2AFF) >> 16);
 
             itemId = SummaryPageItemId(pageIndex, itemIndex);
             berryNo = itemDataBiosGetKinomiNo(itemId) + 1;
             if (berryNo < 10) {
                 msgctrlSetValue(0x34, 0);
-                fn_800FB680(textX, y, -1, 0xCA);
+                GSmsgPrintColor(textX, y, -1, 0xCA);
                 textX += (u16)(GSmsgGetRect(0xCA) >> 16);
             }
             msgctrlSetValue(0x34, berryNo);
-            fn_800FB680(textX, y, -1, 0xCA);
+            GSmsgPrintColor(textX, y, -1, 0xCA);
             textX += (u16)(GSmsgGetRect(0xCA) >> 16);
             itemDataBiosGetPtr((u16)itemId);
-            fn_800FB680(textX + 9, y, -1, itemDataBiosGetName());
+            GSmsgPrintColor(textX + 9, y, -1, itemDataBiosGetName());
 
             msgctrlSetValue(0x34, SummaryPagePocketTotal(pageIndex));
             width = (s16)(GSmsgGetRect(0xCA) >> 16);
             width += (s16)(GSmsgGetRect(0x12E) >> 16);
-            fn_800FB680(x + 0x11A - width, y, -1, 0x12E);
+            GSmsgPrintColor(x + 0x11A - width, y, -1, 0x12E);
 
             msgctrlSetValue(0x34, SummaryPageItemNum(pageIndex, itemIndex));
-            fn_800FB680(x + 0x11A - (s16)(GSmsgGetRect(0xCA) >> 16), y, -1, 0xCA);
+            GSmsgPrintColor(x + 0x11A - (s16)(GSmsgGetRect(0xCA) >> 16), y, -1, 0xCA);
         }
     }
 
     if (visibleIndex < 8) {
-        fn_800FB680(x, visibleIndex * 0x1F - scroll, -1, 0x2AFE);
+        GSmsgPrintColor(x, visibleIndex * 0x1F - scroll, -1, 0x2AFE);
     }
     return 0;
 }
 #pragma pop
 #endif
 
-/* fn_800159BC - 0x800159BC | size: 0x480 */
+/* bagDrawTMList - 0x800159BC | size: 0x480 */
 extern void* lbl_8047A2F8;
 extern const f32 lbl_8047B748;
 extern u32 lbl_8047A2D0;
@@ -622,7 +622,7 @@ asm void fn_800159BC(void) {
 #else
 #pragma push
 #pragma peephole off
-s32 fn_800159BC(s32 x, s32 pageIndex, u16* packedRange) {
+s32 bagDrawTMList(s32 x, s32 pageIndex, u16* packedRange) {
     s32 validCount;
     s32 itemIndex;
     s32 displayLine;
@@ -668,37 +668,37 @@ s32 fn_800159BC(s32 x, s32 pageIndex, u16* packedRange) {
             } else {
                 labelId = 0x2AFF;
             }
-            fn_800FB680(x, y, -1, labelId);
+            GSmsgPrintColor(x, y, -1, labelId);
             textX = x + (u16)(GSmsgGetRect(labelId) >> 16);
             if ((u8)hidenNo != 0xFF) {
                 msgctrlSetValue(0x34, hmNo);
-                fn_800FB680(textX, y, -1, 0xCA);
+                GSmsgPrintColor(textX, y, -1, 0xCA);
                 textX += (u16)(GSmsgGetRect(0xCA) >> 16);
             } else {
                 if (tmNo < 10) {
                     msgctrlSetValue(0x34, 0);
-                    fn_800FB680(textX, y, -1, 0xCA);
+                    GSmsgPrintColor(textX, y, -1, 0xCA);
                     textX += (u16)(GSmsgGetRect(0xCA) >> 16);
                 }
                 msgctrlSetValue(0x34, tmNo);
-                fn_800FB680(textX, y, -1, 0xCA);
+                GSmsgPrintColor(textX, y, -1, 0xCA);
                 textX += (u16)(GSmsgGetRect(0xCA) >> 16);
             }
-            fn_800FB680(textX + 9, y, -1,
+            GSmsgPrintColor(textX + 9, y, -1,
                         wazaDataBiosGetName(wazaDataBiosGetPtr(itemDataBiosGetWazaIDByWazaMachineNo(machineNo))));
 
             msgctrlSetValue(0x34, SummaryPagePocketTotal(pageIndex));
             width = (s16)(GSmsgGetRect(0xCA) >> 16);
             width += (s16)(GSmsgGetRect(0x12E) >> 16);
-            fn_800FB680(x + 0x11A - width, y, -1, 0x12E);
+            GSmsgPrintColor(x + 0x11A - width, y, -1, 0x12E);
 
             msgctrlSetValue(0x34, SummaryPageItemNum(pageIndex, itemIndex));
-            fn_800FB680(x + 0x11A - (s16)(GSmsgGetRect(0xCA) >> 16), y, -1, 0xCA);
+            GSmsgPrintColor(x + 0x11A - (s16)(GSmsgGetRect(0xCA) >> 16), y, -1, 0xCA);
         }
     }
 
     if (visibleIndex < 8) {
-        fn_800FB680(x, visibleIndex * 0x1F - scroll, -1, 0x2AFE);
+        GSmsgPrintColor(x, visibleIndex * 0x1F - scroll, -1, 0x2AFE);
     }
     return 0;
 }
@@ -750,21 +750,21 @@ s32 menuPocketDrawItemList(s32 x, s32 pageIndex, u16* packedRange) {
             itemDataBiosGetPtr((u16)SummaryPageItemId(pageIndex, itemIndex));
             name = itemDataBiosGetName();
             if (name != 0) {
-                fn_800FB680(x, y, -1, name);
+                GSmsgPrintColor(x, y, -1, name);
             }
 
             msgctrlSetValue(0x34, SummaryPagePocketTotal(pageIndex));
             width = (s16)(GSmsgGetRect(0xCA) >> 16);
             width += (s16)(GSmsgGetRect(0x12E) >> 16);
-            fn_800FB680(x + 0x11A - width, y, -1, 0x12E);
+            GSmsgPrintColor(x + 0x11A - width, y, -1, 0x12E);
 
             msgctrlSetValue(0x34, SummaryPageItemNum(pageIndex, itemIndex));
-            fn_800FB680(x + 0x11A - (s16)(GSmsgGetRect(0xCA) >> 16), y, -1, 0xCA);
+            GSmsgPrintColor(x + 0x11A - (s16)(GSmsgGetRect(0xCA) >> 16), y, -1, 0xCA);
         }
     }
 
     if (visibleIndex < lineLimit) {
-        fn_800FB680(x, visibleIndex * 0x1F - scroll, -1, 0x2AFE);
+        GSmsgPrintColor(x, visibleIndex * 0x1F - scroll, -1, 0x2AFE);
     }
     return 0;
 }
@@ -875,7 +875,7 @@ s32 fn_80016348(SummaryPageContext* ctx, u8* item) {
     halfWidth = *(s16*)(item + 0x54) / 2;
     titleId = SummaryGetPage(ctx->pageIndex)->titleId;
     halfText = (s16)(GSmsgGetRect(titleId) >> 16) / 2;
-    fn_800FB680((s32)SUMMARY_F32(lbl_8047A2D4) + (halfWidth - halfText), 0, -1, titleId);
+    GSmsgPrintColor((s32)SUMMARY_F32(lbl_8047A2D4) + (halfWidth - halfText), 0, -1, titleId);
 
     if (lbl_8047B748 != SUMMARY_F32(lbl_8047A2D4)) {
         if (SUMMARY_F32(lbl_8047A2D4) > lbl_8047B748) {
@@ -894,7 +894,7 @@ s32 fn_80016348(SummaryPageContext* ctx, u8* item) {
 
         titleId = SummaryGetPage(neighborIndex)->titleId;
         halfText = (s16)(GSmsgGetRect(titleId) >> 16) / 2;
-        fn_800FB680((s32)neighborX + (halfWidth - halfText), 0, -1, titleId);
+        GSmsgPrintColor((s32)neighborX + (halfWidth - halfText), 0, -1, titleId);
     }
 
     fn_800FE35C();
@@ -1443,7 +1443,7 @@ s32 fn_80017868(u32 unused, u8* ctx) {
     r = heroGetStatus((u32)lbl_8047A2F8, 0xC, 0);
     if ((s32)lbl_8047A2E0 != 3) return 0;
     msgctrlSetValue(0x50, (s32)r);
-    fn_800FB680((s32)*(s16*)(ctx + 0x54) - (s32)(s16)(GSmsgGetRect(0x151) >> 16), 0, -1, 0x151);
+    GSmsgPrintColor((s32)*(s16*)(ctx + 0x54) - (s32)(s16)(GSmsgGetRect(0x151) >> 16), 0, -1, 0x151);
     return 0;
 }
 #endif
@@ -1674,7 +1674,7 @@ s32 fn_80017CB8(SummaryMenuItem* out, s32 maxEntries, s32 pageIndex, s32 selecte
 #endif /* 0x80017CB8 - 0x80017E8C */
 
 #if !defined(GS_POKEMON_SUMMARY_ISLAND) || defined(GS_POKEMON_SUMMARY_80017E8C_ONLY)
-/* fn_80017E8C - 0x80017E8C | size: 0x338 */
+/* bagItemStore - 0x80017E8C | size: 0x338 */
 /* Argument block for the quantity picker menus 0x5B / 0x5C. */
 typedef struct SummaryQuantityMenuArg {
     u8 color[3];
@@ -1695,7 +1695,7 @@ asm void fn_80017E8C(void) {
 /* RULE-EXCEPTION(user-approved): local peephole-off pragma — see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma peephole off
-s32 fn_80017E8C(s32 pageIndex, u16 species, s32 slotIndex) {
+s32 bagItemStore(s32 pageIndex, u16 species, s32 slotIndex) {
     SummaryQuantityMenuArg arg;
     s32 digits;
     s32 menuId;

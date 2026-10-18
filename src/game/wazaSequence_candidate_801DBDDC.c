@@ -53,9 +53,9 @@ typedef struct WazaSequenceLocal {
 void wazaSequenceFree(void* obj)
 {
     extern void fn_800E24B0(u16 handle);
-    extern void fn_800E209C(u16 handle);
+    extern void GSmemFree(u16 handle);
     extern void fn_800F9210(u32, u32);
-    extern void fn_801193BC(void*);
+    extern void gsParticleKillAll(void*);
     extern void GSeffectFree(u32);
     extern void GSlogWrite(const char*, ...);
     /* RULE-EXCEPTION(title-path): shared log-pool stand-in;
@@ -103,7 +103,7 @@ void wazaSequenceFree(void* obj)
                     node->resource = NULL;
                 } else {
                     if (node->resource != NULL) {
-                        fn_801193BC(node->resource);
+                        gsParticleKillAll(node->resource);
                         fn_800F9210(node->resourceGroup, node->resourceA);
                     }
                 }
@@ -129,7 +129,7 @@ void wazaSequenceFree(void* obj)
     handle = sequence->nodeHandle;
     if (handle != 0) {
         fn_800E24B0(handle);
-        fn_800E209C(handle);
+        GSmemFree(handle);
     }
 
     if (sequence->resourceGroup != 0) {
@@ -160,7 +160,7 @@ unlink:
         u16 sequenceHandle = sequence->handle;
         if (sequenceHandle != 0) {
             fn_800E24B0(sequenceHandle);
-            fn_800E209C(sequenceHandle);
+            GSmemFree(sequenceHandle);
         }
     }
 }

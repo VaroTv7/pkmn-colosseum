@@ -425,7 +425,7 @@ extern u16 lbl_8047AEA4;
 
 extern u32 _toolentryAlloc__FUl(u32 size);
 
-extern u32 fn_800E27B0(u32 handle);
+extern u32 GSmemLock(u32 handle);
 
 extern u32 lbl_8047AEB4;
 
@@ -467,7 +467,7 @@ extern void gfxBegin(u32);
 
 extern void gfxVtxPos(f32, f32, f32);
 
-extern void fn_800D5CB8(u32, u32, u32, u32, u32);
+extern void gfxVtxColor4u8(u32, u32, u32, u32, u32);
 
 extern void gfxEnd(void);
 
@@ -487,13 +487,13 @@ extern f32 lbl_8047D100;
 
 extern f32 lbl_8047D104;
 
-extern u32  fn_800E1544(void);
+extern u32  GSmemOptimize(void);
 
 extern void GSlogWrite(const char* fmt, ...);
 
 extern const char lbl_80272AB8[];
 
-extern u8 fn_800E0E14(u32 a, u32 b);
+extern u8 GSmemDumpMap(u32 a, u32 b);
 
 extern const char lbl_80272AE0[];
 
@@ -531,7 +531,7 @@ extern u32 lbl_80478F8C;
 
 extern u32 GSmsgGetRect(u32 val);
 
-extern void fn_800057A8(void);
+extern void GSgetVersionMinor(void);
 
 extern void fn_80140A9C(void);
 
@@ -543,7 +543,7 @@ extern void pokemonInit(void);
 
 extern void pokemonAllKaihuku(void);
 
-extern void fn_800F96E4(void);
+extern void GSmsgGetText(void);
 
 extern void pokemonInitAry(void);
 
@@ -599,7 +599,7 @@ extern u8* fn_80137780(u8* work, u8* params);
 
 extern void GSvecCopy(void);
 
-extern void fn_800E2C04(void);
+extern void GSmemAlloc(void);
 
 extern void GStextureLoad(void);
 
