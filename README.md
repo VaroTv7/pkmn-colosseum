@@ -31,14 +31,15 @@ uv run --with matplotlib tools/plot_progress.py -o /tmp/progress.png
 | Metric | Value |
 |---|---|
 | Fuzzy match | 99.70% |
-| Function match | 98.47% (8,544 / 8,677 functions) |
-| Code match | 92.06% (2,306,056 / 2,504,940 matched code bytes) |
+| Function match | 98.50% (8,547 / 8,677 functions) |
+| Code match | 92.15% (2,308,248 / 2,504,940 matched code bytes) |
 | Data match | 83.30% (2,970,480 / 3,565,996 matched data bytes) |
-| Source-linked | 1,951 / 2,179 scoring units (90.73% of code) |
+| Source-linked | 1,978 / 2,203 scoring units (91.47% of code) |
 
 These measurements cover the **DOL and all 25 configured REL modules**, from the
 full `build/GC6E01/report.json` for the #642 integration, matching batches 2
-and 3, and the corrected [#645 data reconstruction](docs/REL_MODULES.md#rel-125-source)
+and 3, the corrected [#645 data reconstruction](docs/REL_MODULES.md#rel-125-source),
+the #646 name port, and the [#647 Count-Sheep delta](https://github.com/dougchansan/pkmn-colosseum/pull/647)
 (2026-10-18).
 All 26 rebuilt binaries passed their unchanged canonical hashes and direct byte
 comparisons against the originals in the private build image. This is a
@@ -47,7 +48,7 @@ claim of 100% decompilation or gameplay testing. See
 [`docs/COUNT_SHEEP_INTEGRATION.md`](docs/COUNT_SHEEP_INTEGRATION.md) for validation
 scope and provenance.
 
-The DOL alone is 92.03% code-matched and 98.56% data-matched. The combined data
+The DOL alone is 92.12% code-matched and 98.56% data-matched. The combined data
 percentage includes the 561,032-byte `common_rel` resource region supplied by
 original-object fallback. Those resource bytes remain in the denominator and
 do not count as reconstructed source data. On the chart, points from the PR
