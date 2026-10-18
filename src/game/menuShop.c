@@ -30,6 +30,7 @@ extern u32 GSmsgGetRect(u32 id);
     defined(MENUSHOP_CANDIDATE_8002AB00_ONLY) || \
     defined(MENUSHOP_CANDIDATE_8002AE9C_ONLY) || \
     defined(MENUSHOP_ISLAND_8002BCE8_ONLY) || \
+    defined(MENUSHOP_ISLAND_8002B594_ONLY) || \
     defined(MENUSHOP_ISLAND_8002B880_ONLY) || \
     defined(MENUSHOP_ISLAND_8002CE6C_ONLY) || \
     defined(MENUSHOP_ISLAND_80029850_ONLY) || \
@@ -1433,6 +1434,8 @@ s32 fn_8002B40C(ShopAngleOwner* owner, ShopAngleDrawData* draw) {
 #pragma pop
 #endif
 
+#endif /* guard split */
+#if !defined(MENUSHOP_ISLAND_ONLY) || defined(MENUSHOP_ISLAND_8002B594_ONLY)
 /* menuShopDrawMarqueeDot - 0x8002B594 | size: 0x2ec */
 extern void fn_800CDBE0(void);
 extern void fn_800CE148(void);
@@ -1558,7 +1561,8 @@ void menuShopDrawMarqueeDot(void* ctx, u8* data, u32 sprite_id, u32 color_byte, 
     }
 
     color = -0x100;
-    color |= (u8)color_byte;
+    /* The 64-bit OR keeps retail's register order (found with decomp-permuter). */
+    color = color | (s64)(u8)color_byte;
     windowDrawSprite2(x, y, 2, 2, color, ctx, sprite_id & 0xFFFF, 0);
 }
 #pragma pop

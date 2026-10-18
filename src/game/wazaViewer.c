@@ -153,7 +153,7 @@ static inline void wazaViewerLoadFile(const char* messages, const char* path, vo
  * wazaViewerPollCommand - once a second, poll the host file wazaViewer.wvd;
  * when it carries command 1, copy the three 0x200-byte name buffers out of
  * it, re-arm the viewer, and write the record back with the command cleared.
- * The same expansion appears in wazaViewerThread and fn_801D6A64.
+ * The same expansion appears in wazaViewerThread and wazaViewerUpdatePlayMode.
  */
 static inline void wazaViewerPollCommand(const char* messages) {
     extern u16 fn_800E2C04(u32 size, u32 align);
@@ -706,7 +706,7 @@ void fn_801D603C(void) {
         }
         break;
     case 0:
-        fn_801D6A64();
+        wazaViewerUpdatePlayMode();
         break;
     }
 }
@@ -942,10 +942,11 @@ void fn_801D624C(void) {
 }
 
 /**
- * fn_801D6A64 - Move animation secondary mega-function.
+ * wazaViewerUpdatePlayMode - per-frame update for the viewer's play mode: advances the
+ * effect, updates the camera, draws the STEP/PAUSED/PLAYING status and polls commands.
  * Address: 0x801D6A64 | Size: 0x3F4
  */
-void fn_801D6A64(void) {
+void wazaViewerUpdatePlayMode(void) {
     extern f32 lbl_8047E2F0;
     extern const char lbl_8047E2F4;  /* "STEP" */
     extern const char lbl_8047E2FC;  /* "PAUSED" */

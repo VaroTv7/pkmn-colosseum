@@ -344,7 +344,7 @@ extern void wazaViewerLoadSequenceFiles(s32 slot);
 extern void fn_801D5DA0(void);
 extern void fn_801D603C(void); /* GSgapp per-frame callback; takes no arguments */
 extern void fn_801D624C(void);
-extern void fn_801D6A64(void);
+extern void wazaViewerUpdatePlayMode(void);
 extern void fn_801D6E58(void* effect);
 extern void fn_801D7230(void);
 extern void fn_801D744C(u32 bits);
