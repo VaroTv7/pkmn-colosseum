@@ -20,10 +20,10 @@ extern u8 lbl_804673F8[];
 extern u8 lbl_80279338[];
 
 /* Host-file (DVD) wrappers: open returns the file object, 0 on failure. */
-extern void* fn_80167F28(const char* path);
-extern u32 fn_80167E5C(void* file);
-extern void fn_80167E64(void* file);
-extern s32 fn_80167ED0(void* file, void* buf, u32 size, s32 offset);
+extern void* GSdvdOpen(const char* path);
+extern u32 GSdvdGetLength(void* file);
+extern void GSdvdClose(void* file);
+extern s32 GSdvdRead(void* file, void* buf, u32 size, s32 offset);
 extern s32 fn_80167E54(void* file, void* buf, u32 size, s32 offset);
 
 /**
@@ -35,13 +35,13 @@ static inline u32 wazaViewerGetFilesize(const char* messages, const char* path) 
     u32 size;
     void* file;
 
-    file = fn_80167F28(path);
+    file = GSdvdOpen(path);
     if (file == NULL) {
         GSlogWrite(messages + 0x6C, path);
         return 0;
     }
-    size = fn_80167E5C(file);
-    fn_80167E64(file);
+    size = GSdvdGetLength(file);
+    GSdvdClose(file);
     return size;
 }
 
@@ -55,13 +55,13 @@ static inline void wazaViewerLoadFile(const char* messages, const char* path, vo
                                       u32 size, int writing) {
     void* file;
 
-    file = fn_80167F28(path);
+    file = GSdvdOpen(path);
     if (writing) {
         if (file != NULL) {
             if (fn_80167E54(file, buf, size, 0) < 0) {
                 GSlogWrite(messages + 0xF8, path);
             }
-            fn_80167E64(file);
+            GSdvdClose(file);
         } else {
             GSlogWrite(messages + 0x9C, path);
         }
@@ -71,18 +71,18 @@ static inline void wazaViewerLoadFile(const char* messages, const char* path, vo
         GSlogWrite(messages + 0x9C, path);
         return;
     }
-    if (fn_80167ED0(file, buf, (size + 0x1F) & ~0x1F, 0) < 0) {
+    if (GSdvdRead(file, buf, (size + 0x1F) & ~0x1F, 0) < 0) {
         GSlogWrite(messages + 0xC8, path);
-        fn_80167E64(file);
+        GSdvdClose(file);
         return;
     }
-    fn_80167E64(file);
+    GSdvdClose(file);
 }
 
 void wazaViewerLoadSequenceFiles(s32 slot) {
     extern u32 strlen(const char* s);
-    extern u16 fn_800E2C04(u32 size, u32 align);
-    extern void* fn_800E27B0(u16 block);
+    extern u16 GSmemAlloc(u32 size, u32 align);
+    extern void* GSmemLock(u16 block);
     extern void GSmodelSetRotation(void* model, WazaViewerVec* rotation);
     extern void GSmodelSetPosition(void* model, WazaViewerVec* position);
 
@@ -118,17 +118,17 @@ void wazaViewerLoadSequenceFiles(s32 slot) {
     if (modelSize == 0) {
         return;
     }
-    block = fn_800E2C04((modelSize + 0x1F) & ~0x1F, 0x20);
+    block = GSmemAlloc((modelSize + 0x1F) & ~0x1F, 0x20);
     if (block == 0) {
         return;
     }
     *(u16*)(lbl_804673F8 + 0x660) = block;
-    modelBuf = fn_800E27B0(block);
+    modelBuf = GSmemLock(block);
     buf = *(void**)(lbl_804673F8 + 0x65C) = modelBuf;
     wazaViewerLoadFile((const char*)viewerData, modelPath, buf, modelSize, FALSE);
     sequenceLoad(effect, *(void**)(lbl_804673F8 + 0x65C));
     *(s32*)(lbl_804673F8 + 0x04) = 1;
-    fn_801DA4E8(effect, 1);
+    wazaSequenceOwnerSetVisibility(effect, 1);
     rotation = *(WazaViewerVec*)(viewerData + 0x0C);
     position = *(WazaViewerVec*)(viewerData + 0x18);
     position.x = battleGridGetDistance(0);
@@ -136,17 +136,17 @@ void wazaViewerLoadSequenceFiles(s32 slot) {
     GSmodelSetPosition(*(void**)((u8*)effect + 0x24), &position);
     *(s8*)((u8*)effect + 0x76) = -1;
     if (animSize != 0) {
-        block = fn_800E2C04((animSize + 0x1F) & ~0x1F, 0x20);
+        block = GSmemAlloc((animSize + 0x1F) & ~0x1F, 0x20);
         if (block != 0) {
             *(u16*)(lbl_804673F8 + 0x668) = block;
-            animBuf = *(void**)(lbl_804673F8 + 0x664) = fn_800E27B0(block);
+            animBuf = *(void**)(lbl_804673F8 + 0x664) = GSmemLock(block);
             buf = animBuf;
             animPath = (char*)(lbl_804673F8 + 0x41C);
             wazaViewerLoadFile((const char*)viewerData, animPath, buf, animSize, FALSE);
             if ((u8)fn_801DDB4C(effect, *(void**)(lbl_804673F8 + 0x664))) {
                 *(s32*)(lbl_804673F8 + 0x04) = 2;
             } else {
-                fn_801DA8C4(effect, 0, 0);
+                wazaSequenceSysStopWaza(effect, 0, 0);
             }
         }
     }

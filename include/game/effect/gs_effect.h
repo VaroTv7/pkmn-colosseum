@@ -175,7 +175,7 @@ BOOL tracefxStartEffect(u8* work);
 
 /* -----------------------------------------------------------------------
  * tracefxInit, tracefxAddSegment, and tracefxUpdate (invented wrapper
- * names for fn_8013735C, fn_80137D14, and fn_80137F58) were another
+ * names for fn_8013735C, _tracefxUpdate, and _tracefxRender) were another
  * unreferenced duplicate left by the same transplant and have been
  * removed from tracefx.c; their prototypes are gone from here too.
  * ----------------------------------------------------------------------- */

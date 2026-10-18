@@ -21,12 +21,12 @@ extern void _threadSwitch();
 extern void msgctrlSetValue();
 extern void winMsgOpenField();
 extern void winMsgCloseField();
-extern void fn_801DB088();
+extern void wazaSequenceSysUpdate();
 extern void* fn_801DE190(u16 index, void* model, u8 variant);
 extern void fn_801DDD28();
-extern void fn_801DA4E8();
-extern void fn_801DA9E8();
-extern u8 fn_801DA94C();
+extern void wazaSequenceOwnerSetVisibility();
+extern void wazaSequenceSysStartWaza();
+extern u8 wazaSequenceSysIsPlayingWaza();
 extern void floorSetFadeScript();
 
 #if !defined(GS_RANGE_80265EC4_SPLIT) || defined(GS_RANGE_80265EC4_PREFIX)
@@ -68,7 +68,7 @@ void exribbonInit(u8* data)
 /* Address: 0x80265F94 | Size: 0x2BC | Ghidra import
  * d2present gift scene: effect on the gift Pokemon, fade in, its cry,
  * message 0x44BA then a mode-dependent message (0x44BC/0x44BB/0x44B9),
- * fade out; run by fn_80266250 after d2presentOpen stores the mode. */
+ * fade out; run by evolutionSequenceEnd after d2presentOpen stores the mode. */
 void d2presentPlayGiftScene(int r3)
 
 {
@@ -99,15 +99,15 @@ void d2presentPlayGiftScene(int r3)
   }
   uVar3 = (u32)fn_801DE190(sVar7,0,0);
   fn_801DDD28(uVar3,lbl_8047E6F8,4,0);
-  fn_801DA4E8(uVar3,1);
+  wazaSequenceOwnerSetVisibility(uVar3,1);
   uVar1 = lbl_8047E6F8;
-  fn_801DA9E8(uVar3,uVar1,4);
+  wazaSequenceSysStartWaza(uVar3,uVar1,4);
   fadeSet((double)lbl_8047E6FC,2);
   while (cVar9 = fadeCheck(0), cVar9 != '\0') {
-    fn_801DB088();
-    effectStatus = fn_801DA94C(uVar3,uVar1,4);
+    wazaSequenceSysUpdate();
+    effectStatus = wazaSequenceSysIsPlayingWaza(uVar3,uVar1,4);
     if (effectStatus == '\0') {
-      fn_801DA9E8(uVar3,uVar1,4);
+      wazaSequenceSysStartWaza(uVar3,uVar1,4);
     }
     _threadSwitch();
   }
@@ -120,20 +120,20 @@ void d2presentPlayGiftScene(int r3)
     soundStartSE(uVar8);
   }
   while (iVar4 = GSsndGetStatus(uVar8), iVar4 == 2) {
-    fn_801DB088();
-    effectStatus = fn_801DA94C(uVar3,uVar1,4);
+    wazaSequenceSysUpdate();
+    effectStatus = wazaSequenceSysIsPlayingWaza(uVar3,uVar1,4);
     if (effectStatus == '\0') {
-      fn_801DA9E8(uVar3,uVar1,4);
+      wazaSequenceSysStartWaza(uVar3,uVar1,4);
     }
     _threadSwitch();
   }
   winMsgOpenField(0x44ba,0,0);
   while (cVar9 = winMsgCheck(), uVar2 = __cntlzw(1 - cVar9),
          (uVar2 >> 5 & 0xff) != 0) {
-    fn_801DB088();
-    effectStatus = fn_801DA94C(uVar3,uVar1,4);
+    wazaSequenceSysUpdate();
+    effectStatus = wazaSequenceSysIsPlayingWaza(uVar3,uVar1,4);
     if (effectStatus == '\0') {
-      fn_801DA9E8(uVar3,uVar1,4);
+      wazaSequenceSysStartWaza(uVar3,uVar1,4);
     }
     _threadSwitch();
   }
@@ -154,20 +154,20 @@ void d2presentPlayGiftScene(int r3)
   winMsgOpenField(uVar5,0,0);
   while (cVar9 = winMsgCheck(), uVar2 = __cntlzw(1 - cVar9),
          (uVar2 >> 5 & 0xff) != 0) {
-    fn_801DB088();
-    effectStatus = fn_801DA94C(uVar3,uVar1,4);
+    wazaSequenceSysUpdate();
+    effectStatus = wazaSequenceSysIsPlayingWaza(uVar3,uVar1,4);
     if (effectStatus == '\0') {
-      fn_801DA9E8(uVar3,uVar1,4);
+      wazaSequenceSysStartWaza(uVar3,uVar1,4);
     }
     _threadSwitch();
   }
   winMsgCloseField(1);
   fadeSet((double)lbl_8047E6FC,3);
   while (cVar9 = fadeCheck(0), cVar9 != '\0') {
-    fn_801DB088();
-    effectStatus = fn_801DA94C(uVar3,uVar1,4);
+    wazaSequenceSysUpdate();
+    effectStatus = wazaSequenceSysIsPlayingWaza(uVar3,uVar1,4);
     if (effectStatus == '\0') {
-      fn_801DA9E8(uVar3,uVar1,4);
+      wazaSequenceSysStartWaza(uVar3,uVar1,4);
     }
     _threadSwitch();
   }
@@ -176,11 +176,11 @@ void d2presentPlayGiftScene(int r3)
 
 /* RULE-EXCEPTION(user-approved): redundant masks preserve retail's saved-volume register moves; see docs/RULE_EXCEPTIONS.md. */
 /* Address: 0x80266250 | Size: 0xD0 | Ghidra import */
-void fn_80266250(void)
+void evolutionSequenceEnd(void)
 {
-    extern int fn_800FF660();
+    extern int floorBattleEndTerminateScripts();
     extern u32 lbl_8047B680;
-    extern int fn_801653BC();
+    extern int soundGetCurrentSubSound();
     extern int std228_soundGetCurrentBackgroundMusic();
     extern u32 fn_801656D8(u32 id);
     extern u32 std104_soundSetBackgroundMusic(u32 id, u32 volume, u32 priority);
@@ -203,7 +203,7 @@ void fn_80266250(void)
     } else {
         uVar3 = 0;
     }
-    iVar2 = fn_801653BC();
+    iVar2 = soundGetCurrentSubSound();
     if (iVar2 != 0) {
         uVar4 = fn_801656D8(iVar2) & 0xFFFFFFFFFFFFFFFFu;
         scriptSoundStop(0x32);
@@ -219,7 +219,7 @@ void fn_80266250(void)
     if (iVar2 != 0) {
         std105_soundPlayEffect(iVar2, 0x32, uVar4);
     }
-    fn_800FF660();
+    floorBattleEndTerminateScripts();
     floorSetFadeScript(0, 0x5960008);
 }
 

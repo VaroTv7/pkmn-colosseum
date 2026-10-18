@@ -8,18 +8,18 @@
  *   fn_8013735C (tracefxInit)            -- Initialise a TraceFXWork structure
  *   fn_8013757C (tracefxStartEffectImpl) -- Internal start implementation
  *   fn_80137780 (tracefxStopEffectImpl)  -- Internal stop / cleanup
- *   fn_8013796C (tracefxStartUpdate)     -- Begin trail update cycle
+ *   tracefxEffectCreate (tracefxStartUpdate)     -- Begin trail update cycle
  *   fn_801379E4 (tracefxSetTrailParam)   -- Set a trail parameter
  *   fn_80137A2C (tracefxSetTrailColor)   -- Set trail RGBA colour
  *   tracefxStartEffect (tracefxStartEffect)     -- Public start API
- *   fn_80137D14 (tracefxAddSegment)      -- Add segments to a running trail
- *   fn_80137F58 (tracefxUpdate)          -- Per-frame trail logic update
+ *   _tracefxUpdate (tracefxAddSegment)      -- Add segments to a running trail
+ *   _tracefxRender (tracefxUpdate)          -- Per-frame trail logic update
  *
  * A prior campaign transplant had left invented duplicate definitions
  * named tracefxInit, tracefxAddSegment, and tracefxUpdate that reimplement
- * fn_8013735C, fn_80137D14, and fn_80137F58 under friendly names; none had
+ * fn_8013735C, _tracefxUpdate, and _tracefxRender under friendly names; none had
  * any callers anywhere in the tree (the real fn_ names are what get called
- * -- see fn_8013796C below), so they have been removed, along with the
+ * -- see tracefxEffectCreate below), so they have been removed, along with the
  * tracefxStartEffect_Draft helper that only existed to call the fictional
  * tracefxInit and was itself unreferenced.
  *
@@ -65,9 +65,9 @@ extern void  GSlerpGetLinearInterpolationVector(void* dst, void* srcA,
                           void* srcB, f32 t);            /* Vec3 lerp */
 extern void  GSmodelSetVisibility(void* model, u32 flag);        /* GSpart set visibility */
 extern u16   _toolentryAlloc__FUl(u32 size);                     /* GSmemAllocRaw */
-extern void* fn_800E27B0(u16 handle);                   /* GSmemGetPtr */
+extern void* GSmemLock(u16 handle);                   /* GSmemGetPtr */
 extern void  fn_800E24B0(u16 handle);                   /* GSmemLock/free step */
-extern void  fn_800E209C(u16 handle);                   /* GSmemFree */
+extern void  GSmemFree(u16 handle);                   /* GSmemFree */
 extern u32   wazaSequenceSysGetResID(void);                          /* Random seed generator */
 extern void  loadArchivePtr(u32 memOffset, u32 resId,
                           u32 size, u32 handle);         /* GSfloor load resource */
@@ -75,7 +75,7 @@ extern void  loadModel(u32 memOffset, u32 size,
                           u32 data, u32 handle);         /* GSfloor load data */
 extern void  memset(void* dst, u32 val, u32 size);
 extern void  GXDrawDone(void);
-extern void  fn_800B856C(void);
+extern void  GXInvalidateVtxCache(void);
 extern void  GStextureFree(void* p);
 extern void* GSeffectCreate(void* owner, u32 size);
 extern void  GSeffectSetCallbacks();
@@ -94,7 +94,7 @@ extern void  gfxLoadTexture(s32 a, void* p);
 extern void  gfxSetPrimitive(s32 a);
 extern void  gfxBegin(s32 a);
 extern void  gfxVtxPos(f32 x, f32 y, f32 z);
-extern void  fn_800D5CB8(s32 a, u8 r, u8 g, u8 b, u8 al);
+extern void  gfxVtxColor4u8(s32 a, u8 r, u8 g, u8 b, u8 al);
 extern void  gfxVtxTexCoord(s32 a, f32 s, f32 t);
 extern void  gfxEnd(void);
 
@@ -105,8 +105,8 @@ u8*   fn_8013757C(u8* work, void* params, s32 frames);
 u8*   fn_80137780();
 BOOL  fn_801379E4(u8* w);
 BOOL  fn_80137A2C(u8* w);
-BOOL  fn_80137D14(u8* work, u32 steps);
-int   fn_80137F58(u8* w);
+BOOL  _tracefxUpdate(u8* work, u32 steps);
+int   _tracefxRender(u8* w);
 BOOL  tracefxStartEffect(u8* w);
 
 /* ===== String constants (rodata) ===== */
@@ -133,7 +133,7 @@ u8* fn_801364A8(u8* work, u8* params) {
     extern u8 lbl_80314638[];
     extern u8 lbl_80314AE8[];
     extern s32 fn_800D37CC(void);
-    extern u16 fn_800E2C04(u32, u32);
+    extern u16 GSmemAlloc(u32, u32);
     extern void* GStextureLoad(void*);
     extern void fn_800EFD14(void*, u16);
     extern void GStextureSetWrap(void*, s32, s32);
@@ -185,9 +185,9 @@ u8* fn_801364A8(u8* work, u8* params) {
         GSvecCopy(work + 0x28, params + 0x18);
 
         aligned = TRACEFX_ALIGN32(params + 0x54);
-        handle = fn_800E2C04(TRACEFX_ALIGN32_SIZE(*(s32*)(params + 0x4C)), 0x20);
+        handle = GSmemAlloc(TRACEFX_ALIGN32_SIZE(*(s32*)(params + 0x4C)), 0x20);
         if (handle != 0) {
-            copy = fn_800E27B0(handle);
+            copy = GSmemLock(handle);
             memcpy(copy, aligned, TRACEFX_ALIGN32_SIZE(*(s32*)(params + 0x4C)));
             *(u32*)(work + 0x60) = (u32)GStextureLoad(copy);
             fn_800EFD14(*(void**)(work + 0x60), handle);
@@ -231,9 +231,9 @@ u8* fn_801364A8(u8* work, u8* params) {
         *(u16*)(work + 0x32) = *(s32*)(params + 0x0C);
 
         aligned = TRACEFX_ALIGN32(params + 0x18);
-        handle = fn_800E2C04(TRACEFX_ALIGN32_SIZE(*(s32*)(params + 0x10)), 0x20);
+        handle = GSmemAlloc(TRACEFX_ALIGN32_SIZE(*(s32*)(params + 0x10)), 0x20);
         if (handle != 0) {
-            copy = fn_800E27B0(handle);
+            copy = GSmemLock(handle);
             memcpy(copy, aligned, TRACEFX_ALIGN32_SIZE(*(s32*)(params + 0x10)));
             *(u32*)(work + 0x1C) = (u32)GStextureLoad(copy);
             fn_800EFD14(*(void**)(work + 0x1C), handle);
@@ -461,9 +461,9 @@ u8* fn_801364A8(u8* work, u8* params) {
 
         aligned = (u8*)(offset + (u32)params);
         aligned = TRACEFX_ALIGN32(aligned + 0x1C);
-        handle = fn_800E2C04(TRACEFX_ALIGN32_SIZE(*(s32*)(params + 0x10)), 0x20);
+        handle = GSmemAlloc(TRACEFX_ALIGN32_SIZE(*(s32*)(params + 0x10)), 0x20);
         if (handle != 0) {
-            copy = fn_800E27B0(handle);
+            copy = GSmemLock(handle);
             memcpy(copy, aligned, TRACEFX_ALIGN32_SIZE(*(s32*)(params + 0x10)));
             *(u32*)(work + 0x0C) = (u32)GStextureLoad(copy);
             fn_800EFD14(*(void**)(work + 0x0C), handle);
@@ -609,7 +609,7 @@ u8* fn_8013735C(u8* work, void* params, s32 frames) {
 
 /* 0x8013757C | 0x204 */
 u8* fn_8013757C(u8* work, void* params, s32 frames) {
-    extern u16 fn_800E2C04(u32, u32);
+    extern u16 GSmemAlloc(u32, u32);
     extern void* GStextureLoad(void*);
     extern void fn_800EFD14(void*, u16);
     extern void GStextureSetWrap(void*, s32, s32);
@@ -646,9 +646,9 @@ u8* fn_8013757C(u8* work, void* params, s32 frames) {
     *(u16*)(work + 0x0E) = *(u32*)(p + 0x48);
 
     params = TRACEFX_ALIGN32((u8*)params + 0x54);
-    handle = fn_800E2C04(TRACEFX_ALIGN32_SIZE(*(u32*)(p + 0x4C)), 0x20);
+    handle = GSmemAlloc(TRACEFX_ALIGN32_SIZE(*(u32*)(p + 0x4C)), 0x20);
     if (handle != 0) {
-        void* copy = fn_800E27B0(handle);
+        void* copy = GSmemLock(handle);
         memcpy(copy, params, TRACEFX_ALIGN32_SIZE(*(u32*)(p + 0x4C)));
         *(void**)(work + 0x1C) = GStextureLoad(copy);
         fn_800EFD14(*(void**)(work + 0x1C), handle);
@@ -750,11 +750,11 @@ u8* fn_80137780(u8* work, u8* params) {
 #if !defined(TRACEFX_801364A8_ONLY)
 
 /* 0x8013796C | 0x78 */
-void* fn_8013796C(void* owner) {
+void* tracefxEffectCreate(void* owner) {
     void* obj = GSeffectCreate(owner, 0x2C);
     if (obj != (void*)0) {
         GSeffectSetCallbacks(obj, 0, fn_801379E4, tracefxStartEffect, fn_80137A2C, 0,
-                    fn_80137D14, fn_80137F58);
+                    _tracefxUpdate, _tracefxRender);
         GSeffectSetup(obj, 0);
     }
     return obj;
@@ -764,7 +764,7 @@ void* fn_8013796C(void* owner) {
 BOOL fn_801379E4(u8* w) {
     if (w != (void*)0) {
         GXDrawDone();
-        fn_800B856C();
+        GXInvalidateVtxCache();
         if (*(void**)(w + 0x14) != (void*)0) {
             GStextureFree(*(void**)(w + 0x14));
         }
@@ -777,16 +777,16 @@ BOOL fn_80137A2C(u8* w) {
     u16 handle;
     if (w != (void*)0) {
         GXDrawDone();
-        fn_800B856C();
+        GXInvalidateVtxCache();
         handle = *(u16*)(w + 0x0C);
         if (handle != 0) {
             fn_800E24B0(handle);
-            fn_800E209C(handle);
+            GSmemFree(handle);
         }
         handle = *(u16*)(w + 0x0E);
         if (handle != 0) {
             fn_800E24B0(handle);
-            fn_800E209C(handle);
+            GSmemFree(handle);
         }
     }
     return TRUE;
@@ -855,7 +855,7 @@ BOOL tracefxStartEffect(u8* w) {
     }
 
     *(u16*)(w + 0x0C) = handle;
-    nodes = (TraceNode*)fn_800E27B0(handle);
+    nodes = (TraceNode*)GSmemLock(handle);
     *(TraceNode**)(w + 0x04) = nodes;
     *(TraceNode**)(w + 0x00) = nodes;
     memset(nodes, 0, node_bytes);
@@ -877,12 +877,12 @@ BOOL tracefxStartEffect(u8* w) {
     handle = _toolentryAlloc__FUl(count32 << 4);
     if (handle == 0) {
         fn_800E24B0(*(u16*)(w + 0x0C));
-        fn_800E209C(*(u16*)(w + 0x0C));
+        GSmemFree(*(u16*)(w + 0x0C));
         return FALSE;
     }
 
     *(u16*)(w + 0x0E) = handle;
-    *(u8**)(w + 0x08) = (u8*)fn_800E27B0(handle);
+    *(u8**)(w + 0x08) = (u8*)GSmemLock(handle);
     *(u16*)(w + 0x1C) = 0;
     *(u16*)(w + 0x1E) = 0;
 
@@ -906,7 +906,7 @@ fail:
 }
 
 /* 0x80137D14 | 0x244 */
-BOOL fn_80137D14(u8* work, u32 steps) {
+BOOL _tracefxUpdate(u8* work, u32 steps) {
     u8* node;
     void* model;
     u32 i;
@@ -978,7 +978,7 @@ BOOL fn_80137D14(u8* work, u32 steps) {
 }
 
 /* 0x80137F58 | 0x17C */
-int fn_80137F58(u8* w) {
+int _tracefxRender(u8* w) {
     u16 count1;
     u16 count2;
     u8* node;
@@ -1009,10 +1009,10 @@ int fn_80137F58(u8* w) {
     weight = *(u8**)(w + 0x08) + (*(u16*)(w + 0x22) - count2) * 16;
     for (i = 0; (u16)i < count2; i++) {
         gfxVtxPos(*(f32*)(node + 0x00), *(f32*)(node + 0x04), *(f32*)(node + 0x08));
-        fn_800D5CB8(0, w[0x18], w[0x19], w[0x1A], w[0x1B]);
+        gfxVtxColor4u8(0, w[0x18], w[0x19], w[0x1A], w[0x1B]);
         gfxVtxTexCoord(0, *(f32*)(weight + 0x00), *(f32*)(weight + 0x04));
         gfxVtxPos(*(f32*)(node + 0x0C), *(f32*)(node + 0x10), *(f32*)(node + 0x14));
-        fn_800D5CB8(0, w[0x18], w[0x19], w[0x1A], w[0x1B]);
+        gfxVtxColor4u8(0, w[0x18], w[0x19], w[0x1A], w[0x1B]);
         gfxVtxTexCoord(0, *(f32*)(weight + 0x08), *(f32*)(weight + 0x0C));
         node = *(u8**)(node + 0x1C);
         weight += 0x10;

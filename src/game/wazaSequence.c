@@ -100,7 +100,7 @@ void wazaSequenceApplyStop(void* obj) {
                 fn_801D3034(owner);
             }
             if (owner->animationActive == 0) {
-                fn_801DEF0C(owner, 1, 0);
+                wazaSequenceOwnerPlayIdle(owner, 1, 0);
             }
             fn_800E3CC8(owner->model, 0);
             if ((effect->flags & 0x08000000) != 0) {
@@ -117,7 +117,7 @@ void wazaSequenceApplyStop(void* obj) {
             node = effect->firstNode;
             while (node != NULL) {
                 if (node->kind == 3 && node->state == 0 && node->resource != NULL) {
-                    fn_80118874(node->resource, 1);
+                    gsParticleKill(node->resource, 1);
                 }
                 node = node->next;
             }
@@ -143,7 +143,7 @@ void fn_801DBC30(void* obj) {
         if (sequence->active != 0 && owner->currentSequence == sequence) {
             kind = sequence->kind;
             if (kind >= 0xB || kind < 9) {
-                fn_801DEF0C(owner, 1, 0);
+                wazaSequenceOwnerPlayIdle(owner, 1, 0);
             }
             if (sequence->cameraActive != 0) {
                 fn_801D3034(owner);
@@ -182,7 +182,7 @@ void wazaSequenceStart(void* sequence) {
         if (owner->animationActive != 0 && obj->animationMode == 2) {
             wazaSequenceSysResetAnimationExcept(owner);
         }
-        fn_801DD100(owner, obj);
+        wazaSequenceOwnerSetAnim(owner, obj);
         if ((obj->flags & 0x08000000) != 0) {
             GSmodelLinkToGSparticleBank(model, NULL);
         }
@@ -237,9 +237,9 @@ void wazaSequenceFree(void* obj) {
     handle = *(u16*)(sequence + 0x2A);
     if (handle != 0) {
         extern void fn_800E24B0(u16 handle);
-        extern void fn_800E209C(u16 handle);
+        extern void GSmemFree(u16 handle);
         fn_800E24B0(handle);
-        fn_800E209C(handle);
+        GSmemFree(handle);
     }
 }
 
@@ -248,19 +248,19 @@ void wazaSequenceFree(void* obj) {
 #if !defined(PR409_WAZA_SEQUENCE_SPLIT) || defined(PR409_WAZA_SEQUENCE_BFB0_C014)
 
 /**
- * fn_801DBFB0 - Waza blend effect get state.
+ * wazaSequenceAllocNode - Waza blend effect get state.
  * Address: 0x801DBFB0 | Size: 0x64
  */
-WazaSequence* fn_801DBFB0(void) {
+WazaSequence* wazaSequenceAllocNode(void) {
     extern u16 _toolentryAlloc__FUl(u32 size);
-    extern void* fn_800E27B0(u16 handle);
+    extern void* GSmemLock(u16 handle);
 
     u16 handle;
     WazaSequence* obj;
 
     handle = _toolentryAlloc__FUl(0x40);
     if (handle != 0) {
-        obj = fn_800E27B0(handle);
+        obj = GSmemLock(handle);
         memset(obj, 0, 0x40);
         obj->handle = handle;
         return obj;
@@ -272,7 +272,7 @@ WazaSequence* fn_801DBFB0(void) {
 
 /* WAZA_SEQUENCE_C014_ONLY (set by wazaSequence_r52_801DC014_prefix.c) builds
  * only 0x801DC014-0x801DCAA0: wazaSequenceLoadData, wazaSequenceEntryLink,
- * fn_801DC46C, fn_801DC5F0 and _wazaSequenceEffectEntryLoad. */
+ * wazaSequenceLoadEntryParams, fn_801DC5F0 and _wazaSequenceEffectEntryLoad. */
 #if (!defined(PR409_WAZA_SEQUENCE_SPLIT) || defined(PR409_WAZA_SEQUENCE_C014_CDA8)) && \
     !defined(WAZA_SEQUENCE_DCAA0_ONLY)
 
@@ -291,9 +291,9 @@ static inline u8* wazaSequenceLoadParticle(u8* seq, u8* entry, u8* parsed) {
 
 u8 wazaSequenceLoadData(void* sequence, void* resource) {
     extern u16 _toolentryAlloc__FUl(u32);
-    extern void* fn_800E27B0(u16);
+    extern void* GSmemLock(u16);
     extern void fn_800E24B0(u16);
-    extern void fn_800E209C(u16);
+    extern void GSmemFree(u16);
     extern u32 fn_800D37CC(void);
     extern void GSlogWrite(const char*, ...);
     extern const char lbl_8027997C[];
@@ -319,20 +319,20 @@ u8 wazaSequenceLoadData(void* sequence, void* resource) {
         return FALSE;
     }
 
-    header = fn_801DC46C(parser, resource);
+    header = wazaSequenceLoadEntryParams(parser, resource);
     count = *(s32*)(header + 4) - 1;
     data = fn_801DC5F0(seq, header);
     if (count != 0) {
         handle = _toolentryAlloc__FUl(count * 0xB4);
         if (handle != 0) {
             *(void**)(seq + 0x24) = NULL;
-            entry = fn_800E27B0(handle);
+            entry = GSmemLock(handle);
             *(s32*)(seq + 4) = count;
             *(s32*)(seq + 0) = 0;
             *(u16*)(seq + 0x28) = handle;
 
             for (i = 0; i < count; i++, entry += 0xB4) {
-                parsed = fn_801DC46C(entry, data);
+                parsed = wazaSequenceLoadEntryParams(entry, data);
                 switch (*(u32*)(entry + 4)) {
                 case 1:
                     *(s32*)(entry + 0x78) = *(s32*)(parsed + 0);
@@ -392,7 +392,7 @@ u8 wazaSequenceLoadData(void* sequence, void* resource) {
                 default:
                     GSlogWrite(lbl_8027997C);
                     fn_800E24B0(handle);
-                    fn_800E209C(handle);
+                    GSmemFree(handle);
                     return FALSE;
                 }
                 wazaSequenceEntryLink(seq, entry);
@@ -495,10 +495,10 @@ linked:
 }
 
 /**
- * fn_801DC46C - Waza screen overlay effect.
+ * wazaSequenceLoadEntryParams - Waza screen overlay effect.
  * Address: 0x801DC46C | Size: 0x184
  */
-void* fn_801DC46C(u8* entry, void* dataPtr) {
+void* wazaSequenceLoadEntryParams(u8* entry, void* dataPtr) {
     extern s32 fn_800D37CC(void);
     extern const f32 lbl_8047E3A0;
     s32 adjustment = 0;
@@ -671,7 +671,7 @@ void* _wazaSequenceEffectEntryLoad(void* entryPtr, void* dataPtr)
     extern u32 boltEffectCreate(void* callbacks);
     extern u32 electronEffectCreate(void* callbacks);
     extern u32 lightningEffectCreate(void* callbacks);
-    extern u32 fn_8013796C(void* callbacks);
+    extern u32 tracefxEffectCreate(void* callbacks);
     extern u32 leaffxEffectCreate(void* callbacks);
     extern u32 seaEffectCreate(void* callbacks);
     extern u32 surfEffectCreate(void* callbacks);
@@ -724,7 +724,7 @@ void* _wazaSequenceEffectEntryLoad(void* entryPtr, void* dataPtr)
     case 4:
         entry->field_80 = *(u16*)(parsed + 0x30);
         entry->animationMode = *(u16*)(parsed + 0x32);
-        entry->resourceId = fn_8013796C(parsed + 8);
+        entry->resourceId = tracefxEffectCreate(parsed + 8);
         handle = *(u16*)(parsed + 0x28);
         break;
     case 5:
