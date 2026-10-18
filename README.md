@@ -33,12 +33,12 @@ uv run --with matplotlib tools/plot_progress.py -o /tmp/progress.png
 | Fuzzy match | 99.70% |
 | Function match | 98.47% (8,544 / 8,677 functions) |
 | Code match | 92.06% (2,306,056 / 2,504,940 matched code bytes) |
-| Data match | 58.84% (2,098,410 / 3,566,037 matched data bytes) |
-| Source-linked | 1,897 / 2,169 scoring units (90.73% of code) |
+| Data match | 83.30% (2,970,480 / 3,565,996 matched data bytes) |
+| Source-linked | 1,951 / 2,179 scoring units (90.73% of code) |
 
 These measurements cover the **DOL and all 25 configured REL modules**, from the
-full `build/GC6E01/report.json` built for the #642 integration with matching
-batches 2 and 3 in [PR #649](https://github.com/dougchansan/pkmn-colosseum/pull/649)
+full `build/GC6E01/report.json` for the #642 integration, matching batches 2
+and 3, and the corrected [#645 data reconstruction](docs/REL_MODULES.md#rel-125-source)
 (2026-10-18).
 All 26 rebuilt binaries passed their unchanged canonical hashes and direct byte
 comparisons against the originals in the private build image. This is a
@@ -47,11 +47,12 @@ claim of 100% decompilation or gameplay testing. See
 [`docs/COUNT_SHEEP_INTEGRATION.md`](docs/COUNT_SHEEP_INTEGRATION.md) for validation
 scope and provenance.
 
-The DOL alone is 92.03% code-matched and 94.95% data-matched. The combined data
-percentage also includes the large, mostly unreconstructed `common_rel` data
-region, so it is not comparable to an older DOL-only data percentage. On the
-chart, points from the PR #638 merge onward use this DOL + REL scope; the drop
-in the data line there is that scope change, not a regression.
+The DOL alone is 92.03% code-matched and 98.56% data-matched. The combined data
+percentage includes the 561,032-byte `common_rel` resource region supplied by
+original-object fallback. Those resource bytes remain in the denominator and
+do not count as reconstructed source data. On the chart, points from the PR
+#638 merge onward use this DOL + REL scope; the data line reflects that scope
+change and is not comparable to an older DOL-only data percentage.
 
 **Scoring units are not translation units.** An original source region may be
 split into address-owned units with different compiler flags, compiled through

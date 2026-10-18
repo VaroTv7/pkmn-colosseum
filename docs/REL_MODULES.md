@@ -119,9 +119,34 @@ check is the authority for these units.
   points 47 pairs of main.dol `.sbss` pointers at a table and its count.
 - `src/rel/common_rel/snd_song_table.c`, `snd_sample_table.c`: the two
   tables with string pointers (see above).
-- `include/rel/common_rel.h`: their entry types.
+- The other table units under `src/rel/common_rel/` reconstruct trainer and
+  Pokémon records, moves, natures, floor/camera records, task links, resource
+  IDs, sound parameters, and lookup constants. Entry counts come from `_prolog`.
+- `src/rel/common_rel/table_res_data.c`: the eight-entry resource pointer
+  table at `.data 0x8BCB4–0x8BCD4` (32 bytes). Its eight external resource
+  symbols retain their original addresses and pointer order.
+- `include/rel/common_rel.h` and `include/game/data/common_rel.h`: table types.
 
-The remaining tables are still dtk-extracted.
+The typed reconstruction is adapted from
+[wastelandgunner's PR #645](https://github.com/dougchansan/pkmn-colosseum/pull/645),
+head `f84ea9d9d1d5c3fdfca6138ba4344fd7e75a986e`. The corrected import preserves
+that work while keeping the resource payloads in the original-input build path.
+
+The contiguous `.data 0x2D2C–0x8BCB4` region contains 561,032 bytes of fonts,
+message tables, an opaque script-like resource, and the dummy resource. It has
+no named source split or C payload definitions. dtk extracts it from the local
+`orig/GC6E01/files/common_rel.rel` into an automatic original-data object;
+the normal module link resolves the C pointer table against those symbols.
+The existing FSYS extraction steps supply the REL, so this needs no new input
+files or resource-generation script. Extracted files and build products remain
+gitignored.
+
+The resource region remains in the data denominator and is excluded from
+source-matched progress. Relative to #645's original proposal, the corrected
+split adds one automatic scoring unit, retains the 32-byte C pointer table,
+and returns 561,032 bytes to original fallback. Code and function denominators
+are unchanged. The strict object-map freeze records both ranges; the normal
+build verifies all 26 canonical outputs, byte comparisons, and README metrics.
 
 ### REL 1 source
 
