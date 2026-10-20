@@ -116,6 +116,7 @@ GSspline* GSsplineCreate(s32 kind, s32 state, u8 capacity)
     u16 handle;
     u8* data;
     u8* secondary;
+    f32* values;
 
     if (capacity < 2) {
         GSlogWrite(messages + 0x260);
@@ -167,9 +168,11 @@ GSspline* GSsplineCreate(s32 kind, s32 state, u8 capacity)
                 if (handle != 0) {
                     spline->dataHandle = handle;
                     data = GSmemLock(handle);
+                    values = (f32*)data;
+                    values += capacity;
                     spline->vectors = data;
                     spline->secondaryVectors = NULL;
-                    spline->values = (f32*)data + capacity;
+                    spline->values = values;
                     spline->capacity = capacity;
                     spline->state = 0;
                 } else {
@@ -203,9 +206,11 @@ GSspline* GSsplineCreate(s32 kind, s32 state, u8 capacity)
                 if (handle != 0) {
                     spline->dataHandle = handle;
                     data = GSmemLock(handle);
+                    values = (f32*)data;
+                    values += capacity;
                     spline->vectors = data;
                     spline->secondaryVectors = NULL;
-                    spline->values = (f32*)data + capacity;
+                    spline->values = values;
                     spline->capacity = capacity;
                     spline->state = 0;
                 } else {
