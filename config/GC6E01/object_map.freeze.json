@@ -19668,12 +19668,12 @@
       "sections": [
         {
           "name": ".sdata2",
-          "size": 40,
+          "size": 24,
           "virtual_address": 2152190760
         }
       ],
       "total_code": 0,
-      "total_data": 40,
+      "total_data": 24,
       "total_functions": 0
     },
     {
@@ -19719,13 +19719,18 @@
       "name": "main/game/effect/effect_visual_candidate_801402AC",
       "sections": [
         {
+          "name": ".sdata2",
+          "size": 16,
+          "virtual_address": 2152190784
+        },
+        {
           "name": ".text",
           "size": 732,
           "virtual_address": 2148795052
         }
       ],
       "total_code": 732,
-      "total_data": 0,
+      "total_data": 16,
       "total_functions": 1
     },
     {
