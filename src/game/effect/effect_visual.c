@@ -5815,6 +5815,7 @@ void* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl(void* baseTexture,
     extern const char lbl_802730B8[];
     /* RULE-EXCEPTION(user-approved): declaration order chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
     void* outputTexture;
+    s16 spotWidthTemp;
     u16* sourcePixels;
     s16 widthTemp;
     s16 heightTemp;
@@ -5855,6 +5856,7 @@ void* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl(void* baseTexture,
     if (sourcePixels == NULL) {
         goto fail;
     }
+    spotWidthTemp = (s16)GStextureGetXsize(spotTexture);
 
     {
     /* RULE-EXCEPTION(user-approved): declaration order chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
@@ -5871,7 +5873,7 @@ void* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl(void* baseTexture,
     s16 sourceIndex;
     s32 spot;
 
-    scratch = (s16)GStextureGetXsize(spotTexture);
+    scratch = spotWidthTemp;
     spotHeight = (s16)GStextureGetYsize(spotTexture);
     if (scratch > (baseWidth >> 2) || spotHeight > (baseHeight >> 2)) {
         goto fail;
