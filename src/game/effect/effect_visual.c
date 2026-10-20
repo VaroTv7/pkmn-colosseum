@@ -5854,18 +5854,19 @@ void* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl(void* baseTexture,
     }
 
     {
+    /* RULE-EXCEPTION(user-approved): declaration order chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+    const u8* placement;
     u16* lastOutputPixel;
     s16 spotHeight;
-    s32 row;
-    s32 spot;
-    s32 x;
     s32 startPixel;
-    const u8* placement;
-    s32 outputIndex;
-    s16 sourceIndex;
-    s32 y;
     s32 xOffset;
+    s32 row;
+    s32 x;
+    s32 outputIndex;
     s32 yOffset;
+    s32 y;
+    s16 sourceIndex;
+    s32 spot;
 
     scratch = (s16)GStextureGetXsize(spotTexture);
     spotHeight = (s16)GStextureGetYsize(spotTexture);
@@ -5881,8 +5882,9 @@ void* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl(void* baseTexture,
         outputIndex = (s16)(pattern & 0xF) - 8;
         xOffset = (s16)outputIndex;
         pattern >>= 8;
-        y = (s32)(lbl_8047D340 * (f32)yOffset) + placement[1];
+        y = (s32)(lbl_8047D340 * (f32)yOffset);
         x = (s32)(lbl_8047D340 * (f32)xOffset);
+        y += placement[1];
         yOffset = y * baseWidth;
         x = x + placement[0];
         startPixel = (s16)(x + yOffset);
