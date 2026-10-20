@@ -5813,8 +5813,10 @@ void* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl(void* baseTexture,
     extern const f32 lbl_8047D340;
     extern const u8 lbl_80478BA8[8];
     extern const char lbl_802730B8[];
-    u16* sourcePixels;
+    /* RULE-EXCEPTION(user-approved): declaration order chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
     void* outputTexture;
+    u16* sourcePixels;
+    s16 widthTemp;
     s16 heightTemp;
     u32 image;
     s32 baseWidth;
@@ -5823,7 +5825,8 @@ void* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl(void* baseTexture,
     s32 scratch;
 
     sourcePixels = NULL;
-    baseWidth = (s16)GStextureGetXsize(baseTexture);
+    widthTemp = (s16)GStextureGetXsize(baseTexture);
+    baseWidth = widthTemp;
     heightTemp = (s16)GStextureGetYsize(baseTexture);
     baseHeight = heightTemp;
     outputTexture = GStextureCreate(baseWidth, baseHeight,
