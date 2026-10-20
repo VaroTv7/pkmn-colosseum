@@ -5881,9 +5881,9 @@ void* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl(void* baseTexture,
         yOffset = (s16)((s16)((pattern >> 4) & 0xF) - 8);
         outputIndex = (s16)(pattern & 0xF) - 8;
         xOffset = (s16)outputIndex;
-        pattern >>= 8;
-        y = (s32)(lbl_8047D340 * (f32)yOffset);
         x = (s32)(lbl_8047D340 * (f32)xOffset);
+        y = (s32)(lbl_8047D340 * (f32)yOffset);
+        pattern >>= 8;
         y += placement[1];
         yOffset = y * baseWidth;
         x = x + placement[0];
