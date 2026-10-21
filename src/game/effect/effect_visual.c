@@ -5797,7 +5797,7 @@ u32 pachiruEffectSetupModel(void** out, void* model, u32 arg) {
 #endif
 #endif
 
-#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE) || defined(EFFECT_VISUAL_EXACT_801402AC)
 void* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl(void* baseTexture,
                                                              void* spotTexture,
                                                              u32 pattern)
@@ -5810,20 +5810,23 @@ void* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl(void* baseTexture,
     extern void GStextureConvertToHW(void* texture);
     extern void fn_800EF098(void* texture);
     extern void* memcpy(void* dst, const void* src, u32 size);
-    extern const f32 lbl_8047D340;
     extern const u8 lbl_80478BA8[8];
     extern const char lbl_802730B8[];
-    u16* sourcePixels;
+    /* RULE-EXCEPTION(user-approved): declaration order chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
     void* outputTexture;
-    s16 heightTemp;
     u32 image;
     s32 baseWidth;
-    s32 baseHeight;
     s32 pixelCount;
+    u16* sourcePixels;
+    s16 widthTemp;
     s32 scratch;
+    s16 heightTemp;
+    s16 spotWidthTemp;
+    s32 baseHeight;
 
     sourcePixels = NULL;
-    baseWidth = (s16)GStextureGetXsize(baseTexture);
+    widthTemp = (s16)GStextureGetXsize(baseTexture);
+    baseWidth = widthTemp;
     heightTemp = (s16)GStextureGetYsize(baseTexture);
     baseHeight = heightTemp;
     outputTexture = GStextureCreate(baseWidth, baseHeight,
@@ -5852,22 +5855,24 @@ void* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl(void* baseTexture,
     if (sourcePixels == NULL) {
         goto fail;
     }
+    spotWidthTemp = (s16)GStextureGetXsize(spotTexture);
 
     {
+    /* RULE-EXCEPTION(user-approved): declaration order chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+    const u8* placement;
     u16* lastOutputPixel;
     s16 spotHeight;
-    s32 row;
-    s32 spot;
-    s32 x;
     s32 startPixel;
-    const u8* placement;
-    s32 outputIndex;
-    s16 sourceIndex;
-    s32 y;
     s32 xOffset;
+    s32 row;
+    s32 x;
+    s32 outputIndex;
     s32 yOffset;
+    s32 y;
+    s16 sourceIndex;
+    s32 spot;
 
-    scratch = (s16)GStextureGetXsize(spotTexture);
+    scratch = spotWidthTemp;
     spotHeight = (s16)GStextureGetYsize(spotTexture);
     if (scratch > (baseWidth >> 2) || spotHeight > (baseHeight >> 2)) {
         goto fail;
@@ -5880,9 +5885,10 @@ void* _pachiruEffectCreateTexture__FP9GStextureP9GStextureUl(void* baseTexture,
         yOffset = (s16)((s16)((pattern >> 4) & 0xF) - 8);
         outputIndex = (s16)(pattern & 0xF) - 8;
         xOffset = (s16)outputIndex;
+        x = (s32)(3.4f * (f32)xOffset);
+        y = (s32)(3.4f * (f32)yOffset);
         pattern >>= 8;
-        y = (s32)(lbl_8047D340 * (f32)yOffset) + placement[1];
-        x = (s32)(lbl_8047D340 * (f32)xOffset);
+        y += placement[1];
         yOffset = y * baseWidth;
         x = x + placement[0];
         startPixel = (s16)(x + yOffset);
@@ -5935,7 +5941,9 @@ fail:
     }
     return NULL;
 }
+#endif
 
+#if !defined(EFFECT_VISUAL_BANK_ACTIVE)
 #if 0
 asm void itemParamGetPPMaxFullFlag(void) {
 #include "src/game/effect/effect_visual_fn_801436F0.inc"
