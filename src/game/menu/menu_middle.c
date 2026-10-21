@@ -545,7 +545,7 @@ void fn_8006FDEC(u32 r3);
 void fn_8006FE14(u32 r3);
 void fn_8006FE3C(u32 r3);
 void fn_8006FE64(void* menu);
-void fn_8006FEE4(void* menu);
+void menuBattleModeCourseSelectCtrl(void* menu);
 void fn_80070274(u32 r3);
 void fn_8007029C(u32 r3);
 void fn_800702C8(u32 r3);
@@ -4802,7 +4802,7 @@ void fn_8006FE64(void* menu) {
 
 #if defined(MENU_MIDDLE_ALL) || defined(MENU_MIDDLE_RESIDUAL_8006FEE4_ONLY)
 /* 0x8006FEE4 | size: 0x390 */
-void fn_8006FEE4(void* menu) {
+void menuBattleModeCourseSelectCtrl(void* menu) {
     extern void* windowSearchItemID(void* menu, s32 itemId);
     extern void* menuSpriteBiosGetPtr(u32 spriteId);
     extern void fn_80071318(void* sprite, void* data);

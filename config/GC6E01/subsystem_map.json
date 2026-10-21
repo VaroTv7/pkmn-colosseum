@@ -8457,7 +8457,7 @@
 "seed": null
 },
 {
-"name": "fn_8006FEE4",
+"name": "menuBattleModeCourseSelectCtrl",
 "addr": "0x8006FEE4",
 "size": 912,
 "label": "gs-engine",
