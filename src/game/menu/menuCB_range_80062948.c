@@ -24,7 +24,7 @@ extern s32  toolentryTaisenGetPokemonNum();
 extern s32  toolentryTaisenGetHomePlace();
 extern s32  toolentryTaisenGetBattleType();
 extern s32  fn_8006B1D4();
-extern void fn_80068794();
+extern void menuTaisenDrawEntrySlot();
 extern void fn_800688C4();
 extern void fn_800689FC();
 extern void fn_80068BB0();
@@ -2470,7 +2470,8 @@ extern u32 pokemonGetStatus(void*, s32, s32, s32);
 extern void* pokemonBiosGetNicknamePtr(void*);
 extern u16 lbl_802EDA20[][2];
 extern u8 lbl_802EF0A8[];
-extern f32 lbl_8047BFE8;
+/* 0.0f; const, so MWCC may load it ahead of the msg->s50 store like a literal. */
+extern const f32 lbl_8047BFE8;
 extern f32 lbl_8047C008;
 extern f32 lbl_8047C00C;
 
@@ -2508,8 +2509,10 @@ static inline u16 fn_800688C4_GetEntrySlot(u16 command)
     return 0;
 }
 
+#define ENTRY_ABS(x) (((x) > lbl_8047BFE8) ? (x) : -(x))
+
 #if !defined(MENUCB_RANGE_EXACT_800688C4_ONLY) && !defined(MENUCB_RANGE_SUFFIX_80068DBC_ONLY) /* the exact island 0x800688C4-0x80068DBC builds fn_800688C4, fn_800689FC, fn_80068BB0 only */
-void fn_80068794(void* context, UICmdMsg* msg, s32 player, s32 slot)
+void menuTaisenDrawEntrySlot(void* context, UICmdMsg* msg, s32 player, s32 slot)
 {
     typedef struct EntryPosition {
         f32 current[6];
@@ -2534,10 +2537,7 @@ void fn_80068794(void* context, UICmdMsg* msg, s32 player, s32 slot)
             position = &((EntryWork*) lbl_803A9F08)->position[player];
             msg->s50 = ((EntryMoveTable*) lbl_802EF0A8)[msg->cmd].x +
                        (s32) position->current[slot];
-            difference = position->target[slot] - position->current[slot];
-            if (difference < 0.0f) {
-                difference = -difference;
-            }
+            difference = ENTRY_ABS(position->target[slot] - position->current[slot]);
             msg->alpha67 = -(lbl_8047C00C * difference - lbl_8047C008);
             msg->flags4 |= 2;
         } else {
@@ -2548,7 +2548,7 @@ void fn_80068794(void* context, UICmdMsg* msg, s32 player, s32 slot)
 #endif /* !MENUCB_RANGE_EXACT_800688C4_ONLY */
 
 
-#if !defined(MENUCB_RANGE_SUFFIX_80068DBC_ONLY)
+#if !defined(MENUCB_RANGE_SUFFIX_80068DBC_ONLY) && !defined(MENUCB_RANGE_EXACT_80068794_ONLY)
 void fn_800688C4(u8* context, UICmdMsg* msg, s32 player, s32 kind)
 {
     void* name;
@@ -2607,7 +2607,7 @@ void fn_80068BB0(u8* context, UICmdMsg* msg, s32 player, s32 kind)
 }
 #endif /* !MENUCB_RANGE_SUFFIX_80068DBC_ONLY */
 
-#if !defined(MENUCB_RANGE_EXACT_800688C4_ONLY)
+#if !defined(MENUCB_RANGE_EXACT_800688C4_ONLY) && !defined(MENUCB_RANGE_EXACT_80068794_ONLY)
 void fn_80068DBC(u8* context, UICmdMsg* msg, s32 player)
 {
     void* nickname;
@@ -3366,22 +3366,22 @@ void menuTaisenDrawPlayerPanel(void* ctx, void* arg1, s32 arg2)
         break;
     }
     case 0xB43:
-        fn_80068794(ctx, msg, i0, 0);
+        menuTaisenDrawEntrySlot(ctx, msg, i0, 0);
         break;
     case 0xB44:
-        fn_80068794(ctx, msg, i0, 1);
+        menuTaisenDrawEntrySlot(ctx, msg, i0, 1);
         break;
     case 0xB45:
-        fn_80068794(ctx, msg, i0, 2);
+        menuTaisenDrawEntrySlot(ctx, msg, i0, 2);
         break;
     case 0xB46:
-        fn_80068794(ctx, msg, i0, 3);
+        menuTaisenDrawEntrySlot(ctx, msg, i0, 3);
         break;
     case 0xB47:
-        fn_80068794(ctx, msg, i0, 4);
+        menuTaisenDrawEntrySlot(ctx, msg, i0, 4);
         break;
     case 0xB48:
-        fn_80068794(ctx, msg, i0, 5);
+        menuTaisenDrawEntrySlot(ctx, msg, i0, 5);
         break;
     case 0xBC4:
     case 0xBC5:
@@ -3564,22 +3564,22 @@ void menuTaisenDrawPlayerPanel(void* ctx, void* arg1, s32 arg2)
         break;
     }
     case 0xB5F:
-        fn_80068794(ctx, msg, i2, 0);
+        menuTaisenDrawEntrySlot(ctx, msg, i2, 0);
         break;
     case 0xB60:
-        fn_80068794(ctx, msg, i2, 1);
+        menuTaisenDrawEntrySlot(ctx, msg, i2, 1);
         break;
     case 0xB61:
-        fn_80068794(ctx, msg, i2, 2);
+        menuTaisenDrawEntrySlot(ctx, msg, i2, 2);
         break;
     case 0xB62:
-        fn_80068794(ctx, msg, i2, 3);
+        menuTaisenDrawEntrySlot(ctx, msg, i2, 3);
         break;
     case 0xB63:
-        fn_80068794(ctx, msg, i2, 4);
+        menuTaisenDrawEntrySlot(ctx, msg, i2, 4);
         break;
     case 0xB64:
-        fn_80068794(ctx, msg, i2, 5);
+        menuTaisenDrawEntrySlot(ctx, msg, i2, 5);
         break;
     case 0xBA5:
     case 0xBA6:
@@ -3762,22 +3762,22 @@ void menuTaisenDrawPlayerPanel(void* ctx, void* arg1, s32 arg2)
         break;
     }
     case 0xB51:
-        fn_80068794(ctx, msg, i1, 0);
+        menuTaisenDrawEntrySlot(ctx, msg, i1, 0);
         break;
     case 0xB52:
-        fn_80068794(ctx, msg, i1, 1);
+        menuTaisenDrawEntrySlot(ctx, msg, i1, 1);
         break;
     case 0xB53:
-        fn_80068794(ctx, msg, i1, 2);
+        menuTaisenDrawEntrySlot(ctx, msg, i1, 2);
         break;
     case 0xB54:
-        fn_80068794(ctx, msg, i1, 3);
+        menuTaisenDrawEntrySlot(ctx, msg, i1, 3);
         break;
     case 0xB55:
-        fn_80068794(ctx, msg, i1, 4);
+        menuTaisenDrawEntrySlot(ctx, msg, i1, 4);
         break;
     case 0xB56:
-        fn_80068794(ctx, msg, i1, 5);
+        menuTaisenDrawEntrySlot(ctx, msg, i1, 5);
         break;
     case 0xBE3:
     case 0xBE4:
@@ -3960,22 +3960,22 @@ void menuTaisenDrawPlayerPanel(void* ctx, void* arg1, s32 arg2)
         break;
     }
     case 0xB6D:
-        fn_80068794(ctx, msg, i3, 0);
+        menuTaisenDrawEntrySlot(ctx, msg, i3, 0);
         break;
     case 0xB6E:
-        fn_80068794(ctx, msg, i3, 1);
+        menuTaisenDrawEntrySlot(ctx, msg, i3, 1);
         break;
     case 0xB6F:
-        fn_80068794(ctx, msg, i3, 2);
+        menuTaisenDrawEntrySlot(ctx, msg, i3, 2);
         break;
     case 0xB70:
-        fn_80068794(ctx, msg, i3, 3);
+        menuTaisenDrawEntrySlot(ctx, msg, i3, 3);
         break;
     case 0xB71:
-        fn_80068794(ctx, msg, i3, 4);
+        menuTaisenDrawEntrySlot(ctx, msg, i3, 4);
         break;
     case 0xB72:
-        fn_80068794(ctx, msg, i3, 5);
+        menuTaisenDrawEntrySlot(ctx, msg, i3, 5);
         break;
     case 0xB3C:
         fn_800688C4(ctx, msg, i0, 0);

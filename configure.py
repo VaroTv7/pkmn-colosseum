@@ -472,6 +472,58 @@ def GameLib(lib_name: str, mw_version: str, objects: List[Object]) -> Dict[str, 
 # DOL. Matching source objects are declared here and substituted in.
 config.warn_missing_config = False
 config.warn_missing_source = False
+# menu_middle's .rodata pool (0x80267EA8-0x80268708, menuCB_Hook.c's), owned by
+# game/menu/menu_middle_exact_8006E798.c. Score-only menu_middle units that
+# define the tables locally point their pool back at it (TEMPORARY
+# constant_import until menu_middle is one unit again).
+MENU_MIDDLE_RODATA_POOL = (
+    "0126012c019d01a301310137013c014201520159016c01730147014d015f01660179018001ca01ce00003c1400003c15"
+    "00003c1700003c1900003c1b00003c1d00003c2400003c2500003c26000041fc00003c2700003bf900003be600003be7"
+    "00003bf900003dc200003dc300003dc400003dc500003bf900003beb00003bf000003bf300003bf500003bf700003bf8"
+    "00003c6100003c6100003c6100003c2d00003c2f00003bf900003d4d00003d4e00003d4f000043f9000043fa00003bf9"
+    "080a000000000000089b000000000000093e000000000000093700000000000109380000000000010939000000000001"
+    "0ef60000000000010ef70000000000010ef80000000000010ef900000000000108080000000000010809000000000001"
+    "093a000000000002093b000000000002093c000000000002093d000000000002088b000000000003088c000000000004"
+    "088d000000000005088e000000000006088f000000000007089000000000000308910000000000040892000000000005"
+    "089300000000000608940000000000070fc00000000000030fc10000000000040fc20000000000050fc3000000000005"
+    "0fc40000000000060fc50000000000060fc6000000000007089c000000003d960970000000003da3096f000000003da5"
+    "096e000000003da7096d000000003da8096c000000003da9096a000000003dc0096b000000003d790963000000003dac"
+    "0962000000003dad000002700000026f0000026e0000026d000002710000026d095b0fcc095a0959095800000fce0fcf"
+    "0944089c0969094d0fcd094309700968094b094c0942096f09670949094a0941096e0966094709480940096d09650945"
+    "094608a9096c096409570000000000060fd2000000000006094e00000000000609630000000000060962000000000006"
+    "095c000000000006095d000000000006095e000000000006095f00000000000609600000000000060961000000000006"
+    "09600961095f095d095e095c097b000000000003097a0000000000030979000000000003097800000000000409770000"
+    "0000000408a100000000000409b600000000000409b700000000000409b800000000000409c200000000000409c10000"
+    "0000000409c000000000000409bf00000000000409be00000000000409bd00000000000409b200000000000609b30000"
+    "0000000609b400000000000609b500000000000609bb00000000000609b900000000000209bc00000000000209c20000"
+    "00003db609c1000000003db709c0000000003db809bf000000003db909be000000003dba09bd000000003dbb09bc0000"
+    "00003db509bb000000003dc00ee80ee90eea0eeb0eec0eed0eee0eef0d81000000003d560d82000000003d570d830000"
+    "00003d580d84000000003d590d85000000003d5a0d86000000003d5b0d87000000003d5c0d88000000003d600d9b0000"
+    "00003d630d9c0000000041f909d3000000003d630d9a000000003d6409d4000000003d6509d5000000003d6609d60000"
+    "00003d6709d7000000003d6809d8000000003d6f09d9000000003d7009da000000003d6809db000000003d6f09dc0000"
+    "00003d7109dd000000003d7209de000000003d7109df000000003d7209e0000000003d7509e1000000003d760d8d0d8e"
+    "0d8f0d900d910d920d930d940d950e290e2a0e2b0e2c0e2d0e2e0e2f0e300e3109c90000000000000d7f000000000000"
+    "0ef10ef20ef30ef40ef500000a10000000003d5d0a11000000003d5e0a12000000003d5f0a13000000003d610a140000"
+    "00003d620a16000000003d7b0a03000000003d730a00000000003d740a04000000003d750a01000000003d760a050000"
+    "00003d750a02000000003d7611a0000000003d7711a1000000003d6509fe000000003d7809ff000000003d6509f60000"
+    "000000020d7e0000000000020a1d0a330a280e420a1e0a340a290e430a1f0a350a2a0e440a200a360a2b0e450a210a37"
+    "0a2c0e460a220a380a2d0e470a230a390a2e0e480a240a3a0a2f0e490a250a3b0a300e4a0a260a3c0a310e4b0a270a3d"
+    "0a320a3e000001000001010000010100000001000001010101000001010101010000000108a309940995099609970998"
+    "0999000000003db600003db700003db800003db900003dba00003dbb00003d2700003d2800003d2b0a420a470a4b0a4f"
+    "0a530a570a5b0a5f0a630a670a6b0a6f0a730a770a440a480a4c0a500a540a580a5c0a600a640a680a6c0a700a740a78"
+    "0a450a490a4d0a510a550a590a5d0a610a650a690a6d0a710a750a790a460a4a0a4e0a520a560a5a0a5e0a620a660a6a"
+    "0a6e0a720a760a4300000003000000000000000200000006004580000058260058000000585600000da40da50da60da7"
+    "0da80da90daa0dab0dac0dad0eac00000ead00000eae01000eaf01000eb002000eb102000e560e620e6e0e680e570e63"
+    "0e6f0e690e580e640e700e6a0e590e650e710e6b0e5a0e660e720e6c0e5b0e670e730e6d0f260f320f3e0f380f270f33"
+    "0f3f0f390f280f340f400f3a0f290f350f410f3b0f2a0f360f420f3c0f2b0f370f430f3d0e4e0e4f0e500e510e520e53"
+    "0e540e550f1e0f1f0f200f210f220f230f240f250e860000000000040e870000000000070e880000000000040e890000"
+    "000000040e8a0000000000070e8b0000000000070e8c0000000000040e8d00000000000408fb000000003c6208fc0000"
+    "00003d6908fd000000003d6a08fe000000003d6b08ff000000003d6cffffffff213a44f211272bf26d656e7543425f48"
+    "6f6f6b2e6300000030203c3d207072756c652d3e6d5f6e426174746c6554696d654c696d6974000030203c3d20707275"
+    "6c652d3e6d5f6e436f6d6d616e6454696d654c696d69740049443a25316425316425316425316425316400005f4c454e"
+    "475448285f43422e6d5f61547261696e65724f7267293e6a0000000000000000"
+)
+
 config.libs = [
     GameLib(
         "Runtime.PPCEABI.H",
@@ -6184,7 +6236,7 @@ config.libs = [
                 progress_category="game",
             ),
             Object(
-                CodeCandidate,
+                Matching,
                 "game/menu/menuCB_r55_80068794_gc13_o4s.c",
                 mw_version="GC/1.3",
                 extra_cflags=[
@@ -6377,7 +6429,7 @@ config.libs = [
             # pkjbPrepare reports through real string literals; retail pools
             # the unit's read-only strings off one base register (-rostr).
             # TEMPORARY constant_import: this carve emits only the first 101
-            # bytes of the retail pool owned by rodata_8026860C.c.
+            # bytes of the retail pool owned by rodata_80268708.c.
             Object(
                 Matching,
                 "game/menu/menu_candidate_80073E8C_gc20.c",
@@ -8730,6 +8782,22 @@ config.libs = [
                 ],
                 progress_category="game",
             ),
+            # menuBattleModeRefreshRules owns the menu_middle TU's .rodata
+            # (0x80267EA8-0x80268708): retail reads its tables off the pool
+            # base, which MWCC only does for data the TU defines.
+            Object(
+                Matching,
+                "game/menu/menu_middle_exact_8006E798.c",
+                mw_version="GC/2.0",
+                extra_cflags=[
+                    "-opt nopeephole",
+                    "-use_lmw_stmw on",
+                    "-sdata 8",
+                    "-sdata2 8",
+                    "-i src/game/menu",
+                ],
+                progress_category="game",
+            ),
             Object(
                 Matching,
                 "game/menu/menu_middle_candidate_8006DC28.c",
@@ -8762,7 +8830,6 @@ config.libs = [
                     progress_category="game",
                 )
                 for path, version, opt in [
-                    ("game/menu/menu_middle_r59_8006E798_middle.c", "GC/2.0", None),
                     ("game/menu/menu_middle_r59_8006F284_prefix.c", "GC/1.3", None),
                 ]
             ],
@@ -8865,7 +8932,10 @@ config.libs = [
             Object(
                 CodeCandidate,
                 "game/menu/menu_middle_range_8006FEE4.c",
-                mw_version="GC/1.3",
+                # TEMPORARY constant_import
+                constant_import=[{"section": ".rodata", "symbol": "lbl_80267EA8",
+                                  "offset": 0, "expected": MENU_MIDDLE_RODATA_POOL}],
+                mw_version="GC/2.0",
                 extra_cflags=[
                     "-use_lmw_stmw on",
                     "-sdata 8",
@@ -11415,12 +11485,7 @@ config.libs = [
             ),
             Object(
                 DataCandidate,
-                "game/data/rodata_80268424.c",
-                progress_category="game",
-            ),
-            Object(
-                DataCandidate,
-                "game/data/rodata_8026860C.c",
+                "game/data/rodata_80268708.c",
                 progress_category="game",
                 extra_cflags=["-sdata2 0"],
             ),

@@ -138,7 +138,7 @@ extern u8 fn_8006FDEC[];
 extern u8 fn_8006FE14[];
 extern u8 fn_8006FE3C[];
 extern u8 fn_8006FE64[];
-extern u8 fn_8006FEE4[];
+extern u8 menuBattleModeCourseSelectCtrl[];
 extern u8 fn_80070274[];
 extern u8 fn_8007029C[];
 extern u8 fn_800702C8[];
@@ -1497,7 +1497,7 @@ void* lbl_802E2DB8[1904] = {
     (void*)0x00000000,
     (void*)0x00000000,
     (void*)((u8*)fn_8006FE64),
-    (void*)((u8*)fn_8006FEE4),
+    (void*)((u8*)menuBattleModeCourseSelectCtrl),
     (void*)0x00000000,
     (void*)0x61240000,
     (void*)0x089D0000,

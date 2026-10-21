@@ -14,7 +14,7 @@ extern u8 lbl_803D80C6[];
 extern u8 lbl_803F803B[];
 
 /* Auto-carved .rodata 0x8026F568..0x8026F610, following menuSaveLoadSaveGame's
- * assert-string pool (see rodata_8026860C.c). Non-relocated data emitted byte-exact as const u8[]; pointer/jump tables as const void*[] for R_PPC_ADDR32 relocations. */
+ * assert-string pool (see rodata_80268708.c). Non-relocated data emitted byte-exact as const u8[]; pointer/jump tables as const void*[] for R_PPC_ADDR32 relocations. */
 
 const u8 lbl_8026F568[11] = {
     0x70, 0x6F, 0x6B, 0x65, 0x63, 0x6F, 0x6E, 0x76, 0x2E, 0x63, 0x00,

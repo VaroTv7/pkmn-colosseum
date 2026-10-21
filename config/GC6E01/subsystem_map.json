@@ -7625,7 +7625,7 @@
 "seed": null
 },
 {
-"name": "fn_80068794",
+"name": "menuTaisenDrawEntrySlot",
 "addr": "0x80068794",
 "size": 304,
 "label": "fight",
@@ -8457,7 +8457,7 @@
 "seed": null
 },
 {
-"name": "fn_8006FEE4",
+"name": "menuBattleModeCourseSelectCtrl",
 "addr": "0x8006FEE4",
 "size": 912,
 "label": "gs-engine",
