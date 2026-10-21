@@ -2470,7 +2470,8 @@ extern u32 pokemonGetStatus(void*, s32, s32, s32);
 extern void* pokemonBiosGetNicknamePtr(void*);
 extern u16 lbl_802EDA20[][2];
 extern u8 lbl_802EF0A8[];
-extern f32 lbl_8047BFE8;
+/* 0.0f; const, so MWCC may load it ahead of the msg->s50 store like a literal. */
+extern const f32 lbl_8047BFE8;
 extern f32 lbl_8047C008;
 extern f32 lbl_8047C00C;
 
@@ -2508,6 +2509,8 @@ static inline u16 fn_800688C4_GetEntrySlot(u16 command)
     return 0;
 }
 
+#define ENTRY_ABS(x) (((x) > lbl_8047BFE8) ? (x) : -(x))
+
 #if !defined(MENUCB_RANGE_EXACT_800688C4_ONLY) && !defined(MENUCB_RANGE_SUFFIX_80068DBC_ONLY) /* the exact island 0x800688C4-0x80068DBC builds fn_800688C4, fn_800689FC, fn_80068BB0 only */
 void fn_80068794(void* context, UICmdMsg* msg, s32 player, s32 slot)
 {
@@ -2534,10 +2537,7 @@ void fn_80068794(void* context, UICmdMsg* msg, s32 player, s32 slot)
             position = &((EntryWork*) lbl_803A9F08)->position[player];
             msg->s50 = ((EntryMoveTable*) lbl_802EF0A8)[msg->cmd].x +
                        (s32) position->current[slot];
-            difference = position->target[slot] - position->current[slot];
-            if (difference < 0.0f) {
-                difference = -difference;
-            }
+            difference = ENTRY_ABS(position->target[slot] - position->current[slot]);
             msg->alpha67 = -(lbl_8047C00C * difference - lbl_8047C008);
             msg->flags4 |= 2;
         } else {
@@ -2548,7 +2548,7 @@ void fn_80068794(void* context, UICmdMsg* msg, s32 player, s32 slot)
 #endif /* !MENUCB_RANGE_EXACT_800688C4_ONLY */
 
 
-#if !defined(MENUCB_RANGE_SUFFIX_80068DBC_ONLY)
+#if !defined(MENUCB_RANGE_SUFFIX_80068DBC_ONLY) && !defined(MENUCB_RANGE_EXACT_80068794_ONLY)
 void fn_800688C4(u8* context, UICmdMsg* msg, s32 player, s32 kind)
 {
     void* name;
@@ -2607,7 +2607,7 @@ void fn_80068BB0(u8* context, UICmdMsg* msg, s32 player, s32 kind)
 }
 #endif /* !MENUCB_RANGE_SUFFIX_80068DBC_ONLY */
 
-#if !defined(MENUCB_RANGE_EXACT_800688C4_ONLY)
+#if !defined(MENUCB_RANGE_EXACT_800688C4_ONLY) && !defined(MENUCB_RANGE_EXACT_80068794_ONLY)
 void fn_80068DBC(u8* context, UICmdMsg* msg, s32 player)
 {
     void* nickname;
