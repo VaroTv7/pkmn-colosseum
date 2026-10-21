@@ -305,3 +305,4 @@ fn_801EE67C -> std243_shadowPokemonSetState
 fn_801EF634 -> std103_battleGetResult
 fn_8025E1BC -> std244_spawnEffectAtPosition
 fn_80008C40 -> dbgFlagMenuCursor
+fn_80068794 -> menuTaisenDrawEntrySlot

@@ -7625,7 +7625,7 @@
 "seed": null
 },
 {
-"name": "fn_80068794",
+"name": "menuTaisenDrawEntrySlot",
 "addr": "0x80068794",
 "size": 304,
 "label": "fight",
