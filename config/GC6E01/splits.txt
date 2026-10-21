@@ -1330,10 +1330,10 @@ game/menu/menu_middle_r59_8006E338_o1.c:
 
 game/menu/menu_middle_exact_8006E798.c:
 	.text       start:0x8006E798 end:0x8006E9A4
-	.rodata     start:0x80267EA8 end:0x8026860C
+	.rodata     start:0x80267EA8 end:0x80268708
 
-game/data/rodata_8026860C.c:
-	.rodata     start:0x8026860C end:0x80268DC0
+game/data/rodata_80268708.c:
+	.rodata     start:0x80268708 end:0x80268DC0
 
 game/menu/menu_middle_r59_8006E9A4_o1.c:
 	.text       start:0x8006E9A4 end:0x8006EE7C

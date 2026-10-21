@@ -472,7 +472,7 @@ def GameLib(lib_name: str, mw_version: str, objects: List[Object]) -> Dict[str, 
 # DOL. Matching source objects are declared here and substituted in.
 config.warn_missing_config = False
 config.warn_missing_source = False
-# menu_middle's .rodata pool (0x80267EA8-0x8026860C), owned by
+# menu_middle's .rodata pool (0x80267EA8-0x80268708, menuCB_Hook.c's), owned by
 # game/menu/menu_middle_exact_8006E798.c. Score-only menu_middle units that
 # define the tables locally point their pool back at it (TEMPORARY
 # constant_import until menu_middle is one unit again).
@@ -516,7 +516,12 @@ MENU_MIDDLE_RODATA_POOL = (
     "0da80da90daa0dab0dac0dad0eac00000ead00000eae01000eaf01000eb002000eb102000e560e620e6e0e680e570e63"
     "0e6f0e690e580e640e700e6a0e590e650e710e6b0e5a0e660e720e6c0e5b0e670e730e6d0f260f320f3e0f380f270f33"
     "0f3f0f390f280f340f400f3a0f290f350f410f3b0f2a0f360f420f3c0f2b0f370f430f3d0e4e0e4f0e500e510e520e53"
-    "0e540e550f1e0f1f0f200f210f220f230f240f25"
+    "0e540e550f1e0f1f0f200f210f220f230f240f250e860000000000040e870000000000070e880000000000040e890000"
+    "000000040e8a0000000000070e8b0000000000070e8c0000000000040e8d00000000000408fb000000003c6208fc0000"
+    "00003d6908fd000000003d6a08fe000000003d6b08ff000000003d6cffffffff213a44f211272bf26d656e7543425f48"
+    "6f6f6b2e6300000030203c3d207072756c652d3e6d5f6e426174746c6554696d654c696d6974000030203c3d20707275"
+    "6c652d3e6d5f6e436f6d6d616e6454696d654c696d69740049443a25316425316425316425316425316400005f4c454e"
+    "475448285f43422e6d5f61547261696e65724f7267293e6a0000000000000000"
 )
 
 config.libs = [
@@ -6424,7 +6429,7 @@ config.libs = [
             # pkjbPrepare reports through real string literals; retail pools
             # the unit's read-only strings off one base register (-rostr).
             # TEMPORARY constant_import: this carve emits only the first 101
-            # bytes of the retail pool owned by rodata_8026860C.c.
+            # bytes of the retail pool owned by rodata_80268708.c.
             Object(
                 Matching,
                 "game/menu/menu_candidate_80073E8C_gc20.c",
@@ -8778,7 +8783,7 @@ config.libs = [
                 progress_category="game",
             ),
             # menuBattleModeRefreshRules owns the menu_middle TU's .rodata
-            # (0x80267EA8-0x8026860C): retail reads its tables off the pool
+            # (0x80267EA8-0x80268708): retail reads its tables off the pool
             # base, which MWCC only does for data the TU defines.
             Object(
                 Matching,
@@ -11480,7 +11485,7 @@ config.libs = [
             ),
             Object(
                 DataCandidate,
-                "game/data/rodata_8026860C.c",
+                "game/data/rodata_80268708.c",
                 progress_category="game",
                 extra_cflags=["-sdata2 0"],
             ),

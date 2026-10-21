@@ -12,7 +12,7 @@
  *
  * No jump table (the switches are compare trees), no pooled constant. The
  * data is kept extern: the rule presets lbl_80268940 (.rodata, a named
- * 0x108-byte object in rodata_8026860C.c, three 0x54-byte rules), the
+ * 0x108-byte object in rodata_80268708.c, three 0x54-byte rules), the
  * regulation item list lbl_802EE458 (.data) and its count lbl_80478928
  * (.sdata). GC/1.3 -O4,p with the chunk's unit-wide -opt nopeephole, no
  * pragmas.

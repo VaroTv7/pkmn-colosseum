@@ -1,6 +1,6 @@
 #include "dolphin/types.h"
 
-/* Auto-carved .rodata unit 0x8026F2E8..0x8026F4F8, split from rodata_8026860C.c
+/* Auto-carved .rodata unit 0x8026F2E8..0x8026F4F8, split from rodata_80268708.c
  * after the Card-e grid string pool. 0x8026F4F8 - 0x8026F568 is menuSaveLoadSaveGame's
  * assert-string pool (game/gba/gba_conv_r59_800889E4_o1.c). */
 
