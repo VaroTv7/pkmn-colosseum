@@ -8730,6 +8730,22 @@ config.libs = [
                 ],
                 progress_category="game",
             ),
+            # menuBattleModeRefreshRules owns the menu_middle TU's .rodata
+            # (0x80267EA8-0x8026860C): retail reads its tables off the pool
+            # base, which MWCC only does for data the TU defines.
+            Object(
+                Matching,
+                "game/menu/menu_middle_exact_8006E798.c",
+                mw_version="GC/2.0",
+                extra_cflags=[
+                    "-opt nopeephole",
+                    "-use_lmw_stmw on",
+                    "-sdata 8",
+                    "-sdata2 8",
+                    "-i src/game/menu",
+                ],
+                progress_category="game",
+            ),
             Object(
                 Matching,
                 "game/menu/menu_middle_candidate_8006DC28.c",
@@ -8762,7 +8778,6 @@ config.libs = [
                     progress_category="game",
                 )
                 for path, version, opt in [
-                    ("game/menu/menu_middle_r59_8006E798_middle.c", "GC/2.0", None),
                     ("game/menu/menu_middle_r59_8006F284_prefix.c", "GC/1.3", None),
                 ]
             ],
@@ -11411,11 +11426,6 @@ config.libs = [
             Object(
                 DataCandidate,
                 "game/data/rodata_80267DD8.c",
-                progress_category="game",
-            ),
-            Object(
-                DataCandidate,
-                "game/data/rodata_80268424.c",
                 progress_category="game",
             ),
             Object(
