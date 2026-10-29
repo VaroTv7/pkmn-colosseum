@@ -648,6 +648,8 @@ config.libs = [
                 extra_cflags=["-sdata 8", "-sdata2 0"],
                 progress_category="game",
             ),
+            # Explicit original fallback; no source exists for these 18 bytes.
+            Object(NonMatching, "game/data/sdata_80478D86.c", progress_category="game"),
             Object(
                 Matching,
                 "game/data/sdata_80478D98.c",

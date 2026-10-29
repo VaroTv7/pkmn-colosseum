@@ -61,7 +61,7 @@ The address suffix identifies each existing `lbl_80478...` symbol.
 The sequence IDs were recovered as typed `(group, type)` pairs. Both consumers
 advance a `u16*` by two elements per pair. `fn_801DDEE4` explicitly accepts
 types 1 through 4, with nonzero group IDs below the existing source-backed
-counts 364 for types 1 through 3 and 219 for type 4. Comparing complete symbol
+counts 356 for types 1 through 3 and 219 for type 4. Comparing complete symbol
 hashes across that finite valid domain selects the listed pairs uniquely.
 This does not reuse opaque bytes from an unrelated compiled source object.
 
@@ -104,6 +104,17 @@ the scoped main export list. No original symbols are renamed.
 
 The existing source contains no typed direct reference to `D86`, `D88` or
 `D8C`. A scan of the existing C bytecode initializers found the `D80+2`
-references described above, but no encoded pointer into `D86..D98`. Their map
-sizes or generic data-format hints alone do not establish defensible source
-semantics. These 18 bytes therefore remain an explicit unresolved interval.
+references described above, but no encoded pointer into `D86..D98`.
+
+CI5 target relocation metadata identifies five references from still-original
+scripts: `lbl_80377531` at offsets `0xEB`, `0xFF` and `0x113` references
+`D86`, `D88` and `D8C`; `lbl_80378115` at `0xB3` and `0xC7` references
+`D86` and `D88`. Their 20-byte spacing is consistent with the existing status
+setter instruction format, but does not establish which setter or status field
+is used. Their map sizes and generic data-format hints alone do not establish
+defensible source semantics. These 18 bytes therefore remain unresolved.
+
+The intervening 18-byte original fallback is an explicit nonmatching owner
+with a two-byte split alignment. Its first existing symbol starts at
+`0x80478D86`; the section-wide four-byte default cannot describe that boundary.
+No source completion credit is assigned to this owner.

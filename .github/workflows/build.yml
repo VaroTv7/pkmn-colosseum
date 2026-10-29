@@ -76,6 +76,14 @@ jobs:
               --output build/${{ matrix.version }}/zero_data_layout.json
         fi
 
+    - name: Describe known unresolved small-data references
+      if: always()
+      run: |
+        if test -f build/${{ matrix.version }}/report.json; then
+          python3 tools/small_data_reference_diagnostics.py \
+              --output build/${{ matrix.version }}/small_data_reference_diagnostics.json
+        fi
+
     - name: Diagnose linked data addresses
       if: always()
       run: |
@@ -108,6 +116,7 @@ jobs:
           build/${{ matrix.version }}/zero_data_layout.json
           build/${{ matrix.version }}/data_link_diagnostics.json
           build/${{ matrix.version }}/mwcc_data_alignment.json
+          build/${{ matrix.version }}/small_data_reference_diagnostics.json
         if-no-files-found: ignore
 
     - name: Verify registered assembly branch targets

@@ -7047,5 +7047,10 @@ game/data/sdata_80478820.c:
 game/data/sdata_80478D08.c:
 	.sdata      start:0x80478D08 end:0x80478D86
 
+# The first unresolved operand is a two-byte object. Preserve original fallback
+# with its actual boundary instead of the section-wide default alignment.
+game/data/sdata_80478D86.c:
+	.sdata      start:0x80478D86 end:0x80478D98 align:2
+
 game/data/sdata_80478D98.c:
 	.sdata      start:0x80478D98 end:0x80478DB4
