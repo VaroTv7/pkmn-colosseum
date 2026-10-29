@@ -1,28 +1,68 @@
 # Remaining data matching
 
-## Verified starting point
+## Verified source result
 
-The continuation starts from master
-`e354ba3f0475ac50af3b7d9dccc1f2855be8369c`, merged through
-[PR #662](https://github.com/dougchansan/pkmn-colosseum/pull/662).
-Its [master build](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40835427934)
-passes all 26 canonical output hashes and direct original/rebuilt comparisons.
-The corresponding verified report has SHA-256
+The ninth private-input build verifies source revision
+[`dcdfc947cd77221ff38159679f07e704be77d9e4`](https://github.com/dougchansan/pkmn-colosseum/commit/dcdfc947cd77221ff38159679f07e704be77d9e4).
+Its [Build job](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40950775953/job/123717998521)
+passes all 26 unchanged canonical output hashes and all 26 direct
+original/rebuilt comparisons. All 34 zero-data layout checks, assembly branch
+checks and metric-integrity checks pass. The
+[report artifact](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40950775953/artifacts/12931237166)
+contains `report.json` with SHA-256
+`b4153fe0b68fdfdb1bb658bfeaa455c51d3514d1617fd4845a10b2a876b2c7e2`.
+
+| Measure | Verified baseline | Verified continuation | Change |
+| --- | ---: | ---: | ---: |
+| Matched code | 2,504,940 / 2,504,940 bytes | 2,504,940 / 2,504,940 bytes | Unchanged |
+| Exact functions | 8,677 / 8,677 | 8,677 / 8,677 | Unchanged |
+| Source-linked code | 2,504,940 bytes | 2,504,940 bytes | Unchanged |
+| Matched data | 2,970,480 / 3,565,996 bytes (83.30%) | 3,449,436 / 3,565,996 bytes (96.731346%) | +478,956 bytes |
+| Source-linked data | 1,897,440 / 3,565,996 bytes (53.21%) | 3,449,436 / 3,565,996 bytes (96.731346%) | +1,551,996 bytes |
+
+The verified report has 2,226 complete units out of 2,251. The baseline is
+master `e354ba3f0475ac50af3b7d9dccc1f2855be8369c`, merged through
+[PR #662](https://github.com/dougchansan/pkmn-colosseum/pull/662), whose
+[master build](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40835427934)
+also passes all 26 outputs. Its report SHA-256 is
 `898380a43cce0515e7936ccc2fbf6c4a0cf2d8d3d058196242b83e769a646114`.
 
-| Measure | Verified baseline |
-| --- | ---: |
-| Matched code | 2,504,940 / 2,504,940 bytes |
-| Exact functions | 8,677 / 8,677 |
-| Source-linked code | 2,504,940 bytes |
-| Matched data | 2,970,480 / 3,565,996 bytes (83.30%) |
-| Source-linked data | 1,897,440 / 3,565,996 bytes (53.21%) |
+An independent audit of the baseline and new reports verifies all 8,677 function
+identities and the physical interval union unchanged across all 26 modules: no overlapping
+intervals, removed physical bytes, added physical bytes or renamed functions.
+The 3,565,996-byte data denominator is unchanged. The historical tracked-code
+denominator remains 2,504,940 bytes; the separate 7,988-byte interrupt-vector
+template and four-byte alignment padding remain explicit original fallback
+outside that tracked-code denominator. Those 7,992 physical bytes are retained
+and receive no function, matching-code or source-linked credit.
 
-No new data percentage is established by this draft. The README and strict
-topology freeze retain the verified baseline until a fresh private-input build
-and address-coverage audit establish the results.
+The source result above is verified. The overall ninth Build run still fails
+its stale strict-topology freeze, which describes the earlier baseline. The
+documentation and freeze refresh must pass the final required checks on
+[PR #663](https://github.com/dougchansan/pkmn-colosseum/pull/663) before merging;
+this record does not claim those subsequent checks have already passed.
 
-## Current verification checkpoint
+## Remaining data at the verified revision
+
+All 116,560 remaining data bytes use original fallback and receive no matching
+or source-link credit. They remain in completion scope and the denominator.
+
+| Remaining group | Bytes | Location or next reconstruction requirement |
+| --- | ---: | --- |
+| Message storage | 95,056 | Two `common_rel` message groups; typed headers and indices already reconstructed |
+| GS VM script storage | 7,964 | `common_rel` bank `0x0596`; typed structural prefix already reconstructed |
+| DOL script data | 13,500 | Remaining packed battle-script owners; preserve instruction and relocation semantics |
+| Small-data objects with interior names or unresolved extents | 40 | Four complete fallback intervals listed below |
+| **Total** | **116,560** | **Full original data scope retained** |
+
+| Remaining small-data interval | Bytes | Reason for fallback |
+| --- | ---: | --- |
+| `0x804788CC–0x804788D8` | 12 | Complete coordinate arrays with interior labels, plus following aligned storage |
+| `0x80478950–0x80478958` | 8 | Four-element controller-mask and port-order arrays with interior labels |
+| `0x80478D78–0x80478D80` | 8 | One eight-element battle flag array with interior labels |
+| `0x80478D8C–0x80478D98` | 12 | Leading damage operand understood; complete mapped extent unresolved |
+
+## Build evidence
 
 The continuation is tracked in
 [PR #663](https://github.com/dougchansan/pkmn-colosseum/pull/663). Its private-input
@@ -35,13 +75,12 @@ builds distinguish exact source objects from complete output verification:
 | Fifth build | Both typed message prefixes matched and linked; the complete 561,032-byte resource region was byte-identical, including fallback. | `main.dol` and `common_rel.rel` failed; the other 24 outputs passed. |
 | Sixth build | The 156-byte GS VM prefix matched and linked; `main.dol` and 24 REL outputs passed canonical hashes and direct comparisons. | Only `common_rel.rel` differed: 149 byte positions in 84 sound-table pointer addend words. |
 | Seventh build | No fresh compiler/report measurement. | A split at `0x80478D86` required two-byte alignment before compilation could proceed. |
-| Eighth build | All 25 REL outputs, including `common_rel.rel`, passed canonical hashes and direct comparisons. All 8,677 code functions remained exact. | `main.dol` differed in the new `sdata_80478D08.c` owner; the final integrated report remains pending. |
+| Eighth build | All 25 REL outputs, including `common_rel.rel`, passed canonical hashes and direct comparisons. All 8,677 code functions remained exact. | `main.dol` differed in the new `sdata_80478D08.c` owner; a subsequent consumer audit also identified incomplete source object extents. |
+| Ninth build | All 26 outputs, all 34 zero-data layouts and the report-integrity audit passed. Corrected source object bounds preserve all function identities and physical coverage. | Source matching is verified; the final documentation/freeze revision still needs its required PR checks. |
 
-The eighth build also verifies both sound owners as fully exact through the
-comparison-only view described below. Its native linker inputs produce the
-canonical REL. A partially passing build does not establish the continuation's
-final data percentage or waive the remaining DOL check. Later source additions
-and fixes require another complete build before refreshing the leading metrics.
+Earlier partial builds were diagnostic checkpoints. The leading result uses
+the ninth report and complete-output evidence, including the corrected object
+boundaries and explicit fallback intervals.
 
 ## Work remaining at the baseline
 
@@ -65,7 +104,7 @@ The initial proposal selected 66 already exact data candidates, totaling
 their final layout. Native compiler and linked-address diagnostics identified
 the necessary retention, declaration-order and alignment corrections.
 
-The remaining 132-byte `game/data/data_802EE06C.c` switch table starts four
+The initially deferred 132-byte `game/data/data_802EE06C.c` switch table starts four
 bytes past an eight-byte boundary. Its existing definition is now included
 after the generated tables in `menu_middle_r59_8006CCC0_o1.c`, at that owner's
 `.data + 0xBC`. This retains the original `0x802EE06C–0x802EE0F0` interval and
@@ -76,7 +115,8 @@ existing symbol-map boundaries. The first build exposed reversed existing BSS
 declarations and redundant explicit padding. Corrected declaration order,
 scalar or natural padding, and explicit byte alignment preserve the recorded
 placements. Together with twenty existing BSS owners, all 34 owners passed
-the third build's native layout checks and continue to pass in the eighth.
+the third build's native layout checks and pass again in the ninth after the
+consumer-bound corrections described below.
 
 `lbl_8047C9E4` retains its recorded five-byte string extent; the following
 seven zero bytes remain section padding. Four separate unnamed alignment gaps
@@ -90,12 +130,11 @@ zero-storage owner therefore needs a compiled-symbol address and size check,
 in addition to the ordinary report. `tools/verify_zero_data_layout.py` derives
 these expectations independently from `symbols.txt` and `splits.txt`; it checks
 all 1,440 existing symbol boundaries and the intervening zero-padding ranges in
-the fourteen new owners. It also checks the twenty existing BSS owners proposed
-for source linking, covering another 641,904 bytes and 136 existing symbols.
+the fourteen new owners. It also checks the twenty existing BSS owners now
+linked from source, covering another 641,904 bytes and 136 existing symbols.
 The same offset, size, binding, section and alignment requirements apply to both
-groups.
-Other candidates need actual source and
-target section, symbol, relocation and alignment comparison.
+groups. Other candidates need actual source and target section, symbol,
+relocation and alignment comparison.
 
 The full acceptance sequence is:
 
@@ -111,6 +150,9 @@ The full acceptance sequence is:
 5. Refresh the strict topology freeze, README and this work record from the
    verified report, then pass Build, Quality Lint and Regression Guard on the
    final PR head before merging.
+
+The ninth source build and its integrity audit establish steps 1–4. Step 5
+remains a final-head requirement; use the PR's current checks for its outcome.
 
 ## Source metadata and linker layout
 
@@ -253,8 +295,8 @@ equal to the fifth diagnostic, with no relocations.
 These small definitions are included after the existing OS source in
 `sdk_r48_80099790_suffix.c`, extending its already aligned `.sdata` section
 without editing any function. The eighth build verifies the SDK owners from
-native compiled source. Their integrated acceptance still requires the final
-main executable and code-identity/physical-coverage checks.
+native compiled source. The ninth build verifies their integration in the
+canonical main executable with unchanged code identities and physical coverage.
 
 ## Small game-state source
 
@@ -296,16 +338,17 @@ section SHA-256 is
 The interval has no relocations. The local layout calculation uses the
 independently probed MWCC scalar, array and explicit alignment rules. The eighth
 build verifies the native 336-byte candidate's bytes, but the subsequent
-consumer audit found object-bound conflicts. The current 316-byte proposal
-retains only definitions with defensible complete extents and needs a fresh
-native build. No function source, original name or physical data interval is
-removed.
+consumer audit found object-bound conflicts. The ninth build verifies the
+corrected 316-byte source ownership: 172, 120 and 24 bytes from the three
+native source owners, all exact and source-linked. The other 20 bytes remain
+fallback. No function source, original name or physical data interval is removed.
 
 The same audit refines two zero-state definitions to their actual complete
 types: `lbl_8047AD04` is a four-port `u8[4]`, and `lbl_8047A60C` is a four-byte
 uploader boot key. Each absorbs an existing three-byte zero gap. The strict
 zero-layout checks derive the revised extents from the map; the full physical
-intervals and existing consumer functions stay unchanged.
+intervals and existing consumer functions stay unchanged. These corrected
+layouts pass in the ninth build.
 
 The battle/purification reconstruction and its precise owner boundaries are
 recorded separately in
@@ -313,9 +356,10 @@ recorded separately in
 Their typed counts, version pointer and sequence pairs come from
 existing source consumers and complete metadata hashes. The intervening
 status operands remain subject to the individual reconstruction evidence in
-that record. The eighth build's DOL failure is isolated to the first new
-owner; its linked-data count is not evidence that its source layout matches.
-The corrected ownership must pass the native comparison and full DOL check.
+that record. The eighth build's DOL failure was isolated to the first new
+owner. The ninth build verifies the corrected 112-byte, 12-byte and 28-byte
+source owners, totaling 152 exact and source-linked bytes, with the complete
+main executable canonical. The remaining 20 bytes stay fallback.
 
 The eight-byte flag block at `0x80478D78–0x80478D80` retains explicit original
 fallback in this checkpoint. `fight_seq.c` saves, clears and restores all
@@ -332,12 +376,13 @@ No new alias mechanism is introduced for this checkpoint. All eight physical
 bytes remain in the denominator and receive no source credit while using
 fallback.
 
-The subsequent 152-byte initialized-zero candidate at
+The subsequent 152-byte initialized-zero source owner at
 `0x8038FF64–0x8038FFFC` has independent zero hashes and recorded symbol extents.
 Its evidence and layout guard are in
 [`initialized_zero_8038FF64.md`](recon/initialized_zero_8038FF64.md).
-It was added after the eighth build and awaits native and complete-output
-validation.
+It was added after the eighth build. The ninth build verifies all 152 bytes
+as exact and source-linked, including the guarded source-link alignment and
+canonical main executable.
 
 ## Resource scope and verified source coverage
 
@@ -377,7 +422,8 @@ found the expected symbol offsets, no relocations, and all five resource
 hashes equal after translating the host's integer endianness. This is not a
 canonical-output result. The third private-input build independently verified
 all 423,928 bytes from native ProDG source objects. The eighth build verifies
-their integration in the canonical REL.
+their integration in the canonical REL, and the ninth reproduces that result
+while also passing the main executable.
 
 The other 137,104 resource bytes contain two message groups and a GS VM
 script bank. The bounded message diagnostic establishes their structure
@@ -408,8 +454,8 @@ private-input build independently verified both prefixes as 100% exact and
 source-linked with ProDG. It also proved the complete 561,032-byte resource
 region equal in the rebuilt REL, including every fallback interval, with
 SHA-256 `8e3aacaee0aea8b9b2d90a933f65d184cf007cf0b12ac4ec77cf6e8a3e56c78e`.
-The sixth and eighth diagnostics reproduce that complete-region hash, and
-the eighth build also passes the complete REL. Region equality includes
+The sixth, eighth and ninth diagnostics reproduce that complete-region hash,
+and the eighth and ninth builds pass the complete REL. Region equality includes
 fallback and cannot assign source credit to those bytes.
 
 The GS VM diagnostic identifies another reconstructible 156-byte prefix:
@@ -431,7 +477,7 @@ The current resource ownership is therefore:
 | Shared existing definitions and typed font terminator | 423,928 | Native source verified in the third build |
 | Typed message headers and key/offset indices | 33,928 | Native source verified in the fifth build |
 | Typed GS VM header, indices and zero globals | 156 | Native source verified in the sixth build |
-| **Source-produced subtotal** | **458,012** | Canonical REL and complete-region equality in the eighth build |
+| **Source-produced subtotal** | **458,012** | Canonical REL and complete-region equality, retained in the ninth build |
 | Message storage still using fallback | 95,056 | Full intervals retained; 68 bytes are unlinked reuse candidates |
 | Script storage still using fallback | 7,964 | Function-start intervals known; bodies not reconstructed |
 | **Complete resource region** | **561,032** | **Every physical byte remains in scope** |
@@ -454,6 +500,9 @@ region equality and reuse candidates in existing source-backed DOL spans.
 These public diagnostics exclude payload bytes, message text and disassembly.
 
 Count-Sheep's original campaign history and contributor credit remain intact.
-The continuation's commits retain the account-linked coauthor credit when
-building on their source reconstruction. No runtime or gameplay result is
-implied by data matching.
+The rendered page for the
+[verified source commit](https://github.com/dougchansan/pkmn-colosseum/commit/dcdfc947cd77221ff38159679f07e704be77d9e4)
+lists both `dougchansan` and `Count-Sheep` as authors, confirming that the
+continuation's coauthor credit is linked to the contributor's GitHub account.
+The original donor history remains an ancestor. No runtime or gameplay result
+is implied by data matching.

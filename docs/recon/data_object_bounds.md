@@ -4,7 +4,11 @@ The source audit after CI8 found seven new definitions whose mapped extents
 were smaller than the actual objects accessed by existing compiled consumers.
 Matching native bytes and addresses did not establish valid C object bounds.
 These corrections preserve every address and the complete physical data
-denominator. The next native build must verify code identity and data layout.
+denominator. CI9 verifies the corrected native source owners, all 26 canonical
+outputs and direct comparisons, all 34 zero-data layouts, and unchanged
+function identities and physical coverage. The verified source revision is
+`dcdfc947cd77221ff38159679f07e704be77d9e4`; the report and final PR-check status
+are recorded in [`DATA_MATCHING.md`](../DATA_MATCHING.md).
 
 ## Proven complete object extents
 
@@ -53,13 +57,17 @@ original fallback, retaining all four original symbol names.
 | `0x80478950..0x80478958` | 8 | Original fallback |
 | `0x80478958..0x80478970` | 24 | Compiled `sdata_80478958.c` |
 
-The same 336 physical bytes remain in scope. Source ownership is proposed for
-316 bytes, with 20 bytes retained as fallback and receiving no source credit.
+The same 336 physical bytes remain in scope. CI9 verifies all 316 source-owned
+bytes as exact and source-linked: 172, 120 and 24 bytes from the three compiled
+owners. The other 20 bytes remain fallback and receive no source credit.
 Every remaining initializer is unchanged from the CI8-verified source except
 the C8 array's truthful extent refinement. No original object payload is copied
-into a source initializer.
+into a source initializer. The corrected AD04 and A60C extents also pass the
+strict native zero-layout checks.
 
 The SDK literal/state additions and the 152-byte initialized-zero owner have
 no concrete consumer-bound conflict in this targeted audit. This audit checks
 actual declarations and uses; it does not replace the native layout, canonical
-output, relocation, or full function-identity checks.
+output, relocation, or full function-identity checks. CI9 supplies those
+checks for this source revision. The later documentation/topology refresh must
+still pass the final required checks on PR #663.

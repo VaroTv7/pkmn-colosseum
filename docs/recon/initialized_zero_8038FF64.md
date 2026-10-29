@@ -40,7 +40,21 @@ payload or modify symbol offsets/sizes. Native source remains the report
 input.
 
 This check matters because all-zero bytes alone would conceal reordered or
-shifted objects. Source compilation, the guarded link view, linked-address
-diagnostics and canonical output verification must all pass before accepting
-the 152 bytes as source-owned progress. The entire interval stays in the full
-physical data denominator.
+shifted objects. The entire interval stays in the full physical data denominator.
+
+## Verified outcome
+
+CI9 at source revision `dcdfc947cd77221ff38159679f07e704be77d9e4` verifies
+all 152 bytes as exact and source-linked. Its native object has equal section
+bytes and unchanged original symbol offsets and sizes. The native section's
+eight-byte alignment is handled by the guarded four-byte link view described
+above; the report continues to compare the native source object. The complete
+main executable and all 25 REL outputs pass their unchanged canonical hashes
+and direct original/rebuilt comparisons.
+
+The report-integrity audit confirms unchanged function identities, physical
+interval union and the full 3,565,996-byte data denominator, with no overlapping
+intervals. See [`DATA_MATCHING.md`](../DATA_MATCHING.md) for the Build job,
+report artifact and SHA-256. The subsequent documentation/topology refresh
+still requires the final PR checks; this source verification does not claim
+those later checks have already passed.

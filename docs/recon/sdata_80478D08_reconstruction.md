@@ -15,7 +15,14 @@ requires one real eight-byte array plus interior labels; the damage operand's
 complete extent remains unresolved.
 No initializer is inferred from an unrelated short byte match.
 
-## Evidence and validation boundary
+CI9 at source revision `dcdfc947cd77221ff38159679f07e704be77d9e4` verifies
+all three source owners as exact and source-linked: 112 + 12 + 28 = 152 bytes.
+All 26 canonical output hashes and direct comparisons pass. The 20 fallback
+bytes retain their original storage and receive no source credit. The Build
+job, report artifact and remaining final PR checks are recorded in
+[`DATA_MATCHING.md`](../DATA_MATCHING.md).
+
+## Reconstruction evidence and native verification
 
 The reconstruction uses existing C consumers, typed table layouts and the
 metadata-only target hashes from CI5 (`2d9ab305`). No original payload bytes
@@ -26,9 +33,13 @@ original-backed until a sound alias model is available. The version pointer
 has one `R_PPC_ADDR32` relocation to
 `lbl_803751F0`, with addend zero; its encoded word is zero before relocation.
 
-This is source-model evidence. Acceptance still requires the pinned compiler
-to reproduce the actual sections, symbol placements and relocation, followed
-by the normal code-identity and canonical-link gates. The source models predict:
+The source models were checked against the private metadata before compiling.
+CI9 confirms equal native section bytes, equal original symbol offsets and
+sizes, and the version pointer's relocation. Address-named source padding
+corresponds to the target's synthetic gap symbols and preserves every byte at
+its original address. The active-object extent refinements are detailed below.
+The complete source intervals have these
+pre-relocation hashes:
 
 | Interval | Pre-relocation SHA-256 |
 | --- | --- |
@@ -112,7 +123,9 @@ Initialized arrays avoid that placement change, but three separate one-byte
 objects would not describe the caller's actual eight-byte array accesses.
 The entire flag block therefore retains its original fallback. A future source
 owner must preserve one eight-byte C array and supply verified interior aliases
-at offsets 3 and 5. No consumer functions are changed for this checkpoint.
+at offsets 3, 4 and 5 (`D7B`, `D7C` and `D7D`). No consumer functions are
+changed for this checkpoint. CI9 passes all 8,677 function-identity and code
+matching checks with this fallback retained.
 
 ## Status operand references and remaining fallback
 
