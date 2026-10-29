@@ -11,7 +11,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from tools.source_data_aliases import create_views
+from tools.source_data_aliases import comment_records, create_views
 from tools.source_object_metadata import Elf
 
 GROUPS = [{"base": "flags", "size": 8, "aliases": [
@@ -112,6 +112,21 @@ class SourceArrayAliasTests(unittest.TestCase):
         actual = sorted((n, s[1:5]) for n, s in Elf(comparison).symbols if s[5] == 1 and s[2])
         self.assertEqual(actual, expected)
         self.assertEqual(sum(s[2] for _, s in Elf(comparison).symbols if s[5] == 1), 12)
+
+    def test_link_labels_have_nonallocating_compiler_records(self):
+        link, comparison, _ = create_views(self.source, self.target, GROUPS)
+        native = Elf(self.source)
+        native_comment = comment_records(native)[1]
+        for blob, label_record in ((link, bytes(8)),
+                                   (comparison, struct.pack(">IBBH", 1, 0, 8, 0))):
+            view = Elf(blob)
+            comment = comment_records(view)[1]
+            # Every native record, including complete array host alignment and
+            # force-active metadata, stays byte-for-byte unchanged.
+            self.assertEqual(comment[:len(native_comment)], native_comment)
+            for name in ("status", "mode"):
+                index, _ = view.unique_symbol(name)
+                self.assertEqual(comment[44 + 8 * index:52 + 8 * index], label_record)
 
     def test_source_byte_mismatch_rejected(self):
         source = bytearray(self.source)

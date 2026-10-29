@@ -15,18 +15,32 @@ compiled the complete project and verified all 8,677 existing function
 identities with no score regressions, removals, renames or boundary changes.
 Its report measures 3,474,575 of 3,565,996 data bytes matched and source-complete
 (97.43632%), with 2,258 complete units out of 2,272. Full final-output linking
-and canonical comparisons remain pending; the first integration link stalled
-after compilation succeeded, so the build now separates and time-bounds that
-step while preserving all canonical checks.
+and canonical comparisons remain pending. The build separates compilation
+from a bounded final-output step while preserving all canonical checks.
 
-The first build completed all native links but stalled during output
-conversion. The direct GNU data-object path had omitted the ordinary assembler
-path's `dtk elf fixup` compatibility step. The corrected path now applies the
-same source-only fixup. Independent validation of all 29 affected objects
-confirms that all 17,135 data bytes, 207 object symbols, 299 relocations and
-section alignments remain unchanged; the pinned subset report is still fully
-exact. A fresh full build must establish whether output conversion and all
-canonical comparisons now pass.
+The direct GNU data-object path initially omitted the ordinary assembler
+path's `dtk elf fixup` compatibility step. The corrected path applies the same
+source-only fixup. Independent validation of all 29 affected objects confirms
+that all 17,135 data bytes, 207 object symbols, 299 relocations and section
+alignments remain unchanged; the pinned subset report remains fully exact.
+
+The [bounded link-isolation report](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40963988506/artifacts/12935439809)
+identified the separate final-link failure. With the three new array-alias
+views, MWLD timed out and left a zero-byte `main.elf`. Replacing only those
+three inputs with original targets made MWLD finish in 3.59 seconds; keeping
+all 17 generated battle owners and the other native source changes produced a
+DOL with the canonical SHA-256
+`7e6c00a3bd632126d5466cbab856c63ac3c52a5da20b60dba7e756538152c9f4`.
+Replacing the battle owners alone did not resolve the timeout. These private
+fallback variants are diagnostics only and never feed the normal build,
+report or source credit.
+
+The six new zero-size linker labels had incorrectly received active-storage
+CodeWarrior metadata. Existing successfully linked zero-size vector labels
+use zero metadata records. The narrow correction uses that existing label
+representation while preserving native complete C arrays, every source byte,
+all symbol addresses, and the separate comparison view. A fresh normal build
+must verify this correction and all 26 canonical outputs.
 
 | Reconstructed source | Additional bytes | Evidence |
 | --- | ---: | --- |

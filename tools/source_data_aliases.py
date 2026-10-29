@@ -177,9 +177,13 @@ def make_view(source, si, plans, comparison):
                                        target[2] if comparison else 0,
                                        0x11 if comparison else 0x10,
                                        target[4] if comparison else 0, si))
-            # Added labels require only byte alignment. They describe an
-            # existing array/subrange, never separately allocated C storage.
-            comment.extend(struct.pack(">IBBH", 1, 0, 8, 0))
+            # A zero-size NOTYPE label is not separately allocated storage.
+            # Match DTK's Unknown-label records and the successfully linked
+            # interrupt-vector labels: no alignment or force-active metadata.
+            # Keep labels out of MWLD's separately active storage processing.
+            # Positive-sized comparison fragments remain active objects.
+            comment.extend(struct.pack(">IBBH", 1, 0, 8, 0)
+                           if comparison else bytes(8))
             additions += 1
     for index, data in ((strings_index, strings), (source.symtab, symbols),
                         (comment_index, comment)):

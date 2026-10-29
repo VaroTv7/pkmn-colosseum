@@ -9,11 +9,11 @@ for 172 of those bytes, so this proposal reconstructs another **28 physical
 bytes**. The independent damage-operand investigation below also verifies
 the remaining **12 physical bytes** as two separate scalar constants and
 four bytes of linker alignment. Together, these local checks cover all 40
-previously retained small-data bytes. Full project compilation, code-identity
-checks, final linking and all
-26 unchanged canonical output hashes are **pending private-input CI**. The
-isolated report is evidence for these source objects, not a completed project
-build or runtime test.
+previously retained small-data bytes. Private CI also compiles all source
+owners and retains all 8,677 exact function identities. Final linking with the
+corrected alias metadata and all 26 unchanged canonical output hashes are
+**pending private-input CI**. The isolated report is evidence for these source
+objects, not a completed project build or runtime test.
 
 The native definitions retain complete C arrays. The existing symbol map
 describes some of these arrays as smaller, adjacent historical fragments.
@@ -124,7 +124,9 @@ Before producing either view, the helper requires:
 The **link view** preserves every native C symbol's value, size, binding and
 type. It adds the explicitly registered original interior names as global
 `STT_NOTYPE` labels with size zero. These labels allocate no storage and do
-not divide the host array.
+not divide the host array. Their eight-byte CodeWarrior symbol records are
+all zero: no alignment, visibility, force-active or reserved bits. Native
+array hosts retain their original compiler records and full bounds.
 
 The **comparison view** describes the same native bytes using the target's
 historical nonoverlapping object fragments and verified generated zero gaps.
@@ -181,11 +183,14 @@ report measures `total_data = matched_data = complete_data = 200`, with all
 three units complete. This verifies the physical accounting and the 28-byte
 gain without adding credit for overlapping link labels.
 
-The helper's 14 synthetic tests cover complete native bounds, zero-sized
+The helper's 15 synthetic tests cover complete native bounds, zero-sized
 link aliases, exact comparison partitions, unchanged allocated bytes and
 relocations, input-path protection, and rejection of incorrect bytes,
 relocations, extents, alias registrations, gaps or compiler metadata. The
-tests contain synthetic objects only:
+tests also check that added link labels have all-zero CodeWarrior records,
+positive-sized comparison fragments retain their active-object records,
+and all pre-existing native records remain unchanged. They contain synthetic
+objects only:
 
 ```sh
 python3 -m unittest discover -s .github/scripts -p test_source_data_aliases.py
@@ -193,11 +198,40 @@ python3 -m py_compile tools/source_data_aliases.py
 git diff --check
 ```
 
-The local Windows linker crashed on the isolated probe, so final linker
-acceptance is not claimed here. The ordinary project build must establish
-unchanged linked addresses, exact code for every affected source owner and
-all canonical output hashes before this proposal is accepted as a verified
-project-wide gain.
+### First full-link integration and label metadata correction
+
+Private CI compiled all source owners and retained all 8,677 exact function
+identities. The first final-output attempts stalled. A bounded four-variant
+link probe isolated the problem to the three array-alias link copies:
+
+| Private diagnostic variant | MWLD result | DOL result |
+| --- | --- | --- |
+| All current source inputs | Timed out after 30 seconds; zero-byte ELF | Not convertible |
+| Replace only the three alias link copies with their original targets | Completed in 3.59 seconds | Exact canonical hash |
+| Replace only the 17 battle-script source objects with original targets | Timed out after 30 seconds; zero-byte ELF | Not convertible |
+| Replace both diagnostic groups with original targets | Completed in 3.57 seconds | Exact canonical hash |
+
+Both successful diagnostic DOLs have SHA-256
+`7e6c00a3bd632126d5466cbab856c63ac3c52a5da20b60dba7e756538152c9f4`.
+These substitutions were isolated diagnostic files and never entered a
+normal link or source-progress report. Their result isolates the alias
+metadata failure; it does not validate the original alias link copies.
+
+The first helper gave each added zero-size label the CodeWarrior record
+`(alignment=1, visibility=0, active=8, reserved=0)`. That is an active-storage
+record appropriate for the positive-sized comparison fragments. The existing
+successfully linked `gTRKInterruptVectorTable`, `lbl_80003FF0`, `lbl_80004000`
+and `gTRKInterruptVectorTableEnd` labels instead use `(0, 0, 0, 0)`.
+Pinned DTK 1.8.3's `CommentSym::from` likewise gives unknown/label symbols
+zero default alignment and does not set their active bit through `export_all`.
+
+The correction changes **only the six newly added link-label comment records
+to all zero**. Link-label names, offsets, zero sizes, types, bindings and order
+stay unchanged. Every native C symbol and its metadata, all allocated bytes,
+section allocation/alignment, relocation records and comparison-view records
+remain unchanged. The focused synthetic test exercises this distinction.
+Acceptance of the corrected link metadata and all 26 unchanged canonical
+output hashes remain **pending private-input CI**.
 
 ## Two independent damage constants and linker padding
 
