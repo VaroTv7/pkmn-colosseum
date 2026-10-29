@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Ensure publicly uploadable data diagnostics omit private object payloads."""
 import json
+import hashlib
 from pathlib import Path
 import struct
 import sys
@@ -12,6 +13,7 @@ sys.path.insert(0, str(ROOT))
 from tools.data_match_diagnostics import (
     comparisons, elf_metadata, resource_reuse_checks, sanitized_diff,
     selected_units, source_alignment_at_original_address,
+    changed_intervals, rebuilt_output_comparisons,
 )
 
 
@@ -54,6 +56,59 @@ def synthetic_elf(data=b"PRIVATE_OBJECT_CONTENT", *, nobits=False,
 
 
 class DataMatchDiagnosticTests(unittest.TestCase):
+    def test_changed_intervals_count_all_runs_without_exporting_bytes(self):
+        result = changed_intervals(b"abcdefgh", b"XbYdZfgh++", limit=2)
+        self.assertEqual(result, {"changed_byte_positions": 5, "interval_count": 4,
+                                 "intervals": [{"offset": 0, "size": 1},
+                                               {"offset": 2, "size": 1}],
+                                 "intervals_truncated": True})
+        self.assertEqual(changed_intervals(b"abcdef", b"abc")["intervals"],
+                         [{"offset": 3, "size": 3}])
+        self.assertEqual(changed_intervals(b"PRIVATE", b"PRIVATE")["interval_count"], 0)
+        for limit in (0, 129):
+            with self.subTest(limit=limit), self.assertRaises(ValueError):
+                changed_intervals(b"a", b"b", limit)
+
+    def test_output_manifest_hashes_and_common_rel_owner_differences_are_metadata_only(self):
+        def rel(data):
+            blob = bytearray(0x100) + data
+            struct.pack_into(">I", blob, 0, 125)
+            struct.pack_into(">II", blob, 0xC, 5, 0x50)
+            struct.pack_into(">II", blob, 0x50 + 4 * 8, 0x100, len(data))
+            return blob
+        original_main = b"PRIVATE_CANONICAL_PAYLOAD"
+        original_rel = rel(b"ABCDwxyzTAIL")
+        changed_rel = rel(b"ABCDw!yzTAIL")
+        report = {"units": [{"name": "common_rel/sound", "sections": [
+            {"name": ".data", "size": "4", "metadata": {"virtual_address": "4"}}]}]}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            orig = root / "orig/GC6E01"
+            files = {orig / "sys/main.dol": original_main,
+                     orig / "files/common_rel.rel": original_rel,
+                     root / "build/GC6E01/main.dol": original_main,
+                     root / "build/GC6E01/common_rel/common_rel.rel": changed_rel}
+            for path, value in files.items():
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(value)
+            manifest = root / "config/GC6E01/build.sha1"
+            manifest.parent.mkdir(parents=True)
+            manifest.write_text(
+                hashlib.sha1(original_main).hexdigest() + "  build/GC6E01/main.dol\n" +
+                hashlib.sha1(original_rel).hexdigest() + "  build/GC6E01/common_rel/common_rel.rel\n")
+            result = rebuilt_output_comparisons(orig, report, root)
+            self.assertEqual((result["equal_outputs"], result["canonical_outputs"]), (1, 1))
+            changed = result["outputs"][1]
+            self.assertEqual(changed["differences"]["intervals"], [{"offset": 0x105, "size": 1}])
+            owner = changed["data_owner_comparisons"]["owners"][0]
+            self.assertEqual(owner["expected_section_offset"], 4)
+            self.assertFalse(owner["bytes_equal"])
+            self.assertEqual(owner["differences"]["intervals"], [{"offset": 1, "size": 1}])
+            serialized = json.dumps(result)
+            for private in (original_main, b"ABCDwxyzTAIL", b"ABCDw!yzTAIL"):
+                self.assertNotIn(private.decode(), serialized)
+                self.assertNotIn(private.hex(), serialized)
+
     def test_exact_unlinked_and_explicit_promoted_units_are_included(self):
         def unit(name, *, linked, code=0, source=True, matched=True):
             return {"name": name, "measures": {

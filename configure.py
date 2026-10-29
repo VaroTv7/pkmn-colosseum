@@ -13374,6 +13374,7 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/data_8035B8A0.c",
+                extra_cflags=["-sdata 0"],
                 progress_category="game",
             ),
             Object(
@@ -13416,11 +13417,6 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/data_8035E940.c",
-                progress_category="game",
-            ),
-            Object(
-                DataCandidate,
-                "game/data/data_803634EC.c",
                 progress_category="game",
             ),
             Object(
@@ -14085,6 +14081,7 @@ config.libs = [
             # in adjacent original objects with the full resource coverage.
             Object(Matching, "rel/common_rel/message_index_58044.c"),
             Object(Matching, "rel/common_rel/message_index_76C94.c"),
+            Object(Matching, "rel/common_rel/script_structure_89CFC.c"),
             Object(Matching, "rel/common_rel/table_res_data.c"),
             Object(Matching, "rel/common_rel/floor_fight_data.c"),
             Object(Matching, "rel/common_rel/fight_trainer_data.c"),

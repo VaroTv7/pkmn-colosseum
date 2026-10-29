@@ -1957,3 +1957,24 @@ lbl_8047B668
 lbl_8047E700
 lbl_8047E718
 lbl_8047E720
+# data_80375938 was promoted after the original scoped retention audit.
+# These 19 native globals match CI3 target extents and relocation-normalized hashes.
+lbl_80375970
+fight_encount_wipe_data
+lbl_80375A08
+lbl_80375AC8
+lbl_80375BB8
+lbl_80375CA8
+lbl_80375CB8
+lbl_80375CC8
+lbl_80375D10
+lbl_80375D30
+lbl_80375D70
+lbl_80375D80
+lbl_80375DD0
+lbl_80375DF0
+lbl_80375E24
+lbl_80375E44
+lbl_80375E48
+lbl_80375E51
+lbl_80375E5F

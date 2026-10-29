@@ -16,11 +16,13 @@ import subprocess
 from pathlib import Path
 
 if __package__:
-    from .resource_message_diagnostics import resource_message_reuse_checks
+    from .ci_retail import checked_path, read_manifest
+    from .resource_message_diagnostics import _common_rel_data, resource_message_reuse_checks
     from .runtime_data_diagnostics import runtime_structure
     from .source_data_reuse import find_source_reuse
 else:
-    from resource_message_diagnostics import resource_message_reuse_checks
+    from ci_retail import checked_path, read_manifest
+    from resource_message_diagnostics import _common_rel_data, resource_message_reuse_checks
     from runtime_data_diagnostics import runtime_structure
     from source_data_reuse import find_source_reuse
 
@@ -389,6 +391,119 @@ def resource_reuse_checks(orig):
     return result
 
 
+def changed_intervals(original, rebuilt, limit=32):
+    """Count positional differences and retain only bounded offset/size runs."""
+    if not 1 <= limit <= 128:
+        raise ValueError("invalid interval limit")
+    if original == rebuilt:
+        return {"changed_byte_positions": 0, "interval_count": 0,
+                "intervals": [], "intervals_truncated": False}
+    intervals = []
+    interval_count = 0
+    changed = 0
+    start = None
+
+    def record(begin, end):
+        nonlocal interval_count
+        interval_count += 1
+        if len(intervals) < limit:
+            intervals.append({"offset": begin, "size": end - begin})
+
+    common = min(len(original), len(rebuilt))
+    for offset in range(common):
+        if original[offset] != rebuilt[offset]:
+            changed += 1
+            if start is None:
+                start = offset
+        elif start is not None:
+            record(start, offset)
+            start = None
+    end = max(len(original), len(rebuilt))
+    if end != common:
+        changed += end - common
+        if start is None:
+            start = common
+    if start is not None:
+        record(start, end)
+    return {"changed_byte_positions": changed, "interval_count": interval_count,
+            "intervals": intervals, "intervals_truncated": interval_count > len(intervals)}
+
+
+def common_rel_owner_comparisons(original, rebuilt, report):
+    """Compare each report owner's expected .data interval, without payloads."""
+    before = _common_rel_data(original)
+    after = _common_rel_data(rebuilt)
+    rows = []
+    for unit in report.get("units", []):
+        if not unit.get("name", "").startswith("common_rel/"):
+            continue
+        for section in unit.get("sections", []):
+            if section.get("name") != ".data":
+                continue
+            size = int(section.get("size", 0))
+            if size == 0:
+                continue
+            start = int(section["metadata"]["virtual_address"])
+            row = {"unit": unit["name"], "expected_section_offset": start, "size": size}
+            if not 0 <= start < start + size <= len(before):
+                raise ValueError("report data owner exceeds original section")
+            a = before[start:start + size]
+            row["original_sha256"] = hashlib.sha256(a).hexdigest()
+            if start + size > len(after):
+                row["rebuilt_interval_available"] = False
+            else:
+                b = after[start:start + size]
+                row.update(rebuilt_interval_available=True,
+                           rebuilt_sha256=hashlib.sha256(b).hexdigest(),
+                           bytes_equal=a == b, differences=changed_intervals(a, b, 8))
+            rows.append(row)
+    rows.sort(key=lambda row: (row["expected_section_offset"], row["unit"]))
+    return {"section": ".data", "original_size": len(before), "rebuilt_size": len(after),
+            "owners": rows, "equal_owners": sum(row.get("bytes_equal", False) for row in rows)}
+
+
+def rebuilt_output_comparisons(orig, report, repository_root):
+    """Inspect canonical outputs using the same manifest/path rules as CI."""
+    version, entries = read_manifest(
+        repository_root / "config" / orig.name / "build.sha1")
+    if version != orig.name:
+        raise ValueError("original root does not match manifest version")
+    result = {"schema_version": 1, "payload_bytes_included": False,
+              "comparison": "same file offsets; extra bytes count as changed positions",
+              "interval_limit_per_output": 32, "outputs": []}
+    for original_name, rebuilt_name, expected_sha1 in entries:
+        row = {"original_path": original_name, "rebuilt_path": rebuilt_name,
+               "canonical_sha1": expected_sha1}
+        try:
+            original = checked_path(orig, original_name).read_bytes()
+            original_sha1 = hashlib.sha1(original).hexdigest()
+            row.update(original_size=len(original), original_sha1=original_sha1,
+                       original_matches_canonical=original_sha1 == expected_sha1)
+            rebuilt_path = checked_path(repository_root, rebuilt_name)
+            row["rebuilt_present"] = rebuilt_path.is_file()
+            if rebuilt_path.is_file():
+                rebuilt = rebuilt_path.read_bytes()
+                rebuilt_sha1 = hashlib.sha1(rebuilt).hexdigest()
+                row.update(rebuilt_size=len(rebuilt), rebuilt_sha1=rebuilt_sha1,
+                           rebuilt_matches_canonical=rebuilt_sha1 == expected_sha1,
+                           bytes_equal=original == rebuilt,
+                           differences=changed_intervals(original, rebuilt))
+                if original_name == "files/common_rel.rel":
+                    try:
+                        row["data_owner_comparisons"] = common_rel_owner_comparisons(
+                            original, rebuilt, report)
+                    except (ValueError, KeyError, struct.error) as exc:
+                        row["data_owner_comparisons"] = {"error": type(exc).__name__}
+        except (OSError, ValueError) as exc:
+            # File contents and unvalidated exception text remain private.
+            row["error"] = type(exc).__name__
+        result["outputs"].append(row)
+    result["equal_outputs"] = sum(row.get("bytes_equal", False) for row in result["outputs"])
+    result["canonical_outputs"] = sum(row.get("rebuilt_matches_canonical", False)
+                                      for row in result["outputs"])
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--report", type=Path, default=Path("build/GC6E01/report.json"))
@@ -461,6 +576,13 @@ def main():
                   f"source={'yes' if item['source_path'] else 'no'}; "
                   f"metadata={'error' if 'error' in item else 'recorded'}")
     if args.orig:
+        try:
+            output["rebuilt_outputs"] = rebuilt_output_comparisons(args.orig, report, root)
+            print(f"Canonical outputs: {output['rebuilt_outputs']['canonical_outputs']}/"
+                  f"{len(output['rebuilt_outputs']['outputs'])}; offset/hash diagnostics recorded.")
+        except (OSError, ValueError, KeyError, struct.error) as exc:
+            output["rebuilt_outputs"] = {"error": type(exc).__name__}
+            failures += 1
         try:
             output["resource_reuse"] = resource_reuse_checks(args.orig)
             equal = sum(candidate["equal"] for candidate in output["resource_reuse"]["known_candidates"])

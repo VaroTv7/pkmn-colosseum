@@ -8,9 +8,9 @@
  * shared_font_data.c and shared_message_data.c reuse definitions already
  * present in the DOL source for .data 0x2D2C-0x58044 and 0x647B4-0x76C94.
  * message_index_58044.c and message_index_76C94.c reconstruct two additional
- * headers and key/offset tables. Their message storage and the GS VM bank
- * remain in dtk's original-object fallback, read from the supplied
- * common_rel.rel and not counted as source progress.
+ * headers and key/offset tables. script_structure_89CFC.c supplies the GS VM
+ * bank's loader/index prefix and zero globals. The remaining message and
+ * instruction storage uses original fallback and earns no source credit.
  */
 #include "rel/common_rel.h"
 

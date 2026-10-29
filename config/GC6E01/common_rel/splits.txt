@@ -18,6 +18,9 @@ rel/common_rel/shared_message_data.c:
 rel/common_rel/message_index_76C94.c:
 	.data       start:0x00076C94 end:0x0007B1FC
 
+rel/common_rel/script_structure_89CFC.c:
+	.data       start:0x00089CFC end:0x00089D98
+
 rel/common_rel/table_res_data.c:
 	.data       start:0x0008BCB4 end:0x0008BCD4
 

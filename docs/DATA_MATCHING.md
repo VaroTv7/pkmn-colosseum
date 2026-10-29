@@ -149,6 +149,43 @@ values and sizes, bindings, and relocation records remain unchanged; native
 objects remain linker inputs. The standard report generator still performs
 the actual byte/relocation comparison, with its full original denominators.
 
+## Unnamed linker-alignment gaps
+
+Four previously separate fallback intervals contain only alignment padding.
+Their ownership is extended from the preceding source section to the unchanged
+start of the next source section. No C object, initializer, symbol name, symbol
+size, or next-owner address is added or changed.
+
+| Padding interval | Bytes | Preceding source owner | Alignment of the next owner |
+| --- | ---: | --- | --- |
+| `.data` `0x803634EC–0x803634F0` | 4 | `hero_savedata_exact_80129280.c` | Eight-byte compiler data-section alignment for `hero_bios_exact_8012A450.c` |
+| `.data` `0x8036BFA4–0x8036BFC0` | 28 | `particle.c` | `psdisp.c` declares `lbl_8036BFC0` with `aligned(32)` |
+| `.bss` `0x804657AC–0x804657C0` | 20 | `hsd/tev.c` | `hsd/video.c` declares `lbl_804657C0` with `aligned(32)` |
+| `.sbss` `0x8047B490–0x8047B4A0` | 16 | `THPVideoDecode.c` | `THPDec.c` includes the `Ydchuff` declaration with `ATTRIBUTE_ALIGN(32)` |
+
+The fifth private-input diagnostic verifies zero bytes and no relocations in
+both initialized gaps. The other two gaps are zero-initialized section storage.
+A symbol-map audit finds no real object intersecting any of the four intervals;
+all adjacent objects already match in that build. The nonexistent
+`game/data/data_803634EC.c` registration is removed because its entire four-byte
+interval now belongs to its preceding source owner. The other three intervals
+were automatically generated fallback units.
+
+All 68 physical bytes remain in scope. This is linker-generated padding owned
+by the surrounding compiled source, not reconstructed variable storage. A fresh
+report must preserve the full 3,565,996-byte denominator, and canonical output
+checks must verify the resulting layout before accepting any additional credit.
+
+The fifth build passes 24 of 26 canonical output hashes. Its main address
+diagnostic traced an eight-byte small-data shift to a two-byte padding array
+in the merged developer-string owner; `-sdata 0` keeps that padding in its
+original initialized-data section. The named sound literals are now local
+`static const` objects so SN's assembler retains the native section-relative
+addends used by the original REL. Their source text and table references are
+unchanged. The existing comparison-only tool normalizes duplicate addend
+words for objdiff while preserving the native object for linking. These
+last fixes still require a complete canonical-output build.
+
 ## Resource scope and attribution
 
 The 561,032-byte resource region was original fallback in the verified
@@ -212,17 +249,32 @@ recorded keys and offsets reproduce each entire original prefix hash:
 `2f7c61218b1523952a9d2f2e8d97b04adc47fbfbf82097fa92a5f972567fba49`
 and `f3e702439d6589668cd0dfff9e0fd72f47ec5c53b1ea7378f8d9343ae332f1c0`.
 A host compiler layout check also reproduces these hashes with four-byte
-alignment and no relocations after translating integer endianness. Native
-ProDG and canonical output validation remain required. When the rebuilt REL
-is available, the diagnostic compares the complete 561,032-byte resource
-region and each original message resource, including its fallback storage.
+alignment and no relocations after translating integer endianness. The fifth
+private-input build independently verified both prefixes as 100% exact and
+source-linked with ProDG. It also proved the complete 561,032-byte resource
+region equal in the rebuilt REL, including every fallback interval, with
+SHA-256 `8e3aacaee0aea8b9b2d90a933f65d184cf007cf0b12ac4ec77cf6e8a3e56c78e`.
+Complete canonical-output validation remains required; failures elsewhere in
+that build are not waived by this resource-region result.
 
-The two new indices do not reconstruct their message text. Their remaining
-95,056 storage bytes and the 8,120-byte GS VM bank remain fallback (103,176
-bytes total). Current source searches find only 68 bytes of candidate message
-storage reuse; this does not justify counting the rest. The script diagnostic
-reports its loader header, function-offset/relocation tables and bounded
-interval hashes without emitting instructions or literals.
+The GS VM diagnostic identifies another reconstructible 156-byte prefix:
+the 24-byte bank header, 27 relative function offsets (108 bytes), one
+relocation-site offset (4 bytes), and five zero-initialized globals (20 bytes).
+`script_structure_89CFC.c` proposes that typed source over `0x89CFC–0x89D98`.
+The original resource base remains unchanged; a new adjacent original-storage
+symbol covers `0x89D98–0x8BCB4` (7,964 bytes), retaining the complete original
+8,120-byte bank. All four structural interval hashes match the private-input
+diagnostic, and their combined source prefix hashes to
+`d28fdd2d3b968555026b7e9d82d92cfa5d40e2675935dec2ded1794e147417a8`.
+The host compiler layout check passes; native ProDG and complete-bank equality
+for this additional prefix remain pending.
+
+These indices do not reconstruct message text or script instructions. The
+remaining 95,056 message-storage bytes and 7,964 script-storage bytes still
+use fallback (103,020 bytes total). Source searches find only 68 bytes of
+candidate message-storage reuse and no complete script-function intervals;
+this does not justify counting the rest. The diagnostics expose structure,
+hashes and matching locations, without instruction or literal payloads.
 
 Count-Sheep's original campaign history and contributor credit remain intact.
 The continuation's commits retain the account-linked coauthor credit when

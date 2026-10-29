@@ -4080,10 +4080,7 @@ game/hero.c:
 
 game/hero_savedata_exact_80129280.c:
 	.text       start:0x80129280 end:0x8012A450
-	.data       start:0x803634A8 end:0x803634EC
-
-game/data/data_803634EC.c:
-	.data       start:0x803634EC end:0x803634F0
+	.data       start:0x803634A8 end:0x803634F0
 
 game/hero_bios_exact_8012A450.c:
 	.text       start:0x8012A450 end:0x8012AC9C
@@ -4759,7 +4756,7 @@ game/pslist.c:
 game/particle.c:
 	.text       start:0x80169034 end:0x8016A644
 	.rodata     start:0x80273820 end:0x802738B8
-	.data       start:0x8036BF80 end:0x8036BFA4
+	.data       start:0x8036BF80 end:0x8036BFC0
 	.bss        start:0x804527C8 end:0x80452DE8
 	.sdata2     start:0x8047D5B0 end:0x8047D5C0
 
@@ -5283,7 +5280,7 @@ game/data/data_8036CFA8.c:
 hsd/tev.c:
 	.text       start:0x801B3168 end:0x801B42C0
 	.data       start:0x8036CFE8 end:0x8036D258
-	.bss        start:0x80465728 end:0x804657AC
+	.bss        start:0x80465728 end:0x804657C0
 	.sbss       start:0x8047B358 end:0x8047B374
 	.sdata2     start:0x8047DE60 end:0x8047DE70
 
@@ -5796,7 +5793,7 @@ dolphin/thp/THPAudioDecode.c:
 dolphin/thp/THPVideoDecode.c:
 	.text       start:0x801E4EF0 end:0x801E5548
 	.bss        start:0x8046C190 end:0x8046D500
-	.sbss       start:0x8047B488 end:0x8047B490
+	.sbss       start:0x8047B488 end:0x8047B4A0
 
 dolphin/thp/THPDec.c:
 	.text       start:0x801E5548 end:0x801ECFE0

@@ -107,7 +107,9 @@ lbl_125_data_647B4 = .data:0x000647B4; // type:object size:0x124E0
 // Message resource 0x76C94..0x89CFC: preserve its base and complete extent.
 lbl_125_data_76C94 = .data:0x00076C94; // type:object size:0x4568
 lbl_125_data_7B1FC = .data:0x0007B1FC; // type:object size:0xEB00
-lbl_125_data_89CFC = .data:0x00089CFC; // type:object size:0x1FB8
+// GS VM resource retains its base and full extent through 0x8BCB4.
+lbl_125_data_89CFC = .data:0x00089CFC; // type:object size:0x9C
+lbl_125_data_89D98 = .data:0x00089D98; // type:object size:0x1F1C
 lbl_125_data_8BCB4 = .data:0x0008BCB4; // type:object size:0x20
 lbl_125_data_8BCD4 = .data:0x0008BCD4; // type:object size:0x20
 lbl_125_data_8BCF4 = .data:0x0008BCF4; // type:object size:0x3A30
