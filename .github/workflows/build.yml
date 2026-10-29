@@ -56,6 +56,69 @@ jobs:
             --manifest config/${{ matrix.version }}/build.sha1 \
             --orig orig/${{ matrix.version }} --outputs
 
+    - name: Explain remaining data comparisons
+      if: always()
+      run: |
+        if test -f build/${{ matrix.version }}/report.json; then
+          python3 tools/data_match_diagnostics.py \
+              --report build/${{ matrix.version }}/report.json \
+              --config objdiff.json --include-data-only \
+              --orig orig/${{ matrix.version }} \
+              --output build/${{ matrix.version }}/data_match_diagnostics.json
+        fi
+
+    - name: Verify zero-data symbol layouts
+      if: always()
+      run: |
+        if test -f build/${{ matrix.version }}/report.json; then
+          python3 tools/verify_zero_data_layout.py \
+              --build-dir build/${{ matrix.version }} \
+              --output build/${{ matrix.version }}/zero_data_layout.json
+        fi
+
+    - name: Describe known unresolved small-data references
+      if: always()
+      run: |
+        if test -f build/${{ matrix.version }}/report.json; then
+          python3 tools/small_data_reference_diagnostics.py \
+              --output build/${{ matrix.version }}/small_data_reference_diagnostics.json
+        fi
+
+    - name: Diagnose linked data addresses
+      if: always()
+      run: |
+        if test -f build/${{ matrix.version }}/main.elf && test -f build/${{ matrix.version }}/report.json; then
+          python3 tools/data_link_diagnostics.py \
+              --elf build/${{ matrix.version }}/main.elf \
+              --report build/${{ matrix.version }}/report.json \
+              --symbols config/${{ matrix.version }}/symbols.txt \
+              --output build/${{ matrix.version }}/data_link_diagnostics.json
+        fi
+
+    - name: Probe compiler data alignment with synthetic declarations
+      if: always()
+      run: |
+        if test -f build/tools/wibo; then
+          python3 tools/probe_mwcc_data_alignment.py \
+              --compiler /compilers/GC/1.2.5n/mwcceppc.exe \
+              --wrapper build/tools/wibo \
+              --output build/${{ matrix.version }}/mwcc_data_alignment.json
+        fi
+
+    # Metadata and synthetic probes only: no original objects or payloads.
+    - name: Upload data comparison diagnostics
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.version }}_data_diagnostics
+        path: |
+          build/${{ matrix.version }}/data_match_diagnostics.json
+          build/${{ matrix.version }}/zero_data_layout.json
+          build/${{ matrix.version }}/data_link_diagnostics.json
+          build/${{ matrix.version }}/mwcc_data_alignment.json
+          build/${{ matrix.version }}/small_data_reference_diagnostics.json
+        if-no-files-found: ignore
+
     - name: Verify registered assembly branch targets
       run: |
         test -d build/${{ matrix.version }}/asm

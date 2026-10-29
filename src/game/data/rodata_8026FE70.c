@@ -1,5 +1,8 @@
 #include "dolphin/types.h"
 
+/* These byte arrays retain the exact mapped positions inside their source
+ * section; explicit byte alignment avoids compiler-inserted internal gaps. */
+
 /* Auto-carved .rodata unit 0x8026FE70..0x8026FF00 (5 objects; split from
  * rodata_8026FE58.c, whose 0x8026FE58 __constants belong to crt/runtime.c).
  * Non-relocated data emitted byte-exact as const u8[]. */
@@ -11,7 +14,7 @@ const u8 lbl_8026FE70[54] = {
     0x61, 0x62, 0x6C, 0x65, 0x0A, 0x00,
 };
 
-const u8 gap_04_8026FEA6_rodata[2] = {
+const u8 gap_04_8026FEA6_rodata[2] __attribute__((aligned(1))) = {
     0x00, 0x00,
 };
 
@@ -22,7 +25,7 @@ const u8 lbl_8026FEA8[57] = {
     0x6C, 0x74, 0x20, 0x68, 0x65, 0x61, 0x70, 0x0A, 0x00,
 };
 
-const u8 gap_04_8026FEE1_rodata[7] = {
+const u8 gap_04_8026FEE1_rodata[7] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 

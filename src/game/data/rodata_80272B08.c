@@ -1,5 +1,8 @@
 #include "dolphin/types.h"
 
+/* These byte arrays retain the exact mapped positions inside their source
+ * section; explicit byte alignment avoids compiler-inserted internal gaps. */
+
 /* .rodata after dbgMenu's GSmem check strings (0x80272AE0 - 0x80272B08,
  * owned by dbgMenu_r61_middle_8013327C.c). */
 
@@ -10,6 +13,6 @@ const u8 lbl_80272B08[51] = {
     0x21, 0x0A, 0x00,
 };
 
-const u8 gap_04_80272B3B_rodata[5] = {
+const u8 gap_04_80272B3B_rodata[5] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00,
 };

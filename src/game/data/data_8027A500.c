@@ -1,5 +1,10 @@
 #include "dolphin/types.h"
 
+#if defined(COMMON_REL_FONT_DATA) && defined(COMMON_REL_MESSAGE_DATA)
+#error Select one common_rel resource view
+#endif
+
+#if !defined(COMMON_REL_FONT_DATA) && !defined(COMMON_REL_MESSAGE_DATA)
 #pragma section ".data"
 
 extern void* lbl_8027A500[];
@@ -294,9 +299,54 @@ extern u8 scriptStoreTemochiPokemon[];
 extern u8 scriptWaitSyncMotion[];
 extern u8 soundStop[];
 extern u8 testEvolution__Fv[];
+#endif
+
+#ifdef COMMON_REL_FONT_DATA
+/* The REL and DOL font bytes are identical (see docs/DATA_MATCHING.md).
+ * Some glyph words happen to resemble DOL addresses. The DOL owner keeps
+ * its original symbolic relocations, but the resource's REL representation
+ * has no relocations at these words. Resolve those existing source values
+ * to the canonical addresses from config/GC6E01/symbols.txt in this view.
+ * SIInterruptHandler_800CFA60 is dtk's alias for local SIInterruptHandler. */
+#define lbl_8027A500 lbl_125_data_2D2C
+#define lbl_802BD260 lbl_125_data_45A94
+#define lbl_802C0CB0 lbl_125_data_494E4
+#define SIInterruptHandler_800CFA60 0x800CFA60
+#define TRKDoStep 0x800BF68C
+#define TRKDoWriteMemory 0x800BFECC
+#define __CARDEraseSector 0x800AFFE0
+#define dbgFlagMenuCursor 0x80008C40
+#define dbgMenuFightStop 0x80007FDC
+#define dbgMenuPokemonEdit 0x800096B4
+#define demoScene18 0x8008F91C
+#define fn_80006908 0x80006908
+#define fn_80011EA4 0x80011EA4
+#define fn_8001329C 0x8001329C
+#define fn_8002CE6C 0x8002CE6C
+#define fn_8003F464 0x8003F464
+#define fn_800FEF8C 0x800FEF8C
+#define itemFieldUseRecover 0x80021B14
+#define lbl_80003FF0 0x80003FF0
+#define lbl_803FF000 0x803FF000
+#define mainLogicTask 0x80005FA8
+#define menuFightButtonSecretMain 0x8000FE38
+#define menuFightButtonSecretPokemonTop 0x8000ED34
+#define menuFightDrawBall 0x8000FFA8
+#define testEvolution__Fv 0x8000CD50
+#endif
+
+#ifdef COMMON_REL_MESSAGE_DATA
+#define lbl_802CF810 lbl_125_data_647B4
+#endif
 
 /* Auto-carved .data unit 0x8027A500..0x802E28EC (7 objects). Non-relocated data as byte-exact u8[]; pointer/jump tables as void*[] for R_PPC_ADDR32 relocations. */
 
+#if !defined(COMMON_REL_MESSAGE_DATA)
+#ifdef COMMON_REL_FONT_DATA
+/* Resource boundaries are four-byte aligned; suppress preferred alignment
+ * of large arrays so the eight-byte terminator introduces no extra gaps. */
+__attribute__((aligned(4)))
+#endif
 void* lbl_8027A500[68440] = {
     (void*)0x00001616,
     (void*)0x00014ED0,
@@ -68740,6 +68790,23 @@ void* lbl_8027A500[68440] = {
     (void*)0x00000000,
 };
 
+#ifdef COMMON_REL_FONT_DATA
+/* GSmsgFontOpen returns immediately for font ID 0xFFFF. The known
+ * eight-byte resource's structural fields were independently verified
+ * as {0xFFFF, 0, 0, 0}; it is not a glyph payload. */
+struct SharedFontTerminator {
+    u16 id;
+    u8 width;
+    u8 height;
+    u32 nextOffset;
+};
+typedef char SharedFontTerminatorSize[(sizeof(struct SharedFontTerminator) == 8) ? 1 : -1];
+struct SharedFontTerminator lbl_125_data_45A8C = {0xFFFF, 0, 0, 0};
+#endif
+
+#ifdef COMMON_REL_FONT_DATA
+__attribute__((aligned(4)))
+#endif
 void* lbl_802BD260[3732] = {
     (void*)0x00001616,
     (void*)0x000038B0,
@@ -72475,6 +72542,9 @@ void* lbl_802BD260[3732] = {
     (void*)0x00000000,
 };
 
+#ifdef COMMON_REL_FONT_DATA
+__attribute__((aligned(4)))
+#endif
 void* lbl_802C0CB0[15064] = {
     (void*)0x00011212,
     (void*)0x0000EAE0,
@@ -87542,6 +87612,12 @@ void* lbl_802C0CB0[15064] = {
     (void*)0x00000000,
 };
 
+#endif /* !COMMON_REL_MESSAGE_DATA */
+
+#if !defined(COMMON_REL_FONT_DATA)
+#ifdef COMMON_REL_MESSAGE_DATA
+__attribute__((aligned(4)))
+#endif
 u8 lbl_802CF810[74976] = {
     0x00, 0x00, 0x00, 0x01, 0x02, 0xAC, 0x55, 0x53, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x1E, 0x4A,
@@ -93793,6 +93869,9 @@ u8 lbl_802CF810[74976] = {
     0x00, 0x65, 0x00, 0x2E, 0xFF, 0xFF, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
+#endif /* !COMMON_REL_FONT_DATA */
+
+#if !defined(COMMON_REL_FONT_DATA) && !defined(COMMON_REL_MESSAGE_DATA)
 void* lbl_802E1CF0[742] = {
     (void*)0x00000000,
     (void*)0x00000000,
@@ -94561,4 +94640,5 @@ void* lbl_802E2888[18] = {
 
 /* 0x802E28D0 - 0x802E28EC (jumptable_802E28D0) belongs to the linked
  * game/gs_task_residual_80006908.c: it is fn_80006908's own switch table. */
+#endif
 

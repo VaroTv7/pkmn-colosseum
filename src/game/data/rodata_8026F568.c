@@ -1,5 +1,8 @@
 #include "dolphin/types.h"
 
+/* These byte arrays retain the exact mapped positions inside their source
+ * section; explicit byte alignment avoids compiler-inserted internal gaps. */
+
 extern u8 pokemonSetLevelBasisStatus[];
 extern u8 fn_80197C70[];
 extern u8 wsCmdB2[];
@@ -20,7 +23,7 @@ const u8 lbl_8026F568[11] = {
     0x70, 0x6F, 0x6B, 0x65, 0x63, 0x6F, 0x6E, 0x76, 0x2E, 0x63, 0x00,
 };
 
-const u8 gap_04_8026F573_rodata[1] = {
+const u8 gap_04_8026F573_rodata[1] __attribute__((aligned(1))) = {
     0x00,
 };
 
@@ -31,7 +34,7 @@ const u8 lbl_8026F574[49] = {
     0x00,
 };
 
-const u8 gap_04_8026F5A5_rodata[3] = {
+const u8 gap_04_8026F5A5_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -40,7 +43,7 @@ const u8 lbl_8026F5A8[19] = {
     0x2E, 0x63, 0x00,
 };
 
-const u8 gap_04_8026F5BB_rodata[5] = {
+const u8 gap_04_8026F5BB_rodata[5] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -55,7 +58,7 @@ const u8 lbl_8026F5E4[17] = {
     0x00,
 };
 
-const u8 gap_04_8026F5F5_rodata[3] = {
+const u8 gap_04_8026F5F5_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 

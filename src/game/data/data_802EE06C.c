@@ -4,10 +4,14 @@
 
 extern void* jumptable_802EE06C[];
 
-extern u8 fn_8006F720[];
+extern void fn_8006F720(void* menu);
 
-/* Carved .data unit 0x802EE06C..0x802EE0F0: fn_8006F720's switch table. It
- * starts 4-aligned, so the compiled table cannot link from its own unit. */
+/* RULE-EXCEPTION(user-approved): named stand-in for another function's
+ * compiler switch table - see docs/RULE_EXCEPTIONS.md.
+ * This definition is included after menu_middle_r59_8006CCC0_o1.c's generated
+ * tables. Its 0x802EE06C..0x802EE0F0 span starts four-byte aligned at .data+0xBC,
+ * so it shares that source owner instead of introducing an eight-byte-aligned
+ * standalone section. fn_8006F720 imports this table after exact comparison. */
 void* jumptable_802EE06C[33] = {
     (void*)((u8*)fn_8006F720 + 0x80),
     (void*)((u8*)fn_8006F720 + 0x88),

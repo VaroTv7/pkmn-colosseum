@@ -80,10 +80,10 @@ void* fight_encount_wipe_data[34] = {
     (void*)((u8*)fadeEffectHookFunction_fadeout_in_Init),
     (void*)0x0100048A,
     (void*)0x40200000,
-    (void*)((u8*)fadeEffectHookFunction_fadein_Init),
+    (void*)((u8*)fadeEffectHookFunction_trainer_Init),
     (void*)0x00000000,
     (void*)0x3DCCCCCD,
-    (void*)((u8*)fadeEffectHookFunction_trainer_Init),
+    (void*)((u8*)fadeEffectHookFunction_fadein_Init),
     (void*)0x00000000,
 };
 
@@ -238,15 +238,18 @@ void* lbl_80375E44[1] = {
     (void*)((u8*)lbl_80375F39),
 };
 
-u8 lbl_80375E48[9] = {
+/* These bytecode records are adjacent without word-alignment padding.
+ * The existing payloads have no target ELF relocations; keep their original
+ * encoded operands while preserving each record's separate symbol. */
+u8 lbl_80375E48[9] __attribute__((aligned(1))) = {
     0x10, 0x00, 0x00, 0x77, 0x03, 0x12, 0x00, 0x40, 0xEF,
 };
 
-u8 lbl_80375E51[14] = {
+u8 lbl_80375E51[14] __attribute__((aligned(1))) = {
     0xF0, 0x80, 0x37, 0x5E, 0x5E, 0x10, 0x00, 0x00, 0x76, 0xA7, 0x12, 0x00,
     0x40, 0xF7,
 };
 
-u8 lbl_80375E5F[1] = {
+u8 lbl_80375E5F[1] __attribute__((aligned(1))) = {
     0xF6,
 };

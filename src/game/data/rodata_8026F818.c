@@ -1,5 +1,8 @@
 #include "dolphin/types.h"
 
+/* These byte arrays retain the exact mapped positions inside their source
+ * section; explicit byte alignment avoids compiler-inserted internal gaps. */
+
 /* Auto-carved .rodata 0x8026F818..0x8026F858 (the MetroTRK dispatch strings that
  * followed, 0x8026F858..0x8026FA34, are owned by TRKDispatch_range_800BF53C.c). */
 
@@ -8,7 +11,7 @@ const u8 lbl_8026F818[25] = {
     0x20, 0x30, 0x78, 0x25, 0x30, 0x38, 0x78, 0x0A, 0x00,
 };
 
-const u8 gap_04_8026F831_rodata[3] = {
+const u8 gap_04_8026F831_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -17,6 +20,6 @@ const u8 lbl_8026F834[29] = {
     0x65, 0x20, 0x65, 0x72, 0x72, 0x20, 0x3D, 0x20, 0x25, 0x6C, 0x64, 0x0A, 0x00,
 };
 
-const u8 gap_04_8026F851_rodata[7] = {
+const u8 gap_04_8026F851_rodata[7] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };

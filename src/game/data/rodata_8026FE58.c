@@ -1,5 +1,9 @@
 #include "dolphin/types.h"
 
+/* Padding is byte-aligned: MWCC otherwise aligns these arrays to four bytes
+ * and moves the following strings. Retain every original byte in this owner. */
+#pragma force_active on
+
 /* Auto-carved .rodata unit 0x8026FE2C..0x8026FE58 (3 objects; __constants at
  * 0x8026FE58 belongs to crt/runtime.c, 0x8026FE70.. is rodata_8026FE70.c). Non-relocated data emitted byte-exact as const u8[]; pointer/jump tables as const void*[] for R_PPC_ADDR32 relocations. */
 
@@ -8,7 +12,7 @@ const u8 lbl_8026FE2C[19] = {
     0x74, 0x0A, 0x00,
 };
 
-const u8 gap_04_8026FE3F_rodata[1] = {
+const u8 gap_04_8026FE3F_rodata[1] __attribute__((aligned(1))) = {
     0x00,
 };
 
@@ -16,3 +20,5 @@ const u8 lbl_8026FE40[24] = {
     0x44, 0x4F, 0x4E, 0x45, 0x20, 0x43, 0x41, 0x4C, 0x4C, 0x49, 0x4E, 0x47, 0x20, 0x45, 0x58, 0x49,
     0x32, 0x5F, 0x49, 0x6E, 0x69, 0x74, 0x0A, 0x00,
 };
+
+#pragma force_active reset

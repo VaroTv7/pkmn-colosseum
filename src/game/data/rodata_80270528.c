@@ -1,5 +1,8 @@
 #include "dolphin/types.h"
 
+/* These byte arrays retain the exact mapped positions inside their source
+ * section; explicit byte alignment avoids compiler-inserted internal gaps. */
+
 extern u8 HSD_AObjGetAllocData[];
 extern u8 HSD_ChanGetAllocData[];
 extern u8 HSD_DListGetAllocData[];
@@ -328,7 +331,7 @@ const u8 lbl_8027056C[81] = {
     0x00,
 };
 
-const u8 gap_04_802705BD_rodata[3] = {
+const u8 gap_04_802705BD_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -343,7 +346,7 @@ const u8 lbl_802705D0[61] = {
     0x6F, 0x6E, 0x6D, 0x65, 0x6E, 0x74, 0x20, 0x6D, 0x61, 0x70, 0x21, 0x0A, 0x00,
 };
 
-const u8 gap_04_8027060D_rodata[3] = {
+const u8 gap_04_8027060D_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -355,7 +358,7 @@ const u8 lbl_80270610[65] = {
     0x00,
 };
 
-const u8 gap_04_80270651_rodata[7] = {
+const u8 gap_04_80270651_rodata[7] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -500,7 +503,7 @@ const u8 lbl_80270DFC[43] = {
     0x20, 0x2D, 0x3E, 0x20, 0x25, 0x30, 0x38, 0x58, 0x68, 0x0A, 0x00,
 };
 
-const u8 gap_04_80270E27_rodata[1] = {
+const u8 gap_04_80270E27_rodata[1] __attribute__((aligned(1))) = {
     0x00,
 };
 
@@ -510,7 +513,7 @@ const u8 lbl_80270E28[37] = {
     0x49, 0x4F, 0x4E, 0x29, 0x00,
 };
 
-const u8 gap_04_80270E4D_rodata[3] = {
+const u8 gap_04_80270E4D_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -518,7 +521,7 @@ const u8 lbl_80270E50[10] = {
     0x74, 0x72, 0x61, 0x6E, 0x73, 0x6C, 0x61, 0x74, 0x65, 0x00,
 };
 
-const u8 gap_04_80270E5A_rodata[6] = {
+const u8 gap_04_80270E5A_rodata[6] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -526,7 +529,7 @@ const u8 lbl_80270E60[10] = {
     0x74, 0x72, 0x61, 0x6E, 0x73, 0x6C, 0x61, 0x74, 0x65, 0x00,
 };
 
-const u8 gap_04_80270E6A_rodata[2] = {
+const u8 gap_04_80270E6A_rodata[2] __attribute__((aligned(1))) = {
     0x00, 0x00,
 };
 
@@ -536,7 +539,7 @@ const u8 lbl_80270E6C[37] = {
     0x49, 0x4F, 0x4E, 0x29, 0x00,
 };
 
-const u8 gap_04_80270E91_rodata[7] = {
+const u8 gap_04_80270E91_rodata[7] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -544,7 +547,7 @@ const u8 lbl_80270E98[9] = {
     0x73, 0x68, 0x61, 0x64, 0x6F, 0x77, 0x2E, 0x68, 0x00,
 };
 
-const u8 gap_04_80270EA1_rodata[7] = {
+const u8 gap_04_80270EA1_rodata[7] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -552,7 +555,7 @@ const u8 lbl_80270EA8[10] = {
     0x74, 0x72, 0x61, 0x6E, 0x73, 0x6C, 0x61, 0x74, 0x65, 0x00,
 };
 
-const u8 gap_04_80270EB2_rodata[6] = {
+const u8 gap_04_80270EB2_rodata[6] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -567,7 +570,7 @@ const u8 lbl_80270EE8[37] = {
     0x49, 0x4F, 0x4E, 0x29, 0x00,
 };
 
-const u8 gap_04_80270F0D_rodata[3] = {
+const u8 gap_04_80270F0D_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -578,7 +581,7 @@ const u8 lbl_80270F10[49] = {
     0x00,
 };
 
-const u8 gap_04_80270F41_rodata[3] = {
+const u8 gap_04_80270F41_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -589,7 +592,7 @@ const u8 lbl_80270F44[49] = {
     0x00,
 };
 
-const u8 gap_04_80270F75_rodata[3] = {
+const u8 gap_04_80270F75_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -598,7 +601,7 @@ const u8 lbl_80270F78[29] = {
     0x64, 0x65, 0x20, 0x74, 0x6F, 0x6F, 0x20, 0x64, 0x65, 0x65, 0x70, 0x0A, 0x00,
 };
 
-const u8 gap_04_80270F95_rodata[3] = {
+const u8 gap_04_80270F95_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -608,7 +611,7 @@ const u8 lbl_80270F98[35] = {
     0x74, 0x0A, 0x00,
 };
 
-const u8 gap_04_80270FBB_rodata[1] = {
+const u8 gap_04_80270FBB_rodata[1] __attribute__((aligned(1))) = {
     0x00,
 };
 
@@ -620,7 +623,7 @@ const u8 lbl_80270FBC[69] = {
     0x25, 0x64, 0x5D, 0x0A, 0x00,
 };
 
-const u8 gap_04_80271001_rodata[7] = {
+const u8 gap_04_80271001_rodata[7] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -630,7 +633,7 @@ const u8 lbl_80271008[46] = {
     0x55, 0x3D, 0x3D, 0x46, 0x41, 0x4C, 0x45, 0x27, 0x20, 0x4F, 0x4B, 0x3F, 0x0A, 0x00,
 };
 
-const u8 gap_04_80271036_rodata[2] = {
+const u8 gap_04_80271036_rodata[2] __attribute__((aligned(1))) = {
     0x00, 0x00,
 };
 
@@ -640,7 +643,7 @@ const u8 lbl_80271038[42] = {
     0x20, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x73, 0x0A, 0x00,
 };
 
-const u8 gap_04_80271062_rodata[6] = {
+const u8 gap_04_80271062_rodata[6] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -753,7 +756,7 @@ const u8 lbl_802717D4[23] = {
     0x69, 0x6C, 0x65, 0x64, 0x2E, 0x0A, 0x00,
 };
 
-const u8 gap_04_802717EB_rodata[5] = {
+const u8 gap_04_802717EB_rodata[5] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -763,7 +766,7 @@ const u8 lbl_802717F0[35] = {
     0x64, 0x0A, 0x00,
 };
 
-const u8 gap_04_80271813_rodata[1] = {
+const u8 gap_04_80271813_rodata[1] __attribute__((aligned(1))) = {
     0x00,
 };
 

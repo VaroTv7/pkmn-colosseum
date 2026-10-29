@@ -7,6 +7,24 @@
  */
 #include "dolphin/types.h"
 
+/* On-disk MessageGroup prefix consumed by GSmsgOpen/GSmsgFindMessage.
+ * The original fields at 0x02 and 0x06 retain their recorded values;
+ * message storage follows the index and is addressed by relative offset. */
+typedef struct RelMessageHeader {
+    /* 0x00 */ u16 groupId;
+    /* 0x02 */ u8 reserved02;
+    /* 0x03 */ u8 fontId;
+    /* 0x04 */ u16 count;
+    /* 0x06 */ u16 reserved06;
+    /* 0x08 */ struct RelMessageHeader* next;
+    /* 0x0C */ struct RelMessageHeader* previous;
+} RelMessageHeader;
+
+typedef struct RelMessageIndex {
+    u32 key;
+    u32 offset;
+} RelMessageIndex;
+
 /* Song table entry (snd_song_table.c). */
 typedef struct SndSong {
     /* 0x0 */ u32 fileId;

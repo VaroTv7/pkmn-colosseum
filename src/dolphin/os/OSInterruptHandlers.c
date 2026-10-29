@@ -1,6 +1,8 @@
 #include "dolphin/os/OSInterrupt.h"
 
-__OSInterruptHandler* InterruptHandlerTable_8047A710;
+/* The shared small-data owner begins at this pointer so its source section
+ * retains eight-byte alignment without adding bytes before the next object. */
+extern __OSInterruptHandler* InterruptHandlerTable_8047A710;
 
 __OSInterruptHandler __OSSetInterruptHandler(__OSInterrupt interrupt, __OSInterruptHandler handler) {
     __OSInterruptHandler old = InterruptHandlerTable_8047A710[interrupt];

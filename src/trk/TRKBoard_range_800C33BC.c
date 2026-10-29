@@ -10,7 +10,9 @@ extern char lbl_8026FB94[];
 
 #if defined(TRK_BOARD_800C33BC_800C3414)
 
-static s32 TRK_mainError;
+/* Shared BSS starts at this word, preserving the original eight-byte owner
+ * alignment. DTK's address-qualified alias keeps the local symbol traceable. */
+extern s32 TRK_mainError_803FED60;
 
 /* TRK_main - 0x800C33BC | size 0x58 | scope global */
 void TRK_main(void) {
@@ -23,13 +25,13 @@ void TRK_main(void) {
 
     MWTRACE(1, "TRK_Main \n");
     error = TRKInitializeNub();
-    TRK_mainError = error;
+    TRK_mainError_803FED60 = error;
     if (error == 0) {
         TRKNubWelcome();
         TRKNubMainLoop();
     }
     error = TRKTerminateNub();
-    TRK_mainError = error;
+    TRK_mainError_803FED60 = error;
 }
 
 #endif

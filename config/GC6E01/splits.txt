@@ -1375,10 +1375,7 @@ game/menu/menu_middle_candidate_8006C7D4.c:
 
 game/menu/menu_middle_r59_8006CCC0_o1.c:
 	.text       start:0x8006CCC0 end:0x8006D940
-	.data       start:0x802EDFB0 end:0x802EE06C
-
-game/data/data_802EE06C.c:
-	.data       start:0x802EE06C end:0x802EE0F0
+	.data       start:0x802EDFB0 end:0x802EE0F0
 
 game/menu/menu_middle_r59_8006D940_suffix.c:
 	.text       start:0x8006D940 end:0x8006DC28
@@ -1795,7 +1792,7 @@ dolphin/sdk_r48_80099790_suffix.c:
 	.text       start:0x80099790 end:0x8009A0E0
 	.data       start:0x8030FFA0 end:0x80310198
 	.bss        start:0x803FB4A0 end:0x803FB4F0
-	.sdata      start:0x80478970 end:0x8047897C
+	.sdata      start:0x80478970 end:0x80478990
 
 dolphin/os/OSGetExceptionHandler.c:
 	.text       start:0x8009A0E0 end:0x8009A0F4
@@ -1868,7 +1865,6 @@ dolphin/sdk_candidate_8009DF3C.c:
 
 dolphin/os/OSInterruptHandlers.c:
 	.text       start:0x8009DF88 end:0x8009DFB8
-	.sbss       start:0x8047A710 end:0x8047A714
 
 dolphin/os/OSInterrupt.c:
 	.text       start:0x8009DFB8 end:0x8009E7A8
@@ -2155,7 +2151,7 @@ game/data/data_80312500.c:
 	.data       start:0x80312500 end:0x80312554
 
 game/data/data_80312558.c:
-	.data       start:0x80312558 end:0x8031259C
+	.data       start:0x80312558 end:0x803125A0
 
 game/data/data_803125E8.c:
 	.data       start:0x803125E8 end:0x80312668
@@ -2508,8 +2504,8 @@ trk/TRKDispatch_range_800BF53C.c:
 	.rodata     start:0x8026F858 end:0x8026FA34
 	.data       start:0x803137E0 end:0x80313818
 
-game/data/data_80313824.c:
-	.data       start:0x80313824 end:0x803138B0
+trk/TRKRestoreFlags.c:
+	.data       start:0x80313818 end:0x803138B0
 
 game/data/rodata_8026FA34.c:
 	.rodata     start:0x8026FA34 end:0x8026FA40
@@ -2593,7 +2589,6 @@ trk/TRKInit.c:
 trk/TRKBoard_exact_800C33BC.c:
 	.text       start:0x800C33BC end:0x800C3414
 	.rodata     start:0x8026FB80 end:0x8026FB8B
-	.bss        start:0x803FED60 end:0x803FED64
 
 trk/TRKBoard_candidate_800C3414.c:
 	.text       start:0x800C3414 end:0x800C349C
@@ -2692,6 +2687,9 @@ dolphin/sdk_r52_800C4D8C_suffix.c:
 
 crt/exit.c:
 	.text       start:0x800C4E44 end:0x800C5458
+
+crt/ansi_files_data.c:
+	.data       start:0x803138B0 end:0x803139F0
 
 dolphin/sdk_range_800C5458.c:
 	.text       start:0x800C5458 end:0x800C754C
@@ -3711,7 +3709,7 @@ game/data/data_8035B500.c:
 	.data       start:0x8035B500 end:0x8035B878
 
 game/data/data_8035B8A0.c:
-	.data       start:0x8035B8A0 end:0x8035B8B4
+	.data       start:0x8035B8A0 end:0x8035B904
 
 game/data/data_8035B904.c:
 	.data       start:0x8035B904 end:0x8035B950
@@ -4082,10 +4080,7 @@ game/hero.c:
 
 game/hero_savedata_exact_80129280.c:
 	.text       start:0x80129280 end:0x8012A450
-	.data       start:0x803634A8 end:0x803634EC
-
-game/data/data_803634EC.c:
-	.data       start:0x803634EC end:0x803634F0
+	.data       start:0x803634A8 end:0x803634F0
 
 game/hero_bios_exact_8012A450.c:
 	.text       start:0x8012A450 end:0x8012AC9C
@@ -4761,7 +4756,7 @@ game/pslist.c:
 game/particle.c:
 	.text       start:0x80169034 end:0x8016A644
 	.rodata     start:0x80273820 end:0x802738B8
-	.data       start:0x8036BF80 end:0x8036BFA4
+	.data       start:0x8036BF80 end:0x8036BFC0
 	.bss        start:0x804527C8 end:0x80452DE8
 	.sdata2     start:0x8047D5B0 end:0x8047D5C0
 
@@ -5285,7 +5280,7 @@ game/data/data_8036CFA8.c:
 hsd/tev.c:
 	.text       start:0x801B3168 end:0x801B42C0
 	.data       start:0x8036CFE8 end:0x8036D258
-	.bss        start:0x80465728 end:0x804657AC
+	.bss        start:0x80465728 end:0x804657C0
 	.sbss       start:0x8047B358 end:0x8047B374
 	.sdata2     start:0x8047DE60 end:0x8047DE70
 
@@ -5798,7 +5793,7 @@ dolphin/thp/THPAudioDecode.c:
 dolphin/thp/THPVideoDecode.c:
 	.text       start:0x801E4EF0 end:0x801E5548
 	.bss        start:0x8046C190 end:0x8046D500
-	.sbss       start:0x8047B488 end:0x8047B490
+	.sbss       start:0x8047B488 end:0x8047B4A0
 
 dolphin/thp/THPDec.c:
 	.text       start:0x801E5548 end:0x801ECFE0
@@ -6873,6 +6868,12 @@ game/data/sbss_8047A7D8.c:
 game/data/data_80311CB8.c:
 	.data       start:0x80311CB8 end:0x80311D36
 
+game/data/data_80311FEC.c:
+	.data       start:0x80311FEC end:0x80312078
+
+game/data/data_80311DB8.c:
+	.data       start:0x80311DB8 end:0x80311E54
+
 game/data/sbss_8047A8A0.c:
 	.sbss       start:0x8047A8A0 end:0x8047A978
 
@@ -6965,3 +6966,117 @@ game/data/bss_803FB380.c:
 
 game/data/bss_803FB488.c:
 	.bss        start:0x803FB488 end:0x803FB4A0
+
+# Zero-initialized owners reconstructed from the existing symbol boundaries.
+game/data/sbss2_8047E700.c:
+	.sbss2      start:0x8047E700 end:0x8047E708
+
+game/data/sbss_80478DC0.c:
+	.sbss       start:0x80478DC0 end:0x8047A6E0
+
+game/data/sbss_8047A714.c:
+	.sbss       start:0x8047A710 end:0x8047A760
+
+game/data/sbss_8047A9A0.c:
+	.sbss       start:0x8047A9A0 end:0x8047A9F0
+
+game/data/bss_803FED64.c:
+	.bss        start:0x803FED60 end:0x803FFFB0
+
+game/data/sbss_8047AA28.c:
+	.sbss       start:0x8047AA28 end:0x8047AA50
+
+game/data/sbss_8047AA60.c:
+	.sbss       start:0x8047AA60 end:0x8047AAF8
+
+game/data/sbss_8047AB18.c:
+	.sbss       start:0x8047AB18 end:0x8047AF18
+
+game/data/sbss2_8047E718.c:
+	.sbss2      start:0x8047E718 end:0x8047E728
+
+game/data/sbss_8047B050.c:
+	.sbss       start:0x8047B050 end:0x8047B128
+
+game/data/sbss_8047B318.c:
+	.sbss       start:0x8047B318 end:0x8047B358
+
+game/data/sbss_8047B398.c:
+	.sbss       start:0x8047B398 end:0x8047B3D0
+
+game/data/sbss_8047B3D8.c:
+	.sbss       start:0x8047B3D8 end:0x8047B460
+
+game/data/sbss_8047B5B8.c:
+	.sbss       start:0x8047B5B8 end:0x8047B670
+
+# Developer diagnostic strings reconstructed from existing source names.
+game/data/data_80315678.c:
+	.data       start:0x80315678 end:0x80315690
+
+game/data/data_8035B060.c:
+	.data       start:0x8035B060 end:0x8035B088
+
+game/data/data_8035B878.c:
+	.data       start:0x8035B878 end:0x8035B8A0
+
+game/data/data_8035B988.c:
+	.data       start:0x8035B988 end:0x8035B9F8
+
+game/data/data_8035BA10.c:
+	.data       start:0x8035BA10 end:0x8035BA48
+
+game/data/data_8035BA60.c:
+	.data       start:0x8035BA60 end:0x8035BB50
+
+# SDK diagnostics/version literals reconstructed from source uses and build records.
+game/data/data_80311A24.c:
+	.data       start:0x80311A24 end:0x80311AC8
+
+game/data/data_803124B8.c:
+	.data       start:0x803124B8 end:0x80312500
+
+game/data/data_803125A0.c:
+	.data       start:0x803125A0 end:0x803125E8
+
+# Typed small game state, with complete fallback arrays for interior aliases.
+game/data/sdata_80478820.c:
+	.sdata      start:0x80478820 end:0x804788CC
+
+# Coordinate pairs have original interior labels; include D4..D8 so the next
+# compiled section retains its natural eight-byte alignment.
+game/data/sdata_804788CC.c:
+	.sdata      start:0x804788CC end:0x804788D8 align:4
+
+game/data/sdata_804788D8.c:
+	.sdata      start:0x804788D8 end:0x80478950
+
+# Two whole four-byte controller arrays, each with an interior mapped label.
+game/data/sdata_80478950.c:
+	.sdata      start:0x80478950 end:0x80478958
+
+game/data/sdata_80478958.c:
+	.sdata      start:0x80478958 end:0x80478970
+
+# Typed battle state and sequence pairs; unresolved labels stay original-backed.
+game/data/sdata_80478D08.c:
+	.sdata      start:0x80478D08 end:0x80478D78
+
+# One eight-byte flag array has original interior labels at offsets 3 and 5.
+# Preserve the complete array until a verified alias representation is available.
+game/data/sdata_80478D78.c:
+	.sdata      start:0x80478D78 end:0x80478D80
+
+game/data/sdata_80478D80.c:
+	.sdata      start:0x80478D80 end:0x80478D8C
+
+# Preserve the full unresolved damage operand extent without source credit.
+game/data/sdata_80478D8C.c:
+	.sdata      start:0x80478D8C end:0x80478D98 align:4
+
+game/data/sdata_80478D98.c:
+	.sdata      start:0x80478D98 end:0x80478DB4
+
+# Explicit initialized zeros; original symbol extents guarded before source linking.
+game/data/data_8038FF64.c:
+	.data       start:0x8038FF64 end:0x8038FFFC
