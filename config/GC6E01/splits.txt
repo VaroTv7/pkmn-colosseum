@@ -1792,7 +1792,7 @@ dolphin/sdk_r48_80099790_suffix.c:
 	.text       start:0x80099790 end:0x8009A0E0
 	.data       start:0x8030FFA0 end:0x80310198
 	.bss        start:0x803FB4A0 end:0x803FB4F0
-	.sdata      start:0x80478970 end:0x8047897C
+	.sdata      start:0x80478970 end:0x80478990
 
 dolphin/os/OSGetExceptionHandler.c:
 	.text       start:0x8009A0E0 end:0x8009A0F4
@@ -2151,7 +2151,7 @@ game/data/data_80312500.c:
 	.data       start:0x80312500 end:0x80312554
 
 game/data/data_80312558.c:
-	.data       start:0x80312558 end:0x8031259C
+	.data       start:0x80312558 end:0x803125A0
 
 game/data/data_803125E8.c:
 	.data       start:0x803125E8 end:0x80312668
@@ -6868,6 +6868,12 @@ game/data/sbss_8047A7D8.c:
 game/data/data_80311CB8.c:
 	.data       start:0x80311CB8 end:0x80311D36
 
+game/data/data_80311FEC.c:
+	.data       start:0x80311FEC end:0x80312078
+
+game/data/data_80311DB8.c:
+	.data       start:0x80311DB8 end:0x80311E54
+
 game/data/sbss_8047A8A0.c:
 	.sbss       start:0x8047A8A0 end:0x8047A978
 
@@ -7022,3 +7028,24 @@ game/data/data_8035BA10.c:
 
 game/data/data_8035BA60.c:
 	.data       start:0x8035BA60 end:0x8035BB50
+
+# SDK diagnostics/version literals reconstructed from source uses and build records.
+game/data/data_80311A24.c:
+	.data       start:0x80311A24 end:0x80311AC8
+
+game/data/data_803124B8.c:
+	.data       start:0x803124B8 end:0x80312500
+
+game/data/data_803125A0.c:
+	.data       start:0x803125A0 end:0x803125E8
+
+# Typed small game state; all original mapped symbols and bytes are retained.
+game/data/sdata_80478820.c:
+	.sdata      start:0x80478820 end:0x80478970
+
+# Typed battle state and sequence pairs; the 18-byte middle interval stays original-backed.
+game/data/sdata_80478D08.c:
+	.sdata      start:0x80478D08 end:0x80478D86
+
+game/data/sdata_80478D98.c:
+	.sdata      start:0x80478D98 end:0x80478DB4

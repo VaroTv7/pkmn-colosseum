@@ -634,6 +634,46 @@ config.libs = [
         "Runtime.PPCEABI.H",
         "GC/1.2.5n",
         [
+            # Typed task/menu/GBA defaults and small lookup tables.
+            Object(
+                Matching,
+                "game/data/sdata_80478820.c",
+                extra_cflags=["-sdata 8", "-sdata2 0"],
+                progress_category="game",
+            ),
+            # Typed battle counts, flag state and purification sequence pairs.
+            Object(
+                Matching,
+                "game/data/sdata_80478D08.c",
+                extra_cflags=["-sdata 8", "-sdata2 0"],
+                progress_category="game",
+            ),
+            Object(
+                Matching,
+                "game/data/sdata_80478D98.c",
+                extra_cflags=["-sdata 8", "-sdata2 0"],
+                progress_category="game",
+            ),
+            # SDK source literals reconstructed from existing uses and build records.
+            Object(
+                Matching,
+                "game/data/data_80311A24.c",
+                data_alignment=4,
+                extra_cflags=["-sdata 0", "-sdata2 0"],
+                progress_category="sdk",
+            ),
+            Object(
+                Matching,
+                "game/data/data_803124B8.c",
+                extra_cflags=["-sdata 0", "-sdata2 0"],
+                progress_category="sdk",
+            ),
+            Object(
+                Matching,
+                "game/data/data_803125A0.c",
+                extra_cflags=["-sdata 0", "-sdata2 0"],
+                progress_category="sdk",
+            ),
             # Source diagnostic names; private CI verifies their full section bytes.
             Object(
                 Matching,
@@ -815,6 +855,19 @@ config.libs = [
                 Matching,
                 "game/data/data_80311CB8.c",
                 extra_cflags=["-sdata 0", "-sdata2 0"],
+                progress_category="game",
+            ),
+            Object(
+                Matching,
+                "game/data/data_80311FEC.c",
+                extra_cflags=["-sdata 0"],
+                data_alignment=4,
+                progress_category="game",
+            ),
+            Object(
+                Matching,
+                "game/data/data_80311DB8.c",
+                extra_cflags=["-sdata 0"],
                 progress_category="game",
             ),
             Object(

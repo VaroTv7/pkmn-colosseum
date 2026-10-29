@@ -2,3 +2,4 @@
    with its .data, .sdata and .bss. */
 #define SDK_OS_SUFFIX_ONLY
 #include "src/dolphin/sdk_range_80098108.c"
+#include "src/dolphin/os/OSSmallData.c"

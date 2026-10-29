@@ -12,166 +12,84 @@
  */
 #include "rel/common_rel.h"
 
-/* Named local literals preserve source-owned extents for comparison and
- * SN assembler section-relative addends for the retail REL link. Each
- * retains its original four-byte boundary in the ProDG literal pool. */
-static const char lbl_125_rodata_56C[22] __attribute__((aligned(4))) = "sound/ev_kinpaku.song";
-static const char lbl_125_rodata_584[19] __attribute__((aligned(4))) = "sound/gs_logo.song";
-static const char lbl_125_rodata_598[21] __attribute__((aligned(4))) = "sound/me_ex_tre.song";
-static const char lbl_125_rodata_5B0[21] __attribute__((aligned(4))) = "sound/me_winwin.song";
-static const char lbl_125_rodata_5C8[19] __attribute__((aligned(4))) = "sound/virtual.song";
-static const char lbl_125_rodata_5DC[23] __attribute__((aligned(4))) = "sound/siren_atmos.song";
-static const char lbl_125_rodata_5F4[20] __attribute__((aligned(4))) = "sound/level_up.song";
-static const char lbl_125_rodata_608[22] __attribute__((aligned(4))) = "sound/end_roll_c.song";
-static const char lbl_125_rodata_620[20] __attribute__((aligned(4))) = "sound/end_ev_2.song";
-static const char lbl_125_rodata_634[20] __attribute__((aligned(4))) = "sound/end_ev_1.song";
-static const char lbl_125_rodata_648[25] __attribute__((aligned(4))) = "sound/hyper_shiccho.song";
-static const char lbl_125_rodata_664[19] __attribute__((aligned(4))) = "sound/jyakira.song";
-static const char lbl_125_rodata_678[21] __attribute__((aligned(4))) = "sound/open_roll.song";
-static const char lbl_125_rodata_690[21] __attribute__((aligned(4))) = "sound/demo_roll.song";
-static const char lbl_125_rodata_6A8[21] __attribute__((aligned(4))) = "sound/fanfare03.song";
-static const char lbl_125_rodata_6C0[21] __attribute__((aligned(4))) = "sound/me_chukei.song";
-static const char lbl_125_rodata_6D8[21] __attribute__((aligned(4))) = "sound/miraclebo.song";
-static const char lbl_125_rodata_6F0[21] __attribute__((aligned(4))) = "sound/ev_shadow.song";
-static const char lbl_125_rodata_708[17] __attribute__((aligned(4))) = "sound/title.song";
-static const char lbl_125_rodata_71C[22] __attribute__((aligned(4))) = "sound/end_roll_b.song";
-static const char lbl_125_rodata_734[21] __attribute__((aligned(4))) = "sound/worldmap2.song";
-static const char lbl_125_rodata_74C[18] __attribute__((aligned(4))) = "sound/tretre.song";
-static const char lbl_125_rodata_760[23] __attribute__((aligned(4))) = "sound/battle9plus.song";
-static const char lbl_125_rodata_778[18] __attribute__((aligned(4))) = "sound/shinpi.song";
-static const char lbl_125_rodata_78C[19] __attribute__((aligned(4))) = "sound/battle8.song";
-static const char lbl_125_rodata_7A0[20] __attribute__((aligned(4))) = "sound/worldmap.song";
-static const char lbl_125_rodata_7B4[22] __attribute__((aligned(4))) = "sound/ev_shiccho.song";
-static const char lbl_125_rodata_7CC[21] __attribute__((aligned(4))) = "sound/ev_snatch.song";
-static const char lbl_125_rodata_7E4[19] __attribute__((aligned(4))) = "sound/battle9.song";
-static const char lbl_125_rodata_7F8[21] __attribute__((aligned(4))) = "sound/me_relive.song";
-static const char lbl_125_rodata_810[21] __attribute__((aligned(4))) = "sound/me_snatch.song";
-static const char lbl_125_rodata_828[18] __attribute__((aligned(4))) = "sound/me_win.song";
-static const char lbl_125_rodata_83C[19] __attribute__((aligned(4))) = "sound/battle6.song";
-static const char lbl_125_rodata_850[22] __attribute__((aligned(4))) = "sound/agb_shinka.song";
-static const char lbl_125_rodata_868[25] __attribute__((aligned(4))) = "sound/agb_me_shinka.song";
-static const char lbl_125_rodata_884[22] __attribute__((aligned(4))) = "sound/agb_fanfa5.song";
-static const char lbl_125_rodata_89C[19] __attribute__((aligned(4))) = "sound/dungeon.song";
-static const char lbl_125_rodata_8B0[21] __attribute__((aligned(4))) = "sound/mt_battle.song";
-static const char lbl_125_rodata_8C8[21] __attribute__((aligned(4))) = "sound/fanfare02.song";
-static const char lbl_125_rodata_8E0[21] __attribute__((aligned(4))) = "sound/fanfare01.song";
-static const char lbl_125_rodata_8F8[21] __attribute__((aligned(4))) = "sound/fanfare00.song";
-static const char lbl_125_rodata_910[23] __attribute__((aligned(4))) = "sound/agb_fanfa1b.song";
-static const char lbl_125_rodata_928[22] __attribute__((aligned(4))) = "sound/me_welcome.song";
-static const char lbl_125_rodata_940[18] __attribute__((aligned(4))) = "sound/me_fue.song";
-static const char lbl_125_rodata_954[24] __attribute__((aligned(4))) = "sound/tool_battle3.song";
-static const char lbl_125_rodata_96C[24] __attribute__((aligned(4))) = "sound/tool_battle2.song";
-static const char lbl_125_rodata_984[24] __attribute__((aligned(4))) = "sound/tool_battle1.song";
-static const char lbl_125_rodata_99C[22] __attribute__((aligned(4))) = "sound/tool_music.song";
-static const char lbl_125_rodata_9B4[24] __attribute__((aligned(4))) = "sound/me_undertime.song";
-static const char lbl_125_rodata_9CC[19] __attribute__((aligned(4))) = "sound/me_news.song";
-static const char lbl_125_rodata_9E0[21] __attribute__((aligned(4))) = "sound/darkside4.song";
-static const char lbl_125_rodata_9F8[19] __attribute__((aligned(4))) = "sound/battle5.song";
-static const char lbl_125_rodata_A0C[22] __attribute__((aligned(4))) = "sound/agb_me_asa.song";
-static const char lbl_125_rodata_A24[19] __attribute__((aligned(4))) = "sound/battle2.song";
-static const char lbl_125_rodata_A38[19] __attribute__((aligned(4))) = "sound/battle7.song";
-static const char lbl_125_rodata_A4C[23] __attribute__((aligned(4))) = "sound/chakumelo09.song";
-static const char lbl_125_rodata_A64[23] __attribute__((aligned(4))) = "sound/chakumelo08.song";
-static const char lbl_125_rodata_A7C[23] __attribute__((aligned(4))) = "sound/chakumelo07.song";
-static const char lbl_125_rodata_A94[23] __attribute__((aligned(4))) = "sound/chakumelo06.song";
-static const char lbl_125_rodata_AAC[23] __attribute__((aligned(4))) = "sound/chakumelo05.song";
-static const char lbl_125_rodata_AC4[23] __attribute__((aligned(4))) = "sound/chakumelo04.song";
-static const char lbl_125_rodata_ADC[23] __attribute__((aligned(4))) = "sound/chakumelo03.song";
-static const char lbl_125_rodata_AF4[23] __attribute__((aligned(4))) = "sound/chakumelo02.song";
-static const char lbl_125_rodata_B0C[23] __attribute__((aligned(4))) = "sound/chakumelo01.song";
-static const char lbl_125_rodata_B24[23] __attribute__((aligned(4))) = "sound/chakumelo00.song";
-static const char lbl_125_rodata_B3C[21] __attribute__((aligned(4))) = "sound/darkunder.song";
-static const char lbl_125_rodata_B54[18] __attribute__((aligned(4))) = "sound/gtsolo.song";
-static const char lbl_125_rodata_B68[20] __attribute__((aligned(4))) = "sound/mirrorbo.song";
-static const char lbl_125_rodata_B7C[27] __attribute__((aligned(4))) = "sound/wind_atmos_loop.song";
-static const char lbl_125_rodata_B98[17] __attribute__((aligned(4))) = "sound/saint.song";
-static const char lbl_125_rodata_BAC[19] __attribute__((aligned(4))) = "sound/pokecen.song";
-static const char lbl_125_rodata_BC0[20] __attribute__((aligned(4))) = "sound/darkside.song";
-static const char lbl_125_rodata_BD4[19] __attribute__((aligned(4))) = "sound/country.song";
-static const char lbl_125_rodata_BE8[18] __attribute__((aligned(4))) = "sound/stand2.song";
-static const char lbl_125_rodata_BFC[17] __attribute__((aligned(4))) = "sound/stand.song";
-static const char lbl_125_rodata_C10[21] __attribute__((aligned(4))) = "sound/watercity.song";
-static const char lbl_125_rodata_C28[21] __attribute__((aligned(4))) = "sound/windycity.song";
-static const char lbl_125_rodata_C40[20] __attribute__((aligned(4))) = "sound/null_bgm.song";
-
 SndSong lbl_125_data_111B8C[79] = {
-    { 0x019F0800, lbl_125_rodata_C40 },
-    { 0x01A40800, lbl_125_rodata_C28 },
-    { 0x01A20800, lbl_125_rodata_C10 },
-    { 0x01A00800, lbl_125_rodata_BFC },
-    { 0x01A10800, lbl_125_rodata_BE8 },
-    { 0x01E30800, lbl_125_rodata_BD4 },
-    { 0x01E20800, lbl_125_rodata_BC0 },
-    { 0x01E50800, lbl_125_rodata_BAC },
-    { 0x01E40800, lbl_125_rodata_B98 },
-    { 0x01A30800, lbl_125_rodata_B7C },
+    { 0x019F0800, "sound/null_bgm.song" },
+    { 0x01A40800, "sound/windycity.song" },
+    { 0x01A20800, "sound/watercity.song" },
+    { 0x01A00800, "sound/stand.song" },
+    { 0x01A10800, "sound/stand2.song" },
+    { 0x01E30800, "sound/country.song" },
+    { 0x01E20800, "sound/darkside.song" },
+    { 0x01E50800, "sound/pokecen.song" },
+    { 0x01E40800, "sound/saint.song" },
+    { 0x01A30800, "sound/wind_atmos_loop.song" },
     { 0x00000000, NULL },
-    { 0x01E60800, lbl_125_rodata_B68 },
-    { 0x01E70800, lbl_125_rodata_B54 },
-    { 0x01E80800, lbl_125_rodata_B3C },
-    { 0x02EE0800, lbl_125_rodata_B24 },
-    { 0x02F10800, lbl_125_rodata_B0C },
-    { 0x02F20800, lbl_125_rodata_AF4 },
-    { 0x02F30800, lbl_125_rodata_ADC },
-    { 0x02F40800, lbl_125_rodata_AC4 },
-    { 0x02F50800, lbl_125_rodata_AAC },
-    { 0x02F60800, lbl_125_rodata_A94 },
-    { 0x02F70800, lbl_125_rodata_A7C },
-    { 0x02F80800, lbl_125_rodata_A64 },
-    { 0x02F90800, lbl_125_rodata_A4C },
-    { 0x030A0800, lbl_125_rodata_A38 },
-    { 0x03080800, lbl_125_rodata_A24 },
-    { 0x03330800, lbl_125_rodata_A0C },
-    { 0x05EF0800, lbl_125_rodata_9F8 },
-    { 0x05F00800, lbl_125_rodata_9E0 },
-    { 0x05F10800, lbl_125_rodata_9CC },
-    { 0x05F20800, lbl_125_rodata_9B4 },
-    { 0x06A40800, lbl_125_rodata_99C },
-    { 0x06A10800, lbl_125_rodata_984 },
-    { 0x06A20800, lbl_125_rodata_96C },
-    { 0x06A30800, lbl_125_rodata_954 },
-    { 0x06F10800, lbl_125_rodata_940 },
-    { 0x06F20800, lbl_125_rodata_928 },
-    { 0x06F00800, lbl_125_rodata_910 },
-    { 0x08070800, lbl_125_rodata_8F8 },
-    { 0x08080800, lbl_125_rodata_8E0 },
-    { 0x08090800, lbl_125_rodata_8C8 },
-    { 0x080A0800, lbl_125_rodata_8B0 },
-    { 0x080F0800, lbl_125_rodata_89C },
-    { 0x080B0800, lbl_125_rodata_884 },
-    { 0x080C0800, lbl_125_rodata_868 },
-    { 0x080D0800, lbl_125_rodata_850 },
-    { 0x080E0800, lbl_125_rodata_83C },
-    { 0x0B5A0800, lbl_125_rodata_828 },
-    { 0x0B590800, lbl_125_rodata_810 },
-    { 0x0B580800, lbl_125_rodata_7F8 },
-    { 0x0B570800, lbl_125_rodata_7E4 },
-    { 0x0BE80800, lbl_125_rodata_7CC },
-    { 0x0BE70800, lbl_125_rodata_7B4 },
-    { 0x0D120800, lbl_125_rodata_7A0 },
-    { 0x0D110800, lbl_125_rodata_78C },
-    { 0x0D600800, lbl_125_rodata_778 },
-    { 0x0D5F0800, lbl_125_rodata_760 },
-    { 0x0D710800, lbl_125_rodata_74C },
-    { 0x0DAA0800, lbl_125_rodata_734 },
-    { 0x0FED0800, lbl_125_rodata_71C },
-    { 0x0FF00800, lbl_125_rodata_708 },
-    { 0x0FEE0800, lbl_125_rodata_6F0 },
-    { 0x0FEF0800, lbl_125_rodata_6D8 },
-    { 0x0FF10800, lbl_125_rodata_6C0 },
-    { 0x10810800, lbl_125_rodata_6A8 },
-    { 0x10900800, lbl_125_rodata_690 },
-    { 0x10A20800, lbl_125_rodata_678 },
-    { 0x10A30800, lbl_125_rodata_664 },
-    { 0x10B40800, lbl_125_rodata_648 },
-    { 0x10B30800, lbl_125_rodata_634 },
-    { 0x11140800, lbl_125_rodata_620 },
-    { 0x11490800, lbl_125_rodata_608 },
-    { 0x114A0800, lbl_125_rodata_5F4 },
-    { 0x114C0800, lbl_125_rodata_5DC },
-    { 0x114D0800, lbl_125_rodata_5C8 },
-    { 0x114F0800, lbl_125_rodata_5B0 },
-    { 0x114E0800, lbl_125_rodata_598 },
-    { 0x119A0800, lbl_125_rodata_584 },
-    { 0x12640800, lbl_125_rodata_56C },
+    { 0x01E60800, "sound/mirrorbo.song" },
+    { 0x01E70800, "sound/gtsolo.song" },
+    { 0x01E80800, "sound/darkunder.song" },
+    { 0x02EE0800, "sound/chakumelo00.song" },
+    { 0x02F10800, "sound/chakumelo01.song" },
+    { 0x02F20800, "sound/chakumelo02.song" },
+    { 0x02F30800, "sound/chakumelo03.song" },
+    { 0x02F40800, "sound/chakumelo04.song" },
+    { 0x02F50800, "sound/chakumelo05.song" },
+    { 0x02F60800, "sound/chakumelo06.song" },
+    { 0x02F70800, "sound/chakumelo07.song" },
+    { 0x02F80800, "sound/chakumelo08.song" },
+    { 0x02F90800, "sound/chakumelo09.song" },
+    { 0x030A0800, "sound/battle7.song" },
+    { 0x03080800, "sound/battle2.song" },
+    { 0x03330800, "sound/agb_me_asa.song" },
+    { 0x05EF0800, "sound/battle5.song" },
+    { 0x05F00800, "sound/darkside4.song" },
+    { 0x05F10800, "sound/me_news.song" },
+    { 0x05F20800, "sound/me_undertime.song" },
+    { 0x06A40800, "sound/tool_music.song" },
+    { 0x06A10800, "sound/tool_battle1.song" },
+    { 0x06A20800, "sound/tool_battle2.song" },
+    { 0x06A30800, "sound/tool_battle3.song" },
+    { 0x06F10800, "sound/me_fue.song" },
+    { 0x06F20800, "sound/me_welcome.song" },
+    { 0x06F00800, "sound/agb_fanfa1b.song" },
+    { 0x08070800, "sound/fanfare00.song" },
+    { 0x08080800, "sound/fanfare01.song" },
+    { 0x08090800, "sound/fanfare02.song" },
+    { 0x080A0800, "sound/mt_battle.song" },
+    { 0x080F0800, "sound/dungeon.song" },
+    { 0x080B0800, "sound/agb_fanfa5.song" },
+    { 0x080C0800, "sound/agb_me_shinka.song" },
+    { 0x080D0800, "sound/agb_shinka.song" },
+    { 0x080E0800, "sound/battle6.song" },
+    { 0x0B5A0800, "sound/me_win.song" },
+    { 0x0B590800, "sound/me_snatch.song" },
+    { 0x0B580800, "sound/me_relive.song" },
+    { 0x0B570800, "sound/battle9.song" },
+    { 0x0BE80800, "sound/ev_snatch.song" },
+    { 0x0BE70800, "sound/ev_shiccho.song" },
+    { 0x0D120800, "sound/worldmap.song" },
+    { 0x0D110800, "sound/battle8.song" },
+    { 0x0D600800, "sound/shinpi.song" },
+    { 0x0D5F0800, "sound/battle9plus.song" },
+    { 0x0D710800, "sound/tretre.song" },
+    { 0x0DAA0800, "sound/worldmap2.song" },
+    { 0x0FED0800, "sound/end_roll_b.song" },
+    { 0x0FF00800, "sound/title.song" },
+    { 0x0FEE0800, "sound/ev_shadow.song" },
+    { 0x0FEF0800, "sound/miraclebo.song" },
+    { 0x0FF10800, "sound/me_chukei.song" },
+    { 0x10810800, "sound/fanfare03.song" },
+    { 0x10900800, "sound/demo_roll.song" },
+    { 0x10A20800, "sound/open_roll.song" },
+    { 0x10A30800, "sound/jyakira.song" },
+    { 0x10B40800, "sound/hyper_shiccho.song" },
+    { 0x10B30800, "sound/end_ev_1.song" },
+    { 0x11140800, "sound/end_ev_2.song" },
+    { 0x11490800, "sound/end_roll_c.song" },
+    { 0x114A0800, "sound/level_up.song" },
+    { 0x114C0800, "sound/siren_atmos.song" },
+    { 0x114D0800, "sound/virtual.song" },
+    { 0x114F0800, "sound/me_winwin.song" },
+    { 0x114E0800, "sound/me_ex_tre.song" },
+    { 0x119A0800, "sound/gs_logo.song" },
+    { 0x12640800, "sound/ev_kinpaku.song" },
 };

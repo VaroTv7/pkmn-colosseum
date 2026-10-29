@@ -13,10 +13,10 @@ sys.path.insert(0, str(ROOT))
 from tools import prodg_comparison_object as helper
 
 
-def fixture(source=True):
+def fixture(source=True, *, literal_labels=True, table_name="fixture_table"):
     names = ["", ".data", ".rodata", ".rela.data", ".symtab", ".strtab", ".shstrtab"]
     shstr = b"\0".join(x.encode() for x in names) + b"\0"
-    strings = b"\0.LC0\0.LC1\0target_first\0target_second\0fixture_table\0"
+    strings = b"\0.LC0\0.LC1\0target_first\0target_second\0" + table_name.encode() + b"\0"
 
     def symbol(name, value, size, info, section):
         return struct.pack(">IIIBBH", strings.index(name.encode() + b"\0") if name else 0,
@@ -25,11 +25,13 @@ def fixture(source=True):
     symbols = bytes(16)
     symbols += symbol("", 0, 0, 3, 1)
     symbols += symbol("", 0, 0, 3, 2)
-    symbols += symbol(".LC0" if source else "target_first", 0, 0 if source else 4,
-                      0 if source else 1, 2)
-    symbols += symbol(".LC1" if source else "target_second", 4, 0 if source else 4,
-                      0 if source else 1, 2)
-    symbols += symbol("fixture_table", 0, 12, 0x11, 1)
+    if not source or literal_labels:
+        symbols += symbol(".LC0" if source else "target_first", 0, 0 if source else 4,
+                          0 if source else 1, 2)
+        symbols += symbol(".LC1" if source else "target_second", 4, 0 if source else 4,
+                          0 if source else 1, 2)
+    first_global = len(symbols) // 16
+    symbols += symbol(table_name, 0, 12, 0x11, 1)
     relas = [(4, 2, 0), (8, 2, 4)] if source else [(4, 3, 0), (8, 4, 0)]
     rela = b"".join(struct.pack(">IIi", offset, sym << 8 | 1, addend)
                     for offset, sym, addend in relas)
@@ -38,7 +40,7 @@ def fixture(source=True):
     kinds = [0, 1, 1, 4, 2, 3, 3]
     flags = [0, 3, 2, 0, 0, 0, 0]
     links = [0, 0, 0, 4, 5, 0, 0]
-    infos = [0, 0, 0, 1, 5, 0, 0]
+    infos = [0, 0, 0, 1, first_global, 0, 0]
     entsizes = [0, 0, 0, 12, 16, 0, 0]
     blob, sections = bytearray(52), [(0,) * 10]
     for i, payload in enumerate(payloads[1:], 1):
@@ -98,6 +100,63 @@ class ComparisonCopyTests(unittest.TestCase):
         source = patch(self.source, section_offset(self.source, ".data") + 8, ">I", 0)
         _, summary = helper.comparison_copy(source, self.target)
         self.assertEqual(summary["duplicate_addend_words_normalized"], 0)
+
+    def test_unlabeled_pool_appends_global_objects_without_reindexing_relocations(self):
+        source = fixture(literal_labels=False)
+        before = helper.Elf(source)
+        output, summary = helper.comparison_copy(source, self.target)
+        after = helper.Elf(output)
+        self.assertEqual(after.symbols[:len(before.symbols)], before.symbols)
+        added = after.symbols[len(before.symbols):]
+        self.assertEqual([name for name, _ in added],
+                         ["__objdiff_rodata_00000000", "__objdiff_rodata_00000004"])
+        self.assertEqual([symbol[1:4] for _, symbol in added], [(0, 4, 0x11), (4, 4, 0x11)])
+        self.assertEqual(after.sections[after.table_index][7], before.sections[before.table_index][7])
+        self.assertEqual(after.payload(before.names.index(".rela.data")),
+                         before.payload(before.names.index(".rela.data")))
+        self.assertEqual(after.relocations(), before.relocations())
+        self.assertEqual(after.payload(before.names.index(".rodata")), before.payload(2))
+        self.assertEqual(summary["literal_objects_added"], 2)
+        self.assertEqual(summary["inferred_literal_alignment_bytes_verified"], 0)
+        self.assertEqual(summary["duplicate_addend_words_normalized"], 1)
+        self.assertGreater(len(output), len(source))
+        self.assertEqual(source, fixture(literal_labels=False))
+
+    def test_unlabeled_pool_sizes_strings_separately_from_verified_padding(self):
+        source = fixture(literal_labels=False)
+        source = patch(source, section_offset(source, ".rodata"), ">8s", b"a\0\0\0bb\0\0")
+        target = patch(self.target, section_offset(self.target, ".rodata"), ">8s", b"a\0\0\0bb\0\0")
+        target = patch(target, section_offset(target, ".symtab") + 3 * 16 + 8, ">I", 2)
+        target = patch(target, section_offset(target, ".symtab") + 4 * 16 + 8, ">I", 3)
+        output, summary = helper.comparison_copy(source, target)
+        self.assertEqual([s[1][2] for s in helper.Elf(output).symbols[-2:]], [2, 3])
+        self.assertEqual(summary["inferred_literal_alignment_bytes_verified"], 3)
+
+    def test_unlabeled_pool_rejects_embedded_data_unterminated_strings_and_long_gaps(self):
+        for pool in (b"a\0b\0two\0", b"one\0twoX"):
+            source = fixture(literal_labels=False)
+            source = patch(source, section_offset(source, ".rodata"), ">8s", pool)
+            target = patch(self.target, section_offset(self.target, ".rodata"), ">8s", pool)
+            with self.subTest(pool=repr(pool)), self.assertRaisesRegex(ValueError, "literal"):
+                helper.comparison_copy(source, target)
+        source = fixture(literal_labels=False)
+        source = patch(source, section_offset(source, ".rodata"), ">8s", b"a\0\0\0\0\0b\0")
+        source = patch(source, section_offset(source, ".data") + 8, ">I", 6)
+        source = patch(source, section_offset(source, ".rela.data") + 20, ">i", 6)
+        target = patch(self.target, section_offset(self.target, ".rodata"), ">8s", b"a\0\0\0\0\0b\0")
+        target = patch(target, section_offset(target, ".rela.data") + 20, ">i", 2)
+        with self.assertRaisesRegex(ValueError, "alignment padding"):
+            helper.comparison_copy(source, target)
+
+    def test_unlabeled_pool_rejects_unreferenced_prefix_and_symbol_name_collision(self):
+        source = fixture(literal_labels=False)
+        source = patch(source, section_offset(source, ".rela.data") + 8, ">i", 1)
+        target = patch(self.target, section_offset(self.target, ".rela.data") + 8, ">i", 1)
+        with self.assertRaisesRegex(ValueError, "start at zero"):
+            helper.comparison_copy(source, target)
+        source = fixture(literal_labels=False, table_name="__objdiff_rodata_00000000")
+        with self.assertRaisesRegex(ValueError, "already exists"):
+            helper.comparison_copy(source, self.target)
 
     def test_named_source_strings_need_no_literal_metadata_changes(self):
         source = bytearray(self.source)

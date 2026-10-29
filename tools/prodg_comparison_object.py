@@ -8,6 +8,8 @@ It never reads target bytes into the output. Every relocation must have the
 same site, type and resolved section/offset (or external symbol/addend), and
 every remaining byte must already be equal. Compiler-local literal labels
 receive source-derived sizes so objdiff can compare the whole literal pool.
+When the assembler has discarded those labels, verified source relocation
+targets identify the literals, and comparison-only global symbols are added.
 
 Only data-only, big-endian ELF32 PowerPC objects with explicit ADDR32 RELA
 relocations are supported. Unsupported layouts and differences fail closed.
@@ -45,6 +47,7 @@ class Elf:
             raise ValueError("Expected a big-endian ELF32 PowerPC relocatable object")
         if h[8] != 52 or h[9] or h[10] or h[11] != 40 or not 0 < h[12] < 0xFF00:
             raise ValueError("Unsupported ELF header layout")
+        self.section_header_offset = h[6]
         self.sections = [struct.unpack(">10I", chunk(blob, h[6] + i * 40, 40))
                          for i in range(h[12])]
         if h[13] >= len(self.sections) or self.sections[h[13]][1] != 3:
@@ -147,6 +150,68 @@ class Elf:
         return result
 
 
+def inferred_literals(source, relocations):
+    """Infer an unlabeled pool exclusively from source ADDR32 destinations."""
+    rodata = source.allocated[".rodata"]
+    if any(symbol[5] == rodata and symbol[3] & 15 != 3
+           for _, symbol in source.symbols):
+        raise ValueError("Unrecognized symbols in an unlabeled literal pool")
+    starts = sorted({identity[2] for _, identity, _ in relocations.values()
+                     if identity[:2] == ("section", ".rodata")})
+    pool = source.payload(rodata)
+    if not starts or starts[0] != 0:
+        raise ValueError("Source literal relocation targets must start at zero")
+    names = {name for name, _ in source.symbols}
+    literals = []
+    padding = 0
+    for start, end in zip(starts, starts[1:] + [len(pool)]):
+        value = pool[start:end]
+        terminator = value.find(b"\0")
+        if terminator < 0:
+            raise ValueError("Inferred literal has no NUL terminator")
+        size = terminator + 1
+        gap = value[size:]
+        if len(gap) > 3 or any(gap):
+            raise ValueError("Inferred literal interval has invalid alignment padding")
+        name = f"__objdiff_rodata_{start:08X}"
+        if name in names:
+            raise ValueError("Generated literal symbol name already exists")
+        literals.append((name, start, size))
+        names.add(name)
+        padding += len(gap)
+    return literals, padding
+
+
+def append_literal_metadata(source, output, literals):
+    """Append new metadata tables while preserving every existing symbol index."""
+    table_index = source.table_index
+    table = source.sections[table_index]
+    strings_index = table[6]
+    strings = bytearray(source.payload(strings_index))
+    symbols = bytearray(source.payload(table_index))
+    for name, offset, size in literals:
+        name_offset = len(strings)
+        strings.extend(name.encode("ascii") + b"\0")
+        # Appending globals leaves the existing locals/globals boundary and
+        # all relocation symbol indices unchanged. These names never link.
+        symbols.extend(struct.pack(">IIIBBH", name_offset, offset, size,
+                                   0x11, 0, source.allocated[".rodata"]))
+    appended = bytearray()
+    allowed = set()
+    for index, payload in ((strings_index, strings), (table_index, symbols)):
+        alignment = source.sections[index][8] or 1
+        if alignment > 16 or alignment & (alignment - 1):
+            raise ValueError("Unsupported metadata-table alignment")
+        appended.extend(bytes(-(len(output) + len(appended)) % alignment))
+        offset = len(output) + len(appended)
+        appended.extend(payload)
+        header = source.section_header_offset + index * 40
+        struct.pack_into(">II", output, header + 16, offset, len(payload))
+        allowed.update(range(header + 16, header + 24))
+    output.extend(appended)
+    return allowed, bytes(appended)
+
+
 def comparison_copy(source_blob, target_blob):
     source, target = Elf(source_blob), Elf(target_blob)
     for name, index in source.allocated.items():
@@ -188,8 +253,10 @@ def comparison_copy(source_blob, target_blob):
               if s[5] == rodata and re.fullmatch(r"\.LC\d+", name)]
     named = [(i, s) for i, (_, s) in enumerate(source.symbols)
              if s[5] == rodata and s[2] and s[3] & 15 == 1]
+    literals = []
+    inferred_padding = 0
     if not labels and not named:
-        raise ValueError("Literal pool needs source-owned literal extents")
+        literals, inferred_padding = inferred_literals(source, before_relocations)
     if labels and min(s[1] for _, s in labels) != 0:
         raise ValueError("Literal pool needs compiler-local .LC labels starting at zero")
     if named:
@@ -217,16 +284,25 @@ def comparison_copy(source_blob, target_blob):
             raise ValueError("Literal label does not own any source bytes")
         struct.pack_into(">IIIBBH", output, table_at + index * 16,
                          s[0], s[1], next_offset - s[1], 1, s[4], s[5])
+    metadata_allowed, appended_metadata = set(), b""
+    if literals:
+        metadata_allowed, appended_metadata = append_literal_metadata(source, output, literals)
     after = Elf(bytes(output))
     if after.relocations() != before_relocations:
         raise ValueError("Comparison copy changed relocation semantics")
-    allowed = set()
+    if literals and after.symbols[:len(source.symbols)] != source.symbols:
+        raise ValueError("Comparison copy changed existing symbol indices or records")
+    for index, section in enumerate(source.sections):
+        if section[1] in (4, 9) and source.payload(index) != after.payload(index):
+            raise ValueError("Comparison copy changed relocation records")
+    allowed = metadata_allowed
     for name, offset in normalized:
         start = source.sections[source.allocated[name]][4] + offset
         allowed.update(range(start, start + 4))
     for index, _ in labels:
         allowed.update(range(table_at + index * 16 + 8, table_at + index * 16 + 13))
-    if len(output) != len(source_blob) or any(
+    if len(output) != len(source_blob) + len(appended_metadata) or \
+            bytes(output[len(source_blob):]) != appended_metadata or any(
             a != b and i not in allowed for i, (a, b) in enumerate(zip(source_blob, output))):
         raise ValueError("Comparison copy changed unrelated object bytes")
     return bytes(output), {
@@ -237,6 +313,8 @@ def comparison_copy(source_blob, target_blob):
         "duplicate_addend_words_normalized": len(normalized),
         "literal_labels_sized": len(labels),
         "named_literal_objects_verified": len(named),
+        "literal_objects_added": len(literals),
+        "inferred_literal_alignment_bytes_verified": inferred_padding,
         "data_bytes_verified": sum(source.sections[i][5] for i in source.allocated.values()),
     }
 

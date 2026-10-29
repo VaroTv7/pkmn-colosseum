@@ -176,15 +176,96 @@ by the surrounding compiled source, not reconstructed variable storage. A fresh
 report must preserve the full 3,565,996-byte denominator, and canonical output
 checks must verify the resulting layout before accepting any additional credit.
 
-The fifth build passes 24 of 26 canonical output hashes. Its main address
-diagnostic traced an eight-byte small-data shift to a two-byte padding array
-in the merged developer-string owner; `-sdata 0` keeps that padding in its
-original initialized-data section. The named sound literals are now local
-`static const` objects so SN's assembler retains the native section-relative
-addends used by the original REL. Their source text and table references are
-unchanged. The existing comparison-only tool normalizes duplicate addend
-words for objdiff while preserving the native object for linking. These
-last fixes still require a complete canonical-output build.
+The sixth build passes 25 of 26 canonical output hashes, including the main
+executable. Its preceding main address diagnostic traced an eight-byte
+small-data shift to a two-byte padding array in the merged developer-string
+owner; `-sdata 0` restores that padding to its original initialized-data
+section. The only remaining differences are 149 byte positions in 84 pointer
+addend words across the two sound tables. Naming their source literals changed
+SN's stored addend representation, even with local `static` linkage.
+
+The sound sources are restored to their exact, previously validated baseline
+form. Their separate comparison copies infer literal extents solely from
+native source relocation targets and terminated strings with checked zero
+alignment gaps. Generated sized symbols belong only to the comparison copy;
+all existing symbol indices and relocation records stay intact. The existing
+comparison tool normalizes duplicate addend words for objdiff, and the original
+native compiler objects remain the actual linker inputs. No target payload
+or target symbol names are used to create source metadata. This correction
+still requires the final complete canonical-output build.
+
+## SDK diagnostics and small OS state
+
+Three additional source owners reconstruct five SDK strings, covering 308
+initialized bytes with their padding. `DVDRead` and `DVDSeekAsyncPrio` already
+reference the two diagnostics in `dvd/dvdfs_range_800A4D28.c`; their wording
+follows the existing adjacent `DVDReadAsync` diagnostic. The DVD, PAD and ARQ
+version pointers already identify the relevant SDK components. Their build
+stamps are recorded in `config/GC6E01/symbolmap/strings.json`, and follow the
+same version format as the existing OS, SI, AI, AR and DSP source definitions.
+
+| Original interval | Reconstructed definitions | Complete SHA-256 |
+| --- | --- | --- |
+| `.data` `0x80311A24–0x80311AC8` | DVD read/seek diagnostics and DVD build version | `affdfd28135a877801c76d43f1c74d98d40463db2f181e30b239fbb44ad3f1b2` |
+| `.data` `0x803124B8–0x80312500` | PAD build version | `19561f5dbc84f3239f5f4deb8dde4c603d8b3fbb2945bd7d91c7e172cf44e015` |
+| `.data` `0x803125A0–0x803125E8` | ARQ build version | `5fd17a9ea3f19b12b48fd826603a9e67049e1cab2f198568750a1ce4267fe810` |
+
+The literal lengths, individual hashes, zero-padding ranges and absence of
+relocations agree with the fifth private-input diagnostic. The DVD owner
+uses the strict source-only four-byte alignment view. The four-byte gap before
+ARQ's eight-byte-aligned start is assigned to the preceding existing AR version
+source owner; no extra variable is invented for that linker padding.
+
+The 20 bytes at `.sdata` `0x8047897C–0x80478990` are reconstructed from the
+existing OS interfaces: the `OSRegisterVersion` report format, the signed
+current-heap handle initialized to `-1`, and the low-arena pointer initialized
+to `(void*)-1`. `sdk_range_8009A2D8.c` and `sdk_range_800C470C.c` declare the
+heap handle as `s32`; its map extent is refined from eight to four bytes, with
+the following independently verified zero word retained as padding.
+`OSArena.c` supplies the arena pointer's type and accessors. Both explicit
+padding words remain address-named storage. The complete reconstructed bytes
+hash to `bd295bb340e3d031a8f97123ad3cddbd8eded5ffbec0fbbe6a47806632b3c444`,
+equal to the fifth diagnostic, with no relocations.
+
+These small definitions are included after the existing OS source in
+`sdk_r48_80099790_suffix.c`, extending its already aligned `.sdata` section
+without editing any function. Native compiler section/symbol comparisons,
+unchanged code identities, the full physical denominator, and canonical output
+hashes still require the next private-input build before acceptance.
+
+## Small game-state source
+
+`sdata_80478820.c` reconstructs the full 336 bytes at
+`0x80478820–0x80478970`. Its 57 existing mapped symbols keep their original
+names, offsets and extents. Typed scalar and array initializers describe the
+task flags, menu state, counts and small lookup tables. Where an existing map
+object includes a zero suffix, its complete storage extent is retained in the
+typed array; the suffix is not assigned an invented runtime meaning. One
+explicit two-byte zero object fills the already mapped gap at `0x804788CA`.
+
+The existing implementations provide independent context for the data:
+
+- `menuFight.c` and `menuPokemon.c` identify four-choice menu IDs through
+  their switches: `0xC4–0xC7` and `0xE93–0xE96`.
+- `pda_exact_80040308.c` indexes the four filter-choice counts, and
+  `pda_exact_8004A7A8.c` uses the caption pulse phase of pi divided by six.
+- `menuCB_BattleStart.c` indexes the four battle-indicator sprite IDs.
+- `cardesavedata.c` uses the eight MSB-first bit masks, four controller masks,
+  and the controller visitation order. The existing mapped labels partition
+  the latter two tables after their first byte; all labels are retained.
+- `menu_bios_range_8005D7F8.c` supplies the record sizes and uses the table
+  counts. The first sprite and item counts equal the existing source table
+  extents divided by `0x18` and `0x1C`, respectively. Their additional stored
+  words remain in their mapped objects without a new semantic claim.
+
+The actual C initializers have been checked against the sixth private-input
+diagnostic: every original symbol's bytes hash equally, and the complete
+section SHA-256 is
+`ab20ac8aec560e027d89020470d4fd6470bd18439f7ef3467a3e4e72dcd6f313`.
+The interval has no relocations. The local layout calculation uses the
+independently probed MWCC scalar, array and explicit alignment rules; native
+compiler and canonical-output validation remain required. No function source,
+original symbol boundary or physical data interval is removed.
 
 ## Resource scope and attribution
 
@@ -266,8 +347,8 @@ symbol covers `0x89D98–0x8BCB4` (7,964 bytes), retaining the complete original
 8,120-byte bank. All four structural interval hashes match the private-input
 diagnostic, and their combined source prefix hashes to
 `d28fdd2d3b968555026b7e9d82d92cfa5d40e2675935dec2ded1794e147417a8`.
-The host compiler layout check passes; native ProDG and complete-bank equality
-for this additional prefix remain pending.
+The sixth private-input build verifies the native ProDG prefix as 100% exact
+and source-linked, and the complete 8,120-byte bank remains byte-identical.
 
 These indices do not reconstruct message text or script instructions. The
 remaining 95,056 message-storage bytes and 7,964 script-storage bytes still
@@ -280,3 +361,10 @@ Count-Sheep's original campaign history and contributor credit remain intact.
 The continuation's commits retain the account-linked coauthor credit when
 building on their source reconstruction. No runtime or gameplay result is
 implied by data matching.
+
+The German and Dutch DVD fatal-error strings are independently reconstructed
+from text already recorded in the tracked `config/GC6E01/symbolmap/strings.json`,
+following the existing English diagnostic source. Their complete source
+regions, including three zero-padding bytes each, reproduce the original
+156-byte and 140-byte section hashes. The latter uses the same strictly
+verified four-byte source-link alignment as other carved data owners.
