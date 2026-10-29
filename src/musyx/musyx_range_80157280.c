@@ -111,9 +111,9 @@ extern f32 lbl_8047D510;
 extern f32 lbl_8047D514;
 extern f64 lbl_8047D518;
 extern f32 lbl_8047D520;
-extern f64 lbl_8047D528;
-extern f32 lbl_8047D530;
-extern f32 lbl_8047D534;
+extern f64 i2fMagic;
+extern f32 value0_6;
+extern f32 value0_3;
 extern u32 lbl_8047B070;
 extern u32 lbl_8047B078;
 extern u32 lbl_8047B07C;
@@ -200,8 +200,8 @@ void HandleReverb(s32* samples, ReverbWork* work, u32 channel)
     stageBase = channel * 3;
     comb = &work->comb[stageBase];
     allpass = &work->allpass[stageBase];
-    wet = work->wet * lbl_8047D530;
-    dry = lbl_8047D530 - wet;
+    wet = work->wet * value0_6;
+    dry = value0_6 - wet;
     preDelay = work->preDelayBuffer[channel];
     preDelayCursor = work->preDelayCursor[channel];
     filtered = work->previous[channel];
@@ -229,7 +229,7 @@ void HandleReverb(s32* samples, ReverbWork* work, u32 channel)
         mixed = ReverbAllpassSample(&allpass[0], mixed, work->feedback);
         mixed = ReverbAllpassSample(&allpass[1], mixed, work->feedback);
         mixed = ReverbAllpassSample(&allpass[2], mixed, work->feedback);
-        filtered = mixed * lbl_8047D534 +
+        filtered = mixed * value0_3 +
                    work->dampingMix * filtered;
         work->previous[channel] = filtered;
         samples[i] = (s32)(wet * filtered + dry * input);
@@ -256,7 +256,7 @@ void HandleReverb(s32* samples, ReverbWork* work, u32 channel)
     mixed = ReverbAllpassSample(&allpass[0], mixed, work->feedback);
     mixed = ReverbAllpassSample(&allpass[1], mixed, work->feedback);
     mixed = ReverbAllpassSample(&allpass[2], mixed, work->feedback);
-    filtered = mixed * lbl_8047D534 + work->dampingMix * filtered;
+    filtered = mixed * value0_3 + work->dampingMix * filtered;
     work->previous[channel] = filtered;
     samples[159] = (s32)(wet * filtered + dry * input);
 

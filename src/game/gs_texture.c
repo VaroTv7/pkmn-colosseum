@@ -21,18 +21,17 @@
  *     (`GStextureUnlockImage(image)` followed by `GXDrawDone`, and
  *     `GStextureLockImage(image, 0)`). GStextureUnlockImage returns
  *     void (see gs_texture.h).
- *   - GStextureConvertFromHW is linked as gs_texture_exact_800EF1E8.c.
- *     Built on its own, this file is the 0x800EF098-0x800EF1E8 unit and
- *     emits only fn_800EF098; the texture-pool state and the functions
- *     from 0x800EF548 on are compiled by gs_texture_candidate_800EF578.c.
+ *   - GStextureConvertFromHW is linked as gs_texture_exact_800EF1E8.c; the
+ *     copy below is kept for the candidate unit (0x800EF098-0x800EF1E8).
  *   - GStextureConvertFromHW, GStextureGetGXformat, GStextureGetTlutFormat,
  *     GStextureGetFormat, GStextureGetMiplevels, GStextureGetYsize,
  *     GStextureGetXsize, GStextureSetFilter, GStextureSetWrap,
  *     GStextureFree, GStextureLoad and GStextureInit are confirmed real
  *     names (matched against the XD reference binary's GStexture.cpp
  *     function order/sizes), replacing the previous fn_ scaffold names.
- *     fn_800EF098 (exact) has no confirmed name yet; it is the inverse of
- *     GStextureConvertToHW (gs_texture_range_800EEF48.c).
+ *     fn_800EF098 has no confirmed name yet. It is exact and linked from
+ *     this unit, which compiles only that function
+ *     (-DGS_TEXTURE_800EF098_ONLY).
  *
  * Debug strings:
  *   "GStexture: invalid texture format"
@@ -66,10 +65,13 @@ extern u8 lbl_80466BC0[];  /* current display descriptor */
 extern u16 _toolentryAlloc__FUl(u32 size); /* GSmemAllocRaw */
 extern void* GSmemLock(u16 handle); /* GSmemGetPtr */
 
-#if defined(GS_TEXTURE_800EF548_SUFFIX_ACTIVE)
+/* The linked unit compiles only fn_800EF098 (-DGS_TEXTURE_800EF098_ONLY);
+ * the rest of the TU is linked from its own gs_texture_exact_* partitions. */
+#if !defined(GS_TEXTURE_800EF098_ONLY)
 /* ===== Global state (sbss/sdata) ===== */
 /* lbl_8047ABF0 : u16 -- texture pool allocation handle */
 static u16 gsTexPoolHandle;
+
 /* lbl_8047ABF8 : u32 -- max texture count */
 static u32 gsTexMaxCount;               /* @sda21 lbl_8047ABF8 */
 /* lbl_8047ABF4 : GStextureHandle* -- base pointer to texture pool */
@@ -82,20 +84,39 @@ static GStextureHandle* gsTexPool;       /* @sda21 lbl_8047ABF4 */
  *  Rearranges CI4 texture pixel data from linear to 4x4 block-tiled
  *  order. Only operates on format 0x44 (GS_CI4).
  * ======================================================================= */
-void fn_800EF098(GStextureHandle* tex) {
-    /* RULE-EXCEPTION(user-approved): declaration order chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
-    u32 byteCount;
+/* RULE-EXCEPTION(user-approved): single-use inline helper chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+static inline u16 GStextureTiledIndex(u16 i, u16 width, u16 blocksPerRow) {
+    u16 block;
     u16 tile;
     u16 row;
-    u16 i;
     u16 column;
+
+    block = i >> 4;
+    tile = block / blocksPerRow;
+    block %= blocksPerRow; /* block column within its tile row */
+    row = (i % 16) / 4;
+    column = i % 4;
+    return ((tile * width + block) << 2) + row * width + column;
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+static inline void GStextureTileImage(u16* converted, u16* source, u16 pixelCount,
+                                      u16 width, u16 blocksPerRow) {
+    u16 i;
+
+    for (i = 0; i < pixelCount; i++) {
+        converted[GStextureTiledIndex(i, width, blocksPerRow)] = source[i];
+    }
+}
+
+void fn_800EF098(GStextureHandle* tex) {
+    u32 byteCount;
     u16* source;
+    u16* converted;
     u16 width;
     u16 pixelCount;
     u16 handle;
-    u16 tileColumn;
     u16 blocksPerRow;
-    u16* converted;
 
     if (tex->format != 0x44) {
         return;
@@ -116,14 +137,7 @@ void fn_800EF098(GStextureHandle* tex) {
 
     converted = GSmemLock(handle);
     blocksPerRow = width >> 2;
-    for (i = 0; i < pixelCount; i++) {
-        column = i % 4;
-        row = (i % 16) / 4;
-        tileColumn = i >> 4;
-        tile = tileColumn / blocksPerRow;
-        tileColumn %= blocksPerRow;
-        converted[(u16)(((tileColumn + tile * width) << 2) + row * width + column)] = source[i];
-    }
+    GStextureTileImage(converted, source, pixelCount, width, blocksPerRow);
 
     memcpy(source, converted, byteCount);
     DCFlushRange(tex->mipData[0], tex->totalSize);
@@ -132,6 +146,82 @@ void fn_800EF098(GStextureHandle* tex) {
     fn_800E24B0(handle);
     GSmemFree(handle);
 }
+
+#if !defined(GS_TEXTURE_800EF098_ONLY)
+/* =======================================================================
+ *  GStextureConvertFromHW | 0x1F8
+ *  Copies the embedded EFB region into a texture image.
+ * ======================================================================= */
+u8 GStextureConvertFromHW(GStextureHandle* tex, u8 clear) {
+    extern void GXSetTexCopySrc(u16, u16, u16, u16);
+    extern void GXSetTexCopyDst(u16, u16, s32, u8);
+    extern void GXCopyTex(void*, u8);
+    extern void GXPixModeSync(void);
+    extern void GXSetZMode(u8, u32, u8);
+    s32 width;
+    s32 height;
+    s32 gxFormat;
+    s32 format;
+    void* image;
+    const u8* display;
+
+    format = tex->format;
+    if (format != 0x90) {
+        if (format < 0x90) {
+            if (format >= 0x46) {
+                return 0;
+            }
+            if (format < 0x40) {
+                return 0;
+            }
+        } else {
+            if (format != 0xA0) {
+                return 0;
+            }
+        }
+    }
+
+    tex->refCount++;
+    format = tex->format;
+    image = tex->mipData[0];
+    display = lbl_80466BC0;
+    switch (format) {
+    case 0: gxFormat = 8; break;
+    case 1: gxFormat = 9; break;
+    case 0x30: gxFormat = 0xA; break;
+    case 0x40: gxFormat = 0; break;
+    case 0x41: gxFormat = 2; break;
+    case 0x42: gxFormat = 1; break;
+    case 0x43: gxFormat = 3; break;
+    case 0x44: gxFormat = 4; break;
+    case 0x45: gxFormat = 6; break;
+    case 0x90: gxFormat = 5; break;
+    case 0xA0: gxFormat = 0x27; break;
+    case 0xB0: gxFormat = 0xE; break;
+    default: gxFormat = -1; break;
+    }
+
+    width = *(u16*)(display + 4);
+    if (tex->width < width) {
+        width = tex->width;
+    }
+    height = *(u16*)(display + 6);
+    if (tex->height < height) {
+        height = tex->height;
+    }
+
+    GXSetTexCopySrc(0, 0, width, height);
+    GXSetTexCopyDst(width, height, gxFormat, tex->mipLevels > 1);
+    GXSetZMode(1, 3, 1);
+    GXCopyTex(image, clear);
+    GXPixModeSync();
+    GXInvalidateTexAll();
+    DCFlushRange(tex->mipData[0], tex->totalSize);
+    GXInvalidateTexAll();
+    tex->refCount--;
+    return 1;
+}
+#endif /* !GS_TEXTURE_800EF098_ONLY */
 
 #endif
 

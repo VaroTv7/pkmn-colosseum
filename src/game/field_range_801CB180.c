@@ -105,7 +105,7 @@ typedef struct SavedataPayload {
 extern u8 lbl_8047B3C8;
 extern u8 lbl_8047B3D0;
 extern MemcardTaskState* lbl_8047B3D4;
-extern u8 lbl_80467168[];
+extern u8 sRandomArea[];
 extern u32 lbl_804670E8[];
 extern const u8 lbl_802758C8[];
 extern const u8 lbl_8036DCA8[];
@@ -216,7 +216,7 @@ void* heroGetStatus(void* data, s32 status, s32 index);
 void heroSetStatus(void* data, s32 status, void* value);
 extern char* strcpy(char*, const char*);
 extern s32 strcmp(const char*, const char*);
-extern const char lbl_802758E8[];
+extern const char sMemcardBanner[];
 extern const char lbl_802792E8[];
 extern u32 lbl_8047E168;
 extern u16 lbl_8047E170;

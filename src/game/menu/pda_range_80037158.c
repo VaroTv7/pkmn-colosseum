@@ -159,6 +159,7 @@ extern void winSpriteSetDisp(void* sprite, s32 disp);
 extern void GSmsgPrintColor(s32 arg0, s32 arg1, s32 arg2, void* data);
 
 #if !defined(PDA_RANGE_EXACT_80037174_ONLY) && !defined(PDA_SAVE_80038A0C_ONLY) && !defined(PDA_DRIVER_8003842C_ONLY)
+#if !defined(PDA_80039128_ONLY)
 void fn_80037158(void)
 {
 }
@@ -169,13 +170,15 @@ void fn_8003715C(void)
 
     flag = lbl_8047A470;
     lbl_8047A470 = 1;
-    /* RULE-EXCEPTION(user-approved): preserve retail's dead computation. */
+    /* RULE-EXCEPTION(user-approved): preserve retail's dead computation. See docs/RULE_EXCEPTIONS.md. */
     flag = 1 - flag;
 }
+#endif /* !PDA_80039128_ONLY */
 #endif
 
 #if !defined(PDA_RANGE_80037158_ONLY)
 #if !defined(PDA_SAVE_80038A0C_ONLY) && !defined(PDA_DRIVER_8003842C_ONLY)
+#if !defined(PDA_80039128_ONLY)
 void fn_80037174(void)
 {
     lbl_8047A470 = 0;
@@ -198,6 +201,9 @@ void pcMenuDrawPurifiedCount(u32 unused, u8* p)
     extern u32 gfxSetFlags();
     extern u32 menuModelRender();
     extern u32 fn_80132A38();
+    extern u32 fn_80005748(void);
+    extern u32 darkPokemonCountFlag14(void);
+    extern u32 darkPokemonCountFlag12(void);
     u32 result;
 
     switch (*(s16*)(p + 6)) {
@@ -430,10 +436,12 @@ void fn_800376C8(void)
 }
 #pragma opt_propagation reset
 #pragma scheduling reset
+#endif /* !PDA_80039128_ONLY */
 #endif /* !PDA_SAVE_80038A0C_ONLY && !PDA_DRIVER_8003842C_ONLY */
 
 #if !defined(PDA_RANGE_EXACT_80037174_ONLY)
 #if !defined(PDA_SAVE_80038A0C_ONLY) && !defined(PDA_DRIVER_8003842C_ONLY)
+#if !defined(PDA_80039128_ONLY)
 /* Four copies of the same fade-in step, one per 0x18-byte record in
    lbl_803A654C. Two shapes here are load-bearing: 0.0f as a literal, because
    retail reloads the constant instead of reusing the compare's copy, and the
@@ -612,9 +620,6 @@ static inline void pdaUpdateOrbitSprite(PdaSprite* sprite, f32 baseAngle,
             step = -step;
         }
         lbl_8047A48C = step;
-        /* Round-trip through double: retail rounds a separate copy (frsp)
-           for the angle update while the store keeps the original. */
-        step = (f64)step;
         lbl_8047A484 += step;
         if (lbl_8047A484 >= 6.28318548f) {
             lbl_8047A484 -= 6.28318548f;
@@ -899,8 +904,10 @@ void fn_80038A00(void)
     lbl_8047A484 = lbl_8047BA58;
 }
 
+#endif /* !PDA_80039128_ONLY */
 #endif /* !PDA_SAVE_80038A0C_ONLY && !PDA_DRIVER_8003842C_ONLY */
 #if !defined(PDA_SAVE_80038A0C_ONLY)
+#if !defined(PDA_80039128_ONLY)
 /* Re-seed the People screen's two 4-entry widget tables and reset the
    carousel angle back to the table's rest value. */
 static inline void pdaResetPeopleTables(u8* base, u8* tbl)
@@ -951,6 +958,7 @@ static inline void pdaResetPeopleTablesFirst(u8* base, u8* tbl)
     lbl_8047A47D = 0;
 }
 
+#endif /* !PDA_80039128_ONLY */
 #endif /* !PDA_SAVE_80038A0C_ONLY */
 static inline void pdaResetPeopleTablesSave(u8* base, u8* tbl)
 {
@@ -977,6 +985,7 @@ static inline void pdaResetPeopleTablesSave(u8* base, u8* tbl)
 }
 
 #if !defined(PDA_SAVE_80038A0C_ONLY)
+#if !defined(PDA_80039128_ONLY)
 /* People screen driver: run the top-level menu, dispatch the four entries,
    and tear the menu down on exit. */
 #pragma peephole off
@@ -1091,8 +1100,10 @@ void std024_dialogDisplayPCBoxMenu(void)
 }
 #pragma peephole reset
 
+#endif /* !PDA_80039128_ONLY */
 #endif /* !PDA_SAVE_80038A0C_ONLY */
 #if !defined(PDA_DRIVER_8003842C_ONLY)
+#if !defined(PDA_80039128_ONLY)
 /* Prime the save-overwrite prompt with the current play time and the two
    hero-name message slots. */
 static inline void pdaFillSavePrompt(void)
@@ -1240,9 +1251,11 @@ s32 pcMenuSave(void)
     return result;
 }
 #pragma peephole reset
+#endif /* !PDA_80039128_ONLY */
 #endif /* !PDA_DRIVER_8003842C_ONLY */
 
 #if !defined(PDA_SAVE_80038A0C_ONLY) && !defined(PDA_DRIVER_8003842C_ONLY)
+#if !defined(PDA_80039128_ONLY)
 s32 fn_80039004(PdaSprite* context, PdaSprite* sprite)
 {
     extern f32 lbl_803A65B0[][3];
@@ -1442,7 +1455,7 @@ static inline s32 pdaBoxItemNum(s32 target)
 
 /* PC item list: cursor/page input, item swapping, and caption refresh. */
 /* RULE-EXCEPTION(user-approved): allocation shaping and local compiler controls;
-   see docs/RULE_EXCEPTIONS.md, itemStorageListKey. */
+   see docs/RULE_EXCEPTIONS.md, fn_80039A84. */
 #pragma push
 #pragma opt_lifetimes off
 #pragma peephole off
@@ -2174,46 +2187,24 @@ s32 pdaSnagListGetTrainerName(s32 index)
 #pragma pop
 
 
-/* pdaMemoBuildList - 0x8003D818 | size: 0xb4
- * Strategy-memo list setup: copies each memo entry's Pokemon ID into
- * lbl_8047A4E4, stores the count in lbl_8047A4E8, clears the list
- * cursor/scroll bytes, draws the memo page (fn_8003E394) and records the
- * count in the scene work.
- * STATUS (94.89%): retail copies `index = count` with mr (ours folds it to
- * li 0) and builds the final field_10 store in r3/r4 instead of r0/r3. */
-#pragma peephole off
-void pdaMemoBuildList(void)
+static inline u16 pda_8003D818_LoadIds(void)
 {
     extern u16* lbl_8047A4E4;
-    extern u16 lbl_8047A4E8;
     extern u16 memoDataGetPokemonID(u16* data, u32 index);
     extern u16 memoDataGetCount(u16* data);
-    extern void fn_8003E394(void);
-    u8* work;
-    struct {
-        u16 count;
-        u32 index;
-    } memo;
+    u32 index;
+    u16 count;
 
-    work = (u8*)&lbl_803A6818;
-    memo.count = 0;
-    memo.index = memo.count;
-    while ((u16)memo.index < memoDataGetCount(0)) {
-        lbl_8047A4E4[(u16)memo.index] =
-            memoDataGetPokemonID(0, memo.index);
-        memo.count++;
-        memo.index++;
+    count = 0;
+    for (index = 0; (u16)index < memoDataGetCount(0); index++) {
+        lbl_8047A4E4[(u16)index] = memoDataGetPokemonID(0, index);
+        count++;
     }
-    lbl_8047A4E8 = memo.count;
-    work[0x158] = 0;
-    work[0x159] = 0;
-    work[0x15b] = 0;
-    work[0x15a] = 0;
-    work[0x15c] = 0;
-    fn_8003E394();
-    lbl_803A6818.field_10 = lbl_8047A4E8;
+    return count;
 }
-#pragma peephole reset
+
+/* Defined after its caller fn_80040308, which retail calls rather than inlines. */
+u16 pdaMemoBuildList(void);
 
 void fn_80041114(void* work)
 {
@@ -2261,7 +2252,7 @@ void fn_80041B5C(PdaSprite* sprite, PdaEvent* event)
 
 #pragma push
 #pragma peephole off
-/* RULE-EXCEPTION(user-approved): allocation-shaping temporaries preserve the retail conversion spill order. */
+/* RULE-EXCEPTION(user-approved): allocation-shaping temporaries preserve the retail conversion spill order. See docs/RULE_EXCEPTIONS.md. */
 void fn_80043CD8(PdaSprite* alphaSprite, PdaSprite* sprite)
 {
     extern u8 lbl_802EF0A8[];
@@ -2391,7 +2382,7 @@ extern u8 lbl_803A6A60[];
 extern PdaListEntry* lbl_8047A4D4;
 extern u32 lbl_8047A4D0;
 extern u32 lbl_8047A4D8;
-extern u32 lbl_8047A4DC;
+extern s32 lbl_8047A4DC;
 extern u32 lbl_8047A4E0;
 extern u16* lbl_8047A4E4;
 extern u16 lbl_8047A4E8;
@@ -2645,7 +2636,7 @@ static inline f32 pdaAbsF(f32 x)
     return x > 0.0f ? x : -x;
 }
 
-/* RULE-EXCEPTION(user-approved): reconstructed inline helpers pdaAbsF/pdaApproach (pdaUpdateFadeAndSelect, fn_80041E48, pdaStrategyMemoRun) — see docs/RULE_EXCEPTIONS.md */
+/* RULE-EXCEPTION(user-approved): reconstructed inline helpers pdaAbsF/pdaApproach (fn_80040018, fn_80041E48, fn_80044630) — see docs/RULE_EXCEPTIONS.md */
 static inline void pdaApproach(f32* current, f32* target, f32 delta)
 {
     f32 step;
@@ -3087,16 +3078,24 @@ static inline void* pdaAlloc(s32 size, s32 align)
     return NULL;
 }
 
+typedef struct PdaSortEntry {
+    s32 key;
+    PdaListEntry entry;
+} PdaSortEntry;
+
 #pragma peephole off
 void fn_8003CF38(void)
 {
+    extern u16 darkPokemonSaveGet4A0(u16 id);
+    extern u8 darkPokemonCheckFlag16(u16 id);
+    extern u16 darkPokemonGetFlag1C(u16 id);
     u8 temporary[8];
-    u8* sortEntries;
-    u8* lower;
-    s32 count;
     s32 gap;
-    s32 i;
+    u8* lower;
     s32 j;
+    u8* sortEntries;
+    s32 i;
+    s32 count;
     u32 allocation;
     u32 handle;
 
@@ -3112,17 +3111,16 @@ void fn_8003CF38(void)
     for (i = 0; i < (s32)lbl_8047A4DC; i++) {
         u16 value;
 
-        value = darkPokemonSaveGet4A0((u16)(i + 1));
+        value = darkPokemonSaveGet4A0(i + 1);
         if (value != 0 &&
-            (darkPokemonCheckFlag16((u16)(i + 1)) != 0 ||
-             darkPokemonGetFlag1C((u16)(i + 1)) != 0)) {
+            (darkPokemonCheckFlag16(i + 1) != 0 ||
+             darkPokemonGetFlag1C(i + 1) != 0)) {
             lbl_8047A4D4[count].field_00 = value;
             lbl_8047A4D4[count].battleId = (u16)(i + 1);
-            *(u32*)((u8*)lbl_8047A4D8 + count * 8) =
-                fn_801EE0BC();
-            ((PdaListEntry*)((u8*)lbl_8047A4D8 + count * 8 + 4))->field_00 =
+            ((PdaSortEntry*)lbl_8047A4D8)[count].key = fn_801EE0BC();
+            ((PdaSortEntry*)lbl_8047A4D8)[count].entry.field_00 =
                 lbl_8047A4D4[count].field_00;
-            ((PdaListEntry*)((u8*)lbl_8047A4D8 + count * 8 + 4))->battleId =
+            ((PdaSortEntry*)lbl_8047A4D8)[count].entry.battleId =
                 lbl_8047A4D4[count].battleId;
             count++;
         }
@@ -3146,10 +3144,8 @@ void fn_8003CF38(void)
         }
     }
     for (i = 0; i < (s32)lbl_8047A4DC; i++) {
-        lbl_8047A4D4[i].field_00 =
-            ((PdaListEntry*)(sortEntries + i * 8 + 4))->field_00;
-        lbl_8047A4D4[i].battleId =
-            ((PdaListEntry*)(sortEntries + i * 8 + 4))->battleId;
+        lbl_8047A4D4[i].field_00 = ((PdaSortEntry*)lbl_8047A4D8)[i].entry.field_00;
+        lbl_8047A4D4[i].battleId = ((PdaSortEntry*)lbl_8047A4D8)[i].entry.battleId;
     }
 
     handle = GSmemGetHandleByPtr(lbl_8047A4D8);
@@ -3299,13 +3295,13 @@ extern void msgctrlSetValue(s32 id, u32 value);
 void pdaSnagListDrawEntry(u8* context)
 {
     extern s32 darkPokemonGetFlagListValue(u16, s8*);
+    u8 special;
+    u32 ownerText;
     u8* slot;
     u16 kind;
     u32 text;
-    u32 ownerText;
     u32 owner;
     u32 caption;
-    u8 special;
     u16 index;
     u16 trainerId;
 
@@ -3332,8 +3328,12 @@ void pdaSnagListDrawEntry(u8* context)
             }
             break;
         }
-        if (special == 0) {
+        switch (special) {
+        case 0:
             ownerText = GSmsgGetGSchar(text);
+            break;
+        default:
+            break;
         }
     } else {
         ownerText = special;
@@ -3495,114 +3495,8 @@ void fn_8003B6D0(u8* ctx)
     GSmsgPrintColor(0, 0, ctx[0x8b] | -0x100, (void*)0xcf);
 }
 
-#pragma peephole off
-void fn_8003F040(void) {
-    u8 tmp[0x1a];
-    u8* base;
-    u16* idx;
-    s32 count;
-    u32 i;
-    s32 j;
-    s32 gap;
-    s32 k;
-    u32 src_id;
-    u32 lookup;
-    u32 ctx;
-    u32 allocation;
-    u32 a;
-    u8* p;
-    u8* q;
-    u32 handle;
-
-    allocation = GSmemAlloc(0x28a0, 0x20);
-    if ((u16)allocation != 0) {
-        allocation = GSmemLock();
-    } else {
-        allocation = 0;
-    }
-    base = (u8*)allocation;
-
-    allocation = GSmemAlloc(0x320, 0x20);
-    if ((u16)allocation != 0) {
-        allocation = GSmemLock();
-    } else {
-        allocation = 0;
-    }
-    idx = (u16*)allocation;
-
-    for (i = 0; (u16)i < (u16)(*(u16*)&lbl_8047A4E8); i++) {
-        u32 ii = (u16)i;
-        src_id = ((u16*)lbl_8047A4E4)[ii];
-        idx[ii] = (u16)src_id;
-        lookup = src_id;
-        ctx = lbl_8047A4E0;
-        if (ctx != 0) {
-            if (src_id >= 0x8000) {
-                lookup = src_id & 0x3FFF;
-            }
-            allocation = gamedataGetStatus(0, 1);
-            fn_801240C4(ctx, lookup & 0xFFFF, 0xa, allocation);
-            a = fn_8025FDDC(0, lookup);
-            lookup = fn_8025FD34(0, lookup);
-            fn_8011DFE0(ctx, a);
-            fn_8011DF90(ctx, lookup);
-            allocation = lbl_8047A4E0;
-        } else {
-            allocation = 0;
-        }
-        if (allocation != 0) {
-            fn_8011F5C8();
-            fn_8011E778();
-            allocation = fn_8011E760();
-        } else {
-            allocation = 0;
-        }
-        p = base + ii * 0x1a;
-        GSmsgGetText(p + 2, 0x18, (u8*)allocation);
-        *(u16*)p = i;
-    }
-
-    count = (s32)*(u16*)&lbl_8047A4E8;
-    for (gap = count / 2; gap > 0; gap = gap / 2) {
-        for (j = gap; j < count; j++) {
-            k = j - gap;
-            p = base + k * 0x1a;
-            /* Retail emits the three memcpys before GScharCmp, i.e. the
-             * top-test rotation with the compare in the loop condition. */
-            q = base + (k + gap) * 0x1a;
-            while (k >= 0 &&
-                   GScharCmp((u32)(p + 2), (u32)(q + 2)) >= 0) {
-                memcpy(tmp, p, 0x1a);
-                memcpy(p, q, 0x1a);
-                memcpy(q, tmp, 0x1a);
-                p -= gap * 0x1a;
-                k -= gap;
-                q = base + (k + gap) * 0x1a;
-            }
-        }
-    }
-
-    for (i = 0; (u16)i < (u16)(*(u16*)&lbl_8047A4E8); i++) {
-        u32 ii = (u16)i;
-        ((u16*)lbl_8047A4E4)[ii] = idx[*(u16*)(base + ii * 0x1a)];
-    }
-
-    if (base != 0) {
-        handle = GSmemGetHandleByPtr((u32)base);
-        if ((u16)handle != 0) {
-            fn_800E24B0(handle);
-            GSmemFree(handle);
-        }
-    }
-    if (idx != 0) {
-        handle = GSmemGetHandleByPtr((u32)idx);
-        if ((u16)handle != 0) {
-            fn_800E24B0(handle);
-            GSmemFree(handle);
-        }
-    }
-}
-#pragma peephole reset
+/* fn_8003F040 (sort by name) follows fn_8003E394, its only caller. */
+void fn_8003F040(void);
 
 void fn_8003F2DC(u8* arr, s32 count, s32 dir) {
     u8 tmp[4];
@@ -3660,6 +3554,29 @@ void fn_8003F2DC(u8* arr, s32 count, s32 dir) {
 
 /* Main summary-screen state machine. */
 #pragma peephole off
+/* fn_80044630's pdaApproach: the upper clamp is the 20.0f literal (as an extern read it colours the clamp's float registers in the other order). */
+/* RULE-EXCEPTION(user-approved): reconstructed inline helper pda_80044630_Approach (fn_80044630's copy of pdaApproach) - see docs/RULE_EXCEPTIONS.md */
+static inline void pda_80044630_Approach(f32* current, f32* target, f32 rate)
+{
+    f32 step;
+    f32 distance;
+    f32 scaled;
+
+    step = *target - *current;
+    scaled = lbl_8047BCC4 * step;
+    step = scaled * rate;
+    if (step > 20.0f) {
+        step = 20.0f;
+    }
+    if (step <= lbl_8047BCC8) {
+        step = lbl_8047BCC8;
+    }
+    distance = *target - (*current += step);
+    if (pdaAbsF(distance) <= pdaAbsF(step) || pdaAbsF(distance) < lbl_8047BCBC) {
+        *current = *target;
+    }
+}
+
 void pdaStrategyMemoRun(void) {
     extern void  _threadSwitch(void);
     extern u32   menuCloseCustom(u32 a, u32 b, u32 c);
@@ -3685,10 +3602,10 @@ void pdaStrategyMemoRun(void) {
     extern void  std113_mapObjectUnk_8018db68(void* h);
     extern void  std114_mapObjectSetVisibility(void* h, s32 b);
     extern void  GSmodelSetVisibility(void* a, s32 b);
-    extern void  GSmodelSetAnimRate(f32 v);
+    extern void  GSmodelSetAnimRate(void* model, f32 rate);
     extern void  GSmodelSet60fpsAnimFlag(void* h, s32 b);
     extern void  GSmodelSetBoundCheck(void* h, s32 b);
-    extern void  GSmodelDestroyLinkedParticles(void);
+    extern void  GSmodelDestroyLinkedParticles(void* model);
     extern void* wazaSequenceOwnerGetModel(void* h);
     extern void  cameraPlayAnime(u32 a, u32 id, u32 c, u32 d);
     extern void  menuModelTerm(void* subobj);
@@ -3708,9 +3625,11 @@ void pdaStrategyMemoRun(void) {
     const f32* tbl;
     s32  running = 1;
     void* h;
+    void* handle;
+    u32 mem;
 
-    fn_80048918();
     tbl = lbl_80267150;
+    fn_80048918();
     S = (u8*)&lbl_803A6818;
 
     S118 = S + 0x118;
@@ -3883,115 +3802,116 @@ void pdaStrategyMemoRun(void) {
 
             /* ease block D: unk1DC toward unk1E0 (signed-delta + clamps) */
             if (*(f32*)(S + 0x1DC) != *(f32*)(S + 0x1E0)) {
-                pdaApproach((f32*)(S + 0x1DC), (f32*)(S + 0x1E0), *(f32*)(S + 0x3C));
+                pda_80044630_Approach((f32*)(S + 0x1DC), (f32*)(S + 0x1E0), *(f32*)(S + 0x3C));
             }
 
             /* settle test */
-            if (*(f32*)(S + 0x50) != *(f32*)(S + 0x4C)) {
-                _threadSwitch();
-                continue;
-            }
-            *(s32*)(S + 0x14) = 1;
-            menuCloseCustom(0x35, 0, 1);
-            h = *(void**)(S + 0x10C);
-            std114_mapObjectSetVisibility(h, 0);
-            {
-                void* rv = GSresGetResource(std093_getCurrentGroupID(), h);
-                if (rv != 0)
-                    GSmodelSetVisibility(rv, 0);
-            }
-        {
-                void* cam;
-                f32   persp3;
-                f32   persp2;
-                f32   persp1;
-                f32   persp0;
-                f32   rot[3];
-                f32   pos[3];
-                f32   mtx[3];
-
-                std113_mapObjectUnk_8018db68(h);
-
-                *(f32*)(S + 0x6C) = lbl_8047BC94;
-                *(f32*)(S + 0x70) = lbl_8047BC94;
-                *(f32*)(S + 0x74) = lbl_8047BC94;
-                *(f32*)(S + 0x64) = lbl_8047BCF0;
-
-                cam = std112_modelGetResourceID(0x0D181000);
-                *(void**)(S + 0x10C) = cam;
-                *(void**)(S + 0x110) = GSresGetResource(std093_getCurrentGroupID(), cam);
-                GSmodelSetAnimRate(lbl_8047BD18);
-                GSmodelSet60fpsAnimFlag(*(void**)(S + 0x110), 1);
-                GSmodelSetBoundCheck(*(void**)(S + 0x110), 0);
-
-                ((u32*)mtx)[0] = ((const u32*)tbl)[6];
-                ((u32*)mtx)[1] = ((const u32*)tbl)[7];
-                ((u32*)mtx)[2] = ((const u32*)tbl)[8];
-                ((u32*)pos)[0] = ((const u32*)tbl)[9];
-                ((u32*)pos)[1] = ((const u32*)tbl)[10];
-                ((u32*)pos)[2] = ((const u32*)tbl)[11];
-                cam = GSresGetResource(0x17, 0x0D741800);
-                *(void**)(S + 0x114) = cam;
-                GScameraGetPosition(cam, pos);
-                GScameraGetRotation(cam, rot);
-                mtx[0] = *(f32*)((u8*)cam + 0x100);
-                mtx[1] = *(f32*)((u8*)cam + 0x104);
-                mtx[2] = *(f32*)((u8*)cam + 0x108);
-                GScameraGetPerspective(cam, &persp0, &persp1, &persp2, &persp3);
-                GScameraSetPerspective(cam, persp0, persp1, persp2, persp3);
-                GSvecCopy(S118, pos);
-                GSvecCopy(S124, rot);
-                GSvecCopy(S130, mtx);
-
-                *(f32*)(S + 0x13C) = persp0;
-                *(f32*)(S + 0x140) = persp1;
-                *(f32*)(S + 0x144) = persp2;
-                *(f32*)(S + 0x148) = persp3;
-
-                cameraPlayAnime(0x17, 0x0D741800, 0, 1);
-                GSscene_SetMode(4);
-
-                *(s32*)(S + 0x78) = 1;
-                fn_8004BDB8(-1, 2);
-
+            if (*(f32*)(S + 0x50) == *(f32*)(S + 0x4C)) {
+                *(s32*)(S + 0x14) = 1;
+                menuCloseCustom(0x35, 0, 1);
+                h = *(void**)(S + 0x10C);
+                std114_mapObjectSetVisibility(h, 0);
                 {
-                    s32 sub = *(s32*)(S + 0x28);
+                    void* rv = GSresGetResource(std093_getCurrentGroupID(), h);
+                    if (rv != 0)
+                        GSmodelSetVisibility(rv, 0);
+                }
+            {
+                    void* cam;
+                    f32   persp3;
+                    f32   persp2;
+                    f32   persp1;
+                    f32   persp0;
+                    f32   rot[3];
+                    f32   pos[3];
+                    f32   mtx[3];
+
+                    std113_mapObjectUnk_8018db68(h);
+
                     *(f32*)(S + 0x6C) = lbl_8047BC94;
                     *(f32*)(S + 0x70) = lbl_8047BC94;
                     *(f32*)(S + 0x74) = lbl_8047BC94;
                     *(f32*)(S + 0x64) = lbl_8047BCF0;
-                    switch (sub) {
-                    case 0:
-                        *(s32*)(S + 0x1C) = 0xD;
-                        *(s32*)(S + 0x24) = 2;
-                        *(f32*)(S + 0x60) = lbl_8047BC94;
-                        if (wazaSequenceOwnerGetModel(*(void**)(S + 0xA0)) != 0)
-                            GSmodelDestroyLinkedParticles();
-                        break;
-                    case 1:
-                        *(s32*)(S + 0x1C) = 0xD;
-                        *(s32*)(S + 0x24) = 4;
-                        *(f32*)(S + 0x60) = lbl_8047BC94;
-                        if (wazaSequenceOwnerGetModel(*(void**)(S + 0xA0)) != 0)
-                            GSmodelDestroyLinkedParticles();
-                        *(f32*)(S + 0x64) = lbl_8047BCA8;
-                        break;
-                    case 2:
-                        *(s32*)(S + 0x1C) = 0xD;
-                        *(s32*)(S + 0x24) = 5;
-                        *(f32*)(S + 0x60) = lbl_8047BC94;
-                        if (wazaSequenceOwnerGetModel(*(void**)(S + 0xA0)) != 0)
-                            GSmodelDestroyLinkedParticles();
-                        break;
-                    default:
-                        break;
-                    }
-                }
 
-                *(f32*)(S + 0x50) = lbl_8047BCBC;
-                *(f32*)(S + 0x58) = lbl_8047BC94;
-                continue;
+                    cam = *(void**)(S + 0x10C) = std112_modelGetResourceID(0x0D181000);
+                    GSmodelSetAnimRate(*(void**)(S + 0x110) = GSresGetResource(std093_getCurrentGroupID(), cam),
+                                       lbl_8047BD18);
+                    GSmodelSet60fpsAnimFlag(*(void**)(S + 0x110), 1);
+                    GSmodelSetBoundCheck(*(void**)(S + 0x110), 0);
+
+                    ((u32*)mtx)[0] = ((const u32*)tbl)[6];
+                    ((u32*)mtx)[1] = ((const u32*)tbl)[7];
+                    ((u32*)mtx)[2] = ((const u32*)tbl)[8];
+                    ((u32*)pos)[0] = ((const u32*)tbl)[9];
+                    ((u32*)pos)[1] = ((const u32*)tbl)[10];
+                    ((u32*)pos)[2] = ((const u32*)tbl)[11];
+                    cam = GSresGetResource(0x17, 0x0D741800);
+                    *(void**)(S + 0x114) = cam;
+                    GScameraGetPosition(cam, pos);
+                    GScameraGetRotation(cam, rot);
+                    mtx[0] = *(f32*)((u8*)cam + 0x100);
+                    mtx[1] = *(f32*)((u8*)cam + 0x104);
+                    mtx[2] = *(f32*)((u8*)cam + 0x108);
+                    GScameraGetPerspective(cam, &persp0, &persp1, &persp2, &persp3);
+                    GScameraSetPerspective(cam, persp0, persp1, persp2, persp3);
+                    GSvecCopy(S118, pos);
+                    GSvecCopy(S124, rot);
+                    GSvecCopy(S130, mtx);
+
+                    *(f32*)(S + 0x13C) = persp0;
+                    *(f32*)(S + 0x140) = persp1;
+                    *(f32*)(S + 0x144) = persp2;
+                    *(f32*)(S + 0x148) = persp3;
+
+                    cameraPlayAnime(0x17, 0x0D741800, 0, 1);
+                    GSscene_SetMode(4);
+
+                    *(s32*)(S + 0x78) = 1;
+                    fn_8004BDB8(-1, 2);
+
+                    {
+                        s32 sub = *(s32*)(S + 0x28);
+                        void* particles;
+                        *(f32*)(S + 0x6C) = lbl_8047BC94;
+                        *(f32*)(S + 0x70) = lbl_8047BC94;
+                        *(f32*)(S + 0x74) = lbl_8047BC94;
+                        *(f32*)(S + 0x64) = lbl_8047BCF0;
+                        switch (sub) {
+                        case 0:
+                            *(s32*)(S + 0x1C) = 0xD;
+                            *(s32*)(S + 0x24) = 2;
+                            *(f32*)(S + 0x60) = lbl_8047BC94;
+                            if ((particles = wazaSequenceOwnerGetModel(*(void**)(S + 0xA0))) != 0)
+                                GSmodelDestroyLinkedParticles(particles);
+                            break;
+                        case 1:
+                            *(s32*)(S + 0x1C) = 0xD;
+                            *(s32*)(S + 0x24) = 4;
+                            *(f32*)(S + 0x60) = lbl_8047BC94;
+                            if ((particles = wazaSequenceOwnerGetModel(*(void**)(S + 0xA0))) != 0)
+                                GSmodelDestroyLinkedParticles(particles);
+                            *(f32*)(S + 0x64) = lbl_8047BCA8;
+                            break;
+                        case 2:
+                            *(s32*)(S + 0x1C) = 0xD;
+                            *(s32*)(S + 0x24) = 5;
+                            *(f32*)(S + 0x60) = lbl_8047BC94;
+                            if ((particles = wazaSequenceOwnerGetModel(*(void**)(S + 0xA0))) != 0)
+                                GSmodelDestroyLinkedParticles(particles);
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+
+                    *(f32*)(S + 0x50) = lbl_8047BCBC;
+                    *(f32*)(S + 0x58) = lbl_8047BC94;
+                    break;
+                }
+            } else {
+                _threadSwitch();
             }
+            break;
         }
 
         case 8: {   /* .L_80044DA0 */
@@ -4068,13 +3988,11 @@ void pdaStrategyMemoRun(void) {
 
             /* ease block D */
             if (*(f32*)(S + 0x1DC) != *(f32*)(S + 0x1E0)) {
-                pdaApproach((f32*)(S + 0x1DC), (f32*)(S + 0x1E0), *(f32*)(S + 0x3C));
+                pda_80044630_Approach((f32*)(S + 0x1DC), (f32*)(S + 0x1E0), *(f32*)(S + 0x3C));
             }
 
             /* settle test */
-            if (*(f32*)(S + 0x50) != *(f32*)(S + 0x4C)) {
-                _threadSwitch();
-            } else {
+            if (*(f32*)(S + 0x50) == *(f32*)(S + 0x4C)) {
                 *(s32*)(S + 0x1C) = 0;
                 menuCloseCustom(0x3C, 0, 1);
                 menuCloseCustom(0x96, 0, 1);
@@ -4094,10 +4012,9 @@ void pdaStrategyMemoRun(void) {
                 *(f32*)(S + 0x74) = lbl_8047BC94;
                 *(f32*)(S + 0x64) = lbl_8047BCF0;
 
-                h = std112_modelGetResourceID(0x0D171000);
-                *(void**)(S + 0x10C) = h;
-                *(void**)(S + 0x110) = GSresGetResource(std093_getCurrentGroupID(), h);
-                GSmodelSetAnimRate(lbl_8047BD18);
+                h = *(void**)(S + 0x10C) = std112_modelGetResourceID(0x0D171000);
+                GSmodelSetAnimRate(*(void**)(S + 0x110) = GSresGetResource(std093_getCurrentGroupID(), h),
+                                   lbl_8047BD18);
 
                 ((u32*)mtx)[0] = ((const u32*)tbl)[0];
                 ((u32*)mtx)[1] = ((const u32*)tbl)[1];
@@ -4140,6 +4057,8 @@ void pdaStrategyMemoRun(void) {
                 *(s32*)(S + 0x14) = 0;
                 *(f32*)(S + 0x50) = lbl_8047BCBC;
                 *(f32*)(S + 0x58) = lbl_8047BC94;
+            } else {
+                _threadSwitch();
             }
         } break;
 
@@ -4147,15 +4066,11 @@ void pdaStrategyMemoRun(void) {
             f32 step;
             f32 cur;
             f32 tgt;
-            f32 delta;
-            f32 rem;
-            f32 acur;
-            f32 arem;
-            f32 astep;
             f32 px3;
             f32 px2;
             f32 px1;
             f32 px0;
+            f32 nv;
             f32 rot[3];
             f32 pos[3];
             f32 mtx[3];
@@ -4166,14 +4081,14 @@ void pdaStrategyMemoRun(void) {
             if (tgt != cur) {
                 step = *(f32*)(S + 0x3C) / lbl_8047BCB8;
                 if (tgt > cur) {
-                    cur = cur + step;
-                    *(f32*)(S + 0x4C) = cur;
-                    if (cur > lbl_8047BCBC)
+                    nv = cur + step;
+                    *(f32*)(S + 0x4C) = nv;
+                    if (nv > lbl_8047BCBC)
                         *(f32*)(S + 0x4C) = lbl_8047BCBC;
                 } else {
-                    cur = cur - step;
-                    *(f32*)(S + 0x4C) = cur;
-                    if (cur < lbl_8047BC94)
+                    nv = cur - step;
+                    *(f32*)(S + 0x4C) = nv;
+                    if (nv < lbl_8047BC94)
                         *(f32*)(S + 0x4C) = lbl_8047BC94;
                 }
             }
@@ -4184,14 +4099,14 @@ void pdaStrategyMemoRun(void) {
             if (tgt != cur) {
                 step = *(f32*)(S + 0x3C) / lbl_8047BCB8;
                 if (tgt > cur) {
-                    cur = cur + step;
-                    *(f32*)(S + 0x54) = cur;
-                    if (cur > lbl_8047BCBC)
+                    nv = cur + step;
+                    *(f32*)(S + 0x54) = nv;
+                    if (nv > lbl_8047BCBC)
                         *(f32*)(S + 0x54) = lbl_8047BCBC;
                 } else {
-                    cur = cur - step;
-                    *(f32*)(S + 0x54) = cur;
-                    if (cur < lbl_8047BC94)
+                    nv = cur - step;
+                    *(f32*)(S + 0x54) = nv;
+                    if (nv < lbl_8047BC94)
                         *(f32*)(S + 0x54) = lbl_8047BC94;
                 }
             }
@@ -4202,125 +4117,96 @@ void pdaStrategyMemoRun(void) {
             if (tgt != cur) {
                 step = *(f32*)(S + 0x3C) / lbl_8047BCC0;
                 if (tgt > cur) {
-                    cur = cur + step;
-                    *(f32*)(S + 0x5C) = cur;
-                    if (cur > lbl_8047BCBC)
+                    nv = cur + step;
+                    *(f32*)(S + 0x5C) = nv;
+                    if (nv > lbl_8047BCBC)
                         *(f32*)(S + 0x5C) = lbl_8047BCBC;
                 } else {
-                    cur = cur - step;
-                    *(f32*)(S + 0x5C) = cur;
-                    if (cur < lbl_8047BC94)
+                    nv = cur - step;
+                    *(f32*)(S + 0x5C) = nv;
+                    if (nv < lbl_8047BC94)
                         *(f32*)(S + 0x5C) = lbl_8047BC94;
                 }
             }
 
             /* ease block D */
-            acur = *(f32*)(S + 0x1DC);
-            tgt  = *(f32*)(S + 0x1E0);
-            if (acur != tgt) {
-                delta = tgt - acur;
-                astep = (lbl_8047BCC4 * delta) * *(f32*)(S + 0x3C);
-                if (astep > lbl_8047BC98)
-                    astep = lbl_8047BC98;
-                if (astep <= lbl_8047BCC8)
-                    astep = lbl_8047BCC8;
-                acur = *(f32*)(S + 0x1DC) + astep;
-                rem  = tgt - acur;
-                *(f32*)(S + 0x1DC) = acur;
-                if (astep > lbl_8047BC94) {
-                } else {
-                    astep = -astep;
-                }
-                if (rem > lbl_8047BC94)
-                    arem = rem;
-                else
-                    arem = -rem;
-                if (arem <= astep) {
-                    *(f32*)(S + 0x1DC) = tgt;
-                } else {
-                    if (rem > lbl_8047BC94)
-                        rem = rem;
-                    else
-                        rem = -rem;
-                    if (rem < lbl_8047BCBC)
-                        *(f32*)(S + 0x1DC) = tgt;
-                }
+            if (*(f32*)(S + 0x1DC) != *(f32*)(S + 0x1E0)) {
+                pda_80044630_Approach((f32*)(S + 0x1DC), (f32*)(S + 0x1E0), *(f32*)(S + 0x3C));
             }
 
             /* settle test */
-            if (*(f32*)(S + 0x50) != *(f32*)(S + 0x4C)) {
+            if (*(f32*)(S + 0x50) == *(f32*)(S + 0x4C)) {
+
+                *(s32*)(S + 0x1C) = 0;
+                menuCloseCustom(0xa1, 0, 1);
+                menuCloseCustom(0x96, 0, 1);
+                menuCloseCustom(0xa2, 0, 1);
+
+                h = *(void**)(S + 0x10C);
+                std114_mapObjectSetVisibility(h, 0);
+                {
+                    void* rv = GSresGetResource(std093_getCurrentGroupID(), h);
+                    if (rv != 0)
+                        GSmodelSetVisibility(rv, 0);
+                }
+
+                /* .L_800453AC camera-setup */
+                std113_mapObjectUnk_8018db68(h);
+                *(f32*)(S + 0x6C) = lbl_8047BC94;
+                *(f32*)(S + 0x70) = lbl_8047BC94;
+                *(f32*)(S + 0x74) = lbl_8047BC94;
+                *(f32*)(S + 0x64) = lbl_8047BCF0;
+
+                h = *(void**)(S + 0x10C) = std112_modelGetResourceID(0x0D171000);
+                GSmodelSetAnimRate(*(void**)(S + 0x110) = GSresGetResource(std093_getCurrentGroupID(), h),
+                                   lbl_8047BD18);
+
+                ((u32*)mtx)[0] = ((const u32*)tbl)[0];
+                ((u32*)mtx)[1] = ((const u32*)tbl)[1];
+                ((u32*)mtx)[2] = ((const u32*)tbl)[2];
+                ((u32*)pos)[0] = ((const u32*)tbl)[3];
+                ((u32*)pos)[1] = ((const u32*)tbl)[4];
+                ((u32*)pos)[2] = ((const u32*)tbl)[5];
+                h = GSresGetResource(0x17, 0x0D731800);
+                *(void**)(S + 0x114) = h;
+
+                GScameraGetPosition(h, pos);
+                GScameraGetRotation(h, rot);
+
+                mtx[0] = *(f32*)((u8*)h + 0x100);
+                mtx[1] = *(f32*)((u8*)h + 0x104);
+                mtx[2] = *(f32*)((u8*)h + 0x108);
+                GScameraGetPerspective(h, &px0, &px1, &px2, &px3);
+
+                GSvecCopy(S218, pos);
+                GSvecCopy(S218 + 0xC, mtx);
+
+                *(f32*)(S218 + 0x18) = px0;
+                *(f32*)(S218 + 0x1C) = px1;
+                *(f32*)(S218 + 0x20) = px2;
+                *(f32*)(S218 + 0x24) = px3;
+                GScameraSetPerspective(h, px0, px1, px2, px3);
+
+                GSvecCopy(S118, pos);
+                GSvecCopy(S124, rot);
+                GSvecCopy(S130, mtx);
+
+                *(f32*)(S + 0x13C) = px0;
+                *(f32*)(S + 0x140) = px1;
+                *(f32*)(S + 0x144) = px2;
+                *(f32*)(S + 0x148) = px3;
+
+                cameraPlayAnime(0x17, 0x0D731800, 0, 1);
+                GSscene_SetMode(4);
+
+                *(s32*)(S + 0x78) = 0;
+                *(s32*)(S + 0x14) = 0;
+                *(f32*)(S + 0x50) = lbl_8047BCBC;
+                *(f32*)(S + 0x58) = lbl_8047BC94;
+            } else {
                 _threadSwitch();
-                continue;
             }
-
-            *(s32*)(S + 0x1C) = 0;
-            menuCloseCustom(0xa1, 0, 1);
-            menuCloseCustom(0x96, 0, 1);
-            menuCloseCustom(0xa2, 0, 1);
-
-            h = *(void**)(S + 0x10C);
-            std114_mapObjectSetVisibility(h, 0);
-            {
-                void* rv = GSresGetResource(std093_getCurrentGroupID(), h);
-                if (rv != 0)
-                    GSmodelSetVisibility(rv, 0);
-            }
-
-            /* .L_800453AC camera-setup */
-            std113_mapObjectUnk_8018db68(h);
-            *(f32*)(S + 0x6C) = lbl_8047BC94;
-            *(f32*)(S + 0x70) = lbl_8047BC94;
-            *(f32*)(S + 0x74) = lbl_8047BC94;
-            *(f32*)(S + 0x64) = lbl_8047BCF0;
-
-            h = std112_modelGetResourceID(0x0D171000);
-            *(void**)(S + 0x10C) = h;
-            *(void**)(S + 0x110) = GSresGetResource(std093_getCurrentGroupID(), h);
-            GSmodelSetAnimRate(lbl_8047BD18);
-
-            ((u32*)mtx)[0] = ((const u32*)tbl)[0];
-            ((u32*)mtx)[1] = ((const u32*)tbl)[1];
-            ((u32*)mtx)[2] = ((const u32*)tbl)[2];
-            ((u32*)pos)[0] = ((const u32*)tbl)[3];
-            ((u32*)pos)[1] = ((const u32*)tbl)[4];
-            ((u32*)pos)[2] = ((const u32*)tbl)[5];
-            h = GSresGetResource(0x17, 0x0D731800);
-            *(void**)(S + 0x114) = h;
-
-            GScameraGetPosition(h, pos);
-            GScameraGetRotation(h, rot);
-
-            mtx[0] = *(f32*)((u8*)h + 0x100);
-            mtx[1] = *(f32*)((u8*)h + 0x104);
-            mtx[2] = *(f32*)((u8*)h + 0x108);
-            GScameraGetPerspective(h, &px0, &px1, &px2, &px3);
-
-            GSvecCopy(S218, pos);
-            GSvecCopy(S218 + 0xC, mtx);
-
-            *(f32*)(S218 + 0x18) = px0;
-            *(f32*)(S218 + 0x1C) = px1;
-            *(f32*)(S218 + 0x20) = px2;
-            *(f32*)(S218 + 0x24) = px3;
-            GScameraSetPerspective(h, px0, px1, px2, px3);
-
-            GSvecCopy(S118, pos);
-            GSvecCopy(S124, rot);
-            GSvecCopy(S130, mtx);
-
-            *(f32*)(S + 0x13C) = px0;
-            *(f32*)(S + 0x140) = px1;
-            *(f32*)(S + 0x144) = px2;
-            *(f32*)(S + 0x148) = px3;
-
-            cameraPlayAnime(0x17, 0x0D731800, 0, 1);
-            GSscene_SetMode(4);
-
-            *(s32*)(S + 0x78) = 0;
-            *(s32*)(S + 0x14) = 0;
-            *(f32*)(S + 0x50) = lbl_8047BCBC;
-            *(f32*)(S + 0x58) = lbl_8047BC94;
-            continue;
+            break;
         }
 
         case 0xA: {   /* .L_80045550 */
@@ -4391,91 +4277,91 @@ void pdaStrategyMemoRun(void) {
 
             /* ease block D */
             if (*(f32*)(S + 0x1DC) != *(f32*)(S + 0x1E0)) {
-                pdaApproach((f32*)(S + 0x1DC), (f32*)(S + 0x1E0), *(f32*)(S + 0x3C));
+                pda_80044630_Approach((f32*)(S + 0x1DC), (f32*)(S + 0x1E0), *(f32*)(S + 0x3C));
             }
 
             /* settle test */
-            if (*(f32*)(S + 0x50) != *(f32*)(S + 0x4C)) {
-                _threadSwitch();
-                continue;
-            }
+            if (*(f32*)(S + 0x50) == *(f32*)(S + 0x4C)) {
 
-            *(s32*)(S + 0x1C) = 0;
-            menuCloseCustom(0x96, 0, 1);
-            menuCloseCustom(0xA2, 0, 1);
-            h = *(void**)(S + 0x10C);
-            std114_mapObjectSetVisibility(h, 0);
+                *(s32*)(S + 0x1C) = 0;
+                menuCloseCustom(0x96, 0, 1);
+                menuCloseCustom(0xA2, 0, 1);
+                h = *(void**)(S + 0x10C);
+                std114_mapObjectSetVisibility(h, 0);
+                {
+                    void* rv = GSresGetResource(std093_getCurrentGroupID(), h);
+                    if (rv != 0)
+                        GSmodelSetVisibility(rv, 0);
+                }
             {
-                void* rv = GSresGetResource(std093_getCurrentGroupID(), h);
-                if (rv != 0)
-                    GSmodelSetVisibility(rv, 0);
+                    f32 p3;
+                    f32 p2;
+                    f32 p1;
+                    f32 p0;
+                    f32 rotbuf[3];
+                    f32 pos[3];
+                    f32 mtx[3];
+
+                    std113_mapObjectUnk_8018db68(h);
+
+                    *(f32*)(S + 0x6C) = lbl_8047BC94;
+                    *(f32*)(S + 0x70) = lbl_8047BC94;
+                    *(f32*)(S + 0x74) = lbl_8047BC94;
+                    *(f32*)(S + 0x64) = lbl_8047BCF0;
+
+                    h = *(void**)(S + 0x10C) = std112_modelGetResourceID(0x0D171000);
+
+                    GSmodelSetAnimRate(*(void**)(S + 0x110) = GSresGetResource(std093_getCurrentGroupID(), h),
+                                       lbl_8047BD18);
+
+                    ((u32*)mtx)[0] = ((const u32*)tbl)[0];
+                    ((u32*)mtx)[1] = ((const u32*)tbl)[1];
+                    ((u32*)mtx)[2] = ((const u32*)tbl)[2];
+                    ((u32*)pos)[0] = ((const u32*)tbl)[3];
+                    ((u32*)pos)[1] = ((const u32*)tbl)[4];
+                    ((u32*)pos)[2] = ((const u32*)tbl)[5];
+                    h = GSresGetResource(0x17, 0x0D731800);
+                    *(void**)(S + 0x114) = h;
+
+                    GScameraGetPosition(h, pos);
+                    GScameraGetRotation(h, rotbuf);
+
+                    mtx[0] = *(f32*)((u8*)h + 0x100);
+                    mtx[1] = *(f32*)((u8*)h + 0x104);
+                    mtx[2] = *(f32*)((u8*)h + 0x108);
+                    GScameraGetPerspective(h, &p0, &p1, &p2, &p3);
+
+                    GSvecCopy(S218, pos);
+                    GSvecCopy(S218 + 0x0C, mtx);
+
+                    *(f32*)(S218 + 0x18) = p0;
+                    *(f32*)(S218 + 0x1C) = p1;
+                    *(f32*)(S218 + 0x20) = p2;
+                    *(f32*)(S218 + 0x24) = p3;
+                    GScameraSetPerspective(h, p0, p1, p2, p3);
+
+                    GSvecCopy(S118, pos);
+                    GSvecCopy(S124, rotbuf);
+                    GSvecCopy(S130, mtx);
+
+                    *(f32*)(S + 0x13C) = p0;
+                    *(f32*)(S + 0x140) = p1;
+                    *(f32*)(S + 0x144) = p2;
+                    *(f32*)(S + 0x148) = p3;
+                    cameraPlayAnime(0x17, 0x0D731800, 0, 1);
+                    GSscene_SetMode(4);
+
+                    *(s32*)(S + 0x78) = 0;
+                    *(s32*)(S + 0x14) = 0;
+                    *(f32*)(S + 0x50) = lbl_8047BCBC;
+                    *(f32*)(S + 0x58) = lbl_8047BC94;
+
+                    break;
+                }
+            } else {
+                _threadSwitch();
             }
-        {
-                f32 p3;
-                f32 p2;
-                f32 p1;
-                f32 p0;
-                f32 rotbuf[3];
-                f32 pos[3];
-                f32 mtx[3];
-
-                std113_mapObjectUnk_8018db68(h);
-
-                *(f32*)(S + 0x6C) = lbl_8047BC94;
-                *(f32*)(S + 0x70) = lbl_8047BC94;
-                *(f32*)(S + 0x74) = lbl_8047BC94;
-                *(f32*)(S + 0x64) = lbl_8047BCF0;
-
-                h = std112_modelGetResourceID(0x0D171000);
-                *(void**)(S + 0x10C) = h;
-
-                *(void**)(S + 0x110) = GSresGetResource(std093_getCurrentGroupID(), h);
-                GSmodelSetAnimRate(lbl_8047BD18);
-
-                ((u32*)mtx)[0] = ((const u32*)tbl)[0];
-                ((u32*)mtx)[1] = ((const u32*)tbl)[1];
-                ((u32*)mtx)[2] = ((const u32*)tbl)[2];
-                ((u32*)pos)[0] = ((const u32*)tbl)[3];
-                ((u32*)pos)[1] = ((const u32*)tbl)[4];
-                ((u32*)pos)[2] = ((const u32*)tbl)[5];
-                h = GSresGetResource(0x17, 0x0D731800);
-                *(void**)(S + 0x114) = h;
-
-                GScameraGetPosition(h, pos);
-                GScameraGetRotation(h, rotbuf);
-
-                mtx[0] = *(f32*)((u8*)h + 0x100);
-                mtx[1] = *(f32*)((u8*)h + 0x104);
-                mtx[2] = *(f32*)((u8*)h + 0x108);
-                GScameraGetPerspective(h, &p0, &p1, &p2, &p3);
-
-                GSvecCopy(S218, pos);
-                GSvecCopy(S218 + 0x0C, mtx);
-
-                *(f32*)(S218 + 0x18) = p0;
-                *(f32*)(S218 + 0x1C) = p1;
-                *(f32*)(S218 + 0x20) = p2;
-                *(f32*)(S218 + 0x24) = p3;
-                GScameraSetPerspective(h, p0, p1, p2, p3);
-
-                GSvecCopy(S118, pos);
-                GSvecCopy(S124, rotbuf);
-                GSvecCopy(S130, mtx);
-
-                *(f32*)(S + 0x13C) = p0;
-                *(f32*)(S + 0x140) = p1;
-                *(f32*)(S + 0x144) = p2;
-                *(f32*)(S + 0x148) = p3;
-                cameraPlayAnime(0x17, 0x0D731800, 0, 1);
-                GSscene_SetMode(4);
-
-                *(s32*)(S + 0x78) = 0;
-                *(s32*)(S + 0x14) = 0;
-                *(f32*)(S + 0x50) = lbl_8047BCBC;
-                *(f32*)(S + 0x58) = lbl_8047BC94;
-
-                continue;
-            }
+            break;
         }
 
         case 7: {   /* .L_80045918 */
@@ -4545,7 +4431,7 @@ void pdaStrategyMemoRun(void) {
 
             /* ease block D */
             if (*(f32*)(S + 0x1DC) != *(f32*)(S + 0x1E0)) {
-                pdaApproach((f32*)(S + 0x1DC), (f32*)(S + 0x1E0), *(f32*)(S + 0x3C));
+                pda_80044630_Approach((f32*)(S + 0x1DC), (f32*)(S + 0x1E0), *(f32*)(S + 0x3C));
             }
 
             /* settle test */
@@ -4564,12 +4450,6 @@ void pdaStrategyMemoRun(void) {
             f32 tgt;
             f32 step;
             f32 nv;
-            f32 dlt;
-            f32 dstep;
-            f32 ncur;
-            f32 rem;
-            f32 arem;
-            f32 dtgt;
 
             /* ease A */
             tgt = *(f32*)(S + 0x50);
@@ -4626,38 +4506,8 @@ void pdaStrategyMemoRun(void) {
             }
 
             /* block D */
-            cur = *(f32*)(S + 0x1DC);
-            dtgt = *(f32*)(S + 0x1E0);
-            if (cur != dtgt) {
-                dlt = dtgt - cur;
-                dstep = lbl_8047BCC4 * dlt;
-                dstep = dstep * *(f32*)(S + 0x3C);
-                if (dstep > lbl_8047BC98)
-                    dstep = lbl_8047BC98;
-                if (dstep <= lbl_8047BCC8)
-                    dstep = lbl_8047BCC8;
-                ncur = *(f32*)(S + 0x1DC) + dstep;
-                dtgt = *(f32*)(S + 0x1E0);
-                rem = dtgt - ncur;
-                *(f32*)(S + 0x1DC) = ncur;
-                if (dstep > lbl_8047BC94) {
-                } else {
-                    dstep = -dstep;
-                }
-                if (rem > lbl_8047BC94)
-                    arem = rem;
-                else
-                    arem = -rem;
-                if (arem <= dstep) {
-                    *(f32*)(S + 0x1DC) = dtgt;
-                } else {
-                    if (rem <= lbl_8047BC94) {
-                        rem = -rem;
-                    }
-                    if (rem < lbl_8047BCBC) {
-                        *(f32*)(S + 0x1DC) = dtgt;
-                    }
-                }
+            if (*(f32*)(S + 0x1DC) != *(f32*)(S + 0x1E0)) {
+                pda_80044630_Approach((f32*)(S + 0x1DC), (f32*)(S + 0x1E0), *(f32*)(S + 0x3C));
             }
 
             /* converge */
@@ -4809,7 +4659,7 @@ void pdaStrategyMemoRun(void) {
 
             /* block D */
             if (*(f32*)(S + 0x1DC) != *(f32*)(S + 0x1E0)) {
-                pdaApproach((f32*)(S + 0x1DC), (f32*)(S + 0x1E0), *(f32*)(S + 0x3C));
+                pda_80044630_Approach((f32*)(S + 0x1DC), (f32*)(S + 0x1E0), *(f32*)(S + 0x3C));
             }
 
             /* settle */
@@ -4835,29 +4685,29 @@ void pdaStrategyMemoRun(void) {
     }
 
     /* === EXIT / cleanup epilogue (.L_80046054 fall-through .. blr) === */
-    h = *(void**)(S + 0x10C);
-    std114_mapObjectSetVisibility(h, 0);
+    handle = *(void**)(S + 0x10C);
+    std114_mapObjectSetVisibility(handle, 0);
     {
-        void* rv = GSresGetResource(std093_getCurrentGroupID(), h);
+        void* rv = GSresGetResource(std093_getCurrentGroupID(), handle);
         if (rv != 0)
             GSmodelSetVisibility(rv, 0);
     }
-    std113_mapObjectUnk_8018db68(h);
+    std113_mapObjectUnk_8018db68(handle);
 
-        h = *(void**)((u8*)&lbl_803A6818 + 0x150);
-    std114_mapObjectSetVisibility(h, 0);
+        handle = *(void**)((u8*)&lbl_803A6818 + 0x150);
+    std114_mapObjectSetVisibility(handle, 0);
     {
-        void* rv = GSresGetResource(std093_getCurrentGroupID(), h);
+        void* rv = GSresGetResource(std093_getCurrentGroupID(), handle);
         if (rv != 0)
             GSmodelSetVisibility(rv, 0);
     }
-    std113_mapObjectUnk_8018db68(h);
+    std113_mapObjectUnk_8018db68(handle);
 
     if (lbl_8047A4E0 != 0) {
-        h = (void*)GSmemGetHandleByPtr(lbl_8047A4E0);
-        if ((u16)(u32)h != 0) {
+        mem = GSmemGetHandleByPtr(lbl_8047A4E0);
+        if ((u16)mem != 0) {
             fn_800E24B0();
-            GSmemFree((u32)h);
+            GSmemFree(mem);
         }
         lbl_8047A4E0 = 0;
     }
@@ -4866,10 +4716,10 @@ void pdaStrategyMemoRun(void) {
         menuModelTerm((u8*)&lbl_803A6818 + 0x7c);
         menuModelTerm((u8*)&lbl_803A6818 + 0xc4);
 
-        h = (void*)GSmemGetHandleByPtr((u32)lbl_8047A4E4);
-    if ((u16)(u32)h != 0) {
+        mem = GSmemGetHandleByPtr((u32)lbl_8047A4E4);
+    if ((u16)mem != 0) {
         fn_800E24B0();
-        GSmemFree((u32)h);
+        GSmemFree(mem);
     }
     lbl_8047A4E4 = 0;
 }
@@ -4910,44 +4760,51 @@ static inline u32 pdaLoadPokemon(s32 index)
     return 0;
 }
 
-/* pdaLoadPokemon with the trainer seed written back over the species. */
-static inline u32 pdaLoadPokemonB(s32 index)
+/* Whether a memo entry ID has been seen (the high bit marks an unseen entry). */
+static inline BOOL pdaMemoSeen(u16 id)
 {
-    u32 work = lbl_8047A4E0;
-    u32 species;
-    u32 rnd;
-
-    if (work != 0) {
-        species = lbl_8047A4E4[index];
-        if (species >= 0x8000) {
-            species = species & 0x3fff;
-        }
-        pokemonCreate(work, (u16)species, 10, gamedataGetStatus(0, 1));
-        rnd = memoDataGetPokemonRndFromID(0, species);
-        species = memoDataGetPokemonTrainerRndFromID(0, species);
-        pokemonBiosSetRnd(work, rnd);
-        pokemonBiosSetCatchTrainerRnd(work, species);
-        return lbl_8047A4E0;
-    }
-    return 0;
+    return (id & 0x8000) == 0;
 }
 
 /* As pdaLoadPokemon, but from an entry ID the caller already has in hand. */
-static inline u32 pdaLoadPokemonId(u16 id)
+static inline u32 pdaLoadPokemonId(u32 id)
 {
-    u32 work = lbl_8047A4E0;
-    u32 species = id;
+    u32 work;
     u32 rnd;
+    u32 species = id;
+    u32 trainerRnd;
 
-    if (work != 0) {
+    if ((work = lbl_8047A4E0) != 0) {
         if (id >= 0x8000) {
             species = id & 0x3fff;
         }
         pokemonCreate(work, (u16)species, 10, gamedataGetStatus(0, 1));
         rnd = memoDataGetPokemonRndFromID(0, species);
-        species = memoDataGetPokemonTrainerRndFromID(0, species);
+        trainerRnd = memoDataGetPokemonTrainerRndFromID(0, species);
         pokemonBiosSetRnd(work, rnd);
-        pokemonBiosSetCatchTrainerRnd(work, species);
+        pokemonBiosSetCatchTrainerRnd(work, trainerRnd);
+        return lbl_8047A4E0;
+    }
+    return 0;
+}
+
+/* pdaLoadPokemonId for the lookup helpers, which go on to read the work slot. */
+static inline u32 pdaLoadPokemonWork(u32 id)
+{
+    u32 rnd;
+    u32 species = id;
+    u32 trainerRnd;
+    u32 work;
+
+    if ((work = lbl_8047A4E0) != 0) {
+        if (id >= 0x8000) {
+            species = id & 0x3fff;
+        }
+        pokemonCreate(work, (u16)species, 10, gamedataGetStatus(0, 1));
+        rnd = memoDataGetPokemonRndFromID(0, species);
+        trainerRnd = memoDataGetPokemonTrainerRndFromID(0, species);
+        pokemonBiosSetRnd(work, rnd);
+        pokemonBiosSetCatchTrainerRnd(work, trainerRnd);
         return lbl_8047A4E0;
     }
     return 0;
@@ -5122,40 +4979,91 @@ s32 fn_8003D1FC(void)
     return 0;
 }
 
+/* Color variant of the memo entry; bails out before loading when no work slot exists. */
+/* RULE-EXCEPTION(user-approved): single-use inline helper pda_8003D4C8_Color (fn_8003D4C8) - see docs/RULE_EXCEPTIONS.md */
+static inline u8 pda_8003D4C8_Color(u32 id)
+{
+    u32 work = lbl_8047A4E0;
+    void* data;
+
+    if (work != 0) {
+        work = pdaLoadPokemonWork(id);
+        if (work != 0) {
+            data = pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(work));
+            if (data != NULL) {
+                return pokemonDataBiosGetColor(data, 0);
+            }
+        } else {
+            return 0;
+        }
+    }
+    return 0;
+}
+
+/* pdaLoadPokemonId for the colour filter: tests the work slot, then reads it again into work. */
+/* RULE-EXCEPTION(user-approved): single-use inline helper pda_8003D4C8_Load (fn_8003D4C8) - see docs/RULE_EXCEPTIONS.md */
+static inline u32 pda_8003D4C8_Load(u32 id)
+{
+    u32 work;
+    u32 rnd;
+    u32 species = id;
+    u32 trainerRnd;
+
+    if (lbl_8047A4E0 != 0) {
+        work = lbl_8047A4E0;
+        if (id >= 0x8000) {
+            species = id & 0x3fff;
+        }
+        pokemonCreate(work, (u16)species, 10, gamedataGetStatus(0, 1));
+        rnd = memoDataGetPokemonRndFromID(0, species);
+        trainerRnd = memoDataGetPokemonTrainerRndFromID(0, species);
+        pokemonBiosSetRnd(work, rnd);
+        pokemonBiosSetCatchTrainerRnd(work, trainerRnd);
+        return lbl_8047A4E0;
+    }
+    return 0;
+}
+
+/* Copy the seen entries whose colour matches the active colour tab into buf; returns the count. */
+/* RULE-EXCEPTION(user-approved): single-use inline helper pda_8003D4C8_Filter (fn_8003D4C8) - see docs/RULE_EXCEPTIONS.md */
+static inline u16 pda_8003D4C8_Filter(u16* buf)
+{
+    u16 count;
+    u16 i;
+    u32 id;
+    u8 color;
+
+    count = 0;
+    for (i = 0; i < lbl_8047A4E8; i++) {
+        id = lbl_8047A4E4[i];
+        if (pdaMemoSeen(id)) {
+            pda_8003D4C8_Load(id);
+            color = pda_8003D4C8_Color(id);
+            if (color == *(s8*)((u8*)&lbl_803A6818 + 0x159)) {
+                buf[count] = id;
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
 /* Rebuild the memo index table, optionally filtered by the active color tab. */
 #pragma peephole off
 u16 pdaMemoLoadPokemon(void)
 {
-    extern u16 memoDataGetCount(s32 a);
-    extern u16 memoDataGetPokemonID(s32 a, u16 index);
     extern void fn_8003D8CC(void);
     extern void fn_8003DC54(void);
     extern void fn_8003E394(void);
+    u16 total;
     u16 buf[500];
     u16 i;
     u16 count;
-    u16 total;
 
-    count = 0;
-    for (i = 0; i < memoDataGetCount(0); i++) {
-        lbl_8047A4E4[i] = memoDataGetPokemonID(0, i);
-        count++;
-    }
-    lbl_8047A4E8 = count;
+    lbl_8047A4E8 = pda_8003D818_LoadIds();
     fn_8003D8CC();
     if (*(s8*)((u8*)&lbl_803A6818 + 0x159) != 0) {
-        count = 0;
-        for (i = 0; i < lbl_8047A4E8; i++) {
-            u16 id = lbl_8047A4E4[i];
-            if ((id & 0x8000) == 0) {
-                pdaLoadPokemonId(id);
-                if (*(s8*)((u8*)&lbl_803A6818 + 0x159) ==
-                    pdaGetPokemonColor(id)) {
-                    buf[count] = id;
-                    count++;
-                }
-            }
-        }
+        count = pda_8003D4C8_Filter(buf);
         for (i = 0; i < count; i++) {
             lbl_8047A4E4[i] = buf[i];
         }
@@ -5194,13 +5102,42 @@ extern void* pokemonDataBiosGetName(void* data);
 /* Name of the memo entry as a wide string, or NULL when unavailable. */
 static inline void* pdaGetPokemonName(u16 id)
 {
-    u32 work = pdaLoadPokemonId(id);
+    u32 work = pdaLoadPokemonWork(id);
 
     if (work != 0) {
         return pokemonDataBiosGetName(
             pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(work)));
     }
     return NULL;
+}
+
+/* Mark the row's entries used and convert their first characters. */
+/* RULE-EXCEPTION(user-approved): single-use inline helper pda_8003D8CC_Fill (fn_8003D8CC) - see docs/RULE_EXCEPTIONS.md */
+static inline void pda_8003D8CC_Fill(PdaNameEntry* tbl, PdaKanaGroup* group)
+{
+    s32 n;
+
+    for (n = 0; n < group->count; n++) {
+        tbl[n].used = 1;
+        GScharMakeFromSJIS(tbl[n].text, group->words[n]);
+    }
+}
+
+/* Clear the kana-row table and fill it from tab's row. */
+/* RULE-EXCEPTION(user-approved): single-use inline helper pda_8003D8CC_KanaSetup (fn_8003D8CC) - see docs/RULE_EXCEPTIONS.md */
+static inline PdaKanaGroup* pda_8003D8CC_KanaSetup(PdaNameEntry* tbl, s32 tab)
+{
+    PdaKanaGroup* group;
+    s32 n;
+
+    for (n = 0; n < 15; n++) {
+        tbl[n].used = 0;
+    }
+    if (tab != 0) {
+        group = &lbl_802E60B0[0][tab - 1];
+        pda_8003D8CC_Fill(tbl, group);
+    }
+    return group;
 }
 
 /* Filter the memo index table down to the active kana-row tab. */
@@ -5211,33 +5148,20 @@ void fn_8003D8CC(void)
     PdaNameEntry tbl[15];
     u16 out[500];
     PdaKanaGroup* group;
-    s32 tab;
-    s32 n;
-    u16 i;
     u16 j;
-    u16 k;
-    u16 count;
     u16 total;
+    u16 i;
+    u16 id;
+    u16 count;
 
-    tab = *(s8*)((u8*)&lbl_803A6818 + 0x158);
-    if (tab == 0) {
+    if (*(s8*)((u8*)&lbl_803A6818 + 0x158) == 0) {
         return;
     }
-    for (n = 0; n < 15; n++) {
-        tbl[n].used = 0;
-    }
-    if (tab != 0) {
-        group = &lbl_802E60B0[0][tab - 1];
-        for (n = 0; n < group->count; n++) {
-            tbl[n].used = 1;
-            GScharMakeFromSJIS(tbl[n].text, group->words[n]);
-        }
-    }
+    group = pda_8003D8CC_KanaSetup(tbl, *(s8*)((u8*)&lbl_803A6818 + 0x158));
     count = group->count;
     total = 0;
     for (i = 0; i < lbl_8047A4E8; i++) {
-        u16 id = lbl_8047A4E4[i];
-        pdaLoadPokemonId(id);
+        pdaLoadPokemonId(id = lbl_8047A4E4[i]);
         if ((u32)GSmsgGetText((u8*)nameBuf, 0x100, (u8*)pdaGetPokemonName(id)) !=
             0) {
             for (j = 0; j < count; j++) {
@@ -5269,6 +5193,15 @@ static inline f32 pdaFabs(f32 v)
     return -v;
 }
 
+/* fn_800439BC's pdaFabs: retail reloads the 0.0f literal at every compare. */
+static inline f32 pda_800439BC_Fabs(f32 v)
+{
+    if (v > 0.0f) {
+        return v;
+    }
+    return -v;
+}
+
 /* Sample the stick and buttons into the PDA's own key-repeat state. */
 #pragma peephole off
 void pdaReadPadInput(void* scene)
@@ -5281,11 +5214,11 @@ void pdaReadPadInput(void* scene)
     s8 x;
     s8 y;
     f32 ang;
+    s32 i;
     u16 buttons;
     u16 held;
     u16 trig;
     u32 raw;
-    s32 i;
     u8* work = (u8*)scene;
 
     buttons = 0;
@@ -5294,13 +5227,13 @@ void pdaReadPadInput(void* scene)
     y = GSinputGetLeftStickXData(1, 0);
     if ((y < 0 ? -y : y) > 0x20 || (x < 0 ? -x : x) > 0x20) {
         ang = atan2((f64)y, (f64)x);
-        if (pdaFabs(ang) < lbl_8047BCFC) {
+        if (pda_800439BC_Fabs(ang) < lbl_8047BCFC) {
             buttons |= 2;
-        } else if (pdaFabs(ang) > lbl_8047BD00) {
+        } else if (pda_800439BC_Fabs(ang) > lbl_8047BD00) {
             buttons |= 1;
         }
-        if (lbl_8047BD04 < pdaFabs(ang) && pdaFabs(ang) < lbl_8047BD08) {
-            if (ang < lbl_8047BC94) {
+        if (lbl_8047BD04 < pda_800439BC_Fabs(ang) && pda_800439BC_Fabs(ang) < lbl_8047BD08) {
+            if (ang < 0.0f) {
                 buttons |= 4;
             } else {
                 buttons |= 8;
@@ -6089,16 +6022,72 @@ u8 pdaModelOrbitCamera(u8* work)
     return 1;
 }
 
-/* Icon index of one of a memo entry's two types. */
-static inline u16 pdaGetTypeIcon(u16 id, s32 slot)
+/* pdaLoadPokemonId for the type filter: tests the work slot, then reads it again into work. */
+static inline u32 pdaLoadPokemonSlot(u32 id)
 {
-    u16 type = pokemonGetStatus(
-        0, (u16)pokemonGetStatus(pdaLoadPokemonId(id), 0, 0x6e, 0), 0x16, slot);
+    u32 work;
+    u32 rnd;
+    u32 species = id;
+    u32 trainerRnd;
+
+    if (lbl_8047A4E0 != 0) {
+        work = lbl_8047A4E0;
+        if (id >= 0x8000) {
+            species = id & 0x3fff;
+        }
+        pokemonCreate(work, (u16)species, 10, gamedataGetStatus(0, 1));
+        rnd = memoDataGetPokemonRndFromID(0, species);
+        trainerRnd = memoDataGetPokemonTrainerRndFromID(0, species);
+        pokemonBiosSetRnd(work, rnd);
+        pokemonBiosSetCatchTrainerRnd(work, trainerRnd);
+        return lbl_8047A4E0;
+    }
+    return 0;
+}
+
+/* Icon index of one of a memo entry's two types. */
+static inline u16 pdaGetTypeIcon(u32 id, s32 slot)
+{
+    u32 type = (u16)pokemonGetStatus(
+        0, (u16)pokemonGetStatus(pdaLoadPokemonSlot(id), 0, 0x6e, 0), 0x16, slot);
 
     if (type >= 9) {
         type = type - 1;
     }
     return type + 1;
+}
+
+/* Copy the seen entries matching the type tabs into buf; returns the count.
+ * With both set an entry needs both types, otherwise either one. */
+static inline u16 pdaFilterTypes(u16* buf, u16 type0, u16 type1, BOOL both)
+{
+    u16 i;
+    u32 id;
+    u16 count;
+    u16 a;
+    u16 b;
+
+    count = 0;
+    for (i = 0; i < lbl_8047A4E8; i++) {
+        id = lbl_8047A4E4[i];
+        if (pdaMemoSeen(id)) {
+            pdaLoadPokemonSlot(id);
+            a = pdaGetTypeIcon(id, 0);
+            b = pdaGetTypeIcon(id, 1);
+            if (both) {
+                if ((type0 == a && type1 == b) || (type0 == b && type1 == a)) {
+                    buf[count] = id;
+                    count++;
+                }
+            } else {
+                if (type0 == a || type0 == b) {
+                    buf[count] = id;
+                    count++;
+                }
+            }
+        }
+    }
+    return count;
 }
 
 /* Filter the memo index table down to the active type tabs. */
@@ -6113,8 +6102,6 @@ void fn_8003DC54(void)
     u16 single;
     u16 i;
     u16 count;
-    u16 a;
-    u16 b;
 
     if (*(s8*)(S + 0x15a) == 0 && *(s8*)(S + 0x15b) == 0) {
         return;
@@ -6130,35 +6117,13 @@ void fn_8003DC54(void)
         single = 1;
     }
     if (single == 0) {
-        count = 0;
-        for (i = 0; i < lbl_8047A4E8; i++) {
-            u16 id = lbl_8047A4E4[i];
-            if ((id & 0x8000) == 0) {
-                pdaLoadPokemonId(id);
-                a = pdaGetTypeIcon(id, 0);
-                b = pdaGetTypeIcon(id, 1);
-                if ((type0 == a && type1 == b) || (type0 == b && type1 == a)) {
-                    buf1[count++] = id;
-                }
-            }
-        }
+        count = pdaFilterTypes(buf1, type0, type1, TRUE);
         for (i = 0; i < count; i++) {
             lbl_8047A4E4[i] = buf1[i];
         }
         lbl_8047A4E8 = count;
     } else {
-        count = 0;
-        for (i = 0; i < lbl_8047A4E8; i++) {
-            u16 id = lbl_8047A4E4[i];
-            if ((id & 0x8000) == 0) {
-                pdaLoadPokemonId(id);
-                a = pdaGetTypeIcon(id, 0);
-                b = pdaGetTypeIcon(id, 1);
-                if (type0 == a || type0 == b) {
-                    buf0[count++] = id;
-                }
-            }
-        }
+        count = pdaFilterTypes(buf0, type0, type1, FALSE);
         for (i = 0; i < count; i++) {
             lbl_8047A4E4[i] = buf0[i];
         }
@@ -6189,86 +6154,130 @@ static inline void pdaFree(void* p)
     }
 }
 
-static inline u16 pdaGetWeight(u16 id)
+static inline u16 pdaGetWeight(u32 id)
 {
-    u32 work = pdaLoadPokemonId(id);
+    u32 work = lbl_8047A4E0;
     void* data;
 
     if (work != 0) {
-        data = pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(work));
-        if (data != NULL) {
-            return pokemonDataBiosGetWeight(data);
+        work = pdaLoadPokemonWork(id);
+        if (work != 0) {
+            data = pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(work));
+            if (data != NULL) {
+                return pokemonDataBiosGetWeight(data);
+            }
+            return 0;
         }
         return 0;
     }
     return 0;
 }
 
-static inline u16 pdaGetHeight(u16 id)
+static inline u16 pdaGetHeight(u32 id)
 {
-    u32 work = pdaLoadPokemonId(id);
+    u32 work = lbl_8047A4E0;
     void* data;
 
     if (work != 0) {
-        data = pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(work));
-        if (data != NULL) {
-            return pokemonDataBiosGetHeight(data);
+        work = pdaLoadPokemonWork(id);
+        if (work != 0) {
+            data = pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(work));
+            if (data != NULL) {
+                return pokemonDataBiosGetHeight(data);
+            }
+            return 0;
         }
         return 0;
     }
     return 0;
+}
+
+/* Fill the sort pairs with each seen entry's weight; returns the entry count. */
+static inline u16 pdaCollectWeights(PdaSortPair* pairs, u16* ids)
+{
+    u16 i;
+    u32 id;
+    u16 count;
+    u16 key;
+
+    count = 0;
+    for (i = 0; i < lbl_8047A4E8; i++) {
+        id = lbl_8047A4E4[i];
+        if (pdaMemoSeen(id)) {
+            key = pdaGetWeight(id);
+            ids[count] = id;
+            pairs[count].key = key;
+            pairs[count].index = i;
+            count++;
+        }
+    }
+    return count;
+}
+
+/* Fill the sort pairs with each seen entry's height; returns the entry count. */
+static inline u16 pdaCollectHeights(PdaSortPair* pairs, u16* ids)
+{
+    u16 i;
+    u32 id;
+    u16 count;
+    u16 key;
+
+    count = 0;
+    for (i = 0; i < lbl_8047A4E8; i++) {
+        id = lbl_8047A4E4[i];
+        if (pdaMemoSeen(id)) {
+            key = pdaGetHeight(id);
+            ids[count] = id;
+            pairs[count].key = key;
+            pairs[count].index = i;
+            count++;
+        }
+    }
+    return count;
+}
+
+/* Sort tab 1: order the seen entries by weight (the sort runs even for an empty list). */
+/* RULE-EXCEPTION(user-approved): single-use inline helper pda_8003E394_SortWeight (fn_8003E394) - see docs/RULE_EXCEPTIONS.md */
+static inline void pda_8003E394_SortWeight(void)
+{
+    u16 j;
+    u16 count;
+    PdaSortPair* pairs;
+    u16* ids;
+
+    pairs = (PdaSortPair*)pdaAlloc(0x640, 0x20);
+    ids = (u16*)pdaAlloc(0x320, 0x20);
+    count = pdaCollectWeights(pairs, ids);
+    fn_8003F2DC((u8*)pairs, count, 1);
+    for (j = 0; j < count; j++) {
+        lbl_8047A4E4[j] = ids[pairs[j].index];
+    }
+    lbl_8047A4E8 = count;
+    pdaFree(pairs);
+    pdaFree(ids);
 }
 
 /* Reorder the memo index table for the active sort tab. */
 #pragma peephole off
 void fn_8003E394(void)
 {
-    PdaSortPair* pairs;
-    u16* ids;
-    u16 i;
     u16 j;
     u16 count;
+    /* RULE-EXCEPTION(user-approved): no-op store, NULL initialisers that every case overwrites (fn_8003E394) - see docs/RULE_EXCEPTIONS.md */
+    u16* ids = NULL;
+    PdaSortPair* pairs = NULL;
 
     switch (*(s8*)((u8*)&lbl_803A6818 + 0x15c)) {
     case 0:
         fn_8003F040();
         break;
     case 1:
-        pairs = (PdaSortPair*)pdaAlloc(0x640, 0x20);
-        ids = (u16*)pdaAlloc(0x320, 0x20);
-        count = 0;
-        for (i = 0; i < lbl_8047A4E8; i++) {
-            u16 id = lbl_8047A4E4[i];
-            if ((id & 0x8000) == 0) {
-                u16 key = pdaGetWeight(id);
-                ids[count] = id;
-                pairs[count].key = key;
-                pairs[count].index = i;
-                count++;
-            }
-        }
-        fn_8003F2DC((u8*)pairs, count, 1);
-        for (j = 0; j < count; j++) {
-            lbl_8047A4E4[j] = ids[pairs[j].index];
-        }
-        lbl_8047A4E8 = count;
-        pdaFree(pairs);
-        pdaFree(ids);
+        pda_8003E394_SortWeight();
         break;
     case 2:
         pairs = (PdaSortPair*)pdaAlloc(0x640, 0x20);
         ids = (u16*)pdaAlloc(0x320, 0x20);
-        count = 0;
-        for (i = 0; i < lbl_8047A4E8; i++) {
-            u16 id = lbl_8047A4E4[i];
-            if ((id & 0x8000) == 0) {
-                u16 key = pdaGetWeight(id);
-                ids[count] = id;
-                pairs[count].key = key;
-                pairs[count].index = i;
-                count++;
-            }
-        }
+        count = pdaCollectWeights(pairs, ids);
         if (count != 0) {
             fn_8003F2DC((u8*)pairs, count, 0);
             for (j = 0; j < count; j++) {
@@ -6282,17 +6291,7 @@ void fn_8003E394(void)
     case 3:
         pairs = (PdaSortPair*)pdaAlloc(0x640, 0x20);
         ids = (u16*)pdaAlloc(0x320, 0x20);
-        count = 0;
-        for (i = 0; i < lbl_8047A4E8; i++) {
-            u16 id = lbl_8047A4E4[i];
-            if ((id & 0x8000) == 0) {
-                u16 key = pdaGetHeight(id);
-                ids[count] = id;
-                pairs[count].key = key;
-                pairs[count].index = i;
-                count++;
-            }
-        }
+        count = pdaCollectHeights(pairs, ids);
         if (count != 0) {
             fn_8003F2DC((u8*)pairs, count, 1);
             for (j = 0; j < count; j++) {
@@ -6306,17 +6305,7 @@ void fn_8003E394(void)
     case 4:
         pairs = (PdaSortPair*)pdaAlloc(0x640, 0x20);
         ids = (u16*)pdaAlloc(0x320, 0x20);
-        count = 0;
-        for (i = 0; i < lbl_8047A4E8; i++) {
-            u16 id = lbl_8047A4E4[i];
-            if ((id & 0x8000) == 0) {
-                u16 key = pdaGetHeight(id);
-                ids[count] = id;
-                pairs[count].key = key;
-                pairs[count].index = i;
-                count++;
-            }
-        }
+        count = pdaCollectHeights(pairs, ids);
         if (count != 0) {
             fn_8003F2DC((u8*)pairs, count, 0);
             for (j = 0; j < count; j++) {
@@ -6330,6 +6319,58 @@ void fn_8003E394(void)
     default:
         break;
     }
+}
+#pragma peephole reset
+
+typedef struct PdaNamePair {
+    u16 index;
+    u16 name[12];
+} PdaNamePair;
+
+/* Sort the memo index table by species name. */
+#pragma peephole off
+void fn_8003F040(void)
+{
+    extern s32 GScharCmp(u16* a, u16* b);
+    extern void* memcpy(void* dst, const void* src, u32 size);
+    u16 i;
+    PdaNamePair tmp;
+    s32 gap;
+    PdaNamePair* q;
+    PdaNamePair* pairs;
+    s32 k;
+    s32 j;
+    PdaNamePair* p;
+    u16* ids;
+    s32 count;
+
+    pairs = (PdaNamePair*)pdaAlloc(0x28a0, 0x20);
+    ids = (u16*)pdaAlloc(0x320, 0x20);
+    for (i = 0; i < lbl_8047A4E8; i++) {
+        u32 id = lbl_8047A4E4[i];
+        ids[i] = id;
+        GSmsgGetText((u8*)pairs[i].name, 0x18, (u8*)pdaGetPokemonName(id));
+        pairs[i].index = i;
+    }
+
+    count = lbl_8047A4E8;
+    for (gap = count / 2; gap > 0; gap = gap / 2) {
+        for (j = gap; j < count; j++) {
+            for (k = j - gap, p = &pairs[k];
+                 k >= 0 && GScharCmp(p->name, (q = &pairs[k + gap])->name) >= 0;
+                 p -= gap, k -= gap) {
+                memcpy(&tmp, p, 0x1a);
+                memcpy(p, q, 0x1a);
+                memcpy(q, &tmp, 0x1a);
+            }
+        }
+    }
+
+    for (i = 0; i < lbl_8047A4E8; i++) {
+        lbl_8047A4E4[i] = ids[pairs[i].index];
+    }
+    pdaFree(pairs);
+    pdaFree(ids);
 }
 #pragma peephole reset
 
@@ -6644,6 +6685,33 @@ extern void* pokemonTokuseiDataBiosGetPtr(u32 id);
 extern void* pokemonTokuseiDataBiosGetName(void* data);
 extern u32 pokemonDataBiosGetTypeName(void* data);
 
+/* Write both seeds into the work Pokemon. MWCC evaluates the arguments right to
+ * left, so a caller passing both lookups runs the Pokemon seed lookup first. */
+static inline void pda_800411FC_Seeds(u32 work, u32 trainerRnd, u32 rnd)
+{
+    pokemonBiosSetRnd(work, rnd);
+    pokemonBiosSetCatchTrainerRnd(work, trainerRnd);
+}
+
+/* fn_800411FC's pdaLoadPokemon: rebuild the work Pokemon for memo entry `index`. */
+static inline u32 pda_800411FC_Load(s32 index)
+{
+    u32 work = lbl_8047A4E0;
+    u32 species;
+
+    if (work != 0) {
+        species = lbl_8047A4E4[index];
+        if (species >= 0x8000) {
+            species = species & 0x3fff;
+        }
+        pokemonCreate(work, (u16)species, 10, gamedataGetStatus(0, 1));
+        pda_800411FC_Seeds(work, memoDataGetPokemonTrainerRndFromID(0, species),
+                           memoDataGetPokemonRndFromID(0, species));
+        return lbl_8047A4E0;
+    }
+    return 0;
+}
+
 /* Whether the highlighted memo entry has actually been seen. */
 static inline u8 pdaEntrySeen(void)
 {
@@ -6651,12 +6719,12 @@ static inline u8 pdaEntrySeen(void)
 }
 
 /* Species-name message for the highlighted entry, 0 when unavailable. */
-static inline u32 pdaCurrentNameMsg(void)
+static inline u32 pdaCurrentNameMsg(s32 index)
 {
     u32 work;
 
     if (lbl_8047A4E0 != 0) {
-        work = pdaLoadPokemonB(lbl_803A6818.currentIndex);
+        work = pda_800411FC_Load(index);
         if (work != 0) {
             return GSmsgGetGSchar((u32)pokemonDataBiosGetName(
                 pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(work))));
@@ -6666,11 +6734,23 @@ static inline u32 pdaCurrentNameMsg(void)
     return 0;
 }
 
-/* Bios record for the highlighted entry, NULL when unavailable. */
-static inline void* pdaCurrentData(void)
+/* Ability ID in the given slot of the highlighted entry. */
+static inline u16 pda_800411FC_Ability(s32 slot)
 {
-    return pokemonDataBiosGetPtr(
-        pokemonBiosGetPokemonDataId(pdaLoadPokemonB(lbl_803A6818.currentIndex)));
+    return pokemonDataBiosGetTokuseiDataId(
+        pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(
+            pda_800411FC_Load(lbl_803A6818.currentIndex))),
+        slot);
+}
+
+/* Type-name message of the highlighted entry, 0 when unavailable. */
+static inline u32 pda_800411FC_TypeName(void)
+{
+    if (lbl_8047A4E0 != 0) {
+        return pokemonDataBiosGetTypeName(pokemonDataBiosGetPtr(
+            pokemonBiosGetPokemonDataId(pda_800411FC_Load(lbl_803A6818.currentIndex))));
+    }
+    return 0;
 }
 
 /* Height of the highlighted entry, 0 when unavailable. */
@@ -6680,7 +6760,7 @@ static inline u16 pdaCurrentHeight(void)
     void* data;
 
     if (lbl_8047A4E0 != 0) {
-        work = pdaLoadPokemonB(lbl_803A6818.currentIndex);
+        work = pda_800411FC_Load(lbl_803A6818.currentIndex);
         if (work != 0) {
             data = pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(work));
             if (data != NULL) {
@@ -6700,7 +6780,7 @@ static inline u16 pdaCurrentWeight(void)
     void* data;
 
     if (lbl_8047A4E0 != 0) {
-        work = pdaLoadPokemonB(lbl_803A6818.currentIndex);
+        work = pda_800411FC_Load(lbl_803A6818.currentIndex);
         if (work != 0) {
             data = pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(work));
             if (data != NULL) {
@@ -6732,7 +6812,7 @@ void fn_800411FC(PdaSprite* alphaSprite, PdaEvent* event)
     u32 msg;
     s16* pos;
 
-    name = pdaCurrentNameMsg();
+    name = pdaCurrentNameMsg(lbl_803A6818.currentIndex);
     if (name == 0) {
         name = GSmsgGetGSchar(1);
     }
@@ -6741,7 +6821,7 @@ void fn_800411FC(PdaSprite* alphaSprite, PdaEvent* event)
     layout = lbl_802EF0A8;
 
     if (pdaEntrySeen() != 0) {
-        tokusei0 = pokemonDataBiosGetTokuseiDataId(pdaCurrentData(), 0);
+        tokusei0 = pda_800411FC_Ability(0);
         msg = GSmsgGetGSchar((u32)pokemonTokuseiDataBiosGetName(
             pokemonTokuseiDataBiosGetPtr(tokusei0)));
         msgctrlSetValue(0x37, msg);
@@ -6755,7 +6835,7 @@ void fn_800411FC(PdaSprite* alphaSprite, PdaEvent* event)
     }
 
     if (pdaEntrySeen() != 0) {
-        tokusei1 = pokemonDataBiosGetTokuseiDataId(pdaCurrentData(), 1);
+        tokusei1 = pda_800411FC_Ability(1);
         if (tokusei1 != 0 && tokusei1 != tokusei0) {
             pos = (s16*)(lbl_802EF0A8 + 0x20b42);
             msgctrlSetValue(0x37,
@@ -6774,10 +6854,10 @@ void fn_800411FC(PdaSprite* alphaSprite, PdaEvent* event)
     layout = lbl_802EF0A8;
     if (pdaEntrySeen() != 0) {
         height = pdaCurrentHeight();
-        i = 9;
-        lbl_803A67E8[i--] = 0;
-        lbl_803A67E8[i--] = 0x27;
-        lbl_803A67E8[i] = 0x27;
+        i = 10;
+        lbl_803A67E8[--i] = 0;
+        lbl_803A67E8[--i] = 0x27;
+        lbl_803A67E8[--i] = 0x27;
         digits = 3;
         for (;;) {
             digit = height % 10;
@@ -6832,7 +6912,7 @@ void fn_800411FC(PdaSprite* alphaSprite, PdaEvent* event)
 
     layout = lbl_802EF0A8;
     if (pdaEntrySeen() != 0) {
-        msgctrlSetValue(0x31, pokemonDataBiosGetTypeName(pdaCurrentData()));
+        msgctrlSetValue(0x31, pda_800411FC_TypeName());
         GSmsgPrintRect(lbl_8047A4F0 +
                         (*(s16*)(layout + 0x5a22) - sprite->field_50),
                     *(s16*)(layout + 0x5a24) - sprite->field_52,
@@ -7887,6 +7967,28 @@ void fn_80040308(void* menu)
 }
 #pragma peephole reset
 
+/* Reload the memo id table, clear the list filters and refresh the list. */
+#pragma peephole off
+u16 pdaMemoBuildList(void)
+{
+    extern u16* lbl_8047A4E4;
+    extern u16 lbl_8047A4E8;
+    extern void fn_8003E394(void);
+    u8* work;
+
+    work = (u8*)&lbl_803A6818;
+    lbl_8047A4E8 = pda_8003D818_LoadIds();
+    work[0x158] = 0;
+    work[0x159] = 0;
+    work[0x15b] = 0;
+    work[0x15a] = 0;
+    work[0x15c] = 0;
+    fn_8003E394();
+    lbl_803A6818.field_10 = lbl_8047A4E8;
+    return lbl_8047A4E8;
+}
+#pragma peephole reset
+
 typedef struct PdaCryTrail {
     void* data;
     f32 speed;
@@ -7908,15 +8010,19 @@ extern u32 GSinputButtonsChanged(s32 chan);
 extern s32 menuOpen(s32 id, s32 flag);
 
 /* Cry voice of the highlighted entry, 0xffff when it cannot be resolved. */
-static inline u16 pdaCurrentVoice(void)
+static inline u16 pdaCurrentVoice(s32 index)
 {
-    u32 work = pdaLoadPokemon(lbl_803A6818.currentIndex);
+    u32 work = lbl_8047A4E0;
     void* data;
 
     if (work != 0) {
-        data = pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(work));
-        if (data != NULL) {
-            return pokemonDataBiosGetVoice(data);
+        work = pdaLoadPokemon(index);
+        if (work != 0) {
+            data = pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(work));
+            if (data != NULL) {
+                return pokemonDataBiosGetVoice(data);
+            }
+            return 0xffff;
         }
         return 0xffff;
     }
@@ -7924,15 +8030,19 @@ static inline u16 pdaCurrentVoice(void)
 }
 
 /* Cry sample of the highlighted entry, NULL when it cannot be resolved. */
-static inline void* pdaCurrentCry(void)
+static inline void* pdaCurrentCry(s32 index)
 {
-    u32 work = pdaLoadPokemon(lbl_803A6818.currentIndex);
+    u32 work = lbl_8047A4E0;
     void* data;
 
     if (work != 0) {
-        data = pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(work));
-        if (data != NULL) {
-            return pokemonNakigoeDataBiosGetDataAddress(data);
+        work = pdaLoadPokemon(index);
+        if (work != 0) {
+            data = pokemonDataBiosGetPtr(pokemonBiosGetPokemonDataId(work));
+            if (data != NULL) {
+                return pokemonNakigoeDataBiosGetDataAddress(data);
+            }
+            return NULL;
         }
         return NULL;
     }
@@ -7940,9 +8050,9 @@ static inline void* pdaCurrentCry(void)
 }
 
 /* Push a cry onto the ring of trails and age every older entry. */
+#define PDA_CRY(n) (((PdaCryTrail*)lbl_802E52C8)[n])
 static inline void pdaPushCry(void* data, u32 voice)
 {
-    PdaCryTrail* t = (PdaCryTrail*)lbl_802E52C8;
     s32 i;
     s32 j;
 
@@ -7951,22 +8061,95 @@ static inline void pdaPushCry(void* data, u32 voice)
         lbl_8047A4EC = 0;
     }
     i = lbl_8047A4EC;
-    t[i].data = data;
-    t[i].voice = voice;
-    t[i].field_0c = lbl_8047BC94;
-    t[i].field_14 = lbl_8047BC94;
-    t[i].offset = 0;
-    t[i].active = 1;
-    t[i].alpha = lbl_8047BCA0;
-    t[i].field_20 = lbl_8047BD18;
+    PDA_CRY(i).data = data;
+    PDA_CRY(i).voice = voice;
+    PDA_CRY(i).field_0c = lbl_8047BC94;
+    PDA_CRY(i).field_14 = lbl_8047BC94;
+    PDA_CRY(i).offset = 0;
+    PDA_CRY(i).active = 1;
+    PDA_CRY(i).alpha = lbl_8047BCA0;
+    PDA_CRY(i).field_20 = lbl_8047BD18;
     for (j = i - 1; j >= 0; j--) {
-        t[j].offset = (s32)((f32)t[j].offset + t[j].speed);
-        t[j].field_20 = t[j].field_20 + lbl_8047BD1C;
+        PDA_CRY(j).offset = (s32)((f32)PDA_CRY(j).offset + PDA_CRY(j).speed);
+        PDA_CRY(j).field_20 += lbl_8047BD1C;
     }
-    for (j = 7; j > (s32)lbl_8047A4EC; j--) {
-        t[j].offset = (s32)((f32)t[j].offset + t[j].speed);
-        t[j].field_20 = t[j].field_20 + lbl_8047BD1C;
+    for (j = 7; j > lbl_8047A4EC; j--) {
+        PDA_CRY(j).offset = (s32)((f32)PDA_CRY(j).offset + PDA_CRY(j).speed);
+        PDA_CRY(j).field_20 += lbl_8047BD1C;
     }
+}
+
+/* Fill the cry ring with empty trails. */
+/* RULE-EXCEPTION(user-approved): single-use inline helper; its loop counter is an inline local, numbered after the trail push's locals, which gives retail's registers for the ring reset - see docs/RULE_EXCEPTIONS.md */
+static inline void pda_80046168_ClearCries(void)
+{
+    s32 k;
+
+    for (k = 0; k < 8; k++) {
+        pdaPushCry(NULL, 0);
+    }
+}
+
+/* 1 while any trail's cry is still playing. */
+/* RULE-EXCEPTION(user-approved): single-use inline helper; returning the flag gives retail's shared zero for the flag and the loop counter - see docs/RULE_EXCEPTIONS.md */
+static inline u8 pda_80046168_AnyPlaying(void)
+{
+    PdaCryTrail* t;
+    s32 i;
+    s32 playing;
+
+    t = (PdaCryTrail*)lbl_802E52C8;
+    playing = 0;
+    for (i = 0; i < 8; i++) {
+        if (t->data != NULL) {
+            switch (GSsndGetStatus(t->voice)) {
+            case 0:
+                break;
+            case 2:
+                playing = 1;
+                break;
+            case 4:
+                break;
+            default:
+                break;
+            }
+        }
+        t++;
+    }
+    return playing;
+}
+
+/* 1 when the stick or the cancel buttons leave the cry screen. */
+/* RULE-EXCEPTION(user-approved): single-use inline helper; its early returns give retail's shared join for the cancel test - see docs/RULE_EXCEPTIONS.md */
+static inline u8 pda_80046168_StickCancel(void)
+{
+    /* Retail converts the stick values to single precision (fsubs) for this
+     * call, so this caller saw atan2 declared with float parameters. */
+    extern f64 atan2(f32 y, f32 x);
+    extern s8 GSinputGetLeftStickYData(s32 chan, s32 index);
+    extern s8 GSinputGetLeftStickXData(s32 chan, s32 index);
+    s8 x;
+    s8 y;
+    f32 ang;
+
+    if ((fn_800F7BC4(1) & GSinputButtonsChanged(1) & 0x8) != 0) {
+        return 1;
+    }
+    if ((fn_800F7BC4(1) & GSinputButtonsChanged(1) & 0x4) != 0) {
+        return 1;
+    }
+    x = GSinputGetLeftStickYData(1, 0);
+    y = GSinputGetLeftStickXData(1, 0);
+    if ((y < 0 ? -y : y) > 0x20 || (x < 0 ? -x : x) > 0x20) {
+        ang = atan2(y, x);
+        if (pda_800439BC_Fabs(ang) < lbl_8047BCFC) {
+            return 1;
+        }
+        if (pda_800439BC_Fabs(ang) > lbl_8047BD00) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 /* Cry-playback thread for the PDA's Pokemon entry. */
@@ -7974,27 +8157,12 @@ static inline void pdaPushCry(void* data, u32 voice)
 void fn_80046168(void)
 {
     extern void _threadSwitch(void);
-    /* Retail converts the stick values to single precision (fsubs) for this
-     * call, so this caller saw atan2 declared with float parameters. */
-    extern f64 atan2(f32 y, f32 x);
-    extern s8 GSinputGetLeftStickYData(s32 chan, s32 index);
-    extern s8 GSinputGetLeftStickXData(s32 chan, s32 index);
     u8* S;
-    PdaCryTrail* t;
     s32 running;
-    s32 k;
-    s32 i;
-    s32 playing;
-    u8 cancel;
     u16 voice;
-    s8 x;
-    s8 y;
-    f32 ang;
 
     running = 1;
-    for (k = 0; k < 8; k++) {
-        pdaPushCry(NULL, 0);
-    }
+    pda_80046168_ClearCries();
     S = (u8*)&lbl_803A6818;
     while (1) {
         switch (*(s32*)(S + 0x20)) {
@@ -8007,9 +8175,9 @@ void fn_80046168(void)
             if (menuOpen(0xa2, 1) >= 0) {
                 if (pdaEntrySeen() != 0) {
                     menuOpen(0x3e, 0);
-                    voice = pdaCurrentVoice();
+                    voice = pdaCurrentVoice(lbl_803A6818.currentIndex);
                     soundStartRaw(voice, 0, 0);
-                    pdaPushCry(pdaCurrentCry(), voice);
+                    pdaPushCry(pdaCurrentCry(lbl_803A6818.currentIndex), voice);
                     *(s32*)(S + 0x20) = 1;
                 }
             } else {
@@ -8023,56 +8191,14 @@ void fn_80046168(void)
             }
             break;
         case 1:
-            t = (PdaCryTrail*)lbl_802E52C8;
-            playing = 0;
-            for (i = 0; i < 8; i++) {
-                if (t->data != NULL) {
-                    switch (GSsndGetStatus(t->voice)) {
-                    case 0:
-                        break;
-                    case 2:
-                        playing = 1;
-                        break;
-                    case 4:
-                        break;
-                    default:
-                        break;
-                    }
-                }
-                t++;
-            }
-            if ((u8)playing != 0) {
-                if ((fn_800F7BC4(1) & GSinputButtonsChanged(1) & 0x8) != 0) {
-                    cancel = 1;
-                } else if ((fn_800F7BC4(1) & GSinputButtonsChanged(1) & 0x4) != 0) {
-                    cancel = 1;
-                } else {
-                    x = GSinputGetLeftStickYData(1, 0);
-                    y = GSinputGetLeftStickXData(1, 0);
-                    if ((y < 0 ? -y : y) > 0x20 || (x < 0 ? -x : x) > 0x20) {
-                        ang = atan2(y, x);
-                        if (pdaFabs(ang) < lbl_8047BCFC) {
-                            cancel = 1;
-                        } else if (pdaFabs(ang) > lbl_8047BD00) {
-                            cancel = 1;
-                        } else {
-                            cancel = 0;
-                        }
-                    } else {
-                        cancel = 0;
-                    }
-                }
-            } else {
-                cancel = 1;
-            }
-            if (cancel == 1) {
+            if (pda_80046168_AnyPlaying() == 0 || pda_80046168_StickCancel() == 1) {
                 menuCloseCustom(0x3e, 0, 1);
                 *(s32*)(S + 0x20) = 0;
             } else {
                 if ((fn_800F7BC4(1) & GSinputButtonsChanged(1) & 0x100) != 0) {
-                    voice = pdaCurrentVoice();
+                    voice = pdaCurrentVoice(lbl_803A6818.currentIndex);
                     soundStartRaw(voice, 0, 0);
-                    pdaPushCry(pdaCurrentCry(), voice);
+                    pdaPushCry(pdaCurrentCry(lbl_803A6818.currentIndex), voice);
                 }
                 if ((fn_800F7BC4(1) & GSinputButtonsChanged(1) & 0x200) != 0) {
                     if (*(s32*)(S + 0x1c) == 2) {
@@ -8105,71 +8231,43 @@ extern f32 lbl_8047BDB0;
 extern f32 lbl_8047BDB4;
 extern f32 lbl_8047BDB8;
 
-/* Mail-list backdrop: fade panel, scanlines, and the sheared page edge. */
-#pragma peephole off
-s32 fn_800495C8(void* work, PdaSprite* sprite)
+static inline void pda_800495C8_Scanline(PdaSprite* sprite, s16 y, s32 alpha)
 {
     extern u8 lbl_80314E08[];
     extern void gfxSetLineWidth(f32 width);
     extern void gfxVtxColor1u32(s32 index, u32 color);
     extern void gfxVtxPos2s16(s16 x, s16 y);
-    u8* G = lbl_803A6A60;
-    u8* data;
-    f32 kOne;
-    f32 kAlpha;
-    f32 top;
-    f32 kMin;
-    f32 kScale;
-    f32 kMul;
-    f32 kDiv;
-    f32 y;
-    s32 i;
-    s32 j;
-    s32 alpha;
-    s16 row;
     u32 color;
-    f32 step;
-
-    data = *(u8**)((u8*)work + 0x60);
-    if (*(f32*)(G + 0x2c) != *(f32*)(G + 0x28)) {
-        step = *(f32*)(G + 8) / lbl_8047BDA8;
-        if (*(f32*)(G + 0x2c) > *(f32*)(G + 0x28)) {
-            *(f32*)(G + 0x28) = *(f32*)(G + 0x28) + step;
-            if (*(f32*)(G + 0x28) > lbl_8047BDA0) {
-                *(f32*)(G + 0x28) = lbl_8047BDA0;
-            }
-        } else {
-            *(f32*)(G + 0x28) = *(f32*)(G + 0x28) - step;
-            if (*(f32*)(G + 0x28) < lbl_8047BDAC) {
-                *(f32*)(G + 0x28) = lbl_8047BDAC;
-            }
-        }
-    }
-    fn_800411EC();
-    if (*(s8*)(lbl_803A6A60 + 0) == 1) {
-        if (lbl_803A6A60[0x49] != 0 && lbl_803A6A60[0x4a] == 0) {
-            menuOffScreenSetDisp(0);
-            lbl_803A6A60[0x49] = 0;
-        }
-        if (*(s8*)(lbl_803A6A60 + 1) >= 1) {
-            *(f32*)(G + 0x2c) = lbl_8047BDAC;
-            return 0;
-        }
-        *(f32*)(G + 0x2c) = lbl_8047BDA0;
-    } else {
-        if (lbl_803A6A60[0x49] != 1) {
-            menuOffScreenSetDisp(1);
-            lbl_803A6A60[0x49] = 1;
-        }
-        *(f32*)(G + 0x2c) = lbl_8047BDA0;
-    }
 
     gfxSetFlags(1);
     gfxClearFlags(6);
     gfxSetVtxDesc(lbl_80314E08);
-    gfxSetPrimitive(4);
-    gfxBegin(4);
-    alpha = (s32)(lbl_8047BDB0 * *(f32*)(G + 0x28));
+    gfxSetPrimitive(1);
+    gfxSetLineWidth(1.0f);
+    gfxBegin(2);
+    gfxVtxPos2s16(0, y);
+    color = alpha | 0x00800000;
+    gfxVtxColor1u32(0, color);
+    gfxVtxPos2s16(sprite->x, y);
+    gfxVtxColor1u32(0, color);
+    gfxEnd();
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper pda_800495C8_RowLine (fn_800495C8) - see docs/RULE_EXCEPTIONS.md */
+static inline void pda_800495C8_RowLine(PdaSprite* sprite, f32 y, s32 alpha)
+{
+    s16 row = 480.0f * y;
+
+    pda_800495C8_Scanline(sprite, row, alpha);
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper pda_800495C8_Panel (fn_800495C8) - see docs/RULE_EXCEPTIONS.md */
+static inline void pda_800495C8_Panel(PdaSprite* sprite, s32 alpha)
+{
+    extern void gfxVtxColor1u32(s32 index, u32 color);
+    extern void gfxVtxPos2s16(s16 x, s16 y);
+    u32 color;
+
     gfxVtxPos2s16(0, 0);
     color = (u8)alpha | 0x03140e00;
     gfxVtxColor1u32(0, color);
@@ -8180,47 +8278,80 @@ s32 fn_800495C8(void* work, PdaSprite* sprite)
     gfxVtxPos2s16(sprite->x, sprite->y);
     gfxVtxColor1u32(0, color);
     gfxEnd();
+}
+
+/* Mail-list backdrop: fade panel, scanlines, and the sheared page edge. */
+#pragma peephole off
+s32 fn_800495C8(void* work, PdaSprite* sprite)
+{
+    extern u8 lbl_80314E08[];
+    extern void gfxVtxColor1u32(s32 index, u32 color);
+    extern void gfxVtxPos2s16(s16 x, s16 y);
+    u8* G = lbl_803A6A60;
+    u8* data;
+    f32 top;
+    f32 y;
+    u8 fade;
+    s32 j;
+    s32 i;
+    s32 alpha;
+    f32 step;
+
+    data = *(u8**)((u8*)work + 0x60);
+    if (*(f32*)(G + 0x2c) != *(f32*)(G + 0x28)) {
+        step = *(f32*)(G + 8) / 0.5f;
+        if (*(f32*)(G + 0x2c) > *(f32*)(G + 0x28)) {
+            *(f32*)(G + 0x28) = *(f32*)(G + 0x28) + step;
+            if (*(f32*)(G + 0x28) > 1.0f) {
+                *(f32*)(G + 0x28) = 1.0f;
+            }
+        } else {
+            *(f32*)(G + 0x28) = *(f32*)(G + 0x28) - step;
+            if (*(f32*)(G + 0x28) < 0.0f) {
+                *(f32*)(G + 0x28) = 0.0f;
+            }
+        }
+    }
+    fn_800411EC();
+    if (*(s8*)(lbl_803A6A60 + 0) == 1) {
+        if (lbl_803A6A60[0x49] != 0 && lbl_803A6A60[0x4a] == 0) {
+            menuOffScreenSetDisp(0);
+            lbl_803A6A60[0x49] = 0;
+        }
+        if (*(s8*)(lbl_803A6A60 + 1) >= 1) {
+            *(f32*)(G + 0x2c) = 0.0f;
+            return 0;
+        }
+        *(f32*)(G + 0x2c) = 1.0f;
+    } else {
+        if (lbl_803A6A60[0x49] != 1) {
+            menuOffScreenSetDisp(1);
+            lbl_803A6A60[0x49] = 1;
+        }
+        *(f32*)(G + 0x2c) = 1.0f;
+    }
+
+    gfxSetFlags(1);
+    gfxClearFlags(6);
+    gfxSetVtxDesc(lbl_80314E08);
+    gfxSetPrimitive(4);
+    gfxBegin(4);
+    alpha = (s32)(255.0f * *(f32*)(G + 0x28));
+    pda_800495C8_Panel(sprite, alpha);
 
     for (i = 0; i < 0x1e0; i += 4) {
-        gfxSetFlags(1);
-        gfxClearFlags(6);
-        gfxSetVtxDesc(lbl_80314E08);
-        gfxSetPrimitive(1);
-        gfxSetLineWidth(lbl_8047BDA0);
-        gfxBegin(2);
-        gfxVtxPos2s16(0, i);
-        gfxVtxColor1u32(0, 0x00800080);
-        gfxVtxPos2s16(sprite->x, i);
-        gfxVtxColor1u32(0, 0x00800080);
-        gfxEnd();
+        pda_800495C8_Scanline(sprite, i, 0x80);
     }
 
     top = **(f32**)(data + 8);
-    kAlpha = lbl_8047BDB0;
-    kOne = lbl_8047BDA0;
-    kDiv = lbl_8047BDB4;
-    kMul = lbl_8047BDB8;
-    kScale = lbl_8047BDA4;
-    kMin = lbl_8047BDAC;
     for (j = 0; j < 12; j++) {
-        alpha = (s32)(kAlpha * (kOne - (f32)j / kDiv));
-        y = top - kMul * (f32)j / kScale;
-        if (y < kMin) {
-            y = y + kOne;
+        fade = (s32)(255.0f * (1.0f - (f32)j / 12.0f));
+        y = top - 4.0f * (f32)j / 480.0f;
+        if (y < 0.0f) {
+            y += 1.0f;
         }
-        row = kScale * y;
-        gfxSetFlags(1);
-        gfxClearFlags(6);
-        gfxSetVtxDesc(lbl_80314E08);
-        gfxSetPrimitive(1);
-        gfxSetLineWidth(lbl_8047BDA0);
-        gfxBegin(2);
-        gfxVtxPos2s16(0, row);
-        color = (u8)alpha | 0x00800000;
-        gfxVtxColor1u32(0, color);
-        gfxVtxPos2s16(sprite->x, row);
-        gfxVtxColor1u32(0, color);
-        gfxEnd();
+        /* RULE-EXCEPTION(user-approved): redundant mask on the u8 row alpha, chosen for code generation (fn_800495C8) - see docs/RULE_EXCEPTIONS.md */
+        pda_800495C8_RowLine(sprite, y, fade & 0xff);
     }
     return 0;
 }
@@ -8233,17 +8364,78 @@ extern f32 lbl_8047BDE4;
 extern u8 std081_flagCheckTrue(s32 id);
 extern void menuItemBiosSetSelectFlag(s32 id, s32 flag);
 
-/* Per-frame timing, scroll easing and page-flip for the mail list. */
+/* Ease the widgets' horizontal offset toward its target: 10 x the gap per
+ * second, at most 20 per frame, snapping once the remaining gap is within the
+ * step or under 1. */
+/* RULE-EXCEPTION(user-approved): single-use inline helper pda_8004B278_EaseX (fn_8004B278) - see docs/RULE_EXCEPTIONS.md */
+static inline void pda_8004B278_EaseX(f32* cur, f32* target)
+{
+    f32 tgt;
+    f32 delta;
+    f32 rest;
+    f32 moved;
+
+    if (*cur != *target) {
+        delta = *target - *cur;
+        delta = 10.0f * delta;
+        moved = delta * *(f32*)((u8*)&lbl_803A6A60 + 8);
+        if (moved > 20.0f) {
+            moved = 20.0f;
+        }
+        if (moved <= -20.0f) {
+            moved = -20.0f;
+        }
+        *cur += moved;
+        tgt = *target;
+        rest = tgt - *cur;
+        moved = moved > 0.0f ? moved : -moved;
+        if ((rest > 0.0f ? rest : -rest) <= moved || (rest > 0.0f ? rest : -rest) < 1.0f) {
+            *cur = tgt;
+        }
+    }
+}
+
+/* The same easing for the vertical offset. */
+/* RULE-EXCEPTION(user-approved): single-use inline helper pda_8004B278_EaseY (fn_8004B278) - see docs/RULE_EXCEPTIONS.md */
+static inline void pda_8004B278_EaseY(f32* cur, f32* target)
+{
+    f32 delta;
+    f32 rest;
+    f32 moved;
+    f32 speed;
+    f32 tgt;
+
+    if (*cur != *target) {
+        delta = *target - *cur;
+        delta = 10.0f * delta;
+        moved = delta * *(f32*)((u8*)&lbl_803A6A60 + 8);
+        if (moved > 20.0f) {
+            moved = 20.0f;
+        }
+        if (moved <= -20.0f) {
+            moved = -20.0f;
+        }
+        *cur += moved;
+        tgt = *target;
+        rest = tgt - *cur;
+        if (moved > 0.0f) {
+            speed = moved;
+        } else {
+            speed = -moved;
+        }
+        if ((rest > 0.0f ? rest : -rest) <= speed || (rest > 0.0f ? rest : -rest) < 1.0f) {
+            *cur = tgt;
+        }
+    }
+}
+
+/* Per-frame timing, offset easing and background scroll for the mail screen. */
 #pragma peephole off
 s32 fn_8004B278(u8* work)
 {
     extern u32 GSgetFrameStep(void);
     extern s32 fn_800D37CC(void);
     u8* data;
-    f32 delta;
-    f32 moved;
-    f32 rest;
-    f32* p;
 
     data = *(u8**)(work + 0x60);
     *(f32*)((u8*)&lbl_803A6A60 + 8) = (f32)GSgetFrameStep() / (f32)fn_800D37CC();
@@ -8253,80 +8445,24 @@ s32 fn_8004B278(u8* work)
         menuItemBiosSetSelectFlag(0x438, 0);
     }
     *(f32*)(lbl_803A6A60 + 0x40) =
-        lbl_8047BDA8 * *(f32*)((u8*)&lbl_803A6A60 + 8) + *(f32*)(lbl_803A6A60 + 0x40);
-    if (*(f32*)(lbl_803A6A60 + 0x40) > lbl_8047BDA0) {
-        *(f32*)(lbl_803A6A60 + 0x40) = lbl_8047BDAC;
+        0.5f * *(f32*)((u8*)&lbl_803A6A60 + 8) + *(f32*)(lbl_803A6A60 + 0x40);
+    if (*(f32*)(lbl_803A6A60 + 0x40) > 1.0f) {
+        *(f32*)(lbl_803A6A60 + 0x40) = 0.0f;
     }
 
-    if (*(f32*)(lbl_803A6A60 + 0x30) != *(f32*)(lbl_803A6A60 + 0x38)) {
-        delta = *(f32*)(lbl_803A6A60 + 0x38) - *(f32*)(lbl_803A6A60 + 0x30);
-        moved = lbl_8047BDD8 * delta * *(f32*)((u8*)&lbl_803A6A60 + 8);
-        if (moved > lbl_8047BDDC) {
-            moved = lbl_8047BDDC;
-        }
-        if (moved <= lbl_8047BDE0) {
-            moved = lbl_8047BDE0;
-        }
-        *(f32*)(lbl_803A6A60 + 0x30) = *(f32*)(lbl_803A6A60 + 0x30) + moved;
-        rest = *(f32*)(lbl_803A6A60 + 0x38) - *(f32*)(lbl_803A6A60 + 0x30);
-        if (moved > lbl_8047BDAC) {
-        } else {
-            moved = -moved;
-        }
-        if ((rest > lbl_8047BDAC ? rest : -rest) <= moved) {
-            *(f32*)(lbl_803A6A60 + 0x30) = *(f32*)(lbl_803A6A60 + 0x38);
-        } else {
-            if (rest > lbl_8047BDAC) {
-            } else {
-                rest = -rest;
-            }
-            if (rest < lbl_8047BDA0) {
-                *(f32*)(lbl_803A6A60 + 0x30) = *(f32*)(lbl_803A6A60 + 0x38);
-            }
-        }
-    }
-
-    if (*(f32*)(lbl_803A6A60 + 0x34) != *(f32*)(lbl_803A6A60 + 0x3c)) {
-        delta = *(f32*)(lbl_803A6A60 + 0x3c) - *(f32*)(lbl_803A6A60 + 0x34);
-        moved = lbl_8047BDD8 * delta * *(f32*)((u8*)&lbl_803A6A60 + 8);
-        if (moved > lbl_8047BDDC) {
-            moved = lbl_8047BDDC;
-        }
-        if (moved <= lbl_8047BDE0) {
-            moved = lbl_8047BDE0;
-        }
-        *(f32*)(lbl_803A6A60 + 0x34) = *(f32*)(lbl_803A6A60 + 0x34) + moved;
-        rest = *(f32*)(lbl_803A6A60 + 0x3c) - *(f32*)(lbl_803A6A60 + 0x34);
-        if (moved > lbl_8047BDAC) {
-        } else {
-            moved = -moved;
-        }
-        if ((rest > lbl_8047BDAC ? rest : -rest) <= moved) {
-            *(f32*)(lbl_803A6A60 + 0x34) = *(f32*)(lbl_803A6A60 + 0x3c);
-        } else {
-            if (rest > lbl_8047BDAC) {
-            } else {
-                rest = -rest;
-            }
-            if (rest < lbl_8047BDA0) {
-                *(f32*)(lbl_803A6A60 + 0x34) = *(f32*)(lbl_803A6A60 + 0x3c);
-            }
-        }
-    }
+    pda_8004B278_EaseX((f32*)(lbl_803A6A60 + 0x30), (f32*)(lbl_803A6A60 + 0x38));
+    pda_8004B278_EaseY((f32*)(lbl_803A6A60 + 0x34), (f32*)(lbl_803A6A60 + 0x3c));
 
     switch (*(s8*)(work + 1)) {
     case 0:
         if (*(s8*)(work + 2) == 0) {
-            **(f32**)(data + 8) = lbl_8047BDAC;
+            **(f32**)(data + 8) = 0.0f;
             work[2] = 1;
         }
         break;
     case 2:
-        p = *(f32**)(data + 8);
-        *p = *p + lbl_8047BDE4;
-        if (*p >= lbl_8047BDA0) {
-            p = *(f32**)(data + 8);
-            *p = *p - lbl_8047BDA0;
+        if ((**(f32**)(data + 8) += 0.003125f) >= 1.0f) {
+            **(f32**)(data + 8) -= 1.0f;
         }
         break;
     case 3:
@@ -8345,6 +8481,14 @@ typedef struct PdaPairS16 {
     s16 x;
     s16 y;
 } PdaPairS16;
+
+/* lbl_802EF0A8 menu item records, 0x1C bytes each. */
+typedef struct PdaMenuItem {
+    s16 id;
+    s16 x;
+    s16 y;
+    u8 pad06[0x16];
+} PdaMenuItem;
 
 typedef struct PdaSpan12 {
     s16 v[12];
@@ -8377,45 +8521,53 @@ void fn_8004A47C(void)
     topNarrow[0] = lbl_8047BD80;
     topNarrow[1] = lbl_8047BD84;
     if (std081_flagCheckTrue(0x3f0) != 0) {
-        *(s16*)(lbl_802EF0A8 + 0x7608) = topWide[0].x - 6;
-        *(s16*)(lbl_802EF0A8 + 0x7624) = topWide[0].y - 6;
-        *(s16*)(lbl_802EF0A8 + 0x7640) = topWide[1].x - 6;
-        *(s16*)(lbl_802EF0A8 + 0x765c) = topWide[1].y - 6;
+        PdaMenuItem* items = (PdaMenuItem*)lbl_802EF0A8;
+
+        items[0x437].y = topWide[0].x - 6;
+        items[0x438].y = topWide[0].y - 6;
+        items[0x439].y = topWide[1].x - 6;
+        items[0x43a].y = topWide[1].y - 6;
     } else {
-        *(s16*)(lbl_802EF0A8 + 0x7608) = topNarrow[0].x - 6;
-        *(s16*)(lbl_802EF0A8 + 0x7624) = topNarrow[0].y - 6;
-        *(s16*)(lbl_802EF0A8 + 0x7640) = topNarrow[1].x - 6;
-        *(s16*)(lbl_802EF0A8 + 0x765c) = topNarrow[1].y - 6;
+        PdaMenuItem* items = (PdaMenuItem*)lbl_802EF0A8;
+
+        items[0x437].y = topNarrow[0].x - 6;
+        items[0x438].y = topNarrow[0].y - 6;
+        items[0x439].y = topNarrow[1].x - 6;
+        items[0x43a].y = topNarrow[1].y - 6;
     }
 
     wide = lbl_8026719C;
     narrow = lbl_802671B4;
     if (std081_flagCheckTrue(0x3f0) != 0) {
-        *(s16*)(lbl_802EF0A8 + 0xc148) = wide.v[0];
-        *(s16*)(lbl_802EF0A8 + 0xc164) = wide.v[1];
-        *(s16*)(lbl_802EF0A8 + 0xc180) = wide.v[2];
-        *(s16*)(lbl_802EF0A8 + 0xce30) = wide.v[3];
-        *(s16*)(lbl_802EF0A8 + 0xce4c) = wide.v[4];
-        *(s16*)(lbl_802EF0A8 + 0xce68) = wide.v[5];
-        *(s16*)(lbl_802EF0A8 + 0xce84) = wide.v[6];
-        *(s16*)(lbl_802EF0A8 + 0xcea0) = wide.v[7];
-        *(s16*)(lbl_802EF0A8 + 0xcebc) = wide.v[8];
-        *(s16*)(lbl_802EF0A8 + 0xced8) = wide.v[9];
-        *(s16*)(lbl_802EF0A8 + 0xcef4) = wide.v[10];
-        *(s16*)(lbl_802EF0A8 + 0xcf10) = wide.v[11];
+        PdaMenuItem* items = (PdaMenuItem*)lbl_802EF0A8 + 0x6e7;
+
+        items[0].y = wide.v[0];
+        items[1].y = wide.v[1];
+        items[2].y = wide.v[2];
+        items[0x76].y = wide.v[3];
+        items[0x77].y = wide.v[4];
+        items[0x78].y = wide.v[5];
+        items[0x79].y = wide.v[6];
+        items[0x7a].y = wide.v[7];
+        items[0x7b].y = wide.v[8];
+        items[0x7c].y = wide.v[9];
+        items[0x7d].y = wide.v[10];
+        items[0x7e].y = wide.v[11];
     } else {
-        *(s16*)(lbl_802EF0A8 + 0xc148) = narrow.v[0];
-        *(s16*)(lbl_802EF0A8 + 0xc164) = narrow.v[1];
-        *(s16*)(lbl_802EF0A8 + 0xc180) = narrow.v[2];
-        *(s16*)(lbl_802EF0A8 + 0xce30) = narrow.v[3];
-        *(s16*)(lbl_802EF0A8 + 0xce4c) = narrow.v[4];
-        *(s16*)(lbl_802EF0A8 + 0xce68) = narrow.v[5];
-        *(s16*)(lbl_802EF0A8 + 0xce84) = narrow.v[6];
-        *(s16*)(lbl_802EF0A8 + 0xcea0) = narrow.v[7];
-        *(s16*)(lbl_802EF0A8 + 0xcebc) = narrow.v[8];
-        *(s16*)(lbl_802EF0A8 + 0xced8) = narrow.v[9];
-        *(s16*)(lbl_802EF0A8 + 0xcef4) = narrow.v[10];
-        *(s16*)(lbl_802EF0A8 + 0xcf10) = narrow.v[11];
+        PdaMenuItem* items = (PdaMenuItem*)lbl_802EF0A8 + 0x6e7;
+
+        items[0].y = narrow.v[0];
+        items[1].y = narrow.v[1];
+        items[2].y = narrow.v[2];
+        items[0x76].y = narrow.v[3];
+        items[0x77].y = narrow.v[4];
+        items[0x78].y = narrow.v[5];
+        items[0x79].y = narrow.v[6];
+        items[0x7a].y = narrow.v[7];
+        items[0x7b].y = narrow.v[8];
+        items[0x7c].y = narrow.v[9];
+        items[0x7d].y = narrow.v[10];
+        items[0x7e].y = narrow.v[11];
     }
 
     botWide[0] = lbl_8047BD88;
@@ -8423,15 +8575,19 @@ void fn_8004A47C(void)
     botNarrow[0] = lbl_8047BD90;
     botNarrow[1] = lbl_8047BD94;
     if (std081_flagCheckTrue(0x3f0) != 0) {
-        *(s16*)(lbl_802EF0A8 + 0xc0d8) = botWide[0].x - 6;
-        *(s16*)(lbl_802EF0A8 + 0xc0f4) = botWide[0].y - 6;
-        *(s16*)(lbl_802EF0A8 + 0xc110) = botWide[1].x - 6;
-        *(s16*)(lbl_802EF0A8 + 0xc12c) = botWide[1].y - 6;
+        PdaMenuItem* items = (PdaMenuItem*)lbl_802EF0A8 + 0x6e3;
+
+        items[0].y = botWide[0].x - 6;
+        items[1].y = botWide[0].y - 6;
+        items[2].y = botWide[1].x - 6;
+        items[3].y = botWide[1].y - 6;
     } else {
-        *(s16*)(lbl_802EF0A8 + 0xc0d8) = botNarrow[0].x - 6;
-        *(s16*)(lbl_802EF0A8 + 0xc0f4) = botNarrow[0].y - 6;
-        *(s16*)(lbl_802EF0A8 + 0xc110) = botNarrow[1].x - 6;
-        *(s16*)(lbl_802EF0A8 + 0xc12c) = botNarrow[1].y - 6;
+        PdaMenuItem* items = (PdaMenuItem*)lbl_802EF0A8 + 0x6e3;
+
+        items[0].y = botNarrow[0].x - 6;
+        items[1].y = botNarrow[0].y - 6;
+        items[2].y = botNarrow[1].x - 6;
+        items[3].y = botNarrow[1].y - 6;
     }
 }
 #pragma peephole reset
@@ -8449,22 +8605,41 @@ extern void menuSpriteBiosGetPtr(s32 id);
 extern u32 menuGetCursorItemID(s32 menu);
 extern void fn_8004A7A8(void* work, PdaSprite* sprite);
 
+/* Show a header tab and centre it on its measured width plus the tab's wave offset. */
+static inline void pda_800499BC_PlaceTab(PdaSprite* sprite, s32 width, s16 wave)
+{
+    s16 left;
+
+    sprite->flags |= 2;
+    left = width - 0x36;
+    left += wave;
+    sprite->field_50 = left + 0xa8;
+}
+
 /* Per-widget update for the mail screen's sprites and captions. */
 #pragma peephole off
 s32 pdaTrainerDataDraw(void* work, PdaSprite* sprite)
 {
+    extern u32 fn_80005748(void);
     extern f64 sin(f64 x);
     extern void windowDrawSprite2(s16 x, s16 y, s16 w, s16 h, u32 color,
                                   void* work, s32 id, s32 flag);
     PdaPairS16 wave[2];
-    PdaPairS16 icon[2];
+    s32* rank;
     s32 idx;
+    PdaPairS16 icon[2];
+    s16* pos;
     s32 i;
     s32 id;
-    s32 cursor;
+    u16 cursor;
     s32 msg;
     u8* row;
     u32 value;
+    s32 n;
+    s32 x;
+    u8* layout;
+    u32 digit;
+    s16 left;
     u32 status;
 
     fn_8004A7A8(work, sprite);
@@ -8472,6 +8647,7 @@ s32 pdaTrainerDataDraw(void* work, PdaSprite* sprite)
     case 0x6e1:
         icon[0] = lbl_8047BD70;
         icon[1] = lbl_8047BD74;
+        pos = (s16*)(lbl_802EF0A8 + 0xc09e);
         status = heroGetStatus(0, 0xe, 0);
         for (i = lbl_804788F0 - 1; i >= 0; i--) {
             if (lbl_802E61D8[i] <= status) {
@@ -8481,16 +8657,17 @@ s32 pdaTrainerDataDraw(void* work, PdaSprite* sprite)
         if (i < 0) {
             i = 0;
         }
-        idx = i;
+        rank = &idx;
+        *rank = i;
         if (i > 4) {
-            idx = 0;
+            *rank = 0;
         }
-        id = ((u16*)icon)[idx];
+        id = ((u16*)icon)[*rank];
         menuSpriteBiosGetPtr(id);
         windowDrawSprite2(
             (s16)((s32)*(f32*)(lbl_803A6A60 + 0x30) +
-                  (*(s16*)(lbl_802EF0A8 + 0xc09e) - sprite->field_50)),
-            (s16)(*(s16*)(lbl_802EF0A8 + 0xc0a0) - sprite->field_52),
+                  (pos[0] - sprite->field_50)),
+            (s16)(pos[1] - sprite->field_52),
             sprite->x, sprite->y, sprite->alpha | -0x100, work, id, 0);
         break;
     case 0x435:
@@ -8499,24 +8676,29 @@ s32 pdaTrainerDataDraw(void* work, PdaSprite* sprite)
         sprite->colorR = row[0];
         sprite->colorG = row[1];
         sprite->colorB = row[2];
-        if (*(s8*)(lbl_803A6A60 + 0) == 1) {
+        switch (*(s8*)(lbl_803A6A60 + 0)) {
+        case 1:
             if (*(s8*)(lbl_803A6A60 + 1) == 2) {
                 sprite->flags &= ~2;
             } else {
                 sprite->flags |= 2;
             }
+            break;
         }
         break;
     case 0x433:
     case 0x436:
-        if (*(s8*)(lbl_803A6A60 + 0) == 1) {
+        switch (*(s8*)(lbl_803A6A60 + 0)) {
+        case 1:
             if (*(s8*)(lbl_803A6A60 + 1) == 1) {
                 sprite->flags |= 2;
             } else {
                 sprite->flags &= ~2;
             }
-        } else {
+            break;
+        default:
             sprite->flags &= ~2;
+            break;
         }
         break;
     case 0x438:
@@ -8569,15 +8751,15 @@ s32 pdaTrainerDataDraw(void* work, PdaSprite* sprite)
             }
         }
         break;
+    case 0x439:
+        *(s32*)(lbl_803A6A60 + 0x20) = GSmsgGetRect(sprite->messageId) >> 16;
+        break;
     case 0x6e7:
     case 0x6e8:
     case 0x6e9:
     case 0x75d:
     case 0x75e:
     case 0x75f:
-    case 0x439:
-        *(s32*)(lbl_803A6A60 + 0x20) = GSmsgGetRect(sprite->messageId) >> 16;
-        break;
     case 0x760:
     case 0x761:
     case 0x762:
@@ -8586,8 +8768,13 @@ s32 pdaTrainerDataDraw(void* work, PdaSprite* sprite)
     case 0x765:
         fn_8004B598((s32)work, sprite, sprite->eventId);
         break;
+    case 0x6dd:
+    case 0x6e2:
+        break;
     case 0x754:
-        msgctrlSetValue(0x4c, fn_80005748());
+        /* RULE-EXCEPTION(user-approved): scalar reuse of digit for the play time in fn_800499BC - see docs/RULE_EXCEPTIONS.md */
+        digit = fn_80005748();
+        msgctrlSetValue(0x4c, digit);
         break;
     case 0x755:
         msgctrlSetValue(0x50, heroGetStatus(0, 0xd, 0));
@@ -8596,22 +8783,21 @@ s32 pdaTrainerDataDraw(void* work, PdaSprite* sprite)
         msgctrlSetValue(0x50, heroGetStatus(0, 0xc, 0));
         break;
     case 0x757:
-        sprite->field_50 =
-            (s16)(*(s16*)(lbl_802EF0A8 + sprite->eventId * 0x1c + 2) +
-                  (s32)*(f32*)(lbl_803A6A60 + 0x30));
+        pos = (s16*)(lbl_802EF0A8 + sprite->eventId * 0x1c);
+        sprite->field_50 = pos[1] + (s32)*(f32*)(lbl_803A6A60 + 0x30);
         spriteSetEnv(fn_800FE6D0(
             (s16)(*(s16*)((u8*)work + 0x84) + sprite->field_50),
             (s16)(*(s16*)((u8*)work + 0x86) + sprite->field_52)));
-        sprite->field_50 =
-            (s16)(*(s16*)(lbl_802EF0A8 + sprite->eventId * 0x1c + 2) +
-                  (s32)*(f32*)(lbl_803A6A60 + 0x30));
-        value = heroGetStatus(0, 2, 0);
-        idx = sprite->x - 0x20;
-        for (i = 0; i < 5; i++) {
-            idx -= 0xd;
-            msgctrlSetValue(0x34, value % 10);
+        pos = (s16*)(lbl_802EF0A8 + sprite->eventId * 0x1c);
+        sprite->field_50 = pos[1] + (s32)*(f32*)(lbl_803A6A60 + 0x30);
+        value = heroGetStatus(0, 2, 0) & 0xffff;
+        x = sprite->x - 0x20;
+        for (n = 0; n < 5; n++) {
+            x -= 0xd;
+            digit = value % 10;
             value = value / 10;
-            GSmsgPrintColor(idx + 0x24, 0, sprite->alpha | -0x100LL, (void*)0xca);
+            msgctrlSetValue(0x34, digit);
+            GSmsgPrintColor(x + 0x24, 0, sprite->alpha | -0x100, (void*)0xca);
         }
         break;
     case 0x777:
@@ -8640,104 +8826,95 @@ s32 pdaTrainerDataDraw(void* work, PdaSprite* sprite)
     case 0x6e6:
         wave[0] = lbl_8047BD98;
         wave[1] = lbl_8047BD9C;
-        row = lbl_802EF0A8 + sprite->eventId * 0x1c;
+        layout = lbl_802EF0A8 + sprite->eventId * 0x1c;
         switch (*(s8*)(lbl_803A6A60 + 0)) {
         case 0:
             if (sprite->eventId == 0x6e3) {
-                sprite->field_50 = (s16)(s32)(
-                    lbl_8047BDB8 *
-                        (f32)sin(lbl_8047BDC8 *
-                                 (lbl_8047BDCC *
-                                  (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)))) +
-                    (f32)*(s16*)(row + 2));
-                wave[0].x = (s16)(s32)(
-                    lbl_8047BDB8 *
-                    (f32)sin(lbl_8047BDC8 *
-                             (lbl_8047BDCC *
-                              (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)))));
+                sprite->field_50 = (
+                    4.0f *
+                        (f32)sin(3.1415927f *
+                                 (2.0f *
+                                  (2.0f * *(f32*)(lbl_803A6A60 + 0x40)))) +
+                    (f32)*(s16*)(layout + 2));
+                wave[0].x = (
+                    4.0f *
+                    (f32)sin(3.1415927f *
+                             (2.0f *
+                              (2.0f * *(f32*)(lbl_803A6A60 + 0x40)))));
             } else {
+                sprite->field_50 = *(s16*)(layout + 2);
                 wave[0].x = 0;
-                sprite->field_50 = *(s16*)(row + 2);
             }
-            wave[0].x = wave[0].x - 0x1e;
+            wave[0].x -= 0x1e;
             break;
         case 1:
             if (sprite->eventId == 0x6e4) {
-                sprite->field_50 = (s16)(s32)(
-                    lbl_8047BDB8 *
-                        (f32)sin(lbl_8047BDC8 *
-                                 (lbl_8047BDCC *
-                                  (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)))) +
-                    (f32)*(s16*)(row + 2));
-                wave[0].y = (s16)(s32)(
-                    lbl_8047BDB8 *
-                    (f32)sin(lbl_8047BDC8 *
-                             (lbl_8047BDCC *
-                              (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)))));
+                sprite->field_50 = (
+                    4.0f *
+                        (f32)sin(3.1415927f *
+                                 (2.0f *
+                                  (2.0f * *(f32*)(lbl_803A6A60 + 0x40)))) +
+                    (f32)*(s16*)(layout + 2));
+                wave[0].y = (
+                    4.0f *
+                    (f32)sin(3.1415927f *
+                             (2.0f *
+                              (2.0f * *(f32*)(lbl_803A6A60 + 0x40)))));
             } else {
+                sprite->field_50 = *(s16*)(layout + 2);
                 wave[0].y = 0;
-                sprite->field_50 = *(s16*)(row + 2);
             }
-            wave[0].y = wave[0].y - 0x1e;
+            wave[0].y -= 0x1e;
             break;
         case 2:
             if (sprite->eventId == 0x6e5) {
-                wave[1].x = (s16)(s32)(
-                    lbl_8047BDB8 *
-                    (f32)sin(lbl_8047BDC8 *
-                             (lbl_8047BDCC *
-                              (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)))));
+                wave[1].x = (
+                    4.0f *
+                    (f32)sin(3.1415927f *
+                             (2.0f *
+                              (2.0f * *(f32*)(lbl_803A6A60 + 0x40)))));
             } else {
+                sprite->field_50 = *(s16*)(layout + 2);
                 wave[1].x = 0;
-                sprite->field_50 = *(s16*)(row + 2);
             }
-            wave[1].x = wave[1].x - 0x1e;
+            wave[1].x -= 0x1e;
             break;
         case 3:
             if (sprite->eventId == 0x6e6) {
-                sprite->field_50 = (s16)(s32)(
-                    lbl_8047BDB8 *
-                        (f32)sin(lbl_8047BDC8 *
-                                 (lbl_8047BDCC *
-                                  (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)))) +
-                    (f32)*(s16*)(row + 2));
-                wave[1].y = (s16)(s32)(
-                    lbl_8047BDB8 *
-                    (f32)sin(lbl_8047BDC8 *
-                             (lbl_8047BDCC *
-                              (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)))));
+                sprite->field_50 = (
+                    4.0f *
+                        (f32)sin(3.1415927f *
+                                 (2.0f *
+                                  (2.0f * *(f32*)(lbl_803A6A60 + 0x40)))) +
+                    (f32)*(s16*)(layout + 2));
+                wave[1].y = (
+                    4.0f *
+                    (f32)sin(3.1415927f *
+                             (2.0f *
+                              (2.0f * *(f32*)(lbl_803A6A60 + 0x40)))));
             } else {
+                sprite->field_50 = *(s16*)(layout + 2);
                 wave[1].y = 0;
-                sprite->field_50 = *(s16*)(row + 2);
             }
-            wave[1].y = wave[1].y - 0x1e;
+            wave[1].y -= 0x1e;
             break;
         default:
             break;
         }
         if (sprite->eventId == 0x6e5) {
             sprite->flags |= 2;
-            sprite->field_50 =
-                (s16)((s16)(*(s32*)(lbl_803A6A60 + 0x20) - 0x36) + wave[1].x +
-                      0xa8);
+            left = *(s32*)(lbl_803A6A60 + 0x20) - 0x36;
+            left += wave[1].x;
+            sprite->field_50 = left + 0xa8;
         }
         if (sprite->eventId == 0x6e3) {
-            sprite->flags |= 2;
-            sprite->field_50 =
-                (s16)((s16)(*(s32*)(lbl_803A6A60 + 0x18) - 0x36) + wave[0].x +
-                      0xa8);
+            pda_800499BC_PlaceTab(sprite, *(s32*)(lbl_803A6A60 + 0x18), wave[0].x);
         }
         if (sprite->eventId == 0x6e4) {
-            sprite->flags |= 2;
-            sprite->field_50 =
-                (s16)((s16)(*(s32*)(lbl_803A6A60 + 0x1c) - 0x36) + wave[0].y +
-                      0xa8);
+            pda_800499BC_PlaceTab(sprite, *(s32*)(lbl_803A6A60 + 0x1c), wave[0].y);
         }
         if (sprite->eventId == 0x6e6) {
-            sprite->flags |= 2;
-            sprite->field_50 =
-                (s16)((s16)(*(s32*)(lbl_803A6A60 + 0x24) - 0x36) + wave[1].y +
-                      0xa8);
+            pda_800499BC_PlaceTab(sprite, *(s32*)(lbl_803A6A60 + 0x24), wave[1].y);
         }
         if (sprite->eventId == 0x6e4) {
             if (std081_flagCheckTrue(0x3f0) != 0) {
@@ -8758,13 +8935,42 @@ extern f32 lbl_8047BDD0;
 extern f32 lbl_8047BDD4;
 extern f32 lbl_804788D8;
 
-/* Backdrop alpha ramp and the staggered caption pulses on the mail screen. */
-#pragma peephole off
-void fn_8004A7A8(void* work, PdaSprite* sprite)
+/* Fade the caption with the widgets' horizontal offset, then pulse its alpha
+ * and grey level with a sine wave; `k` staggers the phase per caption. */
+static inline void pda_8004A7A8_Pulse(PdaSprite* sprite, f32 k)
 {
     extern f64 sin(f64 x);
     s32 fade;
     f32 pulse;
+
+    if (*(f32*)(lbl_803A6A60 + 0x30) > 255.0f) {
+        fade = 0xff;
+    } else {
+        fade = (s32)*(f32*)(lbl_803A6A60 + 0x30);
+    }
+    sprite->alpha = 0xff - fade;
+    pulse = sin(3.1415927f * (2.0f * *(f32*)(lbl_803A6A60 + 0x40)) + lbl_804788D8 * k);
+    pulse += 1.0f;
+    pulse *= 0.5f;
+    pulse *= 256.0f;
+    if (pulse > 255.0f) {
+        pulse = 255.0f;
+    }
+    if (pulse < 0.0f) {
+        pulse = 0.0f;
+    }
+    sprite->alpha = pulse;
+    sprite->colorR = pulse;
+    sprite->colorG = pulse;
+    sprite->colorB = pulse;
+}
+
+/* Backdrop alpha ramp and the staggered caption pulses on the mail screen. */
+#pragma peephole off
+void fn_8004A7A8(void* work, PdaSprite* sprite)
+{
+    s32 fade;
+    s16* pos;
 
     switch (sprite->eventId) {
     case 0x6e0:
@@ -8777,9 +8983,8 @@ void fn_8004A7A8(void* work, PdaSprite* sprite)
     case 0x756:
     case 0x757:
     case 0x758:
-        sprite->field_50 =
-            (s16)(*(s16*)(lbl_802EF0A8 + sprite->eventId * 0x1c + 2) +
-                  (s32)*(f32*)(lbl_803A6A60 + 0x30));
+        pos = (s16*)(lbl_802EF0A8 + sprite->eventId * 0x1c);
+        sprite->field_50 = pos[1] + (s32)*(f32*)(lbl_803A6A60 + 0x30);
         spriteSetEnv(fn_800FE6D0(
             (s16)(*(s16*)((u8*)work + 0x84) + sprite->field_50),
             (s16)(*(s16*)((u8*)work + 0x86) + sprite->field_52)));
@@ -8790,16 +8995,15 @@ void fn_8004A7A8(void* work, PdaSprite* sprite)
     case 0x435:
     case 0x436:
     case 0x6dd:
-        sprite->field_52 =
-            (s16)(*(s16*)(lbl_802EF0A8 + sprite->eventId * 0x1c + 4) +
-                  (s32)*(f32*)(lbl_803A6A60 + 0x34));
+        pos = (s16*)(lbl_802EF0A8 + sprite->eventId * 0x1c);
+        sprite->field_52 = pos[2] + (s32)*(f32*)(lbl_803A6A60 + 0x34);
         break;
     case 0x437:
     case 0x438:
     case 0x439:
     case 0x43a:
     case 0x777:
-        if (*(f32*)(lbl_803A6A60 + 0x30) > lbl_8047BDB0) {
+        if (*(f32*)(lbl_803A6A60 + 0x30) > 255.0f) {
             fade = 0xff;
         } else {
             fade = (s32)*(f32*)(lbl_803A6A60 + 0x30);
@@ -8807,244 +9011,34 @@ void fn_8004A7A8(void* work, PdaSprite* sprite)
         sprite->alpha = 0xff - fade;
         break;
     case 0x6ea:
-        if (*(f32*)(lbl_803A6A60 + 0x30) > lbl_8047BDB0) {
-            fade = 0xff;
-        } else {
-            fade = (s32)*(f32*)(lbl_803A6A60 + 0x30);
-        }
-        sprite->alpha = 0xff - fade;
-        pulse = (f32)sin(lbl_8047BDC8 *
-                             (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)) +
-                         lbl_804788D8 * lbl_8047BDAC);
-        pulse = pulse + lbl_8047BDA0;
-        pulse = pulse * lbl_8047BDA8;
-        pulse = pulse * lbl_8047BDD0;
-        if (pulse > lbl_8047BDB0) {
-            pulse = lbl_8047BDB0;
-        }
-        if (pulse < lbl_8047BDAC) {
-            pulse = lbl_8047BDAC;
-        }
-        sprite->alpha = (u8)(s32)pulse;
-        sprite->colorR = (u8)(s32)pulse;
-        sprite->colorG = (u8)(s32)pulse;
-        sprite->colorB = (u8)(s32)pulse;
+        pda_8004A7A8_Pulse(sprite, 0.0f);
         break;
     case 0x6eb:
-        if (*(f32*)(lbl_803A6A60 + 0x30) > lbl_8047BDB0) {
-            fade = 0xff;
-        } else {
-            fade = (s32)*(f32*)(lbl_803A6A60 + 0x30);
-        }
-        sprite->alpha = 0xff - fade;
-        pulse = (f32)sin(lbl_8047BDC8 *
-                              (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)) +
-                          lbl_804788D8 * lbl_8047BDA0);
-        pulse = pulse + lbl_8047BDA0;
-        pulse = pulse * lbl_8047BDA8;
-        pulse = pulse * lbl_8047BDD0;
-        if (pulse > lbl_8047BDB0) {
-            pulse = lbl_8047BDB0;
-        }
-        if (pulse < lbl_8047BDAC) {
-            pulse = lbl_8047BDAC;
-        }
-        sprite->alpha = (u8)(s32)pulse;
-        sprite->colorR = (u8)(s32)pulse;
-        sprite->colorG = (u8)(s32)pulse;
-        sprite->colorB = (u8)(s32)pulse;
+        pda_8004A7A8_Pulse(sprite, 1.0f);
         break;
     case 0x6ec:
-        if (*(f32*)(lbl_803A6A60 + 0x30) > lbl_8047BDB0) {
-            fade = 0xff;
-        } else {
-            fade = (s32)*(f32*)(lbl_803A6A60 + 0x30);
-        }
-        sprite->alpha = 0xff - fade;
-        pulse = (f32)sin(lbl_8047BDC8 *
-                              (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)) +
-                          lbl_804788D8 * lbl_8047BDCC);
-        pulse = pulse + lbl_8047BDA0;
-        pulse = pulse * lbl_8047BDA8;
-        pulse = pulse * lbl_8047BDD0;
-        if (pulse > lbl_8047BDB0) {
-            pulse = lbl_8047BDB0;
-        }
-        if (pulse < lbl_8047BDAC) {
-            pulse = lbl_8047BDAC;
-        }
-        sprite->alpha = (u8)(s32)pulse;
-        sprite->colorR = (u8)(s32)pulse;
-        sprite->colorG = (u8)(s32)pulse;
-        sprite->colorB = (u8)(s32)pulse;
+        pda_8004A7A8_Pulse(sprite, 2.0f);
         break;
     case 0x6ed:
-        if (*(f32*)(lbl_803A6A60 + 0x30) > lbl_8047BDB0) {
-            fade = 0xff;
-        } else {
-            fade = (s32)*(f32*)(lbl_803A6A60 + 0x30);
-        }
-        sprite->alpha = 0xff - fade;
-        pulse = (f32)sin(lbl_8047BDC8 *
-                              (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)) +
-                          lbl_804788D8 * lbl_8047BDD4);
-        pulse = pulse + lbl_8047BDA0;
-        pulse = pulse * lbl_8047BDA8;
-        pulse = pulse * lbl_8047BDD0;
-        if (pulse > lbl_8047BDB0) {
-            pulse = lbl_8047BDB0;
-        }
-        if (pulse < lbl_8047BDAC) {
-            pulse = lbl_8047BDAC;
-        }
-        sprite->alpha = (u8)(s32)pulse;
-        sprite->colorR = (u8)(s32)pulse;
-        sprite->colorG = (u8)(s32)pulse;
-        sprite->colorB = (u8)(s32)pulse;
+        pda_8004A7A8_Pulse(sprite, 3.0f);
         break;
     case 0x6ee:
-        if (*(f32*)(lbl_803A6A60 + 0x30) > lbl_8047BDB0) {
-            fade = 0xff;
-        } else {
-            fade = (s32)*(f32*)(lbl_803A6A60 + 0x30);
-        }
-        sprite->alpha = 0xff - fade;
-        pulse = (f32)sin(lbl_8047BDC8 *
-                              (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)) +
-                          lbl_804788D8 * lbl_8047BDB8);
-        pulse = pulse + lbl_8047BDA0;
-        pulse = pulse * lbl_8047BDA8;
-        pulse = pulse * lbl_8047BDD0;
-        if (pulse > lbl_8047BDB0) {
-            pulse = lbl_8047BDB0;
-        }
-        if (pulse < lbl_8047BDAC) {
-            pulse = lbl_8047BDAC;
-        }
-        sprite->alpha = (u8)(s32)pulse;
-        sprite->colorR = (u8)(s32)pulse;
-        sprite->colorG = (u8)(s32)pulse;
-        sprite->colorB = (u8)(s32)pulse;
+        pda_8004A7A8_Pulse(sprite, 4.0f);
         break;
     case 0x6ef:
-        if (*(f32*)(lbl_803A6A60 + 0x30) > lbl_8047BDB0) {
-            fade = 0xff;
-        } else {
-            fade = (s32)*(f32*)(lbl_803A6A60 + 0x30);
-        }
-        sprite->alpha = 0xff - fade;
-        pulse = (f32)sin(lbl_8047BDC8 *
-                             (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)) +
-                         lbl_804788D8 * lbl_8047BDAC);
-        pulse = pulse + lbl_8047BDA0;
-        pulse = pulse * lbl_8047BDA8;
-        pulse = pulse * lbl_8047BDD0;
-        if (pulse > lbl_8047BDB0) {
-            pulse = lbl_8047BDB0;
-        }
-        if (pulse < lbl_8047BDAC) {
-            pulse = lbl_8047BDAC;
-        }
-        sprite->alpha = (u8)(s32)pulse;
-        sprite->colorR = (u8)(s32)pulse;
-        sprite->colorG = (u8)(s32)pulse;
-        sprite->colorB = (u8)(s32)pulse;
+        pda_8004A7A8_Pulse(sprite, 0.0f);
         break;
     case 0x6f0:
-        if (*(f32*)(lbl_803A6A60 + 0x30) > lbl_8047BDB0) {
-            fade = 0xff;
-        } else {
-            fade = (s32)*(f32*)(lbl_803A6A60 + 0x30);
-        }
-        sprite->alpha = 0xff - fade;
-        pulse = (f32)sin(lbl_8047BDC8 *
-                              (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)) +
-                          lbl_804788D8 * lbl_8047BDA0);
-        pulse = pulse + lbl_8047BDA0;
-        pulse = pulse * lbl_8047BDA8;
-        pulse = pulse * lbl_8047BDD0;
-        if (pulse > lbl_8047BDB0) {
-            pulse = lbl_8047BDB0;
-        }
-        if (pulse < lbl_8047BDAC) {
-            pulse = lbl_8047BDAC;
-        }
-        sprite->alpha = (u8)(s32)pulse;
-        sprite->colorR = (u8)(s32)pulse;
-        sprite->colorG = (u8)(s32)pulse;
-        sprite->colorB = (u8)(s32)pulse;
+        pda_8004A7A8_Pulse(sprite, 1.0f);
         break;
     case 0x6f1:
-        if (*(f32*)(lbl_803A6A60 + 0x30) > lbl_8047BDB0) {
-            fade = 0xff;
-        } else {
-            fade = (s32)*(f32*)(lbl_803A6A60 + 0x30);
-        }
-        sprite->alpha = 0xff - fade;
-        pulse = (f32)sin(lbl_8047BDC8 *
-                              (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)) +
-                          lbl_804788D8 * lbl_8047BDCC);
-        pulse = pulse + lbl_8047BDA0;
-        pulse = pulse * lbl_8047BDA8;
-        pulse = pulse * lbl_8047BDD0;
-        if (pulse > lbl_8047BDB0) {
-            pulse = lbl_8047BDB0;
-        }
-        if (pulse < lbl_8047BDAC) {
-            pulse = lbl_8047BDAC;
-        }
-        sprite->alpha = (u8)(s32)pulse;
-        sprite->colorR = (u8)(s32)pulse;
-        sprite->colorG = (u8)(s32)pulse;
-        sprite->colorB = (u8)(s32)pulse;
+        pda_8004A7A8_Pulse(sprite, 2.0f);
         break;
     case 0x6f2:
-        if (*(f32*)(lbl_803A6A60 + 0x30) > lbl_8047BDB0) {
-            fade = 0xff;
-        } else {
-            fade = (s32)*(f32*)(lbl_803A6A60 + 0x30);
-        }
-        sprite->alpha = 0xff - fade;
-        pulse = (f32)sin(lbl_8047BDC8 *
-                              (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)) +
-                          lbl_804788D8 * lbl_8047BDD4);
-        pulse = pulse + lbl_8047BDA0;
-        pulse = pulse * lbl_8047BDA8;
-        pulse = pulse * lbl_8047BDD0;
-        if (pulse > lbl_8047BDB0) {
-            pulse = lbl_8047BDB0;
-        }
-        if (pulse < lbl_8047BDAC) {
-            pulse = lbl_8047BDAC;
-        }
-        sprite->alpha = (u8)(s32)pulse;
-        sprite->colorR = (u8)(s32)pulse;
-        sprite->colorG = (u8)(s32)pulse;
-        sprite->colorB = (u8)(s32)pulse;
+        pda_8004A7A8_Pulse(sprite, 3.0f);
         break;
     case 0x6f3:
-        if (*(f32*)(lbl_803A6A60 + 0x30) > lbl_8047BDB0) {
-            fade = 0xff;
-        } else {
-            fade = (s32)*(f32*)(lbl_803A6A60 + 0x30);
-        }
-        sprite->alpha = 0xff - fade;
-        pulse = (f32)sin(lbl_8047BDC8 *
-                              (lbl_8047BDCC * *(f32*)(lbl_803A6A60 + 0x40)) +
-                          lbl_804788D8 * lbl_8047BDB8);
-        pulse = pulse + lbl_8047BDA0;
-        pulse = pulse * lbl_8047BDA8;
-        pulse = pulse * lbl_8047BDD0;
-        if (pulse > lbl_8047BDB0) {
-            pulse = lbl_8047BDB0;
-        }
-        if (pulse < lbl_8047BDAC) {
-            pulse = lbl_8047BDAC;
-        }
-        sprite->alpha = (u8)(s32)pulse;
-        sprite->colorR = (u8)(s32)pulse;
-        sprite->colorG = (u8)(s32)pulse;
-        sprite->colorB = (u8)(s32)pulse;
+        pda_8004A7A8_Pulse(sprite, 4.0f);
         break;
     case 0x6e7:
     case 0x6e8:
@@ -9052,7 +9046,7 @@ void fn_8004A7A8(void* work, PdaSprite* sprite)
     case 0x6f4:
     case 0x6f5:
     case 0x6f6:
-        if (*(f32*)(lbl_803A6A60 + 0x30) > lbl_8047BDB0) {
+        if (*(f32*)(lbl_803A6A60 + 0x30) > 255.0f) {
             fade = 0xff;
         } else {
             fade = (s32)*(f32*)(lbl_803A6A60 + 0x30);
@@ -9063,7 +9057,7 @@ void fn_8004A7A8(void* work, PdaSprite* sprite)
     case 0x6e4:
     case 0x6e5:
     case 0x6e6:
-        if (*(f32*)(lbl_803A6A60 + 0x30) > lbl_8047BDB0) {
+        if (*(f32*)(lbl_803A6A60 + 0x30) > 255.0f) {
             fade = 0xff;
         } else {
             fade = (s32)*(f32*)(lbl_803A6A60 + 0x30);
@@ -9085,10 +9079,80 @@ extern f32 lbl_8047BAD0;
 extern f32 lbl_8047BAD4;
 extern f32 lbl_8047BAD8;
 extern u32 lbl_8047A4D0;
-extern u32 lbl_8047A4DC;
+extern s32 lbl_8047A4DC;
 extern void darkPokemonSetFlag0C(u16 id, s32 flag);
 extern void pokemonBiosSetDarkpokemonDataId(u32 work, s32 id);
 extern void pokemonBiosSetDp(u32 work, s32 dp);
+
+/* Rebuild the preview Pokemon for the selected party entry. */
+/* RULE-EXCEPTION(user-approved): reconstructed inline helper pda_8003C7C0_LoadPreview (fn_8003C7C0, fn_8003B85C) - see docs/RULE_EXCEPTIONS.md */
+static inline void pda_8003C7C0_LoadPreview(u32 work, u16 species, u16 entry, u16 rndId)
+{
+    u8 shadow;
+    u8 snagged;
+    s32 mode;
+    u32 rnd;
+
+    darkPokemonGetFlag1C(entry);
+    darkPokemonCheckFlag16(entry);
+    shadow = darkPokemonCheckFlag12(entry);
+    snagged = darkPokemonCheckFlag14(entry);
+    if (shadow != 0) {
+        if (snagged != 0) {
+            mode = 1;
+        } else {
+            mode = 0;
+        }
+    } else {
+        mode = 2;
+    }
+    pokemonCreate(work, species, 10, gamedataGetStatus(0, 1));
+    rnd = *(u32*)((u8*)&lbl_803A6748 + 0x98);
+    darkPokemonSaveGet8(rndId);
+    pokemonBiosSetRnd(work, rnd);
+    switch (mode) {
+    case 0:
+    case 2:
+        pokemonBiosSetDarkpokemonDataId(work, 1);
+        pokemonBiosSetDp(work, 10);
+        break;
+    case 1:
+        pokemonBiosSetDarkpokemonDataId(work, 0);
+        pokemonBiosSetDp(work, 0);
+        break;
+    default:
+        break;
+    }
+}
+
+/* Magnitude of a scroll step. */
+static inline f32 pda_8003B85C_Abs(f32 x)
+{
+    return x > 0.0f ? x : -x;
+}
+
+/* Ease one scroll coordinate toward its target, snapping once the step would overshoot. */
+static inline void pda_8003B85C_Ease(f32* cur, f32 t, f32 c)
+{
+    f32 rate;
+    f32 moved;
+    f32 rest;
+    f32 diff;
+
+    if (c != t) {
+        rate = lbl_8047BACC * *(f32*)((u8*)&lbl_803A6748 + 0x24);
+        if (*(s8*)((u8*)&lbl_803A6748 + 0x40) != 0) {
+            rate = lbl_8047BAD0 * rate;
+        }
+        diff = t - c;
+        moved = diff * rate;
+        *cur = c + moved;
+        rest = t - *cur;
+        if (pda_8003B85C_Abs(rest) <= pda_8003B85C_Abs(moved)) {
+            *cur = t;
+        }
+    }
+}
 
 /* Party-list scroll, cursor movement and the selected Pokemon preview. */
 #pragma peephole off
@@ -9097,19 +9161,17 @@ s32 pdaSnagListDetailKey(void* window, s32 enabled)
     extern u32 GSgetFrameStep(void);
     extern s32 fn_800D37CC(void);
     u16* keys;
-    s32 prevIndex;
     s32 held;
+    s32 prevIndex;
     s32 idx;
     u16 code;
     u16 species;
     u16 entry;
     u16 rndId;
-    s32 mode;
-    u32 rnd;
-    f32 rate;
-    f32 moved;
-    f32 rest;
+    u32 work;
+    s16 baseY;
     f32 step;
+    f32 cur;
     f32 dt;
 
     keys = windowGetKeyInfo(window);
@@ -9121,97 +9183,23 @@ s32 pdaSnagListDetailKey(void* window, s32 enabled)
     if (*(f32*)((u8*)&lbl_803A6748 + 0x28) >= lbl_8047BAC8) {
         *(f32*)((u8*)&lbl_803A6748 + 0x28) = lbl_8047BAC4;
     }
-    if (*(f32*)((u8*)&lbl_803A6748 + 0x14) != *(f32*)((u8*)&lbl_803A6748 + 0x1c)) {
-        rate = lbl_8047BACC * *(f32*)((u8*)&lbl_803A6748 + 0x24);
-        if (*(s8*)((u8*)&lbl_803A6748 + 0x40) != 0) {
-            rate = lbl_8047BAD0 * rate;
-        }
-        moved = (*(f32*)((u8*)&lbl_803A6748 + 0x1c) - *(f32*)((u8*)&lbl_803A6748 + 0x14)) * rate;
-        *(f32*)((u8*)&lbl_803A6748 + 0x14) = *(f32*)((u8*)&lbl_803A6748 + 0x14) + moved;
-        rest = *(f32*)((u8*)&lbl_803A6748 + 0x1c) - *(f32*)((u8*)&lbl_803A6748 + 0x14);
-        if (moved > lbl_8047BAC4) {
-        } else {
-            moved = -moved;
-        }
-        if (rest > lbl_8047BAC4) {
-        } else {
-            rest = -rest;
-        }
-        if (rest <= moved) {
-            *(f32*)((u8*)&lbl_803A6748 + 0x14) = *(f32*)((u8*)&lbl_803A6748 + 0x1c);
-        }
-    }
-    if (*(f32*)((u8*)&lbl_803A6748 + 0x18) != *(f32*)((u8*)&lbl_803A6748 + 0x20)) {
-        rate = lbl_8047BACC * *(f32*)((u8*)&lbl_803A6748 + 0x24);
-        if (*(s8*)((u8*)&lbl_803A6748 + 0x40) != 0) {
-            rate = lbl_8047BAD0 * rate;
-        }
-        moved = (*(f32*)((u8*)&lbl_803A6748 + 0x20) - *(f32*)((u8*)&lbl_803A6748 + 0x18)) * rate;
-        *(f32*)((u8*)&lbl_803A6748 + 0x18) = *(f32*)((u8*)&lbl_803A6748 + 0x18) + moved;
-        rest = *(f32*)((u8*)&lbl_803A6748 + 0x20) - *(f32*)((u8*)&lbl_803A6748 + 0x18);
-        if (moved > lbl_8047BAC4) {
-        } else {
-            moved = -moved;
-        }
-        if (rest > lbl_8047BAC4) {
-        } else {
-            rest = -rest;
-        }
-        if (rest <= moved) {
-            *(f32*)((u8*)&lbl_803A6748 + 0x18) = *(f32*)((u8*)&lbl_803A6748 + 0x20);
-        }
-    }
-    if (*(f32*)((u8*)&lbl_803A6748 + 0x2c) != *(f32*)((u8*)&lbl_803A6748 + 0x34)) {
-        rate = lbl_8047BACC * *(f32*)((u8*)&lbl_803A6748 + 0x24);
-        if (*(s8*)((u8*)&lbl_803A6748 + 0x40) != 0) {
-            rate = lbl_8047BAD0 * rate;
-        }
-        moved = (*(f32*)((u8*)&lbl_803A6748 + 0x34) - *(f32*)((u8*)&lbl_803A6748 + 0x2c)) * rate;
-        *(f32*)((u8*)&lbl_803A6748 + 0x2c) = *(f32*)((u8*)&lbl_803A6748 + 0x2c) + moved;
-        rest = *(f32*)((u8*)&lbl_803A6748 + 0x34) - *(f32*)((u8*)&lbl_803A6748 + 0x2c);
-        if (moved > lbl_8047BAC4) {
-        } else {
-            moved = -moved;
-        }
-        if (rest > lbl_8047BAC4) {
-        } else {
-            rest = -rest;
-        }
-        if (rest <= moved) {
-            *(f32*)((u8*)&lbl_803A6748 + 0x2c) = *(f32*)((u8*)&lbl_803A6748 + 0x34);
-        }
-    }
-    if (*(f32*)((u8*)&lbl_803A6748 + 0x30) != *(f32*)((u8*)&lbl_803A6748 + 0x38)) {
-        rate = lbl_8047BACC * *(f32*)((u8*)&lbl_803A6748 + 0x24);
-        if (*(s8*)((u8*)&lbl_803A6748 + 0x40) != 0) {
-            rate = lbl_8047BAD0 * rate;
-        }
-        moved = (*(f32*)((u8*)&lbl_803A6748 + 0x38) - *(f32*)((u8*)&lbl_803A6748 + 0x30)) * rate;
-        *(f32*)((u8*)&lbl_803A6748 + 0x30) = *(f32*)((u8*)&lbl_803A6748 + 0x30) + moved;
-        rest = *(f32*)((u8*)&lbl_803A6748 + 0x38) - *(f32*)((u8*)&lbl_803A6748 + 0x30);
-        if (moved > lbl_8047BAC4) {
-        } else {
-            moved = -moved;
-        }
-        if (rest > lbl_8047BAC4) {
-        } else {
-            rest = -rest;
-        }
-        if (rest <= moved) {
-            *(f32*)((u8*)&lbl_803A6748 + 0x30) = *(f32*)((u8*)&lbl_803A6748 + 0x38);
-        }
-    }
+    pda_8003B85C_Ease((f32*)((u8*)&lbl_803A6748 + 0x14), *(f32*)((u8*)&lbl_803A6748 + 0x1c), *(f32*)((u8*)&lbl_803A6748 + 0x14));
+    pda_8003B85C_Ease((f32*)((u8*)&lbl_803A6748 + 0x18), *(f32*)((u8*)&lbl_803A6748 + 0x20), *(f32*)((u8*)&lbl_803A6748 + 0x18));
+    pda_8003B85C_Ease((f32*)((u8*)&lbl_803A6748 + 0x2c), *(f32*)((u8*)&lbl_803A6748 + 0x34), *(f32*)((u8*)&lbl_803A6748 + 0x2c));
+    pda_8003B85C_Ease((f32*)((u8*)&lbl_803A6748 + 0x30), *(f32*)((u8*)&lbl_803A6748 + 0x38), *(f32*)((u8*)&lbl_803A6748 + 0x30));
 
     if (*(f32*)((u8*)&lbl_803A6748 + 0x48) != *(f32*)((u8*)&lbl_803A6748 + 0x44)) {
         step = *(f32*)((u8*)&lbl_803A6748 + 0x24) / lbl_8047BAD4;
         if (*(f32*)((u8*)&lbl_803A6748 + 0x48) > *(f32*)((u8*)&lbl_803A6748 + 0x44)) {
-            *(f32*)((u8*)&lbl_803A6748 + 0x44) = *(f32*)((u8*)&lbl_803A6748 + 0x44) + step;
-            if (*(f32*)((u8*)&lbl_803A6748 + 0x44) > lbl_8047BAC8) {
+            cur = *(f32*)((u8*)&lbl_803A6748 + 0x44) + step;
+            *(f32*)((u8*)&lbl_803A6748 + 0x44) = cur;
+            if (cur > lbl_8047BAC8) {
                 *(f32*)((u8*)&lbl_803A6748 + 0x44) = lbl_8047BAC8;
             }
         } else {
-            *(f32*)((u8*)&lbl_803A6748 + 0x44) = *(f32*)((u8*)&lbl_803A6748 + 0x44) - step;
-            if (*(f32*)((u8*)&lbl_803A6748 + 0x44) < lbl_8047BAC4) {
+            cur = *(f32*)((u8*)&lbl_803A6748 + 0x44) - step;
+            *(f32*)((u8*)&lbl_803A6748 + 0x44) = cur;
+            if (cur < lbl_8047BAC4) {
                 *(f32*)((u8*)&lbl_803A6748 + 0x44) = lbl_8047BAC4;
             }
         }
@@ -9227,7 +9215,7 @@ s32 pdaSnagListDetailKey(void* window, s32 enabled)
     }
     if ((code & 2) != 0) {
         if (lbl_8047A4DC != 0) {
-            if (*(s32*)&lbl_803A6748 < (s32)lbl_8047A4DC - 1) {
+            if (*(s32*)&lbl_803A6748 < lbl_8047A4DC - 1) {
                 if (enabled != 0) {
                     darkPokemonSetFlag0C(lbl_8047A4D4[*(s32*)&lbl_803A6748].battleId, 0);
                 }
@@ -9271,51 +9259,23 @@ s32 pdaSnagListDetailKey(void* window, s32 enabled)
     if (enabled != 0) {
         if (prevIndex != *(s32*)&lbl_803A6748) {
             if (darkPokemonCheckFlag16(lbl_8047A4D4[*(s32*)&lbl_803A6748].battleId) != 0) {
+                work = lbl_8047A4D0;
                 idx = *(s32*)&lbl_803A6748;
                 species = lbl_8047A4D4[idx].field_00;
                 entry = lbl_8047A4D4[(u16)idx].battleId;
                 rndId = lbl_8047A4D4[idx].battleId;
-                darkPokemonGetFlag1C(entry);
-                darkPokemonCheckFlag16(entry);
-                if (darkPokemonCheckFlag12(entry) != 0) {
-                    if (darkPokemonCheckFlag14(entry) != 0) {
-                        mode = 1;
-                    } else {
-                        mode = 0;
-                    }
-                } else {
-                    mode = 2;
-                }
-                pokemonCreate(lbl_8047A4D0, species, 10,
-                              gamedataGetStatus(0, 1));
-                rnd = *(u32*)((u8*)&lbl_803A6748 + 0x98);
-                darkPokemonSaveGet8(rndId);
-                pokemonBiosSetRnd(lbl_8047A4D0, rnd);
-                switch (mode) {
-                case 0:
-                case 2:
-                    pokemonBiosSetDarkpokemonDataId(lbl_8047A4D0, 1);
-                    pokemonBiosSetDp(lbl_8047A4D0, 10);
-                    break;
-                case 1:
-                    pokemonBiosSetDarkpokemonDataId(lbl_8047A4D0, 0);
-                    pokemonBiosSetDp(lbl_8047A4D0, 0);
-                    break;
-                default:
-                    break;
-                }
+                pda_8003C7C0_LoadPreview(work, species, entry, rndId);
                 menuPokemonModelRequest((u8*)&lbl_803A6748 + 0x4c, lbl_8047A4D0);
             }
         }
         *(f32*)((u8*)&lbl_803A6748 + 0x18) = *(f32*)((u8*)&lbl_803A6748 + 0x20);
+        baseY = *(s16*)(lbl_802EF0A8 + 0x50a0);
         idx = *(s32*)&lbl_803A6748 - *(s32*)((u8*)&lbl_803A6748 + 0x8);
         if (idx >= 10) {
             idx = 9;
         }
-        *(f32*)((u8*)&lbl_803A6748 + 0x38) =
-            (f32)(*(s16*)(lbl_802EF0A8 + 0x50a0) + idx * 0x18);
-        *(f32*)((u8*)&lbl_803A6748 + 0x30) =
-            (f32)(*(s16*)(lbl_802EF0A8 + 0x50a0) + idx * 0x18);
+        *(f32*)((u8*)&lbl_803A6748 + 0x30) = *(f32*)((u8*)&lbl_803A6748 + 0x38) =
+            baseY + idx * 0x18;
     }
     return 0;
 }
@@ -9331,6 +9291,8 @@ extern void menuModelTerm(void* work);
 void pdaSnagListRun(void)
 {
     extern void _threadSwitch(void);
+    u32 handle;
+    u32 work;
     u8* model;
     u8* tbl;
     u8* base;
@@ -9341,10 +9303,12 @@ void pdaSnagListRun(void)
     u16 entry;
     u16 rndId;
     s32 mode;
-    u32 work;
     u32 rnd;
-    u32 handle;
     f32 step;
+    u8 shadow;
+    u8 snagged;
+    f32 cur;
+    s16* dim;
 
     state = 0;
     running = 1;
@@ -9371,12 +9335,12 @@ void pdaSnagListRun(void)
     }
     model = (u8*)&lbl_803A6748 + 0x4c;
     *(s32*)((u8*)&lbl_803A6748 + 0x10) = lbl_8047A4DC;
-    *(f32*)((u8*)&lbl_803A6748 + 0x2c) = (f32)*(s16*)(lbl_802EF0A8 + 0x509e);
-    *(f32*)((u8*)&lbl_803A6748 + 0x34) = (f32)*(s16*)(lbl_802EF0A8 + 0x509e);
-    *(f32*)((u8*)&lbl_803A6748 + 0x30) = (f32)*(s16*)(lbl_802EF0A8 + 0x50a0);
-    *(f32*)((u8*)&lbl_803A6748 + 0x38) = (f32)*(s16*)(lbl_802EF0A8 + 0x50a0);
-    menuModelInit(model, *(s16*)(lbl_802EF0A8 + 0x17ca6),
-                  *(s16*)(lbl_802EF0A8 + 0x17ca8));
+    *(f32*)((u8*)&lbl_803A6748 + 0x34) = *(f32*)((u8*)&lbl_803A6748 + 0x2c) =
+        *(s16*)(lbl_802EF0A8 + 0x509e);
+    *(f32*)((u8*)&lbl_803A6748 + 0x38) = *(f32*)((u8*)&lbl_803A6748 + 0x30) =
+        *(s16*)(lbl_802EF0A8 + 0x50a0);
+    dim = (s16*)(lbl_802EF0A8 + 0x17ca6);
+    menuModelInit(model, dim[0], dim[1]);
 
     while (1) {
         switch (state) {
@@ -9396,37 +9360,10 @@ void pdaSnagListRun(void)
                     soundStartRaw(0x24, 0, 0);
                     work = lbl_8047A4D0;
                     idx = *(s32*)&lbl_803A6748;
-                    entry = lbl_8047A4D4[(u16)idx].battleId;
                     species = lbl_8047A4D4[idx].field_00;
+                    entry = lbl_8047A4D4[(u16)idx].battleId;
                     rndId = lbl_8047A4D4[idx].battleId;
-                    darkPokemonGetFlag1C(entry);
-                    darkPokemonCheckFlag16(entry);
-                    if (darkPokemonCheckFlag12(entry) != 0) {
-                        if (darkPokemonCheckFlag14(entry) != 0) {
-                            mode = 1;
-                        } else {
-                            mode = 0;
-                        }
-                    } else {
-                        mode = 2;
-                    }
-                    pokemonCreate(work, species, 10, gamedataGetStatus(0, 1));
-                    rnd = *(u32*)((u8*)&lbl_803A6748 + 0x98);
-                    darkPokemonSaveGet8(rndId);
-                    pokemonBiosSetRnd(work, rnd);
-                    switch (mode) {
-                    case 0:
-                    case 2:
-                        pokemonBiosSetDarkpokemonDataId(work, 1);
-                        pokemonBiosSetDp(work, 10);
-                        break;
-                    case 1:
-                        pokemonBiosSetDarkpokemonDataId(work, 0);
-                        pokemonBiosSetDp(work, 0);
-                        break;
-                    default:
-                        break;
-                    }
+                    pda_8003C7C0_LoadPreview(work, species, entry, rndId);
                     menuPokemonModelRequest(model, lbl_8047A4D0);
                     *(f32*)((u8*)&lbl_803A6748 + 0x48) = lbl_8047BAC4;
                 } else {
@@ -9443,15 +9380,15 @@ void pdaSnagListRun(void)
                 step = *(f32*)((u8*)&lbl_803A6748 + 0x24) / lbl_8047BAD4;
                 if (*(f32*)((u8*)&lbl_803A6748 + 0x48) >
                     *(f32*)((u8*)&lbl_803A6748 + 0x44)) {
-                    *(f32*)((u8*)&lbl_803A6748 + 0x44) =
-                        *(f32*)((u8*)&lbl_803A6748 + 0x44) + step;
-                    if (*(f32*)((u8*)&lbl_803A6748 + 0x44) > lbl_8047BAC8) {
+                    cur = *(f32*)((u8*)&lbl_803A6748 + 0x44) + step;
+                    *(f32*)((u8*)&lbl_803A6748 + 0x44) = cur;
+                    if (cur > lbl_8047BAC8) {
                         *(f32*)((u8*)&lbl_803A6748 + 0x44) = lbl_8047BAC8;
                     }
                 } else {
-                    *(f32*)((u8*)&lbl_803A6748 + 0x44) =
-                        *(f32*)((u8*)&lbl_803A6748 + 0x44) - step;
-                    if (*(f32*)((u8*)&lbl_803A6748 + 0x44) < lbl_8047BAC4) {
+                    cur = *(f32*)((u8*)&lbl_803A6748 + 0x44) - step;
+                    *(f32*)((u8*)&lbl_803A6748 + 0x44) = cur;
+                    if (cur < lbl_8047BAC4) {
                         *(f32*)((u8*)&lbl_803A6748 + 0x44) = lbl_8047BAC4;
                     }
                 }
@@ -9479,15 +9416,15 @@ void pdaSnagListRun(void)
                 step = *(f32*)((u8*)&lbl_803A6748 + 0x24) / lbl_8047BAD4;
                 if (*(f32*)((u8*)&lbl_803A6748 + 0x48) >
                     *(f32*)((u8*)&lbl_803A6748 + 0x44)) {
-                    *(f32*)((u8*)&lbl_803A6748 + 0x44) =
-                        *(f32*)((u8*)&lbl_803A6748 + 0x44) + step;
-                    if (*(f32*)((u8*)&lbl_803A6748 + 0x44) > lbl_8047BAC8) {
+                    cur = *(f32*)((u8*)&lbl_803A6748 + 0x44) + step;
+                    *(f32*)((u8*)&lbl_803A6748 + 0x44) = cur;
+                    if (cur > lbl_8047BAC8) {
                         *(f32*)((u8*)&lbl_803A6748 + 0x44) = lbl_8047BAC8;
                     }
                 } else {
-                    *(f32*)((u8*)&lbl_803A6748 + 0x44) =
-                        *(f32*)((u8*)&lbl_803A6748 + 0x44) - step;
-                    if (*(f32*)((u8*)&lbl_803A6748 + 0x44) < lbl_8047BAC4) {
+                    cur = *(f32*)((u8*)&lbl_803A6748 + 0x44) - step;
+                    *(f32*)((u8*)&lbl_803A6748 + 0x44) = cur;
+                    if (cur < lbl_8047BAC4) {
                         *(f32*)((u8*)&lbl_803A6748 + 0x44) = lbl_8047BAC4;
                     }
                 }
@@ -9508,15 +9445,15 @@ void pdaSnagListRun(void)
                 step = *(f32*)((u8*)&lbl_803A6748 + 0x24) / lbl_8047BAD4;
                 if (*(f32*)((u8*)&lbl_803A6748 + 0x48) >
                     *(f32*)((u8*)&lbl_803A6748 + 0x44)) {
-                    *(f32*)((u8*)&lbl_803A6748 + 0x44) =
-                        *(f32*)((u8*)&lbl_803A6748 + 0x44) + step;
-                    if (*(f32*)((u8*)&lbl_803A6748 + 0x44) > lbl_8047BAC8) {
+                    cur = *(f32*)((u8*)&lbl_803A6748 + 0x44) + step;
+                    *(f32*)((u8*)&lbl_803A6748 + 0x44) = cur;
+                    if (cur > lbl_8047BAC8) {
                         *(f32*)((u8*)&lbl_803A6748 + 0x44) = lbl_8047BAC8;
                     }
                 } else {
-                    *(f32*)((u8*)&lbl_803A6748 + 0x44) =
-                        *(f32*)((u8*)&lbl_803A6748 + 0x44) - step;
-                    if (*(f32*)((u8*)&lbl_803A6748 + 0x44) < lbl_8047BAC4) {
+                    cur = *(f32*)((u8*)&lbl_803A6748 + 0x44) - step;
+                    *(f32*)((u8*)&lbl_803A6748 + 0x44) = cur;
+                    if (cur < lbl_8047BAC4) {
                         *(f32*)((u8*)&lbl_803A6748 + 0x44) = lbl_8047BAC4;
                     }
                 }
@@ -9573,6 +9510,46 @@ extern void* fightTrainerPokemonDataBiosGetPtr(void* data);
 extern void* fightTrainerPokemonDataBiosGetNickname(void* entry);
 extern u8 fightTrainerPokemonDataBiosGetDarkPokemonFlag(void* entry);
 
+/* The owner caption of a party entry's battle: the trainer-kind or species
+ * caption chosen by the entry's variant, or 0 without a battle list. */
+/* RULE-EXCEPTION(user-approved): single-use inline helper pda_8003C2B8_OwnerText (fn_8003C2B8) - see docs/RULE_EXCEPTIONS.md */
+static inline u32 pda_8003C2B8_OwnerText(s32 off, u8* slot)
+{
+    u16 kind;
+    u32 caption;
+    u32 text;
+    u8 special;
+    u16 trainerId;
+
+    special = 0;
+    if (lbl_8047A4D0 != 0) {
+        kind = *(u16*)((u8*)lbl_8047A4D4 + off + 2);
+        caption = darkPokemonGetFlagListValue(kind, slot);
+        switch (*slot) {
+        case 0:
+            caption = 0x371f;
+            break;
+        case 1:
+        case 2:
+            if (kind == 0x43) {
+                caption = 0x12b0;
+            } else if ((trainerId = fn_801EEFAC(kind, 0)) == 9) {
+                text = darkPokemonSaveGetName(kind);
+                special = 1;
+            } else {
+                caption = fn_801FCC7C(fightTrainerDataBiosGetPtr(trainerId));
+            }
+            break;
+        }
+        if (special != 0) {
+            return text;
+        }
+        text = GSmsgGetGSchar(caption);
+        return text;
+    }
+    return 0;
+}
+
 /* Draw one row per party entry: nickname, owner and battle caption. */
 #pragma peephole off
 void pdaSnagListDrawDetail(PdaSprite* alphaSprite, PdaEvent* event)
@@ -9580,19 +9557,15 @@ void pdaSnagListDrawDetail(PdaSprite* alphaSprite, PdaEvent* event)
     s32 y;
     void* entry;
     u32 name;
-    u32 owner;
-    u32 text;
-    u32 ownerText;
     u32 caption;
+    u32 owner;
     u32 msg;
     u32 tint;
     u16 id;
-    u16 kind;
     s32 i;
     s32 off;
     s32 mode;
     u8* slot;
-    u8 special;
     void* nick;
     u16 trainerId;
     u8 registered;
@@ -9613,11 +9586,9 @@ void pdaSnagListDrawDetail(PdaSprite* alphaSprite, PdaEvent* event)
     slot = (u8*)&lbl_803A6748 + 0x94;
     firstX = *(f32*)((u8*)&lbl_803A6748 + 0x14);
     rowY = *(f32*)((u8*)&lbl_803A6748 + 0x18);
-    i = 0;
-    off = 0;
     shifted = lbl_8047BAC8 + (firstX - lbl_8047BAF8 - lbl_8047BAFC);
     stride = lbl_8047BAD8;
-    for (i = 0; i < (s32)lbl_8047A4DC; i++) {
+    for (i = 0, off = 0; i < (s32)lbl_8047A4DC; i++) {
         if (i >= *(s32*)((u8*)&lbl_803A6748 + 0x8) - 1 &&
             i <= *(s32*)((u8*)&lbl_803A6748 + 0xc) + 1) {
             id = *(u16*)((u8*)lbl_8047A4D4 + off + 2);
@@ -9648,36 +9619,8 @@ void pdaSnagListDrawDetail(PdaSprite* alphaSprite, PdaEvent* event)
             if (name == 0) {
                 msg = GSmsgGetGSchar(1);
             }
-            special = 0;
-            ownerText = 0;
-            if (lbl_8047A4D0 != 0) {
-                kind = *(u16*)((u8*)lbl_8047A4D4 + off + 2);
-                caption = darkPokemonGetFlagListValue(kind, slot);
-                switch (*slot) {
-                case 0:
-                    caption = 0x371f;
-                    break;
-                case 1:
-                case 2:
-                    if (kind == 0x43) {
-                        caption = 0x12b0;
-                    } else if ((trainerId = fn_801EEFAC(kind, 0)) == 9) {
-                        text = darkPokemonSaveGetName(kind);
-                        special = 1;
-                    } else {
-                        caption = fn_801FCC7C(fightTrainerDataBiosGetPtr(trainerId));
-                    }
-                    break;
-                }
-                if (special != 0) {
-                    ownerText = text;
-                } else {
-                    text = GSmsgGetGSchar(caption);
-                    ownerText = text;
-                }
-            }
-            owner = ownerText;
-            if (ownerText == 0) {
+            owner = pda_8003C2B8_OwnerText(off, slot);
+            if (owner == 0) {
                 owner = GSmsgGetGSchar(1);
             }
             caption = pdaSnagListGetTrainerName(i);
@@ -9717,9 +9660,9 @@ void pdaSnagListDrawDetail(PdaSprite* alphaSprite, PdaEvent* event)
             msgctrlSetValue(0x37, msg);
             y = (s32)rowY;
             GSmsgPrintColor(0, y, tint | alphaSprite->alphaByte, (void*)0xe7);
-            msgctrlSetValue(0x37, owner);
-            GSmsgPrintColor(0x89, y, tint | alphaSprite->alphaByte, (void*)0xe7);
             msgctrlSetValue(0x37, caption);
+            GSmsgPrintColor(0x89, y, tint | alphaSprite->alphaByte, (void*)0xe7);
+            msgctrlSetValue(0x37, owner);
             GSmsgPrintColor(0x13d, y, tint | alphaSprite->alphaByte, (void*)0xe7);
         }
         rowY = rowY + stride;
@@ -9729,10 +9672,12 @@ void pdaSnagListDrawDetail(PdaSprite* alphaSprite, PdaEvent* event)
 }
 #pragma peephole reset
 
+#endif /* !PDA_80039128_ONLY */
 #endif /* !PDA_SAVE_80038A0C_ONLY && !PDA_DRIVER_8003842C_ONLY */
 #if !defined(PDA_DRIVER_8003842C_ONLY)
 extern u8 lbl_80267060[];
 extern u8 lbl_803A65B0[];
+#if !defined(PDA_80039128_ONLY)
 typedef struct PdaMenuRecord {
     s32 eventId;
     u8 pad04[0x10];
@@ -9778,9 +9723,11 @@ s32 itemStorageMenuCB(void* work, PdaSprite* sprite)
     return 0;
 }
 #pragma peephole reset
+#endif /* !PDA_80039128_ONLY */
 #endif /* !PDA_DRIVER_8003842C_ONLY */
 
 #if !defined(PDA_SAVE_80038A0C_ONLY) && !defined(PDA_DRIVER_8003842C_ONLY)
+#if !defined(PDA_80039128_ONLY)
 extern u16 pcboxGetNbItemSlot(s32 box);
 extern u16 itemBiosGetItemDataId(void* item);
 extern void* itemDataBiosGetPtr(u16 id);
@@ -9796,22 +9743,22 @@ extern u16 itemBiosGetNum(void* item);
 s32 fn_80039644(void* work, PdaSprite* sprite)
 {
     s32 start;
-    s32 rows;
     s32 yAdj;
+    s32 rows;
     s32 total;
     s32 slots;
     s32 i;
     s32 j;
-    s32 index;
     s32 found;
-    s32 rowY;
     s32 nameX;
+    s32 rowY;
     s32 y;
     s32 width;
     u32 itemId;
     u16 count;
     void* item;
     void* name;
+    s32 index;
 
     (void)work;
     start = 0;
@@ -9845,7 +9792,7 @@ s32 fn_80039644(void* work, PdaSprite* sprite)
             continue;
         }
         y = rowY - yAdj;
-        itemId = pdaBoxItemId(index);
+        itemId = pdaBoxItemIdFirst(index);
         name = itemDataBiosGetName(itemDataBiosGetPtr(itemId));
         if (name != NULL) {
             GSmsgPrintColor(0, y, (s32)sprite, name);
@@ -9867,13 +9814,31 @@ s32 fn_80039644(void* work, PdaSprite* sprite)
 #pragma pop
 #pragma peephole reset
 
-extern f32 lbl_8047BA90;
-extern f32 lbl_8047BA94;
-extern f32 lbl_8047BA98;
+#endif /* !PDA_80039128_ONLY */
 extern f32 lbl_8047BAA8;
 
+/* Slide each of the eight main-menu buttons right and fade it in, clamping at
+   its record's target X and at full alpha. */
+/* RULE-EXCEPTION(user-approved): single-use inline helper; its own loop counter numbers after the strength-reduced cursors, which gives retail's r5/r6/r7 - see docs/RULE_EXCEPTIONS.md */
+static inline void pda_80039128_Slide(void)
+{
+    s32 i;
+
+    for (i = 0; i < 8; i++) {
+        if ((((f32*)lbl_803A65B0)[i * 3] += 13.333333f) > ((s32*)lbl_80267060)[i * 6 + 3]) {
+            ((f32*)lbl_803A65B0)[i * 3] = ((s32*)lbl_80267060)[i * 6 + 3];
+        }
+        if ((((f32*)lbl_803A65B0)[i * 3 + 2] += 8.333333f) > 255.0f) {
+            ((f32*)lbl_803A65B0)[i * 3 + 2] = 255.0f;
+        }
+    }
+}
+
 /* Seed and then advance the main-menu button slide-in animation. */
+#if !defined(PDA_80039128_ONLY)
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (peephole off) for the shared-file compiles; the linked unit pda_candidate_80039128 uses -opt nopeephole - see docs/RULE_EXCEPTIONS.md */
 #pragma peephole off
+#endif
 s32 fn_80039128(u8* work)
 {
     s32 i;
@@ -9890,25 +9855,7 @@ s32 fn_80039128(u8* work)
         }
         break;
     case 2:
-        {
-            s32* src;
-            f32* dst;
-            f32 v;
-            src = (s32*)lbl_80267060;
-            dst = (f32*)lbl_803A65B0;
-            for (i = 0; i < 8; src += 6, dst += 3, i++) {
-                v = dst[0] + lbl_8047BA90;
-                dst[0] = v;
-                if (v > (f32)src[3]) {
-                    dst[0] = (f32)src[3];
-                }
-                v = dst[2] + lbl_8047BA94;
-                dst[2] = v;
-                if (v > lbl_8047BA98) {
-                    dst[2] = lbl_8047BA98;
-                }
-            }
-        }
+        pda_80039128_Slide();
         break;
     case 3:
         if (*(s8*)(work + 2) == 0) {
@@ -9920,7 +9867,9 @@ s32 fn_80039128(u8* work)
     }
     return 0;
 }
+#if !defined(PDA_80039128_ONLY)
 #pragma peephole reset
+#endif
 #endif /* !PDA_SAVE_80038A0C_ONLY && !PDA_DRIVER_8003842C_ONLY */
 #endif /* !PDA_RANGE_EXACT_80037174_ONLY */
 #endif /* !PDA_RANGE_80037158_ONLY */

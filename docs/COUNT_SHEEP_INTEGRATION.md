@@ -1,4 +1,59 @@
-# Count-Sheep integration validation — 2026-10-12
+# Count-Sheep integration validation
+
+## Completion import — 2026-10-28 (validation pending)
+
+This integration brings the remaining Count-Sheep history through
+`51bfe4314a218dfaf9592fc80723c50498d0ee55` onto upstream
+`876de33adc88acdbac119b846c5115ee41e54ccb`. Both parents and their contributor
+attribution are retained. The donor describes its final tree as 100% matched
+and linked **code**; its README and tracked reports are older measurements.
+That donor claim is not a measurement of this combined tree. A fresh private
+CI build must establish the integrated result before it is accepted.
+
+The verified upstream baseline report (Build run `39548218157`, artifact
+`12322732309`, archive SHA-256
+`fc533e590d936e23306db302a039d750a4cd12dcddfca12f588135347573b7d4`) contains:
+
+| Measure | Upstream baseline |
+| --- | ---: |
+| Exact code | 2,312,648 / 2,504,940 bytes |
+| Exact functions | 8,554 / 8,677 |
+| Source-linked code | 2,294,704 bytes |
+| Matched data | 2,970,480 / 3,565,996 bytes |
+| Source-linked data | 1,890,688 bytes |
+
+The reconciliation preserves all 42 runtime-evidence names and 2,095 improved
+upstream function names absent from the donor spelling. Name mapping uses the
+original address and size, with simultaneous identifier replacement so aliases
+such as donor `OSLink`/upstream `Relocate` cannot cascade. Game string literals
+and historical disabled assembly wrappers are unchanged.
+
+Donor source owners and compiler profiles replace superseded code carves. The
+upstream common_rel reconstruction, false-relocation exclusions, callable DOL
+exports, loose-REL support, canonical hashes and private-input CI remain intact.
+Forty upstream data-only units are retained where the donor has no explicit
+owner. The SDK arena buffer now belongs to its exact code owner; its adjacent
+72-byte prefix and 24-byte tail remain separate zero-initialized source units.
+These 42 data units cover 16,574 bytes already present in the baseline. They
+are preservation, not newly claimed progress. The 561,032-byte original
+resource fallback remains uncredited as reconstructed source.
+
+The donor adds 28 evidenced library-assembly registry entries (hardware
+primitives and THP helpers), with no new first-party assembly entries. The
+registry and its evidence remain separate from claims about decompiled C/C++.
+Build now verifies registered branch targets against freshly generated retail
+assembly. Quality Lint covers new C++ source/header files as well as C files.
+
+Local validation covers configuration generation, checker tests, jump-table
+importer tests, added-source quality, live-wrapper scanning and whitespace.
+This checkout has no retail inputs, so it cannot reproduce byte matching.
+The original README and denominator freeze remain in place until the fresh
+report can be audited and used to update them. CI uploads its metrics-only
+report even after a later consistency failure; no required gate is bypassed.
+No original binaries, extracted objects, compiler binaries or gameplay results
+are published by this integration.
+
+## Original integration — 2026-10-12
 
 PR: https://github.com/dougchansan/pkmn-colosseum/pull/638
 

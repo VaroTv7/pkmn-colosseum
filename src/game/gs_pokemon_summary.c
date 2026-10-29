@@ -1,36 +1,36 @@
 /**
  * @file gs_pokemon_summary.c
- * @brief Bag (item pocket) menu: pocket pages, item lists and cursor marquee.
+ * @brief GSpokeSummary -- Pokemon summary screen and status display.
  *
  * Address range: 0x80015000 - 0x800181C4 (~30 functions)
  *
- * Despite the file name, this is the bag menu, not a Pokemon summary screen:
- * the 6-entry page table lbl_80266918 has one entry per pocket (data source,
- * colours, drawPage callback, cursor/title message ids), the list pages read
- * the player's items through heroHizukiItemGetItemAryPtr, and the selected
- * row gets the same 45-dot chasing marquee as the shop menu
- * (menuPocketDrawMarqueeFrame / menuPocketDrawMarqueeDot). menuPocket2NumCtrl
- * follows this range.
+ * This module implements the Pokemon summary/status screen that displays
+ * detailed information about a single Pokemon. It handles:
+ *   - Multi-page summary display (Info, Moves, Stats, Ribbons, etc.)
+ *   - Move detail popup with type/power/accuracy
+ *   - Contest stat visualization
+ *   - Ribbon collection display
+ *   - Shadow Pokemon purification gauge
  *
- * NOTE: the per-function roles in the list below were early guesses and are
- * mostly wrong (e.g. the "Summary" page names); prefer the names in
- * config/GC6E01/symbols.txt.
+ * The summary screen operates as a sub-state of the party menu. When
+ * the player selects "Summary" on a party Pokemon, this module takes
+ * over rendering and input handling.
  *
  * Key functions:
  *   fn_8001501C  GSpokeSummary_DrawLabel      -- 0x34 bytes, render text label
  *   fn_80015050  GSpokeSummary_DrawHandler     -- 0x94 bytes, invoke page draw handler
  *   fn_800150E4  GSpokeSummary_DrawPage        -- 0x290 bytes, main page renderer
- *   menuPocketDrawNameList                    -- 0x23C bytes, names-only item-list page (pocket 1)
+ *   fn_80015374  GSpokeSummary_DrawMovePage     -- 0x23C bytes, move list page
  *   fn_800155B0  GSpokeSummary_DrawStatsPage    -- 0x40C bytes, stat hexagon page
- *   bagDrawTMList  GSpokeSummary_DrawRibbonPage   -- 0x480 bytes, ribbon collection
- *   menuPocketDrawItemList                    -- 0x374 bytes, item-list page draw (pockets 4/5)
+ *   fn_800159BC  GSpokeSummary_DrawRibbonPage   -- 0x480 bytes, ribbon collection
+ *   fn_80015E3C  GSpokeSummary_ProcessInput     -- 0x374 bytes, input handler
  *   fn_800161B0  GSpokeSummary_PageTransition   -- 0x198 bytes, page flip animation
  *   fn_80016348  GSpokeSummary_UpdateCursor     -- 0x188 bytes, cursor movement
  *   fn_800164D0  GSpokeSummary_MoveDetail       -- 0x148 bytes, move detail popup
  *   fn_80016618  GSpokeSummary_GetPageCount     -- 0xA4 bytes, count available pages
  *   fn_800166BC  GSpokeSummary_SetupPage        -- 0x114 bytes, initialize page data
- *   menuPocketDrawMarqueeDot                  -- 0x2EC bytes, one dot of the cursor marquee
- *   menuPocketDrawMarqueeFrame                -- 0x458 bytes, cursor placement + 45-dot marquee
+ *   fn_800167D0  GSpokeSummary_DrawTypeIcon     -- 0x2EC bytes, draw Pokemon type icon
+ *   fn_80016ABC  GSpokeSummary_DrawStatBar      -- 0x458 bytes, draw stat bar graphic
  *   fn_80016F14  GSpokeSummary_DrawExpBar       -- 0x114 bytes, draw EXP bar
  *   fn_80017028  GSpokeSummary_DrawHPBar        -- 0x73C bytes, draw HP bar with color
  *   fn_80017764  GSpokeSummary_GetBarColor      -- 0x2C bytes, HP color threshold
@@ -42,7 +42,7 @@
  *   fn_80017990  GSpokeSummary_AnimateGauge     -- 0x7C bytes, gauge fill animation
  *   fn_80017A0C  GSpokeSummary_DrawPageDots     -- 0x2AC bytes, page indicator dots
  *   fn_80017CB8  GSpokeSummary_DrawBackground   -- 0x1D4 bytes, background gradient
- *   bagItemStore  GSpokeSummary_Init             -- 0x338 bytes, full initialization
+ *   fn_80017E8C  GSpokeSummary_Init             -- 0x338 bytes, full initialization
  *
  * The page drawing system uses a function pointer table at sSummaryPageEntries.
  * Each page entry is 0x4C bytes and contains:
@@ -113,11 +113,17 @@ extern f32   gStickDeflection;    /* lbl_8047A2D0 */
  * address range, so the exact islands can link on their own.
  */
 #if defined(GS_POKEMON_SUMMARY_80017CB8_ONLY) || \
+    defined(GS_POKEMON_SUMMARY_800150E4_ONLY) || \
+    defined(GS_POKEMON_SUMMARY_80015374_ONLY) || \
+    defined(GS_POKEMON_SUMMARY_800155B0_ONLY) || \
+    defined(GS_POKEMON_SUMMARY_800159BC_ONLY) || \
+    defined(GS_POKEMON_SUMMARY_80015E3C_ONLY) || \
     defined(GS_POKEMON_SUMMARY_800161B0_ONLY) || \
     defined(GS_POKEMON_SUMMARY_8001793C_ONLY) || \
     defined(GS_POKEMON_SUMMARY_80017E8C_ONLY) || \
     defined(GS_POKEMON_SUMMARY_800166BC_ONLY) || \
-    defined(GS_POKEMON_SUMMARY_80016ABC_ONLY)
+    defined(GS_POKEMON_SUMMARY_80016ABC_ONLY) || \
+    defined(GS_POKEMON_SUMMARY_800167D0_ONLY)
 #define GS_POKEMON_SUMMARY_ISLAND
 #endif
 
@@ -219,7 +225,7 @@ typedef s32 (*DrawHandlerFn)(u8*, u8*, u16*);
 typedef s32 (*SummaryMenuCallback)(s32, s32, s32*);
 
 extern u16 itemBiosGetItemDataId(void*);
-extern u32 itemDataBiosGetName(void);
+extern u32 itemDataBiosGetName(void* itemData);
 extern u32 itemDataBiosGetKinomiNo(u16);
 extern u32 itemDataBiosGetWazaMachineNo(void* itemData);
 extern u32 itemDataBiosGetHidenMachineNo(void* itemData);
@@ -322,7 +328,8 @@ static inline u16 SummaryListGetNum(s32 kind, s32 index) {
         if (fn_801429E8(list) != 0) {
             visibleIndex++;
             if (visibleIndex >= index) {
-                return itemBiosGetNum(list);
+                u16 n = itemBiosGetNum(list);
+                return n;
             }
         }
     }
@@ -389,7 +396,7 @@ static inline u16 SummaryPageItemNum(s32 pageIndex, s32 index) {
     return SummaryListGetNum(SUMMARY_PAGES[pageIndex].dataSource, index);
 }
 
-static inline s32 SummaryPagePocketTotal(s32 pageIndex) {
+static inline u16 SummaryPagePocketTotal(s32 pageIndex) {
     return SummaryPocketTotal(SUMMARY_PAGES[pageIndex].dataSource);
 }
 
@@ -413,6 +420,48 @@ s32 fn_80015050(u8* src, u8* param) {
 }
 #endif
 
+#endif /* !GS_POKEMON_SUMMARY_ISLAND */
+
+#if !defined(GS_POKEMON_SUMMARY_ISLAND) || defined(GS_POKEMON_SUMMARY_800150E4_ONLY) || \
+    defined(GS_POKEMON_SUMMARY_80015374_ONLY) || defined(GS_POKEMON_SUMMARY_800155B0_ONLY)
+/*
+ * Item id of the index-th valid entry, held in a u16 local before it is
+ * returned (as SummaryListGetNum holds its quantity). The page draws
+ * fn_800150E4, fn_80015374 and fn_800155B0 use this copy.
+ */
+/* RULE-EXCEPTION(user-approved): inline helper copy (u16 item-id local) chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+static inline u16 SummaryListGetItemIdU16(s32 kind, s32 index) {
+    void* list;
+    u16 count;
+    s32 i;
+    s32 visibleIndex;
+
+    if (kind >= 0) {
+        list = heroItemGetItemKindToItemAryPtr(lbl_8047A2F8, kind, &count, 0, 0, 0);
+    } else {
+        list = heroHizukiItemGetItemAryPtr(lbl_8047A2F8, &count, 0, 0, 0);
+    }
+
+    visibleIndex = -1;
+    for (i = 0; i < count; i++, list = (u8*)list + 4) {
+        if (fn_801429E8(list) != 0) {
+            visibleIndex++;
+            if (visibleIndex >= index) {
+                u16 id = itemBiosGetItemDataId(list);
+                return id;
+            }
+        }
+    }
+    return 0;
+}
+
+static inline u16 SummaryPageItemIdU16(s32 pageIndex, s32 index) {
+    return SummaryListGetItemIdU16(SUMMARY_PAGES[pageIndex].dataSource, index);
+}
+#endif /* !GS_POKEMON_SUMMARY_ISLAND || 800150E4_ONLY || 80015374_ONLY || 800155B0_ONLY */
+
+#if !defined(GS_POKEMON_SUMMARY_ISLAND) || defined(GS_POKEMON_SUMMARY_800150E4_ONLY)
+
 /* fn_800150E4 - 0x800150E4 | size: 0x290 */
 extern void* lbl_8047A2F8;
 extern const f32 lbl_8047B748;
@@ -423,17 +472,22 @@ asm void fn_800150E4(void) {
 #include "src/game/gs_pokemon_summary_fn_800150E4.inc"
 }
 #else
+/* The island unit turns the peephole pass off with -opt nopeephole. */
+#if !defined(GS_POKEMON_SUMMARY_800150E4_ONLY)
 #pragma push
 #pragma peephole off
+#endif
 s32 fn_800150E4(s32 x, s32 pageIndex, u16* packedRange) {
     s32 validCount;
-    s32 itemIndex;
     s32 displayLine;
     s32 visibleIndex;
     s32 lineLimit;
-    s32 scroll;
-    s32 y;
+    int y;
+    s32 itemIndex;
     s32 textX;
+    s32 scroll;
+    u32 name;
+    s32 itemId;
 
     displayLine = 0;
     lineLimit = 8;
@@ -462,8 +516,10 @@ s32 fn_800150E4(s32 x, s32 pageIndex, u16* packedRange) {
             msgctrlSetValue(0x34, itemIndex + 1);
             GSmsgPrintColor(textX, y, -1, 0xCA);
             textX += (u16)(GSmsgGetRect(0xCA) >> 16);
-            itemDataBiosGetPtr((u16)SummaryPageItemId(pageIndex, itemIndex));
-            GSmsgPrintColor(textX + 10, y, -1, itemDataBiosGetName());
+            /* RULE-EXCEPTION(user-approved): s32 carrier of the u16 item id, cast back for the call, chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+            itemId = SummaryPageItemIdU16(pageIndex, itemIndex);
+            name = itemDataBiosGetName(itemDataBiosGetPtr((u16)itemId));
+            GSmsgPrintColor(textX + 10, y, -1, name);
         }
     }
 
@@ -472,10 +528,16 @@ s32 fn_800150E4(s32 x, s32 pageIndex, u16* packedRange) {
     }
     return 0;
 }
+#if !defined(GS_POKEMON_SUMMARY_800150E4_ONLY)
 #pragma pop
 #endif
+#endif
 
-/* menuPocketDrawNameList - 0x80015374 | size: 0x23c */
+#endif /* !GS_POKEMON_SUMMARY_ISLAND || GS_POKEMON_SUMMARY_800150E4_ONLY */
+
+#if !defined(GS_POKEMON_SUMMARY_ISLAND) || defined(GS_POKEMON_SUMMARY_80015374_ONLY)
+
+/* fn_80015374 - 0x80015374 | size: 0x23c */
 extern void* lbl_8047A2F8;
 extern const f32 lbl_8047B748;
 extern u32 lbl_8047A2D0;
@@ -485,17 +547,21 @@ asm void fn_80015374(void) {
 #include "src/game/gs_pokemon_summary_fn_80015374.inc"
 }
 #else
+/* The island unit turns the peephole pass off with -opt nopeephole. */
+#if !defined(GS_POKEMON_SUMMARY_80015374_ONLY)
 #pragma push
 #pragma peephole off
-s32 menuPocketDrawNameList(s32 x, s32 pageIndex, u16* packedRange) {
-    s32 validCount;
-    s32 itemIndex;
-    s32 displayLine;
+#endif
+s32 menuPocketDrawNameList(int x, s32 pageIndex, u16* packedRange) {
+    u32 name;
+    s32 itemId;
     s32 visibleIndex;
     s32 lineLimit;
+    s32 displayLine;
     s32 scroll;
+    s32 validCount;
+    s32 itemIndex;
     s32 y;
-    u32 name;
 
     displayLine = 0;
     lineLimit = 8;
@@ -516,8 +582,9 @@ s32 menuPocketDrawNameList(s32 x, s32 pageIndex, u16* packedRange) {
          displayLine++, visibleIndex++, itemIndex++) {
         if (itemIndex >= 0) {
             y = displayLine * 0x1F - scroll;
-            itemDataBiosGetPtr((u16)SummaryPageItemId(pageIndex, itemIndex));
-            name = itemDataBiosGetName();
+            /* RULE-EXCEPTION(user-approved): s32 carrier of the u16 item id, cast back for the call, chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+            itemId = SummaryPageItemIdU16(pageIndex, itemIndex);
+            name = itemDataBiosGetName(itemDataBiosGetPtr((u16)itemId));
             if (name != 0) {
                 GSmsgPrintColor(x, y, -1, name);
             }
@@ -529,8 +596,14 @@ s32 menuPocketDrawNameList(s32 x, s32 pageIndex, u16* packedRange) {
     }
     return 0;
 }
+#if !defined(GS_POKEMON_SUMMARY_80015374_ONLY)
 #pragma pop
 #endif
+#endif
+
+#endif /* !GS_POKEMON_SUMMARY_ISLAND || GS_POKEMON_SUMMARY_80015374_ONLY */
+
+#if !defined(GS_POKEMON_SUMMARY_ISLAND) || defined(GS_POKEMON_SUMMARY_800155B0_ONLY)
 
 /* fn_800155B0 - 0x800155B0 | size: 0x40c */
 extern void* lbl_8047A2F8;
@@ -542,20 +615,24 @@ asm void fn_800155B0(void) {
 #include "src/game/gs_pokemon_summary_fn_800155B0.inc"
 }
 #else
+/* The island unit turns the peephole pass off with -opt nopeephole. */
+#if !defined(GS_POKEMON_SUMMARY_800155B0_ONLY)
 #pragma push
 #pragma peephole off
-s32 fn_800155B0(s32 x, s32 pageIndex, u16* packedRange) {
-    s32 validCount;
-    s32 itemIndex;
+#endif
+s32 fn_800155B0(int x, s32 pageIndex, u16* packedRange) {
+    s16 numWidth;
+    s16 width;
+    u8 berryNo;
+    u16 itemId;
+    s32 y;
+    s32 scroll;
+    s32 lineLimit;
     s32 displayLine;
     s32 visibleIndex;
-    s32 lineLimit;
-    s32 scroll;
-    s32 y;
+    s32 itemIndex;
+    s32 validCount;
     s32 textX;
-    u16 itemId;
-    u8 berryNo;
-    s16 width;
 
     displayLine = 0;
     lineLimit = 8;
@@ -579,7 +656,7 @@ s32 fn_800155B0(s32 x, s32 pageIndex, u16* packedRange) {
             GSmsgPrintColor(x, y, -1, 0x2AFF);
             textX = x + (u16)(GSmsgGetRect(0x2AFF) >> 16);
 
-            itemId = SummaryPageItemId(pageIndex, itemIndex);
+            itemId = SummaryPageItemIdU16(pageIndex, itemIndex);
             berryNo = itemDataBiosGetKinomiNo(itemId) + 1;
             if (berryNo < 10) {
                 msgctrlSetValue(0x34, 0);
@@ -589,8 +666,8 @@ s32 fn_800155B0(s32 x, s32 pageIndex, u16* packedRange) {
             msgctrlSetValue(0x34, berryNo);
             GSmsgPrintColor(textX, y, -1, 0xCA);
             textX += (u16)(GSmsgGetRect(0xCA) >> 16);
-            itemDataBiosGetPtr((u16)itemId);
-            GSmsgPrintColor(textX + 9, y, -1, itemDataBiosGetName());
+            /* RULE-EXCEPTION(user-approved): no-op mask of the u16 item id for the call, chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+            GSmsgPrintColor(textX + 9, y, -1, itemDataBiosGetName(itemDataBiosGetPtr(itemId & 0xFFFF)));
 
             msgctrlSetValue(0x34, SummaryPagePocketTotal(pageIndex));
             width = (s16)(GSmsgGetRect(0xCA) >> 16);
@@ -598,7 +675,8 @@ s32 fn_800155B0(s32 x, s32 pageIndex, u16* packedRange) {
             GSmsgPrintColor(x + 0x11A - width, y, -1, 0x12E);
 
             msgctrlSetValue(0x34, SummaryPageItemNum(pageIndex, itemIndex));
-            GSmsgPrintColor(x + 0x11A - (s16)(GSmsgGetRect(0xCA) >> 16), y, -1, 0xCA);
+            numWidth = (s16)(GSmsgGetRect(0xCA) >> 16);
+            GSmsgPrintColor(x + 0x11A - numWidth, y, -1, 0xCA);
         }
     }
 
@@ -607,10 +685,15 @@ s32 fn_800155B0(s32 x, s32 pageIndex, u16* packedRange) {
     }
     return 0;
 }
+#if !defined(GS_POKEMON_SUMMARY_800155B0_ONLY)
 #pragma pop
 #endif
+#endif
 
-/* bagDrawTMList - 0x800159BC | size: 0x480 */
+#endif /* !GS_POKEMON_SUMMARY_ISLAND || GS_POKEMON_SUMMARY_800155B0_ONLY */
+
+#if !defined(GS_POKEMON_SUMMARY_ISLAND) || defined(GS_POKEMON_SUMMARY_800159BC_ONLY)
+/* fn_800159BC - 0x800159BC | size: 0x480 */
 extern void* lbl_8047A2F8;
 extern const f32 lbl_8047B748;
 extern u32 lbl_8047A2D0;
@@ -620,23 +703,26 @@ asm void fn_800159BC(void) {
 #include "src/game/gs_pokemon_summary_fn_800159BC.inc"
 }
 #else
+/* The island unit turns the peephole pass off with -opt nopeephole. */
+#if !defined(GS_POKEMON_SUMMARY_800159BC_ONLY)
 #pragma push
 #pragma peephole off
-s32 bagDrawTMList(s32 x, s32 pageIndex, u16* packedRange) {
+#endif
+s32 bagDrawTMList(int x, s32 pageIndex, u16* packedRange) {
     s32 validCount;
     s32 itemIndex;
-    s32 displayLine;
     s32 visibleIndex;
     s32 lineLimit;
     s32 scroll;
-    s32 y;
+    int y;
     s32 textX;
-    void* itemData;
     u8 machineNo;
     s32 tmNo;
+    s32 displayLine;
     u32 hidenNo;
     u8 hmNo;
     u32 labelId;
+    void* itemData;
     s16 width;
 
     displayLine = 0;
@@ -702,10 +788,15 @@ s32 bagDrawTMList(s32 x, s32 pageIndex, u16* packedRange) {
     }
     return 0;
 }
+#if !defined(GS_POKEMON_SUMMARY_800159BC_ONLY)
 #pragma pop
 #endif
+#endif
+#endif /* !GS_POKEMON_SUMMARY_ISLAND || GS_POKEMON_SUMMARY_800159BC_ONLY */
 
-/* menuPocketDrawItemList - 0x80015E3C | size: 0x374 */
+#if !defined(GS_POKEMON_SUMMARY_ISLAND) || defined(GS_POKEMON_SUMMARY_80015E3C_ONLY)
+
+/* fn_80015E3C - 0x80015E3C | size: 0x374 */
 extern void* lbl_8047A2F8;
 extern const f32 lbl_8047B748;
 extern u32 lbl_8047A2D0;
@@ -715,18 +806,22 @@ asm void fn_80015E3C(void) {
 #include "src/game/gs_pokemon_summary_fn_80015E3C.inc"
 }
 #else
+/* The island unit turns the peephole pass off with -opt nopeephole. */
+#if !defined(GS_POKEMON_SUMMARY_80015E3C_ONLY)
 #pragma push
 #pragma peephole off
-s32 menuPocketDrawItemList(s32 x, s32 pageIndex, u16* packedRange) {
+#endif
+s32 menuPocketDrawItemList(int x, s32 pageIndex, u16* packedRange) {
     s32 validCount;
     s32 itemIndex;
     s32 displayLine;
     s32 visibleIndex;
     s32 lineLimit;
     s32 scroll;
-    s32 y;
+    int y;
     u32 name;
     s16 width;
+    s32 rowX;
 
     displayLine = 0;
     lineLimit = 8;
@@ -743,20 +838,21 @@ s32 menuPocketDrawItemList(s32 x, s32 pageIndex, u16* packedRange) {
         scroll = (s32)SUMMARY_F32(lbl_8047A2D0);
     }
 
+    /* RULE-EXCEPTION(user-approved): carrier copy of x for the name and pocket-total columns, chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+    rowX = x;
     for (visibleIndex = displayLine; visibleIndex < lineLimit && itemIndex < validCount;
          displayLine++, visibleIndex++, itemIndex++) {
         if (itemIndex >= 0) {
             y = displayLine * 0x1F - scroll;
-            itemDataBiosGetPtr((u16)SummaryPageItemId(pageIndex, itemIndex));
-            name = itemDataBiosGetName();
+            name = itemDataBiosGetName(itemDataBiosGetPtr((u16)SummaryPageItemId(pageIndex, itemIndex)));
             if (name != 0) {
-                GSmsgPrintColor(x, y, -1, name);
+                GSmsgPrintColor(rowX, y, -1, name);
             }
 
             msgctrlSetValue(0x34, SummaryPagePocketTotal(pageIndex));
             width = (s16)(GSmsgGetRect(0xCA) >> 16);
             width += (s16)(GSmsgGetRect(0x12E) >> 16);
-            GSmsgPrintColor(x + 0x11A - width, y, -1, 0x12E);
+            GSmsgPrintColor(rowX + 0x11A - width, y, -1, 0x12E);
 
             msgctrlSetValue(0x34, SummaryPageItemNum(pageIndex, itemIndex));
             GSmsgPrintColor(x + 0x11A - (s16)(GSmsgGetRect(0xCA) >> 16), y, -1, 0xCA);
@@ -768,10 +864,12 @@ s32 menuPocketDrawItemList(s32 x, s32 pageIndex, u16* packedRange) {
     }
     return 0;
 }
+#if !defined(GS_POKEMON_SUMMARY_80015E3C_ONLY)
 #pragma pop
 #endif
+#endif
 
-#endif /* !GS_POKEMON_SUMMARY_ISLAND */
+#endif /* !GS_POKEMON_SUMMARY_ISLAND || GS_POKEMON_SUMMARY_80015E3C_ONLY */
 
 #if !defined(GS_POKEMON_SUMMARY_ISLAND) || defined(GS_POKEMON_SUMMARY_800161B0_ONLY)
 /* fn_800161B0 - 0x800161B0 | size: 0x198 */
@@ -1009,45 +1107,36 @@ s32 fn_800166BC(SummaryPageContext* ctx, u8* item) {
 
 #endif /* 0x800166BC - 0x800167D0 */
 
-#if !defined(GS_POKEMON_SUMMARY_ISLAND)
-/* menuPocketDrawMarqueeDot - 0x800167D0 | size: 0x2ec */
-extern void fn_800CDBE0(void);
-extern void fn_800CE148(void);
-extern const f32 lbl_8047B748;
-extern const f32 lbl_8047B744;
-extern const f32 lbl_8047B768;
-extern const f32 lbl_8047B75C;
-extern const f32 lbl_8047B770;
-extern const f32 lbl_8047B774;
-extern const f32 lbl_8047B778;
+#if !defined(GS_POKEMON_SUMMARY_ISLAND) || defined(GS_POKEMON_SUMMARY_800167D0_ONLY)
+/* fn_800167D0 - 0x800167D0 | size: 0x2ec */
 #if 0
 asm void fn_800167D0(void) {
 #include "src/game/gs_pokemon_summary_fn_800167D0.inc"
 }
 #else
-#pragma push
-#pragma peephole off
+/* Trace a point around a rounded-end gauge outline: straight top edge,
+   right semicircle, straight bottom edge, left semicircle. */
 void menuPocketDrawMarqueeDot(u8* owner, u8* item, f32 phase, u16 iconId, u8 alpha) {
-    f32 stops[5];
+    f32 t;
     f32 width;
     f32 height;
+    f32 angle;
+    f32 stops[5];
     f32 radius;
     f32 total;
-    f32 t;
-    f32 angle;
-    s32 segment;
+    int segment;
     s32 x;
     s32 y;
 
     width = *(s16*)(item + 0x54);
     height = *(s16*)(item + 0x56);
-    radius = SUMMARY_F32(lbl_8047B75C) * height * SUMMARY_F32(lbl_8047B770);
-    total = SUMMARY_F32(lbl_8047B774) * (width + radius);
-    stops[0] = SUMMARY_F32(lbl_8047B748);
+    radius = 3.14159274f * height / 2.0f;
+    total = 2.0f * (width + radius);
+    stops[0] = 0.0f;
     stops[1] = width / total;
     stops[2] = (width + radius) / total;
-    stops[3] = (lbl_8047B774 * width + radius) / total;
-    stops[4] = SUMMARY_F32(lbl_8047B744);
+    stops[3] = (2.0f * width + radius) / total;
+    stops[4] = 1.0f;
 
     for (segment = 0; segment < 4; segment++) {
         if (stops[segment] <= phase && stops[segment + 1] > phase) {
@@ -1061,31 +1150,30 @@ void menuPocketDrawMarqueeDot(u8* owner, u8* item, f32 phase, u16 iconId, u8 alp
         y = 0;
     }
     if (segment == 1) {
-        angle = SUMMARY_F32(lbl_8047B75C) * t - SUMMARY_F32(lbl_8047B778);
-        x = (height - SUMMARY_F32(lbl_8047B774)) * (f32)cos(angle) * SUMMARY_F32(lbl_8047B770) + width;
-        y = height * SUMMARY_F32(lbl_8047B770) + (height - SUMMARY_F32(lbl_8047B774)) * (f32)sin(angle) * SUMMARY_F32(lbl_8047B770);
+        angle = 3.14159274f * t - 1.57079637f;
+        x = (height - 2.0f) * (f32)cos(angle) / 2.0f + width;
+        y = height / 2.0f + (height - 2.0f) * (f32)sin(angle) / 2.0f;
     }
     if (segment == 2) {
-        x = height - SUMMARY_F32(lbl_8047B774);
-        y = (lbl_8047B744 - t) * width;
+        x = (1.0f - t) * width;
+        y = height - 2.0f;
     }
     if (segment == 3) {
-        angle = SUMMARY_F32(lbl_8047B75C) * t + SUMMARY_F32(lbl_8047B778);
-        x = (height - SUMMARY_F32(lbl_8047B774)) * (f32)cos(angle) * SUMMARY_F32(lbl_8047B770);
-        y = height * SUMMARY_F32(lbl_8047B770) + (height - SUMMARY_F32(lbl_8047B774)) * (f32)sin(angle) * SUMMARY_F32(lbl_8047B770);
+        angle = 3.14159274f * t + 1.57079637f;
+        x = (height - 2.0f) * (f32)cos(angle) / 2.0f;
+        y = height / 2.0f + (height - 2.0f) * (f32)sin(angle) / 2.0f;
     }
 
     windowDrawSprite2(x, y, 2, 2, alpha | 0xFFFFFF00, (s32)owner, iconId, 0);
 }
-#pragma pop
 #endif
 
-#endif /* !GS_POKEMON_SUMMARY_ISLAND */
+#endif /* !GS_POKEMON_SUMMARY_ISLAND || GS_POKEMON_SUMMARY_800167D0_ONLY */
 
 #if !defined(GS_POKEMON_SUMMARY_ISLAND) || defined(GS_POKEMON_SUMMARY_80016ABC_ONLY)
 /* Defined in the preceding region, which the 80016ABC carve leaves out. */
 void menuPocketDrawMarqueeDot(u8* owner, u8* item, f32 phase, u16 iconId, u8 alpha);
-/* menuPocketDrawMarqueeFrame - 0x80016ABC | size: 0x458 */
+/* fn_80016ABC - 0x80016ABC | size: 0x458 */
 extern u32 lbl_8047A2D8;
 extern u32 lbl_8047A2E8;
 extern u32 lbl_8047A2C8;
@@ -1674,7 +1762,7 @@ s32 fn_80017CB8(SummaryMenuItem* out, s32 maxEntries, s32 pageIndex, s32 selecte
 #endif /* 0x80017CB8 - 0x80017E8C */
 
 #if !defined(GS_POKEMON_SUMMARY_ISLAND) || defined(GS_POKEMON_SUMMARY_80017E8C_ONLY)
-/* bagItemStore - 0x80017E8C | size: 0x338 */
+/* fn_80017E8C - 0x80017E8C | size: 0x338 */
 /* Argument block for the quantity picker menus 0x5B / 0x5C. */
 typedef struct SummaryQuantityMenuArg {
     u8 color[3];

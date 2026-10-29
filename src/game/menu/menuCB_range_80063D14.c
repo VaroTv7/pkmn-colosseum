@@ -2,8 +2,13 @@
  * @file menuCB_range_80063D14.c
  * @brief Residual menuCB candidate range, 0x80063D14 - 0x80064378.
  */
-#define MENUCB_RANGE_RESIDUAL_EMPTY_ONLY
-#include "menuCB_range_80062948.c"
+#include "dolphin/types.h"
+
+extern s32 toolentryTaisenGetBattleType(void);
+extern s32 toolentryTaisenGetEntryPlayerNum(void);
+extern s32 fn_8006B1D4(void);
+extern u16 toolentryTaisenGetPokemonNum(s32);
+extern s32 battleResultGet10(void);
 
 typedef struct MenuCBEntryPort {
     u32 unused;
@@ -13,10 +18,10 @@ typedef struct MenuCBEntryPort {
 extern void std104_soundSetBackgroundMusic(s32, s32, s32);
 extern void* memcpy(void*, const void*, u32);
 extern MenuCBEntryPort* savedataBattleGetEntryPtr(s32);
-extern void* fn_8006A814(MenuCBEntryPort*);
+extern u32 fn_8006A814(MenuCBEntryPort*);
 extern s32 savedataBattleGetTeamPtr(s32);
-extern void gbaCommandSendWazaText(void*, s32);
-extern void fn_8008AB20(void*, u16, s32);
+extern void gbaCommandSendWazaText(s32, s32);
+extern void fn_8008AB20(s32, u32, u32);
 extern void toolentryTaisenInitPokemonOrder(s32);
 extern void* savedataBattleFindEntryByPlayer(s32);
 extern s32 menuOpen(s32, s32);
@@ -62,21 +67,10 @@ typedef struct MenuCBEntryWork {
     /* 0xCE5C */ s32 message;
 } MenuCBEntryWork;
 
-#define MENUCB_WORK ((MenuCBEntryWork*)lbl_803A9F08)
+extern MenuCBEntryWork lbl_803A9F08;
+#define MENUCB_WORK (&lbl_803A9F08)
 
-static inline s32 menuCBEntryMode(s32 battleType)
-{
-    s32 mode;
-
-    if (battleType == 1) {
-        mode = 2;
-    } else {
-        mode = 1;
-    }
-    return mode;
-}
-
-static inline s32 menuCBMin(u16 a, u16 b)
+static inline u16 menuCBMin(u16 a, u16 b)
 {
     if (a < b) {
         return a;
@@ -86,7 +80,7 @@ static inline s32 menuCBMin(u16 a, u16 b)
 
 static inline void menuCBSetEntryState(s32 next)
 {
-    *(s32*)&lbl_803A9F08[0x00] = next;
+    lbl_803A9F08.state = next;
 }
 
 static inline u16 menuCBIsHomeBattle(void)
@@ -121,7 +115,7 @@ static inline void menuCBClearEntrySlots(MenuCBEntryWork* state)
     s32 j;
 
     state->cursor = 0;
-    ((MenuCBEntryWork*)lbl_803A9F08)->slotsDirty = 0;
+    lbl_803A9F08.slotsDirty = 0;
     for (i = 0; i < 4; i++) {
         player = &state->player[i];
         for (j = 0; j < 6; j++) {
@@ -132,35 +126,14 @@ static inline void menuCBClearEntrySlots(MenuCBEntryWork* state)
     }
 }
 
-s32 menuTaisenSetupBattle(void* work)
+/* RULE-EXCEPTION(user-approved): single-use inline helper (GBA port loop, nested under menuCBEntryInit) chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+static inline void menuCBEntryPorts(s32 battleType, s32 playerCount)
 {
-    void* entries[4];
-    s32 battleType;
-    s32 waiting;
-    u16 maxCount;
-    s32 playerCount;
-    u16 pokemonCount;
     s32 player;
-    s32 count;
-    s32 menuResult;
-    s32 keepRunning;
+    u32 command;
+    u16 maxCount;
     MenuCBEntryPort* port;
-    void* command;
-
-    keepRunning = 1;
-    std104_soundSetBackgroundMusic(0x1E, 0, 0xFF);
-    memcpy(((MenuCBEntryWork*)lbl_803A9F08)->copy, work, 0xCC2C);
-
-    battleType = toolentryTaisenGetBattleType();
-    playerCount = toolentryTaisenGetEntryPlayerNum();
-    MENUCB_WORK->cancelled = 1;
-    MENUCB_WORK->message = -1;
-    MENUCB_WORK->scale = lbl_8047BFE8;
-    MENUCB_WORK->frame = 0;
-    MENUCB_WORK->cursor = 0;
-    MENUCB_WORK->timer = 0;
-    MENUCB_WORK->state = 0;
-    MENUCB_WORK->selection = 0;
+    u16 pokemonCount;
 
     for (player = 0; player < playerCount; player++) {
         s32 wazaText;
@@ -173,25 +146,95 @@ s32 menuTaisenSetupBattle(void* work)
             s32 mode;
 
             gbaCommandSendWazaText(command, wazaText);
-            mode = menuCBEntryMode(battleType);
+            if (battleType == 1) {
+                mode = 2;
+            } else {
+                mode = 1;
+            }
             maxCount = fn_8006B1D4();
-            pokemonCount = toolentryTaisenGetPokemonNum(player);
+            pokemonCount = toolentryTaisenGetPokemonNum(player) & 0xFFFF;
             fn_8008AB20(command, menuCBMin(pokemonCount, maxCount), mode);
         }
     }
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper (setup stores) chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+static inline void menuCBEntryInit(void)
+{
+    s32 battleType;
+    s32 playerCount;
+
+    battleType = toolentryTaisenGetBattleType();
+    playerCount = toolentryTaisenGetEntryPlayerNum();
+    MENUCB_WORK->cancelled = 1;
+    MENUCB_WORK->message = -1;
+    MENUCB_WORK->scale = 0.0f;
+    MENUCB_WORK->frame = 0;
+    MENUCB_WORK->cursor = 0;
+    MENUCB_WORK->timer = 0;
+    MENUCB_WORK->state = 0;
+    MENUCB_WORK->selection = 0;
+    menuCBEntryPorts(battleType, playerCount);
+}
+
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper (decision wait loop) chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+static inline void menuCBWaitDecided(void)
+{
+    s32 waiting;
+
+    waiting = 1;
+    do {
+        if (menuCBDecided()) {
+            waiting = 0;
+        } else {
+            _threadSwitch();
+        }
+    } while (waiting != 0);
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper (entry-order loop, nested under menuCBEntryOrderAll) chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+static inline void menuCBEntryOrder(void** entries)
+{
+    void** e;
+    s32 player;
+
+    for (player = 0, e = &entries[player]; player < 4; e++, player++) {
+        *e = savedataBattleFindEntryByPlayer(player);
+        if (*e != NULL) {
+            MENUCB_WORK->order[player] = *(s32*)((u8*)*e + 0x28);
+        } else {
+            MENUCB_WORK->order[player] = -1;
+        }
+    }
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper (depth wrapper for the entry-order loop) chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+static inline void menuCBEntryOrderAll(void** entries)
+{
+    menuCBEntryOrder(entries);
+}
+
+s32 menuTaisenSetupBattle(void* work)
+{
+    void* entries[4];
+    s32 battleType;
+    s32 player;
+    s32 count;
+    s32 menuResult;
+    s32 keepRunning;
+
+    keepRunning = 1;
+    std104_soundSetBackgroundMusic(0x1E, 0, 0xFF);
+    memcpy(lbl_803A9F08.copy, work, 0xCC2C);
+
+    menuCBEntryInit();
 
     for (player = 0; player < 4; player++) {
         toolentryTaisenInitPokemonOrder(player);
     }
 
-    for (player = 0; player < 4; player++) {
-        entries[player] = savedataBattleFindEntryByPlayer(player);
-        if (entries[player] != NULL) {
-            MENUCB_WORK->order[player] = *(s32*)((u8*)entries[player] + 0x28);
-        } else {
-            MENUCB_WORK->order[player] = -1;
-        }
-    }
+    menuCBEntryOrderAll(entries);
 
     switch (toolentryTaisenGetBattleType()) {
     case 0:
@@ -207,7 +250,7 @@ s32 menuTaisenSetupBattle(void* work)
     }
 
     do {
-        switch (*(s32*)&lbl_803A9F08[0x00]) {
+        switch (lbl_803A9F08.state) {
         case 0:
             menuSetEnablePort(0);
             menuResult = menuOpen(0xC6, 1);
@@ -222,7 +265,7 @@ s32 menuTaisenSetupBattle(void* work)
             break;
         case 1:
             if (menuOpen(0xC5, 1) == 0) {
-                lbl_803A9F08[4] = 1;
+                lbl_803A9F08.ready[0] = 1;
                 menuCloseCustom(0xC5, 0, 1);
                 menuCBSetEntryState(0);
             } else {
@@ -254,14 +297,7 @@ s32 menuTaisenSetupBattle(void* work)
             winMsgOpen(2, 0x44DC, 1, 1);
         } else {
             winMsgOpen(2, 0x44E7, 1, 1);
-            waiting = 1;
-            do {
-                if (menuCBDecided()) {
-                    waiting = 0;
-                } else {
-                    _threadSwitch();
-                }
-            } while (waiting != 0);
+            menuCBWaitDecided();
             winMsgClose(1);
         }
         menuCBClearEntrySlots(MENUCB_WORK);

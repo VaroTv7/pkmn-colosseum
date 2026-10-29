@@ -226,7 +226,7 @@ extern s32 fightTrainerAiWazaValueJisin();
 extern s32 fightTrainerAiWazaValueJibaku();
 extern s32 fightTrainerAiWazaValueNull();
 
-/* 0x8021A6CC size 0x98: wsCmd9A (owner line 1445) */
+/* 0x8021A6CC size 0x98: fn_8021A6CC (owner line 1445) */
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_801F4C14 fightFloorSetStatus
 void wsCmd9A(void) {
@@ -245,7 +245,7 @@ void wsCmd9A(void) {
 #undef fn_801F4C14
 #undef fn_801F025C
 
-/* 0x8021A764 size 0xA8: wsCmd99 (owner line 1654) */
+/* 0x8021A764 size 0xA8: fn_8021A764 (owner line 1654) */
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_801F6E44 fightSideCheckWriteJoutaiDataId
 #define fn_801F4C14 fightFloorSetStatus
@@ -271,7 +271,7 @@ void wsCmd99(void) {
 #undef fn_801F6E44
 #undef fn_801F025C
 
-/* 0x8021A80C size 0x6C: wsCmd98 (owner line 1360) */
+/* 0x8021A80C size 0x6C: fn_8021A80C (owner line 1360) */
 #define fn_801F54A4 fightFloorGetStatus
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_802653FC fightMenuFightOutPokemonRenewStatusMenu
@@ -291,7 +291,8 @@ void wsCmd98(void) {
 #undef fn_801F025C
 #undef fn_801F54A4
 
-/* 0x8021A878 size 0x10C: wsCmd97 (owner line 4214) */
+/* 0x8021A878 size 0x10C: fn_8021A878 (owner line 4214) */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma kept for byte match - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_802016A4 fightOutPokemonGetSex
@@ -344,7 +345,7 @@ doCall:
 #undef fn_802016A4
 #undef fn_801F025C
 
-/* 0x8021A984 size 0x194: wsCmd96 (owner line 14563) */
+/* 0x8021A984 size 0x194: fn_8021A984 (owner line 14563) */
 #pragma optimize_for_size reset
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_8012640C pokemonGetStatus
@@ -454,7 +455,7 @@ void WS_WEATHER_CHANGE(void)
 #undef fn_801F4C14
 #undef fn_801F2988
 
-/* 0x8021AB9C size 0x80: wsCmd94 (owner line 1400) */
+/* 0x8021AB9C size 0x80: fn_8021AB9C (owner line 1400) */
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_8012640C pokemonGetStatus
 #define fn_80203ADC fightOutPokemonNowHpWaruValue
@@ -477,7 +478,9 @@ void wsCmd94(void) {
 #undef fn_801F025C
 
 /* 0x8021AC1C size 0x390: fn_8021AC1C (owner line 14662) */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma kept for byte match - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma kept for byte match - see docs/RULE_EXCEPTIONS.md */
 #pragma opt_propagation off
 void fightCheckOneHitKO(void)
 
@@ -602,7 +605,8 @@ void fightCheckOneHitKO(void)
   }
 }
 
-/* 0x8021AFAC size 0x104: wsCmd92 (owner line 4060) */
+/* 0x8021AFAC size 0x104: fn_8021AFAC (owner line 4060) */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma kept for byte match - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
 #pragma scheduling reset
 #pragma opt_lifetimes reset
@@ -651,7 +655,7 @@ void wsCmd92(void) {
 #undef fn_801F6E44
 #undef fn_801F025C
 
-/* 0x8021B0B0 size 0xF4: wsCmd91 (owner line 4338) */
+/* 0x8021B0B0 size 0xF4: fn_8021B0B0 (owner line 4338) */
 #define fn_801F54A4 fightFloorGetStatus
 #define fn_801F2A7C fightFloorGetGcHeroFightTrainerPtr
 #define fn_801FB1C0 fightTrainerGetStatus
@@ -698,7 +702,8 @@ skipB0B0:
 #undef fn_801F2A7C
 #undef fn_801F54A4
 
-/* 0x8021B1A4 size 0x1C0: wsCmd90 (owner line 14787) */
+/* 0x8021B1A4 size 0x1C0: fn_8021B1A4 (owner line 14787) */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma kept for byte match - see docs/RULE_EXCEPTIONS.md */
 #pragma opt_lifetimes off
 void wsCmd90(void)
 
@@ -789,7 +794,7 @@ done:
     return;
 }
 
-/* 0x8021B364 size 0x120: fightAiCollectWazaTypes (owner line 14882) */
+/* 0x8021B364 size 0x120: fn_8021B364 (owner line 14882) */
 #pragma opt_lifetimes reset
 #define fn_80205B8C fightOutPokemonGetPokemonPtr
 #define fn_80123CD4 pokemonWazaCheckValid
@@ -848,7 +853,7 @@ u32 fightAiCollectWazaTypes(u32 r3, u32 r4)
 #undef fn_80123CD4
 #undef fn_80205B8C
 
-/* 0x8021B484 size 0x18C: wsCmd8F (owner line 14934) */
+/* 0x8021B484 size 0x18C: fn_8021B484 (owner line 14934) */
 void wsCmd8F(void)
 {
     extern u32 GSrand();
@@ -924,7 +929,7 @@ done:
     return;
 }
 
-/* 0x8021B610 size 0x18: wsCmd8E (owner line 232) */
+/* 0x8021B610 size 0x18: fn_8021B610 (owner line 232) */
 u8* wsCmd8E(void) {
     u8* pc = lbl_8047B610;
     lbl_8047B626 = 0;
@@ -932,7 +937,7 @@ u8* wsCmd8E(void) {
     return pc;
 }
 
-/* 0x8021B628 size 0xE4: wsCmd8D (owner line 3937) */
+/* 0x8021B628 size 0xE4: fn_8021B628 (owner line 3937) */
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_8012640C pokemonGetStatus
 #define fn_8011BBD8 wazaSetStatus
@@ -986,7 +991,7 @@ void WS_ABARERU(void)
 }
 #undef fn_801F025C
 
-/* 0x8021B760 size 0xD0: wsCmd8B (owner line 3978) */
+/* 0x8021B760 size 0xD0: fn_8021B760 (owner line 3978) */
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_8012640C pokemonGetStatus
 #define fn_8020A2B8 fightWazaBiosCopy
@@ -1040,7 +1045,7 @@ s32 _fightSeqWsKuroikiriSub__FPvUsPv(void* ctx, u16 param2, void* param3) {
 }
 #undef fn_802062FC
 
-/* 0x8021B8B8 size 0x58: wsCmd89 (owner line 1301) */
+/* 0x8021B8B8 size 0x58: fn_8021B8B8 (owner line 1301) */
 void wsCmd89(void) {
     u8 val = *(u8*)((u8*)lbl_80379F58 + (0x1 << 16) + 0x601e);
     if (wsStatBuffChange(val & 0xF0, val & 0x0F, lbl_8047B610[1],

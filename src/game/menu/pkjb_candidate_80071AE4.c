@@ -1,21 +1,28 @@
 /**
  * @file pkjb_candidate_80071AE4.c
- * @brief pkjb_uploader.c carve, 0x80071AE4 - 0x800722A0 (candidate).
+ * @brief pkjb_uploader.c carve, 0x80071AE4 - 0x80071E34 (fn_80071AE4).
  *
- * fn_80071E34 is exact; fn_80071AE4 and fn_80071EA4 are not yet:
- * - fn_80071AE4: retail keeps the upload size (count * 4 + 16, + 0x70 with
- *   the extra block) inside the retry loop and computes the header swap
- *   after the hoisted idle-callback addresses; this source hoists both.
- * - fn_80071EA4: the two header/body receive loops are right; only the
- *   placement of the first loop's pointer copy and the swap scheduling
- *   differ.
+ * fn_80071AE4's buffer is the u8 block gbaCommunication.c passes
+ * (p + 0x4344, through fn_80089D30). The command-0x22 helper takes the
+ * swapped header word and splits it into its own extra/count locals at its
+ * top; MWCC hoists the header read and swap out of the retry loop into a
+ * block of their own after the idle-callback addresses, as in retail, and
+ * the helper's count local keeps retail's register order. The hoist needs
+ * GC/2.5 or later (GC/2.0 keeps the swap in the loop).
+ *
+ * fn_80071E34 is pkjb_exact_80071E34.c. fn_80071EA4 receives into a byte
+ * buffer (gbaCommunication.c passes u8 readBuffer[0xD8]) one word at a time
+ * at a byte offset; the body size is an unsigned word count times 4.
+ * pkjb_candidate_80071EA4.c compiles it from this file alone
+ * (PKJB_80071EA4_ONLY); compiled directly, this file holds fn_80071AE4 only.
  * Unit flags and shared helpers: see game/menu/pkjb_uploader_shared.h.
  */
 #include "game/menu/pkjb_uploader_shared.h"
 
-s32 fn_80071EA4(s32 chan, u32* data);
+s32 fn_80071EA4(s32 chan, u8* data);
 
-static inline s32 pkjbSendBlockIdle(s32 chan, const u32* data, s32 size)
+#ifndef PKJB_80071EA4_ONLY
+static inline s32 pkjbSendBlockIdle(s32 chan, const u8* data, s32 size)
 {
     u32 word;
     u8 status;
@@ -24,7 +31,7 @@ static inline s32 pkjbSendBlockIdle(s32 chan, const u32* data, s32 size)
     s32 offset;
 
     for (offset = 0; offset < size; offset += 4) {
-        word = *(const u32*)((u32)data + offset);
+        word = *(const u32*)(data + offset);
         if (GBAWrite(chan, (u8*)&word, &status) != 0) {
             return 16;
         }
@@ -54,12 +61,16 @@ static inline s32 pkjbSendBlockIdle(s32 chan, const u32* data, s32 size)
     return 0;
 }
 
-static inline s32 pkjbSend22(s32 chan, const u32* data, u16 count, u16 extra)
+static inline s32 pkjbSend22(s32 chan, const u8* data, u32 header)
 {
     u32 response;
+    u16 count;
     s32 result;
     s32 size;
+    u16 extra;
 
+    extra = header >> 16;
+    count = header;
     result = fn_80073C38(chan);
     if (result != 0) {
         return result;
@@ -84,7 +95,7 @@ static inline s32 pkjbSend22(s32 chan, const u32* data, u16 count, u16 extra)
 }
 
 /* 0x80071AE4 | 0x350: command 0x22, upload a block sized by its own header. */
-s32 fn_80071AE4(s32 chan, const u32* data)
+s32 fn_80071AE4(s32 chan, const u8* data)
 {
     s32 key;
     s32 result;
@@ -92,38 +103,24 @@ s32 fn_80071AE4(s32 chan, const u32* data)
     u32 start;
     s32 expired;
     u32 packed;
-    u16 extra;
-    u16 count;
 
     key = chan + 1;
     gbaCommandSetKeyState(key, 2);
     timeout = OSMillisecondsToTicks(100);
     start = OSGetTick();
-    packed = pkjbSwap32(data[3]);
-    extra = packed >> 16;
-    count = packed;
     do {
+        packed = pkjbSwap32(*(u32*)(data + 12));
         expired = OSGetTick() - start > timeout;
-        result = pkjbSend22(chan, data, count, extra);
+        result = pkjbSend22(chan, data, packed);
     } while (result == 1 && !expired);
     gbaCommandSetKeyState(key, result != 0 ? 1 : 3);
     return result;
 }
+#endif /* !PKJB_80071EA4_ONLY */
 
-/* 0x80071E34 | 0x70: fn_80071EA4 with the key state held. */
-s32 fn_80071E34(s32 chan, u32* data)
-{
-    s32 key;
-    s32 result;
+#ifdef PKJB_80071EA4_ONLY
 
-    key = chan + 1;
-    gbaCommandSetKeyState(key, 2);
-    result = fn_80071EA4(chan, data);
-    gbaCommandSetKeyState(key, 1);
-    return result;
-}
-
-static inline s32 pkjbRecvBlock(s32 chan, u32* data, s32 size)
+static inline s32 pkjbRecvBlock(s32 chan, u8* data, s32 size)
 {
     u32 word;
     u8 length;
@@ -135,7 +132,7 @@ static inline s32 pkjbRecvBlock(s32 chan, u32* data, s32 size)
         if (result != 0) {
             return result;
         }
-        *(u32*)((u8*)data + offset) = word;
+        *(u32*)(data + offset) = word;
         if (lbl_803B6E08[chan] != 0) {
             return 1000;
         }
@@ -144,11 +141,11 @@ static inline s32 pkjbRecvBlock(s32 chan, u32* data, s32 size)
 }
 
 /* 0x80071EA4 | 0x3FC: command 0x33, receive a 16-byte header and its body. */
-s32 fn_80071EA4(s32 chan, u32* data)
+s32 fn_80071EA4(s32 chan, u8* data)
 {
     u32 response;
     s32 result;
-    s32 size;
+    u32 size;
 
     result = fn_80073C38(chan);
     if (result != 0) {
@@ -165,10 +162,11 @@ s32 fn_80071EA4(s32 chan, u32* data)
     if (result != 0) {
         return result + 15;
     }
-    size = (pkjbSwap32(data[3]) & 0xFFFF) * 4;
-    result = pkjbRecvBlock(chan, data + 4, size);
+    size = (pkjbSwap32(*(u32*)(data + 12)) & 0xFFFF) * 4;
+    result = pkjbRecvBlock(chan, data + 16, size);
     if (result != 0) {
         return result + 18;
     }
     return 0;
 }
+#endif /* PKJB_80071EA4_ONLY */

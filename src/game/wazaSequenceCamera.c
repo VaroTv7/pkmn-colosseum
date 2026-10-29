@@ -15,6 +15,10 @@
 #include "dolphin/mtx.h"
 #include "game/battle/waza_camera_stop.h"
 
+/* camera.c defines cameraUpdate with an unused u32 parameter; it never reads r3 and no caller sets it. */
+extern void cameraUpdate(void);
+extern void GSvecAdd(void* a, void* b, void* c);
+
 /* Camera parameters computed per move (lbl_804673A0, 0x34 bytes). */
 typedef struct WazaSequenceCameraParams {
     s32 motion;         /* 0x00 */
@@ -94,7 +98,7 @@ void* wazaSequenceCameraGetPattern__Fbi(u8 shortTable, s32 flags) {
 #endif
 
 /**
- * battleCameraWazaGetOwner - Waza get global state from SDA.
+ * fn_801D2C6C - Waza get global state from SDA.
  * Address: 0x801D2C6C | Size: 0x8
  */
 extern void* lbl_8047B3EC;
@@ -297,7 +301,7 @@ void fn_801D2F94(void) {
 }
 
 /**
- * battleCameraWazaInit - Waza animation reset: set lbl_8047B3F4=1, lbl_8047B3EC=0, lbl_8047B3F0=0.
+ * fn_801D301C - Waza animation reset: set lbl_8047B3F4=1, lbl_8047B3EC=0, lbl_8047B3F0=0.
  * Address: 0x801D301C | Size: 0x18
  */
 extern u8  lbl_8047B3F4;
@@ -839,7 +843,6 @@ void _wazaSequenceCameraDoDollyPosition__FP21TemplateExpFileHeaderP24wazaSequenc
     extern void GSscene_GetCameraPositionVector(Vec*);
     extern void GSvecSub(Vec*, Vec*, Vec*);
     extern void vecScale(Vec*, Vec*, f32);
-    extern void GSvecAdd(Vec*, Vec*, Vec*);
     extern s32 fn_800D37CC(void);
     extern void cameraMovePosition(s32, Vec*, f32);
     u8* file = header;

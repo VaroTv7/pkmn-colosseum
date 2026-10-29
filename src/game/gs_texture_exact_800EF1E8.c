@@ -8,8 +8,8 @@
  * unit's flags (GC/1.3 -O4,p). Text only; the display size comes from the
  * HSD video state through HAL's HSD_VIGetRenderMode inline.
  *
- * The texture-copy SDK calls (GXSetTexCopySrc source rectangle, GXSetTexCopyDst
- * destination size/format/mipmap, GXCopyTex copy) are declared with the
+ * The texture-copy SDK calls (fn_800B962C source rectangle, fn_800B96F8
+ * destination size/format/mipmap, fn_800B9FE4 copy) are declared with the
  * prototypes of their linked unit (src/dolphin/sdk_range_800B9578.c). The
  * mipmap flag is passed as GX_TRUE/GX_FALSE; a bare comparison gives the
  * same instructions but a different register allocation.
@@ -30,6 +30,7 @@ extern void GXSetTexCopySrc(u16 left, u16 top, u16 width, u16 height);
 extern void GXSetTexCopyDst(u16 width, u16 height, s32 format, u8 mipmap);
 extern void GXCopyTex(void* dest, u8 clear);
 extern void GXPixModeSync(void);
+extern void GXSetZMode(u8 compare_enable, u32 func, u8 update_enable);
 
 /* 0x800EF1E8 | 0x1F8 */
 u8 GStextureConvertFromHW(GStextureHandle* tex, u8 clear) {

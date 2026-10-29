@@ -16,6 +16,8 @@
 
 #include "dolphin/types.h"
 
+extern void gfxLoadIdentity(void);
+
 /* ===== External SDK / engine functions ===== */
 extern void  GSlogWrite(const char*, ...);             /* OSReport / GSlog */
 extern void* memcpy(void* dst, const void* src, u32 n);
@@ -134,7 +136,7 @@ extern void GXBegin(u32, u32, u16);
 extern u8 lbl_80314350[];
 extern u8 lbl_804001F0[];
 extern void fn_800D6A80(u16, s32, u32*, u32*);
-extern u8 lbl_804007E8[];
+extern u8 sTex0[];
 extern void GXSetVtxAttrFmt(u32, u32, u32, u32, u8);
 extern void GXClearVtxDesc(void);
 extern void GXSetVtxDesc(u32, u32);

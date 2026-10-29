@@ -573,7 +573,7 @@ def main() -> int:
     diff = subprocess.run(
         [
             "git", "diff", "--unified=0", f"{base}...{head}", "--",
-            "src/**/*.c", "src/**/*.h",
+            "src/**/*.c", "src/**/*.h", "src/**/*.cpp", "src/**/*.hpp",
         ],
         capture_output=True,
         text=True,

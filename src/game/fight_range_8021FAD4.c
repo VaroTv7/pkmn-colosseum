@@ -1,6 +1,6 @@
 /**
  * @file fight_range_8021FAD4.c
- * @brief wsCmd49 (move-script command), 0x8021FAD4 - 0x80220778, with its
+ * @brief fn_8021FAD4 (move-script command), 0x8021FAD4 - 0x80220778, with its
  *        switch jump table (.data 0x8039A0A8 - 0x8039A0F0).
  *
  * Moved out of the shared fight_range_80211A00.c so the unit compiles only
@@ -14,6 +14,8 @@ extern u32 lbl_8047B618;
 extern void* lbl_8047B62C;
 extern void wsRunScript(void*, void*, u8);
 extern u8 lbl_80478D78[8];
+
+extern void fn_801DA36C(void* effect, s32 trajType);
 
 void wsCmd49(void)
 {

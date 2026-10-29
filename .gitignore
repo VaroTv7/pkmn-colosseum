@@ -10,6 +10,8 @@ __pycache__
 # Original files
 orig/*/*
 !orig/*/.gitkeep
+# A local link to someone else's extracted disc; never tracked.
+orig/orig
 *.dol
 *.rel
 *.elf
@@ -58,7 +60,7 @@ tools/mwcc_compiler/
 /*.d
 
 # Local reference data / scratch (not tracked in git)
-tools/symbolmap/xd_ref/GXXE01/_xdsplit/
+tools/symbolmap/xd_ref/GXXE01/_xdsplit
 tools/symbolmap/xd_ref/GXXE01/config/
 tools/decomp_work/scratch/
 .pi-sessions/

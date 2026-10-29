@@ -10,6 +10,11 @@
 
 #include "game/battle/battle_waza_types.h"
 
+struct GStextureHandle;
+extern void GStextureFree(struct GStextureHandle* texture);
+extern void GSgappTerminate(u32 taskId);
+extern void GSvecCopy(void* dst, void* src);
+
 /** Bare 3-float vector, as passed to the GSscene camera setters. */
 typedef struct WazaViewerVec {
     /* 0x0 */ f32 x;
@@ -65,7 +70,7 @@ void _wazaViewerFinalize(u8 r, u8 g, u8 b, f32 duration) {
     if (lbl_804673F8[0x87D] == 0) {
         vtrDeactivate();
     }
-    GSgappTerminate((void*)lbl_8047B3F8);
+    GSgappTerminate(lbl_8047B3F8);
     lbl_8047B3F8 = 0;
     wazaSequenceSysRelease();
 }
@@ -85,7 +90,7 @@ void _wazaViewerUpdate(void) {
 
 #endif
 
-#if !defined(PR409_WAZA_VIEWER_SPLIT) || defined(PR409_WAZA_VIEWER_53D8_7E58) || defined(PR409_WAZA_VIEWER_EXACT_56B0_5A94)
+#if !defined(PR409_WAZA_VIEWER_SPLIT) || defined(PR409_WAZA_VIEWER_53D8_7E58) || defined(PR409_WAZA_VIEWER_EXACT_56B0_5A94) || defined(PR409_WAZA_VIEWER_EXACT_5DA0) || defined(PR409_WAZA_VIEWER_EXACT_624C) || defined(PR409_WAZA_VIEWER_EXACT_6E58) || defined(PR409_WAZA_VIEWER_EXACT_7464)
 
 extern u8 lbl_80279338[];
 
@@ -154,7 +159,7 @@ static inline void wazaViewerLoadFile(const char* messages, const char* path, vo
  * wazaViewerPollCommand - once a second, poll the host file wazaViewer.wvd;
  * when it carries command 1, copy the three 0x200-byte name buffers out of
  * it, re-arm the viewer, and write the record back with the command cleared.
- * The same expansion appears in wazaViewerThread and wazaViewerUpdatePlayMode.
+ * The same expansion appears in wazaViewerThread and fn_801D6A64.
  */
 static inline void wazaViewerPollCommand(const char* messages) {
     extern u16 GSmemAlloc(u32 size, u32 align);
@@ -162,10 +167,10 @@ static inline void wazaViewerPollCommand(const char* messages) {
     extern void fn_800E24B0(u16 block);
     extern void GSmemFree(u16 block);
 
-    char* path;
-    u32 size;
-    void* sizeFile;
     void* readFile;
+    char* path;
+    void* sizeFile;
+    u32 size;
     u16 block;
     void* record;
     void* writeFile;
@@ -229,7 +234,7 @@ static inline void wazaViewerPollCommand(const char* messages) {
  */
 #endif
 
-#if !defined(PR409_WAZA_VIEWER_EXACT_56B0_5A94)
+#if !defined(PR409_WAZA_VIEWER_EXACT_56B0_5A94) && !defined(PR409_WAZA_VIEWER_EXACT_5DA0) && !defined(PR409_WAZA_VIEWER_EXACT_624C) && !defined(PR409_WAZA_VIEWER_EXACT_6E58) && !defined(PR409_WAZA_VIEWER_EXACT_7464) && !defined(PR409_WAZA_VIEWER_FN_ONLY)
 #if !defined(PR409_WAZA_VIEWER_THREAD_ONLY)
 void _wazaViewerInitialize(void) {
     extern struct GSmodel* GSresGetResource(u32 group, u32 handle);
@@ -290,7 +295,7 @@ void wazaViewerThread(void) {
 
 #endif
 
-#if !defined(PR409_WAZA_VIEWER_THREAD_ONLY)
+#if !defined(PR409_WAZA_VIEWER_THREAD_ONLY) && !defined(PR409_WAZA_VIEWER_EXACT_5DA0) && !defined(PR409_WAZA_VIEWER_EXACT_624C) && !defined(PR409_WAZA_VIEWER_EXACT_6E58) && !defined(PR409_WAZA_VIEWER_EXACT_7464) && !defined(PR409_WAZA_VIEWER_FN_ONLY)
 
 /**
  * fn_801D56B0 - Re-arm the viewer after a sequence file has been loaded:
@@ -442,11 +447,13 @@ void fn_801D58E4(void) {
     *(s32*)(lbl_804673F8 + 0x63C) = 0;
 }
 
+#endif
+
+#if !defined(PR409_WAZA_VIEWER_THREAD_ONLY)
 #if !defined(PR409_WAZA_VIEWER_EXACT_56B0_5A94)
+#if !defined(PR409_WAZA_VIEWER_SPLIT) || defined(PR409_WAZA_VIEWER_5A94_PREFIX)
 /**
- * wazaViewerLoadSequenceFiles - load the viewer's waza sequence file (+0x1C)
- * and optional second file (+0x41C) from the host into a new effect, and
- * store it in viewer slot `slot`.
+ * fn_801D5A94 - Move animation helper: combined effect sequence.
  * Address: 0x801D5A94 | Size: 0x30C
  */
 void wazaViewerLoadSequenceFiles(s32 slot) {
@@ -456,28 +463,24 @@ void wazaViewerLoadSequenceFiles(s32 slot) {
     extern void GSmodelSetRotation(void* model, WazaViewerVec* rotation);
     extern void GSmodelSetPosition(void* model, WazaViewerVec* position);
 
-    void* modelBuf;
     const u8* viewerData;
-    char* modelPath;
     s32 modelSize;
     s32 animSize;
     void* effect;
-    char* animPath;
     u16 block;
-    void* animBuf;
+    u16 modelBlock;
     void* buf;
+    void* animBuf;
     WazaViewerVec rotation;
     WazaViewerVec position;
 
     viewerData = lbl_80279338;
-    modelPath = (char*)(lbl_804673F8 + 0x1C);
     modelSize = 0;
     animSize = 0;
-    if (strlen(modelPath) != 0) {
-        modelSize = wazaViewerGetFilesize((const char*)viewerData, modelPath);
-        animPath = (char*)(lbl_804673F8 + 0x41C);
-        if (strlen(animPath) != 0) {
-            animSize = wazaViewerGetFilesize((const char*)viewerData, animPath);
+    if (strlen((char*)(lbl_804673F8 + 0x1C)) != 0) {
+        modelSize = wazaViewerGetFilesize((const char*)viewerData, (char*)(lbl_804673F8 + 0x1C));
+        if (strlen((char*)(lbl_804673F8 + 0x41C)) != 0) {
+            animSize = wazaViewerGetFilesize((const char*)viewerData, (char*)(lbl_804673F8 + 0x41C));
         }
     }
 
@@ -488,14 +491,13 @@ void wazaViewerLoadSequenceFiles(s32 slot) {
     if (modelSize == 0) {
         return;
     }
-    block = GSmemAlloc((modelSize + 0x1F) & ~0x1F, 0x20);
-    if (block == 0) {
+    modelBlock = GSmemAlloc((modelSize + 0x1F) & ~0x1F, 0x20);
+    if (modelBlock == 0) {
         return;
     }
-    *(u16*)(lbl_804673F8 + 0x660) = block;
-    modelBuf = GSmemLock(block);
-    buf = *(void**)(lbl_804673F8 + 0x65C) = modelBuf;
-    wazaViewerLoadFile((const char*)viewerData, modelPath, buf, modelSize, FALSE);
+    *(u16*)(lbl_804673F8 + 0x660) = modelBlock;
+    buf = *(void**)(lbl_804673F8 + 0x65C) = GSmemLock(modelBlock);
+    wazaViewerLoadFile((const char*)viewerData, (char*)(lbl_804673F8 + 0x1C), buf, modelSize, FALSE);
     sequenceLoad(effect, *(void**)(lbl_804673F8 + 0x65C));
     *(s32*)(lbl_804673F8 + 0x04) = 1;
     wazaSequenceOwnerSetVisibility(effect, 1);
@@ -509,10 +511,10 @@ void wazaViewerLoadSequenceFiles(s32 slot) {
         block = GSmemAlloc((animSize + 0x1F) & ~0x1F, 0x20);
         if (block != 0) {
             *(u16*)(lbl_804673F8 + 0x668) = block;
-            animBuf = *(void**)(lbl_804673F8 + 0x664) = GSmemLock(block);
-            buf = animBuf;
-            animPath = (char*)(lbl_804673F8 + 0x41C);
-            wazaViewerLoadFile((const char*)viewerData, animPath, buf, animSize, FALSE);
+            /* RULE-EXCEPTION(user-approved): pointer carrier for the allocator result, chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+            animBuf = GSmemLock(block);
+            buf = *(void**)(lbl_804673F8 + 0x664) = animBuf;
+            wazaViewerLoadFile((const char*)viewerData, (char*)(lbl_804673F8 + 0x41C), buf, animSize, FALSE);
             if ((u8)fn_801DDB4C(effect, *(void**)(lbl_804673F8 + 0x664))) {
                 *(s32*)(lbl_804673F8 + 0x04) = 2;
             } else {
@@ -523,6 +525,9 @@ void wazaViewerLoadSequenceFiles(s32 slot) {
     ((void**)(lbl_804673F8 + 0x61C))[slot] = effect;
 }
 
+#endif
+
+#if !defined(PR409_WAZA_VIEWER_SPLIT) || defined(PR409_WAZA_VIEWER_EXACT_5DA0)
 /**
  * fn_801D5DA0 - Move animation helper: element-specific rendering.
  * Address: 0x801D5DA0 | Size: 0x29C
@@ -637,6 +642,10 @@ void fn_801D5DA0(void) {
     GSmodelEnableModulation(*(void**)((u8*)sequence + 0x24), color);
 }
 
+#endif
+
+#if !defined(PR409_WAZA_VIEWER_EXACT_5DA0)
+#if !defined(PR409_WAZA_VIEWER_SPLIT) || defined(PR409_WAZA_VIEWER_603C_ONLY)
 /**
  * fn_801D603C - Move animation helper: hit effect rendering.
  * Address: 0x801D603C | Size: 0x210
@@ -657,6 +666,7 @@ void fn_801D603C(void) {
     void** models;
     void* sequence;
     void* node;
+    void* current;
     s32 state;
     s32 arg1;
     s32 arg2;
@@ -684,14 +694,14 @@ void fn_801D603C(void) {
         state = vtrGetMode();
         arg2 = arg1 = 0;
         if (((WazaViewerCtrl*)(lbl_804673F8 + 0x08))->overlay) {
-            sequence = models[*(s32*)(lbl_804673F8 + 0x624)];
-            if (sequence != NULL) {
-                node = *(void**)((u8*)sequence + 0x68);
+            current = models[*(s32*)(lbl_804673F8 + 0x624)];
+            if (current != NULL) {
+                node = *(void**)((u8*)current + 0x68);
                 if (node != NULL) {
                     arg1 = *(u16*)((u8*)node + 0x2C);
                     arg2 = *(u16*)((u8*)node + 0x2E);
                 }
-                if ((u8)wazaSequenceSysIsPlayingWaza(sequence, arg1, arg2)) {
+                if ((u8)wazaSequenceSysIsPlayingWaza(current, arg1, arg2)) {
                     fn_800FE6A0(lbl_8047E2F0, lbl_8047E2F0);
                     switch (state) {
                     case 3:
@@ -717,6 +727,8 @@ void fn_801D603C(void) {
         break;
     }
 }
+
+#endif
 
 /**
  * wazaViewerSpawnAttacker - respawn the attacker-side effect from the work
@@ -827,6 +839,7 @@ static inline void wazaViewerSpawnTarget(u8* work, s32 mode) {
     *(void**)(lbl_804673F8 + 0x620) = effect;
 }
 
+#if !defined(PR409_WAZA_VIEWER_SPLIT) || defined(PR409_WAZA_VIEWER_EXACT_624C)
 /**
  * fn_801D624C - Move animation mega-function.
  * Address: 0x801D624C | Size: 0x818
@@ -948,9 +961,11 @@ void fn_801D624C(void) {
     }
 }
 
+#endif
+
+#if !defined(PR409_WAZA_VIEWER_SPLIT) || defined(PR409_WAZA_VIEWER_6A64_ONLY)
 /**
- * wazaViewerUpdatePlayMode - per-frame update for the viewer's play mode: advances the
- * effect, updates the camera, draws the STEP/PAUSED/PLAYING status and polls commands.
+ * fn_801D6A64 - Move animation secondary mega-function.
  * Address: 0x801D6A64 | Size: 0x3F4
  */
 void wazaViewerUpdatePlayMode(void) {
@@ -965,15 +980,17 @@ void wazaViewerUpdatePlayMode(void) {
     extern void fn_800FE6A0(f32 width, f32 height);
     extern void GSmsgPrintf(s32 x, s32 y, u32 color, const char* fmt, ...);
 
-    u8 color[4];
-    int arg1;
+    s32 state;
     void* node;
     const char* messages;
-    u32 arg2;
     u8 paused;
     void* effect;
-    s32 state;
+    s32 arg1;
+    s32 arg2;
     void** models;
+    void* current;
+    void* currentNode;
+    u8 color[4];
 
     messages = (const char*)lbl_80279338;
     models = (void**)(lbl_804673F8 + 0x61C);
@@ -1003,16 +1020,16 @@ void wazaViewerUpdatePlayMode(void) {
     }
     fn_801D7230();
     state = vtrGetMode();
-    arg1 = arg2 = 0;
+    arg2 = arg1 = 0;
     if (((WazaViewerCtrl*)(lbl_804673F8 + 0x08))->overlay) {
-        effect = models[*(s32*)(lbl_804673F8 + 0x624)];
-        if (effect != NULL) {
-            node = *(void**)((u8*)effect + 0x68);
-            if (node != NULL) {
-                arg1 = *(u16*)((u8*)node + 0x2C);
-                arg2 = *(u16*)((u8*)node + 0x2E);
+        current = models[*(s32*)(lbl_804673F8 + 0x624)];
+        if (current != NULL) {
+            currentNode = *(void**)((u8*)current + 0x68);
+            if (currentNode != NULL) {
+                arg1 = *(u16*)((u8*)currentNode + 0x2C);
+                arg2 = *(u16*)((u8*)currentNode + 0x2E);
             }
-            if ((u8)wazaSequenceSysIsPlayingWaza(effect, arg1, arg2)) {
+            if ((u8)wazaSequenceSysIsPlayingWaza(current, arg1, arg2)) {
                 fn_800FE6A0(lbl_8047E2F0, lbl_8047E2F0);
                 switch (state) {
                 case 3:
@@ -1037,6 +1054,9 @@ void wazaViewerUpdatePlayMode(void) {
     }
 }
 
+#endif
+
+#if !defined(PR409_WAZA_VIEWER_SPLIT) || defined(PR409_WAZA_VIEWER_EXACT_6E58)
 /**
  * fn_801D6E58 - Move animation tertiary mega-function.
  * Address: 0x801D6E58 | Size: 0x3D8
@@ -1248,8 +1268,11 @@ void fn_801D7230(void) {
     }
 }
 
+#endif
+
+#if !defined(PR409_WAZA_VIEWER_EXACT_624C) && !defined(PR409_WAZA_VIEWER_EXACT_6E58) && !defined(PR409_WAZA_VIEWER_EXACT_7464) && !defined(PR409_WAZA_VIEWER_FN_ONLY)
 /**
- * wazaViewerSetErrorFlag - Move animation OR bits into lbl_804673F8+0xC.
+ * fn_801D744C - Move animation OR bits into lbl_804673F8+0xC.
  * Address: 0x801D744C | Size: 0x18
  */
 extern u8 lbl_804673F8[];
@@ -1257,6 +1280,9 @@ void wazaViewerSetErrorFlag(u32 bits) {
     *(u32*)(lbl_804673F8 + 0x0C) |= bits;
 }
 
+#endif
+
+#if !defined(PR409_WAZA_VIEWER_EXACT_624C) && !defined(PR409_WAZA_VIEWER_EXACT_6E58)
 /* =========================================================================
  * CORE WAZA SEQUENCE FUNCTIONS (0x801D7464 - 0x801D9E34)
  *
@@ -1271,6 +1297,7 @@ void wazaViewerSetErrorFlag(u32 bits) {
  * Loads all entries (particle, model, camera, sound) for a move's animation.
  * Referenced by battle_logic.c.
  */
+#if !defined(PR409_WAZA_VIEWER_SPLIT) || defined(PR409_WAZA_VIEWER_EXACT_7464)
 void fn_801D7464(void) {
     extern u8 lbl_804673F8[];
     extern u8 lbl_803725A0[];
@@ -1498,6 +1525,9 @@ void fn_801D7464(void) {
     }
 }
 
+#endif
+
+#if !defined(PR409_WAZA_VIEWER_SPLIT) || defined(PR409_WAZA_VIEWER_7B94_ONLY)
 /**
  * fn_801D7B94 / wazaSequenceUpdate - Per-frame waza sequence update.
  * Address: 0x801D7B94 | Size: 0x2C4
@@ -1508,14 +1538,6 @@ void fn_801D7464(void) {
 void fn_801D7B94(void* effect) {
     extern u8 lbl_804673F8[];
     extern u8 lbl_80314638[];
-    extern const f32 lbl_8047E318;
-    extern const f32 lbl_8047E30C;
-    extern const f32 lbl_8047E330;
-    extern const f32 lbl_8047E334;
-    extern const f32 lbl_8047E338;
-    extern const f32 lbl_8047E33C;
-    extern const f32 lbl_8047E340;
-    extern const f32 lbl_8047E344;
     extern void _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID();
     extern void* GScameraGetActiveCamera(void);
     extern void GScameraGetPosition(void*, WazaViewerVec*);
@@ -1538,22 +1560,26 @@ void fn_801D7B94(void* effect) {
     extern void gfxVtxPos(f32, f32, f32);
     extern void gfxVtxColor4u8(s32, s32, s32, s32, s32);
     extern void gfxEnd(void);
+    typedef struct WazaSequenceEntry {
+        u8 unk00[0x4C];
+        s32 parts[0x10];
+        u8 unk8C[0xD4 - 0x8C];
+    } WazaSequenceEntry;
     u8* data;
-    u8* entry;
+    WazaSequenceEntry* entry;
     struct GSmodel* model;
-    GSpart* part;
     void* camera;
-    WazaViewerVec transform;
-    WazaViewerVec cameraPosition;
-    f32 aspect;
-    f32 fov;
-    f32 scale;
-    s32 partIndex;
+    GSpart* part;
     s32 i;
+    WazaViewerVec cameraPosition;
+    WazaViewerVec transform;
+    f32 fov;
+    f32 aspect;
+    f32 scale;
 
     data = effect;
     model = *(struct GSmodel**)(data + 0x24);
-    entry = *(u8**)(data + 0x2C) + *(u16*)(data + 0x32) * 0xD4;
+    entry = *(WazaSequenceEntry**)(data + 0x2C) + *(u16*)(data + 0x32);
     _cameraLoadCameraMatrix__FP9_GScamera12GSgfxLayerID(
         *(void**)(data + 0x2C));
     camera = GScameraGetActiveCamera();
@@ -1562,22 +1588,22 @@ void fn_801D7B94(void* effect) {
 
     switch (*(s32*)(data + 0x10)) {
     case -2:
-        aspect = lbl_8047E318;
+        aspect = 0.5f;
         break;
     case -1:
-        aspect = lbl_8047E330;
+        aspect = 0.75f;
         break;
     case 0:
-        aspect = lbl_8047E30C;
+        aspect = 1.0f;
         break;
     case 1:
-        aspect = lbl_8047E334;
+        aspect = 1.3333f;
         break;
     case 2:
-        aspect = lbl_8047E338;
+        aspect = 2.0f;
         break;
     case 3:
-        aspect = lbl_8047E33C;
+        aspect = 4.0f;
         break;
     }
 
@@ -1585,23 +1611,22 @@ void fn_801D7B94(void* effect) {
     gfxSetUpdates(1, 1, 1);
     gfxSetZMode(0, 7, 0);
     gfxSetCullMode(0);
-    scale = lbl_8047E340 * aspect /
+    scale = 256.0f * aspect /
             (fov * vecMag(&cameraPosition));
-    if (scale > lbl_8047E30C) {
-        scale = lbl_8047E30C;
+    if (scale > 1.0f) {
+        scale = 1.0f;
     }
-    GXSetPointSize((s32)(lbl_8047E344 * scale), 5);
+    GXSetPointSize((s32)(255.0f * scale), 5);
     gfxSetFlags(1);
     gfxClearFlags(6);
     gfxSetVtxDesc(lbl_80314638);
     gfxSetPrimitive(0);
 
-    partIndex = *(s32*)(lbl_804673F8 + 0x18);
-    if (partIndex < 0) {
+    if (*(s32*)(lbl_804673F8 + 0x18) < 0) {
         gfxBegin(0x10);
         for (i = 0; i < 0x10; i++) {
             part = GSmodelGetPart(
-                model, *(s32*)(entry + 0x4C + i * 4));
+                model, entry->parts[i]);
             if (part != NULL) {
                 GSpartGetTransform(part, &transform, NULL, NULL);
                 GSpartFree(part);
@@ -1616,7 +1641,7 @@ void fn_801D7B94(void* effect) {
     } else {
         gfxBegin(1);
         part = GSmodelGetPart(
-            model, *(s32*)(entry + 0x4C + partIndex * 4));
+            model, entry->parts[*(s32*)(lbl_804673F8 + 0x18)]);
         if (part != NULL) {
             GSpartGetTransform(part, &transform, NULL, NULL);
             GSpartFree(part);
@@ -1629,6 +1654,12 @@ void fn_801D7B94(void* effect) {
         gfxEnd();
     }
 }
+
+#endif
+
+#endif
+
+#endif
 
 #endif
 

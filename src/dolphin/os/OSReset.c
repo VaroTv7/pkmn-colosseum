@@ -59,7 +59,7 @@ typedef struct OSResetFunctionQueue {
     OSResetFunctionInfo* tail;
 } OSResetFunctionQueue;
 
-#if defined(OSRESET_SUFFIX) || defined(OSRESET_PREFIX)
+#if defined(OSRESET_SUFFIX) || defined(OSRESET_PREFIX_REBOOT) || defined(OSRESET_PREFIX_EXACT)
 #define ResetFunctionQueue (*(OSResetFunctionQueue*)&ResetFunctionQueue_8047A738)
 #else
 static OSResetFunctionQueue ResetFunctionQueue;
@@ -85,9 +85,7 @@ typedef struct ApploaderHeader {
 
 #define AT_ADDRESS(addr) : addr
 
-#if defined(OSRESET_PREFIX)
-static ApploaderHeader Header __attribute__((aligned(32)));
-#endif
+extern ApploaderHeader Header;
 extern void* lbl_8047A728;
 extern void* lbl_8047A72C;
 extern volatile BOOL lbl_8047A730[2];
@@ -125,7 +123,7 @@ volatile u16 __VIRegs[59] AT_ADDRESS(0xCC002000);
 #if defined(OSRESET_SUFFIX)
 static inline int CallResetFunctions(int final);
 extern void Reset_8009FF50(u32 resetCode);
-#elif defined(OSRESET_PREFIX)
+#elif defined(OSRESET_PREFIX_EXACT)
 s32 __OSCallResetFunctions(s32 final);
 #else
 static int CallResetFunctions(int final);
@@ -141,7 +139,7 @@ static inline BOOL IsStreamEnabled(void) {
     return FALSE;
 }
 
-#if !defined(OSRESET_SUFFIX)
+#if !defined(OSRESET_SUFFIX) && !defined(OSRESET_PREFIX_EXACT)
 /* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma peephole off
@@ -150,6 +148,9 @@ void __OSReboot(u32 resetCode, u32 bootDol) {
     DVDCommandBlock streamCommand;
     DVDCommandBlock headerCommand;
     DVDCommandBlock rebootCommand;
+    /* RULE-EXCEPTION(user-approved): raw-buffer alias of the apploader header chosen for allocation - see docs/RULE_EXCEPTIONS.md */
+    void* headerBuffer = &Header;
+    ApploaderHeader* header = (ApploaderHeader*)headerBuffer;
     u32 rebootSize;
     u32 offset;
     OSTime start;
@@ -195,7 +196,7 @@ void __OSReboot(u32 resetCode, u32 bootDol) {
         AISetStreamPlayState(0);
     }
 
-    DVDReadAbsAsyncPrio(&headerCommand, &Header, sizeof(ApploaderHeader),
+    DVDReadAbsAsyncPrio(&headerCommand, headerBuffer, sizeof(ApploaderHeader),
                         0x2440, NULL, 0);
     start = OSGetTime();
     while (DVDGetCommandBlockStatus(&headerCommand)) {
@@ -204,8 +205,8 @@ void __OSReboot(u32 resetCode, u32 bootDol) {
         }
     }
 
-    offset = Header.size + 0x20;
-    rebootSize = OS_ROUND_UP_32B(Header.rebootSize);
+    offset = header->size + 0x20;
+    rebootSize = OS_ROUND_UP_32B(header->rebootSize);
     DVDReadAbsAsyncPrio(&rebootCommand, (void*)0x81300000, rebootSize,
                         offset + 0x2440, NULL, 0);
     start = OSGetTime();
@@ -221,15 +222,18 @@ void __OSReboot(u32 resetCode, u32 bootDol) {
     fn_8009FADC((void*)0x81300000);
 }
 #pragma pop
+#endif
 
+#if !defined(OSRESET_SUFFIX) && !defined(OSRESET_PREFIX_REBOOT)
 void OSRegisterResetFunction(OSResetFunctionInfo* info) {
     ENQUEUE_INFO_PRIO(info, &ResetFunctionQueue);
 }
 #endif
 
+#if !defined(OSRESET_PREFIX_REBOOT)
 #if defined(OSRESET_SUFFIX)
 static inline int CallResetFunctions(int final) {
-#elif defined(OSRESET_PREFIX)
+#elif defined(OSRESET_PREFIX_EXACT)
 s32 __OSCallResetFunctions(s32 final) {
 #else
 static int CallResetFunctions(int final) {
@@ -252,8 +256,9 @@ static int CallResetFunctions(int final) {
     }
     return 1;
 }
+#endif
 
-#if !defined(OSRESET_PREFIX) && !defined(OSRESET_SUFFIX)
+#if !defined(OSRESET_PREFIX_REBOOT) && !defined(OSRESET_PREFIX_EXACT) && !defined(OSRESET_SUFFIX)
 static asm void Reset(u32 resetCode) {
     nofralloc
     b       _skip1
@@ -296,7 +301,7 @@ _hang2:
 }
 #endif
 
-#if !defined(OSRESET_PREFIX)
+#if !defined(OSRESET_PREFIX_REBOOT) && !defined(OSRESET_PREFIX_EXACT)
 static inline void CancelThreads(void) {
     OSThread* thread;
     OSThread* next;
@@ -314,6 +319,9 @@ static inline void CancelThreads(void) {
     }
 }
 
+/* RULE-EXCEPTION(user-approved): peephole off for __OSDoHotReset, OSResetSystem
+   and OSGetResetCode; unit-level -opt nopeephole changes __OSResetSWInterruptHandler
+   in the same unit - see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma peephole off
 void __OSDoHotReset(u32 resetCode) {
@@ -326,10 +334,7 @@ void __OSDoHotReset(u32 resetCode) {
     Reset(resetCode * 8);
 #endif
 }
-#pragma pop
 
-#pragma push
-#pragma peephole off
 void OSResetSystem(BOOL reset, u32 resetCode, BOOL forceMenu) {
     BOOL rc;
     BOOL padcal;
@@ -390,10 +395,7 @@ void OSResetSystem(BOOL reset, u32 resetCode, BOOL forceMenu) {
 
     __PADDisableRecalibration(padcal);
 }
-#pragma pop
 
-#pragma push
-#pragma peephole off
 u32 OSGetResetCode(void) {
     u32 resetCode;
     volatile u32* pi;
@@ -454,7 +456,7 @@ void __OSResetSWInterruptHandler(s16 interrupt, OSContext* context) {
  * 2 function(s)
  * =================================================================== */
 
-/* __OSCallResetFunctions - 0x8009FEBC | size: 0x94
+/* fn_8009FEBC - 0x8009FEBC | size: 0x94
  * CallResetFunctions variant - walks the reset function queue, calling
  * each function. Stops early if any function fails. Returns 1 on
  * success, 0 if any function (or SyncSram) failed.

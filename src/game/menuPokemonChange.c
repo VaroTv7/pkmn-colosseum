@@ -8,7 +8,7 @@
  * address range of this translation unit (0x8002DD24-0x80030170). This
  * range was originally mislabeled as world-map code; it is actually the
  * head of the XD-era menuPokemonChange.cpp translation unit -- the
- * dispatcher gbaTradeRun and the remainder of that TU live in the next
+ * dispatcher fn_80031B4C and the remainder of that TU live in the next
  * unit, game/gs_npc_event.c (0x80030170-0x80033278).
  */
 
@@ -87,7 +87,8 @@ static inline void menuPokemonChangeAlert(u32 msgId) {
 #if defined(MENU_POKEMON_CHANGE_EXACT_8002DD24_ONLY) || defined(MENU_POKEMON_CHANGE_EXACT_8002DF10_ONLY) || \
     defined(MENU_POKEMON_CHANGE_EXACT_8002E460_ONLY) || defined(MENU_POKEMON_CHANGE_EXACT_8002F284_ONLY) || \
     defined(MENU_POKEMON_CHANGE_EXACT_8002EE74_ONLY) || defined(MENU_POKEMON_CHANGE_EXACT_8002F79C_ONLY) || \
-    defined(MENU_POKEMON_CHANGE_EXACT_8002EA5C_ONLY)
+    defined(MENU_POKEMON_CHANGE_EXACT_8002EA5C_ONLY) || defined(MENU_POKEMON_CHANGE_EXACT_8002FC58_ONLY) || \
+    defined(MENU_POKEMON_CHANGE_EXACT_8002E26C_ONLY)
 /* A wrapper unit that links one exact function of this file. */
 #define MENU_POKEMON_CHANGE_EXACT_ISLAND
 #endif
@@ -326,15 +327,33 @@ void stateFunctionEvolution(void) {
 #endif
 
 #endif /* guard split */
-#if !defined(MENU_POKEMON_CHANGE_EXACT_ISLAND)
+#if !defined(MENU_POKEMON_CHANGE_EXACT_ISLAND) || defined(MENU_POKEMON_CHANGE_EXACT_8002E26C_ONLY)
+#if defined(MENU_POKEMON_CHANGE_EXACT_8002E26C_ONLY)
+/* The translation unit's .bss (0x803A2518-0x803A3278), in definition order:
+ * the scratch Pokemon bios, the NPC-event queue popped by fn_80030170, the
+ * partner's hero (party) record and the two menu models of the traded
+ * Pokemon. MWCC addresses them off one pooled base register. The other
+ * units of this file reach them through extern declarations. */
+u8 lbl_803A2518[0x138];
+u8 lbl_803A2650[0x38];
+u8 lbl_803A2688[0xB60];
+u8 lbl_803A31E8[0x48];
+u8 lbl_803A3230[0x48];
+#else
+extern u8 lbl_803A2518[];
+extern u8 lbl_803A2688[];
+extern u8 lbl_803A31E8[];
+extern u8 lbl_803A3230[];
+#endif
 /* 0x8002E26C | size: 0x1F4
  * Swaps the two traded Pokemon through the scratch bios at the start of the
  * work area, then replays the trade camera and rebuilds both menu models. */
-/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
+#if !defined(MENU_POKEMON_CHANGE_EXACT_8002E26C_ONLY)
+/* RULE-EXCEPTION(user-approved): the file's local peephole-control pragma for the whole-file compiles; the linked carve uses unit-level -opt nopeephole instead - see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma peephole off
+#endif
 void stateFunctionExChangeMain(void) {
-    extern u8 lbl_803A2518[];
     extern u32 lbl_8047A424;
     extern u32 lbl_8047A420;
     extern f32 lbl_8047B9D0;
@@ -344,7 +363,7 @@ void stateFunctionExChangeMain(void) {
     extern u32 lbl_8047A42C;
     extern void pokemonInit(void* bios);
     extern void* heroGetStatus(void* hero, u32 selector, u16 index);
-    extern void pokemonBiosCopy(u32* dst, u32* src);
+    extern void pokemonBiosCopy(void* dst, void* src);
     extern void menuClose(s32 id);
     extern void menuModelTerm(void* model);
     extern void GSmodelSetVisibility(void* obj, s32 flag);
@@ -361,20 +380,18 @@ void stateFunctionExChangeMain(void) {
     extern void menuModelInit(void* model, s32 w, s32 h);
     extern void menuPokemonModelRequest(void* model, void* pokemon);
     extern s32 menuOpen(s32 id, s32 flag);
-    MenuWork* work;
     void* pokemonA;
     void* pokemonB;
 
-    work = (MenuWork*)lbl_803A2518;
-    pokemonInit(work->bios);
+    pokemonInit(lbl_803A2518);
     pokemonA = heroGetStatus(NULL, 3, lbl_8047A424);
-    pokemonB = heroGetStatus(work->hero, 3, lbl_8047A420);
-    pokemonBiosCopy(work->bios, pokemonB);
+    pokemonB = heroGetStatus(lbl_803A2688, 3, lbl_8047A420);
+    pokemonBiosCopy(lbl_803A2518, pokemonB);
     pokemonBiosCopy(pokemonB, pokemonA);
-    pokemonBiosCopy(pokemonA, work->bios);
+    pokemonBiosCopy(pokemonA, lbl_803A2518);
     menuClose(0xDE);
-    menuModelTerm(work->modelA);
-    menuModelTerm(work->modelB);
+    menuModelTerm(lbl_803A3230);
+    menuModelTerm(lbl_803A31E8);
     lbl_8047A41C = 0;
     GSmodelSetVisibility((void*)lbl_8047A414, 0);
     fadeSet(lbl_8047B9D0, 3);
@@ -391,10 +408,10 @@ void stateFunctionExChangeMain(void) {
     fadeSet(lbl_8047B9D8, 3);
     fadeCheck(1);
     floorSetMapVisibility(0);
-    menuModelInit(work->modelA, 0xE8, 0x11C);
-    menuModelInit(work->modelB, 0xE8, 0x11C);
-    menuPokemonModelRequest(work->modelA, pokemonA);
-    menuPokemonModelRequest(work->modelB, pokemonB);
+    menuModelInit(lbl_803A3230, 0xE8, 0x11C);
+    menuModelInit(lbl_803A31E8, 0xE8, 0x11C);
+    menuPokemonModelRequest(lbl_803A3230, pokemonA);
+    menuPokemonModelRequest(lbl_803A31E8, pokemonB);
     cameraPlayAnime(0x37C, 0x0FFF1800, 0, 1);
     GSmodelSetVisibility((void*)lbl_8047A414, 1);
     menuOpen(0xDE, 1);
@@ -403,11 +420,13 @@ void stateFunctionExChangeMain(void) {
     fadeCheck(1);
     lbl_8047A42C = 0x10;
 }
+#if !defined(MENU_POKEMON_CHANGE_EXACT_8002E26C_ONLY)
 #pragma pop
+#endif
 
 #endif
 
-#if !defined(MENU_POKEMON_CHANGE_EXACT_ISLAND)
+#if !defined(MENU_POKEMON_CHANGE_EXACT_ISLAND) || defined(MENU_POKEMON_CHANGE_EXACT_8002FC58_ONLY)
 
 /* One row of the change menu's item table (lbl_80266E90). */
 typedef struct PokemonChangeMenuEntry {
@@ -417,31 +436,27 @@ typedef struct PokemonChangeMenuEntry {
     u16 itemId;
 } PokemonChangeMenuEntry;
 
-/* Whether a party Pokemon may be picked for a trade. */
-static inline u8 menuPokemonChangeCanSelect(void* pokemon) {
-    extern u8 pokemonCheckValid(void* pokemon);
-    extern u8 menuCBRule_CheckPokemonEventFlag(void* pokemon);
-    u8 selectable = 0;
-
-    if (pokemonCheckValid(pokemon) != 0 && menuCBRule_CheckPokemonEventFlag(pokemon) == 1) {
-        selectable = 1;
-    }
-    return selectable;
-}
+/* The NPC-event queue popped by fn_80030170 (gs_npc_event.c). */
+typedef struct PokemonChangeQueue {
+    void* items[13];
+    u32 index;
+} PokemonChangeQueue;
 
 /* 0x8002FC58 | size: 0x518
  * Builds and runs the Pokemon-change selection menu (0xD9). */
-/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
+#if !defined(MENU_POKEMON_CHANGE_EXACT_8002FC58_ONLY)
+/* RULE-EXCEPTION(user-approved): the file's local peephole-control pragma for the whole-file compiles; the linked carve uses unit-level -opt nopeephole instead - see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma peephole off
+#endif
 void fn_8002FC58(void) {
     extern void* savedataGetStatus(s32 side, s32 slotType);
     extern void* heroBiosGetPokemonPtr(void* hero, u16 index);
     extern u8 pokemonCheckValid(void* pokemon);
     extern u8 menuCBRule_CheckPokemonEventFlag(void* pokemon);
     extern void menuItemBiosSetSelectFlag(s32 itemId, s32 flag);
-    extern void fn_80030170(void);
-    extern void menuFaceRequestPokemonFace(s32 a, void (*cb)(void));
+    extern void* fn_80030170(PokemonChangeQueue* queue);
+    extern u16 menuFaceRequestPokemonFace(void* pokemon, void* (*callback)(u32), u32 arg);
     extern s32 menuGetCursor(s32 id);
     extern s32 menuGetCursorFromItemID(s32 id, s32 itemId);
     extern void fn_801021F8(s32 id, s32 flag);
@@ -450,7 +465,7 @@ void fn_8002FC58(void) {
     extern void windowCheckCursor(s32 id, s32 flag);
     extern s32 windowGetValue(s32 id);
     extern s32 menuGetCursorItemID(s32 id);
-    extern void* lbl_803A2650[];
+    extern PokemonChangeQueue lbl_803A2650;
     extern u8 lbl_803A2688[];
     extern PokemonChangeMenuEntry lbl_80266E90[];
     extern u8 lbl_8047A410;
@@ -465,32 +480,66 @@ void fn_8002FC58(void) {
     s32 value;
     s32 selected;
     s32 result;
+    s32 item;
+    void* member;
+    u8 selectable;
 
     cursor = count = 0;
     party = savedataGetStatus(0, 2);
     for (i = 0; i < 6; i++) {
         pokemon = heroBiosGetPokemonPtr(party, i);
         if (pokemonCheckValid(pokemon) != 0 && menuCBRule_CheckPokemonEventFlag(pokemon) == 1) {
-            lbl_803A2650[count++] = pokemon;
+            lbl_803A2650.items[count++] = pokemon;
         }
     }
-    party = lbl_803A2688;
+    /* RULE-EXCEPTION(user-approved): scalar reuse - the partner's party walk reuses the two dead locals the other way round (pokemon holds the party record, party the Pokemon), which gives retail's register numbering - see docs/RULE_EXCEPTIONS.md */
+    pokemon = lbl_803A2688;
     for (i = 0; i < 6; i++) {
-        pokemon = heroBiosGetPokemonPtr(party, i);
-        if (pokemonCheckValid(pokemon) != 0 && menuCBRule_CheckPokemonEventFlag(pokemon) == 1) {
-            lbl_803A2650[count++] = pokemon;
+        party = heroBiosGetPokemonPtr(pokemon, i);
+        if (pokemonCheckValid(party) != 0 && menuCBRule_CheckPokemonEventFlag(party) == 1) {
+            lbl_803A2650.items[count++] = party;
         }
     }
-    lbl_803A2650[count] = NULL;
-    lbl_803A2650[13] = NULL;
-    menuFaceRequestPokemonFace(0, fn_80030170);
+    lbl_803A2650.items[count] = NULL;
+    lbl_803A2650.index = 0;
+    menuFaceRequestPokemonFace(NULL, (void* (*)(u32))fn_80030170, (u32)&lbl_803A2650);
     save = savedataGetStatus(0, 2);
-    menuItemBiosSetSelectFlag(0x1005, menuPokemonChangeCanSelect(heroBiosGetPokemonPtr(save, 0)));
-    menuItemBiosSetSelectFlag(0x1002, menuPokemonChangeCanSelect(heroBiosGetPokemonPtr(save, 1)));
-    menuItemBiosSetSelectFlag(0x1004, menuPokemonChangeCanSelect(heroBiosGetPokemonPtr(save, 2)));
-    menuItemBiosSetSelectFlag(0x1001, menuPokemonChangeCanSelect(heroBiosGetPokemonPtr(save, 3)));
-    menuItemBiosSetSelectFlag(0x1003, menuPokemonChangeCanSelect(heroBiosGetPokemonPtr(save, 4)));
-    menuItemBiosSetSelectFlag(0x1000, menuPokemonChangeCanSelect(heroBiosGetPokemonPtr(save, 5)));
+    member = heroBiosGetPokemonPtr(save, 0);
+    selectable = 0;
+    if (pokemonCheckValid(member) != 0 && menuCBRule_CheckPokemonEventFlag(member) == 1) {
+        selectable = 1;
+    }
+    menuItemBiosSetSelectFlag(0x1005, selectable);
+    member = heroBiosGetPokemonPtr(save, 1);
+    selectable = 0;
+    if (pokemonCheckValid(member) != 0 && menuCBRule_CheckPokemonEventFlag(member) == 1) {
+        selectable = 1;
+    }
+    menuItemBiosSetSelectFlag(0x1002, selectable);
+    member = heroBiosGetPokemonPtr(save, 2);
+    selectable = 0;
+    if (pokemonCheckValid(member) != 0 && menuCBRule_CheckPokemonEventFlag(member) == 1) {
+        selectable = 1;
+    }
+    menuItemBiosSetSelectFlag(0x1004, selectable);
+    member = heroBiosGetPokemonPtr(save, 3);
+    selectable = 0;
+    if (pokemonCheckValid(member) != 0 && menuCBRule_CheckPokemonEventFlag(member) == 1) {
+        selectable = 1;
+    }
+    menuItemBiosSetSelectFlag(0x1001, selectable);
+    member = heroBiosGetPokemonPtr(save, 4);
+    selectable = 0;
+    if (pokemonCheckValid(member) != 0 && menuCBRule_CheckPokemonEventFlag(member) == 1) {
+        selectable = 1;
+    }
+    menuItemBiosSetSelectFlag(0x1003, selectable);
+    member = heroBiosGetPokemonPtr(save, 5);
+    selectable = 0;
+    if (pokemonCheckValid(member) != 0 && menuCBRule_CheckPokemonEventFlag(member) == 1) {
+        selectable = 1;
+    }
+    menuItemBiosSetSelectFlag(0x1000, selectable);
     menuItemBiosSetSelectFlag(0xFFF, 0);
     menuItemBiosSetSelectFlag(0xFFC, 0);
     menuItemBiosSetSelectFlag(0xFFE, 0);
@@ -511,9 +560,9 @@ void fn_8002FC58(void) {
     windowCheckCursor(0xD9, 1);
     value = windowGetValue(0xD9);
     selected = 0;
-    cursor = menuGetCursorItemID(0xD9);
+    item = menuGetCursorItemID(0xD9);
     for (i = 0; i < 12; i++) {
-        if (cursor == lbl_80266E90[i].itemId) {
+        if (item == lbl_80266E90[i].itemId) {
             selected = lbl_80266E90[i].slot;
         }
     }
@@ -538,7 +587,9 @@ void fn_8002FC58(void) {
         break;
     }
 }
+#if !defined(MENU_POKEMON_CHANGE_EXACT_8002FC58_ONLY)
 #pragma pop
+#endif
 
 
 #endif
@@ -739,18 +790,17 @@ static inline u8 menuPokemonChangeHasOther(void* hero, s32 exclude) {
 /* 0x8002EA5C | size: 0x418
  * Picks the selected party Pokemon as the one to trade, refusing it when its
  * held item cannot be traded or when no other Pokemon could stay behind. */
+/* The fn_8002EA5C unit builds with -opt nopeephole instead of this pragma. */
+#if !defined(MENU_POKEMON_CHANGE_EXACT_8002EA5C_ONLY)
 /* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
-/* Retail does not share the repeated subexpressions here: common-subexpression
- * elimination stays off for this function (see docs/RULE_EXCEPTIONS.md). */
 #pragma push
 #pragma peephole off
-#pragma opt_common_subs off
+#endif
 void gbaTradeCheckImportItems(void) {
     extern u8 lbl_803A2688[];
     extern u32 lbl_8047A428;
     extern u32 lbl_8047A420;
     extern u32 lbl_8047A42C;
-    extern const f32 lbl_8047B9D0;
     extern void* heroGetStatus(void* hero, u32 selector, u16 index);
     extern u16 pokemonBiosGetItemDataId(void* pokemon);
     extern void* itemDataBiosGetPtr(u16 id);
@@ -793,13 +843,15 @@ void gbaTradeCheckImportItems(void) {
         return;
     }
     lbl_8047A420 = lbl_8047A428;
-    menuPokemonChangeWait(lbl_8047B9D0);
-    fadeSet(lbl_8047B9D0, 3);
+    menuPokemonChangeWait(0.3f);
+    fadeSet(0.3f, 3);
     fadeCheck(1);
     menuClose(0xD9);
     lbl_8047A42C = 0xC;
 }
+#if !defined(MENU_POKEMON_CHANGE_EXACT_8002EA5C_ONLY)
 #pragma pop
+#endif
 
 #endif /* guard split */
 #if !defined(MENU_POKEMON_CHANGE_EXACT_ISLAND) || defined(MENU_POKEMON_CHANGE_EXACT_8002EE74_ONLY)
@@ -1143,7 +1195,6 @@ valid_destination:
     (*(s32*)&lbl_8047A428) = stateValue;
     (*(s32*)&lbl_8047A42C) = 8;
 }
-#pragma peephole on
 #else
 /* fn_8002F284 - GSmap_LoadDestination (0x8002F284, 0x518 bytes)
  *
