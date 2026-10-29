@@ -394,9 +394,11 @@ config.custom_build_rules = [
     },
 ]
 # Preserve the original hidden padding marker for report accounting. Only the
-# separate linker input clears its visibility; the 7,988 vector bytes remain
-# original fallback, with no source or completion credit. The helper rejects
-# every change beyond that marker's one ELF visibility byte.
+# separate linker input restores its native local binding and visibility;
+# the 7,988 vector bytes remain original fallback, with no source credit.
+# The helper preserves allocated bytes and section offsets while keeping
+# relocation indices, CodeWarrior records and DTK address metadata aligned
+# with the reordered symbols. Public vector boundary labels stay global.
 config.fallback_link_overrides = {
     ("main", "crt/interrupt_vectors"): {
         "rule": "vector_link_visibility",

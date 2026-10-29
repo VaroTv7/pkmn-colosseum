@@ -4,11 +4,52 @@
 import argparse
 from contextlib import suppress
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 import signal
 import subprocess
 import time
+
+
+def linker_command_summary(argv, version):
+    """Return only allowlisted executable names and a confined output path."""
+    basename = lambda value: value.replace("\\", "/").rsplit("/", 1)[-1]
+    if not argv or basename(argv[0]) != "wibo":
+        return None
+    names = ["wibo"]
+    if len(argv) > 1 and basename(argv[1]) in {"mwldeppc.exe", "mwcceppc.exe", "ngccc.exe"}:
+        names.append(basename(argv[1]))
+    outputs = [argv[i + 1] for i, value in enumerate(argv[:-1]) if value == "-o"]
+    output = "unavailable"
+    if len(outputs) == 1:
+        candidate = outputs[0]
+        path = PurePosixPath(candidate)
+        if (len(candidate) <= 256 and re.fullmatch(r"[A-Za-z0-9_./-]+", candidate)
+                and not path.is_absolute() and path.parts[:2] == ("build", version)
+                and len(path.parts) > 2 and ".." not in path.parts
+                and str(path) == candidate):
+            output = candidate
+    return " -> ".join(names) + "; output=" + output
+
+
+def linker_process_metadata(version, proc_root=Path("/proc")):
+    print("Build diagnostic: Wibo executable names and validated build output only", flush=True)
+    for entry in sorted(proc_root.iterdir()):
+        if not entry.name.isdigit():
+            continue
+        try:
+            if (entry / "comm").read_text().strip() != "wibo":
+                continue
+            with (entry / "cmdline").open("rb") as command_line:
+                raw = command_line.read(65537)
+            if len(raw) > 65536:
+                continue
+            argv = [part.decode("utf-8", "replace") for part in raw.rstrip(b"\0").split(b"\0")]
+            summary = linker_command_summary(argv, version)
+            if summary is not None:
+                print(f"PID {entry.name}: {summary}", flush=True)
+        except (OSError, UnicodeError):
+            continue
 
 
 def snapshot(version):
@@ -17,6 +58,7 @@ def snapshot(version):
         subprocess.run(["ps", "-eo", "pid,ppid,etime,comm"], check=False, timeout=3)
     except (OSError, subprocess.TimeoutExpired) as exc:
         print(f"Process metadata unavailable: {type(exc).__name__}", flush=True)
+    linker_process_metadata(version)
     build_dir = Path("build") / version
     paths = {build_dir / "main.elf", build_dir / "main.dol"}
     manifest = Path("config") / version / "build.sha1"
