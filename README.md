@@ -18,8 +18,8 @@ This includes accepted assembly implementations with recorded evidence.
 | Fuzzy match | 100.00% |
 | Function match | 100.00% (8,677 / 8,677 functions) |
 | Code match | 100.00% (2,504,940 / 2,504,940 matched code bytes) |
-| Data match | 96.73% (3,449,436 / 3,565,996 matched data bytes) |
-| Source-linked | 2,226 / 2,251 scoring units (100.00% of code) |
+| Data match | 97.44% (3,474,575 / 3,565,996 matched data bytes) |
+| Source-linked | 2,258 / 2,272 scoring units (100.00% of code) |
 
 Source-linked data is **3,449,436 / 3,565,996 bytes**. Compared with the
 completed Count-Sheep import, this adds **478,956 matched data bytes** and

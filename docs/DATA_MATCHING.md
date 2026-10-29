@@ -9,9 +9,15 @@ passed. The verified baseline for the next continuation is master
 `4cf5494422955e6f383b8470ae5e46dd5362fc4f`: 3,449,436 of 3,565,996 data
 bytes matched and linked from source, with all 8,677 tracked functions exact.
 
-The following additional source is implemented and locally verified. Full
-integration and canonical output checks are pending; these local figures are
-not yet a new project-wide completion claim.
+The following additional source is implemented. The
+[PR #664 Regression Guard](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40960309403)
+compiled the complete project and verified all 8,677 existing function
+identities with no score regressions, removals, renames or boundary changes.
+Its report measures 3,474,575 of 3,565,996 data bytes matched and source-complete
+(97.43632%), with 2,258 complete units out of 2,272. Full final-output linking
+and canonical comparisons remain pending; the first integration link stalled
+after compilation succeeded, so the build now separates and time-bounds that
+step while preserving all canonical checks.
 
 | Reconstructed source | Additional bytes | Evidence |
 | --- | ---: | --- |
@@ -19,7 +25,7 @@ not yet a new project-wide completion claim.
 | Seventeen packed battle-script owners | 13,500 | [Typed commands, symbol extents and 299 real relocations](recon/battle_script_source.md) |
 | Complete small-data arrays and damage constants | 40 | [Native object bounds, interior labels and natural alignment](recon/small_data_array_aliases.md) |
 | Message controls, counter templates and existing-source reuse | 3,635 | [219 complete entries from semantic templates](recon/message_templates.md) |
-| **Total local source gain** | **25,139** | **Full denominator retained** |
+| **Verified compiler-report gain** | **25,139** | **Full denominator retained** |
 
 The pinned objdiff subset report verifies all 30 generated script/template
 owners: 25,099 of 25,099 data bytes exact and source-complete, with no native
@@ -29,12 +35,19 @@ bytes. The generated-source report SHA-256 is
 Generated C, data assembly and objects remain ignored build outputs; authored
 source and source-only compilers are the tracked inputs.
 
-The expected residual is 91,421 message-content bytes in 13 explicit original
+The measured residual is 91,421 message-content bytes in 13 explicit original
 fallback intervals. Reconstructing a message decoder or its formatting rules
 does not reconstruct the unique message contents. Those bytes remain in the
 3,565,996-byte scope and receive no source or matching credit. The complete
-integrated report and all unchanged canonical outputs must establish the
-actual gain before README progress and the topology freeze are refreshed.
+integrated report and all unchanged canonical outputs remain required before
+merging. README progress and the topology freeze now describe the measured
+compiler report, whose SHA-256 is
+`c4e3995c1d8155a5b9536a4de02dae2580ff2b9a8a265cdcf4426e897680e09b`.
+The [metadata-only regression artifact](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40960309403/artifacts/12934569660)
+contains this report. An independent physical-coverage audit verifies the
+same interval union across all 26 modules: no overlapping intervals, removed
+physical bytes or added physical bytes. The code, function and data
+denominators are unchanged.
 
 ## Verified PR #663 source result
 

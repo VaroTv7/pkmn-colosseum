@@ -6,21 +6,21 @@
     "total_code": 2504940,
     "total_data": 3565996,
     "total_functions": 8677,
-    "total_units": 2251
+    "total_units": 2272
   },
   "topology_status": {
-    "auto_units": 20,
-    "named_units": 2231,
-    "source_backed_units": 2226,
+    "auto_units": 17,
+    "named_units": 2255,
+    "source_backed_units": 2258,
     "auto_code": 0,
-    "auto_data": 116520,
+    "auto_data": 13500,
     "auto_functions": 0
   },
   "baseline_progress": {
     "matched_code": "2504940",
     "matched_code_percent": 100.0,
-    "matched_data": "3449436",
-    "matched_data_percent": 96.731346,
+    "matched_data": "3474575",
+    "matched_data_percent": 97.43632,
     "matched_functions": 8677,
     "matched_functions_percent": 100.0,
     "fuzzy_match_percent": 100.0
@@ -57,25 +57,12 @@
       "sections": [
         {
           "name": ".sdata",
-          "size": 172,
+          "size": 184,
           "virtual_address": 2152171552
         }
       ],
       "total_code": 0,
-      "total_data": 172,
-      "total_functions": 0
-    },
-    {
-      "name": "main/game/data/sdata_804788CC",
-      "sections": [
-        {
-          "name": ".sdata",
-          "size": 12,
-          "virtual_address": 2152171724
-        }
-      ],
-      "total_code": 0,
-      "total_data": 12,
+      "total_data": 184,
       "total_functions": 0
     },
     {
@@ -26256,25 +26243,12 @@
       "sections": [
         {
           "name": ".sdata",
-          "size": 12,
+          "size": 24,
           "virtual_address": 2152172928
         }
       ],
       "total_code": 0,
-      "total_data": 12,
-      "total_functions": 0
-    },
-    {
-      "name": "main/game/data/sdata_80478D8C",
-      "sections": [
-        {
-          "name": ".sdata",
-          "size": 12,
-          "virtual_address": 2152172940
-        }
-      ],
-      "total_code": 0,
-      "total_data": 12,
+      "total_data": 24,
       "total_functions": 0
     },
     {
@@ -31496,16 +31470,198 @@
       "total_functions": 0
     },
     {
-      "name": "common_rel/auto_02_0005BF64_data",
+      "name": "common_rel/rel/common_rel/message_storage_5BF64",
       "sections": [
         {
           "name": ".data",
-          "size": 34896,
+          "size": 144,
           "virtual_address": 376676
         }
       ],
       "total_code": 0,
-      "total_data": 34896,
+      "total_data": 144,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_templates_5BFF4",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 156,
+          "virtual_address": 376820
+        }
+      ],
+      "total_code": 0,
+      "total_data": 156,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_storage_5C090",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 22914,
+          "virtual_address": 376976
+        }
+      ],
+      "total_code": 0,
+      "total_data": 22914,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_templates_61A12",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 46,
+          "virtual_address": 399890
+        }
+      ],
+      "total_code": 0,
+      "total_data": 46,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_storage_61A40",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 28,
+          "virtual_address": 399936
+        }
+      ],
+      "total_code": 0,
+      "total_data": 28,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_templates_61A5C",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 31,
+          "virtual_address": 399964
+        }
+      ],
+      "total_code": 0,
+      "total_data": 31,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_storage_61A7B",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 784,
+          "virtual_address": 399995
+        }
+      ],
+      "total_code": 0,
+      "total_data": 784,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_templates_61D8B",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 9,
+          "virtual_address": 400779
+        }
+      ],
+      "total_code": 0,
+      "total_data": 9,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_storage_61D94",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 178,
+          "virtual_address": 400788
+        }
+      ],
+      "total_code": 0,
+      "total_data": 178,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_templates_61E46",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 49,
+          "virtual_address": 400966
+        }
+      ],
+      "total_code": 0,
+      "total_data": 49,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_storage_61E77",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 4594,
+          "virtual_address": 401015
+        }
+      ],
+      "total_code": 0,
+      "total_data": 4594,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_templates_63069",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 5,
+          "virtual_address": 405609
+        }
+      ],
+      "total_code": 0,
+      "total_data": 5,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_storage_6306E",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 4244,
+          "virtual_address": 405614
+        }
+      ],
+      "total_code": 0,
+      "total_data": 4244,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_templates_64102",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 12,
+          "virtual_address": 409858
+        }
+      ],
+      "total_code": 0,
+      "total_data": 12,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_storage_6410E",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 1702,
+          "virtual_address": 409870
+        }
+      ],
+      "total_code": 0,
+      "total_data": 1702,
       "total_functions": 0
     },
     {
@@ -31535,16 +31691,133 @@
       "total_functions": 0
     },
     {
-      "name": "common_rel/auto_02_0007B1FC_data",
+      "name": "common_rel/rel/common_rel/message_templates_7B1FC",
       "sections": [
         {
           "name": ".data",
-          "size": 60160,
+          "size": 108,
           "virtual_address": 504316
         }
       ],
       "total_code": 0,
-      "total_data": 60160,
+      "total_data": 108,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_storage_7B268",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 22601,
+          "virtual_address": 504424
+        }
+      ],
+      "total_code": 0,
+      "total_data": 22601,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_templates_80AB1",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 1584,
+          "virtual_address": 527025
+        }
+      ],
+      "total_code": 0,
+      "total_data": 1584,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_storage_810E1",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 272,
+          "virtual_address": 528609
+        }
+      ],
+      "total_code": 0,
+      "total_data": 272,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_templates_811F1",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 1048,
+          "virtual_address": 528881
+        }
+      ],
+      "total_code": 0,
+      "total_data": 1048,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_storage_81609",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 18932,
+          "virtual_address": 529929
+        }
+      ],
+      "total_code": 0,
+      "total_data": 18932,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_templates_85FFD",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 23,
+          "virtual_address": 548861
+        }
+      ],
+      "total_code": 0,
+      "total_data": 23,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_storage_86014",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 14196,
+          "virtual_address": 548884
+        }
+      ],
+      "total_code": 0,
+      "total_data": 14196,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_templates_89788",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 564,
+          "virtual_address": 563080
+        }
+      ],
+      "total_code": 0,
+      "total_data": 564,
+      "total_functions": 0
+    },
+    {
+      "name": "common_rel/rel/common_rel/message_storage_899BC",
+      "sections": [
+        {
+          "name": ".data",
+          "size": 832,
+          "virtual_address": 563644
+        }
+      ],
+      "total_code": 0,
+      "total_data": 832,
       "total_functions": 0
     },
     {
@@ -31561,7 +31834,7 @@
       "total_functions": 0
     },
     {
-      "name": "common_rel/auto_02_00089D98_data",
+      "name": "common_rel/rel/common_rel/common_script_0596",
       "sections": [
         {
           "name": ".data",
