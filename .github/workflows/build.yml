@@ -50,7 +50,7 @@ jobs:
         python configure.py --map --version ${{ matrix.version }} \
             --binutils /binutils --compilers /compilers
         ninja -j2 all_source build/${{ matrix.version }}/report.json
-        ninja -j2
+        python3 tools/ci_full_build_diagnostics.py --version ${{ matrix.version }}
         sha1sum -c config/${{ matrix.version }}/build.sha1
         python3 tools/ci_retail.py \
             --manifest config/${{ matrix.version }}/build.sha1 \
