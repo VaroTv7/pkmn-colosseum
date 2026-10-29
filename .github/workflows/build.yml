@@ -92,6 +92,7 @@ jobs:
               --elf build/${{ matrix.version }}/main.elf \
               --report build/${{ matrix.version }}/report.json \
               --symbols config/${{ matrix.version }}/symbols.txt \
+              --array-aliases config/${{ matrix.version }}/data_aliases \
               --output build/${{ matrix.version }}/data_link_diagnostics.json
         fi
 

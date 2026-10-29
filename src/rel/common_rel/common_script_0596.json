@@ -1,0 +1,1109 @@
+{
+  "format": "gs-vm-program-v1",
+  "bank_id": "0x0596",
+  "symbol": "lbl_125_data_89D98",
+  "start_offset": 156,
+  "description": "Shared field scripts reconstructed as structured program source. The existing typed header owns the function index, one runtime fixup and five zero globals. Function order follows their physical code order; indices preserve external script handles. Native identifiers/signatures come from lbl_802E1CF0 in data_8027A500.c.",
+  "globals": {
+    "current_room": {"index": 0, "type": "int"},
+    "previous_floor": {"index": 1, "type": "int"},
+    "elevator_centiseconds": {"index": 2, "type": "int"},
+    "elevator_seconds": {"index": 3, "type": "float"},
+    "saved_music": {"index": 4, "type": "int"}
+  },
+  "natives": {
+    "winMsgOpenField": {"index": 7, "parameters": ["int", "int", "int"]},
+    "winMsgCloseField": {"index": 8, "parameters": ["int"]},
+    "fadeSet": {"index": 28, "parameters": ["int", "float"]},
+    "fadeCheck": {"index": 29, "parameters": ["int"]},
+    "heroMoveMain": {"index": 31, "parameters": []},
+    "heroMoveInitEvent": {"index": 32, "parameters": []},
+    "heroMoveTermEvent": {"index": 33, "parameters": []},
+    "heroMoveAddAutoEvent": {
+      "index": 34,
+      "parameters": ["int", "int", "int", "int", "int"],
+      "ignored_extra_arguments": true,
+      "description": "Native register table consumes five words; one call preserves a sixth ignored VM argument."
+    },
+    "GSscene_SetMode": {"index": 36, "parameters": ["int"]},
+    "cameraSetTarget": {"index": 37, "parameters": ["int", "int"]},
+    "std040_cameraSetPosition": {"index": 40, "parameters": ["float", "float", "float"]},
+    "cameraSetRotation": {"index": 41, "parameters": ["float", "float", "float"]},
+    "peopleSetVisible": {"index": 50, "parameters": ["int", "int", "int"]},
+    "peopleWaitSyncMotion": {"index": 53, "parameters": ["int", "int", "int"]},
+    "peopleCloseByID": {"index": 57, "parameters": ["int", "int"]},
+    "std078_flagSetFalse": {"index": 78, "parameters": ["int"]},
+    "std079_flagSetTrue": {"index": 79, "parameters": ["int"]},
+    "std081_flagCheckTrue": {"index": 81, "parameters": ["int"]},
+    "std092_getCurrentRoomID": {"index": 92, "parameters": []},
+    "floorGetPrevFloorID": {"index": 94, "parameters": []},
+    "floorLink": {"index": 95, "parameters": ["int", "int"]},
+    "floorEventCtrlDoor": {"index": 96, "parameters": ["int", "int", "int"]},
+    "std098_mapWarpToMenuRoom": {"index": 98, "parameters": ["int"]},
+    "std104_soundSetBackgroundMusic": {"index": 104, "parameters": ["int", "int", "int"]},
+    "floorLinkWithSE": {"index": 125, "parameters": ["int", "int", "int"]},
+    "std128_mapSetReturnMap": {"index": 128, "parameters": ["int", "int", "int"]},
+    "std136_fieldClearFlag_8047ad71": {"index": 136, "parameters": []},
+    "std138_soundPlayEffectEx": {"index": 138, "parameters": ["int", "int", "int", "int"]},
+    "floorSetFadeScript": {"index": 144, "parameters": ["int", "int"]},
+    "std151_characterFaceDirection": {"index": 151, "parameters": ["int", "int", "int"]},
+    "std157_sleep": {"index": 157, "parameters": ["float"]},
+    "std163_useCologne": {"index": 163, "parameters": ["int", "int"]},
+    "mailMainSendByScrpt": {"index": 173, "parameters": ["int"]},
+    "evolution": {"index": 174, "parameters": []},
+    "cameraReturn": {"index": 179, "parameters": ["float", "int"]},
+    "std182_tvNewsEvent": {"index": 182, "parameters": ["int"]},
+    "floorEventElevatorMain": {"index": 197, "parameters": ["int", "int", "int", "int"]},
+    "fn_80088428": {"index": 206, "parameters": []},
+    "std228_soundGetCurrentBackgroundMusic": {"index": 228, "parameters": []},
+    "evolutionSequenceEnd": {"index": 230, "parameters": []},
+    "std243_shadowPokemonSetState": {"index": 243, "parameters": ["int", "int"]}
+  },
+  "functions": [
+    {
+      "index": 15,
+      "name": "sleep_scaled_frame_value",
+      "return_type": "void",
+      "description": "Sleep for 0.6 times frame slot zero. Keep the frame-slot convention explicit; do not reinterpret this as the first top-level variadic argument.",
+      "locals": {"frame_value": {"index": 0, "type": "int"}},
+      "body": [["eval", ["call", "std157_sleep", ["multiply", ["float", 0.6], ["local", "frame_value"]]]]]
+    },
+    {
+      "index": 0,
+      "name": "default_success_0",
+      "return_type": "int",
+      "description": "Default successful callback. The VM return value is frame slot zero.",
+      "locals": {},
+      "body": [["return", ["int", 1]]]
+    },
+    {
+      "index": 1,
+      "name": "default_success_1",
+      "return_type": "int",
+      "description": "Default successful callback. The VM return value is frame slot zero.",
+      "locals": {},
+      "body": [["return", ["int", 1]]]
+    },
+    {
+      "index": 2,
+      "name": "default_success_2",
+      "return_type": "int",
+      "description": "Default successful callback. The VM return value is frame slot zero.",
+      "locals": {},
+      "body": [["return", ["int", 1]]]
+    },
+    {
+      "index": 3,
+      "name": "move_hero",
+      "return_type": "int",
+      "description": "Default floor main script: advance hero movement once per frame.",
+      "locals": {},
+      "body": [
+        ["while", ["int", 1], [["eval", ["call", "heroMoveMain"]], ["wait_frames", ["int", 1]]]],
+        ["return", ["int", 1]]
+      ]
+    },
+    {
+      "index": 10,
+      "name": "update_treasure_visibility",
+      "return_type": "int",
+      "description": "Refresh the selected treasure actor each frame while its event flag is clear; preserve the native visibility mode values.",
+      "locals": {
+        "group": {"index": 1, "type": "int"},
+        "person": {"index": 2, "type": "int"},
+        "event_flag": {"index": 3, "type": "int"},
+        "hide_flag": {"index": 4, "type": "int"}
+      },
+      "body": [
+        [
+          "while",
+          ["int", 1],
+          [
+            [
+              "if",
+              ["logical_not", ["call", "std081_flagCheckTrue", ["local", "event_flag"]]],
+              [
+                [
+                  "if",
+                  ["call", "std081_flagCheckTrue", ["local", "hide_flag"]],
+                  [["eval", ["call", "peopleSetVisible", ["local", "group"], ["local", "person"], ["int", 1]]]],
+                  [["eval", ["call", "peopleSetVisible", ["local", "group"], ["local", "person"], ["int", 0]]]]
+                ]
+              ]
+            ],
+            ["wait_frames", ["int", 1]]
+          ]
+        ],
+        ["return", ["int", 1]]
+      ]
+    },
+    {
+      "index": 14,
+      "name": "close_person_after_motion",
+      "return_type": "void",
+      "description": "Wait for a selected actor motion, then close that actor. This wrapper has no explicit return value.",
+      "locals": {"group": {"index": 1, "type": "int"}, "person": {"index": 2, "type": "int"}},
+      "body": [
+        ["eval", ["call", "peopleWaitSyncMotion", ["local", "group"], ["local", "person"], ["int", 1]]],
+        ["eval", ["call", "peopleCloseByID", ["local", "group"], ["local", "person"]]]
+      ]
+    },
+    {
+      "index": 4,
+      "name": "link_floor_with_sound",
+      "return_type": "int",
+      "description": "Request a floor change with an entry position and the native door-sound mode.",
+      "locals": {
+        "destination_floor": {"index": 1, "type": "int"},
+        "destination_entry": {"index": 2, "type": "int"},
+        "sound_mode": {"index": 3, "type": "int"}
+      },
+      "body": [
+        [
+          "eval",
+          [
+            "call",
+            "floorLinkWithSE",
+            ["local", "destination_floor"],
+            ["local", "destination_entry"],
+            ["local", "sound_mode"]
+          ]
+        ],
+        ["return", ["int", 1]]
+      ]
+    },
+    {
+      "index": 5,
+      "name": "control_door",
+      "return_type": "int",
+      "description": "Run door mode zero for the selected door of the current room.",
+      "locals": {"door": {"index": 1, "type": "int"}},
+      "body": [
+        ["eval", ["set", ["global", "current_room"], ["call", "std092_getCurrentRoomID"]]],
+        ["eval", ["call", "floorEventCtrlDoor", ["global", "current_room"], ["local", "door"], ["int", 0]]],
+        ["return", ["int", 1]]
+      ]
+    },
+    {
+      "index": 6,
+      "name": "leave_elevator",
+      "return_type": "int",
+      "description": "Board an elevator with sound, choose its alternate animation, fade before its duration elapses, and schedule the arrival callback. Native elevator durations are centiseconds.",
+      "locals": {
+        "elevator": {"index": 1, "type": "int"},
+        "destination_floor": {"index": 2, "type": "int"},
+        "destination_elevator": {"index": 3, "type": "int"},
+        "alternate": {"index": 4, "type": "int"}
+      },
+      "body": [
+        ["eval", ["call", "heroMoveInitEvent"]],
+        ["eval", ["call", "std151_characterFaceDirection", ["int", 0], ["int", 100], ["int", 0]]],
+        ["eval", ["call", "std151_characterFaceDirection", ["int", 0], ["int", 101], ["int", 0]]],
+        ["eval", ["set", ["global", "current_room"], ["call", "std092_getCurrentRoomID"]]],
+        [
+          "eval",
+          [
+            "call",
+            "floorEventElevatorMain",
+            ["global", "current_room"],
+            ["local", "elevator"],
+            ["int", "0x81"],
+            ["int", 0]
+          ]
+        ],
+        [
+          "if",
+          ["equal", ["local", "alternate"], ["int", 0]],
+          [
+            [
+              "eval",
+              [
+                "set",
+                ["global", "elevator_centiseconds"],
+                [
+                  "call",
+                  "floorEventElevatorMain",
+                  ["global", "current_room"],
+                  ["local", "elevator"],
+                  ["int", "0xA4"],
+                  ["int", 0]
+                ]
+              ]
+            ]
+          ],
+          [
+            [
+              "eval",
+              [
+                "set",
+                ["global", "elevator_centiseconds"],
+                [
+                  "call",
+                  "floorEventElevatorMain",
+                  ["global", "current_room"],
+                  ["local", "elevator"],
+                  ["int", "0xA8"],
+                  ["int", 0]
+                ]
+              ]
+            ]
+          ]
+        ],
+        [
+          "eval",
+          ["set", ["global", "elevator_seconds"], ["divide", ["global", "elevator_centiseconds"], ["float", 100]]]
+        ],
+        ["eval", ["call", "std157_sleep", ["subtract", ["global", "elevator_seconds"], ["float", 0.5]]]],
+        ["eval", ["call", "fadeSet", ["int", 3], ["float", 0.5]]],
+        ["eval", ["call", "fadeCheck", ["int", 1]]],
+        [
+          "eval",
+          [
+            "call",
+            "heroMoveAddAutoEvent",
+            ["script", "enter_elevator"],
+            ["local", "destination_elevator"],
+            ["local", "alternate"],
+            ["int", 0],
+            ["int", 0]
+          ]
+        ],
+        ["eval", ["call", "floorLink", ["local", "destination_floor"], ["int", 0]]],
+        ["eval", ["call", "floorSetFadeScript", ["int", 0], ["int", 0]]],
+        ["eval", ["call", "heroMoveTermEvent"]],
+        ["return", ["int", 1]]
+      ]
+    },
+    {
+      "index": 7,
+      "name": "enter_elevator",
+      "return_type": "int",
+      "description": "Attach the actors to the arriving elevator, restore the scene camera, fade in, wait for motion, and walk out.",
+      "locals": {"elevator": {"index": 1, "type": "int"}, "alternate": {"index": 2, "type": "int"}},
+      "body": [
+        ["eval", ["call", "heroMoveInitEvent"]],
+        ["eval", ["set", ["global", "current_room"], ["call", "std092_getCurrentRoomID"]]],
+        ["eval", ["call", "floorEventCtrlDoor", ["global", "current_room"], ["local", "elevator"], ["int", 3]]],
+        [
+          "eval",
+          [
+            "call",
+            "floorEventElevatorMain",
+            ["global", "current_room"],
+            ["local", "elevator"],
+            ["int", "0x100"],
+            ["int", 1]
+          ]
+        ],
+        [
+          "if",
+          ["equal", ["local", "alternate"], ["int", 0]],
+          [
+            [
+              "eval",
+              [
+                "call",
+                "floorEventElevatorMain",
+                ["global", "current_room"],
+                ["local", "elevator"],
+                ["int", "0x24"],
+                ["int", 1]
+              ]
+            ]
+          ],
+          [
+            [
+              "eval",
+              [
+                "call",
+                "floorEventElevatorMain",
+                ["global", "current_room"],
+                ["local", "elevator"],
+                ["int", "0x28"],
+                ["int", 1]
+              ]
+            ]
+          ]
+        ],
+        ["eval", ["call", "GSscene_SetMode", ["int", 0]]],
+        ["eval", ["call", "cameraSetTarget", ["int", 0], ["int", 100]]],
+        ["wait_frames", ["int", 1]],
+        ["eval", ["call", "fadeSet", ["int", 2], ["float", 0.5]]],
+        [
+          "eval",
+          [
+            "call",
+            "floorEventElevatorMain",
+            ["global", "current_room"],
+            ["local", "elevator"],
+            ["int", "0xC0"],
+            ["int", 1]
+          ]
+        ],
+        ["wait_frames", ["int", 5]],
+        ["eval", ["call", "fadeCheck", ["int", 1]]],
+        ["eval", ["set", ["global", "current_room"], ["call", "std092_getCurrentRoomID"]]],
+        [
+          "eval",
+          [
+            "call",
+            "floorEventElevatorMain",
+            ["global", "current_room"],
+            ["local", "elevator"],
+            ["int", "0x82"],
+            ["int", 1]
+          ]
+        ],
+        ["eval", ["call", "heroMoveTermEvent"]],
+        ["return", ["int", 1]]
+      ]
+    },
+    {
+      "index": 11,
+      "name": "show_field_message",
+      "return_type": "int",
+      "description": "Suspend hero movement while a caller-selected field message is displayed.",
+      "locals": {"message_id": {"index": 1, "type": "int"}},
+      "body": [
+        ["eval", ["call", "heroMoveInitEvent"]],
+        ["eval", ["call", "winMsgOpenField", ["local", "message_id"], ["int", 1], ["int", 0]]],
+        ["eval", ["call", "winMsgCloseField", ["int", 1]]],
+        ["eval", ["call", "heroMoveTermEvent"]],
+        ["return", ["int", 1]]
+      ]
+    },
+    {
+      "index": 12,
+      "name": "leave_elevator_for_room_123",
+      "return_type": "int",
+      "description": "Select one of three source elevators before linking to room 123. The six supplied event operands are intentional: the native registry consumes only its first five arguments, so the last VM argument remains ignored.",
+      "locals": {
+        "event_arg1": {"index": 1, "type": "int"},
+        "event_arg2": {"index": 2, "type": "int"},
+        "event_arg3": {"index": 3, "type": "int"},
+        "source_resource": {"index": 4, "type": "int"}
+      },
+      "body": [
+        ["eval", ["call", "heroMoveInitEvent"]],
+        ["eval", ["set", ["global", "current_room"], ["call", "std092_getCurrentRoomID"]]],
+        [
+          "if",
+          ["equal", ["local", "source_resource"], ["int", "0x11311800"]],
+          [
+            ["eval", ["call", "std151_characterFaceDirection", ["int", 0], ["int", 100], ["int", 0]]],
+            ["eval", ["call", "std151_characterFaceDirection", ["int", 0], ["int", 101], ["int", 0]]],
+            [
+              "eval",
+              [
+                "call",
+                "floorEventElevatorMain",
+                ["global", "current_room"],
+                ["int", 158],
+                ["int", "0x81"],
+                ["int", 0]
+              ]
+            ],
+            [
+              "eval",
+              [
+                "set",
+                ["global", "elevator_centiseconds"],
+                [
+                  "call",
+                  "floorEventElevatorMain",
+                  ["global", "current_room"],
+                  ["int", 158],
+                  ["int", "0xA4"],
+                  ["int", 0]
+                ]
+              ]
+            ],
+            [
+              "eval",
+              [
+                "set",
+                ["global", "elevator_seconds"],
+                ["divide", ["global", "elevator_centiseconds"], ["float", 100]]
+              ]
+            ],
+            ["eval", ["call", "std157_sleep", ["subtract", ["global", "elevator_seconds"], ["float", 0.5]]]]
+          ],
+          [
+            [
+              "if",
+              ["equal", ["local", "source_resource"], ["int", "0x11321800"]],
+              [
+                ["eval", ["call", "std151_characterFaceDirection", ["int", 0], ["int", 100], ["int", 0]]],
+                ["eval", ["call", "std151_characterFaceDirection", ["int", 0], ["int", 101], ["int", 0]]],
+                [
+                  "eval",
+                  [
+                    "call",
+                    "floorEventElevatorMain",
+                    ["global", "current_room"],
+                    ["int", 159],
+                    ["int", "0x81"],
+                    ["int", 0]
+                  ]
+                ],
+                [
+                  "eval",
+                  [
+                    "set",
+                    ["global", "elevator_centiseconds"],
+                    [
+                      "call",
+                      "floorEventElevatorMain",
+                      ["global", "current_room"],
+                      ["int", 159],
+                      ["int", "0xA8"],
+                      ["int", 0]
+                    ]
+                  ]
+                ],
+                [
+                  "eval",
+                  [
+                    "set",
+                    ["global", "elevator_seconds"],
+                    ["divide", ["global", "elevator_centiseconds"], ["float", 100]]
+                  ]
+                ],
+                ["eval", ["call", "std157_sleep", ["subtract", ["global", "elevator_seconds"], ["float", 0.5]]]]
+              ],
+              [
+                [
+                  "if",
+                  ["equal", ["local", "source_resource"], ["int", "0x11331800"]],
+                  [
+                    ["eval", ["call", "std151_characterFaceDirection", ["int", 0], ["int", 100], ["int", 0]]],
+                    ["eval", ["call", "std151_characterFaceDirection", ["int", 0], ["int", 101], ["int", 0]]],
+                    [
+                      "eval",
+                      [
+                        "call",
+                        "floorEventElevatorMain",
+                        ["global", "current_room"],
+                        ["int", 160],
+                        ["int", "0x81"],
+                        ["int", 0]
+                      ]
+                    ],
+                    [
+                      "eval",
+                      [
+                        "set",
+                        ["global", "elevator_centiseconds"],
+                        [
+                          "call",
+                          "floorEventElevatorMain",
+                          ["global", "current_room"],
+                          ["int", 160],
+                          ["int", "0xA4"],
+                          ["int", 0]
+                        ]
+                      ]
+                    ],
+                    [
+                      "eval",
+                      [
+                        "set",
+                        ["global", "elevator_seconds"],
+                        ["divide", ["global", "elevator_centiseconds"], ["float", 100]]
+                      ]
+                    ],
+                    ["eval", ["call", "std157_sleep", ["subtract", ["global", "elevator_seconds"], ["float", 0.5]]]]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        [
+          "eval",
+          [
+            "call",
+            "heroMoveAddAutoEvent",
+            ["script_id", "0x100", 7],
+            ["int", 163],
+            ["local", "event_arg1"],
+            ["local", "source_resource"],
+            ["local", "event_arg2"],
+            ["local", "event_arg3"]
+          ]
+        ],
+        ["eval", ["call", "floorLink", ["int", 123], ["int", 0]]],
+        ["eval", ["call", "floorSetFadeScript", ["script", "transition_begin_fade"], ["int", 0]]],
+        ["eval", ["call", "heroMoveTermEvent"]],
+        ["return", ["int", 1]]
+      ]
+    },
+    {
+      "index": 13,
+      "name": "return_to_menu_room",
+      "return_type": "int",
+      "description": "Record a return-map slot, warp to menu room 0x391, and release the hero event after a frame.",
+      "locals": {"return_slot": {"index": 1, "type": "int"}, "return_entry": {"index": 2, "type": "int"}},
+      "body": [
+        ["eval", ["call", "heroMoveInitEvent"]],
+        ["eval", ["set", ["global", "previous_floor"], ["call", "floorGetPrevFloorID"]]],
+        [
+          "eval",
+          [
+            "call",
+            "std128_mapSetReturnMap",
+            ["local", "return_slot"],
+            ["global", "previous_floor"],
+            ["local", "return_entry"]
+          ]
+        ],
+        ["eval", ["call", "std098_mapWarpToMenuRoom", ["int", "0x391"]]],
+        ["wait_frames", ["int", 1]],
+        ["eval", ["call", "heroMoveTermEvent"]],
+        ["return", ["int", 1]]
+      ]
+    },
+    {
+      "index": 8,
+      "name": "transition_poll_fade",
+      "return_type": "int",
+      "description": "Half-second fade callback; keep the native fade mode explicit. The default pair is installed by gs_floor_data.c.",
+      "locals": {},
+      "body": [["eval", ["call", "fadeSet", ["int", 2], ["float", 0.5]]], ["return", ["int", 1]]]
+    },
+    {
+      "index": 9,
+      "name": "transition_begin_fade",
+      "return_type": "int",
+      "description": "Half-second fade callback; keep the native fade mode explicit. The default pair is installed by gs_floor_data.c.",
+      "locals": {},
+      "body": [["eval", ["call", "fadeSet", ["int", 3], ["float", 0.5]]], ["return", ["int", 1]]]
+    },
+    {
+      "index": 22,
+      "name": "transition_poll_alternate_fade",
+      "return_type": "int",
+      "description": "Half-second fade callback; keep the native fade mode explicit. The default pair is installed by gs_floor_data.c.",
+      "locals": {},
+      "body": [["eval", ["call", "fadeSet", ["int", 4], ["float", 0.5]]], ["return", ["int", 1]]]
+    },
+    {
+      "index": 23,
+      "name": "transition_begin_alternate_fade",
+      "return_type": "int",
+      "description": "Half-second fade callback; keep the native fade mode explicit. The default pair is installed by gs_floor_data.c.",
+      "locals": {},
+      "body": [["eval", ["call", "fadeSet", ["int", 5], ["float", 0.5]]], ["return", ["int", 1]]]
+    },
+    {
+      "index": 16,
+      "name": "use_cologne",
+      "return_type": "int",
+      "description": "Apply the chosen cologne item to its selected Pokemon target.",
+      "locals": {"item_id": {"index": 1, "type": "int"}, "target": {"index": 2, "type": "int"}},
+      "body": [["eval", ["call", "std163_useCologne", ["local", "item_id"], ["local", "target"]]], ["return", ["int", 1]]]
+    },
+    {
+      "index": 17,
+      "name": "evolve",
+      "return_type": "int",
+      "description": "Run the native evolution sequence and return success.",
+      "locals": {},
+      "body": [["eval", ["call", "evolution"]], ["return", ["int", 1]]]
+    },
+    {
+      "index": 20,
+      "name": "run_gba_exchange",
+      "return_type": "int",
+      "description": "Invoke the existing address-named GBA communication wrapper; preserve its native identity.",
+      "locals": {},
+      "body": [["eval", ["call", "fn_80088428"]], ["return", ["int", 1]]]
+    },
+    {
+      "index": 26,
+      "name": "finish_evolution",
+      "return_type": "int",
+      "description": "Finalize the evolution sequence and return success.",
+      "locals": {},
+      "body": [["eval", ["call", "evolutionSequenceEnd"]], ["return", ["int", 1]]]
+    },
+    {
+      "index": 18,
+      "name": "send_mail_10",
+      "return_type": "int",
+      "description": "Send mail ID 10 through the normal duplicate-aware mailbox path.",
+      "locals": {},
+      "body": [["eval", ["call", "mailMainSendByScrpt", ["int", 10]]], ["return", ["int", 1]]]
+    },
+    {
+      "index": 21,
+      "name": "send_story_mail",
+      "return_type": "int",
+      "description": "Select mail notifications from story flags, preserving eager GS logical-AND evaluation separately from nested conditional branches. The native mailbox routine suppresses duplicate mail.",
+      "locals": {},
+      "body": [
+        [
+          "if",
+          ["call", "std081_flagCheckTrue", ["int", "0xa79"]],
+          [
+            [
+              "if",
+              ["logical_not", ["call", "std081_flagCheckTrue", ["int", "0xa7a"]]],
+              [["eval", ["call", "mailMainSendByScrpt", ["int", 14]]]]
+            ]
+          ]
+        ],
+        [
+          "if",
+          ["call", "std081_flagCheckTrue", ["int", "0xa7b"]],
+          [
+            [
+              "if",
+              ["logical_not", ["call", "std081_flagCheckTrue", ["int", "0xa7c"]]],
+              [["eval", ["call", "mailMainSendByScrpt", ["int", 15]]]]
+            ]
+          ]
+        ],
+        [
+          "if",
+          [
+            "logical_and",
+            ["call", "std081_flagCheckTrue", ["int", "0xae8"]],
+            ["logical_not", ["call", "std081_flagCheckTrue", ["int", "0xaeb"]]]
+          ],
+          [
+            [
+              "if",
+              [
+                "logical_and",
+                [
+                  "logical_and",
+                  ["call", "std081_flagCheckTrue", ["int", "0x483"]],
+                  ["call", "std081_flagCheckTrue", ["int", "0xaed"]]
+                ],
+                ["logical_not", ["call", "std081_flagCheckTrue", ["int", "0xac4"]]]
+              ],
+              [
+                ["eval", ["call", "mailMainSendByScrpt", ["int", 24]]],
+                ["eval", ["call", "std079_flagSetTrue", ["int", "0xaec"]]],
+                ["eval", ["call", "std079_flagSetTrue", ["int", "0xaed"]]]
+              ],
+              [
+                [
+                  "if",
+                  [
+                    "logical_and",
+                    [
+                      "logical_and",
+                      ["call", "std081_flagCheckTrue", ["int", "0xac1"]],
+                      ["call", "std081_flagCheckTrue", ["int", "0xaed"]]
+                    ],
+                    ["logical_not", ["call", "std081_flagCheckTrue", ["int", "0xac2"]]]
+                  ],
+                  [
+                    ["eval", ["call", "mailMainSendByScrpt", ["int", 23]]],
+                    ["eval", ["call", "std079_flagSetTrue", ["int", "0xaec"]]],
+                    ["eval", ["call", "std079_flagSetTrue", ["int", "0xaed"]]]
+                  ],
+                  [
+                    [
+                      "if",
+                      [
+                        "logical_and",
+                        [
+                          "logical_and",
+                          [
+                            "logical_and",
+                            [
+                              "logical_and",
+                              ["call", "std081_flagCheckTrue", ["int", "0xaae"]],
+                              ["call", "std081_flagCheckTrue", ["int", "0xaec"]]
+                            ],
+                            ["call", "std081_flagCheckTrue", ["int", "0xac0"]]
+                          ],
+                          ["call", "std081_flagCheckTrue", ["int", "0xa2d"]]
+                        ],
+                        ["logical_not", ["call", "std081_flagCheckTrue", ["int", "0xac1"]]]
+                      ],
+                      [
+                        ["eval", ["call", "mailMainSendByScrpt", ["int", 22]]],
+                        ["eval", ["call", "std079_flagSetTrue", ["int", "0xaec"]]]
+                      ],
+                      [
+                        [
+                          "if",
+                          [
+                            "logical_and",
+                            ["call", "std081_flagCheckTrue", ["int", "0xaec"]],
+                            ["logical_not", ["call", "std081_flagCheckTrue", ["int", "0xaae"]]]
+                          ],
+                          [
+                            ["eval", ["call", "mailMainSendByScrpt", ["int", 21]]],
+                            ["eval", ["call", "std079_flagSetTrue", ["int", "0xaec"]]]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        [
+          "if",
+          [
+            "logical_and",
+            ["call", "std081_flagCheckTrue", ["int", "0xa87"]],
+            ["logical_not", ["call", "std081_flagCheckTrue", ["int", "0xa25"]]]
+          ],
+          [
+            [
+              "if",
+              ["call", "std081_flagCheckTrue", ["int", "0xdd8"]],
+              [
+                [
+                  "if",
+                  ["call", "std081_flagCheckTrue", ["int", "0xdf0"]],
+                  [["eval", ["call", "mailMainSendByScrpt", ["int", 13]]]],
+                  [
+                    [
+                      "if",
+                      ["call", "std081_flagCheckTrue", ["int", "0xa1c"]],
+                      [["eval", ["call", "mailMainSendByScrpt", ["int", 27]]]],
+                      [
+                        [
+                          "if",
+                          ["call", "std081_flagCheckTrue", ["int", "0xdef"]],
+                          [["eval", ["call", "mailMainSendByScrpt", ["int", 28]]]]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                [
+                  "if",
+                  ["call", "std081_flagCheckTrue", ["int", "0xa8a"]],
+                  [["eval", ["call", "mailMainSendByScrpt", ["int", 12]]]]
+                ]
+              ]
+            ]
+          ]
+        ],
+        [
+          "if",
+          ["call", "std081_flagCheckTrue", ["int", "0xa85"]],
+          [["eval", ["call", "mailMainSendByScrpt", ["int", 6]]]]
+        ],
+        [
+          "if",
+          ["call", "std081_flagCheckTrue", ["int", "0xdd9"]],
+          [["eval", ["call", "mailMainSendByScrpt", ["int", 8]]]]
+        ],
+        ["return", ["int", 1]]
+      ]
+    },
+    {
+      "index": 19,
+      "name": "show_tv_news",
+      "return_type": "int",
+      "description": "Play the story-selected TV news using a camera for the current room. Unsupported rooms log an internal diagnostic, restore actor visibility and return failure. Supported rooms restore music, camera and actors afterward.",
+      "locals": {"room": {"index": 1, "type": "int"}},
+      "body": [
+        [
+          "if",
+          ["call", "std081_flagCheckTrue", ["int", "0xadb"]],
+          [
+            [
+              "if",
+              ["logical_not", ["call", "std081_flagCheckTrue", ["int", "0x483"]]],
+              [["eval", ["call", "std243_shadowPokemonSetState", ["int", 67], ["int", 3]]]]
+            ]
+          ]
+        ],
+        [
+          "if",
+          ["call", "std081_flagCheckTrue", ["int", "0xada"]],
+          [
+            [
+              "if",
+              ["logical_not", ["call", "std081_flagCheckTrue", ["int", "0xa0f"]]],
+              [["eval", ["call", "std243_shadowPokemonSetState", ["int", 67], ["int", 4]]]]
+            ]
+          ]
+        ],
+        ["eval", ["set", ["local", "room"], ["call", "std092_getCurrentRoomID"]]],
+        ["eval", ["call", "peopleSetVisible", ["int", 0], ["int", 100], ["int", 0]]],
+        [
+          "if",
+          ["call", "std081_flagCheckTrue", ["int", "0x3e5"]],
+          [["eval", ["call", "peopleSetVisible", ["int", 0], ["int", 101], ["int", 0]]]]
+        ],
+        ["eval", ["call", "std136_fieldClearFlag_8047ad71"]],
+        ["eval", ["call", "GSscene_SetMode", ["int", 3]]],
+        [
+          "if",
+          ["equal", ["local", "room"], ["int", 5]],
+          [
+            ["eval", ["call", "std040_cameraSetPosition", ["float", -17.55], ["float", 16.852], ["float", -17.989]]],
+            ["eval", ["call", "cameraSetRotation", ["float", -0.23], ["float", 0.439], ["float", 0.0]]]
+          ],
+          [
+            [
+              "if",
+              ["equal", ["local", "room"], ["int", 6]],
+              [
+                [
+                  "eval",
+                  ["call", "std040_cameraSetPosition", ["float", -16.875], ["float", 17.068], ["float", -15.939]]
+                ],
+                ["eval", ["call", "cameraSetRotation", ["float", -0.295], ["float", 0.255], ["float", 0.0]]]
+              ],
+              [
+                [
+                  "if",
+                  ["equal", ["local", "room"], ["int", 7]],
+                  [
+                    [
+                      "eval",
+                      ["call", "std040_cameraSetPosition", ["float", 3.151], ["float", 13.485], ["float", -8.802]]
+                    ],
+                    ["eval", ["call", "cameraSetRotation", ["float", -0.155], ["float", -1.234], ["float", 0.0]]]
+                  ],
+                  [
+                    [
+                      "if",
+                      ["equal", ["local", "room"], ["int", 8]],
+                      [
+                        [
+                          "eval",
+                          [
+                            "call",
+                            "std040_cameraSetPosition",
+                            ["float", 13.773],
+                            ["float", 20.928],
+                            ["float", -8.917]
+                          ]
+                        ],
+                        ["eval", ["call", "cameraSetRotation", ["float", -0.178], ["float", 0.194], ["float", 0.0]]]
+                      ],
+                      [
+                        [
+                          "if",
+                          ["equal", ["local", "room"], ["int", 19]],
+                          [
+                            [
+                              "eval",
+                              [
+                                "call",
+                                "std040_cameraSetPosition",
+                                ["float", 1.069],
+                                ["float", 15.486],
+                                ["float", -12.894]
+                              ]
+                            ],
+                            [
+                              "eval",
+                              ["call", "cameraSetRotation", ["float", -0.052], ["float", 0.036], ["float", 0.0]]
+                            ]
+                          ],
+                          [
+                            [
+                              "if",
+                              ["equal", ["local", "room"], ["int", 41]],
+                              [
+                                [
+                                  "eval",
+                                  [
+                                    "call",
+                                    "std040_cameraSetPosition",
+                                    ["float", 7.931],
+                                    ["float", 16.14],
+                                    ["float", 2.771]
+                                  ]
+                                ],
+                                [
+                                  "eval",
+                                  [
+                                    "call",
+                                    "cameraSetRotation",
+                                    ["float", -0.312],
+                                    ["float", -0.675],
+                                    ["float", 0.0]
+                                  ]
+                                ]
+                              ],
+                              [
+                                [
+                                  "if",
+                                  ["equal", ["local", "room"], ["int", 44]],
+                                  [
+                                    [
+                                      "eval",
+                                      [
+                                        "call",
+                                        "std040_cameraSetPosition",
+                                        ["float", -8.548],
+                                        ["float", 15.495],
+                                        ["float", -23.265]
+                                      ]
+                                    ],
+                                    [
+                                      "eval",
+                                      [
+                                        "call",
+                                        "cameraSetRotation",
+                                        ["float", -0.268],
+                                        ["float", 0.017],
+                                        ["float", 0.0]
+                                      ]
+                                    ]
+                                  ],
+                                  [
+                                    [
+                                      "if",
+                                      ["equal", ["local", "room"], ["int", 2]],
+                                      [
+                                        [
+                                          "eval",
+                                          [
+                                            "call",
+                                            "std040_cameraSetPosition",
+                                            ["float", -31.861],
+                                            ["float", 16.789],
+                                            ["float", 13.126]
+                                          ]
+                                        ],
+                                        [
+                                          "eval",
+                                          [
+                                            "call",
+                                            "cameraSetRotation",
+                                            ["float", -0.104],
+                                            ["float", -6.664],
+                                            ["float", 0.0]
+                                          ]
+                                        ]
+                                      ],
+                                      [
+                                        ["log", "unsupported_tv_room"],
+                                        ["eval", ["call", "peopleSetVisible", ["int", 0], ["int", 100], ["int", 1]]],
+                                        [
+                                          "if",
+                                          ["call", "std081_flagCheckTrue", ["int", "0x3e5"]],
+                                          [
+                                            [
+                                              "eval",
+                                              ["call", "peopleSetVisible", ["int", 0], ["int", 101], ["int", 1]]
+                                            ]
+                                          ]
+                                        ],
+                                        ["return", ["int", 0]]
+                                      ]
+                                    ]
+                                  ]
+                                ]
+                              ]
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        ["eval", ["set", ["global", "saved_music"], ["call", "std228_soundGetCurrentBackgroundMusic"]]],
+        [
+          "if",
+          ["call", "std081_flagCheckTrue", ["int", "0xadb"]],
+          [["eval", ["call", "std104_soundSetBackgroundMusic", ["int", 1133], ["int", 0], ["int", 127]]]],
+          [
+            [
+              "if",
+              ["call", "std081_flagCheckTrue", ["int", "0xada"]],
+              [["eval", ["call", "std104_soundSetBackgroundMusic", ["int", 1133], ["int", 0], ["int", 127]]]],
+              [["eval", ["call", "std104_soundSetBackgroundMusic", ["int", 28], ["int", 0], ["int", 127]]]]
+            ]
+          ]
+        ],
+        ["eval", ["call", "std182_tvNewsEvent", ["local", "room"]]],
+        [
+          "if",
+          ["call", "std081_flagCheckTrue", ["int", "0xadb"]],
+          [["eval", ["call", "std138_soundPlayEffectEx", ["int", 1133], ["int", 1000], ["int", 0], ["int", 255]]]],
+          [
+            [
+              "if",
+              ["call", "std081_flagCheckTrue", ["int", "0xada"]],
+              [
+                [
+                  "eval",
+                  ["call", "std138_soundPlayEffectEx", ["int", 1133], ["int", 1000], ["int", 0], ["int", 255]]
+                ]
+              ],
+              [["eval", ["call", "std138_soundPlayEffectEx", ["int", 28], ["int", 1000], ["int", 0], ["int", 255]]]]
+            ]
+          ]
+        ],
+        [
+          "if",
+          ["equal", ["global", "saved_music"], ["int", 1019]],
+          [
+            [
+              "eval",
+              ["call", "std104_soundSetBackgroundMusic", ["global", "saved_music"], ["int", 0], ["int", 255]]
+            ]
+          ],
+          [
+            [
+              "if",
+              ["equal", ["global", "saved_music"], ["int", 1235]],
+              [
+                [
+                  "eval",
+                  ["call", "std104_soundSetBackgroundMusic", ["global", "saved_music"], ["int", 0], ["int", 255]]
+                ]
+              ],
+              [
+                [
+                  "eval",
+                  ["call", "std104_soundSetBackgroundMusic", ["global", "saved_music"], ["int", 0], ["int", 80]]
+                ]
+              ]
+            ]
+          ]
+        ],
+        ["eval", ["call", "cameraReturn", ["float", 0], ["int", 1]]],
+        ["eval", ["call", "peopleSetVisible", ["int", 0], ["int", 100], ["int", 1]]],
+        [
+          "if",
+          ["call", "std081_flagCheckTrue", ["int", "0x3e5"]],
+          [["eval", ["call", "peopleSetVisible", ["int", 0], ["int", 101], ["int", 1]]]]
+        ],
+        ["return", ["int", 1]]
+      ]
+    },
+    {
+      "index": 24,
+      "name": "clear_tv_news_flag_0ADB",
+      "return_type": "int",
+      "description": "Clear the first story-selected TV news flag.",
+      "locals": {},
+      "body": [["eval", ["call", "std078_flagSetFalse", ["int", "0xADB"]]], ["return", ["int", 1]]]
+    },
+    {
+      "index": 25,
+      "name": "clear_tv_news_flag_0ADA",
+      "return_type": "int",
+      "description": "Clear the second story-selected TV news flag.",
+      "locals": {},
+      "body": [["eval", ["call", "std078_flagSetFalse", ["int", "0xADA"]]], ["return", ["int", 1]]]
+    }
+  ],
+  "diagnostics": {"unsupported_tv_room": "UNKNOWN TV FLOOR!!!!\\n"}
+}

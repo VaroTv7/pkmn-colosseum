@@ -1,0 +1,121 @@
+{
+  "format": "colosseum-battle-source-v1",
+  "catalog": "catalog.json",
+  "unit": "main/auto_05_80379B0C_data",
+  "alignment": 4,
+  "programs": [
+    {
+      "symbol": "lbl_80379B0C",
+      "body": [
+        {"command": "play_animation", "battler": 25, "animation": 7, "argument": null},
+        {"command": "wait_animation", "channel": 7},
+        {"command": "print_message", "message_id": 30393},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "remove_held_item", "battler": 25},
+        {"command": "return_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_80379B22",
+      "body": [
+        {"command": "play_animation", "battler": "attacker", "animation": 7, "argument": null},
+        {"command": "wait_animation", "channel": 7},
+        {"command": "set_word_bits", "destination": {"symbol": "lbl_8047B618", "encoding": "reloc"}, "mask": 256},
+        {"command": "apply_damage_and_update_hp", "battler": "attacker"},
+        {"command": "print_message", "message_id": 30391},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_hp_animation", "battler": "attacker"},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "remove_held_item", "battler": "attacker"},
+        {"command": "end_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_80379B45",
+      "body": [
+        {"command": "play_animation", "battler": "attacker", "animation": 7, "argument": null},
+        {"command": "wait_animation", "channel": 7},
+        {"command": "print_message", "message_id": 30392},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "remove_held_item", "battler": "attacker"},
+        {"command": "end_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_80379B5B",
+      "body": [
+        {"command": "call_sequence", "target": {"script": "lbl_80379B61", "entry": "entry", "encoding": "reloc"}},
+        {"command": "end_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_80379B61",
+      "body": [
+        {"command": "play_animation", "battler": "attacker", "animation": 7, "argument": null},
+        {"command": "wait_animation", "channel": 7},
+        {"command": "set_word_bits", "destination": {"symbol": "lbl_8047B618", "encoding": "absolute"}, "mask": 256},
+        {"command": "apply_damage_and_update_hp", "battler": "attacker"},
+        {"command": "print_message", "message_id": 30394},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_hp_animation", "battler": "attacker"},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "return_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_80379B82",
+      "body": [
+        {"command": "play_animation", "battler": "attacker", "animation": 7, "argument": null},
+        {"command": "wait_animation", "channel": 7},
+        {"command": "set_word_bits", "destination": {"symbol": "lbl_8047B618", "encoding": "reloc"}, "mask": 256},
+        {"command": "apply_damage_and_update_hp", "battler": "attacker"},
+        {"command": "print_message", "message_id": 30391},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_hp_animation", "battler": "attacker"},
+        {"command": "print_message", "message_id": 30198},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "set_byte", "destination": {"symbol": "lbl_80478D7B", "encoding": "absolute"}, "value": 71},
+        {"command": "apply_primary_effect"},
+        {"command": "remove_held_item", "battler": "attacker"},
+        {"command": "end_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_80379BB4",
+      "body": [
+        {"command": "play_animation", "battler": "attacker", "animation": 7, "argument": null},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "change_stat_stage", "flags": 65, "target": {"script": "lbl_80379BB4", "entry": "at_set_byte_3", "encoding": "absolute"}},
+        {"label": "at_set_byte_3", "command": "set_byte", "destination": {"symbol": "lbl_80478D7D", "encoding": "reloc"}, "value": 4},
+        {"command": "call_sequence", "target": {"script": "lbl_8037631E", "entry": "at_play_animation_2", "encoding": "absolute"}},
+        {"command": "remove_held_item", "battler": "attacker"},
+        {"command": "end_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_80379BD1",
+      "body": [
+        {"command": "play_animation", "battler": "attacker", "animation": 7, "argument": null},
+        {"command": "wait_animation", "channel": 7},
+        {"command": "print_message", "message_id": 30199},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "remove_held_item", "battler": "attacker"},
+        {"command": "end_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_80379BE7",
+      "body": [
+        {"command": "print_message", "message_id": 30396},
+        {"command": "wait_message", "frames": 64},
+        {"command": "return_sequence"},
+        {"command": "print_selection_message_legacy", "message_prefix": 30197, "note": "The handler reads a 32-bit message using these two bytes and two following bytes, then advances only three bytes."},
+        {"command": "return_selection"}
+      ]
+    }
+  ]
+}

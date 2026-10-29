@@ -32,7 +32,7 @@ void fightSeqTurnEnd(void)
     extern void wsRunEndOfTurnScript();
     extern void fightSeqTurnEndAll();
     extern u8 lbl_80379F58[];
-    extern u8 lbl_80478D78[1];
+    extern u8 lbl_80478D78[8];
     extern u32 lbl_8047B618;
   u32 side;
   u16 sVar2;

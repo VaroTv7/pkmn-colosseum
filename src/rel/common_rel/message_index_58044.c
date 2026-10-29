@@ -4,8 +4,8 @@
  *
  * The original resource spans 0x58044-0x647B4. This source owns
  * only its 0x3F20-byte header/index prefix; storage at
- * 0x5BF64-0x647B4 remains adjacent original fallback. Entry offsets
- * remain relative to the unchanged resource base. No message text is defined.
+ * 0x5BF64-0x647B4 is partitioned into reconstructed templates and original storage. Entry offsets
+ * remain relative to the unchanged resource base. This owner defines only the header and index.
  * Prefix SHA-256: 2f7c61218b1523952a9d2f2e8d97b04adc47fbfbf82097fa92a5f972567fba49
  * See docs/DATA_MATCHING.md for the exact coverage and validation audit.
  */

@@ -1,9 +1,9 @@
 #include "dolphin/types.h"
 
 /* Small game state used by the existing task and menu implementations.
- * This prefix ends at 0x804788CC. The following coordinate pairs retain
- * original fallback because their mapped interior aliases need a verified
- * source representation. See docs/recon/data_object_bounds.md. */
+ * The complete coordinate arrays retain their original interior labels in
+ * the guarded source-link metadata view. Native C bounds remain unchanged.
+ * See docs/recon/small_data_array_aliases.md. */
 #pragma force_active on
 
 /* Task/input defaults (gs_task.c and main.c). */
@@ -40,5 +40,11 @@ s32 lbl_804788B8[2] = {-1, 0};
 s32 lbl_804788C0 = 90;
 u8 lbl_804788C4 = 5;
 s16 lbl_804788C8[2] = {0, 0};
+
+/* The PDA renderer reads both coordinates. lbl_804788CE and lbl_804788D2
+ * are linker labels for element one, not independently allocated objects. */
+s16 lbl_804788CC[2] = {-130, 40};
+s16 lbl_804788D0[2] = {0, 64};
+u8 lbl_804788D4[4] = {10, 11, 18, 5}; /* filter choice counts */
 
 #pragma force_active reset

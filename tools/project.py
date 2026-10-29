@@ -16,6 +16,8 @@ import math
 import os
 import platform
 import re
+import shlex
+import subprocess
 import sys
 from pathlib import Path
 from typing import (
@@ -68,6 +70,7 @@ class Object:
             "constant_import": None,
             "comparison_view": None,
             "data_alignment": None,
+            "data_aliases": None,
             "jump_table_import": None,
             "extab_padding": None,
             "extra_asflags": [],
@@ -79,6 +82,7 @@ class Object:
             "scratch_preset_id": None,
             "shift_jis": None,
             "source": name,
+            "source_generator": None,
             "symbol_mappings": None,
             "src_dir": None,
         }
@@ -148,6 +152,17 @@ class Object:
             if obj.options["data_alignment"] != 4 or not obj.completed or is_prodg(obj.options["mw_version"]):
                 sys.exit(f"Unsupported source-link data alignment for {obj.name}")
             obj.link_obj_path = build_dir / "link" / f"{base_name}.o"
+        aliases = obj.options["data_aliases"]
+        if aliases is not None:
+            if not isinstance(aliases, str) or not re.fullmatch(
+                    r"config/[A-Z0-9]+/data_aliases/[A-Za-z_0-9]+\.json", aliases) or \
+                    not obj.completed or is_prodg(obj.options["mw_version"]) or \
+                    obj.options["comparison_view"] is not None or \
+                    obj.options["data_alignment"] is not None or \
+                    obj.options["source_generator"] is not None:
+                sys.exit(f"Unsupported source-array alias view for {obj.name}")
+            obj.link_obj_path = build_dir / "link" / f"{base_name}.o"
+            obj.comparison_obj_path = build_dir / "compare" / f"{base_name}.o"
         mappings = obj.options["symbol_mappings"]
         if mappings is not None and (not isinstance(mappings, dict) or
                 any(not isinstance(k, str) or not k or not isinstance(v, str) or not v
@@ -156,7 +171,37 @@ class Object:
             sys.exit(f"Invalid source comparison symbol mappings for {obj.name}")
         obj.asm_obj_path = build_dir / "mod" / f"{base_name}.o"
         obj.ctx_path = build_dir / "src" / f"{base_name}.ctx"
+        generator = obj.options["source_generator"]
+        if generator is not None:
+            validate_source_generator(generator, obj.name)
+            if obj.src_path.suffix != ".json":
+                sys.exit(f"Generated data requires an authored JSON source: {obj.name}")
+            if generator["kind"] == "object":
+                obj.ctx_path = None
         return obj
+
+
+def validate_source_generator(generator: Any, name: str) -> None:
+    """Register a source compiler, never an original-object replacement."""
+    if not isinstance(generator, dict) or not {"kind", "tool"} <= set(generator) or \
+            not set(generator) <= {"kind", "tool", "args", "dependencies", "assembler"} or \
+            generator["kind"] not in ("c", "object") or \
+            not isinstance(generator["tool"], str) or \
+            not re.fullmatch(r"tools/[A-Za-z_0-9]+\.py", generator["tool"]) or \
+            not isinstance(generator.get("assembler", False), bool) or \
+            generator.get("assembler", False) and generator["kind"] != "object":
+        sys.exit(f"Invalid data source generator for {name}")
+    for key in ("args", "dependencies"):
+        values = generator.get(key, [])
+        if not isinstance(values, list) or any(not isinstance(value, str) or
+                not value or any(char in value for char in ("\0", "\n", "\r", "$"))
+                for value in values):
+            sys.exit(f"Invalid data source generator {key} for {name}")
+    for value in generator.get("dependencies", []):
+        path = Path(value)
+        if path.is_absolute() or ".." in path.parts or path.parts[0] not in (
+                "src", "include", "config", "tools"):
+            sys.exit(f"Data source generator dependencies must be source files: {name}")
 
 
 class ProgressCategory:
@@ -806,6 +851,17 @@ def generate_build_ninja(
         name="link_data_alignment",
         command=f"$python {source_metadata} align --source $source --target $target --alignment 4 --output $out",
         description="Verify source data link alignment $out",
+    )
+    n.rule(
+        name="generate_data_source",
+        command="$python $generator --source $in --output $out $generator_args",
+        description="Compile data source $in",
+    )
+    source_aliases = config.tools_dir / "source_data_aliases.py"
+    n.rule(
+        name="source_data_aliases",
+        command=f"$python {source_aliases} --source $source --target $target --groups $groups --link-output $link_output --comparison-output $comparison_output",
+        description="Verify complete source arrays and interior aliases $source",
     )
 
     # GNU ld, for partial links of modules built with the SN toolchain
@@ -1457,7 +1513,37 @@ def generate_build_ninja(
             built_obj_path: Optional[Path] = None
             if obj.src_path is not None and obj.src_path.exists():
                 check_path_case(obj.src_path)
-                if file_is_c_cpp(obj.src_path):
+                generator = obj.options["source_generator"]
+                if generator is not None:
+                    if build_obj["code_size"] != 0 or build_obj["data_size"] <= 0:
+                        sys.exit(f"Source generators require a data-only owner: {obj_name}")
+                    dependencies = [Path(generator["tool"]),
+                                    *map(Path, generator.get("dependencies", []))]
+                    arguments = list(generator.get("args", []))
+                    if generator.get("assembler", False):
+                        arguments += ["--assembler", str(binutils / f"powerpc-eabi-as{EXE}")]
+                        dependencies.append(binutils_implicit or binutils / f"powerpc-eabi-as{EXE}")
+                    quote_args = subprocess.list2cmdline if is_windows() else shlex.join
+                    output = obj.src_obj_path
+                    if generator["kind"] == "c":
+                        output = config.out_path() / "generated" / Path(obj.name).with_suffix(".c")
+                    n.build(
+                        outputs=output,
+                        rule="generate_data_source",
+                        inputs=obj.src_path,
+                        implicit=dependencies,
+                        variables={"generator": quote_args([generator["tool"]]),
+                                   "generator_args": quote_args(arguments)},
+                        order_only="pre-compile",
+                    )
+                    if generator["kind"] == "c":
+                        built_obj_path = c_build(obj, output)
+                    else:
+                        built_obj_path = obj.src_obj_path
+                        source_added.add(built_obj_path)
+                        if obj.options["add_to_all"]:
+                            source_inputs.append(built_obj_path)
+                elif file_is_c_cpp(obj.src_path):
                     # Add C/C++ build rule
                     built_obj_path = c_build(obj, obj.src_path)
                 elif file_is_asm(obj.src_path):
@@ -1480,7 +1566,23 @@ def generate_build_ninja(
                 link_built_obj = True
                 built_obj_path = asm_build(obj, obj.asm_path, obj.asm_obj_path)
 
-            if obj.comparison_obj_path is not None:
+            if obj.options["data_aliases"] is not None:
+                if not link_built_obj or built_obj_path != obj.src_obj_path or obj_path is None or \
+                        build_obj["code_size"] != 0:
+                    sys.exit(f"Array aliases require completed native data source: {obj.name}")
+                groups = Path(obj.options["data_aliases"])
+                n.build(
+                    outputs=[obj.link_obj_path, obj.comparison_obj_path],
+                    rule="source_data_aliases",
+                    inputs=[built_obj_path, Path(obj_path), groups],
+                    implicit=[source_aliases, source_metadata],
+                    variables={"source": built_obj_path, "target": Path(obj_path),
+                               "groups": groups, "link_output": obj.link_obj_path,
+                               "comparison_output": obj.comparison_obj_path},
+                )
+                source_inputs.extend([obj.link_obj_path, obj.comparison_obj_path])
+                built_obj_path = obj.link_obj_path
+            elif obj.comparison_obj_path is not None:
                 if built_obj_path != obj.src_obj_path or obj_path is None:
                     sys.exit(f"Source comparison view needs native source and target objects: {obj.name}")
                 # This separate view is used only by objdiff. The native source
@@ -1507,7 +1609,7 @@ def generate_build_ninja(
                 )
                 source_inputs.append(obj.comparison_obj_path)
 
-            if obj.link_obj_path is not None:
+            if obj.link_obj_path is not None and obj.options["data_aliases"] is None:
                 if not link_built_obj or built_obj_path != obj.src_obj_path or obj_path is None:
                     sys.exit(f"Data link alignment needs completed native source and target objects: {obj.name}")
                 # Source bytes, symbols and relocations must independently match.
@@ -2077,8 +2179,12 @@ def generate_objdiff_config(
                     reverse_fn_order = False
 
         compiler_version = COMPILER_MAP.get(obj.options["mw_version"])
+        generated_object = obj.options["source_generator"] is not None and \
+            obj.options["source_generator"]["kind"] == "object"
+        if generated_object:
+            compiler_version = None
         if compiler_version is None:
-            if not is_prodg(obj.options["mw_version"]):
+            if not generated_object and not is_prodg(obj.options["mw_version"]):
                 print(f"Missing scratch compiler mapping for {obj.options['mw_version']}")
         else:
             cflags_str = make_flags_str(all_cflags)

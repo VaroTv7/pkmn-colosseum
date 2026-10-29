@@ -277,7 +277,7 @@ void fightSeqSetEffectAminFlag(u8 enable) {
     defined(PR424_FIGHT_SEQ_80211830_802118FC)
 /* 0x80211830 | size: 0xCC */
 void fightSeqInit(void) {
-    extern u8 lbl_80478D78[1];
+    extern u8 lbl_80478D78[8];
     extern u32 lbl_8047B62C;
     extern void fightFloorLoopValidFightOutPokemon();
     extern void* fightFloorGetValidFightSidePtr();

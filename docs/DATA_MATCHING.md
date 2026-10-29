@@ -1,6 +1,42 @@
 # Remaining data matching
 
-## Verified source result
+## Script and small-data continuation
+
+[PR #663](https://github.com/dougchansan/pkmn-colosseum/pull/663) is merged.
+Its final required checks and the
+[post-merge Build](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40953799950)
+passed. The verified baseline for the next continuation is master
+`4cf5494422955e6f383b8470ae5e46dd5362fc4f`: 3,449,436 of 3,565,996 data
+bytes matched and linked from source, with all 8,677 tracked functions exact.
+
+The following additional source is implemented and locally verified. Full
+integration and canonical output checks are pending; these local figures are
+not yet a new project-wide completion claim.
+
+| Reconstructed source | Additional bytes | Evidence |
+| --- | ---: | --- |
+| Semantic GS VM bank `0x0596` | 7,964 | [Structured programs, native signatures and runtime fixup](recon/common_script_0596.md) |
+| Seventeen packed battle-script owners | 13,500 | [Typed commands, symbol extents and 299 real relocations](recon/battle_script_source.md) |
+| Complete small-data arrays and damage constants | 40 | [Native object bounds, interior labels and natural alignment](recon/small_data_array_aliases.md) |
+| Message controls, counter templates and existing-source reuse | 3,635 | [219 complete entries from semantic templates](recon/message_templates.md) |
+| **Total local source gain** | **25,139** | **Full denominator retained** |
+
+The pinned objdiff subset report verifies all 30 generated script/template
+owners: 25,099 of 25,099 data bytes exact and source-complete, with no native
+code or functions. Separate native-object reports verify all 40 small-data
+bytes. The generated-source report SHA-256 is
+`568f498367d1032a507365edcfc81ef5d48b5726e090b4a1ccbd5af4031001a7`.
+Generated C, data assembly and objects remain ignored build outputs; authored
+source and source-only compilers are the tracked inputs.
+
+The expected residual is 91,421 message-content bytes in 13 explicit original
+fallback intervals. Reconstructing a message decoder or its formatting rules
+does not reconstruct the unique message contents. Those bytes remain in the
+3,565,996-byte scope and receive no source or matching credit. The complete
+integrated report and all unchanged canonical outputs must establish the
+actual gain before README progress and the topology freeze are refreshed.
+
+## Verified PR #663 source result
 
 The ninth private-input build verifies source revision
 [`dcdfc947cd77221ff38159679f07e704be77d9e4`](https://github.com/dougchansan/pkmn-colosseum/commit/dcdfc947cd77221ff38159679f07e704be77d9e4).
@@ -36,13 +72,13 @@ template and four-byte alignment padding remain explicit original fallback
 outside that tracked-code denominator. Those 7,992 physical bytes are retained
 and receive no function, matching-code or source-linked credit.
 
-The source result above is verified. The overall ninth Build run still fails
-its stale strict-topology freeze, which describes the earlier baseline. The
-documentation and freeze refresh must pass the final required checks on
-[PR #663](https://github.com/dougchansan/pkmn-colosseum/pull/663) before merging;
-this record does not claim those subsequent checks have already passed.
+The ninth Build established the source result above. The subsequent
+documentation and topology-freeze refresh passed all required checks on the
+final PR #663 head, `2e2b83e8ee7e6d67ada2923d0fd7c76d6f98e387`.
+The merged master tree is identical to that tested tree, and its post-merge
+Build also passed.
 
-## Remaining data at the verified revision
+## Remaining data at the PR #663 baseline
 
 All 116,560 remaining data bytes use original fallback and receive no matching
 or source-link credit. They remain in completion scope and the denominator.
@@ -151,8 +187,9 @@ The full acceptance sequence is:
    verified report, then pass Build, Quality Lint and Regression Guard on the
    final PR head before merging.
 
-The ninth source build and its integrity audit establish steps 1–4. Step 5
-remains a final-head requirement; use the PR's current checks for its outcome.
+The ninth source build and its integrity audit established steps 1–4 for
+PR #663. Its final head and post-merge Build also passed step 5. The new
+continuation above must independently repeat this acceptance sequence.
 
 ## Source metadata and linker layout
 

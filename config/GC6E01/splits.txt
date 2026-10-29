@@ -7039,14 +7039,9 @@ game/data/data_803124B8.c:
 game/data/data_803125A0.c:
 	.data       start:0x803125A0 end:0x803125E8
 
-# Typed small game state, with complete fallback arrays for interior aliases.
+# Typed small game state; complete C arrays retain verified interior linker labels.
 game/data/sdata_80478820.c:
-	.sdata      start:0x80478820 end:0x804788CC
-
-# Coordinate pairs have original interior labels; include D4..D8 so the next
-# compiled section retains its natural eight-byte alignment.
-game/data/sdata_804788CC.c:
-	.sdata      start:0x804788CC end:0x804788D8 align:4
+	.sdata      start:0x80478820 end:0x804788D8
 
 game/data/sdata_804788D8.c:
 	.sdata      start:0x804788D8 end:0x80478950
@@ -7058,21 +7053,17 @@ game/data/sdata_80478950.c:
 game/data/sdata_80478958.c:
 	.sdata      start:0x80478958 end:0x80478970
 
-# Typed battle state and sequence pairs; unresolved labels stay original-backed.
+# Typed battle state and sequence pairs with complete native object bounds.
 game/data/sdata_80478D08.c:
 	.sdata      start:0x80478D08 end:0x80478D78
 
 # One eight-byte flag array has original interior labels at offsets 3 and 5.
-# Preserve the complete array until a verified alias representation is available.
+# The source-link view adds zero-sized labels without shortening the C array.
 game/data/sdata_80478D78.c:
 	.sdata      start:0x80478D78 end:0x80478D80
 
 game/data/sdata_80478D80.c:
-	.sdata      start:0x80478D80 end:0x80478D8C
-
-# Preserve the full unresolved damage operand extent without source credit.
-game/data/sdata_80478D8C.c:
-	.sdata      start:0x80478D8C end:0x80478D98 align:4
+	.sdata      start:0x80478D80 end:0x80478D98
 
 game/data/sdata_80478D98.c:
 	.sdata      start:0x80478D98 end:0x80478DB4

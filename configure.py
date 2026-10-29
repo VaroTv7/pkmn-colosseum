@@ -16,6 +16,7 @@
 ###
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
@@ -629,28 +630,67 @@ MENU_MIDDLE_RODATA_POOL = (
     "475448285f43422e6d5f61547261696e65724f7267293e6a0000000000000000"
 )
 
+# Battle-script sources keep the original data-only owner identities. Their
+# compiler derives widths and branch labels from the interpreted data language.
+BATTLE_SCRIPT_ADDRESSES = (
+    "80375E60", "80375F9C", "80376104", "80377088", "80377D90", "80378538",
+    "80378724", "80378798", "80378968", "80378AA0", "80378B44", "80378D7C",
+    "8037939C", "80379478", "803795D8", "80379808", "80379B0C",
+)
+battle_catalog_path = Path("src/game/battle_scripts/catalog.json")
+battle_catalog = json.loads(battle_catalog_path.read_text(encoding="utf-8"))
+config.reconfig_deps.append(battle_catalog_path)
+battle_source_dependencies = [
+    "tools/battle_script_format.py",
+    "config/GC6E01/symbols.txt",
+    str(battle_catalog_path),
+    *[f"src/game/battle_scripts/scripts_{address}.battle.json"
+      for address in BATTLE_SCRIPT_ADDRESSES],
+    *sorted({entry["source"] for entry in battle_catalog["external_entries"]}),
+]
+
 config.libs = [
     GameLib(
         "Runtime.PPCEABI.H",
         "GC/1.2.5n",
         [
+            *[
+                Object(
+                    Matching,
+                    f"auto_05_{address}_data",
+                    source=f"game/battle_scripts/scripts_{address}.battle.json",
+                    source_generator={
+                        "kind": "object", "tool": "tools/compile_battle_scripts.py",
+                        "args": ["--symbols", "config/GC6E01/symbols.txt"],
+                        "dependencies": battle_source_dependencies,
+                        "assembler": True,
+                    },
+                    progress_category="game",
+                )
+                for address in BATTLE_SCRIPT_ADDRESSES
+            ],
             # Typed task/menu/GBA defaults and small lookup tables.
             Object(
                 Matching,
                 "game/data/sdata_80478820.c",
                 extra_cflags=["-sdata 8", "-sdata2 0"],
+                data_aliases="config/GC6E01/data_aliases/sdata_80478820.json",
                 progress_category="game",
             ),
-            # Coordinate arrays retain original interior labels until aliases are modeled.
-            Object(NonMatching, "game/data/sdata_804788CC.c", progress_category="game"),
             Object(
                 Matching,
                 "game/data/sdata_804788D8.c",
                 extra_cflags=["-sdata 8", "-sdata2 0"],
                 progress_category="game",
             ),
-            # Each four-byte controller array has an original label at byte one.
-            Object(NonMatching, "game/data/sdata_80478950.c", progress_category="game"),
+            # Complete controller arrays retain their historical interior labels.
+            Object(
+                Matching,
+                "game/data/sdata_80478950.c",
+                extra_cflags=["-sdata 8", "-sdata2 0"],
+                data_aliases="config/GC6E01/data_aliases/sdata_80478950.json",
+                progress_category="game",
+            ),
             Object(
                 Matching,
                 "game/data/sdata_80478958.c",
@@ -664,16 +704,20 @@ config.libs = [
                 extra_cflags=["-sdata 8", "-sdata2 0"],
                 progress_category="game",
             ),
-            # One eight-byte flag array with overlapping labels needs an alias model.
-            Object(NonMatching, "game/data/sdata_80478D78.c", progress_category="game"),
+            # The native eight-byte flag array keeps its full C object bounds.
+            Object(
+                Matching,
+                "game/data/sdata_80478D78.c",
+                extra_cflags=["-sdata 8", "-sdata2 0"],
+                data_aliases="config/GC6E01/data_aliases/sdata_80478D78.json",
+                progress_category="game",
+            ),
             Object(
                 Matching,
                 "game/data/sdata_80478D80.c",
                 extra_cflags=["-sdata 8", "-sdata2 0"],
                 progress_category="game",
             ),
-            # Explicit original fallback; the complete damage operand extent is unresolved.
-            Object(NonMatching, "game/data/sdata_80478D8C.c", progress_category="game"),
             Object(
                 Matching,
                 "game/data/sdata_80478D98.c",
@@ -14169,6 +14213,34 @@ config.libs = [
             Object(Matching, "rel/common_rel/message_index_58044.c"),
             Object(Matching, "rel/common_rel/message_index_76C94.c"),
             Object(Matching, "rel/common_rel/script_structure_89CFC.c"),
+            Object(
+                Matching,
+                "rel/common_rel/common_script_0596.c",
+                source="rel/common_rel/common_script_0596.json",
+                source_generator={"kind": "c", "tool": "tools/gs_vm_script_source.py"},
+            ),
+            # Packed GSchar controls and counter labels compiled from semantic templates.
+            *[
+                Object(
+                    Matching,
+                    f"rel/common_rel/message_templates_{address}.c",
+                    source="rel/common_rel/message_templates.json",
+                    source_generator={
+                        "kind": "object", "tool": "tools/message_template_source.py",
+                        "args": ["--unit", f"message_templates_{address}"],
+                        "dependencies": ["tools/source_object_metadata.py"],
+                        "assembler": True,
+                    },
+                )
+                for address in ("5BFF4", "61A12", "61A5C", "61D8B", "61E46", "63069",
+                                "64102", "7B1FC", "80AB1", "811F1", "85FFD", "89788")
+            ],
+            # Every remaining message byte stays in an explicit original interval.
+            *[
+                Object(NonMatching, f"rel/common_rel/message_storage_{address}.c")
+                for address in ("5BF64", "5C090", "61A40", "61A7B", "61D94", "61E77",
+                                "6306E", "6410E", "7B268", "810E1", "81609", "86014", "899BC")
+            ],
             Object(Matching, "rel/common_rel/table_res_data.c"),
             Object(Matching, "rel/common_rel/floor_fight_data.c"),
             Object(Matching, "rel/common_rel/fight_trainer_data.c"),

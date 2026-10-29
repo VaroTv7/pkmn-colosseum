@@ -1,0 +1,24 @@
+[
+  {
+    "base": "lbl_804788CC",
+    "size": 4,
+    "aliases": [
+      {
+        "name": "lbl_804788CE",
+        "offset": 2,
+        "size": 2
+      }
+    ]
+  },
+  {
+    "base": "lbl_804788D0",
+    "size": 4,
+    "aliases": [
+      {
+        "name": "lbl_804788D2",
+        "offset": 2,
+        "size": 2
+      }
+    ]
+  }
+]

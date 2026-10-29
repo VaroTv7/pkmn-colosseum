@@ -3,8 +3,9 @@
  * @brief GS VM bank header, function index, relocation index and zero globals.
  *
  * The complete resource spans .data 0x89CFC-0x8BCB4. This typed source owns
- * its first 156 bytes through 0x89D98; the 7,964 bytes of instruction storage
- * remain adjacent original fallback. Offsets retain the unchanged bank base.
+ * its first 156 bytes through 0x89D98. The adjacent 7,964 bytes are authored
+ * in common_script_0596.json and compiled by tools/gs_vm_script_source.py.
+ * Offsets retain the unchanged bank base; see docs/recon/common_script_0596.md.
  * Layout follows GSVMScript in include/game/gs_vm.h and cms_RegisterScript.
  * Every structural interval and the zero globals were hash-verified against
  * the private-input diagnostic. No script instructions or literals appear.

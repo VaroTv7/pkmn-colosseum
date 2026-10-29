@@ -1,0 +1,284 @@
+{
+  "format": "colosseum-battle-source-v1",
+  "catalog": "catalog.json",
+  "unit": "main/auto_05_80379808_data",
+  "alignment": 8,
+  "programs": [
+    {
+      "symbol": "lbl_80379808",
+      "body": [
+        {"command": "play_animation", "battler": 22, "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "wait_frames", "frames": 32},
+        {"command": "print_message_from_table", "message_table": {"symbol": "lbl_80279E30", "encoding": "absolute", "addend": 24}},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "return_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_8037981F",
+      "body": [
+        {"command": "play_animation", "battler": 22, "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "wait_frames", "frames": 32},
+        {"command": "print_message_from_table", "message_table": {"symbol": "lbl_80279E54", "encoding": "reloc"}},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "return_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_80379836",
+      "body": [
+        {"command": "play_animation", "battler": 22, "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "wait_frames", "frames": 32},
+        {"command": "print_message_from_table", "message_table": {"symbol": "lbl_80279E54", "encoding": "absolute", "addend": 12}},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "return_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_8037984D",
+      "body": [
+        {"command": "play_animation", "battler": "defender", "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "wait_frames", "frames": 32},
+        {"command": "print_message", "message_id": 30217},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "jump", "target": {"script": "lbl_80375FBF", "entry": "entry", "encoding": "reloc"}}
+      ]
+    },
+    {
+      "symbol": "lbl_80379868",
+      "body": [
+        {"command": "play_animation", "battler": 22, "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "wait_frames", "frames": 32},
+        {"command": "print_message", "message_id": 30242},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "jump", "target": {"script": "lbl_80375FBF", "entry": "entry", "encoding": "absolute"}}
+      ]
+    },
+    {
+      "symbol": "lbl_80379883",
+      "body": [
+        {"command": "play_animation", "battler": "defender", "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "wait_frames", "frames": 32},
+        {"command": "print_message", "message_id": 30219},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "jump", "target": {"script": "lbl_80375FBF", "entry": "entry", "encoding": "absolute"}}
+      ]
+    },
+    {
+      "symbol": "lbl_8037989E",
+      "body": [
+        {"command": "announce_move"},
+        {"command": "consume_pp"},
+        {"command": "wait_frames", "frames": 32},
+        {"command": "play_animation", "battler": "defender", "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "print_message", "message_id": 30227},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "jump", "target": {"script": "lbl_80375FBF", "entry": "entry", "encoding": "absolute"}}
+      ]
+    },
+    {
+      "symbol": "lbl_803798BB",
+      "body": [
+        {"command": "play_animation", "battler": 25, "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "wait_frames", "frames": 32},
+        {"command": "print_message", "message_id": 30232},
+        {"command": "wait_message", "frames": 64},
+        {"command": "set_byte", "destination": {"symbol": "lbl_80478D7D", "encoding": "reloc"}, "value": 3},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "return_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_803798D8",
+      "body": [
+        {"command": "play_animation", "battler": "defender", "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "wait_frames", "frames": 32},
+        {"command": "print_message", "message_id": 30234},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "jump", "target": {"script": "lbl_80375FBF", "entry": "entry", "encoding": "absolute"}}
+      ]
+    },
+    {
+      "symbol": "lbl_803798F3",
+      "body": [
+        {"command": "play_animation", "battler": "defender", "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "print_message", "message_id": 30215},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "return_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_80379907",
+      "body": [
+        {"command": "set_word_bits", "destination": {"symbol": "lbl_8047B618", "encoding": "reloc"}, "mask": 1048832},
+        {"command": "play_animation", "battler": "attacker", "animation": 24, "argument": null},
+        {"command": "wait_animation", "channel": 5},
+        {"command": "apply_damage_and_update_hp", "battler": "attacker"},
+        {"command": "print_message", "message_id": 30224},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_hp_animation", "battler": "attacker"},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "handle_fainted_battler", "battler": "attacker", "branch_mode": 0, "target": null},
+        {"command": "return_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_8037992F",
+      "body": [
+        {"command": "compat_wait_state"},
+        {"command": "apply_secondary_effect"},
+        {"command": "return_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_80379932",
+      "body": [
+        {"command": "animate_secondary_condition", "battler": "attacker", "condition": 10},
+        {"command": "wait_animation", "channel": 7},
+        {"command": "print_message", "message_id": 30233},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "return_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_80379945",
+      "body": [
+        {"command": "compat_wait_state"},
+        {"command": "apply_primary_effect"},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "return_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_8037994A",
+      "body": [
+        {"command": "play_animation", "battler": 25, "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "refresh_status_icon", "battler": 25},
+        {"command": "print_message", "message_id": 30244},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "return_sequence"},
+        {"command": "play_animation", "battler": "attacker", "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "print_message", "message_id": 30307},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "set_byte", "destination": {"symbol": "lbl_8047B627", "encoding": "reloc"}, "value": 0},
+        {"command": "finish_move_effects", "mode": 2, "stop_state": 16},
+        {"command": "end_move"},
+        {"command": "play_animation", "battler": "attacker", "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "print_message", "message_id": 30308},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "execute_called_move", "move_selector": 0}
+      ]
+    },
+    {
+      "symbol": "lbl_80379992",
+      "body": [
+        {"command": "play_animation", "battler": "attacker", "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "print_message_from_table", "message_table": {"symbol": "lbl_80279E6C", "encoding": "reloc"}},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "set_byte", "destination": {"symbol": "lbl_8047B627", "encoding": "absolute"}, "value": 0},
+        {"command": "finish_move_effects", "mode": 2, "stop_state": 16},
+        {"command": "end_move"},
+        {"command": "play_animation", "battler": "attacker", "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "print_message", "message_id": 30309},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "set_byte", "destination": {"symbol": "lbl_80478D7B", "encoding": "absolute"}, "value": 65},
+        {"command": "apply_primary_effect"},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "set_byte", "destination": {"symbol": "lbl_8047B627", "encoding": "reloc"}, "value": 0},
+        {"command": "finish_move_effects", "mode": 2, "stop_state": 16},
+        {"command": "end_move"},
+        {"command": "play_animation", "battler": "attacker", "animation": 23, "argument": null},
+        {"command": "wait_animation", "channel": 0},
+        {"command": "print_message", "message_id": 30311},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "jump", "target": {"script": "lbl_8037934F", "entry": "entry", "encoding": "absolute"}}
+      ]
+    },
+    {
+      "symbol": "lbl_803799ED",
+      "body": [
+        {"command": "execute_called_move", "move_selector": 0}
+      ]
+    },
+    {
+      "symbol": "lbl_803799EF",
+      "body": [
+        {"command": "jump", "target": {"script": "lbl_8037934F", "entry": "entry", "encoding": "reloc"}}
+      ]
+    },
+    {
+      "symbol": "lbl_803799F4",
+      "body": [
+        {"command": "set_byte", "destination": {"symbol": "lbl_8047B627", "encoding": "absolute"}, "value": 0},
+        {"command": "finish_move_effects", "mode": 2, "stop_state": 16},
+        {"command": "end_move"}
+      ]
+    },
+    {
+      "symbol": "lbl_803799FE",
+      "body": [
+        {"command": "select_replacement_battler", "battler": "attacker", "target": {"script": "lbl_803799F4", "entry": "entry", "encoding": "reloc"}},
+        {"command": "compat_wait_state"},
+        {"command": "buffer_switch_name", "battler": "attacker", "name_kind": 2},
+        {"command": "load_switched_battler", "battler": "attacker"},
+        {"command": "initialize_switched_battler", "battler": "attacker", "mode": 0},
+        {"command": "buffer_low_hp_message", "battler": "attacker"},
+        {"command": "print_message_from_table", "message_table": {"symbol": "lbl_80279EA0", "encoding": "reloc"}},
+        {"command": "animate_switch_in", "battler": "attacker", "mode": 0},
+        {"command": "wait_message", "frames": 0},
+        {"command": "compat_wait_state"},
+        {"command": "apply_switch_in_effects", "battler": "attacker"},
+        {"command": "jump", "target": {"script": "lbl_803799F4", "entry": "entry", "encoding": "absolute"}}
+      ]
+    },
+    {
+      "symbol": "lbl_80379A22",
+      "body": [
+        {"command": "play_animation", "battler": "defender", "animation": 2, "argument": null},
+        {"command": "wait_animation", "channel": 7},
+        {"command": "print_message", "message_id": 30130},
+        {"command": "wait_message", "frames": 64},
+        {"command": "wait_animation", "channel": 6},
+        {"command": "return_sequence"}
+      ]
+    },
+    {
+      "symbol": "lbl_80379A36",
+      "body": [
+        {"command": "call_sequence", "target": {"script": "lbl_80379A3C", "entry": "entry", "encoding": "absolute"}},
+        {"command": "end_sequence"}
+      ]
+    }
+  ]
+}
