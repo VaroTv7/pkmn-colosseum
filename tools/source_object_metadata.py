@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Make narrowly verified metadata views of compiled PowerPC source objects.
 
-``names`` changes only anonymous data-symbol names for comparison. objdiff
+``names`` changes only compiler-local data-symbol names for comparison. objdiff
 v3.6.1's report command does not apply project symbol_mappings. The native
 object remains the linker input; no symbol size, value, binding, relocation,
 code or data changes in this view.
@@ -162,8 +162,8 @@ def comparison_names(source_blob, target_blob, mappings):
     strings_index = table[6]
     strings = bytearray(source.payload(strings_index))
     for target_name, source_name in mappings.items():
-        if not re.fullmatch(r"@\d+", source_name):
-            raise ValueError("Only anonymous compiler data symbols may be named")
+        if not re.fullmatch(r"(?:@\d+|[A-Za-z_]\w*\$\d+)", source_name):
+            raise ValueError("Only compiler-local data symbols may be named")
         index, s = source.unique_symbol(source_name)
         _, t = target.unique_symbol(target_name)
         if any(n == target_name for n, _ in source.symbols):

@@ -142,8 +142,8 @@ The metadata format follows the pinned toolkit's
 The pinned objdiff v3.6.1
 [`report_object` implementation](https://github.com/encounter/objdiff/blob/v3.6.1/objdiff-cli/src/cmd/report.rs)
 constructs a default symbol mapping instead of using each unit's configured
-mapping. Six comparison-only views therefore give the existing anonymous
-compiler data objects their independently established target names. This
+mapping. Six comparison-only views therefore give existing anonymous or
+compiler-disambiguated function-local data objects their established target names. This
 changes only symbol-name/string-table metadata. All source bytes, symbol
 values and sizes, bindings, and relocation records remain unchanged; native
 objects remain linker inputs. The standard report generator still performs

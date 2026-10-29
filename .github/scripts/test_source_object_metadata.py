@@ -15,14 +15,15 @@ from tools import source_object_metadata as helper
 
 
 def fixture(*, source=True, anonymous=False, text=False, section=".data",
-            symbol_alignment=4, extra_symbol=False, relocation="external", pool=False):
+            symbol_alignment=4, extra_symbol=False, relocation="external", pool=False,
+            local_name="@11"):
     names = ["", section] + ([".text"] if text else [])
     names += [".rela" + section, ".comment", ".symtab", ".strtab", ".shstrtab"]
     index = {name: i for i, name in enumerate(names)}
     strings = bytearray(b"\0")
     # name, offset, size, type/binding, visibility, section, MWCC alignment
     symbols = [("", 0, 0, 0, 0, 0, 0), ("", 0, 0, 3, 0, 1, 8 if source else 4),
-               ("@11" if anonymous else "head", 0, 4, 1 if anonymous else 0x11, 0, 1, symbol_alignment),
+               (local_name if anonymous else "head", 0, 4, 1 if anonymous else 0x11, 0, 1, symbol_alignment),
                ("pointer", 4, 4, 0x11, 0, 1, 4),
                ("source_padding" if source else "gap_00_80000008_" + section[1:], 8, 4, 0x11, 0 if source else 2, 1, 1),
                ("external", 0, 0, 0x10, 0, 0, 0)]
@@ -227,6 +228,14 @@ class DataAlignmentViewTests(unittest.TestCase):
 class ComparisonNamesTests(unittest.TestCase):
     def setUp(self):
         self.source, self.target = fixture(anonymous=True, text=True), fixture(source=False, text=True)
+
+    def test_function_local_compiler_name_preserves_native_identity(self):
+        source = fixture(anonymous=True, local_name="zero$288", text=True)
+        output, _ = helper.comparison_names(source, self.target, {"head": "zero$288"})
+        before, after = helper.Elf(source), helper.Elf(output)
+        self.assertEqual(before.unique_symbol("zero$288")[1][1:], after.unique_symbol("head")[1][1:])
+        self.assertEqual(before.payload(1), after.payload(1))
+        self.assertEqual(before.payload(2), after.payload(2))
 
     def test_names_view_preserves_every_non_name_record_and_source_payload(self):
         target = patch(self.target, section_offset(self.target, ".data"), ">I", 0x55667788)
