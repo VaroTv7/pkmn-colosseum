@@ -8,4 +8,4 @@ __declspec(section ".data") u8 gTRKRestoreFlags[9] = { 0 };
 
 /* Keep the following existing MetroTRK data at its four-byte offset inside
  * this eight-byte-aligned owner. Its definitions and symbols are unchanged. */
-#include "../game/data/data_80313824.c"
+#include "src/game/data/data_80313824.c"
