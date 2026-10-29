@@ -12,9 +12,9 @@ import time
 
 
 def snapshot(version):
-    print("Build diagnostic: process IDs, parent IDs, elapsed seconds, names", flush=True)
+    print("Build diagnostic: process IDs, parent IDs, elapsed time, names", flush=True)
     try:
-        subprocess.run(["ps", "-eo", "pid,ppid,etimes,comm"], check=False, timeout=3)
+        subprocess.run(["ps", "-eo", "pid,ppid,etime,comm"], check=False, timeout=3)
     except (OSError, subprocess.TimeoutExpired) as exc:
         print(f"Process metadata unavailable: {type(exc).__name__}", flush=True)
     build_dir = Path("build") / version
