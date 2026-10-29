@@ -83,6 +83,25 @@ class ZeroDataLayoutTests(unittest.TestCase):
         expected["start"] += 4
         self.assertTrue(check_object(object_blob(alignment=8), expected))
 
+    def test_implicit_gap_needs_no_manufactured_storage_symbol(self):
+        expected = self.expected()
+        expected["symbols"][0]["size"] = 1
+        expected["gaps"] = [{"offset": 1, "size": 3}]
+        self.assertEqual(check_object(object_blob([("first", 0, 1), ("second", 4, 4)]), expected), [])
+
+    def test_explicit_padding_must_fit_independent_gap_and_name_address(self):
+        expected = self.expected()
+        expected["symbols"][0]["size"] = 1
+        expected["gaps"] = [{"offset": 1, "size": 3}]
+        base = [("first", 0, 1), ("second", 4, 4)]
+        self.assertEqual(check_object(object_blob(base + [("padding_80470001", 1, 1),
+                                                         ("padding_80470002", 2, 2)]), expected), [])
+        for extra in [[("padding_80470001", 1, 4)],
+                      [("padding_80470002", 1, 1)],
+                      [("unmapped", 1, 3)],
+                      [("padding_80470001", 1, 3), ("padding_80470002", 2, 1)]]:
+            self.assertTrue(check_object(object_blob(base + extra), expected), extra)
+
     def test_metadata_derives_local_alias_and_gap_without_source_declarations(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
@@ -94,8 +113,8 @@ class ZeroDataLayoutTests(unittest.TestCase):
             result = expectations(base / "units.json", base / "symbols.txt", base / "splits.txt")
             self.assertEqual(result[0]["symbols"], [
                 {"name": "first_80470000", "offset": 0, "size": 1},
-                {"name": "padding_80470001", "offset": 1, "size": 3},
                 {"name": "second", "offset": 4, "size": 4}])
+            self.assertEqual(result[0]["gaps"], [{"offset": 1, "size": 3}])
             (base / "splits.txt").write_text("game/data/test.c:\n\t.sbss start:0x80470000 end:0x80470006\n")
             with self.assertRaises(ValueError):
                 expectations(base / "units.json", base / "symbols.txt", base / "splits.txt")

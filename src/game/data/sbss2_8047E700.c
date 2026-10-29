@@ -2,11 +2,9 @@
 
 /*
  * Zero-initialized storage at .sbss2 0x8047E700-0x8047E708.
- * The existing symbol map establishes every object boundary. Unrecovered
- * types remain byte storage; padding keeps the original relative addresses.
- * MWCC emits uninitialized definitions in reverse source order. Force-active
- * preserves storage that retail retains without a direct DOL reference.
- * No game payload or nonzero initializer is imported.
+ * Original symbols establish object extents. Native scalar alignment supplies
+ * ordinary gaps; remaining padding uses individual bytes. MWCC emits these
+ * definitions in reverse order. Every symbol and gap is independently checked.
  */
 #pragma force_active on
 

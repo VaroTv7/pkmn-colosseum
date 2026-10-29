@@ -15,6 +15,13 @@ import struct
 import subprocess
 from pathlib import Path
 
+if __package__:
+    from .resource_message_diagnostics import resource_message_reuse_checks
+    from .runtime_data_diagnostics import runtime_structure
+else:
+    from resource_message_diagnostics import resource_message_reuse_checks
+    from runtime_data_diagnostics import runtime_structure
+
 
 DATA_SECTIONS = {".rodata", ".data", ".sdata", ".sdata2"}
 BSS_SECTIONS = {".bss", ".sbss", ".sbss2"}
@@ -419,6 +426,10 @@ def main():
                     prefix = config.get("target_dir" if kind == "target" else "base_dir") or ""
                     metadata[kind], private[kind] = elf_metadata(root / prefix / path)
             item.update(metadata)
+            if "target" in metadata:
+                runtime = runtime_structure(unit, metadata["target"], private["target"])
+                if runtime is not None:
+                    item["runtime_structure"] = runtime
             if "source" in metadata:
                 item["source_alignment_at_original_address"] = source_alignment_at_original_address(
                     unit, metadata["source"])
@@ -454,6 +465,11 @@ def main():
             print(f"Resource candidates: {equal}/4 equal (hashes and addresses only).")
         except (OSError, ValueError, struct.error) as exc:
             output["resource_reuse"] = {"error": type(exc).__name__}
+            failures += 1
+        try:
+            output["resource_messages"] = resource_message_reuse_checks(args.orig, report, root)
+        except (OSError, ValueError, KeyError, struct.error, subprocess.CalledProcessError) as exc:
+            output["resource_messages"] = {"error": type(exc).__name__}
             failures += 1
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(output, indent=2) + "\n")

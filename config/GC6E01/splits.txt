@@ -1375,10 +1375,7 @@ game/menu/menu_middle_candidate_8006C7D4.c:
 
 game/menu/menu_middle_r59_8006CCC0_o1.c:
 	.text       start:0x8006CCC0 end:0x8006D940
-	.data       start:0x802EDFB0 end:0x802EE06C
-
-game/data/data_802EE06C.c:
-	.data       start:0x802EE06C end:0x802EE0F0
+	.data       start:0x802EDFB0 end:0x802EE0F0
 
 game/menu/menu_middle_r59_8006D940_suffix.c:
 	.text       start:0x8006D940 end:0x8006DC28
@@ -1868,7 +1865,6 @@ dolphin/sdk_candidate_8009DF3C.c:
 
 dolphin/os/OSInterruptHandlers.c:
 	.text       start:0x8009DF88 end:0x8009DFB8
-	.sbss       start:0x8047A710 end:0x8047A714
 
 dolphin/os/OSInterrupt.c:
 	.text       start:0x8009DFB8 end:0x8009E7A8
@@ -2508,8 +2504,8 @@ trk/TRKDispatch_range_800BF53C.c:
 	.rodata     start:0x8026F858 end:0x8026FA34
 	.data       start:0x803137E0 end:0x80313818
 
-game/data/data_80313824.c:
-	.data       start:0x80313824 end:0x803138B0
+trk/TRKRestoreFlags.c:
+	.data       start:0x80313818 end:0x803138B0
 
 game/data/rodata_8026FA34.c:
 	.rodata     start:0x8026FA34 end:0x8026FA40
@@ -2593,7 +2589,6 @@ trk/TRKInit.c:
 trk/TRKBoard_exact_800C33BC.c:
 	.text       start:0x800C33BC end:0x800C3414
 	.rodata     start:0x8026FB80 end:0x8026FB8B
-	.bss        start:0x803FED60 end:0x803FED64
 
 trk/TRKBoard_candidate_800C3414.c:
 	.text       start:0x800C3414 end:0x800C349C
@@ -6974,13 +6969,13 @@ game/data/sbss_80478DC0.c:
 	.sbss       start:0x80478DC0 end:0x8047A6E0
 
 game/data/sbss_8047A714.c:
-	.sbss       start:0x8047A714 end:0x8047A760
+	.sbss       start:0x8047A710 end:0x8047A760
 
 game/data/sbss_8047A9A0.c:
 	.sbss       start:0x8047A9A0 end:0x8047A9F0
 
 game/data/bss_803FED64.c:
-	.bss        start:0x803FED64 end:0x803FFFB0
+	.bss        start:0x803FED60 end:0x803FFFB0
 
 game/data/sbss_8047AA28.c:
 	.sbss       start:0x8047AA28 end:0x8047AA50

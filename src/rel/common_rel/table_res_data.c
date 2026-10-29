@@ -5,11 +5,10 @@
  * Module 125 .data 0x8BCB4 - 0x8BCD4. _prolog publishes this table and
  * its eight-entry count for tableResBiosGetResPtr.
  *
- * The resource payloads at .data 0x2D2C - 0x8BCB4, including fonts,
- * message tables and the remaining opaque resources, stay in dtk's
- * original-object fallback. They are read locally from the supplied
- * common_rel.rel; their bytes are not defined in this source file or
- * counted as compiled-source progress.
+ * shared_font_data.c and shared_message_data.c reuse definitions already
+ * present in the DOL source for .data 0x2D2C-0x58044 and 0x647B4-0x76C94.
+ * The other resources remain in dtk's original-object fallback, read from
+ * the supplied common_rel.rel and not counted as source progress.
  */
 #include "rel/common_rel.h"
 

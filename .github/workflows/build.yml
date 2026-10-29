@@ -76,7 +76,28 @@ jobs:
               --output build/${{ matrix.version }}/zero_data_layout.json
         fi
 
-    # Metadata only: no original objects, data bytes or instruction text.
+    - name: Diagnose linked data addresses
+      if: always()
+      run: |
+        if test -f build/${{ matrix.version }}/main.elf && test -f build/${{ matrix.version }}/report.json; then
+          python3 tools/data_link_diagnostics.py \
+              --elf build/${{ matrix.version }}/main.elf \
+              --report build/${{ matrix.version }}/report.json \
+              --symbols config/${{ matrix.version }}/symbols.txt \
+              --output build/${{ matrix.version }}/data_link_diagnostics.json
+        fi
+
+    - name: Probe compiler data alignment with synthetic declarations
+      if: always()
+      run: |
+        if test -f build/tools/wibo; then
+          python3 tools/probe_mwcc_data_alignment.py \
+              --compiler /compilers/GC/1.2.5n/mwcceppc.exe \
+              --wrapper build/tools/wibo \
+              --output build/${{ matrix.version }}/mwcc_data_alignment.json
+        fi
+
+    # Metadata and synthetic probes only: no original objects or payloads.
     - name: Upload data comparison diagnostics
       if: always()
       uses: actions/upload-artifact@v4
@@ -85,6 +106,8 @@ jobs:
         path: |
           build/${{ matrix.version }}/data_match_diagnostics.json
           build/${{ matrix.version }}/zero_data_layout.json
+          build/${{ matrix.version }}/data_link_diagnostics.json
+          build/${{ matrix.version }}/mwcc_data_alignment.json
         if-no-files-found: ignore
 
     - name: Verify registered assembly branch targets

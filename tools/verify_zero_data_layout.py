@@ -82,21 +82,20 @@ def expectations(manifest_path, symbols_path, splits_path):
         selected.sort(key=lambda row: row["offset"])
         cursor = 0
         expected = []
+        gaps = []
         for row in selected:
             if row["offset"] < cursor:
                 raise ValueError("zero-data symbols overlap")
             if row["offset"] > cursor:
-                expected.append({"name": f"padding_{start + cursor:08X}",
-                                 "offset": cursor, "size": row["offset"] - cursor})
+                gaps.append({"offset": cursor, "size": row["offset"] - cursor})
             expected.append(row)
             cursor = row["offset"] + row["size"]
         if cursor < end - start:
-            expected.append({"name": f"padding_{start + cursor:08X}",
-                             "offset": cursor, "size": end - start - cursor})
+            gaps.append({"offset": cursor, "size": end - start - cursor})
         if len({row["name"] for row in expected}) != len(expected):
             raise ValueError("duplicate zero-data symbol name")
         result.append({"unit": unit, "section": section, "start": start,
-                       "size": end - start, "symbols": expected,
+                       "size": end - start, "symbols": expected, "gaps": gaps,
                        "existing_symbols": len(selected)})
     return result
 
@@ -136,10 +135,27 @@ def check_object(blob, expected):
         wanted = (index, row["offset"], row["size"], 0x11)
         if actual != wanted:
             errors.append(f"{row['name']}: section/offset/size/binding {actual} != {wanted}")
+    # A compiler may leave map-derived gaps implicit. Any explicit padding
+    # definition must name its own address and fit wholly inside one such gap.
+    # It may not cover a real object, overlap another padding symbol, or create
+    # extra storage outside the independently established section extent.
+    padding_ranges = []
     for symbol in symbols:
-        if (symbol["shndx"] == index and symbol["size"]
-                and symbol["info"] & 15 != 3 and symbol["name"] not in names):
+        if (symbol["shndx"] != index or not symbol["size"]
+                or symbol["info"] & 15 == 3 or symbol["name"] in names):
+            continue
+        match = re.fullmatch(r"padding_([0-9A-F]{8})", symbol["name"])
+        start, end = symbol["value"], symbol["value"] + symbol["size"]
+        valid = (match is not None and symbol["info"] == 0x11
+                 and int(match[1], 16) == expected["start"] + start
+                 and any(gap["offset"] <= start and end <= gap["offset"] + gap["size"]
+                         for gap in expected.get("gaps", [])))
+        if not valid:
             errors.append(f"unexpected storage symbol: {symbol['name']}")
+        elif any(a < end and start < b for a, b in padding_ranges):
+            errors.append(f"overlapping padding symbol: {symbol['name']}")
+        else:
+            padding_ranges.append((start, end))
     return errors
 
 

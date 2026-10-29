@@ -60,13 +60,24 @@ hashes, relocation identities and comparison results. Its public JSON excludes
 payload bytes and disassembly. It also checks whether four resource spans match
 definitions already present in the DOL, reporting hashes and equality only.
 
-`tools/prodg_comparison_object.py` is prepared but **not connected to the build**.
-The two sound-table units already link correctly; SN's duplicated in-place
-RELA addends and unsized literal labels prevent a normal object comparison.
-The helper creates a separate source-comparison view only after proving exact
-relocation semantics and equality of all remaining bytes. It preserves the
-native linker input. The actual compiler objects must satisfy these checks
-before this path can be enabled or any additional matching credit claimed.
+The first private build verified the sound tables' exact literal-pool hashes
+and explicit relocation destinations. Their existing literal text is now
+given named source definitions, retaining each original string and reference.
+`tools/prodg_comparison_object.py` is connected only to these two data-only
+owners. It creates a separate source-comparison view after proving exact
+relocation semantics and equality of all non-relocation bytes. It normalizes
+SN's duplicated in-place RELA addends and preserves the native linker input.
+Actual compiler objects must pass these checks and canonical outputs before
+any additional matching credit is accepted.
+
+The first verification build retained all 8,677 exact functions but failed
+the canonical outputs and 32 of 34 zero-owner layout checks. It exposed
+reversed existing BSS declarations and redundant explicit padding in the new
+candidates. The next revision corrects declaration order, uses natural or
+scalar padding, tests reduced array alignment, and moves two preceding
+four-byte globals into aligned data-only owners. Metadata-only linked-address
+diagnostics and synthetic compiler probes investigate the remaining layouts.
+These failures are not accepted progress measurements.
 
 ## Validation requirements
 
@@ -109,6 +120,34 @@ evidence. Equal lengths alone do not prove equal data or correct relocations.
 An implementation of a resource format does not by itself reconstruct its
 contents; copied resource payloads and original-object fallback must not be
 relabelled as reconstructed implementation progress.
+
+The first private-input build for [PR #663](https://github.com/dougchansan/pkmn-colosseum/pull/663),
+head `35a32f20260da97b2af02b28bf8b31e73cd3cea4`, established equality of four
+complete resource spans with definitions already present in the DOL source:
+
+| Existing DOL definition | Common REL `.data` offset | Bytes |
+| --- | ---: | ---: |
+| `lbl_8027A500` | `0x2D2C` | 273,760 |
+| `lbl_802BD260` | `0x45A94` | 14,928 |
+| `lbl_802C0CB0` | `0x494E4` | 60,256 |
+| `lbl_802CF810` | `0x647B4` | 74,976 |
+
+The known eight-byte font header at `0x45A8C` was also verified as the
+`{0xFFFF, 0, 0, 0}` terminator recognized by `GSmsgFontOpen`. The draft shares
+the four existing definitions through `shared_font_data.c` and
+`shared_message_data.c`, adding only that typed structural terminator. It
+reuses 423,928 bytes without duplicating the font or message initializers.
+
+The normal DOL preprocessor output is unchanged. In the REL font view only,
+31 existing symbolic pixel words resolve to their canonical address values,
+because these words are data rather than REL imports. Four-byte alignment
+retains each original resource boundary. A 32-bit host compiler sanity check
+found the expected symbol offsets, no relocations, and all five resource
+hashes equal after translating the host's integer endianness. This is not a
+ProDG build or canonical-output result: both new owners are proposed source
+links awaiting those required checks, and no new percentage is claimed here.
+The other 137,104 resource bytes retain original fallback pending further
+reconstruction.
 
 Count-Sheep's original campaign history and contributor credit remain intact.
 The continuation's commits retain the account-linked coauthor credit when

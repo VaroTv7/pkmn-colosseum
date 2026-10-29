@@ -99,6 +99,23 @@ class ComparisonCopyTests(unittest.TestCase):
         _, summary = helper.comparison_copy(source, self.target)
         self.assertEqual(summary["duplicate_addend_words_normalized"], 0)
 
+    def test_named_source_strings_need_no_literal_metadata_changes(self):
+        source = bytearray(self.source)
+        elf = helper.Elf(self.source)
+        strings = elf.payload(elf.sections[elf.table_index][6])
+        table = section_offset(self.source, ".symtab")
+        for index, name in ((3, b'target_first\0'), (4, b'target_second\0')):
+            struct.pack_into('>I', source, table + index * 16, strings.index(name))
+            struct.pack_into('>I', source, table + index * 16 + 8, 4)
+            source[table + index * 16 + 12] = 1
+        output, summary = helper.comparison_copy(bytes(source), self.target)
+        self.assertEqual(summary['literal_labels_sized'], 0)
+        self.assertEqual(summary['named_literal_objects_verified'], 2)
+        self.assertEqual(helper.Elf(output).payload(elf.table_index), bytes(source)[table:table + 96])
+        bad = patch(bytes(source), table + 3 * 16 + 8, '>I', 3)
+        with self.assertRaisesRegex(ValueError, 'terminated source string'):
+            helper.comparison_copy(bad, self.target)
+
     def test_different_data_value_is_not_hidden(self):
         source = patch(self.source, section_offset(self.source, ".data"), ">I", 0x01020305)
         with self.assertRaisesRegex(ValueError, "Non-relocation bytes differ"):

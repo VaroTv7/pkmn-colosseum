@@ -157,7 +157,7 @@ extern u8 jumptable_802EDEFC[];
 extern u8 jumptable_802EDF20[];
 extern u8 jumptable_802EDFB0[];
 extern u8 jumptable_802EDFCC[];
-extern u8 jumptable_802EE06C[];
+extern void* jumptable_802EE06C[];
 extern u8 jumptable_802EE0F0[];
 extern u8 jumptable_802EE20C[];
 extern u8 jumptable_802EE31C[];

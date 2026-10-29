@@ -186,8 +186,27 @@ def comparison_copy(source_blob, target_blob):
     rodata = source.allocated[".rodata"]
     labels = [(i, s) for i, (name, s) in enumerate(source.symbols)
               if s[5] == rodata and re.fullmatch(r"\.LC\d+", name)]
-    if not labels or min(s[1] for _, s in labels) != 0:
+    named = [(i, s) for i, (_, s) in enumerate(source.symbols)
+             if s[5] == rodata and s[2] and s[3] & 15 == 1]
+    if not labels and not named:
+        raise ValueError("Literal pool needs source-owned literal extents")
+    if labels and min(s[1] for _, s in labels) != 0:
         raise ValueError("Literal pool needs compiler-local .LC labels starting at zero")
+    if named:
+        if labels:
+            raise ValueError("Mixed sized and compiler-local literal metadata")
+        pool = source.payload(rodata)
+        cursor = 0
+        for _, symbol in sorted(named, key=lambda row: row[1][1]):
+            start, size = symbol[1:3]
+            if start < cursor or any(pool[cursor:start]):
+                raise ValueError("Named literal extents overlap or leave nonzero gaps")
+            value = pool[start:start + size]
+            if not value or value[-1] != 0 or 0 in value[:-1]:
+                raise ValueError("Named literal extent is not one terminated source string")
+            cursor = start + size
+        if any(pool[cursor:]):
+            raise ValueError("Named literal extents leave nonzero trailing data")
     if any(s[2] or s[3] != 0 or s[4] != 0 for _, s in labels):
         raise ValueError("Unexpected compiler-local literal metadata")
     ends = sorted({s[1] for _, s in labels} | {source.sections[rodata][5]})
@@ -217,6 +236,7 @@ def comparison_copy(source_blob, target_blob):
         "relocations_verified": len(before_relocations),
         "duplicate_addend_words_normalized": len(normalized),
         "literal_labels_sized": len(labels),
+        "named_literal_objects_verified": len(named),
         "data_bytes_verified": sum(source.sections[i][5] for i in source.allocated.values()),
     }
 

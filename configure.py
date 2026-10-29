@@ -996,6 +996,15 @@ config.libs = [
             Object(
                 Matching,
                 "hsd/quatlib.c",
+                # CI-verified source symbol extents and relocation signatures.
+                symbol_mappings={
+                    'lbl_8047DD18': '@100',
+                    'lbl_8047DD1C': '@101',
+                    'lbl_8047DD20': '@243',
+                    'lbl_8047DD28': '@244',
+                    'lbl_8047DD30': '@245',
+                    'lbl_8047DD38': '@246',
+                },
                 mw_version="GC/1.3.2",
                 extra_cflags=["-O1", "-inline auto,deferred", "-use_lmw_stmw on", "-str reuse,readonly"],
                 progress_category="hsd",
@@ -5622,6 +5631,12 @@ config.libs = [
             Object(
                 Matching,
                 "dolphin/sdk_r52_800BD7A0_prefix.c",
+                # CI-verified source symbol extents and relocation signatures.
+                symbol_mappings={
+                    'jumptable_80313628': '@146',
+                    'jumptable_80313684': '@145',
+                    'jumptable_80313714': '@256',
+                },
                 mw_version="GC/1.2.5n",
                 progress_category="sdk",
             ),
@@ -5680,6 +5695,10 @@ config.libs = [
             Object(
                 Matching,
                 "dolphin/sdk_range_800C5458.c",
+                # CI-verified source symbol extents and relocation signatures.
+                symbol_mappings={
+                    'lbl_8047C400': '@212',
+                },
                 mw_version="GC/2.5",
                 extra_cflags=["-use_lmw_stmw on", "-str pool,readonly"],
                 progress_category="sdk",
@@ -6537,6 +6556,27 @@ config.libs = [
             Object(
                 Matching,
                 "hsd/tobj.c",
+                # CI-verified source symbol extents and relocation signatures.
+                symbol_mappings={
+                    'jumptable_8036D5A4': '@827',
+                    'jumptable_8036D5D0': '@918',
+                    'jumptable_8036D5F0': '@1082',
+                    'jumptable_8036D610': '@1081',
+                    'jumptable_8036D630': '@1080',
+                    'jumptable_8036D650': '@1079',
+                    'jumptable_8036D670': '@1078',
+                    'jumptable_8036D690': '@1077',
+                    'jumptable_8036D6B0': '@1076',
+                    'jumptable_8036D6D0': '@1075',
+                    'jumptable_8036D6F0': '@1198',
+                    'jumptable_8036D714': '@1281',
+                    'jumptable_8036D734': '@1648',
+                    'lbl_8036D43C': 'zero$288',
+                    'lbl_8036D46C': 'func$323',
+                    'lbl_8036D48C': 'tevdesc$355',
+                    'lbl_8036D510': 'tevdesc$365',
+                    'lbl_8036D594': 'default_lod$572',
+                },
                 mw_version="GC/1.3.2",
                 extra_cflags=["-O1", "-inline auto,deferred", "-use_lmw_stmw on", "-str reuse,readonly"],
                 progress_category="hsd",
@@ -9919,7 +9959,8 @@ config.libs = [
                         {
                             "symbol": "jumptable_802EE06C",
                             "function": "fn_8006F720",
-                            "owner": "game/data/data_802EE06C.c",
+                            "owner": "game/menu/menu_middle_r59_8006CCC0_o1.c",
+                            "owner_offset": 0xBC,
                         }
                         if path == "game/menu/menu_middle_r59_8006F720_o1.c"
                         else None
@@ -9950,6 +9991,10 @@ config.libs = [
             Object(
                 Matching,
                 "game/menu/menu_middle_r59_8006E338_o1.c",
+                # CI-verified source symbol extents and relocation signatures.
+                symbol_mappings={
+                    'lbl_8047E708': '@19',
+                },
                 mw_version="GC/2.0",
                 constant_import=[
                     MENU_CB_HOOK_POOL_IMPORT,
@@ -10692,6 +10737,25 @@ config.libs = [
             Object(
                 Matching,
                 "hsd/initialize.c",
+                # CI-verified source symbol extents and relocation signatures.
+                symbol_mappings={
+                    'lbl_8047DAB0': '@150',
+                    'lbl_8047DAB8': '@151',
+                    'lbl_8047DAC0': '@152',
+                    'lbl_8047DAC4': '@153',
+                    'lbl_8047DACC': '@154',
+                    'lbl_8047DAD4': '@155',
+                    'lbl_8047DAD8': '@156',
+                    'lbl_8047DADC': '@157',
+                    'lbl_8047DAE4': '@158',
+                    'lbl_8047DAEC': '@159',
+                    'lbl_8047DAF4': '@160',
+                    'lbl_8047DAFC': '@161',
+                    'lbl_8047DB04': '@162',
+                    'lbl_8047DB0C': '@296',
+                    'lbl_8047DB14': '@316',
+                    'lbl_8047DB18': '@317',
+                },
                 mw_version="GC/1.3.2",
                 extra_cflags=["-O1", "-inline auto,deferred", "-use_lmw_stmw on", "-str reuse,readonly"],
                 progress_category="hsd",
@@ -13107,14 +13171,6 @@ config.libs = [
                 "game/data/data_802EDE54.c",
                 progress_category="game",
             ),
-            # fn_8006F720's switch table starts 4-aligned at 0x802EE06C; every
-            # compiled .data section is 8-aligned, so this unit links from the
-            # extracted object until it can share a unit with the table before.
-            Object(
-                NonMatching,
-                "game/data/data_802EE06C.c",
-                progress_category="game",
-            ),
             Object(
                 Matching,
                 "game/data/data_802EE458.c",
@@ -13202,7 +13258,7 @@ config.libs = [
             ),
             Object(
                 Matching,
-                "game/data/data_80313824.c",
+                "trk/TRKRestoreFlags.c",
                 progress_category="game",
             ),
             Object(
@@ -13942,10 +13998,15 @@ config.libs = [
             Object(Matching, "rel/common_rel/common_rel.c"),
             Object(Matching, "rel/common_rel/const_data.c"),
             Object(Matching, "rel/common_rel/msg_face_data.c"),
+            # Shared DOL resource definitions; each complete original span
+            # was hash-equal in the private-input resource reuse diagnostic.
+            # Source/native REL and canonical-output checks remain required.
+            Object(Matching, "rel/common_rel/shared_font_data.c"),
+            Object(Matching, "rel/common_rel/shared_message_data.c"),
             Object(Matching, "rel/common_rel/table_res_data.c"),
             Object(Matching, "rel/common_rel/floor_fight_data.c"),
             Object(Matching, "rel/common_rel/fight_trainer_data.c"),
-            Object(Matching, "rel/common_rel/snd_song_table.c"),
+            Object(Matching, "rel/common_rel/snd_song_table.c", comparison_view="prodg_data"),
             Object(Matching, "rel/common_rel/gs_task_data.c"),
             Object(Matching, "rel/common_rel/fight_ai_data.c"),
             Object(Matching, "rel/common_rel/treasure_data.c"),
@@ -13953,7 +14014,7 @@ config.libs = [
             Object(Matching, "rel/common_rel/pokemon_data.c"),
             Object(Matching, "rel/common_rel/people_data.c"),
             Object(Matching, "rel/common_rel/snd_volume_data.c"),
-            Object(Matching, "rel/common_rel/snd_sample_table.c"),
+            Object(Matching, "rel/common_rel/snd_sample_table.c", comparison_view="prodg_data"),
             Object(Matching, "rel/common_rel/misc_data.c"),
         ],
     ),

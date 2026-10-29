@@ -66,6 +66,7 @@ class Object:
             "cflags": None,
             "constant_export": None,
             "constant_import": None,
+            "comparison_view": None,
             "jump_table_import": None,
             "extab_padding": None,
             "extra_asflags": [],
@@ -77,6 +78,7 @@ class Object:
             "scratch_preset_id": None,
             "shift_jis": None,
             "source": name,
+            "symbol_mappings": None,
             "src_dir": None,
         }
         self.options.update(options)
@@ -85,6 +87,7 @@ class Object:
         self.src_path: Optional[Path] = None
         self.asm_path: Optional[Path] = None
         self.src_obj_path: Optional[Path] = None
+        self.comparison_obj_path: Optional[Path] = None
         self.asm_obj_path: Optional[Path] = None
         self.ctx_path: Optional[Path] = None
 
@@ -132,6 +135,16 @@ class Object:
             ).with_suffix(".s")
         base_name = Path(self.name).with_suffix("")
         obj.src_obj_path = build_dir / "src" / f"{base_name}.o"
+        if obj.options["comparison_view"] is not None:
+            if obj.options["comparison_view"] != "prodg_data" or not is_prodg(obj.options["mw_version"]):
+                sys.exit(f"Unsupported source comparison view for {obj.name}")
+            obj.comparison_obj_path = build_dir / "compare" / f"{base_name}.o"
+        mappings = obj.options["symbol_mappings"]
+        if mappings is not None and (not isinstance(mappings, dict) or
+                any(not isinstance(k, str) or not k or not isinstance(v, str) or not v
+                    for k, v in mappings.items()) or
+                len(set(mappings.values())) != len(mappings)):
+            sys.exit(f"Invalid source comparison symbol mappings for {obj.name}")
         obj.asm_obj_path = build_dir / "mod" / f"{base_name}.o"
         obj.ctx_path = build_dir / "src" / f"{base_name}.ctx"
         return obj
@@ -766,6 +779,14 @@ def generate_build_ninja(
         wrapper_implicit,
         binutils_implicit or gnu_objcopy,
     ]
+
+    # GNU ld, for partial links of modules built with the SN toolchain
+    prodg_comparison = config.tools_dir / "prodg_comparison_object.py"
+    n.rule(
+        name="compare_prodg_data",
+        command=f"$python {prodg_comparison} --source $source --target $target --output $out",
+        description="Verify ProDG comparison view $out",
+    )
 
     # GNU ld, for partial links of modules built with the SN toolchain
     gnu_ld = binutils / f"powerpc-eabi-ld{EXE}"
@@ -1439,6 +1460,20 @@ def generate_build_ninja(
                 link_built_obj = True
                 built_obj_path = asm_build(obj, obj.asm_path, obj.asm_obj_path)
 
+            if obj.comparison_obj_path is not None:
+                if built_obj_path != obj.src_obj_path or obj_path is None:
+                    sys.exit(f"Source comparison view needs native source and target objects: {obj.name}")
+                # This separate view is used only by objdiff. The native source
+                # object remains the linker input, and the target is immutable.
+                n.build(
+                    outputs=obj.comparison_obj_path,
+                    rule="compare_prodg_data",
+                    inputs=[built_obj_path, Path(obj_path)],
+                    implicit=prodg_comparison,
+                    variables={"source": built_obj_path, "target": Path(obj_path)},
+                )
+                source_inputs.append(obj.comparison_obj_path)
+
             if link_built_obj and built_obj_path is not None:
                 # Use the source-built object
                 link_step.add(built_obj_path)
@@ -1960,8 +1995,10 @@ def generate_objdiff_config(
 
         src_exists = obj.src_path is not None and obj.src_path.exists()
         if src_exists:
-            unit_config["base_path"] = obj.src_obj_path
+            unit_config["base_path"] = obj.comparison_obj_path or obj.src_obj_path
             unit_config["metadata"]["source_path"] = obj.src_path
+        if obj.options["symbol_mappings"] is not None:
+            unit_config["symbol_mappings"] = dict(obj.options["symbol_mappings"])
 
         # Filter out include directories
         def keep_flag(flag):
