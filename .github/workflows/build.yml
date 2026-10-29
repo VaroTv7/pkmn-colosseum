@@ -55,7 +55,8 @@ jobs:
       run: |
         ninja -j2 build/${{ matrix.version }}.main.forceactive.lcf \
             build/${{ matrix.version }}/link/crt/interrupt_vectors.o
-        python3 tools/probe_source_data_link.py --link-timeout 30 --convert-timeout 20
+        python3 tools/probe_source_data_link.py --link-timeout 30 --convert-timeout 20 \
+            --objcopy /binutils/powerpc-eabi-objcopy
 
     # Only metadata from isolated variants; their fallback objects and output
     # files never feed the normal link/report and must never be uploaded.
