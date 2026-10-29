@@ -172,6 +172,37 @@ config.force_active_symbols["main"] = [
     # Preserve retail zero-initialized bytes after the EXI control block,
     # now that EXIGetID owns that block in its exact source unit.
     "lbl_803FB488",
+    # game/data/rodata_80267EA8.c: the matching menu code addresses this
+    # verified retail pool through its base plus byte offsets. Retain each
+    # typed table after moving the pool into its own source unit.
+    "lbl_80267EA8",
+    "lbl_80267F68",
+    "lbl_80267FE8",
+    "lbl_80268070",
+    "lbl_802680C0",
+    "lbl_802680D8",
+    "lbl_802680E4",
+    "lbl_80268120",
+    "lbl_80268178",
+    "lbl_80268184",
+    "lbl_802681B4",
+    "lbl_80268234",
+    "lbl_80268424",
+    "lbl_8026847C",
+    "lbl_8026849C",
+    "lbl_802684AC",
+    "lbl_802684C4",
+    "lbl_802684D0",
+    "lbl_80268540",
+    "lbl_80268550",
+    "lbl_80268560",
+    "lbl_80268574",
+    "lbl_8026858C",
+    "lbl_8026860C",
+    "lbl_8026864C",
+    "lbl_80268674",
+    "lbl_80268680",
+    "lbl_802686D0",
     # game/data/{bss,sdata,sbss}_*.c: retail variables that nothing in
     # main.dol references; compiled from source they would be dead-stripped
     # and the rest of the section would move.
@@ -12386,6 +12417,11 @@ config.libs = [
             ),
             Object(
                 Matching,
+                "dolphin/os/OSReset_data.c",
+                progress_category="sdk",
+            ),
+            Object(
+                Matching,
                 "dolphin/os/OSReset_candidate_suffix.c",
                 progress_category="sdk",
             ),
@@ -12565,13 +12601,14 @@ config.libs = [
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
-                "game/data/rodata_80268424.c",
+                Matching,
+                "game/data/rodata_80267EA8.c",
                 progress_category="game",
+                extra_cflags=["-sdata2 0"],
             ),
             Object(
                 DataCandidate,
-                "game/data/rodata_8026860C.c",
+                "game/data/rodata_80268708.c",
                 progress_category="game",
                 extra_cflags=["-sdata2 0"],
             ),

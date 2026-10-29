@@ -1162,6 +1162,12 @@ typedef struct NpcEventRosterEntry {
     u8 data[0xCA];
 } NpcEventRosterEntry;
 
+/* The record's last 0x2A bytes (0xA0-0xC9) are copied to the display data
+ * as one halfword-aligned block. */
+typedef struct NpcEventRecordTail {
+    u16 data[21];
+} NpcEventRecordTail;
+
 typedef struct NpcEventDisplayData {
     u8 data[0xD0];
 } NpcEventDisplayData;
@@ -1194,6 +1200,7 @@ static inline NpcEventRosterEntry* NpcEventGetRoster(u32 index)
 
 #define NPC_EVENT_ROSTER(index) NpcEventGetRoster(index)
 
+/* RULE-EXCEPTION(user-approved): single-use inline helper (fn_800327FC's party level step) - see docs/RULE_EXCEPTIONS.md */
 static inline u8 NpcEventGetPartyLevel(void)
 {
     extern u8 pokemonCheckValid(void*);
@@ -1215,6 +1222,7 @@ static inline u8 NpcEventGetPartyLevel(void)
     return best;
 }
 
+/* RULE-EXCEPTION(user-approved): single-use inline helper (fn_800327FC's team level step) - see docs/RULE_EXCEPTIONS.md */
 static inline u8 NpcEventGetTeamLevel(s8 slot)
 {
     u8* team;
@@ -1236,6 +1244,7 @@ static inline u8 NpcEventGetTeamLevel(s8 slot)
     return best;
 }
 
+/* RULE-EXCEPTION(user-approved): single-use inline helper (fn_800327FC's candidate selection step) - see docs/RULE_EXCEPTIONS.md */
 static inline s8 NpcEventSelectCandidate(void)
 {
     s32 scores[3];
@@ -1274,9 +1283,11 @@ static inline s8 NpcEventSelectCandidate(void)
     return selected;
 }
 
-/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
+#if !defined(GS_NPC_EVENT_ONLY_800327FC)
+/* RULE-EXCEPTION(user-approved): the file's local peephole-control pragma for the whole-file compiles; the linked carve uses unit-level -opt nopeephole instead - see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma peephole off
+#endif
 void cardeBattleSelectCard(void)
 {
     extern u8 pokemonCheckValid(void*);
@@ -1326,8 +1337,7 @@ void cardeBattleSelectCard(void)
         *(u16*)&display.data[0x7A] = *(u16*)&selected_record.data[0x74];
         *(NpcEventSetupData*)&display.data[0x7C] = *(NpcEventSetupData*)&selected_record.data[0x76];
         *(u16*)&display.data[0xA4] = *(u16*)&selected_record.data[0x9E];
-        *(u16*)&display.data[0xCE] = *(u16*)&selected_record.data[0xC8];
-        *(NpcEventSetupData*)&display.data[0xA6] = *(NpcEventSetupData*)&selected_record.data[0xA0];
+        *(NpcEventRecordTail*)&display.data[0xA6] = *(NpcEventRecordTail*)&selected_record.data[0xA0];
 
         lbl_8047A43C = 0;
         lbl_803A3278[0] = 0;
@@ -1384,16 +1394,20 @@ void cardeBattleSelectCard(void)
         break;
     }
 }
+#if !defined(GS_NPC_EVENT_ONLY_800327FC)
 #pragma pop
+#endif
 
 
 
 #endif
 
-/* cardeBuildTrainerEncounter and cardeBuildTrainerPokemon also build alone for the linked
+/* fn_80032ED8 and fn_800330B8 also build alone for the linked
  * gs_npc_event_candidate_80032ED8 unit. */
-#if !defined(GS_NPC_EVENT_ONLY_800324A0) && !defined(GS_NPC_EVENT_ONLY_800301B0)
+#if !defined(GS_NPC_EVENT_ONLY_800324A0) && !defined(GS_NPC_EVENT_ONLY_800301B0) && !defined(GS_NPC_EVENT_ONLY_80031B4C) && !defined(GS_NPC_EVENT_ONLY_800327FC)
 /* 0x80032ED8 | 0x1E0 */
+extern u32 std093_getCurrentGroupID(void);
+extern void cameraPlayAnime(u32 groupId, u32 animationId, s32 frame, u8 loop);
 extern u8*  fightEncountDataBiosGetPtr(s32);
 extern void fightEncountDataBiosSetTrainer(u8*, s32);
 extern void fightEncountDataBiosSetFightFloorDataId(u8*, u16);
@@ -1520,16 +1534,16 @@ void fn_80032ED8_legacy_disabled(void) {
     fightTrainerDataBiosGetPtr();
     r4 = *(u8*)((u8*)r29 + 0xC);
     r27 = r3;
-    fightTrainerSet00();
+    fn_801FCB94();
     r3 = r27;
     r4 = 0x26;
     fightTrainerDataBiosSetKindDataId();
     r4 = *(u16*)((u8*)r29 + 0x20);
     r3 = r27;
-    fightTrainerSet06();
+    fn_801FCB84();
     r4 = *(u8*)((u8*)r29 + 0x24);
     r3 = r27;
-    fightTrainerSet10();
+    fn_801FCAFC();
     r3 = r29;
     fn_800896E0();
     r3 = 0x0;
@@ -1542,7 +1556,7 @@ void fn_80032ED8_legacy_disabled(void) {
         r5 = *(u16*)((u8*)r28 + 0x12);
         r3 = r27;
         r4 = r26 & 0xFF;
-        fightTrainerSetU16Arr14();
+        fn_801FCB40();
         r28 = r28 + 0x2;
         r26 = r26 + 0x1;
     } while ((s32)r26 < 4);
@@ -1559,7 +1573,7 @@ void fn_80032ED8_legacy_disabled(void) {
         if (r31 != 0) {
             r3 = r26;
             r4 = r27;
-            cardeBuildTrainerPokemon();
+            fn_800330B8();
         } else {
 
             tmp = r24 + 0xd;
@@ -1569,7 +1583,7 @@ void fn_80032ED8_legacy_disabled(void) {
             tmp = tmp * 0x2a;
             r4 = r28 + tmp;
             r4 = r4 + 0x514;
-            cardeBuildTrainerPokemon();
+            fn_800330B8();
         }
         r27 = r27 + 0x2a;
         r26 = r26 + 0x50;
@@ -1589,7 +1603,7 @@ void fn_80032ED8_legacy_disabled(void) {
     r3 = r30;
     r4 = 0x1;
     r5 = 0x0;
-    fieldStartEncount();
+    fn_801CA5C4();
     r26 = r3;
     fn_80113F48();
     r4 = 0x11170000;

@@ -1008,7 +1008,7 @@ s32 fn_8002ACB8(void* r3, u8* r4) {
         msgctrlSetValue(0x50, heroGetStatus(0, 0xC, 0));
         text_id = 0x151;
         x = (s32)*(s16*)(r4 + 0x54) - (s32)(s16)(GSmsgGetRect(text_id) >> 16);
-        GSmsgPrintColor(x, 0, -1, text_id);
+        fn_800FB680(x, 0, -1, text_id);
         goto done;
     }
 
@@ -1041,7 +1041,7 @@ s32 fn_8002ACB8(void* r3, u8* r4) {
     msgctrlSetValue(0x50, (void*)value);
     text_id = 0x153;
     x = (s32)*(s16*)(r4 + 0x54) - (s32)(s16)(GSmsgGetRect(text_id) >> 16);
-    GSmsgPrintColor(x + 6, 0, -1, text_id);
+    fn_800FB680(x + 6, 0, -1, text_id);
 done:
     return 0;
 }
@@ -1193,7 +1193,7 @@ s32 fn_8002B03C(void* r3) {
     ctx = *(void**)((u8*)r3 + 0x60);
     v = ((u8*)ctx)[0x1c];
     if (v == 0 || v == 1) {
-        GSmsgPrintColor(0, 0, -1, 0x2b2e);
+        fn_800FB680(0, 0, -1, 0x2b2e);
     }
     return 0;
 }
@@ -1207,7 +1207,7 @@ asm void fn_8002B088(void) {
 }
 #else
 s32 fn_8002B088(void) {
-    GSmsgPrintColor(0, 0, -1, lbl_8047A3E4);
+    fn_800FB680(0, 0, -1, lbl_8047A3E4);
     return 0;
 }
 #endif

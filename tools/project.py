@@ -461,6 +461,11 @@ def load_build_config(
 def generate_build(config: ProjectConfig) -> None:
     config.validate()
     objects = config.objects()
+    # A completed object must never silently fall back to extracted retail
+    # code when its source is removed or its configured path is misspelled.
+    for obj in objects.values():
+        if obj.completed and (obj.src_path is None or not obj.src_path.is_file()):
+            sys.exit(f"Completed object {obj.name} has no source file: {obj.src_path}")
     build_config = load_build_config(config, config.out_path() / "config.json")
     generate_build_ninja(config, objects, build_config)
     generate_objdiff_config(config, objects, build_config)
