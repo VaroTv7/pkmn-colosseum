@@ -6965,3 +6965,46 @@ game/data/bss_803FB380.c:
 
 game/data/bss_803FB488.c:
 	.bss        start:0x803FB488 end:0x803FB4A0
+
+# Zero-initialized owners reconstructed from the existing symbol boundaries.
+game/data/sbss2_8047E700.c:
+	.sbss2      start:0x8047E700 end:0x8047E708
+
+game/data/sbss_80478DC0.c:
+	.sbss       start:0x80478DC0 end:0x8047A6E0
+
+game/data/sbss_8047A714.c:
+	.sbss       start:0x8047A714 end:0x8047A760
+
+game/data/sbss_8047A9A0.c:
+	.sbss       start:0x8047A9A0 end:0x8047A9F0
+
+game/data/bss_803FED64.c:
+	.bss        start:0x803FED64 end:0x803FFFB0
+
+game/data/sbss_8047AA28.c:
+	.sbss       start:0x8047AA28 end:0x8047AA50
+
+game/data/sbss_8047AA60.c:
+	.sbss       start:0x8047AA60 end:0x8047AAF8
+
+game/data/sbss_8047AB18.c:
+	.sbss       start:0x8047AB18 end:0x8047AF18
+
+game/data/sbss2_8047E718.c:
+	.sbss2      start:0x8047E718 end:0x8047E728
+
+game/data/sbss_8047B050.c:
+	.sbss       start:0x8047B050 end:0x8047B128
+
+game/data/sbss_8047B318.c:
+	.sbss       start:0x8047B318 end:0x8047B358
+
+game/data/sbss_8047B398.c:
+	.sbss       start:0x8047B398 end:0x8047B3D0
+
+game/data/sbss_8047B3D8.c:
+	.sbss       start:0x8047B3D8 end:0x8047B460
+
+game/data/sbss_8047B5B8.c:
+	.sbss       start:0x8047B5B8 end:0x8047B670

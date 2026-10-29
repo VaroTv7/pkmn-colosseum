@@ -18,4 +18,5 @@ SDATA2 const u8 lbl_8047C9CC[5] = "cobj";
 SDATA2 const f32 lbl_8047C9D4 = 60.0f;
 SDATA2 const f32 lbl_8047C9D8 = 1.33333302f;
 SDATA2 const u8 lbl_8047C9DC[7] = "aobj.h";
-SDATA2 const u8 lbl_8047C9E4[12] = "aobj";
+/* The following seven zero bytes are section padding, not part of the string. */
+SDATA2 const u8 lbl_8047C9E4[5] = "aobj";
