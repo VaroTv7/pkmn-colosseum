@@ -10,7 +10,8 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from tools.resource_message_diagnostics import (
-    SourceRegion, analyze_message_group, eligible_source_regions,
+    SourceRegion, analyze_message_group, analyze_script_bank, eligible_source_regions,
+    resource_range_integrity,
 )
 
 
@@ -19,7 +20,53 @@ def message_group(entries, payload):
             + b"".join(struct.pack(">II", *entry) for entry in entries) + payload)
 
 
+def script_bank():
+    return (struct.pack(">HHHHHBBIiI", 7, 0x1234, 3, 2, 0x5678, 0, 0, 64, 56, 0)
+            + struct.pack(">III", 36, 44, 36)
+            + b"FUNC_ONE" + b"SECOND_FUNC!" + b"GLOBAL!!"
+            + struct.pack(">II", 36, 44))
+
+
 class ResourceMessageDiagnosticTests(unittest.TestCase):
+    def test_complete_resource_hash_includes_original_fallback_storage(self):
+        original = b"HEADER_INDEX_PRIVATE_STORAGE"
+        result = resource_range_integrity(original, original, 0, len(original))
+        self.assertTrue(result["bytes_equal"])
+        changed = original[:-1] + b"!"
+        self.assertTrue(resource_range_integrity(original, changed, 0, 12)["bytes_equal"])
+        self.assertFalse(resource_range_integrity(original, changed, 0, len(original))["bytes_equal"])
+        self.assertNotIn("PRIVATE_STORAGE", json.dumps(result))
+        for start, end in ((-1, 2), (0, len(original) + 1), (3, 3)):
+            with self.subTest(start=start, end=end), self.assertRaises(ValueError):
+                resource_range_integrity(original, original, start, end)
+
+    def test_script_metadata_bounds_and_hashes_do_not_expose_instructions(self):
+        regions = [SourceRegion("main/shared", "src/shared.c", ".data", 0x80200000,
+                                b"PREFIXFUNC_ONE")]
+        result = analyze_script_bank(script_bank(), regions, 0x89CFC)
+        self.assertEqual(result["resource_type"], "gs_vm_script_bank")
+        self.assertEqual(result["function_offsets"], [36, 44, 36])
+        self.assertEqual(result["relocation_sites"], [36, 44])
+        self.assertEqual(result["structural_bytes"], 44)
+        self.assertEqual(result["non_table_storage_bytes"], 28)
+        self.assertEqual(result["reusable_storage_bytes"], 8)
+        self.assertEqual(result["unique_function_offsets"], 2)
+        self.assertEqual(result["intervals"][2]["function_indices"], [0, 2])
+        serialized = json.dumps(result)
+        for private in (b"FUNC_ONE", b"SECOND_FUNC!", b"GLOBAL!!"):
+            self.assertNotIn(private.decode(), serialized)
+            self.assertNotIn(private.hex(), serialized)
+        invalid = [script_bank()[:23]]
+        for offset, fmt, value in ((4, ">H", 0xFFFF), (24, ">I", 72),
+                                   (12, ">I", 70), (64, ">I", 70),
+                                   (16, ">i", -1), (68, ">I", 36)):
+            changed = bytearray(script_bank())
+            struct.pack_into(fmt, changed, offset, value)
+            invalid.append(changed)
+        for number, data in enumerate(invalid):
+            with self.subTest(number=number), self.assertRaises(ValueError):
+                analyze_script_bank(data, [], 0x89CFC)
+
     def test_offset_metadata_and_source_locations_do_not_expose_text(self):
         first, second = b"PRIVATE_SYNTHETIC_TEXT_1", b"PRIVATE_SYNTHETIC_TEXT_2"
         start = 16 + 3 * 8

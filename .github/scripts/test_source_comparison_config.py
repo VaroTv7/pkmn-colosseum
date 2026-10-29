@@ -73,6 +73,40 @@ class SourceComparisonConfigTests(unittest.TestCase):
         self.assertIn('originals/sound.o', edge)
         self.assertNotIn('/compare/', edge)
 
+    def test_data_names_view_changes_only_the_comparison_path(self):
+        obj = self.object(comparison_view='data_names', mw_version='GC/1.2.5n',
+                          symbol_mappings={'target_literal': '@12'})
+        ninja, unit = self.generate(obj)
+        self.assertEqual(unit['base_path'], 'build/GC6E01/compare/sound.o')
+        self.assertEqual(unit['target_path'], 'originals/sound.o')
+        self.assertNotIn('symbol_mappings', unit)
+        self.assertEqual(json.loads(Path('build/GC6E01/compare/sound.names.json').read_text()),
+                         {'target_literal': '@12'})
+        edge = next(s for s in ninja.splitlines() if s.startswith('build build/GC6E01/main.elf:'))
+        self.assertIn('build/GC6E01/src/sound.o', edge)
+        self.assertNotIn('/compare/', edge)
+        self.assertIn('compare_data_names build/GC6E01/src/sound.o originals/sound.o', ninja)
+
+    def test_link_alignment_keeps_native_source_as_comparison_input(self):
+        obj = self.object(data_alignment=4, mw_version='GC/1.2.5n')
+        ninja, unit = self.generate(obj)
+        self.assertEqual(unit['base_path'], 'build/GC6E01/src/sound.o')
+        self.assertEqual(unit['target_path'], 'originals/sound.o')
+        edge = next(s for s in ninja.splitlines() if s.startswith('build build/GC6E01/main.elf:'))
+        self.assertIn('build/GC6E01/link/sound.o', edge)
+        self.assertNotIn('originals/sound.o', edge)
+        self.assertIn('link_data_alignment build/GC6E01/src/sound.o originals/sound.o', ninja)
+
+    def test_link_alignment_cannot_promote_candidates_or_use_unknown_options(self):
+        for completed, options in (
+            (False, {'data_alignment': 4, 'mw_version': 'GC/1.2.5n'}),
+            (True, {'data_alignment': 4, 'mw_version': 'ProDG/3.5'}),
+            (True, {'data_alignment': 2, 'mw_version': 'GC/1.2.5n'}),
+            (True, {'comparison_view': 'data_names'}),
+        ):
+            with self.subTest(options=options), self.assertRaises(SystemExit):
+                self.object(completed, **options)
+
     def test_unknown_view_and_wrong_compiler_are_rejected(self):
         for options in ({'comparison_view': 'unknown'},
                         {'comparison_view': 'prodg_data', 'mw_version': 'GC/1.2.5n'}):

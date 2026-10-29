@@ -1,5 +1,8 @@
 #include "dolphin/types.h"
 
+/* These byte arrays retain the exact mapped positions inside their source
+ * section; explicit byte alignment avoids compiler-inserted internal gaps. */
+
 #pragma section ".data"
 
 extern void* lbl_803786D0[];
@@ -29,17 +32,17 @@ u8 lbl_803786F4[15] = {
     0x1B, 0x11, 0x3C,
 };
 
-u8 lbl_80378703[15] = {
+u8 lbl_80378703[15] __attribute__((aligned(1))) = {
     0x1A, 0x12, 0x56, 0x12, 0x10, 0x00, 0x00, 0x75, 0x45, 0x12, 0x00, 0x40,
     0x1B, 0x12, 0x3C,
 };
 
-u8 lbl_80378712[15] = {
+u8 lbl_80378712[15] __attribute__((aligned(1))) = {
     0x1A, 0x15, 0x56, 0x15, 0x10, 0x00, 0x00, 0x77, 0x01, 0x12, 0x00, 0x40,
     0x1B, 0x15, 0x3C,
 };
 
-u8 lbl_80378721[3] = {
+u8 lbl_80378721[3] __attribute__((aligned(1))) = {
     0x23, 0x15, 0x3E,
 };
 

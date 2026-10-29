@@ -1,5 +1,8 @@
 #include "dolphin/types.h"
 
+/* These byte arrays retain the exact mapped positions inside their source
+ * section; explicit byte alignment avoids compiler-inserted internal gaps. */
+
 /* .rodata after lightningStartEffect's strings (0x80272B40 - 0x80272C30, owned by
  * effect_visual_candidate_801386DC.c). */
 
@@ -19,7 +22,7 @@ const u8 lbl_80272C90[49] = {
     0x00,
 };
 
-const u8 gap_04_80272CC1_rodata[3] = {
+const u8 gap_04_80272CC1_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -30,7 +33,7 @@ const u8 lbl_80272CC4[61] = {
     0x6C, 0x6F, 0x6E, 0x65, 0x20, 0x6D, 0x6F, 0x64, 0x65, 0x6C, 0x2E, 0x0A, 0x00,
 };
 
-const u8 gap_04_80272D01_rodata[7] = {
+const u8 gap_04_80272D01_rodata[7] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -42,7 +45,7 @@ const u8 lbl_80272D08[74] = {
     0x20, 0x6D, 0x65, 0x6D, 0x6F, 0x72, 0x79, 0x21, 0x0A, 0x00,
 };
 
-const u8 gap_04_80272D52_rodata[2] = {
+const u8 gap_04_80272D52_rodata[2] __attribute__((aligned(1))) = {
     0x00, 0x00,
 };
 
@@ -53,7 +56,7 @@ const u8 lbl_80272D54[54] = {
     0x65, 0x63, 0x74, 0x21, 0x0A, 0x00,
 };
 
-const u8 gap_04_80272D8A_rodata[6] = {
+const u8 gap_04_80272D8A_rodata[6] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -67,7 +70,7 @@ const u8 lbl_80272D90[97] = {
     0x00,
 };
 
-const u8 gap_04_80272DF1_rodata[3] = {
+const u8 gap_04_80272DF1_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -78,7 +81,7 @@ const u8 lbl_80272DF4[53] = {
     0x63, 0x74, 0x21, 0x0A, 0x00,
 };
 
-const u8 gap_04_80272E29_rodata[7] = {
+const u8 gap_04_80272E29_rodata[7] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -89,7 +92,7 @@ const u8 lbl_80272E30[62] = {
     0x61, 0x6C, 0x69, 0x64, 0x20, 0x66, 0x69, 0x6C, 0x74, 0x65, 0x72, 0x21, 0x0A, 0x00,
 };
 
-const u8 gap_04_80272E6E_rodata[2] = {
+const u8 gap_04_80272E6E_rodata[2] __attribute__((aligned(1))) = {
     0x00, 0x00,
 };
 
@@ -99,7 +102,7 @@ const u8 lbl_80272E70[45] = {
     0x74, 0x65, 0x72, 0x20, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x21, 0x0A, 0x00,
 };
 
-const u8 gap_04_80272E9D_rodata[3] = {
+const u8 gap_04_80272E9D_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -109,7 +112,7 @@ const u8 lbl_80272EA0[47] = {
     0x20, 0x77, 0x61, 0x76, 0x65, 0x20, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x21, 0x0A, 0x00,
 };
 
-const u8 gap_04_80272ECF_rodata[1] = {
+const u8 gap_04_80272ECF_rodata[1] __attribute__((aligned(1))) = {
     0x00,
 };
 
@@ -119,7 +122,7 @@ const u8 lbl_80272ED0[45] = {
     0x73, 0x65, 0x61, 0x20, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x21, 0x0A, 0x00,
 };
 
-const u8 gap_04_80272EFD_rodata[3] = {
+const u8 gap_04_80272EFD_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -147,7 +150,7 @@ const u8 lbl_80272F70[47] = {
     0x20, 0x62, 0x6C, 0x75, 0x72, 0x20, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x21, 0x0A, 0x00,
 };
 
-const u8 gap_04_80272F9F_rodata[1] = {
+const u8 gap_04_80272F9F_rodata[1] __attribute__((aligned(1))) = {
     0x00,
 };
 
@@ -157,7 +160,7 @@ const u8 lbl_80272FA0[47] = {
     0x20, 0x61, 0x75, 0x72, 0x61, 0x20, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x21, 0x0A, 0x00,
 };
 
-const u8 gap_04_80272FCF_rodata[1] = {
+const u8 gap_04_80272FCF_rodata[1] __attribute__((aligned(1))) = {
     0x00,
 };
 
@@ -165,7 +168,7 @@ const u8 lbl_80272FD0[10] = {
     0x74, 0x72, 0x61, 0x6E, 0x73, 0x6C, 0x61, 0x74, 0x65, 0x00,
 };
 
-const u8 gap_04_80272FDA_rodata[6] = {
+const u8 gap_04_80272FDA_rodata[6] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -176,7 +179,7 @@ const u8 lbl_80272FE0[59] = {
     0x6E, 0x20, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x21, 0x0A, 0x00,
 };
 
-const u8 gap_04_8027301B_rodata[1] = {
+const u8 gap_04_8027301B_rodata[1] __attribute__((aligned(1))) = {
     0x00,
 };
 
@@ -203,7 +206,7 @@ const u8 lbl_80273078[57] = {
     0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x21, 0x0A, 0x00,
 };
 
-const u8 gap_04_802730B1_rodata[7] = {
+const u8 gap_04_802730B1_rodata[7] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -213,7 +216,7 @@ const u8 lbl_802730B8[35] = {
     0x65, 0x0A, 0x00,
 };
 
-const u8 gap_04_802730DB_rodata[5] = {
+const u8 gap_04_802730DB_rodata[5] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00,
 };
 

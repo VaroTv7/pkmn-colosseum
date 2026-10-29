@@ -1,5 +1,8 @@
 #include "dolphin/types.h"
 
+/* These byte arrays retain the exact mapped positions inside their source
+ * section; explicit byte alignment avoids compiler-inserted internal gaps. */
+
 extern u8 HSD_AObjGetAllocData[];
 extern u8 HSD_ChanGetAllocData[];
 extern u8 HSD_DListGetAllocData[];
@@ -320,7 +323,7 @@ const u8 lbl_80273568[34] = {
     0x0A, 0x00,
 };
 
-const u8 gap_04_8027358A_rodata[2] = {
+const u8 gap_04_8027358A_rodata[2] __attribute__((aligned(1))) = {
     0x00, 0x00,
 };
 
@@ -331,7 +334,7 @@ const u8 lbl_8027358C[55] = {
     0x64, 0x3D, 0x25, 0x64, 0x29, 0x0A, 0x00,
 };
 
-const u8 gap_04_802735C3_rodata[1] = {
+const u8 gap_04_802735C3_rodata[1] __attribute__((aligned(1))) = {
     0x00,
 };
 
@@ -364,7 +367,7 @@ const u8 lbl_802736CC[30] = {
     0x64, 0x20, 0x47, 0x72, 0x6F, 0x75, 0x70, 0x28, 0x25, 0x64, 0x29, 0x0A, 0x0A, 0x00,
 };
 
-const u8 gap_04_802736EA_rodata[6] = {
+const u8 gap_04_802736EA_rodata[6] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -374,7 +377,7 @@ const u8 lbl_802736F0[41] = {
     0x6E, 0x20, 0x53, 0x45, 0x3D, 0x25, 0x64, 0x0A, 0x00,
 };
 
-const u8 gap_04_80273719_rodata[3] = {
+const u8 gap_04_80273719_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -384,7 +387,7 @@ const u8 lbl_8027371C[42] = {
     0x6E, 0x20, 0x42, 0x47, 0x4D, 0x3D, 0x25, 0x64, 0x0A, 0x00,
 };
 
-const u8 gap_04_80273746_rodata[2] = {
+const u8 gap_04_80273746_rodata[2] __attribute__((aligned(1))) = {
     0x00, 0x00,
 };
 
@@ -393,7 +396,7 @@ const u8 lbl_80273748[27] = {
     0x41, 0x4C, 0x4C, 0x3A, 0x53, 0x74, 0x61, 0x72, 0x74, 0x0A, 0x00,
 };
 
-const u8 gap_04_80273763_rodata[1] = {
+const u8 gap_04_80273763_rodata[1] __attribute__((aligned(1))) = {
     0x00,
 };
 
@@ -402,7 +405,7 @@ const u8 lbl_80273764[25] = {
     0x41, 0x4C, 0x4C, 0x3A, 0x45, 0x6E, 0x64, 0x0A, 0x00,
 };
 
-const u8 gap_04_8027377D_rodata[3] = {
+const u8 gap_04_8027377D_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 
@@ -413,6 +416,6 @@ const u8 lbl_80273780[49] = {
     0x00,
 };
 
-const u8 gap_04_802737B1_rodata[7] = {
+const u8 gap_04_802737B1_rodata[7] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };

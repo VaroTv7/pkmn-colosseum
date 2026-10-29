@@ -67,6 +67,7 @@ class Object:
             "constant_export": None,
             "constant_import": None,
             "comparison_view": None,
+            "data_alignment": None,
             "jump_table_import": None,
             "extab_padding": None,
             "extra_asflags": [],
@@ -88,6 +89,7 @@ class Object:
         self.asm_path: Optional[Path] = None
         self.src_obj_path: Optional[Path] = None
         self.comparison_obj_path: Optional[Path] = None
+        self.link_obj_path: Optional[Path] = None
         self.asm_obj_path: Optional[Path] = None
         self.ctx_path: Optional[Path] = None
 
@@ -136,9 +138,16 @@ class Object:
         base_name = Path(self.name).with_suffix("")
         obj.src_obj_path = build_dir / "src" / f"{base_name}.o"
         if obj.options["comparison_view"] is not None:
-            if obj.options["comparison_view"] != "prodg_data" or not is_prodg(obj.options["mw_version"]):
+            view = obj.options["comparison_view"]
+            if view not in ("prodg_data", "data_names") or (
+                view == "prodg_data" and not is_prodg(obj.options["mw_version"])
+            ) or (view == "data_names" and not obj.options["symbol_mappings"]):
                 sys.exit(f"Unsupported source comparison view for {obj.name}")
             obj.comparison_obj_path = build_dir / "compare" / f"{base_name}.o"
+        if obj.options["data_alignment"] is not None:
+            if obj.options["data_alignment"] != 4 or not obj.completed or is_prodg(obj.options["mw_version"]):
+                sys.exit(f"Unsupported source-link data alignment for {obj.name}")
+            obj.link_obj_path = build_dir / "link" / f"{base_name}.o"
         mappings = obj.options["symbol_mappings"]
         if mappings is not None and (not isinstance(mappings, dict) or
                 any(not isinstance(k, str) or not k or not isinstance(v, str) or not v
@@ -786,6 +795,17 @@ def generate_build_ninja(
         name="compare_prodg_data",
         command=f"$python {prodg_comparison} --source $source --target $target --output $out",
         description="Verify ProDG comparison view $out",
+    )
+    source_metadata = config.tools_dir / "source_object_metadata.py"
+    n.rule(
+        name="compare_data_names",
+        command=f"$python {source_metadata} names --source $source --target $target --mappings $mappings --output $out",
+        description="Name source data for comparison $out",
+    )
+    n.rule(
+        name="link_data_alignment",
+        command=f"$python {source_metadata} align --source $source --target $target --alignment 4 --output $out",
+        description="Verify source data link alignment $out",
     )
 
     # GNU ld, for partial links of modules built with the SN toolchain
@@ -1465,14 +1485,43 @@ def generate_build_ninja(
                     sys.exit(f"Source comparison view needs native source and target objects: {obj.name}")
                 # This separate view is used only by objdiff. The native source
                 # object remains the linker input, and the target is immutable.
+                comparison_inputs = [built_obj_path, Path(obj_path)]
+                comparison_variables = {"source": built_obj_path, "target": Path(obj_path)}
+                if obj.options["comparison_view"] == "data_names":
+                    mappings_path = obj.comparison_obj_path.with_suffix(".names.json")
+                    mappings_path.parent.mkdir(parents=True, exist_ok=True)
+                    mappings_path.write_text(json.dumps(obj.options["symbol_mappings"], sort_keys=True) + "\n")
+                    comparison_inputs.append(mappings_path)
+                    comparison_variables["mappings"] = mappings_path
+                    comparison_rule = "compare_data_names"
+                    comparison_tool = source_metadata
+                else:
+                    comparison_rule = "compare_prodg_data"
+                    comparison_tool = prodg_comparison
                 n.build(
                     outputs=obj.comparison_obj_path,
-                    rule="compare_prodg_data",
-                    inputs=[built_obj_path, Path(obj_path)],
-                    implicit=prodg_comparison,
-                    variables={"source": built_obj_path, "target": Path(obj_path)},
+                    rule=comparison_rule,
+                    inputs=comparison_inputs,
+                    implicit=comparison_tool,
+                    variables=comparison_variables,
                 )
                 source_inputs.append(obj.comparison_obj_path)
+
+            if obj.link_obj_path is not None:
+                if not link_built_obj or built_obj_path != obj.src_obj_path or obj_path is None:
+                    sys.exit(f"Data link alignment needs completed native source and target objects: {obj.name}")
+                # Source bytes, symbols and relocations must independently match.
+                # Only the verified section alignment changes in this link copy;
+                # objdiff continues to measure the untouched native source object.
+                n.build(
+                    outputs=obj.link_obj_path,
+                    rule="link_data_alignment",
+                    inputs=[built_obj_path, Path(obj_path)],
+                    implicit=source_metadata,
+                    variables={"source": built_obj_path, "target": Path(obj_path)},
+                )
+                source_inputs.append(obj.link_obj_path)
+                built_obj_path = obj.link_obj_path
 
             if link_built_obj and built_obj_path is not None:
                 # Use the source-built object
@@ -1999,6 +2048,10 @@ def generate_objdiff_config(
             unit_config["metadata"]["source_path"] = obj.src_path
         if obj.options["symbol_mappings"] is not None:
             unit_config["symbol_mappings"] = dict(obj.options["symbol_mappings"])
+        if obj.options["comparison_view"] == "data_names":
+            # The comparison copy already carries the target names. Passing
+            # the native anonymous names here would break the interactive diff.
+            unit_config["symbol_mappings"] = None
 
         # Filter out include directories
         def keep_flag(flag):

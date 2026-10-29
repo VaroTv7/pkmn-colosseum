@@ -99,9 +99,14 @@ lbl_125_data_2D2C = .data:0x00002D2C; // type:object size:0x42D60
 lbl_125_data_45A8C = .data:0x00045A8C; // type:object size:0x8
 lbl_125_data_45A94 = .data:0x00045A94; // type:object size:0x3A50
 lbl_125_data_494E4 = .data:0x000494E4; // type:object size:0xEB60
-lbl_125_data_58044 = .data:0x00058044; // type:object size:0xC770
+// Message resource 0x58044..0x647B4: typed prefix and adjacent original storage.
+// Whole-resource coverage and hashes are recorded in docs/DATA_MATCHING.md.
+lbl_125_data_58044 = .data:0x00058044; // type:object size:0x3F20
+lbl_125_data_5BF64 = .data:0x0005BF64; // type:object size:0x8850
 lbl_125_data_647B4 = .data:0x000647B4; // type:object size:0x124E0
-lbl_125_data_76C94 = .data:0x00076C94; // type:object size:0x13068
+// Message resource 0x76C94..0x89CFC: preserve its base and complete extent.
+lbl_125_data_76C94 = .data:0x00076C94; // type:object size:0x4568
+lbl_125_data_7B1FC = .data:0x0007B1FC; // type:object size:0xEB00
 lbl_125_data_89CFC = .data:0x00089CFC; // type:object size:0x1FB8
 lbl_125_data_8BCB4 = .data:0x0008BCB4; // type:object size:0x20
 lbl_125_data_8BCD4 = .data:0x0008BCD4; // type:object size:0x20

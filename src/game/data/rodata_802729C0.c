@@ -1,5 +1,8 @@
 #include "dolphin/types.h"
 
+/* These byte arrays retain the exact mapped positions inside their source
+ * section; explicit byte alignment avoids compiler-inserted internal gaps. */
+
 /* .rodata after the evolution code's status lists (0x80272998 - 0x802729C0,
  * owned by pokemon_evolution_exact_8012805C.c). */
 
@@ -30,7 +33,7 @@ const u8 lbl_80272A58[73] = {
     0x20, 0x49, 0x44, 0x20, 0x25, 0x64, 0x2E, 0x0A, 0x00,
 };
 
-const u8 gap_04_80272AA1_rodata[7] = {
+const u8 gap_04_80272AA1_rodata[7] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
@@ -44,7 +47,7 @@ const u8 lbl_80272AB8[37] = {
     0x74, 0x65, 0x73, 0x0A, 0x00,
 };
 
-const u8 gap_04_80272ADD_rodata[3] = {
+const u8 gap_04_80272ADD_rodata[3] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00,
 };
 

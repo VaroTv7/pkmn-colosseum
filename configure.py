@@ -350,6 +350,15 @@ config.force_active_symbols["main"].extend(
     if line.strip() and not line.lstrip().startswith("#")
 )
 
+# Reconstructed data can be addressed through a pool base plus an offset.
+# Preserve its independently checked storage even without a direct relocation.
+source_data_exports = Path("config") / config.version / "source_data_exports.txt"
+config.reconfig_deps.append(source_data_exports)
+config.force_active_symbols["main"].extend(
+    line.strip() for line in source_data_exports.read_text(encoding="utf-8").splitlines()
+    if line.strip() and not line.lstrip().startswith("#")
+)
+
 # REL modules live inside FSYS archives (docs/REL_MODULES.md). dtk reads them
 # as loose files from orig/<version>/files, so the split step depends on an
 # extraction step: tools/fsys_extract.py unpacks the modules listed in
@@ -625,87 +634,124 @@ config.libs = [
         "Runtime.PPCEABI.H",
         "GC/1.2.5n",
         [
+            # Source diagnostic names; private CI verifies their full section bytes.
+            Object(
+                Matching,
+                "game/data/data_80315678.c",
+                extra_cflags=["-sdata 0", "-sdata2 0"],
+                progress_category="game",
+            ),
+            Object(
+                Matching,
+                "game/data/data_8035B060.c",
+                extra_cflags=["-sdata 0", "-sdata2 0"],
+                progress_category="game",
+            ),
+            Object(
+                Matching,
+                "game/data/data_8035B878.c",
+                extra_cflags=["-sdata 0", "-sdata2 0"],
+                progress_category="game",
+            ),
+            Object(
+                Matching,
+                "game/data/data_8035B988.c",
+                extra_cflags=["-sdata 0", "-sdata2 0"],
+                progress_category="game",
+            ),
+            Object(
+                Matching,
+                "game/data/data_8035BA10.c",
+                extra_cflags=["-sdata 0", "-sdata2 0"],
+                progress_category="game",
+            ),
+            Object(
+                Matching,
+                "game/data/data_8035BA60.c",
+                extra_cflags=["-sdata 0", "-sdata2 0"],
+                progress_category="game",
+            ),
             # Zero-init owners are candidates until symbol layouts and the full link pass.
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/sbss2_8047E700.c",
                 extra_cflags=["-sdata 16", "-sdata2 8"],
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/sbss_80478DC0.c",
                 extra_cflags=["-sdata 16", "-sdata2 8"],
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/sbss_8047A714.c",
                 extra_cflags=["-sdata 16", "-sdata2 8"],
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/sbss_8047A9A0.c",
                 extra_cflags=["-sdata 16", "-sdata2 8"],
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/bss_803FED64.c",
                 extra_cflags=["-sdata 0", "-sdata2 0"],
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/sbss_8047AA28.c",
                 extra_cflags=["-sdata 16", "-sdata2 8"],
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/sbss_8047AA60.c",
                 extra_cflags=["-sdata 16", "-sdata2 8"],
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/sbss_8047AB18.c",
                 extra_cflags=["-sdata 16", "-sdata2 8"],
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/sbss2_8047E718.c",
                 extra_cflags=["-sdata 16", "-sdata2 8"],
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/sbss_8047B050.c",
                 extra_cflags=["-sdata 16", "-sdata2 8"],
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/sbss_8047B318.c",
                 extra_cflags=["-sdata 16", "-sdata2 8"],
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/sbss_8047B398.c",
                 extra_cflags=["-sdata 16", "-sdata2 8"],
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/sbss_8047B3D8.c",
                 extra_cflags=["-sdata 16", "-sdata2 8"],
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/sbss_8047B5B8.c",
                 extra_cflags=["-sdata 16", "-sdata2 8"],
                 progress_category="game",
@@ -997,6 +1043,7 @@ config.libs = [
                 Matching,
                 "hsd/quatlib.c",
                 # CI-verified source symbol extents and relocation signatures.
+                comparison_view="data_names",
                 symbol_mappings={
                     'lbl_8047DD18': '@100',
                     'lbl_8047DD1C': '@101',
@@ -5632,10 +5679,10 @@ config.libs = [
                 Matching,
                 "dolphin/sdk_r52_800BD7A0_prefix.c",
                 # CI-verified source symbol extents and relocation signatures.
+                comparison_view="data_names",
                 symbol_mappings={
                     'jumptable_80313628': '@146',
                     'jumptable_80313684': '@145',
-                    'jumptable_80313714': '@256',
                 },
                 mw_version="GC/1.2.5n",
                 progress_category="sdk",
@@ -5696,6 +5743,7 @@ config.libs = [
                 Matching,
                 "dolphin/sdk_range_800C5458.c",
                 # CI-verified source symbol extents and relocation signatures.
+                comparison_view="data_names",
                 symbol_mappings={
                     'lbl_8047C400': '@212',
                 },
@@ -6557,6 +6605,7 @@ config.libs = [
                 Matching,
                 "hsd/tobj.c",
                 # CI-verified source symbol extents and relocation signatures.
+                comparison_view="data_names",
                 symbol_mappings={
                     'jumptable_8036D5A4': '@827',
                     'jumptable_8036D5D0': '@918',
@@ -9992,6 +10041,7 @@ config.libs = [
                 Matching,
                 "game/menu/menu_middle_r59_8006E338_o1.c",
                 # CI-verified source symbol extents and relocation signatures.
+                comparison_view="data_names",
                 symbol_mappings={
                     'lbl_8047E708': '@19',
                 },
@@ -10738,6 +10788,7 @@ config.libs = [
                 Matching,
                 "hsd/initialize.c",
                 # CI-verified source symbol extents and relocation signatures.
+                comparison_view="data_names",
                 symbol_mappings={
                     'lbl_8047DAB0': '@150',
                     'lbl_8047DAB8': '@151',
@@ -12741,6 +12792,7 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/rodata_80266C7C.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
@@ -12766,12 +12818,14 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/rodata_80267A5C.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
                 Matching,
                 "game/data/rodata_80267DD8.c",
                 progress_category="game",
+                extra_cflags=["-sdata2 0"],
             ),
             Object(
                 Matching,
@@ -12812,6 +12866,7 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/rodata_8026FA34.c",
+                data_alignment=4,
                 progress_category="game",
                 extra_cflags=["-sdata2 0"],
             ),
@@ -12824,18 +12879,21 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/rodata_8026FB94.c",
+                data_alignment=4,
                 progress_category="game",
                 extra_cflags=["-sdata2 0"],
             ),
             Object(
                 Matching,
                 "game/data/rodata_8026FD4C.c",
+                data_alignment=4,
                 progress_category="game",
                 extra_cflags=["-sdata2 0"],
             ),
             Object(
                 Matching,
                 "game/data/rodata_8026FE58.c",
+                data_alignment=4,
                 progress_category="game",
                 extra_cflags=["-sdata2 0"],
             ),
@@ -13209,6 +13267,7 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/data_80311AD4.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
@@ -13224,6 +13283,7 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/data_80311E54.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
@@ -13259,6 +13319,11 @@ config.libs = [
             Object(
                 Matching,
                 "trk/TRKRestoreFlags.c",
+                progress_category="game",
+            ),
+            Object(
+                Matching,
+                "crt/ansi_files_data.c",
                 progress_category="game",
             ),
             Object(
@@ -13314,11 +13379,13 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/data_8035B904.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
                 Matching,
                 "game/data/data_8035B96C.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
@@ -13442,7 +13509,7 @@ config.libs = [
                 progress_category="game",
             ),
             Object(
-                DataCandidate,
+                Matching,
                 "game/data/data_80375938.c",
                 progress_category="game",
             ),
@@ -13459,11 +13526,13 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/data_80376FCC.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
                 Matching,
                 "game/data/data_80377B0C.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
@@ -13479,6 +13548,7 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/data_80378794.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
@@ -13489,6 +13559,7 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/data_80378A7C.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
@@ -13499,6 +13570,7 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/data_80378D14.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
@@ -13509,31 +13581,37 @@ config.libs = [
             Object(
                 Matching,
                 "game/data/data_8037943C.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
                 Matching,
                 "game/data/data_803794CC.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
                 Matching,
                 "game/data/data_80379714.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
                 Matching,
                 "game/data/data_80379A3C.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
                 Matching,
                 "game/data/data_80379BF4.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
                 Matching,
                 "game/data/data_8038FFFC.c",
+                data_alignment=4,
                 progress_category="game",
             ),
             Object(
@@ -14003,6 +14081,10 @@ config.libs = [
             # Source/native REL and canonical-output checks remain required.
             Object(Matching, "rel/common_rel/shared_font_data.c"),
             Object(Matching, "rel/common_rel/shared_message_data.c"),
+            # Typed MessageGroup headers and indices; message storage stays
+            # in adjacent original objects with the full resource coverage.
+            Object(Matching, "rel/common_rel/message_index_58044.c"),
+            Object(Matching, "rel/common_rel/message_index_76C94.c"),
             Object(Matching, "rel/common_rel/table_res_data.c"),
             Object(Matching, "rel/common_rel/floor_fight_data.c"),
             Object(Matching, "rel/common_rel/fight_trainer_data.c"),

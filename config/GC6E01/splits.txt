@@ -2688,6 +2688,9 @@ dolphin/sdk_r52_800C4D8C_suffix.c:
 crt/exit.c:
 	.text       start:0x800C4E44 end:0x800C5458
 
+crt/ansi_files_data.c:
+	.data       start:0x803138B0 end:0x803139F0
+
 dolphin/sdk_range_800C5458.c:
 	.text       start:0x800C5458 end:0x800C754C
 	.rodata     start:0x8026FF00 end:0x8026FFE0
@@ -3706,7 +3709,7 @@ game/data/data_8035B500.c:
 	.data       start:0x8035B500 end:0x8035B878
 
 game/data/data_8035B8A0.c:
-	.data       start:0x8035B8A0 end:0x8035B8B4
+	.data       start:0x8035B8A0 end:0x8035B904
 
 game/data/data_8035B904.c:
 	.data       start:0x8035B904 end:0x8035B950
@@ -7003,3 +7006,22 @@ game/data/sbss_8047B3D8.c:
 
 game/data/sbss_8047B5B8.c:
 	.sbss       start:0x8047B5B8 end:0x8047B670
+
+# Developer diagnostic strings reconstructed from existing source names.
+game/data/data_80315678.c:
+	.data       start:0x80315678 end:0x80315690
+
+game/data/data_8035B060.c:
+	.data       start:0x8035B060 end:0x8035B088
+
+game/data/data_8035B878.c:
+	.data       start:0x8035B878 end:0x8035B8A0
+
+game/data/data_8035B988.c:
+	.data       start:0x8035B988 end:0x8035B9F8
+
+game/data/data_8035BA10.c:
+	.data       start:0x8035BA10 end:0x8035BA48
+
+game/data/data_8035BA60.c:
+	.data       start:0x8035BA60 end:0x8035BB50

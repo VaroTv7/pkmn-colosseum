@@ -108,11 +108,52 @@ The full acceptance sequence is:
    verified report, then pass Build, Quality Lint and Regression Guard on the
    final PR head before merging.
 
+## Source metadata and linker layout
+
+The first three draft builds kept all 8,677 tracked functions exact, but failed
+the canonical output hashes. Their percentages are provisional. The third
+build verified all 34 zero-data owners' native symbol layouts, covering
+655,080 bytes, and identified the remaining linker shifts. Newly linked
+objects need explicit retention, byte-array alignment at packed boundaries,
+and the original section boundary alignment. `source_data_exports.txt`
+retains only the source definitions introduced by this continuation.
+
+Twenty-one initialized data owners start four bytes past an eight-byte
+boundary. MWCC emits eight-byte section alignment even though their actual
+C objects require at most four. `tools/source_object_metadata.py align`
+creates a separate source-link object after requiring identical section
+bytes, every original data-symbol extent, and relocation semantics. It reads
+the compiler's per-symbol alignment records and rejects any real object that
+requires more than four-byte alignment. Only the section alignment and its
+section metadata change. The native object remains the report input, and
+the original target remains untouched.
+
+One pointer-array owner also has MWCC's local, untyped, zero-sized
+`...data.0` section-base marker. A duplicated eight-byte alignment on that
+marker may be lowered with the section alignment only when real object
+extents and verified zero gaps cover the entire section. It is explicitly a
+section marker, not an additional reconstructed C object. No code, data,
+symbol offset, symbol size, symbol binding, or relocation record is changed
+by the link view. This is compiled source with a documented linker-layout
+adjustment, and remains subject to all canonical hashes and byte comparisons.
+The metadata format follows the pinned toolkit's
+[`MWComment`/`CommentSym` definitions](https://github.com/encounter/decomp-toolkit/blob/v1.8.3/src/util/comment.rs).
+
+The pinned objdiff v3.6.1
+[`report_object` implementation](https://github.com/encounter/objdiff/blob/v3.6.1/objdiff-cli/src/cmd/report.rs)
+constructs a default symbol mapping instead of using each unit's configured
+mapping. Six comparison-only views therefore give the existing anonymous
+compiler data objects their independently established target names. This
+changes only symbol-name/string-table metadata. All source bytes, symbol
+values and sizes, bindings, and relocation records remain unchanged; native
+objects remain linker inputs. The standard report generator still performs
+the actual byte/relocation comparison, with its full original denominators.
+
 ## Resource scope and attribution
 
-The 561,032-byte resource region currently remains original fallback, as
-documented in [`REL_MODULES.md`](REL_MODULES.md) and the corrected import in
-PR #646. It remains in the full data denominator and in the completion scope.
+The 561,032-byte resource region was original fallback in the verified
+baseline, as documented in [`REL_MODULES.md`](REL_MODULES.md) and the corrected
+import in PR #646. It remains in the full data denominator and completion scope.
 Independently reconstructed implementations, typed data definitions and
 verified reuse of existing source may earn matching and source-link credit.
 Each claimed gain requires source-object, relocation and canonical-output
@@ -144,10 +185,44 @@ because these words are data rather than REL imports. Four-byte alignment
 retains each original resource boundary. A 32-bit host compiler sanity check
 found the expected symbol offsets, no relocations, and all five resource
 hashes equal after translating the host's integer endianness. This is not a
-ProDG build or canonical-output result: both new owners are proposed source
-links awaiting those required checks, and no new percentage is claimed here.
-The other 137,104 resource bytes retain original fallback pending further
-reconstruction.
+canonical-output result. The third private-input build independently verified
+all 423,928 bytes from native ProDG source objects; the source links still
+await passing complete output checks, and no accepted percentage is claimed here.
+The other 137,104 resource bytes contain two message groups and a GS VM
+script bank. The bounded message diagnostic establishes their structure
+without publishing message text. Two additional proposed owners reconstruct
+the headers and key/offset indices, totaling 33,928 bytes:
+
+| Complete original message resource | Original bytes | Typed header/index | Adjacent original storage |
+| --- | ---: | --- | --- |
+| `0x58044–0x647B4` | 51,056 | `0x58044–0x5BF64` (16,160 bytes; 2,018 entries) | `0x5BF64–0x647B4` (34,896 bytes) |
+| `0x76C94–0x89CFC` | 77,928 | `0x76C94–0x7B1FC` (17,768 bytes; 2,219 entries) | `0x7B1FC–0x89CFC` (60,160 bytes) |
+
+This is an intentional ownership refinement of two previously opaque
+aggregate symbols. Their original names and addresses remain on the typed
+prefixes; new symbols identify the immediately adjacent storage. No gap,
+overlap, omitted byte or resource-pointer change is introduced. Entry offsets
+remain relative to each unchanged resource base, as required by
+`GSmsgFindMessage`. The complete resource hashes remain
+`e38470739c2815a81041f140d3f4e019b942d016f64f0cb3ac48c4b6c4211778`
+and `0185880becce6f0bb4a3d55666a48124bfb2a8348150b8d628210847e7d1f754`.
+
+The existing DOL header convention supplies the reserved fields, and the
+recorded keys and offsets reproduce each entire original prefix hash:
+`2f7c61218b1523952a9d2f2e8d97b04adc47fbfbf82097fa92a5f972567fba49`
+and `f3e702439d6589668cd0dfff9e0fd72f47ec5c53b1ea7378f8d9343ae332f1c0`.
+A host compiler layout check also reproduces these hashes with four-byte
+alignment and no relocations after translating integer endianness. Native
+ProDG and canonical output validation remain required. When the rebuilt REL
+is available, the diagnostic compares the complete 561,032-byte resource
+region and each original message resource, including its fallback storage.
+
+The two new indices do not reconstruct their message text. Their remaining
+95,056 storage bytes and the 8,120-byte GS VM bank remain fallback (103,176
+bytes total). Current source searches find only 68 bytes of candidate message
+storage reuse; this does not justify counting the rest. The script diagnostic
+reports its loader header, function-offset/relocation tables and bounded
+interval hashes without emitting instructions or literals.
 
 Count-Sheep's original campaign history and contributor credit remain intact.
 The continuation's commits retain the account-linked coauthor credit when

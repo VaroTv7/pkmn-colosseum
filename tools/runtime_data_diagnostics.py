@@ -154,9 +154,23 @@ def runtime_structure(unit, metadata, private):
         raise ValueError("Multiple runtime regions in one owner")
     address, size = recognized[0]
     expected = 0x140 if address == FILE_ADDRESS else 12
-    if size != expected:
-        raise ValueError("Runtime report extent differs")
     section, data = metadata[".data"], private[".data"]
+    if size != expected:
+        # Restore flags may share an aligned owner with the following existing
+        # MetroTRK data. Inspect only the same twelve-byte prefix; never decode
+        # unrelated storage using this known runtime ABI.
+        if address != RESTORE_ADDRESS or size < expected or data is None \
+                or len(data) != size or section["size"] != size:
+            raise ValueError("Runtime report extent differs")
+        if any(symbol["offset"] < expected < symbol["offset"] + symbol["size"]
+               for symbol in section["symbols"]):
+            raise ValueError("Runtime prefix bisects another symbol")
+        section = dict(section, size=expected,
+                       symbols=[symbol for symbol in section["symbols"]
+                                if symbol["offset"] < expected],
+                       relocations=[relocation for relocation in section["relocations"]
+                                    if relocation["offset"] < expected])
+        data = data[:expected]
     if address == FILE_ADDRESS:
         return file_initializer(section, data)
     return restore_initializer(section, data)

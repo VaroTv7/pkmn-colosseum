@@ -1,5 +1,8 @@
 #include "dolphin/types.h"
 
+/* These byte arrays retain the exact mapped positions inside their source
+ * section; explicit byte alignment avoids compiler-inserted internal gaps. */
+
 /* Continues rodata_80273A00.c after cameraInit's initialisers
  * (0x80273D98-0x80273DC8, src/game/camera_801765F4.c): the stripped
  * cameraDispInfo's zero vectors and strings (see camera.c), then fsys'
@@ -41,7 +44,7 @@ const u8 lbl_80273F70[11] = {
     0x67, 0x73, 0x66, 0x73, 0x79, 0x73, 0x2E, 0x74, 0x6F, 0x63, 0x00,
 };
 
-const u8 gap_04_80273F7B_rodata[5] = {
+const u8 gap_04_80273F7B_rodata[5] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00,
 };
 

@@ -18,9 +18,11 @@ from pathlib import Path
 if __package__:
     from .resource_message_diagnostics import resource_message_reuse_checks
     from .runtime_data_diagnostics import runtime_structure
+    from .source_data_reuse import find_source_reuse
 else:
     from resource_message_diagnostics import resource_message_reuse_checks
     from runtime_data_diagnostics import runtime_structure
+    from source_data_reuse import find_source_reuse
 
 
 DATA_SECTIONS = {".rodata", ".data", ".sdata", ".sdata2"}
@@ -470,6 +472,12 @@ def main():
             output["resource_messages"] = resource_message_reuse_checks(args.orig, report, root)
         except (OSError, ValueError, KeyError, struct.error, subprocess.CalledProcessError) as exc:
             output["resource_messages"] = {"error": type(exc).__name__}
+            failures += 1
+        try:
+            output["compiled_source_reuse"] = find_source_reuse(
+                config, report, root, args.report.resolve().parent, elf_metadata)
+        except (OSError, ValueError, KeyError, struct.error, subprocess.CalledProcessError) as exc:
+            output["compiled_source_reuse"] = {"error": type(exc).__name__}
             failures += 1
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(output, indent=2) + "\n")

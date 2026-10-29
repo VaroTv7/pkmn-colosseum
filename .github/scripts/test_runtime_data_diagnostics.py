@@ -130,6 +130,21 @@ class RuntimeDataDiagnosticTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             restore_initializer(section, data)
 
+    def test_merged_restore_owner_only_decodes_known_prefix(self):
+        section, data = restore_fixture()
+        section["size"] = 152
+        section["symbols"].append({"name": "following_state", "offset": 12,
+                                   "size": 140, "type": 1, "binding": 1})
+        data += b"PRIVATE_FOLLOWING_PAYLOAD".ljust(140, b"!")
+        result = runtime_structure(report_unit(RESTORE_ADDRESS, 152),
+                                   {".data": section}, {".data": data})
+        self.assertEqual(result["flags"], [False] * 9)
+        self.assertNotIn("PRIVATE_FOLLOWING_PAYLOAD", json.dumps(result))
+        section["symbols"][-1]["offset"] = 11
+        with self.assertRaises(ValueError):
+            runtime_structure(report_unit(RESTORE_ADDRESS, 152),
+                              {".data": section}, {".data": data})
+
 
 if __name__ == "__main__":
     unittest.main()

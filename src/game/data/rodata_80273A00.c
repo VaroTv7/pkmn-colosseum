@@ -1,5 +1,8 @@
 #include "dolphin/types.h"
 
+/* These byte arrays retain the exact mapped positions inside their source
+ * section; explicit byte alignment avoids compiler-inserted internal gaps. */
+
 extern u8 HSD_AObjGetAllocData[];
 extern u8 HSD_ChanGetAllocData[];
 extern u8 HSD_DListGetAllocData[];
@@ -310,7 +313,7 @@ const u8 lbl_80273A00[11] = {
     0x67, 0x73, 0x25, 0x30, 0x34, 0x64, 0x2E, 0x78, 0x66, 0x62, 0x00,
 };
 
-const u8 gap_04_80273A0B_rodata[5] = {
+const u8 gap_04_80273A0B_rodata[5] __attribute__((aligned(1))) = {
     0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
