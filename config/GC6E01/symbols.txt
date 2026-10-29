@@ -13,7 +13,9 @@ gTRKInterruptVectorTable = .init:0x800034AC; // type:label scope:global
 # This is the existing 7,988-byte original vector-table fallback, not a function.
 # Hide only its synthetic marker from function scoring, preserving the baseline
 # denominator; the named fallback and full physical .init interval remain visible.
-pad_00_800034AC_init = .init:0x800034AC; // type:function size:0x1F34 scope:global hidden
+# Keep the raw templates free of inferred outgoing relocations, as they were
+# before the marker existed during DTK's function-analysis pass.
+pad_00_800034AC_init = .init:0x800034AC; // type:function size:0x1F34 scope:global hidden noreloc
 lbl_80003FF0 = .init:0x80003FF0; // type:label
 lbl_80004000 = .init:0x80004000; // type:label
 fn_800053E0 = .init:0x800053E0; // type:function size:0x2C
