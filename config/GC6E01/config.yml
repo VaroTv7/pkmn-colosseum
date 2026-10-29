@@ -75,6 +75,11 @@ block_relocations:
   - source: .rodata:0x80276C28
   - source: .rodata:0x80276E34
   - source: .rodata:0x802790E8
+  # Packed battle instructions: this aligned word straddles the final byte of
+  # a WS_STATUS_SET16 pointer and the next play-animation instruction header.
+  # It is not a pointer to lbl_80451217; the semantic bytecode source preserves
+  # all four original bytes without a false ADDR32 relocation.
+  - source: .data:0x80378FF4
 
 # REL modules. The game keeps them inside FSYS archives; extract them into
 # orig/GC6E01/files/ with tools/fsys_extract.py first (docs/REL_MODULES.md).

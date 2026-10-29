@@ -5,7 +5,7 @@
 #include "dolphin/types.h"
 
 extern u8* lbl_8047B610;
-extern u8 lbl_80478D78[1];
+extern u8 lbl_80478D78[8];
 extern u8 fn_801DDD28();
 extern void wazaSequenceSysStartWaza();
 extern u32 fightTrainerGetIrekaeFightPokemon();

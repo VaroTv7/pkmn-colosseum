@@ -99,15 +99,38 @@ lbl_125_data_2D2C = .data:0x00002D2C; // type:object size:0x42D60
 lbl_125_data_45A8C = .data:0x00045A8C; // type:object size:0x8
 lbl_125_data_45A94 = .data:0x00045A94; // type:object size:0x3A50
 lbl_125_data_494E4 = .data:0x000494E4; // type:object size:0xEB60
-// Message resource 0x58044..0x647B4: typed prefix and adjacent original storage.
-// Whole-resource coverage and hashes are recorded in docs/DATA_MATCHING.md.
+// Message resource 0x58044..0x647B4: typed prefix, source templates and explicit original storage.
+// Full resource coverage remains recorded in docs/DATA_MATCHING.md.
 lbl_125_data_58044 = .data:0x00058044; // type:object size:0x3F20
-lbl_125_data_5BF64 = .data:0x0005BF64; // type:object size:0x8850
+lbl_125_data_5BF64 = .data:0x0005BF64; // type:object size:0x90
+lbl_125_data_5BFF4 = .data:0x0005BFF4; // type:object size:0x9C
+lbl_125_data_5C090 = .data:0x0005C090; // type:object size:0x5982
+lbl_125_data_61A12 = .data:0x00061A12; // type:object size:0x2E
+lbl_125_data_61A40 = .data:0x00061A40; // type:object size:0x1C
+lbl_125_data_61A5C = .data:0x00061A5C; // type:object size:0x1F
+lbl_125_data_61A7B = .data:0x00061A7B; // type:object size:0x310
+lbl_125_data_61D8B = .data:0x00061D8B; // type:object size:0x9
+lbl_125_data_61D94 = .data:0x00061D94; // type:object size:0xB2
+lbl_125_data_61E46 = .data:0x00061E46; // type:object size:0x31
+lbl_125_data_61E77 = .data:0x00061E77; // type:object size:0x11F2
+lbl_125_data_63069 = .data:0x00063069; // type:object size:0x5
+lbl_125_data_6306E = .data:0x0006306E; // type:object size:0x1094
+lbl_125_data_64102 = .data:0x00064102; // type:object size:0xC
+lbl_125_data_6410E = .data:0x0006410E; // type:object size:0x6A6
 lbl_125_data_647B4 = .data:0x000647B4; // type:object size:0x124E0
 // Message resource 0x76C94..0x89CFC: preserve its base and complete extent.
 lbl_125_data_76C94 = .data:0x00076C94; // type:object size:0x4568
-lbl_125_data_7B1FC = .data:0x0007B1FC; // type:object size:0xEB00
-// GS VM resource retains its base and full extent through 0x8BCB4.
+lbl_125_data_7B1FC = .data:0x0007B1FC; // type:object size:0x6C
+lbl_125_data_7B268 = .data:0x0007B268; // type:object size:0x5849
+lbl_125_data_80AB1 = .data:0x00080AB1; // type:object size:0x630
+lbl_125_data_810E1 = .data:0x000810E1; // type:object size:0x110
+lbl_125_data_811F1 = .data:0x000811F1; // type:object size:0x418
+lbl_125_data_81609 = .data:0x00081609; // type:object size:0x49F4
+lbl_125_data_85FFD = .data:0x00085FFD; // type:object size:0x17
+lbl_125_data_86014 = .data:0x00086014; // type:object size:0x3774
+lbl_125_data_89788 = .data:0x00089788; // type:object size:0x234
+lbl_125_data_899BC = .data:0x000899BC; // type:object size:0x340
+// Complete GS VM bank: typed prefix followed by compiled semantic source.
 lbl_125_data_89CFC = .data:0x00089CFC; // type:object size:0x9C
 lbl_125_data_89D98 = .data:0x00089D98; // type:object size:0x1F1C
 lbl_125_data_8BCB4 = .data:0x0008BCB4; // type:object size:0x20

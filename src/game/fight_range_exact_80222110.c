@@ -6,7 +6,7 @@
 
 extern u8* lbl_8047B610;
 extern u8 lbl_8047B614;
-extern u8 lbl_80478D78[1];
+extern u8 lbl_80478D78[8];
 extern u32 lbl_8047B618;
 extern void* lbl_8047B62C;
 extern u8 lbl_80379F58[];

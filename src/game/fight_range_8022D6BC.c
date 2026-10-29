@@ -8,7 +8,7 @@
  */
 #include "dolphin/types.h"
 
-extern u8 lbl_80478D78[1];
+extern u8 lbl_80478D78[8];
 extern u16 GSrand(void);
 extern void wsRunScript(void*, void*, u8);
 

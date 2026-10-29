@@ -1,0 +1,620 @@
+{
+  "schema": "gs-message-templates-v1",
+  "units": {
+    "message_templates_5BFF4": {
+      "symbol": "lbl_125_data_5BFF4",
+      "start": 376820,
+      "size": 156,
+      "messages": [
+        {
+          "key": 201,
+          "parts": [
+            {
+              "control": "font",
+              "value": 0
+            },
+            {
+              "control": "menu_digit"
+            }
+          ]
+        },
+        {
+          "key": 202,
+          "parts": [
+            {
+              "control": "menu_digit"
+            }
+          ]
+        },
+        {
+          "key": 203,
+          "parts": [
+            {
+              "control": "font",
+              "value": 4
+            },
+            {
+              "control": "menu_digit"
+            }
+          ]
+        },
+        {
+          "key": 204,
+          "parts": [
+            "ON"
+          ]
+        },
+        {
+          "key": 205,
+          "parts": [
+            "OFF"
+          ]
+        },
+        {
+          "key": 206,
+          "parts": [
+            {
+              "control": "font",
+              "value": 0
+            },
+            {
+              "control": "menu_message"
+            }
+          ]
+        },
+        {
+          "key": 207,
+          "parts": [
+            {
+              "control": "menu_message"
+            }
+          ]
+        },
+        {
+          "key": 209,
+          "parts": [
+            {
+              "control": "font",
+              "value": 0
+            },
+            {
+              "control": "menu_unsigned"
+            }
+          ]
+        },
+        {
+          "key": 210,
+          "parts": [
+            {
+              "control": "menu_unsigned"
+            }
+          ]
+        },
+        {
+          "key": 211,
+          "parts": [
+            {
+              "control": "font",
+              "value": 2
+            },
+            {
+              "control": "menu_unsigned"
+            }
+          ]
+        },
+        {
+          "key": 212,
+          "parts": [
+            {
+              "control": "font",
+              "value": 0
+            },
+            {
+              "control": "menu_zero_digit"
+            }
+          ]
+        },
+        {
+          "key": 213,
+          "parts": [
+            {
+              "control": "menu_zero_digit"
+            }
+          ]
+        },
+        {
+          "key": 214,
+          "parts": [
+            {
+              "control": "font",
+              "value": 2
+            },
+            {
+              "control": "menu_zero_digit"
+            }
+          ]
+        },
+        {
+          "key": 215,
+          "parts": [
+            {
+              "control": "font",
+              "value": 0
+            },
+            {
+              "control": "menu_hex"
+            }
+          ]
+        },
+        {
+          "key": 216,
+          "parts": [
+            {
+              "control": "menu_hex"
+            }
+          ]
+        },
+        {
+          "key": 217,
+          "parts": [
+            {
+              "control": "font",
+              "value": 2
+            },
+            {
+              "control": "menu_hex"
+            }
+          ]
+        },
+        {
+          "key": 219,
+          "parts": [
+            {
+              "control": "menu_money"
+            }
+          ]
+        },
+        {
+          "key": 220,
+          "parts": [
+            {
+              "control": "font",
+              "value": 2
+            },
+            {
+              "control": "menu_money"
+            }
+          ]
+        },
+        {
+          "key": 221,
+          "parts": [
+            {
+              "control": "font",
+              "value": 0
+            },
+            {
+              "control": "align",
+              "value": 2
+            },
+            {
+              "control": "menu_unsigned"
+            }
+          ]
+        },
+        {
+          "key": 222,
+          "parts": [
+            {
+              "control": "align",
+              "value": 2
+            },
+            {
+              "control": "menu_unsigned"
+            }
+          ]
+        }
+      ]
+    },
+    "message_templates_61A12": {
+      "symbol": "lbl_125_data_61A12",
+      "start": 399890,
+      "size": 46,
+      "messages": [
+        {
+          "key": 2356,
+          "parts": [
+            "????"
+          ]
+        },
+        {
+          "key": 218,
+          "parts": [
+            {
+              "control": "font",
+              "value": 0
+            },
+            {
+              "control": "menu_money"
+            }
+          ]
+        },
+        {
+          "key": 223,
+          "parts": [
+            {
+              "control": "font",
+              "value": 2
+            },
+            {
+              "control": "align",
+              "value": 2
+            },
+            {
+              "control": "menu_unsigned"
+            }
+          ]
+        },
+        {
+          "key": 224,
+          "parts": [
+            {
+              "control": "font",
+              "value": 0
+            },
+            {
+              "control": "string"
+            }
+          ]
+        },
+        {
+          "key": 225,
+          "parts": [
+            {
+              "control": "string"
+            }
+          ]
+        }
+      ]
+    },
+    "message_templates_61A5C": {
+      "symbol": "lbl_125_data_61A5C",
+      "start": 399964,
+      "size": 31,
+      "messages": [
+        {
+          "key": 226,
+          "parts": [
+            {
+              "control": "font",
+              "value": 2
+            },
+            {
+              "control": "string"
+            }
+          ]
+        },
+        {
+          "key": 227,
+          "parts": [
+            {
+              "control": "font",
+              "value": 0
+            },
+            {
+              "control": "baseline_bias",
+              "value": -2
+            },
+            {
+              "control": "menu_message"
+            }
+          ]
+        },
+        {
+          "key": 228,
+          "parts": [
+            {
+              "control": "baseline_bias",
+              "value": -2
+            },
+            {
+              "control": "menu_message"
+            }
+          ]
+        }
+      ]
+    },
+    "message_templates_61D8B": {
+      "symbol": "lbl_125_data_61D8B",
+      "start": 400779,
+      "size": 9,
+      "messages": [
+        {
+          "key": 208,
+          "parts": [
+            {
+              "control": "font",
+              "value": 2
+            },
+            {
+              "control": "menu_message"
+            }
+          ]
+        }
+      ]
+    },
+    "message_templates_61E46": {
+      "symbol": "lbl_125_data_61E46",
+      "start": 400966,
+      "size": 49,
+      "messages": [
+        {
+          "key": 229,
+          "parts": [
+            {
+              "control": "font",
+              "value": 2
+            },
+            {
+              "control": "baseline_bias",
+              "value": -2
+            },
+            {
+              "control": "menu_message"
+            }
+          ]
+        },
+        {
+          "key": 230,
+          "parts": [
+            {
+              "control": "font",
+              "value": 3
+            },
+            {
+              "control": "menu_digit"
+            }
+          ]
+        },
+        {
+          "key": 231,
+          "parts": [
+            {
+              "control": "font",
+              "value": 3
+            },
+            {
+              "control": "menu_message"
+            }
+          ]
+        },
+        {
+          "key": 232,
+          "parts": [
+            {
+              "control": "font",
+              "value": 4
+            },
+            {
+              "control": "menu_digit"
+            }
+          ]
+        },
+        {
+          "key": 233,
+          "parts": [
+            {
+              "control": "font",
+              "value": 4
+            },
+            {
+              "control": "menu_message"
+            }
+          ]
+        }
+      ]
+    },
+    "message_templates_63069": {
+      "symbol": "lbl_125_data_63069",
+      "start": 405609,
+      "size": 5,
+      "messages": [
+        {
+          "key": 4426,
+          "parts": [
+            {
+              "control": "hero_name"
+            }
+          ]
+        }
+      ]
+    },
+    "message_templates_64102": {
+      "symbol": "lbl_125_data_64102",
+      "start": 409858,
+      "size": 12,
+      "messages": [
+        {
+          "key": 3007,
+          "parts": [
+            "FIGHT"
+          ]
+        }
+      ]
+    },
+    "message_templates_7B1FC": {
+      "symbol": "lbl_125_data_7B1FC",
+      "start": 504316,
+      "size": 108,
+      "messages": [
+        {
+          "first_key": 60000,
+          "template": "TEST0{number}",
+          "axes": [
+            {
+              "name": "number",
+              "values": {
+                "start": 1,
+                "stop": 7
+              }
+            }
+          ],
+          "prefix": [
+            {
+              "control": "font",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    },
+    "message_templates_85FFD": {
+      "symbol": "lbl_125_data_85FFD",
+      "start": 548861,
+      "size": 23,
+      "messages": [
+        {
+          "key": 61785,
+          "parts": [
+            {
+              "control": "event_string_0"
+            },
+            {
+              "control": "line_break"
+            },
+            {
+              "control": "event_string_1"
+            },
+            {
+              "control": "line_break"
+            },
+            {
+              "control": "string"
+            },
+            {
+              "control": "line_break"
+            },
+            {
+              "control": "digit"
+            }
+          ]
+        }
+      ]
+    },
+    "message_templates_80AB1": {
+      "symbol": "lbl_125_data_80AB1",
+      "start": 527025,
+      "size": 1584,
+      "messages": [
+        {
+          "first_key": 60921,
+          "template": "D2_{number}人目",
+          "axes": [
+            {
+              "name": "number",
+              "values": {
+                "start": 1,
+                "stop": 101
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "message_templates_811F1": {
+      "symbol": "lbl_125_data_811F1",
+      "start": 528881,
+      "size": 1048,
+      "messages": [
+        {
+          "first_key": 61046,
+          "template": "M4アンダーセット{set}_{member}人目",
+          "axes": [
+            {
+              "name": "set",
+              "values": {
+                "start": 1,
+                "stop": 6
+              }
+            },
+            {
+              "name": "member",
+              "values": {
+                "start": 1,
+                "stop": 5
+              }
+            }
+          ]
+        },
+        {
+          "first_key": 61066,
+          "template": "M4ボトムセット{set}_{member}人目",
+          "axes": [
+            {
+              "name": "set",
+              "values": {
+                "start": 1,
+                "stop": 5
+              }
+            },
+            {
+              "name": "member",
+              "values": {
+                "start": 1,
+                "stop": 4
+              }
+            }
+          ]
+        },
+        {
+          "first_key": 61078,
+          "template": "M4ボトムセット5_{member}人目",
+          "axes": [
+            {
+              "name": "member",
+              "values": {
+                "start": 1,
+                "stop": 5
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "message_templates_89788": {
+      "symbol": "lbl_125_data_89788",
+      "start": 563080,
+      "size": 564,
+      "messages": [
+        {
+          "first_key": 62159,
+          "template": "シナリオ{number}",
+          "axes": [
+            {
+              "name": "number",
+              "values": {
+                "start": 1,
+                "stop": 21
+              }
+            }
+          ],
+          "fullwidth": true
+        },
+        {
+          "first_key": 62179,
+          "template": "８人ダブル{number}",
+          "axes": [
+            {
+              "name": "number",
+              "values": {
+                "start": 1,
+                "stop": 21
+              }
+            }
+          ],
+          "fullwidth": true
+        }
+      ]
+    }
+  }
+}

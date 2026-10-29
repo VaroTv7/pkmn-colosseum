@@ -45,12 +45,17 @@ jobs:
     # files, and public-repository caches can be read by fork pull requests.
     # Fresh builds also remove the need for git-restore-mtime, whose old
     # git-whatchanged invocation is incompatible with the current runner Git.
-    - name: Build all source, full retail outputs and report
+    - name: Build all source and report
       run: |
         python configure.py --map --version ${{ matrix.version }} \
             --binutils /binutils --compilers /compilers
         ninja -j2 all_source build/${{ matrix.version }}/report.json
-        ninja -j2
+
+    - name: Link full retail outputs and verify canonical hashes
+      run: |
+        # A stalled legacy linker must fail with logs while report diagnostics
+        # can still run. The last complete source-and-output build took 125s.
+        timeout -s TERM -k 30 300 ninja -j2
         sha1sum -c config/${{ matrix.version }}/build.sha1
         python3 tools/ci_retail.py \
             --manifest config/${{ matrix.version }}/build.sha1 \
@@ -92,6 +97,7 @@ jobs:
               --elf build/${{ matrix.version }}/main.elf \
               --report build/${{ matrix.version }}/report.json \
               --symbols config/${{ matrix.version }}/symbols.txt \
+              --array-aliases config/${{ matrix.version }}/data_aliases \
               --output build/${{ matrix.version }}/data_link_diagnostics.json
         fi
 

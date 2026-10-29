@@ -11,7 +11,7 @@
 #include "dolphin/types.h"
 
 extern u8* lbl_8047B610;
-extern u8 lbl_80478D78[1];
+extern u8 lbl_80478D78[8];
 extern u32 lbl_8047B618;
 
 void wsCmd9C(void)
@@ -27,7 +27,7 @@ void wsCmd9C(void)
     extern u32 fightOutPokemonMaxHpWaruValue();
     extern u32 fightOutPokemonGetPokemonPtr();
     extern u32 pokemonGetStatus();
-    extern u8 lbl_80478D78[1];
+    extern u8 lbl_80478D78[8];
     extern u32 lbl_8047B618;
   u32 attacker;
   u32 move;

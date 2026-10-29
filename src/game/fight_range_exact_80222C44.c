@@ -68,7 +68,7 @@ extern void fightApplyDamageVariance(char, char);
 extern void fightSeqWazaTypeCalc(u32, char, char, char);
 extern void* fn_801F025C();
 extern u8 fn_802624CC();
-extern u8 lbl_80478D78[1];
+extern u8 lbl_80478D78[8];
 extern void fn_801F37B0();
 extern u32 _fightDoTraceSub();
 extern s32 _fightSeqWsKuroikiriSub__FPvUsPv(void*, u16, void*);

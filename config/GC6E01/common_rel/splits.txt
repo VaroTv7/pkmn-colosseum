@@ -12,14 +12,92 @@ rel/common_rel/shared_font_data.c:
 rel/common_rel/message_index_58044.c:
 	.data       start:0x00058044 end:0x0005BF64
 
+rel/common_rel/message_storage_5BF64.c:
+	.data       start:0x0005BF64 end:0x0005BFF4 align:1
+
+rel/common_rel/message_templates_5BFF4.c:
+	.data       start:0x0005BFF4 end:0x0005C090 align:1
+
+rel/common_rel/message_storage_5C090.c:
+	.data       start:0x0005C090 end:0x00061A12 align:1
+
+rel/common_rel/message_templates_61A12.c:
+	.data       start:0x00061A12 end:0x00061A40 align:1
+
+rel/common_rel/message_storage_61A40.c:
+	.data       start:0x00061A40 end:0x00061A5C align:1
+
+rel/common_rel/message_templates_61A5C.c:
+	.data       start:0x00061A5C end:0x00061A7B align:1
+
+rel/common_rel/message_storage_61A7B.c:
+	.data       start:0x00061A7B end:0x00061D8B align:1
+
+rel/common_rel/message_templates_61D8B.c:
+	.data       start:0x00061D8B end:0x00061D94 align:1
+
+rel/common_rel/message_storage_61D94.c:
+	.data       start:0x00061D94 end:0x00061E46 align:1
+
+rel/common_rel/message_templates_61E46.c:
+	.data       start:0x00061E46 end:0x00061E77 align:1
+
+rel/common_rel/message_storage_61E77.c:
+	.data       start:0x00061E77 end:0x00063069 align:1
+
+rel/common_rel/message_templates_63069.c:
+	.data       start:0x00063069 end:0x0006306E align:1
+
+rel/common_rel/message_storage_6306E.c:
+	.data       start:0x0006306E end:0x00064102 align:1
+
+rel/common_rel/message_templates_64102.c:
+	.data       start:0x00064102 end:0x0006410E align:1
+
+rel/common_rel/message_storage_6410E.c:
+	.data       start:0x0006410E end:0x000647B4 align:1
+
 rel/common_rel/shared_message_data.c:
 	.data       start:0x000647B4 end:0x00076C94
 
 rel/common_rel/message_index_76C94.c:
 	.data       start:0x00076C94 end:0x0007B1FC
 
+rel/common_rel/message_templates_7B1FC.c:
+	.data       start:0x0007B1FC end:0x0007B268 align:1
+
+rel/common_rel/message_storage_7B268.c:
+	.data       start:0x0007B268 end:0x00080AB1 align:1
+
+rel/common_rel/message_templates_80AB1.c:
+	.data       start:0x00080AB1 end:0x000810E1 align:1
+
+rel/common_rel/message_storage_810E1.c:
+	.data       start:0x000810E1 end:0x000811F1 align:1
+
+rel/common_rel/message_templates_811F1.c:
+	.data       start:0x000811F1 end:0x00081609 align:1
+
+rel/common_rel/message_storage_81609.c:
+	.data       start:0x00081609 end:0x00085FFD align:1
+
+rel/common_rel/message_templates_85FFD.c:
+	.data       start:0x00085FFD end:0x00086014 align:1
+
+rel/common_rel/message_storage_86014.c:
+	.data       start:0x00086014 end:0x00089788 align:1
+
+rel/common_rel/message_templates_89788.c:
+	.data       start:0x00089788 end:0x000899BC align:1
+
+rel/common_rel/message_storage_899BC.c:
+	.data       start:0x000899BC end:0x00089CFC align:1
+
 rel/common_rel/script_structure_89CFC.c:
 	.data       start:0x00089CFC end:0x00089D98
+
+rel/common_rel/common_script_0596.c:
+	.data       start:0x00089D98 end:0x0008BCB4
 
 rel/common_rel/table_res_data.c:
 	.data       start:0x0008BCB4 end:0x0008BCD4

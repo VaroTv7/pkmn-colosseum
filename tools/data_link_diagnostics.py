@@ -5,6 +5,8 @@ Only complete, source-backed, data-only main units are selected. Incomplete
 candidates still linked from originals are explicitly skipped. Output contains
 symbol names, addresses, sizes and comparison status, never section payloads.
 Missing/dead-stripped symbols are diagnostic observations, not matching credit.
+An optional array-alias registration directory preserves original map fragment
+extents while checking the real complete C arrays and zero-size linked labels.
 """
 
 import argparse
@@ -82,12 +84,129 @@ def map_symbols(text):
     return output
 
 
-def diagnose(report, expected, actual):
+def load_array_aliases(directory, expected):
+    """Validate explicit source registrations against all original map extents.
+
+    These are the same scoped registrations validated against native objects by
+    source_data_aliases.py. This diagnostic independently checks their map and
+    owner bounds; it never infers aliases from a linked size mismatch.
+    """
+    def require(condition, message):
+        if not condition:
+            raise ValueError(message)
+
+    def unique_fields(pairs):
+        result = {}
+        for key, value in pairs:
+            require(key not in result, "Duplicate array-alias JSON field")
+            result[key] = value
+        return result
+
+    require(directory.is_dir(), "Array-alias directory is missing")
+    paths = sorted(directory.glob("*.json"))
+    require(paths, "Array-alias directory has no registrations")
+    by_name = {}
+    for symbol in expected:
+        by_name.setdefault(symbol["name"], []).append(symbol)
+
+    def original(name):
+        require(isinstance(name, str) and re.fullmatch(r"[A-Za-z_]\w*", name),
+                "Invalid array-alias symbol name")
+        definitions = by_name.get(name, [])
+        require(len(definitions) == 1, "Unmapped or ambiguous array-alias symbol")
+        result = definitions[0]
+        require(result["section"] == ".sdata" and result["alias"] == name,
+                "Array aliases require original global small-data names")
+        return result
+
+    output, host_ranges = {}, []
+    for path in paths:
+        require(path.is_file() and path.resolve().parent == directory.resolve()
+                and re.fullmatch(r"sdata_[0-9A-Fa-f]{8}\.json", path.name),
+                "Unexpected array-alias registration path")
+        groups = json.loads(path.read_text(), object_pairs_hook=unique_fields)
+        require(isinstance(groups, list) and groups, "Expected array-alias groups")
+        for group in groups:
+            require(isinstance(group, dict) and set(group) == {"base", "size", "aliases"},
+                    "Malformed array-alias group")
+            base, size, aliases = group["base"], group["size"], group["aliases"]
+            host = original(base)
+            require(type(size) is int and host["size"] < size <= 0xFFFFFFFF
+                    and isinstance(aliases, list) and aliases,
+                    "Invalid complete source-array extent")
+            start, end = host["address"], host["address"] + size
+            require(end <= 0x100000000 and not any(a < end and start < b
+                                                  for a, b in host_ranges),
+                    "Overlapping or out-of-range source arrays")
+            host_ranges.append((start, end))
+            members = {base: host}
+            for alias in aliases:
+                require(isinstance(alias, dict) and set(alias) == {"name", "offset", "size"},
+                        "Malformed interior alias")
+                name, offset, extent = alias["name"], alias["offset"], alias["size"]
+                mapped = original(name)
+                require(name not in members and type(offset) is int
+                        and type(extent) is int and 0 < offset < size
+                        and 0 < extent <= size - offset
+                        and (mapped["address"], mapped["size"]) == (start + offset, extent),
+                        "Interior alias exceeds its host or differs from the original map")
+                members[name] = mapped
+            spans = sorted((s["address"], s["address"] + s["size"])
+                           for s in members.values())
+            require(all(a[1] <= b[0] for a, b in zip(spans, spans[1:])),
+                    "Original array fragments overlap")
+            for mapped in expected:
+                if mapped["section"] != ".sdata":
+                    continue
+                a, b = mapped["address"], mapped["address"] + mapped["size"]
+                if a < end and start < b:
+                    require(mapped["name"] in members and start <= a < b <= end,
+                            "Unregistered mapped object intersects the source array")
+            for name, mapped in members.items():
+                require(name not in output, "Duplicate array-alias registration")
+                output[name] = {
+                    "registration": path.name,
+                    "owner": "main/game/data/" + path.stem,
+                    "source_path": "src/game/data/" + path.stem + ".c",
+                    "kind": "complete_array" if name == base else "interior_label",
+                    "host": base, "host_address": start, "host_size": size,
+                    "expected_address": mapped["address"],
+                    "expected_source_size": size if name == base else 0,
+                    "original_fragment_size": mapped["size"],
+                }
+    return output
+
+
+def diagnose(report, expected, actual, array_aliases=None):
     result = {"schema_version": 1, "payload_bytes_included": False,
               "scope": "complete_source_data_only_main_units",
               "units": [], "skipped_incomplete_units": []}
     totals = {key: 0 for key in ("match", "address_mismatch", "size_mismatch",
                                 "missing", "ambiguous")}
+    aliases = array_aliases or {}
+    if aliases:
+        # A registration must belong wholly to its named source owner, even if
+        # that owner is incomplete and will be skipped by the address report.
+        for entry in aliases.values():
+            owners = [u for u in report["units"] if u["name"] == entry["owner"]]
+            if len(owners) != 1:
+                raise ValueError("Array-alias owner is missing or ambiguous")
+            owner = owners[0]
+            if owner.get("metadata", {}).get("source_path") != entry["source_path"] \
+                    or int(owner["measures"].get("total_code", 0)):
+                raise ValueError("Array-alias registration is not a native data-only source owner")
+            sections = [s for s in owner.get("sections", []) if s["name"] == ".sdata"]
+            if len(sections) != 1:
+                raise ValueError("Array-alias owner has no unique small-data section")
+            start = int(sections[0]["metadata"]["virtual_address"])
+            end = start + int(sections[0]["size"])
+            if not start <= entry["host_address"] < entry["host_address"] + entry["host_size"] <= end:
+                raise ValueError("Complete source array exceeds its reported physical owner")
+        result["array_aliases"] = {
+            "registrations": sorted({entry["registration"] for entry in aliases.values()}),
+            "complete_arrays": sum(entry["kind"] == "complete_array" for entry in aliases.values()),
+            "interior_labels": sum(entry["kind"] == "interior_label" for entry in aliases.values()),
+        }
     for unit in report["units"]:
         measures, metadata = unit["measures"], unit.get("metadata", {})
         if not unit["name"].startswith("main/") or not metadata.get("source_path") \
@@ -122,13 +241,21 @@ def diagnose(report, expected, actual):
                        "expected_size": symbol["size"],
                        "linked_name": name if definitions else None,
                        "actual_definitions": definitions}
+                expected_size = symbol["size"]
+                if symbol["name"] in aliases:
+                    entry = aliases[symbol["name"]]
+                    if entry["expected_address"] != symbol["address"] \
+                            or entry["original_fragment_size"] != symbol["size"]:
+                        raise ValueError("Array-alias expectation disagrees with the original map")
+                    row["source_array_layout"] = entry
+                    expected_size = entry["expected_source_size"]
                 if not definitions:
                     status = "missing"
                 elif len(definitions) != 1:
                     status = "ambiguous"
                 elif definitions[0]["address"] != symbol["address"]:
                     status = "address_mismatch"
-                elif definitions[0]["size"] != symbol["size"]:
+                elif definitions[0]["size"] != expected_size:
                     status = "size_mismatch"
                 else:
                     status = "match"
@@ -148,11 +275,15 @@ def main():
     parser.add_argument("--elf", type=Path, default=Path("build/GC6E01/main.elf"))
     parser.add_argument("--report", type=Path, default=Path("build/GC6E01/report.json"))
     parser.add_argument("--symbols", type=Path, default=Path("config/GC6E01/symbols.txt"))
+    parser.add_argument("--array-aliases", type=Path,
+                        help="Optional scoped source-array alias registration directory")
     parser.add_argument("--output", type=Path, default=Path("build/GC6E01/data_link_diagnostics.json"))
     args = parser.parse_args()
     try:
-        result = diagnose(json.loads(args.report.read_text()),
-                          map_symbols(args.symbols.read_text()), linked_symbols(args.elf.read_bytes()))
+        expected = map_symbols(args.symbols.read_text())
+        aliases = load_array_aliases(args.array_aliases, expected) if args.array_aliases else None
+        result = diagnose(json.loads(args.report.read_text()), expected,
+                          linked_symbols(args.elf.read_bytes()), aliases)
     except (OSError, ValueError, KeyError, TypeError, struct.error) as exc:
         result = {"schema_version": 1, "payload_bytes_included": False,
                   "error": type(exc).__name__}

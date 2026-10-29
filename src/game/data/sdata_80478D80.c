@@ -4,8 +4,6 @@
 
 /* WS_STATUS_SET16 operands for fightFloorSetStatus field 0x3B. These
  * constants also occur in the corresponding direct C status setters.
- * Keep the preceding eight-byte flag block original-backed until its
- * overlapping map labels can describe one genuine source array.
  * See docs/recon/sdata_80478D08_reconstruction.md for typed evidence. */
 __declspec(section ".sdata") u16 lbl_80478D80[3] = {0x45, 0x43, 0x40};
 
@@ -14,5 +12,13 @@ __declspec(section ".sdata") u16 lbl_80478D80[3] = {0x45, 0x43, 0x40};
 __declspec(section ".sdata") u16 lbl_80478D86 __attribute__((aligned(2))) = 0x41;
 __declspec(section ".sdata") u16 lbl_80478D88 __attribute__((aligned(2))) = 0x42;
 __declspec(section ".sdata") u8 padding_80478D8A[2] __attribute__((aligned(1))) = {0};
+
+/* Separate WS_STATUS_SET32 operands for fight-floor field 0x3E (damage).
+ * The decoded consumers each read one word, including the unaligned script
+ * reference to D90 that has no ELF relocation. The next owner's eight-byte
+ * alignment supplies the verified four-byte gap after D94.
+ * See docs/recon/small_data_array_aliases.md. */
+__declspec(section ".sdata") u32 lbl_80478D8C = 20;
+__declspec(section ".sdata") u32 lbl_80478D90 = 40;
 
 #pragma force_active reset
