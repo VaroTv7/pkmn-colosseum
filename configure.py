@@ -387,7 +387,23 @@ config.custom_build_rules = [
         "command": "$python tools/fsys_extract.py extract $in $members -o $out_dir",
         "description": "FSYS $in -> $members",
     },
+    {
+        "name": "vector_link_visibility",
+        "command": "$python tools/link_vector_object.py $in $out",
+        "description": "VECTOR LINK COPY $out",
+    },
 ]
+# Preserve the original hidden padding marker for report accounting. Only the
+# separate linker input clears its visibility; the 7,988 vector bytes remain
+# original fallback, with no source or completion credit. The helper rejects
+# every change beyond that marker's one ELF visibility byte.
+config.fallback_link_overrides = {
+    ("main", "crt/interrupt_vectors"): {
+        "rule": "vector_link_visibility",
+        "output": config.out_path() / "link/crt/interrupt_vectors.o",
+        "implicit": [Path("tools/link_vector_object.py")],
+    },
+}
 # Accept validated loose RELs as an alternative to retaining entire FSYS
 # archives. An available archive stays a Ninja dependency and is authoritative.
 from tools.fsys_inputs import extraction_steps
