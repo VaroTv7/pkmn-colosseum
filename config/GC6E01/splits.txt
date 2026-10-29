@@ -7039,18 +7039,44 @@ game/data/data_803124B8.c:
 game/data/data_803125A0.c:
 	.data       start:0x803125A0 end:0x803125E8
 
-# Typed small game state; all original mapped symbols and bytes are retained.
+# Typed small game state, with complete fallback arrays for interior aliases.
 game/data/sdata_80478820.c:
-	.sdata      start:0x80478820 end:0x80478970
+	.sdata      start:0x80478820 end:0x804788CC
 
-# Typed battle state and sequence pairs; the 18-byte middle interval stays original-backed.
+# Coordinate pairs have original interior labels; include D4..D8 so the next
+# compiled section retains its natural eight-byte alignment.
+game/data/sdata_804788CC.c:
+	.sdata      start:0x804788CC end:0x804788D8 align:4
+
+game/data/sdata_804788D8.c:
+	.sdata      start:0x804788D8 end:0x80478950
+
+# Two whole four-byte controller arrays, each with an interior mapped label.
+game/data/sdata_80478950.c:
+	.sdata      start:0x80478950 end:0x80478958
+
+game/data/sdata_80478958.c:
+	.sdata      start:0x80478958 end:0x80478970
+
+# Typed battle state and sequence pairs; unresolved labels stay original-backed.
 game/data/sdata_80478D08.c:
-	.sdata      start:0x80478D08 end:0x80478D86
+	.sdata      start:0x80478D08 end:0x80478D78
 
-# The first unresolved operand is a two-byte object. Preserve original fallback
-# with its actual boundary instead of the section-wide default alignment.
-game/data/sdata_80478D86.c:
-	.sdata      start:0x80478D86 end:0x80478D98 align:2
+# One eight-byte flag array has original interior labels at offsets 3 and 5.
+# Preserve the complete array until a verified alias representation is available.
+game/data/sdata_80478D78.c:
+	.sdata      start:0x80478D78 end:0x80478D80
+
+game/data/sdata_80478D80.c:
+	.sdata      start:0x80478D80 end:0x80478D8C
+
+# Preserve the full unresolved damage operand extent without source credit.
+game/data/sdata_80478D8C.c:
+	.sdata      start:0x80478D8C end:0x80478D98 align:4
 
 game/data/sdata_80478D98.c:
 	.sdata      start:0x80478D98 end:0x80478DB4
+
+# Explicit initialized zeros; original symbol extents guarded before source linking.
+game/data/data_8038FF64.c:
+	.data       start:0x8038FF64 end:0x8038FFFC

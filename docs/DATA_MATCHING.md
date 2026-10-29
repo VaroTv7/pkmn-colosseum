@@ -22,6 +22,27 @@ No new data percentage is established by this draft. The README and strict
 topology freeze retain the verified baseline until a fresh private-input build
 and address-coverage audit establish the results.
 
+## Current verification checkpoint
+
+The continuation is tracked in
+[PR #663](https://github.com/dougchansan/pkmn-colosseum/pull/663). Its private-input
+builds distinguish exact source objects from complete output verification:
+
+| Checkpoint | Established evidence | Remaining integration issue at that checkpoint |
+| --- | --- | --- |
+| First build | All 8,677 functions remained exact; four complete resource spans matched existing source definitions. | Canonical outputs and 32 of 34 zero-owner layout checks failed. |
+| Third build | All 34 zero-data owners passed native symbol-layout checks, covering 655,080 bytes; 423,928 shared resource bytes matched from native ProDG source. | DOL linker layout and complete outputs still required correction. |
+| Fifth build | Both typed message prefixes matched and linked; the complete 561,032-byte resource region was byte-identical, including fallback. | `main.dol` and `common_rel.rel` failed; the other 24 outputs passed. |
+| Sixth build | The 156-byte GS VM prefix matched and linked; `main.dol` and 24 REL outputs passed canonical hashes and direct comparisons. | Only `common_rel.rel` differed: 149 byte positions in 84 sound-table pointer addend words. |
+| Seventh build | No fresh compiler/report measurement. | A split at `0x80478D86` required two-byte alignment before compilation could proceed. |
+| Eighth build | All 25 REL outputs, including `common_rel.rel`, passed canonical hashes and direct comparisons. All 8,677 code functions remained exact. | `main.dol` differed in the new `sdata_80478D08.c` owner; the final integrated report remains pending. |
+
+The eighth build also verifies both sound owners as fully exact through the
+comparison-only view described below. Its native linker inputs produce the
+canonical REL. A partially passing build does not establish the continuation's
+final data percentage or waive the remaining DOL check. Later source additions
+and fixes require another complete build before refreshing the leading metrics.
+
 ## Work remaining at the baseline
 
 | Group | Units | Unmatched data | Data still linked from originals |
@@ -37,47 +58,30 @@ initialized globals, and packed battle bytecode. Embedded bytecode pointers
 must retain their relocation semantics; these regions must not be interpreted
 as arbitrary string pools.
 
-## Changes prepared for verification
+## Source ownership and zero-storage reconstruction
 
-Sixty-six exact data candidates, totaling 1,077,180 bytes, are selected for
-source-link verification. Their existing sources, flags and declaration order
-are preserved. This is a proposal: byte matching of an isolated data section
-does not prove a correct final layout. The remaining 132-byte
-`game/data/data_802EE06C.c` owner stays incomplete because its documented
-four-byte retail start conflicts with the compiled section's alignment.
+The initial proposal selected 66 already exact data candidates, totaling
+1,077,180 bytes, for source linking. Isolated section equality did not prove
+their final layout. Native compiler and linked-address diagnostics identified
+the necessary retention, declaration-order and alignment corrections.
 
-Fourteen new zero-initialized data candidates cover 13,168 bytes using the
-existing symbol-map boundaries. These remain `DataCandidate` until the compiled
-symbol layouts and full outputs pass. No initialized game payload is added.
-The entirely unnamed 20-byte and 16-byte zero-storage holes remain unchanged.
+The remaining 132-byte `game/data/data_802EE06C.c` switch table starts four
+bytes past an eight-byte boundary. Its existing definition is now included
+after the generated tables in `menu_middle_r59_8006CCC0_o1.c`, at that owner's
+`.data + 0xBC`. This retains the original `0x802EE06C–0x802EE0F0` interval and
+relocation targets without introducing a separately aligned section.
 
-`lbl_8047C9E4` is reduced to its recorded five-byte `aobj` string extent;
-the following seven zero bytes belong to section padding. This correction also
-requires compiler and canonical-output verification.
+Fourteen newly reconstructed zero-storage owners cover 13,168 bytes using
+existing symbol-map boundaries. The first build exposed reversed existing BSS
+declarations and redundant explicit padding. Corrected declaration order,
+scalar or natural padding, and explicit byte alignment preserve the recorded
+placements. Together with twenty existing BSS owners, all 34 owners passed
+the third build's native layout checks and continue to pass in the eighth.
 
-`tools/data_match_diagnostics.py` records section and symbol sizes, alignment,
-hashes, relocation identities and comparison results. Its public JSON excludes
-payload bytes and disassembly. It also checks whether four resource spans match
-definitions already present in the DOL, reporting hashes and equality only.
-
-The first private build verified the sound tables' exact literal-pool hashes
-and explicit relocation destinations. Their existing literal text is now
-given named source definitions, retaining each original string and reference.
-`tools/prodg_comparison_object.py` is connected only to these two data-only
-owners. It creates a separate source-comparison view after proving exact
-relocation semantics and equality of all non-relocation bytes. It normalizes
-SN's duplicated in-place RELA addends and preserves the native linker input.
-Actual compiler objects must pass these checks and canonical outputs before
-any additional matching credit is accepted.
-
-The first verification build retained all 8,677 exact functions but failed
-the canonical outputs and 32 of 34 zero-owner layout checks. It exposed
-reversed existing BSS declarations and redundant explicit padding in the new
-candidates. The next revision corrects declaration order, uses natural or
-scalar padding, tests reduced array alignment, and moves two preceding
-four-byte globals into aligned data-only owners. Metadata-only linked-address
-diagnostics and synthetic compiler probes investigate the remaining layouts.
-These failures are not accepted progress measurements.
+`lbl_8047C9E4` retains its recorded five-byte string extent; the following
+seven zero bytes remain section padding. Four separate unnamed alignment gaps
+are accounted for in the ownership table below. These changes preserve every
+physical byte in the original denominator.
 
 ## Validation requirements
 
@@ -110,17 +114,14 @@ The full acceptance sequence is:
 
 ## Source metadata and linker layout
 
-The first three draft builds kept all 8,677 tracked functions exact, but failed
-the canonical output hashes. Their percentages are provisional. The third
-build verified all 34 zero-data owners' native symbol layouts, covering
-655,080 bytes, and identified the remaining linker shifts. Newly linked
-objects need explicit retention, byte-array alignment at packed boundaries,
-and the original section boundary alignment. `source_data_exports.txt`
-retains only the source definitions introduced by this continuation.
+`source_data_exports.txt` retains only the source definitions introduced by
+this continuation. Packed boundaries retain explicit byte-array alignment;
+section starts retain the original linker alignment.
 
-Twenty-one initialized data owners start four bytes past an eight-byte
-boundary. MWCC emits eight-byte section alignment even though their actual
-C objects require at most four. `tools/source_object_metadata.py align`
+The initial audit found 21 initialized data owners starting four bytes past
+an eight-byte boundary. MWCC emits eight-byte section alignment even though
+their actual C objects require at most four. The same issue applies to some
+later reconstructed owners. `tools/source_object_metadata.py align`
 creates a separate source-link object after requiring identical section
 bytes, every original data-symbol extent, and relocation semantics. It reads
 the compiler's per-symbol alignment records and rejects any real object that
@@ -172,27 +173,42 @@ interval now belongs to its preceding source owner. The other three intervals
 were automatically generated fallback units.
 
 All 68 physical bytes remain in scope. This is linker-generated padding owned
-by the surrounding compiled source, not reconstructed variable storage. A fresh
-report must preserve the full 3,565,996-byte denominator, and canonical output
-checks must verify the resulting layout before accepting any additional credit.
+by the surrounding compiled source. The sixth build's canonical main executable
+verified that layout after `-sdata 0` restored a two-byte padding array in the
+merged developer-string owner to its original initialized-data section. Later
+DOL additions remain subject to the same complete-output check.
 
-The sixth build passes 25 of 26 canonical output hashes, including the main
-executable. Its preceding main address diagnostic traced an eight-byte
-small-data shift to a two-byte padding array in the merged developer-string
-owner; `-sdata 0` restores that padding to its original initialized-data
-section. The only remaining differences are 149 byte positions in 84 pointer
-addend words across the two sound tables. Naming their source literals changed
-SN's stored addend representation, even with local `static` linkage.
+## Native sound tables and their comparison view
 
-The sound sources are restored to their exact, previously validated baseline
-form. Their separate comparison copies infer literal extents solely from
-native source relocation targets and terminated strings with checked zero
-alignment gaps. Generated sized symbols belong only to the comparison copy;
-all existing symbol indices and relocation records stay intact. The existing
-comparison tool normalizes duplicate addend words for objdiff, and the original
-native compiler objects remain the actual linker inputs. No target payload
-or target symbol names are used to create source metadata. This correction
-still requires the final complete canonical-output build.
+The first private build established exact source literal-pool hashes and
+explicit relocation destinations for `snd_song_table.c` and
+`snd_sample_table.c`. An intermediate attempt gave the existing literals named
+definitions so objdiff could measure them. That approach changed SN's stored
+pointer addends, even with local `static` linkage. The sixth build isolated
+the resulting REL mismatch to 149 byte positions in 84 pointer words. That
+source change was abandoned.
+
+Both sound C files are restored byte-for-byte to the verified baseline.
+`tools/prodg_comparison_object.py` creates a separate source-comparison copy;
+the native compiler object remains the actual linker input. Before creating
+the copy, the tool requires identical section extents and relocation semantics,
+normalizes only duplicated explicit section-relative RELA addend words, and
+requires every remaining allocated byte, including padding, to equal the target.
+
+For unlabeled native pools, literal starts come exclusively from source
+`R_PPC_ADDR32` relocation destinations. They must cover the pool from offset
+zero, and each interval must contain one terminated source string followed by
+at most three zero alignment bytes. Generated names and sized object symbols
+are appended only to the comparison copy. Existing symbol indices, symbol
+records and relocation records remain unchanged. No target payload or target
+symbol names supply the new metadata.
+
+The eighth build verifies both complete source owners through this view
+(2,400 song-table bytes and 376 sample-table bytes), while the untouched native
+objects reproduce the canonical `common_rel.rel`. The comparison view neither
+changes linker inputs nor promotes an incomplete owner. Synthetic checks cover
+unlabeled pools, symbol-index preservation, invalid padding and missing
+terminators, name collisions, and separate report/link paths.
 
 ## SDK diagnostics and small OS state
 
@@ -216,6 +232,13 @@ uses the strict source-only four-byte alignment view. The four-byte gap before
 ARQ's eight-byte-aligned start is assigned to the preceding existing AR version
 source owner; no extra variable is invented for that linker padding.
 
+The German and Dutch DVD fatal-error strings are reconstructed from text
+already recorded in `config/GC6E01/symbolmap/strings.json`, following the
+existing English diagnostic source. Their complete 156-byte and 140-byte
+regions include three zero-padding bytes each and reproduce the original
+section hashes. The latter uses the same strictly verified four-byte
+source-link alignment as other carved data owners.
+
 The 20 bytes at `.sdata` `0x8047897C–0x80478990` are reconstructed from the
 existing OS interfaces: the `OSRegisterVersion` report format, the signed
 current-heap handle initialized to `-1`, and the low-arena pointer initialized
@@ -229,19 +252,27 @@ equal to the fifth diagnostic, with no relocations.
 
 These small definitions are included after the existing OS source in
 `sdk_r48_80099790_suffix.c`, extending its already aligned `.sdata` section
-without editing any function. Native compiler section/symbol comparisons,
-unchanged code identities, the full physical denominator, and canonical output
-hashes still require the next private-input build before acceptance.
+without editing any function. The eighth build verifies the SDK owners from
+native compiled source. Their integrated acceptance still requires the final
+main executable and code-identity/physical-coverage checks.
 
 ## Small game-state source
 
-`sdata_80478820.c` reconstructs the full 336 bytes at
-`0x80478820–0x80478970`. Its 57 existing mapped symbols keep their original
-names, offsets and extents. Typed scalar and array initializers describe the
-task flags, menu state, counts and small lookup tables. Where an existing map
-object includes a zero suffix, its complete storage extent is retained in the
-typed array; the suffix is not assigned an invented runtime meaning. One
-explicit two-byte zero object fills the already mapped gap at `0x804788CA`.
+Three source owners reconstruct 316 of the 336 bytes at
+`0x80478820–0x80478970`: `sdata_80478820.c`, `sdata_804788D8.c` and
+`sdata_80478958.c`. Typed scalar and array initializers describe task flags,
+menu state, counts and small lookup tables. Where an existing map object
+includes a zero suffix, its complete storage extent is retained in the typed
+array without an invented runtime meaning.
+
+The consumer audit after CI8 identifies `lbl_804788C8` as a two-element
+coordinate array. Its four-byte definition and map extent absorb the verified
+zero halfword at `0x804788CA`. Two other coordinate arrays and two controller
+tables have interior mapped names that require a verified alias mechanism.
+Their complete storage remains fallback over `0x804788CC–0x804788D8` (12 bytes)
+and `0x80478950–0x80478958` (8 bytes). All original names, addresses and all 336
+physical bytes remain in scope. The source and caller evidence is recorded in
+[`data_object_bounds.md`](recon/data_object_bounds.md).
 
 The existing implementations provide independent context for the data:
 
@@ -250,9 +281,9 @@ The existing implementations provide independent context for the data:
 - `pda_exact_80040308.c` indexes the four filter-choice counts, and
   `pda_exact_8004A7A8.c` uses the caption pulse phase of pi divided by six.
 - `menuCB_BattleStart.c` indexes the four battle-indicator sprite IDs.
-- `cardesavedata.c` uses the eight MSB-first bit masks, four controller masks,
-  and the controller visitation order. The existing mapped labels partition
-  the latter two tables after their first byte; all labels are retained.
+- `cardesavedata.c` uses the eight MSB-first bit masks. Its four controller masks
+  and controller visitation order are each four-element arrays; their mapped
+  interior labels are retained in the eight-byte fallback described above.
 - `menu_bios_range_8005D7F8.c` supplies the record sizes and uses the table
   counts. The first sprite and item counts equal the existing source table
   extents divided by `0x18` and `0x1C`, respectively. Their additional stored
@@ -263,11 +294,52 @@ diagnostic: every original symbol's bytes hash equally, and the complete
 section SHA-256 is
 `ab20ac8aec560e027d89020470d4fd6470bd18439f7ef3467a3e4e72dcd6f313`.
 The interval has no relocations. The local layout calculation uses the
-independently probed MWCC scalar, array and explicit alignment rules; native
-compiler and canonical-output validation remain required. No function source,
-original symbol boundary or physical data interval is removed.
+independently probed MWCC scalar, array and explicit alignment rules. The eighth
+build verifies the native 336-byte candidate's bytes, but the subsequent
+consumer audit found object-bound conflicts. The current 316-byte proposal
+retains only definitions with defensible complete extents and needs a fresh
+native build. No function source, original name or physical data interval is
+removed.
 
-## Resource scope and attribution
+The same audit refines two zero-state definitions to their actual complete
+types: `lbl_8047AD04` is a four-port `u8[4]`, and `lbl_8047A60C` is a four-byte
+uploader boot key. Each absorbs an existing three-byte zero gap. The strict
+zero-layout checks derive the revised extents from the map; the full physical
+intervals and existing consumer functions stay unchanged.
+
+The battle/purification reconstruction and its precise owner boundaries are
+recorded separately in
+[`sdata_80478D08_reconstruction.md`](recon/sdata_80478D08_reconstruction.md).
+Their typed counts, version pointer and sequence pairs come from
+existing source consumers and complete metadata hashes. The intervening
+status operands remain subject to the individual reconstruction evidence in
+that record. The eighth build's DOL failure is isolated to the first new
+owner; its linked-data count is not evidence that its source layout matches.
+The corrected ownership must pass the native comparison and full DOL check.
+
+The eight-byte flag block at `0x80478D78–0x80478D80` retains explicit original
+fallback in this checkpoint. `fight_seq.c` saves, clears and restores all
+eight elements of `lbl_80478D78`. Its interior address labels at offsets
+3, 4 and 5 therefore identify elements of one real `u8[8]` object. Defining
+separate one-byte objects for those labels does not satisfy the array extent
+used by the existing consumers, even if the linked bytes match.
+
+A source follow-up must define the full array and preserve the existing
+`lbl_80478D7B`, `lbl_80478D7C` and `lbl_80478D7D` references through a verified
+interior-label mechanism. The existing constant-export helper only renames
+an already emitted `.sdata2` literal; it supplies no such `.sdata` aliases.
+No new alias mechanism is introduced for this checkpoint. All eight physical
+bytes remain in the denominator and receive no source credit while using
+fallback.
+
+The subsequent 152-byte initialized-zero candidate at
+`0x8038FF64–0x8038FFFC` has independent zero hashes and recorded symbol extents.
+Its evidence and layout guard are in
+[`initialized_zero_8038FF64.md`](recon/initialized_zero_8038FF64.md).
+It was added after the eighth build and awaits native and complete-output
+validation.
+
+## Resource scope and verified source coverage
 
 The 561,032-byte resource region was original fallback in the verified
 baseline, as documented in [`REL_MODULES.md`](REL_MODULES.md) and the corrected
@@ -292,7 +364,7 @@ complete resource spans with definitions already present in the DOL source:
 | `lbl_802CF810` | `0x647B4` | 74,976 |
 
 The known eight-byte font header at `0x45A8C` was also verified as the
-`{0xFFFF, 0, 0, 0}` terminator recognized by `GSmsgFontOpen`. The draft shares
+`{0xFFFF, 0, 0, 0}` terminator recognized by `GSmsgFontOpen`. The source shares
 the four existing definitions through `shared_font_data.c` and
 `shared_message_data.c`, adding only that typed structural terminator. It
 reuses 423,928 bytes without duplicating the font or message initializers.
@@ -304,11 +376,12 @@ retains each original resource boundary. A 32-bit host compiler sanity check
 found the expected symbol offsets, no relocations, and all five resource
 hashes equal after translating the host's integer endianness. This is not a
 canonical-output result. The third private-input build independently verified
-all 423,928 bytes from native ProDG source objects; the source links still
-await passing complete output checks, and no accepted percentage is claimed here.
+all 423,928 bytes from native ProDG source objects. The eighth build verifies
+their integration in the canonical REL.
+
 The other 137,104 resource bytes contain two message groups and a GS VM
 script bank. The bounded message diagnostic establishes their structure
-without publishing message text. Two additional proposed owners reconstruct
+without publishing message text. Two additional source owners reconstruct
 the headers and key/offset indices, totaling 33,928 bytes:
 
 | Complete original message resource | Original bytes | Typed header/index | Adjacent original storage |
@@ -335,13 +408,14 @@ private-input build independently verified both prefixes as 100% exact and
 source-linked with ProDG. It also proved the complete 561,032-byte resource
 region equal in the rebuilt REL, including every fallback interval, with
 SHA-256 `8e3aacaee0aea8b9b2d90a933f65d184cf007cf0b12ac4ec77cf6e8a3e56c78e`.
-Complete canonical-output validation remains required; failures elsewhere in
-that build are not waived by this resource-region result.
+The sixth and eighth diagnostics reproduce that complete-region hash, and
+the eighth build also passes the complete REL. Region equality includes
+fallback and cannot assign source credit to those bytes.
 
 The GS VM diagnostic identifies another reconstructible 156-byte prefix:
 the 24-byte bank header, 27 relative function offsets (108 bytes), one
 relocation-site offset (4 bytes), and five zero-initialized globals (20 bytes).
-`script_structure_89CFC.c` proposes that typed source over `0x89CFC–0x89D98`.
+`script_structure_89CFC.c` defines that typed source over `0x89CFC–0x89D98`.
 The original resource base remains unchanged; a new adjacent original-storage
 symbol covers `0x89D98–0x8BCB4` (7,964 bytes), retaining the complete original
 8,120-byte bank. All four structural interval hashes match the private-input
@@ -350,21 +424,36 @@ diagnostic, and their combined source prefix hashes to
 The sixth private-input build verifies the native ProDG prefix as 100% exact
 and source-linked, and the complete 8,120-byte bank remains byte-identical.
 
-These indices do not reconstruct message text or script instructions. The
-remaining 95,056 message-storage bytes and 7,964 script-storage bytes still
-use fallback (103,020 bytes total). Source searches find only 68 bytes of
-candidate message-storage reuse and no complete script-function intervals;
-this does not justify counting the rest. The diagnostics expose structure,
-hashes and matching locations, without instruction or literal payloads.
+The current resource ownership is therefore:
+
+| Resource coverage | Bytes | Evidence |
+| --- | ---: | --- |
+| Shared existing definitions and typed font terminator | 423,928 | Native source verified in the third build |
+| Typed message headers and key/offset indices | 33,928 | Native source verified in the fifth build |
+| Typed GS VM header, indices and zero globals | 156 | Native source verified in the sixth build |
+| **Source-produced subtotal** | **458,012** | Canonical REL and complete-region equality in the eighth build |
+| Message storage still using fallback | 95,056 | Full intervals retained; 68 bytes are unlinked reuse candidates |
+| Script storage still using fallback | 7,964 | Function-start intervals known; bodies not reconstructed |
+| **Complete resource region** | **561,032** | **Every physical byte remains in scope** |
+
+The 103,020 fallback bytes receive no source credit. The searches found no
+complete script-function interval already represented in the searched source
+data. That is a reuse result, not proof that the scripts cannot be reverse
+engineered. Further gains require independently reviewed source, complete
+interval comparison and preserved bank/resource boundaries.
+
+## Diagnostic outputs and attribution
+
+`tools/data_match_diagnostics.py` records section and symbol sizes, alignment,
+hashes, relocation identities and source comparison results. Its full-output
+diagnostic compares all 26 manifest outputs against their original files and
+canonical hashes. Bounded changed intervals report offsets and sizes, and
+per-owner comparisons locate remaining `common_rel` data differences.
+`tools/resource_message_diagnostics.py` records resource structure, complete
+region equality and reuse candidates in existing source-backed DOL spans.
+These public diagnostics exclude payload bytes, message text and disassembly.
 
 Count-Sheep's original campaign history and contributor credit remain intact.
 The continuation's commits retain the account-linked coauthor credit when
 building on their source reconstruction. No runtime or gameplay result is
 implied by data matching.
-
-The German and Dutch DVD fatal-error strings are independently reconstructed
-from text already recorded in the tracked `config/GC6E01/symbolmap/strings.json`,
-following the existing English diagnostic source. Their complete source
-regions, including three zero-padding bytes each, reproduce the original
-156-byte and 140-byte section hashes. The latter uses the same strictly
-verified four-byte source-link alignment as other carved data owners.

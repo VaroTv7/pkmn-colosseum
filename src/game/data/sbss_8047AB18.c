@@ -139,7 +139,8 @@ u8 lbl_8047AD1C[0x4];
 u16 lbl_8047AD18;
 u8 lbl_8047AD10[0x8];
 u8 lbl_8047AD08[0x8];
-u8 lbl_8047AD04;
+/* menuUpdateKeyInfo/menuInit access one byte for each of four ports. */
+u8 lbl_8047AD04[4];
 u8 lbl_8047AD00[0x4];
 u8 lbl_8047ACF8[0x8];
 u8 lbl_8047ACF4[0x4];

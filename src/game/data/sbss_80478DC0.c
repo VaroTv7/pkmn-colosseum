@@ -49,7 +49,8 @@ u8 lbl_8047A628[0x4];
 u8 lbl_8047A620[0x8];
 u8 lbl_8047A618[0x8];
 u8 lbl_8047A610[0x8];
-u8 lbl_8047A60C;
+/* The uploader status check compares the complete four-byte boot key. */
+u32 lbl_8047A60C;
 u8 lbl_8047A608[0x4];
 u8 lbl_8047A604[0x4];
 u8 lbl_8047A600[0x4];

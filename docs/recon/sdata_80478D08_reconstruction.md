@@ -1,25 +1,29 @@
 # Battle and purification small-data reconstruction
 
-These source owners reconstruct 154 bytes of the previously original-backed
+These source owners reconstruct 152 bytes of the previously original-backed
 `.sdata` interval `0x80478D08..0x80478DB4`:
 
 | Owner | Interval | Bytes |
 | --- | --- | ---: |
-| `src/game/data/sdata_80478D08.c` | `0x80478D08..0x80478D86` | 126 |
+| `src/game/data/sdata_80478D08.c` | `0x80478D08..0x80478D78` | 112 |
+| `src/game/data/sdata_80478D80.c` | `0x80478D80..0x80478D8C` | 12 |
 | `src/game/data/sdata_80478D98.c` | `0x80478D98..0x80478DB4` | 28 |
 
-The 18 bytes at `0x80478D86..0x80478D98` retain their original-object fallback.
-Their map labels are `lbl_80478D86`, `lbl_80478D88` and `lbl_80478D8C`.
+The eight-byte flag block at `0x80478D78..0x80478D80` and the 12 bytes at
+`0x80478D8C..0x80478D98` retain their original-object fallback. The flag block
+requires one real eight-byte array plus interior labels; the damage operand's
+complete extent remains unresolved.
 No initializer is inferred from an unrelated short byte match.
 
 ## Evidence and validation boundary
 
 The reconstruction uses existing C consumers, typed table layouts and the
 metadata-only target hashes from CI5 (`2d9ab305`). No original payload bytes
-were read or copied. Every one of the 22 reconstructed original symbols matches
+were read or copied. Every one of the 21 reconstructed original symbols matches
 its complete preexisting SHA-256, including any zero padding included in its
-old extent. The three intervening hidden flag gaps also match their all-zero
-hashes. The version pointer has one `R_PPC_ADDR32` relocation to
+old extent. The flag bytes and gaps also have all-zero hashes, but remain
+original-backed until a sound alias model is available. The version pointer
+has one `R_PPC_ADDR32` relocation to
 `lbl_803751F0`, with addend zero; its encoded word is zero before relocation.
 
 This is source-model evidence. Acceptance still requires the pinned compiler
@@ -28,7 +32,8 @@ by the normal code-identity and canonical-link gates. The source models predict:
 
 | Interval | Pre-relocation SHA-256 |
 | --- | --- |
-| `0x80478D08..0x80478D86` | `d6498c304a380ef0ca254ad2b76d61759e24aaa2b29145a73ece3145d1c6ed68` |
+| `0x80478D08..0x80478D78` | `e30374a2fe8e13ba3b87fd0f82aa18b964809ce1db36944ddfacc5c7f54bfcc4` |
+| `0x80478D80..0x80478D8C` | `a885f1e132b95f490c3c1ad177d3da305fb4a8d7f2b24fd8f95579b38c57db82` |
 | `0x80478D98..0x80478DB4` | `fccf313e5a55cb7dd8c680590df9c563a5a8b1fe1ef01846ef25fa6a59e18a9b` |
 
 ## Typed values
@@ -51,8 +56,8 @@ The address suffix identifies each existing `lbl_80478...` symbol.
 | `D60` | `u32 = 5` | Bounds and clamping for those five denominator entries. |
 | `D68` | `u32 = 13` | `fightAbicntDoKakeWaru` indexes the thirteen nonpadding numerator/denominator pairs in `lbl_80375D10`. |
 | `D70` | `u32 = 13` | `fightWazaHitKakurituDataBiosGetPtr` indexes the thirteen nonpadding pairs in `lbl_80375DD0`. |
-| `D78`, `D7B`, `D7D` | Zero flag bytes | Battle script code clears the eight-byte flag block and addresses its existing sublabels at offsets 0, 3 and 5. |
 | `D80` | `u16[3] = {0x45, 0x43, 0x40}` | Script `lbl_80377B0C` passes the first halfword to `WS_STATUS_SET16`; other scripts use `D80+2`. Opcode `0xFC` and status kind 7 route these operands to `fightFloorSetStatus` field `0x3B`. The same three values occur in direct C setters of that field; the six-byte hash selects their order. |
+| `D86`, `D88` | `u16 = 0x41`, `u16 = 0x42` | CI8's five-site reference diagnostic proves `WS_STATUS_SET16`, fight-floor field `0x3C`, which routes through Pokemon field `0xDF` to move-status removal. `fightWazaIsJoutaiSousai` explicitly checks the same paired status IDs. Complete symbol hashes verify both values and the two zero padding bytes after `D88`. |
 | `D98` | `s32 = 4 * 6` | `toolentryDebugPokemonCreate` allocates/counts this many Pokemon and initializes four parties of six. Complete extent verification confirms the capacity is 24. |
 | `DA0` | `u16[2] = {100, 3}` | `std244_spawnEffectAtPosition` passes one pair to `effectCreate` and `effectPlayWaza`. |
 | `DA8` | `u16[4] = {77, 4, 122, 4}` | `reliveMain` passes two pairs to `loadSequence` and `effectPlayWaza`. |
@@ -81,7 +86,7 @@ The source evidence is in:
 
 ## Scalar extents and padding
 
-Sixteen old map entries include padding beyond the active type demonstrated
+Seventeen old map entries include padding beyond the active type demonstrated
 by their consumers. Their symbol extents are refined to the active object size;
 the same bytes remain owned by the same section, and address-named source
 padding retains the independently verified zero storage. Neither section
@@ -94,27 +99,34 @@ coverage nor the total-data denominator changes.
 | `D18` | 8 | 1 |
 | `D30` | 8 | 6 |
 | `D58` | 8 | 5 |
+| `D88` | 4 | 2 |
 
 Explicit padding arrays use the compiler-verified one-byte alignment attribute
 to avoid adding a second alignment gap. Every definition is explicitly placed
-in `.sdata`, including zero-initialized records and flags, and retained through
+in `.sdata`, including zero-initialized records, and retained through
 the scoped main export list. No original symbols are renamed.
 
-## Unresolved interval
+CI8 exposed one compiler storage distinction: scalar zero-byte definitions in
+the flag block moved into `.sbss` despite the explicit `.sdata` declaration.
+Initialized arrays avoid that placement change, but three separate one-byte
+objects would not describe the caller's actual eight-byte array accesses.
+The entire flag block therefore retains its original fallback. A future source
+owner must preserve one eight-byte C array and supply verified interior aliases
+at offsets 3 and 5. No consumer functions are changed for this checkpoint.
 
-The existing source contains no typed direct reference to `D86`, `D88` or
-`D8C`. A scan of the existing C bytecode initializers found the `D80+2`
-references described above, but no encoded pointer into `D86..D98`.
+## Status operand references and remaining fallback
 
-CI5 target relocation metadata identifies five references from still-original
-scripts: `lbl_80377531` at offsets `0xEB`, `0xFF` and `0x113` references
-`D86`, `D88` and `D8C`; `lbl_80378115` at `0xB3` and `0xC7` references
-`D86` and `D88`. Their 20-byte spacing is consistent with the existing status
-setter instruction format, but does not establish which setter or status field
-is used. Their map sizes and generic data-format hints alone do not establish
-defensible source semantics. These 18 bytes therefore remain unresolved.
+The bounded metadata diagnostic in `tools/small_data_reference_diagnostics.py`
+validates exactly five preexisting relocation sites using the existing handler
+schemas. CI8 verifies `D86` and `D88` as the 16-bit status-removal operands
+described above. The sites are `lbl_80377531` at offsets `0xEB` and `0xFF`,
+and `lbl_80378115` at offsets `0xB3` and `0xC7`.
 
-The intervening 18-byte original fallback is an explicit nonmatching owner
-with a two-byte split alignment. Its first existing symbol starts at
-`0x80478D86`; the section-wide four-byte default cannot describe that boundary.
-No source completion credit is assigned to this owner.
+The fifth site, `lbl_80377531` at `0x113`, reads `D8C` through
+`WS_STATUS_SET32`, fight-floor field `0x3E`. The existing setter chain reaches
+`fightWazaBiosSetDamage`, which writes a 32-bit damage value at offset `0x9C`
+of the move state. This establishes the leading word's type and purpose, but
+does not independently establish the entire 12-byte mapped extent. Those 12
+bytes remain an explicit nonmatching owner with four-byte split alignment.
+Neither that owner nor the eight-byte flag fallback receives source completion
+credit.

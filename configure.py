@@ -641,19 +641,51 @@ config.libs = [
                 extra_cflags=["-sdata 8", "-sdata2 0"],
                 progress_category="game",
             ),
-            # Typed battle counts, flag state and purification sequence pairs.
+            # Coordinate arrays retain original interior labels until aliases are modeled.
+            Object(NonMatching, "game/data/sdata_804788CC.c", progress_category="game"),
+            Object(
+                Matching,
+                "game/data/sdata_804788D8.c",
+                extra_cflags=["-sdata 8", "-sdata2 0"],
+                progress_category="game",
+            ),
+            # Each four-byte controller array has an original label at byte one.
+            Object(NonMatching, "game/data/sdata_80478950.c", progress_category="game"),
+            Object(
+                Matching,
+                "game/data/sdata_80478958.c",
+                extra_cflags=["-sdata 8", "-sdata2 0"],
+                progress_category="game",
+            ),
+            # Typed battle counts, status operands and purification sequence pairs.
             Object(
                 Matching,
                 "game/data/sdata_80478D08.c",
                 extra_cflags=["-sdata 8", "-sdata2 0"],
                 progress_category="game",
             ),
-            # Explicit original fallback; no source exists for these 18 bytes.
-            Object(NonMatching, "game/data/sdata_80478D86.c", progress_category="game"),
+            # One eight-byte flag array with overlapping labels needs an alias model.
+            Object(NonMatching, "game/data/sdata_80478D78.c", progress_category="game"),
+            Object(
+                Matching,
+                "game/data/sdata_80478D80.c",
+                extra_cflags=["-sdata 8", "-sdata2 0"],
+                progress_category="game",
+            ),
+            # Explicit original fallback; the complete damage operand extent is unresolved.
+            Object(NonMatching, "game/data/sdata_80478D8C.c", progress_category="game"),
             Object(
                 Matching,
                 "game/data/sdata_80478D98.c",
                 extra_cflags=["-sdata 8", "-sdata2 0"],
+                progress_category="game",
+            ),
+            # Initialized zero storage with guarded original object extents.
+            Object(
+                Matching,
+                "game/data/data_8038FF64.c",
+                data_alignment=4,
+                extra_cflags=["-sdata 0", "-sdata2 0"],
                 progress_category="game",
             ),
             # SDK source literals reconstructed from existing uses and build records.

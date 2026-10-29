@@ -5,7 +5,7 @@
 
 #pragma force_active on
 
-/* Independently reconstructed small-data globals, 0x80478D08..0x80478D86.
+/* Independently reconstructed small-data globals, 0x80478D08..0x80478D78.
  * The original map includes alignment bytes in several scalar extents.
  * Keep the live types used by the callers and name the verified zero padding.
  * See docs/recon/sdata_80478D08_reconstruction.md for evidence and hashes. */
@@ -62,18 +62,5 @@ SDATA u32 lbl_80478D68 = 13;
 SDATA u8 padding_80478D6C[4] BYTE_ALIGNED = {0};
 SDATA u32 lbl_80478D70 = 13;
 SDATA u8 padding_80478D74[4] BYTE_ALIGNED = {0};
-
-/* Eight zero-initialized battle-script flag bytes. Preserve the existing
- * addressable sublabels at offsets 0, 3 and 5 and the intervening map gaps. */
-SDATA u8 lbl_80478D78 = 0;
-SDATA u8 padding_80478D79[2] BYTE_ALIGNED = {0};
-SDATA u8 lbl_80478D7B = 0;
-SDATA u8 padding_80478D7C = 0;
-SDATA u8 lbl_80478D7D = 0;
-SDATA u8 padding_80478D7E[2] BYTE_ALIGNED = {0};
-
-/* WS_STATUS_SET16 operands for fightFloorSetStatus field 0x3B. These
- * constants also occur in the corresponding direct C status setters. */
-SDATA u16 lbl_80478D80[3] = {0x45, 0x43, 0x40};
 
 #pragma force_active reset
