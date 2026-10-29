@@ -19,6 +19,15 @@ and canonical comparisons remain pending; the first integration link stalled
 after compilation succeeded, so the build now separates and time-bounds that
 step while preserving all canonical checks.
 
+The first build completed all native links but stalled during output
+conversion. The direct GNU data-object path had omitted the ordinary assembler
+path's `dtk elf fixup` compatibility step. The corrected path now applies the
+same source-only fixup. Independent validation of all 29 affected objects
+confirms that all 17,135 data bytes, 207 object symbols, 299 relocations and
+section alignments remain unchanged; the pinned subset report is still fully
+exact. A fresh full build must establish whether output conversion and all
+canonical comparisons now pass.
+
 | Reconstructed source | Additional bytes | Evidence |
 | --- | ---: | --- |
 | Semantic GS VM bank `0x0596` | 7,964 | [Structured programs, native signatures and runtime fixup](recon/common_script_0596.md) |

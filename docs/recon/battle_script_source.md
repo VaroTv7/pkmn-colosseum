@@ -88,6 +88,14 @@ The authored JSON, compiler, source schema, neighboring C definitions, and
 public symbol map are the build inputs. Private originals were used only to
 reverse engineer and independently verify the authored source.
 
+The generated object follows the existing GNU assembler build path through
+`dtk elf fixup`. This source-only compatibility step sets the embedded PowerPC
+ELF flag and removes empty sections and their section symbols. Independent
+comparison of all 17 battle and 12 message objects verifies unchanged allocated
+bytes, object symbols, relocations and section alignment. Their pinned objdiff
+report remains 17,135 of 17,135 data bytes exact and 29 of 29 units complete.
+No target object or original payload is an input to this fixup.
+
 ## Address encodings and relocation classification
 
 The interpreter reads packed, big-endian wire addresses. The existing object

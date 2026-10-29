@@ -857,6 +857,13 @@ def generate_build_ninja(
         command="$python $generator --source $in --output $out $generator_args",
         description="Compile data source $in",
     )
+    n.rule(
+        name="generate_data_object",
+        # Match the ordinary GNU assembler path's PowerPC ELF compatibility
+        # step. It operates on generated source alone, never the target object.
+        command=f"{CHAIN}$python $generator --source $in --output $out $generator_args && {dtk} elf fixup $out $out",
+        description="Compile data object $in",
+    )
     source_aliases = config.tools_dir / "source_data_aliases.py"
     n.rule(
         name="source_data_aliases",
@@ -1525,11 +1532,15 @@ def generate_build_ninja(
                         dependencies.append(binutils_implicit or binutils / f"powerpc-eabi-as{EXE}")
                     quote_args = subprocess.list2cmdline if is_windows() else shlex.join
                     output = obj.src_obj_path
+                    rule = "generate_data_object"
                     if generator["kind"] == "c":
+                        rule = "generate_data_source"
                         output = config.out_path() / "generated" / Path(obj.name).with_suffix(".c")
+                    else:
+                        dependencies.append(dtk)
                     n.build(
                         outputs=output,
-                        rule="generate_data_source",
+                        rule=rule,
                         inputs=obj.src_path,
                         implicit=dependencies,
                         variables={"generator": quote_args([generator["tool"]]),
