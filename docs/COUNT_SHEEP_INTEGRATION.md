@@ -4,8 +4,8 @@
 
 This integration brings the remaining Count-Sheep history through
 `51bfe4314a218dfaf9592fc80723c50498d0ee55` onto upstream
-`876de33adc88acdbac119b846c5115ee41e54ccb`. Both parents and their contributor
-attribution are retained. The donor describes its final tree as 100% matched
+`876de33adc88acdbac119b846c5115ee41e54ccb`. Both parents, all 751 donor commits and their contributor
+attribution are retained. The README explicitly credits Count-Sheep. The donor describes its final tree as 100% matched
 and linked **code**; its README and tracked reports are older measurements.
 That donor claim is not a measurement of this combined tree. A fresh private
 CI build must establish the integrated result before it is accepted.
@@ -32,7 +32,7 @@ Donor source owners and compiler profiles replace superseded code carves. The
 upstream common_rel reconstruction, false-relocation exclusions, callable DOL
 exports, loose-REL support, canonical hashes and private-input CI remain intact.
 Forty upstream data-only units are retained where the donor has no explicit
-owner. The SDK arena buffer now belongs to its exact code owner; its adjacent
+owner. The SDK EXI control block now belongs to its exact code owner; its adjacent
 72-byte prefix and 24-byte tail remain separate zero-initialized source units.
 These 42 data units cover 16,574 bytes already present in the baseline. They
 are preservation, not newly claimed progress. The 561,032-byte original

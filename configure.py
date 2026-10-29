@@ -169,6 +169,9 @@ config.sjiswrap_path = args.sjiswrap
 config.config_path = Path("config") / config.version / "config.yml"
 config.check_sha_path = Path("config") / config.version / "build.sha1"
 config.force_active_symbols["main"] = [
+    # Preserve retail zero-initialized bytes after the EXI control block,
+    # now that EXIGetID owns that block in its exact source unit.
+    "lbl_803FB488",
     # game/data/{bss,sdata,sbss}_*.c: retail variables that nothing in
     # main.dol references; compiled from source they would be dead-stripped
     # and the rest of the section would move.

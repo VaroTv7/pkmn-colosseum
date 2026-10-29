@@ -153,6 +153,16 @@ generated `objdiff.json` / `build/GC6E01/report.json`.
 Do not commit generated `.inc` files, extracted game assets, target objects,
 compiler binaries, or asm-wrapper bodies as decompilation progress.
 
+## Contributors
+
+[Count-Sheep](https://github.com/Count-Sheep) contributed the extensive matching
+and linking campaign integrated from their
+[Pokémon Colosseum fork](https://github.com/Count-Sheep/pkmn-colosseum), including
+source reconstruction, compiler analysis, matching tools and supporting evidence.
+The integration preserves their original commits and author attribution. See
+[`docs/COUNT_SHEEP_INTEGRATION.md`](docs/COUNT_SHEEP_INTEGRATION.md) for the import
+history and validation scope.
+
 ## License
 
 The decompiled source in this repository is released under the

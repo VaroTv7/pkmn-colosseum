@@ -360,7 +360,7 @@ typedef struct MenuCBBattle {
 /* menuCB_Battle.c's .rodata (0x80267C18-0x80267DD8): the tables are file
  * statics, addressed off one base as retail does; the two strings
  * fn_80069A60 (menuCB_Battle.c unit) also reads keep their lbl_ names. */
-static const u32 staBGM[3] = { 0x1F, 0x20, 0x21 };
+static const u32 sMenuMiddleBattleBgm[3] = { 0x1F, 0x20, 0x21 };
 static const u16 staColosseum[7] = { 0x2B, 0x2C, 0x2D, 0x30, 0x2F, 0x30, 0x2A };
 static const u32 staSyoukaiWzx[8] = { 0x95, 0x96, 0x97, 0x98, 0x99, 0x9A, 0x9C, 0x9B };
 static const u8 staCPU[2][4][8] = {
@@ -552,7 +552,7 @@ s32 menuCBBattleSetupFight(MenuCBBattle* p) {
         }
         break;
     default:
-        bgm = staBGM[(*(u32*)&lbl_8047A5D8)];
+        bgm = sMenuMiddleBattleBgm[(*(u32*)&lbl_8047A5D8)];
         (*(u32*)&lbl_8047A5D8)++;
         (*(u32*)&lbl_8047A5D8) = (*(u32*)&lbl_8047A5D8) % 3;
         break;

@@ -269,7 +269,7 @@ static inline u8 CardEReadField(CardEReader* reader,
  * separate objects, which retail addresses off one pool base
  * (`addi rX, base, 0x0/0x1E0/0x240/0x360`). */
 #if defined(CARDESAVEDATA_ALL) || defined(CARDESAVEDATA_DECODE_TU)
-static const CardEFieldDesc sCardEHeaderFields[40] = {
+static const CardEFieldDesc sCardEDecodeHeaderFields[40] = {
     { 0, 4, 1 },
     { 1, 3, 1 },
     { 2, 2, 1 },
@@ -1608,13 +1608,13 @@ u32 cardeDecode(void* output, const u8* packed, u32 size)
     reader.packed = packed;
     reader.size = size;
     reader.bitPosition = 0;
-    CardEReadField(&reader, sCardEHeaderFields, 0, -1);
+    CardEReadField(&reader, sCardEDecodeHeaderFields, 0, -1);
 
     reader.bitPosition = 0;
     switch (*(s32*)output) {
     case 0:
         for (i = 0; i < 40; i++) {
-            if (!CardEReadField(&reader, sCardEHeaderFields, i, -1)) {
+            if (!CardEReadField(&reader, sCardEDecodeHeaderFields, i, -1)) {
                 valid = 0;
             }
         }
