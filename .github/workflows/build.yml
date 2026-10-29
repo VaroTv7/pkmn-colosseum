@@ -55,7 +55,7 @@ jobs:
       run: |
         # A stalled legacy linker must fail with logs while report diagnostics
         # can still run. The last complete source-and-output build took 125s.
-        timeout --signal=TERM --kill-after=30s 5m ninja -j2
+        timeout -s TERM -k 30 300 ninja -j2
         sha1sum -c config/${{ matrix.version }}/build.sha1
         python3 tools/ci_retail.py \
             --manifest config/${{ matrix.version }}/build.sha1 \
