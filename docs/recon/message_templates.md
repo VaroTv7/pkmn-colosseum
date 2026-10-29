@@ -1,6 +1,6 @@
 # Packed message controls and generated labels
 
-## Verified scope and acceptance status
+## Verified native and integrated result
 
 `src/rel/common_rel/message_templates.json` reconstructs **219 complete message
 entries totaling 3,635 bytes** in 12 `common_rel .data` owners. Independent
@@ -9,11 +9,29 @@ key, starting offset, complete storage extent and bytes. All 12 generated
 native objects also match their entire original intervals, with **alignment
 1**, one correctly sized exported data symbol and **zero relocations**.
 
-**Full integrated canonical CI is pending for this checkpoint.** The local
-source/native comparisons described here do not claim that the complete
-DOL/REL build, canonical hashes, topology or metric-integrity gates have
-passed with the new owners. Final acceptance must retain those checks and
-the full physical data denominator.
+The normal [Build 40968205519, job 123777997002](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/job/123777997002)
+**passed** at source revision
+[`456efababa4448e5b66c1c8ac336531c1e669536`](https://github.com/dougchansan/pkmn-colosseum/commit/456efababa4448e5b66c1c8ac336531c1e669536).
+It linked all 12 generated source objects and passed all **26 unchanged
+canonical hashes and direct byte comparisons**: `main.dol` and 25 RELs. The
+same build passed all 34 zero-layout checks, assembly-branch checks, metric
+integrity, the strict topology freeze and the README progress-table check.
+
+The [fresh report artifact 12939685347](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/artifacts/12939685347)
+records all 12 owners as complete, with a **3,635-byte matched and
+source-linked data gain**. This reduces the outstanding message payload from
+95,056 to **91,421 bytes**. Those remaining bytes retain their fallback owners
+and stay in the full **3,565,996-byte data denominator**. Across the checkpoint,
+matched and source-linked data are both **3,474,575 bytes (97.436320%)**.
+
+An independent audit of that report confirmed all **8,677 function identities**,
+the **2,504,940-byte code denominator**, and the exact physical interval union
+across all 26 modules remained unchanged, with no overlaps. The report JSON
+SHA-256 is `c4e3995c1d8155a5b9536a4de02dae2580ff2b9a8a265cdcf4426e897680e09b`;
+the downloaded artifact archive SHA-256 is
+`5aaeaec12cf7377291735cafdca1893862d7dcd8288f8e8206d9814ffe9104a2`.
+These results establish native output equality and source accounting;
+runtime gameplay testing was outside this verification.
 
 This reconstruction covers formatting controls, simple UI states, complete
 entries already represented by existing source, and regular counter-label
@@ -140,9 +158,10 @@ authored `.data` payload, alignment 1, the expected object symbol and size,
 and no data relocations. These checks preserve the packed storage used by
 the original message reader.
 
-When the objects are linked and accepted, they contribute source-linked
-**data**. They do not add decompiled PowerPC functions or assembly-code
-credit, and the original fallback cannot supply their source credit.
+The normal canonical build links these objects and reports all 3,635 bytes
+as matched and source-linked **data**. They do not add decompiled PowerPC
+functions or assembly-code credit, and the original fallback cannot supply
+their source credit.
 
 ## Validation evidence
 
@@ -169,6 +188,6 @@ checks for the actual source selection:
 
 Only counts, boundaries, identities, hashes and equality results are suitable
 as public verification metadata. Private originals and decoded catalogs are
-not documentation or build inputs. The final integrated build must still
-prove that these source owners preserve the unchanged complete resources,
+not documentation or build inputs. The normal integrated build cited above
+verified that these source owners preserve the unchanged complete resources,
 canonical outputs and physical progress scope.

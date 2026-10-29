@@ -1,6 +1,6 @@
 # Shared GS VM bank 0x0596: semantic source reconstruction
 
-## Verified local result and CI status
+## Verified native and integrated result
 
 The authored program in
 `src/rel/common_rel/common_script_0596.json` reconstructs the **7,964 bytes**
@@ -25,11 +25,29 @@ its 156-byte `.data` definition. Their native section bytes concatenate to
 the original bank exactly. All 27 generated entry offsets agree with the
 already reconstructed header.
 
-**Full canonical CI is pending for this reconstruction.** These local results
-establish the source bytes, layout and native object contents; they do not
-claim that the complete DOL/REL build, report-integrity checks or runtime
-testing have passed for the new checkpoint. Final acceptance also requires
-the repository's unchanged canonical hashes and full physical denominator.
+The normal [Build 40968205519, job 123777997002](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/job/123777997002)
+**passed** at source revision
+[`456efababa4448e5b66c1c8ac336531c1e669536`](https://github.com/dougchansan/pkmn-colosseum/commit/456efababa4448e5b66c1c8ac336531c1e669536).
+It linked the generated source object and passed all **26 unchanged canonical
+hashes and direct byte comparisons**: `main.dol` and 25 RELs. The same build
+passed all 34 zero-layout checks, assembly-branch checks, metric integrity,
+the strict topology freeze and the README progress-table check.
+
+The [fresh report artifact 12939685347](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/artifacts/12939685347)
+records this program's **7,964-byte matched and source-linked data gain**.
+The existing 156-byte header is not counted again as new progress. Across
+the checkpoint, matched and source-linked data are both **3,474,575 of
+3,565,996 bytes (97.436320%)**. The remaining **91,421 message bytes** stay in
+the denominator as fallback and receive no source credit.
+
+An independent audit of that report confirmed all **8,677 function identities**,
+the **2,504,940-byte code denominator**, and the exact physical interval union
+across all 26 modules remained unchanged, with no overlaps. The report JSON
+SHA-256 is `c4e3995c1d8155a5b9536a4de02dae2580ff2b9a8a265cdcf4426e897680e09b`;
+the downloaded artifact archive SHA-256 is
+`5aaeaec12cf7377291735cafdca1893862d7dcd8288f8e8206d9814ffe9104a2`.
+These results establish native output equality and source accounting;
+runtime gameplay testing was outside this verification.
 
 ## Program, rather than an instruction transcript
 
@@ -167,7 +185,8 @@ The seven tests in `.github/scripts/test_gs_vm_script_source.py` pass:
   C registry and the generated layout against the existing typed header.
 
 The tests contain no original program-byte fixtures. The separate private
-native-object comparison supplies whole-region equality evidence. Source data
-credit must come from this generated native object when it is actually linked;
-the original fallback is not credited, and reconstructed script data does not
-change the PowerPC function/code denominator.
+native-object comparison supplies whole-region equality evidence. The normal
+canonical build links the generated native object and reports its complete
+7,964-byte interval as matched and source-linked data. The original fallback
+is not credited, and reconstructed script data does not change the PowerPC
+function/code denominator.

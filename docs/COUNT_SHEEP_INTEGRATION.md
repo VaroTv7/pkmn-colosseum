@@ -1,5 +1,11 @@
 # Count-Sheep integration validation
 
+This document records the completed fork import and its historical checkpoints.
+Subsequent source reconstruction raises matched and source-linked data to
+**97.44%** while retaining the import's code coverage, donor history and
+attribution. See [the current data evidence](DATA_MATCHING.md) and
+[PR #664](https://github.com/dougchansan/pkmn-colosseum/pull/664).
+
 ## Completion import — 2026-10-29
 
 **The integrated tree matches and links 100% of the project's tracked code:

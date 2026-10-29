@@ -2,19 +2,24 @@
 
 ## Status and scope
 
-Local checks with the pinned GC/1.2.5n compiler and objdiff 3.6.1 verify three
-native source sections and their guarded comparison views: 200 of 200 data
-bytes match across three complete units. The earlier source prefix accounted
-for 172 of those bytes, so this proposal reconstructs another **28 physical
+The normal production build verifies three native source sections and their
+guarded comparison views: 200 of 200 data bytes match across three complete
+units. The earlier source prefix accounted for 172 of those bytes, so these
+array definitions reconstruct another **28 physical
 bytes**. The independent damage-operand investigation below also verifies
 the remaining **12 physical bytes** as two separate scalar constants and
-four bytes of linker alignment. Together, these local checks cover all 40
-previously retained small-data bytes. Private CI also compiles all source
-owners and retains all 8,677 exact function identities. An isolated link using
-only source-derived alias copies with their `.comment` sections removed also
-produces the exact canonical DOL hash. The normal production build and all
-26 unchanged canonical output hashes are **pending private-input CI**. These
-checks are not a completed project build or runtime test.
+four bytes of linker alignment. Together, the four source owners account for
+224 matched and complete data bytes, a verified **40-byte gain** over their
+previous 184 source bytes.
+
+[Normal Build 40968205519](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/job/123777997002)
+at [source commit 456efababa4448e5b66c1c8ac336531c1e669536](https://github.com/dougchansan/pkmn-colosseum/commit/456efababa4448e5b66c1c8ac336531c1e669536)
+passed all **26 unchanged canonical output hashes and direct binary
+comparisons**, without running diagnostic substitution variants. The full
+source report and independent coverage audit retain all **8,677 exact function
+identities**, all 2,504,940 code bytes, and the unchanged physical interval
+union across all 26 modules. The data denominator remains 3,565,996 bytes.
+This verifies the integrated reconstruction; runtime gameplay was not tested.
 
 The native definitions retain complete C arrays. The existing symbol map
 describes some of these arrays as smaller, adjacent historical fragments.
@@ -55,8 +60,8 @@ declarations in other source carves do not establish smaller storage bounds.
 also access its individual elements through index seven. The new definition
 is one initialized `u8[8]`. Twenty-four stale `extern` declarations in 19
 source files were corrected from `[1]` to `[8]`, without changing any function
-computation or executable statement. These declaration-only changes require the full native
-code-identity checks in CI.
+computation or executable statement. The normal CI report verifies that these
+declaration-only changes preserve the native code identities.
 
 The directly changed battle source owners are:
 
@@ -85,7 +90,7 @@ The remaining declaration is in the included `game/fight_seq.c`. Its current
 registered wrappers are `fight_seq_candidate_80211170.c`,
 `fight_seq_r54_80211810_prefix.c`, `fight_seq_r54_80211830_gc13_o4p.c` and
 `fight_seq_r54_802118FC_suffix.c`; the appropriate conditional body is selected
-by each wrapper. The full report must retain all original function identities.
+by each wrapper. The verified full report retains all original function identities.
 
 ### The byte at `0x80478D7C`
 
@@ -264,9 +269,11 @@ pinned-compiler objects passes its strict validation, preserves all native
 and original target inputs, and produces comparison objects byte-identical
 to the existing 200/200 matching report. The five array hosts and six original
 interior names remain in the existing `FORCEACTIVE` retention list. No
-diagnostic substitution is used by the production build. Normal production
-linking and all 26 unchanged canonical output hashes remain **pending
-private-input CI**.
+diagnostic substitution is used by the production build. The subsequent
+[normal production build](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/job/123777997002)
+passes all 26 canonical hashes and direct comparisons with this link-only
+normalization. It also passes the 34 zero-data layout checks, assembly-branch
+checks, metric-integrity checks, strict freeze, and README metric table check.
 
 ## Two independent damage constants and linker padding
 
@@ -326,8 +333,15 @@ The previous D80 source accounted for 12 bytes, so this owner contributes
 another 12 physical bytes: eight bytes of independently typed constants and
 four bytes of verified linker alignment.
 
-Together with the three array owners, the four isolated reports account for
-224 matched bytes, previously 184 source bytes, for a proposed 40-byte gain.
-The physical denominator is unchanged. Full project CI must still verify
-the new linked layout, native consumers and canonical hashes before this is
-reported as a verified project-wide result.
+Together with the three array owners, the normal integrated report accounts
+for 224 matched and complete bytes, previously 184 source bytes, for a verified
+40-byte gain. The physical denominator and exact interval union are unchanged;
+no bytes were removed, added, or counted twice. The native consumers and all
+canonical outputs pass the normal production checks described above.
+
+The [report artifact from that build](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/artifacts/12939685347)
+contains the verified report with SHA-256
+`c4e3995c1d8155a5b9536a4de02dae2580ff2b9a8a265cdcf4426e897680e09b`.
+The array owners report 184, 8, and 8 matched/complete data bytes; the D80
+owner reports 24. These checks establish binary identity and honest source
+accounting, without claiming runtime gameplay coverage.

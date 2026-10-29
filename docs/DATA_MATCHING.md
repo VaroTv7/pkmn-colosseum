@@ -1,22 +1,38 @@
 # Remaining data matching
 
-## Script and small-data continuation
+## Verified script and small-data continuation
 
-[PR #663](https://github.com/dougchansan/pkmn-colosseum/pull/663) is merged.
-Its final required checks and the
-[post-merge Build](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40953799950)
-passed. The verified baseline for the next continuation is master
-`4cf5494422955e6f383b8470ae5e46dd5362fc4f`: 3,449,436 of 3,565,996 data
-bytes matched and linked from source, with all 8,677 tracked functions exact.
+The normal private-input
+[Build job](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/job/123777997002)
+at source revision
+[`456efababa4448e5b66c1c8ac336531c1e669536`](https://github.com/dougchansan/pkmn-colosseum/commit/456efababa4448e5b66c1c8ac336531c1e669536)
+passes all **26 unchanged canonical hashes and direct original/rebuilt byte
+comparisons**. It compiles and links the reconstructed programs, small C data
+and message templates through the normal production path, with no diagnostic
+input substitutions. All 34 zero-data layout checks, registered assembly
+branch checks, metric integrity, strict topology freeze and README/report
+checks pass.
 
-The following additional source is implemented. The
-[PR #664 Regression Guard](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40960309403)
+The fresh report verifies **3,474,575 of 3,565,996 data bytes matched and linked
+from source (97.43632%)**, with 2,258 complete units out of 2,272. All 8,677
+tracked functions and all 2,504,940 tracked code bytes remain exact and
+source-linked. This continuation adds **25,139 data bytes** beyond the merged
+[PR #663](https://github.com/dougchansan/pkmn-colosseum/pull/663) baseline,
+master `4cf5494422955e6f383b8470ae5e46dd5362fc4f`. That baseline's final checks
+and [post-merge Build](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40953799950)
+also passed at 3,449,436 matched and source-linked data bytes.
+
+The same source revision's
+[Regression Guard](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205600)
 compiled the complete project and verified all 8,677 existing function
 identities with no score regressions, removals, renames or boundary changes.
-Its report measures 3,474,575 of 3,565,996 data bytes matched and source-complete
-(97.43632%), with 2,258 complete units out of 2,272. Full final-output linking
-and canonical comparisons remain pending. The build separates compilation
-from a bounded final-output step while preserving all canonical checks.
+Quality Lint also passes. The normal Build report is byte-identical to the
+earlier compiler report from
+[Regression Guard 40960309403](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40960309403).
+The build separates compilation from a bounded final-output step while
+preserving all canonical checks. All 275 local checker tests pass.
+
+### Linker compatibility evidence
 
 The direct GNU data-object path initially omitted the ordinary assembler
 path's `dtk elf fixup` compatibility step. The corrected path applies the same
@@ -50,8 +66,16 @@ every allocated byte, full array and alias identity, relocation, alignment
 and ELF flag before writing. The immutable native compiler object and the
 comparison view retain their existing metadata and bounds. Temporary probe
 steps and tooling have been removed from the final tree; their committed
-history and metadata-only artifacts retain the experiment. The normal build
-must independently verify this representation and all 26 canonical outputs.
+history and metadata-only artifacts retain the experiment. The successful
+normal Build above independently verifies this exact representation and all
+26 canonical outputs. Its linked-data diagnostic verifies all five complete
+array hosts and six zero-size interior labels at their expected addresses.
+All 209 added symbols match: 195 battle-script symbols and 14 small-data
+symbols. The 31 size mismatches and 19 missing symbols elsewhere in that
+diagnostic are unchanged from the preceding verified build; there are no new
+residual issues, address mismatches or ambiguities.
+
+### Source gain and remaining data
 
 | Reconstructed source | Additional bytes | Evidence |
 | --- | ---: | --- |
@@ -59,7 +83,7 @@ must independently verify this representation and all 26 canonical outputs.
 | Seventeen packed battle-script owners | 13,500 | [Typed commands, symbol extents and 299 real relocations](recon/battle_script_source.md) |
 | Complete small-data arrays and damage constants | 40 | [Native object bounds, interior labels and natural alignment](recon/small_data_array_aliases.md) |
 | Message controls, counter templates and existing-source reuse | 3,635 | [219 complete entries from semantic templates](recon/message_templates.md) |
-| **Verified compiler-report gain** | **25,139** | **Full denominator retained** |
+| **Verified matched and source-linked gain** | **25,139** | **Full denominator retained** |
 
 The pinned objdiff subset report verifies all 30 generated script/template
 owners: 25,099 of 25,099 data bytes exact and source-complete, with no native
@@ -72,16 +96,21 @@ source and source-only compilers are the tracked inputs.
 The measured residual is 91,421 message-content bytes in 13 explicit original
 fallback intervals. Reconstructing a message decoder or its formatting rules
 does not reconstruct the unique message contents. Those bytes remain in the
-3,565,996-byte scope and receive no source or matching credit. The complete
-integrated report and all unchanged canonical outputs remain required before
-merging. README progress and the topology freeze now describe the measured
-compiler report, whose SHA-256 is
+3,565,996-byte scope and receive no source or matching credit. README progress
+and the topology freeze describe the verified normal Build report, whose
+SHA-256 is
 `c4e3995c1d8155a5b9536a4de02dae2580ff2b9a8a265cdcf4426e897680e09b`.
-The [metadata-only regression artifact](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40960309403/artifacts/12934569660)
-contains this report. An independent physical-coverage audit verifies the
-same interval union across all 26 modules: no overlapping intervals, removed
-physical bytes or added physical bytes. The code, function and data
-denominators are unchanged.
+The [normal Build report artifact](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/artifacts/12939685347)
+contains this report; its archive SHA-256 is
+`5aaeaec12cf7377291735cafdca1893862d7dcd8288f8e8206d9814ffe9104a2`.
+The [metadata-only diagnostics](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/artifacts/12937999603)
+record the canonical output comparisons, zero-data layouts and linked symbols.
+An independent audit of this fresh report verifies all 8,677 function
+identities and the same physical interval union across all 26 modules: no
+overlapping intervals, removed physical bytes, added physical bytes or renamed
+functions. The code, function and data denominators are unchanged. The
+separate 7,992-byte physical interrupt-vector fallback remains disclosed
+below and receives no tracked-code or source credit.
 
 ## Verified PR #663 source result
 
@@ -145,7 +174,7 @@ or source-link credit. They remain in completion scope and the denominator.
 | `0x80478D78–0x80478D80` | 8 | One eight-element battle flag array with interior labels |
 | `0x80478D8C–0x80478D98` | 12 | Leading damage operand understood; complete mapped extent unresolved |
 
-## Build evidence
+## PR #663 build history
 
 The continuation is tracked in
 [PR #663](https://github.com/dougchansan/pkmn-colosseum/pull/663). Its private-input
@@ -235,8 +264,10 @@ The full acceptance sequence is:
    final PR head before merging.
 
 The ninth source build and its integrity audit established steps 1–4 for
-PR #663. Its final head and post-merge Build also passed step 5. The new
-continuation above must independently repeat this acceptance sequence.
+PR #663. Its final head and post-merge Build also passed step 5. The normal
+source-continuation Build above independently passes steps 1–4 with the
+measured topology freeze and README table. All required checks continue to
+apply to the final PR #664 head before merging.
 
 ## Source metadata and linker layout
 

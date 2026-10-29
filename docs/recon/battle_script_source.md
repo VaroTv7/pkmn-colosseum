@@ -6,6 +6,10 @@ original object names and exactly 13,500 physical data bytes. These are programs
 for the game's battle interpreter, so they contribute to source-backed **data**.
 They do not add decompiled C functions or native assembly functions.
 
+The 17 owners are verified in the normal production build, contributing a
+**13,500-byte gain in matched and complete source data**. Their physical
+coverage remains unchanged. The integration evidence is recorded below.
+
 `tools/battle_script_format.py` defines the supported commands and their typed
 operands. Each command records the existing matching C handler and source path
 used to establish its meaning, operand widths, and instruction stride. The
@@ -179,7 +183,24 @@ the complete 17-owner extent, and dependency coverage. Assembler-dependent
 synthetic cases explicitly skip when the assembler has not been downloaded;
 they ran locally with the project's PowerPC assembler.
 
-The full native-source report, function-identity audit, unchanged physical data
-coverage, and all canonical DOL/REL output hashes remain required integration
-gates. Local object equality does not claim that the final integrated build has
-already passed those gates or that runtime gameplay was tested.
+[Normal Build 40968205519](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/job/123777997002)
+at [source commit 456efababa4448e5b66c1c8ac336531c1e669536](https://github.com/dougchansan/pkmn-colosseum/commit/456efababa4448e5b66c1c8ac336531c1e669536)
+passed all **26 unchanged canonical DOL/REL hashes and direct binary
+comparisons**. The normal build ran no diagnostic target-substitution variants.
+It also passed the 34 zero-data layout checks, assembly-branch checks,
+metric-integrity checks, strict freeze, and README metric table check.
+
+The full source report confirms all 17 battle owners complete, with
+`total_data = matched_data = complete_data = 13,500`. This is a verified
+13,500-byte source-data gain. The independent audit preserves all **8,677
+function identities**, all 2,504,940 native code bytes, and the exact physical
+interval union across all 26 modules, with no overlaps, removed bytes or added
+bytes. The full data denominator remains 3,565,996 bytes; no native functions
+or physical storage were reclassified out of scope to obtain this result.
+
+The [report artifact from that build](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/artifacts/12939685347)
+has report SHA-256
+`c4e3995c1d8155a5b9536a4de02dae2580ff2b9a8a265cdcf4426e897680e09b`.
+These integrated checks establish source accounting and binary identity.
+Runtime gameplay was not tested, and the structural control-flow audit does
+not claim that every branch is reachable or terminates.

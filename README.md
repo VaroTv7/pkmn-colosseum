@@ -11,7 +11,7 @@ A matching decompilation project for the GameCube game **Pokémon Colosseum**
 **All 8,677 tracked functions and all 2,504,940 tracked code bytes match and
 link from source (100%) across the DOL and all 25 configured REL modules.**
 This includes accepted assembly implementations with recorded evidence.
-**Data matching and source-linked data are both 96.73%.**
+**Data matching and source-linked data are both 97.44%.**
 
 | Metric | Value |
 |---|---|
@@ -21,27 +21,28 @@ This includes accepted assembly implementations with recorded evidence.
 | Data match | 97.44% (3,474,575 / 3,565,996 matched data bytes) |
 | Source-linked | 2,258 / 2,272 scoring units (100.00% of code) |
 
-Source-linked data is **3,449,436 / 3,565,996 bytes**. Compared with the
-completed Count-Sheep import, this adds **478,956 matched data bytes** and
-**1,551,996 source-linked data bytes**. The full data denominator is unchanged.
+Source-linked data is **3,474,575 / 3,565,996 bytes**. Compared with the
+completed Count-Sheep import, this adds **504,095 matched data bytes** and
+**1,577,135 source-linked data bytes**. The latest source continuation adds
+25,139 bytes beyond the verified 96.73% checkpoint in
+[PR #663](https://github.com/dougchansan/pkmn-colosseum/pull/663).
+The full data denominator is unchanged.
 
 The data reconstruction was verified at source revision
-[`dcdfc947cd77221ff38159679f07e704be77d9e4`](https://github.com/dougchansan/pkmn-colosseum/commit/dcdfc947cd77221ff38159679f07e704be77d9e4).
-Its [source-validation run](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40950775953/job/123717998521)
+[`456efababa4448e5b66c1c8ac336531c1e669536`](https://github.com/dougchansan/pkmn-colosseum/commit/456efababa4448e5b66c1c8ac336531c1e669536).
+Its [normal Build job](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/job/123777997002)
 compiled and linked all outputs, passed all **26 unchanged canonical hashes
 and direct original/rebuilt byte comparisons**, verified all 34 zero-data
-owners, and passed the registered assembly branch-target checks. The report
-audit preserves all 8,677 function identities and bounds, all code bytes, and
-the exact union of physical data intervals, with no overlaps or omitted bytes.
-That run's overall result was red only because its topology freeze still
-described the previous split layout. This metadata refresh updates the freeze
-and progress table from the verified report. Required checks continue to apply
-to the final integration head in
-[PR #663](https://github.com/dougchansan/pkmn-colosseum/pull/663).
+owners, and passed the registered assembly branch-target, metric-integrity,
+strict topology-freeze and README/report checks. An independent report audit
+preserves all 8,677 function identities and bounds, all code bytes, and the
+exact union of physical data intervals, with no overlaps or omitted bytes.
+The reconstruction and its final integration checks are recorded in
+[PR #664](https://github.com/dougchansan/pkmn-colosseum/pull/664).
 
 The table comes from that run's
-[`GC6E01_report` artifact](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40950775953/artifacts/12931237166),
-with SHA-256 `b4153fe0b68fdfdb1bb658bfeaa455c51d3514d1617fd4845a10b2a876b2c7e2`.
+[`GC6E01_report` artifact](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/artifacts/12939685347),
+with report SHA-256 `c4e3995c1d8155a5b9536a4de02dae2580ff2b9a8a265cdcf4426e897680e09b`.
 For subsequent builds, the authoritative report is
 `build/GC6E01/report.json`; the root-level `report.json` is historical.
 [`docs/DATA_MATCHING.md`](docs/DATA_MATCHING.md) records the data evidence,
@@ -54,22 +55,22 @@ denominator. Its full physical interval is retained and covered by the final
 binary comparisons. These results do not establish a pure-C percentage or
 runtime gameplay testing.
 
-**116,560 data bytes remain original fallback:** 95,056 bytes of message
-storage, 7,964 bytes of GS VM script storage, 13,500 bytes of DOL battle-script
-storage, and 40 bytes of small state requiring complete object/alias or operand
-reconstruction. All remain in the data denominator. Of the original
-561,032-byte `common_rel` resource interval, **458,012 bytes now match and link
-from source**, while 103,020 bytes remain fallback. Reconstructing a format or
-interpreter alone does not reconstruct these remaining contents.
+**91,421 data bytes remain original fallback**, all in 13 explicit message-content
+intervals. The remaining GS VM and battle programs, complete small-data arrays
+and constants, and 219 understood message entries now match and link from
+source. Of the original 561,032-byte `common_rel` resource interval,
+**469,611 bytes now match and link from source**. Every remaining byte stays in
+the data denominator with no source credit. A message reader or formatting
+implementation does not reconstruct the unique message contents it consumes.
 
 **Scoring units are not translation units.** An original source region may be
 split into address-owned units with different compiler flags, compiled through
 one-line `#include` shims. The full report contains 8,677 distinct module/address
 function identities, with no duplicate claims. Its 2,504,940-byte code denominator
 contains 2,495,112 DOL bytes and 9,828 REL bytes, all matched and source-linked.
-The freeze tracks the section topology of all **2,251 scoring units**, including
-units that contain data or original fallback regions. The change from 2,244
-units reflects audited data ownership refinements without changing physical
+The freeze tracks the section topology of all **2,272 scoring units**, including
+units that contain data or original fallback regions. The change from 2,251
+units reflects audited source ownership refinements without changing physical
 coverage or code, function and data denominators.
 
 The completed fork import and Count-Sheep's retained original history are
