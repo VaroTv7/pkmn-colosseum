@@ -74,7 +74,7 @@ static inline s32 pdaBoxItemIdFirst(s32 target)
 
 /* PC item list: cursor/page input, item swapping, and caption refresh. */
 /* RULE-EXCEPTION(user-approved): allocation shaping and local compiler controls;
-   see docs/RULE_EXCEPTIONS.md, itemStorageListKey. */
+   see docs/RULE_EXCEPTIONS.md, fn_80039A84. */
 #pragma push
 #pragma opt_lifetimes off
 #pragma peephole off

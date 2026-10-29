@@ -13,6 +13,8 @@
 #include "dolphin/os/OSAlarm.h"
 #include "dolphin/vi/VI.h"
 
+void OSRegisterVersion(const char* version);
+
 /* The bus clock is the SDK's address-bound __OSBusClock, which MWCC
  * reloads at each use. */
 extern u32 __OSBusClock : 0x800000F8;
@@ -415,7 +417,6 @@ int __SITransfer(s32 chan, void* output, u32 outputBytes, void* input,
     return 1;
 }
 
-#pragma dont_inline on
 u32 SIGetStatus(s32 chan) {
     BOOL enabled;
     u32 sr;
@@ -433,7 +434,6 @@ u32 SIGetStatus(s32 chan) {
     OSRestoreInterrupts(enabled);
     return sr;
 }
-#pragma dont_inline reset
 
 void SISetCommand(s32 chan, u32 command) {
     __SIChannelRegs[chan].reg = command;

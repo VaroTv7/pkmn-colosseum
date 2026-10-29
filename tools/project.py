@@ -49,6 +49,12 @@ Library = Dict[str, Any]
 PrecompiledHeader = Dict[str, Any]
 
 
+class FallbackLinkOverride(TypedDict):
+    rule: str
+    output: Path
+    implicit: List[Path]
+
+
 class Object:
     def __init__(self, completed: bool, name: str, **options: Any) -> None:
         self.name = name
@@ -197,6 +203,11 @@ class ProjectConfig:
         self.custom_build_steps: Optional[Dict[str, List[Dict[str, Any]]]] = (
             None  # Custom build steps, types are ["pre-split", "pre-compile", "post-compile", "post-link", "post-build"]
         )
+        # Derived copies of original fallback objects for linker compatibility.
+        # Keys are (module name, unit name). Objdiff keeps the original target.
+        self.fallback_link_overrides: Dict[
+            Tuple[str, str], FallbackLinkOverride
+        ] = {}
         self.generate_compile_commands: bool = (
             True  # Generate compile_commands.json for clangd
         )
@@ -461,6 +472,11 @@ def load_build_config(
 def generate_build(config: ProjectConfig) -> None:
     config.validate()
     objects = config.objects()
+    # A completed object must never silently fall back to extracted retail
+    # code when its source is removed or its configured path is misspelled.
+    for obj in objects.values():
+        if obj.completed and (obj.src_path is None or not obj.src_path.is_file()):
+            sys.exit(f"Completed object {obj.name} has no source file: {obj.src_path}")
     build_config = load_build_config(config, config.out_path() / "config.json")
     generate_build_ninja(config, objects, build_config)
     generate_objdiff_config(config, objects, build_config)
@@ -857,8 +873,7 @@ def generate_build_ninja(
         n.rule(
             name=rule + "_jump_table_import",
             command=command + f' && $python {jump_table_import} --object "$out"'
-            ' --owner "$jump_table_owner" --symbol "$jump_table_symbol"'
-            ' --function "$jump_table_function" --owner-offset "$jump_table_owner_offset"',
+            ' --owner "$jump_table_owner" --function "$jump_table_function" $jump_table_args',
             description="MWCC $out (import verified jump table)",
             depfile="$basefile.d",
             deps="gcc",
@@ -867,8 +882,7 @@ def generate_build_ninja(
             name=rule + "_constant_import_jump_table_import",
             command=command + f" && $python {constant_import} --object \"$out\" $constant_imports"
             + f' && $python {jump_table_import} --object "$out"'
-            ' --owner "$jump_table_owner" --symbol "$jump_table_symbol"'
-            ' --function "$jump_table_function" --owner-offset "$jump_table_owner_offset"',
+            ' --owner "$jump_table_owner" --function "$jump_table_function" $jump_table_args',
             description="MWCC $out (import shared constant and verified jump table)",
             depfile="$basefile.d",
             deps="gcc",
@@ -1123,6 +1137,7 @@ def generate_build_ninja(
         used_compiler_versions: Set[str] = set()
         source_inputs: List[Path] = []
         source_added: Set[Path] = set()
+        used_fallback_link_overrides: Set[Tuple[str, str]] = set()
 
         if config.precompiled_headers:
             for pch in config.precompiled_headers:
@@ -1248,24 +1263,46 @@ def generate_build_ninja(
                 variables["constant_imports"] = " ".join(literals)
             table = obj.options["jump_table_import"]
             if table is not None:
-                if prodg or export is not None or \
-                        not {"symbol", "function", "owner"} <= set(table) or \
-                        not set(table) <= {"symbol", "function", "owner", "owner_offset"} or \
-                        not isinstance(table.get("owner_offset", 0), int) or \
-                        table.get("owner_offset", 0) < 0 or \
-                        not all(re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*", table[key])
-                                for key in ("symbol", "function")) or \
+                if prodg or export is not None or not isinstance(table, dict) or \
+                        not {"function", "owner"} <= set(table) or \
+                        not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*", table["function"]) or \
                         not re.fullmatch(r"game/(?:[A-Za-z_0-9]+/)*[A-Za-z_0-9]+\.c",
                                          table["owner"]):
                     sys.exit(f"Invalid MWCC jump-table import for {obj.name}")
+                if "tables" in table:
+                    entries = table["tables"]
+                    if set(table) != {"function", "owner", "tables"} or \
+                            not isinstance(entries, list) or len(entries) < 2 or \
+                            any(not isinstance(entry, dict) or
+                                not {"symbol", "owner_offset"} <= set(entry) or
+                                not set(entry) <= {"symbol", "owner_offset", "function"} or
+                                not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*",
+                                                 entry.get("function", "x")) or
+                                not isinstance(entry["owner_offset"], int) or
+                                entry["owner_offset"] < 0 or
+                                not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*", entry["symbol"])
+                                for entry in entries) or \
+                            len({entry["symbol"] for entry in entries}) != len(entries):
+                        sys.exit(f"Invalid MWCC jump-table import for {obj.name}")
+                    table_args = " ".join(
+                        f'--table {entry["symbol"]}:{entry["owner_offset"]}'
+                        + (f':{entry["function"]}' if "function" in entry else "")
+                        for entry in entries)
+                else:
+                    if not {"symbol", "function", "owner"} <= set(table) or \
+                            not set(table) <= {"symbol", "function", "owner", "owner_offset"} or \
+                            not isinstance(table.get("owner_offset", 0), int) or \
+                            table.get("owner_offset", 0) < 0 or \
+                            not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]*", table["symbol"]):
+                        sys.exit(f"Invalid MWCC jump-table import for {obj.name}")
+                    table_args = f'--symbol {table["symbol"]} --owner-offset {table.get("owner_offset", 0)}'
                 build_rule += "_jump_table_import"
                 owner_obj = config.out_path() / "obj" / Path(table["owner"]).with_suffix(".o")
                 build_implcit = [*build_implcit, jump_table_import, owner_obj]
                 variables.update({
                     "jump_table_owner": owner_obj,
-                    "jump_table_symbol": table["symbol"],
                     "jump_table_function": table["function"],
-                    "jump_table_owner_offset": str(table.get("owner_offset", 0)),
+                    "jump_table_args": table_args,
                 })
             n.comment(f"{obj.name}: {lib_name} (linked {obj.completed})")
             n.build(
@@ -1342,14 +1379,37 @@ def generate_build_ninja(
 
             return obj_path
 
+        def add_original(build_obj: BuildConfigUnit, link_step: LinkStep) -> None:
+            if build_obj["object"] is None:
+                return
+            original = Path(build_obj["object"])
+            key = (link_step.name, build_obj["name"])
+            override = config.fallback_link_overrides.get(key)
+            if override is None:
+                link_step.add(original)
+                return
+            output = Path(override["output"])
+            if output.resolve() == original.resolve():
+                sys.exit(f"Fallback link override must preserve its original target: {key}")
+            custom_rules = {rule["name"] for rule in config.custom_build_rules or []}
+            if override["rule"] not in custom_rules:
+                sys.exit(f"Fallback link override requires a declared custom rule: {key}")
+            n.build(
+                outputs=output,
+                rule=override["rule"],
+                inputs=original,
+                implicit=override["implicit"],
+            )
+            used_fallback_link_overrides.add(key)
+            link_step.add(output)
+
         def add_unit(build_obj: BuildConfigUnit, link_step: LinkStep):
             obj_path, obj_name = build_obj["object"], build_obj["name"]
             obj = objects.get(obj_name)
             if obj is None:
                 if config.warn_missing_config and not build_obj["autogenerated"]:
                     print(f"Missing configuration for {obj_name}")
-                if obj_path is not None:
-                    link_step.add(Path(obj_path))
+                add_original(build_obj, link_step)
                 return
 
             link_built_obj = obj.completed
@@ -1384,7 +1444,7 @@ def generate_build_ninja(
                 link_step.add(built_obj_path)
             elif obj_path is not None:
                 # Use the original (extracted) object
-                link_step.add(Path(obj_path))
+                add_original(build_obj, link_step)
 
         # Add DOL link step
         link_step = LinkStep(build_config)
@@ -1411,6 +1471,12 @@ def generate_build_ninja(
                         module_link_step,
                     )
                 link_steps.append(module_link_step)
+        unused_overrides = set(config.fallback_link_overrides) - used_fallback_link_overrides
+        if unused_overrides:
+            sys.exit(
+                "Fallback link override is not used by an original fallback: "
+                + ", ".join(f"{module}/{unit}" for module, unit in sorted(unused_overrides))
+            )
         n.newline()
 
         # Check if all compiler versions exist

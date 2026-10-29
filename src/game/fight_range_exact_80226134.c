@@ -54,11 +54,16 @@ void wsCmd13(void) {
     lbl_8047B610 = lbl_8047B610 + 5;
 }
 
+/* Retail callers pass the frame count in r3; battle_main.c's fightMainWaitFrame
+ * body forwards it, unread, to dbgMenuFightGetMsgSpeedToFrame(u32). */
+extern void fightMainWaitFrame(u32 frames);
+extern void fightMenuCloseMsg(void);
 #define fn_801F000C fightMainWaitFrame
 #define fn_8026246C fightMenuCloseMsg
 void wsCmd12(void) {
     if (lbl_80478D78[7] != 0) {
-        fn_8026246C(fn_801F000C(*(u16*)(lbl_8047B610 + 1)));
+        fn_801F000C(*(u16*)(lbl_8047B610 + 1));
+        fn_8026246C();
         lbl_80478D78[7] = 0;
     }
     lbl_8047B610 += 3;
@@ -275,6 +280,10 @@ void wsCmd0D(void) {
 #define fn_80207C24 fightOutPokemonSetWazaEffectDownFlag
 #define fn_801FEF74 fightOutPokemonGetJoutaiMigawariHp
 #define fn_80202810 fightOutPokemonWriteJoutaiDataId
+extern u8 wazaSequenceSysIsAllEnd(s32 timeType);
+extern void _threadSwitch(void);
+extern s16 fightOutPokemonWritePokemonJoutaiDataId(void* ctx, void* typeObj, void* inputParam);
+extern u16 fightOutPokemonSetPokemonJoutai08(void* context, void* item, void* target);
 void wsCmd0C(void) {
     extern int fn_802656AC();
     extern s32 fn_80102620();
@@ -309,8 +318,8 @@ void wsCmd0C(void) {
         } while (1);
         fn_80202810(ctx, 0x14);
         wsRunScript(lbl_8047B62C, (void*)&lbl_80379A22, 0);
-        fightOutPokemonWritePokemonJoutaiDataId(ctx, 0x14, 0);
-        fightOutPokemonSetPokemonJoutai08(ctx, 0x14, 0);
+        fightOutPokemonWritePokemonJoutaiDataId((void*)ctx, (void*)0x14, 0);
+        fightOutPokemonSetPokemonJoutai08((void*)ctx, (void*)0x14, 0);
     }
     lbl_8047B610 = lbl_8047B610 + 2;
 }

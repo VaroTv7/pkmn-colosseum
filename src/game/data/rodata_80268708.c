@@ -14,7 +14,7 @@ extern u8 lbl_803D80C6[];
 extern u8 lbl_803F803B[];
 
 /* Auto-carved .rodata unit 0x80268708..0x80268DC0 (0x80267EA8-0x80268708 is
- * menuCB_Hook.c's pool, owned by game/menu/menu_middle_exact_8006E798.c). 0x80268DC0 - 0x8026F1C8 is
+ * menuCB_Hook.c's pool, owned by game/data/rodata_80267EA8.c). 0x80268DC0 - 0x8026F1C8 is
  * the cardedecode.c TU's pool (game/menu/cardesavedata_decode_80080310.c),
  * then the Card-e grid string pool (game/menu/cardesavedata_grid_80082650.c);
  * rodata_8026F2E8.c continues after it. Non-relocated data emitted byte-exact as const u8[]; pointer/jump tables as const void*[] for R_PPC_ADDR32 relocations. */

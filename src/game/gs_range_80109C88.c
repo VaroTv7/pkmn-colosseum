@@ -17,6 +17,7 @@ extern u8 pokemonGetAnnonKatati(u32 personality);
 extern u8 pokemonCheckRare(void* pokemon);
 extern u16 lbl_8035B478[][2];
 extern void* memset(void* dst, int val, u32 size);
+extern void* memcpy(void* dst, const void* src, u32 len);
 
 /* Face model key: either a plain 32-bit face id (type 0) or a description
  * built from a Pokemon (type 1). */
@@ -129,7 +130,7 @@ static inline u8 faceModelIsPokemon(FaceModel* m, void* pokemon)
     !defined(GS_FN_8010B718) && !defined(GS_FN_8010B9E8) && \
     !defined(GS_FN_8010BBB8) && !defined(GS_FN_8010BCE4) && \
     !defined(GS_FN_8010BD6C)
-/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
+/* Built with the unit flag -opt nopeephole (no local pragma). */
 s32 menuPokemonModelRequest(FaceModel* m, void* pokemon)
 {
     if (m == NULL) {
@@ -165,7 +166,7 @@ s32 menuPokemonModelRequest(FaceModel* m, void* pokemon)
     return 1;
 }
 
-/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
+/* Built with the unit flag -opt nopeephole (no local pragma). */
 s32 menuPokemonModelRequestById(FaceModel* m, u32 id)
 {
     if (m == NULL) {
@@ -202,7 +203,7 @@ s32 menuPokemonModelRequestById(FaceModel* m, u32 id)
     return 0;
 }
 
-/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
+/* Built with the unit flag -opt nopeephole (no local pragma). */
 u8 menuPokemonModelIsLoaded(FaceModel* m, void* pokemon)
 {
     FaceKey k;
@@ -222,7 +223,7 @@ u8 menuPokemonModelIsLoaded(FaceModel* m, void* pokemon)
 #endif
 
 /* The unit built from this file directly is 0x80109C88 - 0x8010A420
- * (menuPokemonModelRequest, menuPokemonModelRequestById, menuPokemonModelIsLoaded). The rest of the range is
+ * (fn_80109C88, fn_8010A010, fn_8010A210). The rest of the range is
  * compiled through gs_range_8010A88C_suffix.c, which defines
  * GS_RANGE_80109C88_ALL. */
 #if defined(GS_RANGE_80109C88_ALL) || defined(GS_FN_8010A88C) || \
@@ -867,7 +868,7 @@ typedef struct MenuModel {
  * retail has the object in r28 with w and h in r29/r30. The table pointer is
  * a local too, so its address stays in r31 for the five vector copies and the
  * three log strings instead of being rebuilt at each call. GSlogWrite takes
- * the unit's name string as its second argument, as menuModelTerm's call does.
+ * the unit's name string as its second argument, as fn_8010A420's call does.
  * `i` is declared before `light`, which is what gives them retail's r24/r25. */
 s32 menuModelInit(MenuModel* obj, s32 w, s32 h)
 {

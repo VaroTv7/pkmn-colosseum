@@ -1,4 +1,4 @@
-/* World-map arrival dialog and travel request, 0x8002D91C-0x8002DD24. */
+/* World-map arrival dialog, 0x8002D91C-0x8002DC6C. menuShopOpen follows in menuShop_exact_8002DC6C.c. */
 #include "dolphin/types.h"
 
 typedef struct ShopLocationEntry {
@@ -12,7 +12,8 @@ typedef struct ShopTravelState {
     u32 active;
 } ShopTravelState;
 
-extern u32 lbl_8047A3FC;
+/* lbl_8047A3FC: the 8-byte travel request in .sbss (sda-addressed under -sdata 8). */
+extern ShopTravelState lbl_8047A3FC;
 extern ShopLocationEntry* lbl_80478E54;
 extern void* lbl_8047A3DC;
 extern s32 menuOpen(s32 menu, s32 flag);
@@ -23,9 +24,10 @@ extern u32 fn_8002A0B8(u8* buffer, s32 location, s32 field, s32 value, ...);
 extern u32 fn_80029FAC(u8* buffer, s32 location, s32 field, s32 value, ...);
 extern void fn_8002A1C4(u8* location, s32 message, s32 terminator, ...);
 extern void fn_8002A2CC(u8* location, s32 message, s32 terminator, ...);
+extern void fn_80018F54(u32 a, u32 b, u32 c);
 extern void fn_8002CE6C(u8* location, u8 type);
 extern void fn_8002D154(s32 location, u8 type);
-extern void fn_8002C408(s32 location, u32 type);
+extern void fn_8002C408(s32 location, u8 type);
 extern void fn_8002C284(u32 location, u8 type);
 extern void winMsgOpenWithSE(s32 kind, u32 message, s32 arg2, s32 arg3,
                              u8 format);
@@ -36,14 +38,6 @@ extern void fn_800E24B0(u32 handle);
 extern void GSmemFree(u32 handle);
 extern void floorBattleEndTerminateScripts(void);
 extern void floorSetFadeScript(s32 mode, u32 value);
-extern void mailMainReceiveTerminate(void);
-extern u32 fn_800D37CC(void);
-extern void menuCreateOffScreen(f32 duration);
-extern void _flagSet(s32 flag, s32 value);
-extern void std098_mapWarpToMenuRoom(s32 event);
-extern void _threadSwitch(void);
-extern void menuReleaseOffScreen(f32 duration);
-extern f32 lbl_8047B9CC;
 
 /* These menu helpers are also expanded in fn_8002D5D4. */
 static inline s32 shopQueryMenu(s32 menu)
@@ -80,15 +74,6 @@ static inline s32 shopNormalizeMenu83(s32 result)
     }
 }
 
-static inline u32 shopMemoryAlloc(void)
-{
-    return _toolentryAlloc__FUl(0x7198);
-}
-
-/* RULE-EXCEPTION(user-approved): lifetime optimization disabled for the
- * arrival-dialog register allocation; approved 2026-10-08. */
-#pragma push
-#pragma opt_lifetimes off
 void fn_8002D91C(u32 location_index)
 {
     ShopLocationEntry* location_entry;
@@ -103,11 +88,10 @@ void fn_8002D91C(u32 location_index)
     u8 text0;
 
     location = location_index;
-    location_entry = lbl_80478E54;
-    location_entry += location;
-    state = (ShopTravelState*)&lbl_8047A3FC;
-    state->location = location_index;
-    state->active = 0;
+    lbl_8047A3FC.location = location_index;
+    /* RULE-EXCEPTION(user-approved): assignment inside the store chosen for codegen - see docs/RULE_EXCEPTIONS.md */
+    (state = &lbl_8047A3FC)->active = 0;
+    location_entry = &lbl_80478E54[location];
     type = location_entry->type;
 
     switch (type) {
@@ -134,13 +118,13 @@ void fn_8002D91C(u32 location_index)
         break;
     }
     case 1:
-        fn_8002CE6C((u8*)location, type);
+        fn_8002CE6C((u8*)location_index, type);
         break;
     default: {
         u32 message;
 
         done = 0;
-        memory = shopMemoryAlloc();
+        memory = _toolentryAlloc__FUl(0x7198);
         lbl_8047A3DC = GSmemLock(memory);
         message = fn_80029FAC(&text0, location, 0, -1);
         winMsgOpenWithSE(2, message, 1, 0, text0);
@@ -182,29 +166,4 @@ void fn_8002D91C(u32 location_index)
         floorBattleEndTerminateScripts();
         floorSetFadeScript(0, 0);
     }
-}
-#pragma pop
-
-/* STATUS (99.67%): retail schedules `li r0,1` (active) before the
- * `li r5,&lbl_8047A3FC` state pointer; every statement order, inline
- * helper, array and direct-global form tried keeps ours the other way. */
-void menuShopOpen(u32 flag)
-{
-    ShopTravelState* state;
-    f32 duration;
-
-    mailMainReceiveTerminate();
-    duration = (f32)(s32)fn_800D37CC();
-    duration = lbl_8047B9CC / duration;
-    menuCreateOffScreen(duration);
-    state = (ShopTravelState*)&lbl_8047A3FC;
-    state->location = flag;
-    state->active = 1;
-    _flagSet(1, 2);
-    std098_mapWarpToMenuRoom(0x38F);
-    floorSetFadeScript(0, 0);
-    _threadSwitch();
-    duration = (f32)(s32)fn_800D37CC();
-    duration = lbl_8047B9CC / duration;
-    menuReleaseOffScreen(duration);
 }

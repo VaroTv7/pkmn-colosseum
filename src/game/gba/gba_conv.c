@@ -138,7 +138,7 @@ void fn_80089030(u8 x);
  * Those units build with -opt nopeephole, matching the peephole-off state the
  * full file reaches through fn_80088428's pragma. */
 #if defined(GBA_CONV_CARVE_800886D0) || defined(GBA_CONV_CARVE_800889E4) || \
-    defined(GBA_CONV_CARVE_80088C60)
+    defined(GBA_CONV_CARVE_80088C60) || defined(GBA_CONV_CARVE_800884BC)
 #define GBA_CONV_CARVE
 #define PR424_GBA_CONV_TAIL_ONLY
 #endif
@@ -5053,11 +5053,11 @@ static inline s32 gbaConvRunLinkMode(void) {
     return -1;
 }
 
-/* The species grid's initializer lands in .rodata ahead of menuSaveLoadSaveGame's
- * pooled assert strings; that unit's wrapper leaves dnaKeyCodeCheck out so the
+/* The species grid's initializer lands in .rodata ahead of fn_800889E4's
+ * pooled assert strings; that unit's wrapper leaves fn_800884BC out so the
  * strings keep their retail base. */
 #if !defined(GBA_CONV_800889E4_ONLY)
-/* 3x3 table of species ids searched by dnaKeyCodeCheck (passed by value). */
+/* 3x3 table of species ids searched by fn_800884BC (passed by value). */
 typedef struct GbaConvSpeciesGrid {
     u16 ids[3][3];
 } GbaConvSpeciesGrid;
@@ -5069,18 +5069,53 @@ static inline u16 gbaConvGridAt(GbaConvSpeciesGrid grid, s32 row, s32 col) {
     return grid.ids[row][col];
 }
 
-static inline s32 gbaConvGridHas(GbaConvSpeciesGrid grid, u16 id) {
-    s32 row;
-    s32 col;
+/* Checks that every id in state->ids appears in the species grid; returns 2
+ * when one is missing, otherwise waits for the GBA side and returns its
+ * result. */
+static inline u32 gbaConvCheckIds(GbaConvChannelState* state) {
+    extern void std098_mapWarpToMenuRoom(s32 id);
+    extern void _threadSwitch(void);
+    s32 i;
+    GbaConvSpeciesGrid grid;
+    u16* id;
 
-    for (row = 0; row < 3; row++) {
-        for (col = 0; col < 3; col++) {
-            if (gbaConvGridAt(grid, row, col) == id) {
-                return 1;
+    /* lbl_8026F488 starts with the 3x3 grid {{0xB9, 0xC8, 0xF4}, {0x11F, 0x9C, 0xF3}, {0x99, 0xF5, 0x9F}}. */
+    /* RULE-EXCEPTION(user-approved): typed view of the retail rodata blob lbl_8026F488 - see docs/RULE_EXCEPTIONS.md */
+    grid = *(const GbaConvSpeciesGrid*)lbl_8026F488;
+    id = state->ids;
+    for (i = 0; i < 3; id++, i++) {
+        u16 target = *id;
+        GbaConvSpeciesGrid search = grid;
+        /* RULE-EXCEPTION(user-approved): carrier copy of the grid per id - see docs/RULE_EXCEPTIONS.md */
+        GbaConvSpeciesGrid rows = search;
+        s32 found;
+        s32 row;
+
+        for (row = 0; row < 3; row++) {
+            /* RULE-EXCEPTION(user-approved): carrier copy of the grid per row - see docs/RULE_EXCEPTIONS.md */
+            GbaConvSpeciesGrid g = rows;
+            s32 col;
+
+            for (col = 0; col < 3; col++) {
+                /* RULE-EXCEPTION(user-approved): carrier copy of the grid per column - see docs/RULE_EXCEPTIONS.md */
+                GbaConvSpeciesGrid h = g;
+                u16 v = gbaConvGridAt(h, row, col);
+
+                if (v == target) {
+                    found = 1;
+                    goto checked;
+                }
             }
         }
+        found = 0;
+    checked:
+        if (!found) {
+            return 2;
+        }
     }
-    return 0;
+    std098_mapWarpToMenuRoom(0x387);
+    _threadSwitch();
+    return ((GbaConvChannelState*)lbl_803FB2F8)->result;
 }
 
 #endif
@@ -5107,29 +5142,18 @@ void fn_80088428(void) {
     floorBattleEndTerminateScripts();
     state->result = r31;
 }
+#endif
 
+#if !defined(GBA_CONV_CARVE) || defined(GBA_CONV_CARVE_800884BC)
 #if !defined(GBA_CONV_800889E4_ONLY)
 /* 0x800884BC | size: 0x214 */
 u32 dnaKeyCodeCheck(u16 a, u16 b, u16 c) {
-    extern void std098_mapWarpToMenuRoom(s32 id);
-    extern void _threadSwitch(void);
     GbaConvChannelState* state = (GbaConvChannelState*)lbl_803FB2F8;
-    s32 i;
-    GbaConvSpeciesGrid grid;
-    static const GbaConvSpeciesGrid species = {{{0xB9, 0xC8, 0xF4}, {0x11F, 0x9C, 0xF3}, {0x99, 0xF5, 0x9F}}};
 
     state->ids[0] = a;
     state->ids[1] = b;
     state->ids[2] = c;
-    grid = species;
-    for (i = 0; i < 3; i++) {
-        if (!gbaConvGridHas(grid, state->ids[i])) {
-            return 2;
-        }
-    }
-    std098_mapWarpToMenuRoom(0x387);
-    _threadSwitch();
-    return ((GbaConvChannelState*)lbl_803FB2F8)->result;
+    return gbaConvCheckIds(state);
 }
 #endif
 #endif

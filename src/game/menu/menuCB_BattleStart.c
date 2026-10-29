@@ -27,7 +27,9 @@
     defined(MENUCB_BATTLESTART_80062284_ONLY) || \
     defined(MENUCB_BATTLESTART_800626CC_ONLY) || \
     defined(MENUCB_BATTLESTART_80062834_ONLY) || \
-    defined(MENUCB_BATTLESTART_8005DFC8_ONLY)
+    defined(MENUCB_BATTLESTART_8005DFC8_ONLY) || \
+    defined(MENUCB_BATTLESTART_8005FFE4_ONLY) || \
+    defined(MENUCB_BATTLESTART_80062334_ONLY)
 #define MENUCB_BATTLESTART_SPLIT_UNIT
 #endif
 
@@ -411,6 +413,8 @@ void fn_8005E690(MenuCBBattleStartButton* button) {
 #endif
 
 #if !defined(MENUCB_BATTLESTART_SPLIT_UNIT) || defined(MENUCB_BATTLESTART_8005E7F0_ONLY)
+void fn_8005DFC8(void* arg);
+
 void fn_8005E730(void* arg) {
     fn_8005DFC8(arg);
 }
@@ -703,7 +707,37 @@ typedef struct MenuCBBattleStartOrderTable {
     MenuCBBattleStartOrderRow row[6];
 } MenuCBBattleStartOrderTable;
 
-#if !defined(MENUCB_BATTLESTART_SPLIT_UNIT)
+#if !defined(MENUCB_BATTLESTART_SPLIT_UNIT) || defined(MENUCB_BATTLESTART_8005FFE4_ONLY)
+/* RULE-EXCEPTION(user-approved): single-function inline helper (_menuCBBattleStartSetIndex__Fv) - see docs/RULE_EXCEPTIONS.md */
+static inline void battleStartFillOrder(MenuCBBattleStartOrderRow* row, u16 n)
+{
+    u16 slot;
+
+    for (slot = 0; slot < n; slot++) {
+        row->slot[slot] = slot;
+    }
+    for (slot = n; slot < 6; slot++) {
+        row->slot[slot] = n++;
+    }
+}
+
+/* RULE-EXCEPTION(user-approved): inline helper chosen for register allocation (_menuCBBattleStartSetIndex__Fv) - see docs/RULE_EXCEPTIONS.md */
+static inline void battleStartCopyRows(const MenuCBBattleStartOrderTable* rows, u16* count)
+{
+    s32 player;
+    /* RULE-EXCEPTION(user-approved): scalar carrier (count cursor copy) - see docs/RULE_EXCEPTIONS.md */
+    u16* cnt = count;
+    MenuCBBattleStartOrderRow* order = (MenuCBBattleStartOrderRow*)lbl_803A9E40;
+
+    for (player = 0; player < 2; cnt++, player++, order++) {
+        MenuCBBattleStartOrderTable table = *rows;
+        MenuCBBattleStartOrderRow* src = table.row;
+
+        src += *cnt - 1;
+        *order = *src;
+    }
+}
+
 void _menuCBBattleStartSetIndex__Fv(void)
 {
     extern s32 toolentryTaisenGetBattleType(void);
@@ -715,20 +749,20 @@ void _menuCBBattleStartSetIndex__Fv(void)
     u16 count[4] = { 6, 6, 6, 6 };
     MenuCBBattleStartOrderRow* order;
     s32 player;
+    s32 i;
     u16 slot;
-    u16 n;
 
     order = (MenuCBBattleStartOrderRow*)lbl_803A9E40;
-    for (player = 0; player < 4; player++) {
+    for (player = 0; player < 4; player++, order++) {
         for (slot = 0; slot < 6; slot++) {
-            order[player].slot[slot] = slot;
+            order->slot[slot] = slot;
         }
     }
 
     switch (lbl_803A9A60.status) {
     case 0:
-        for (player = 0; player < 4; player++) {
-            count[player] = toolentryTaisenGetPokemonNum(player);
+        for (i = 0; i < 4; i++) {
+            count[i] = toolentryTaisenGetPokemonNum(i);
         }
         break;
     case 1:
@@ -739,36 +773,16 @@ void _menuCBBattleStartSetIndex__Fv(void)
     }
 
     switch (battleType) {
-    case 0: {
-        order = (MenuCBBattleStartOrderRow*)lbl_803A9E40;
-        for (player = 0; player < 2; player++, order++) {
-            MenuCBBattleStartOrderTable table = lbl_80267AF8;
-            s32 row = count[player] - 1;
-
-            *order = table.row[row];
-        }
+    case 0:
+        battleStartCopyRows(&lbl_80267AF8, count);
         break;
-    }
-    case 1: {
-        order = (MenuCBBattleStartOrderRow*)lbl_803A9E40;
-        for (player = 0; player < 2; player++, order++) {
-            MenuCBBattleStartOrderTable table = lbl_80267B88;
-            s32 row = count[player] - 1;
-
-            *order = table.row[row];
-        }
+    case 1:
+        battleStartCopyRows(&lbl_80267B88, count);
         break;
-    }
     case 2:
         order = (MenuCBBattleStartOrderRow*)lbl_803A9E40;
-        for (player = 0; player < 4; player++) {
-            n = count[player];
-            for (slot = 0; slot < n; slot++) {
-                order[player].slot[slot] = slot;
-            }
-            for (slot = n; slot < 6; slot++) {
-                order[player].slot[slot] = n++;
-            }
+        for (player = 0; player < 4; player++, order++) {
+            battleStartFillOrder(order, count[player]);
         }
         break;
     }
@@ -777,7 +791,7 @@ void _menuCBBattleStartSetIndex__Fv(void)
 
 #if !defined(MENUCB_BATTLESTART_SPLIT_UNIT) || defined(MENUCB_BATTLESTART_80061F6C_ONLY)
 /* RULE-EXCEPTION(user-approved): single-function inline helper (menuCBBattleStartInit) — see docs/RULE_EXCEPTIONS.md */
-static inline u8 battleStartTypeCompatible(void)
+static inline u8 battleStartTypeCompatibleBody(void)
 {
     extern s32 toolentryTaisenGetBattleType(void);
     s32 firstBattleType;
@@ -796,6 +810,12 @@ static inline u8 battleStartTypeCompatible(void)
     }
     return compatible;
 }
+
+/* RULE-EXCEPTION(user-approved): single-use inline wrapper (menuCBBattleStartInit); one more inline level numbers the battle-type locals after the HP loop's - see docs/RULE_EXCEPTIONS.md */
+static inline u8 battleStartTypeCompatible(void)
+{
+    return battleStartTypeCompatibleBody();
+}
 #endif
 
 #if !defined(MENUCB_BATTLESTART_SPLIT_UNIT) || defined(MENUCB_BATTLESTART_80061F6C_ONLY)
@@ -807,10 +827,10 @@ static inline void battleStartInitHp(void)
     extern u16 pokemonBiosGetHp(void*);
     extern const f32 lbl_8047BF60;
     extern const f32 lbl_8047BFAC;
-    MenuCBBattleStartPlayerLayout* layout;
-    void* pokemon;
-    s32 slot;
     s32 player;
+    s32 slot;
+    void* pokemon;
+    MenuCBBattleStartPlayerLayout* layout;
 
     for (player = 0; player < 4; player++) {
         layout = &lbl_803A9A60.players[player];
@@ -861,6 +881,7 @@ void menuCBBattleStartInit(void* menu, s32 mode)
     void* trainerKind;
     s32 battleId;
     u8* dst;
+    s32 trainerId;
 
     if (battleStartTypeCompatible() != 0) {
         trainer = toolentryTaisenGetHeroPtr(1);
@@ -871,8 +892,8 @@ void menuCBBattleStartInit(void* menu, s32 mode)
         } else {
             GScharCpy(dst, GSmsgGetGSchar(1));
         }
-        trainerData = fightTrainerDataBiosGetPtr(
-            toolentryTaisenGetTrainerDataID(1));
+        trainerId = toolentryTaisenGetTrainerDataID(1);
+        trainerData = fightTrainerDataBiosGetPtr(trainerId);
         trainerKind = fightTrainerKindDataBiosGetPtr(
             fightTrainerDataBiosGetKindDataId(trainerData));
         lbl_803A9A60.model.trainerPrefix =
@@ -947,7 +968,7 @@ s32 fn_80062284(s32 trainer) {
 }
 #endif
 
-#if !defined(MENUCB_BATTLESTART_SPLIT_UNIT)
+#if !defined(MENUCB_BATTLESTART_SPLIT_UNIT) || defined(MENUCB_BATTLESTART_80062334_ONLY)
 void fn_80062334(void)
 {
     extern s32 toolentryTaisenGetBattleType(void);
@@ -994,14 +1015,15 @@ void fn_80062334(void)
     reverse[4] = lbl_8047BFA8;
     reverse[5] = lbl_8047BFA4;
     state = &lbl_803A9A60;
-    fwd = forward;
-    rev = reverse;
 
     for (player = 0; player < 4; player++) {
-        view = &state->players[player].view;
+        view = &lbl_803A9A60.players[player].view;
         if (battleType == 2) {
-            for (slot = 0; slot < 6; slot++) {
-                switch (state->status) {
+            /* &table[slot] (slot = 0) is hoisted out of the player loop, which
+             * gives retail's fwd r9 / rev r10 / state r11 numbering. */
+            for (slot = 0, fwd = &forward[slot], rev = &reverse[slot]; slot < 6;
+                 slot++) {
+                switch (lbl_803A9A60.status) {
                 case 0:
                     view->header.marker[slot] = 3;
                     view->reset[slot] = lbl_8047BF60;
@@ -1024,7 +1046,7 @@ void fn_80062334(void)
         } else {
             for (slot = 0; slot < 6; slot++) {
                 destination = orderGroups[player][slot];
-                switch (state->status) {
+                switch (lbl_803A9A60.status) {
                 case 0:
                     view->header.marker[slot] = 3;
                     view->reset[slot] = lbl_8047BF60;
@@ -1048,7 +1070,7 @@ void fn_80062334(void)
     }
 
     for (player = 0; player < 4; player++) {
-        position = &state->trainerPositions[player];
+        position = &lbl_803A9A60.trainerPositions[player];
         if (battleType == 2) {
             if (player < 2) {
                 position->y = lbl_8047BFBC;
@@ -1075,38 +1097,33 @@ void fn_80062334(void)
     state->field35C = lbl_8047BF90;
     lbl_803A9A60.field360 = lbl_8047BF70;
     lbl_803A9A60.field364 = lbl_8047BF90;
-    lbl_803A9A60.transitions.target[1] = lbl_8047BF60;
+    lbl_803A9A60.transitions.target[1] = 0.0f;
     lbl_803A9A60.transitions.current[1] = lbl_8047BFBC;
-    lbl_803A9A60.transitions.active[1] = lbl_8047BF60;
-    lbl_803A9A60.transitions.target[0] = lbl_8047BF60;
+    lbl_803A9A60.transitions.active[1] = 0.0f;
+    lbl_803A9A60.transitions.target[0] = 0.0f;
     lbl_803A9A60.transitions.current[0] = lbl_8047BFC0;
-    lbl_803A9A60.transitions.active[0] = lbl_8047BF60;
+    lbl_803A9A60.transitions.active[0] = 0.0f;
 }
 #endif
 
 static inline void battleStartInterpolate(f32* current, f32* target, f32 delta)
 {
-    extern const f32 lbl_8047BF60;
-    extern const f32 lbl_8047BF90;
-    extern const f32 lbl_8047BF94;
-    extern const f32 lbl_8047BF98;
-    extern const f32 lbl_8047BF9C;
     f32 step;
     f32 distance;
 
-    step = lbl_8047BF94 * (*target - *current);
-    step *= delta;
-    if (step > lbl_8047BF98) {
-        step = lbl_8047BF98;
+    step = *target - *current;
+    step = 10.0f * step * delta;
+    if (step > 20.0f) {
+        step = 20.0f;
     }
-    if (step <= lbl_8047BF9C) {
-        step = lbl_8047BF9C;
+    if (step <= -20.0f) {
+        step = -20.0f;
     }
 
     *current += step;
     distance = *target - *current;
     if (battleStartAbs(distance) <= battleStartAbs(step) ||
-        battleStartAbs(distance) < lbl_8047BF90) {
+        battleStartAbs(distance) < 1.0f) {
         *current = *target;
     }
 }
@@ -1114,55 +1131,52 @@ static inline void battleStartInterpolate(f32* current, f32* target, f32 delta)
 #if !defined(MENUCB_BATTLESTART_SPLIT_UNIT) || defined(MENUCB_BATTLESTART_80060A28_ONLY)
 void fn_80060A28(void)
 {
-    extern const f32 lbl_8047BF60;
-    MenuCBBattleStartState* state;
     MenuCBBattleStartPlayerView* view;
     MenuCBBattleStartPosition* position;
     s32 player;
     s32 slot;
     s32 index;
 
-    state = &lbl_803A9A60;
     for (player = 0; player < 4; player++) {
-        view = &state->players[player].view;
+        view = &lbl_803A9A60.players[player].view;
         for (slot = 0; slot < 6; slot++) {
-            if (lbl_8047BF60 != view->position[slot]) {
-                view->position[slot] -= state->deltaTime;
-                if (view->position[slot] < lbl_8047BF60) {
-                    view->position[slot] = lbl_8047BF60;
+            if (0.0f != view->position[slot]) {
+                view->position[slot] -= lbl_803A9A60.deltaTime;
+                if (view->position[slot] < 0.0f) {
+                    view->position[slot] = 0.0f;
                 }
             } else if (view->side[slot] != view->alpha[slot]) {
                 battleStartInterpolate(&view->side[slot], &view->alpha[slot],
-                                       state->deltaTime);
+                                       lbl_803A9A60.deltaTime);
             }
         }
     }
 
     for (player = 0; player < 4; player++) {
-        position = &state->trainerPositions[player];
-        if (lbl_8047BF60 != position->x) {
-            position->x -= state->deltaTime;
-            if (position->x < lbl_8047BF60) {
-                position->x = lbl_8047BF60;
+        position = &lbl_803A9A60.trainerPositions[player];
+        if (0.0f != position->x) {
+            position->x -= lbl_803A9A60.deltaTime;
+            if (position->x < 0.0f) {
+                position->x = 0.0f;
             }
         } else if (position->y != position->z) {
             battleStartInterpolate(&position->y, &position->z,
-                                   state->deltaTime);
+                                   lbl_803A9A60.deltaTime);
         }
     }
 
     for (index = 0; index < 2; index++) {
-        if (lbl_8047BF60 != state->transitions.active[index]) {
+        if (0.0f != lbl_803A9A60.transitions.active[index]) {
             /* Retail decrements the slot-indexed entry (slot is 6 here). */
-            lbl_803A9A60.transitions.active[slot] -= state->deltaTime;
-            if (lbl_803A9A60.transitions.active[slot] < lbl_8047BF60) {
-                lbl_803A9A60.transitions.active[slot] = lbl_8047BF60;
+            lbl_803A9A60.transitions.active[slot] -= lbl_803A9A60.deltaTime;
+            if (lbl_803A9A60.transitions.active[slot] < 0.0f) {
+                lbl_803A9A60.transitions.active[slot] = 0.0f;
             }
-        } else if (state->transitions.current[index] !=
-                   state->transitions.target[index]) {
-            battleStartInterpolate(&state->transitions.current[index],
-                                   &state->transitions.target[index],
-                                   state->deltaTime);
+        } else if (lbl_803A9A60.transitions.current[index] !=
+                   lbl_803A9A60.transitions.target[index]) {
+            battleStartInterpolate(&lbl_803A9A60.transitions.current[index],
+                                   &lbl_803A9A60.transitions.target[index],
+                                   lbl_803A9A60.deltaTime);
         }
     }
 }
@@ -1180,6 +1194,11 @@ void fn_80061BBC(void*, UICmdMsg*, s32, s32, s32);
 u8 fn_80061D34(void*, UICmdMsg*, s32, s32, s32);
 
 #if !defined(MENUCB_BATTLESTART_SPLIT_UNIT) || defined(MENUCB_BATTLESTART_8005E7F0_ONLY)
+void fn_80060434(MenuCBBattleStartMessageContext* context, UICmdMsg* message);
+void fn_800608C4(void* context, MenuCBBattleStartDrawParams* params);
+void fn_800609B4(MenuCBBattleStartSpriteContext* context,
+                 MenuCBBattleStartSprite* sprite, f32 xOffset);
+
 /* Battle-start command dispatcher. */
 void fn_8005E7F0(void* ctx, void* arg1)
 {

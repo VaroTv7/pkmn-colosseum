@@ -52,9 +52,6 @@ game/gs_task_residual_80006908.c:
 game/data/data_802E28F0.c:
 	.data       start:0x802E28F0 end:0x802E4B78
 
-game/data/data_802E4B78.c:
-	.data       start:0x802E4B78 end:0x802E4B96
-
 game/data/data_802E4B98.c:
 	.data       start:0x802E4B98 end:0x802E4C80
 
@@ -112,7 +109,7 @@ game/menuFight_exact_8000DC88.c:
 game/menuFight_exact_8000DE24.c:
 	.text       start:0x8000DE24 end:0x8000DEC4
 
-game/menuFight_exact_8000DEC4.c:
+game/menuFight_r51_8000DE24.c:
 	.text       start:0x8000DEC4 end:0x8000DFF0
 
 game/menuFight_exact_8000DFF0.c:
@@ -134,18 +131,14 @@ game/menuFight_exact_8000F310.c:
 	.text       start:0x8000F310 end:0x8000F400
 	.data       start:0x802E4C80 end:0x802E4CA8
 
-game/menuFight_exact_8000F400.c:
-	.text       start:0x8000F400 end:0x8000F768
+game/data/data_802E4CA8.c:
 	.data       start:0x802E4CA8 end:0x802E4CD8
 
-game/menuFight_r51_8000F768.c:
-	.text       start:0x8000F768 end:0x8000F964
+game/menuFight_exact_8000F400.c:
+	.text       start:0x8000F400 end:0x8000F768
 
-game/menuFight_exact_8000F964.c:
-	.text       start:0x8000F964 end:0x8000FFA8
-
-game/menuFight_exact_8000FFA8.c:
-	.text       start:0x8000FFA8 end:0x800100C0
+game/menuFight_exact_8000F768.c:
+	.text       start:0x8000F768 end:0x800100C0
 	.data       start:0x802E4CD8 end:0x802E4D8C
 
 game/menuFight_exact_800100C0.c:
@@ -226,7 +219,13 @@ game/gs_pokemon_summary_r57b_8001501C_prefix.c:
 	.text       start:0x8001501C end:0x800150E4
 
 game/gs_pokemon_summary_r57b_800150E4_o4s.c:
-	.text       start:0x800150E4 end:0x800159BC
+	.text       start:0x800150E4 end:0x80015374
+
+game/gs_pokemon_summary_r57b_80015374_o4s.c:
+	.text       start:0x80015374 end:0x800155B0
+
+game/gs_pokemon_summary_r57b_800155B0_o4s.c:
+	.text       start:0x800155B0 end:0x800159BC
 
 game/gs_pokemon_summary_r57b_800159BC_middle.c:
 	.text       start:0x800159BC end:0x80015E3C
@@ -340,7 +339,7 @@ game/data/bss_803A1F88.c:
 	.bss        start:0x803A1F88 end:0x803A2040
 
 game/data/bss_803A2040.c:
-	.bss        start:0x803A2040 end:0x803A3E58
+	.bss        start:0x803A2040 end:0x803A2518
 
 game/data/rodata_80266C30.c:
 	.rodata     start:0x80266C30 end:0x80266C7C
@@ -409,7 +408,16 @@ game/gs_title_exact_80022050.c:
 	.text       start:0x80022050 end:0x8002217C
 
 game/gs_title_candidate_8002217C.c:
-	.text       start:0x8002217C end:0x80022E54
+	.text       start:0x8002217C end:0x80022478
+
+game/gs_title_candidate_80022478.c:
+	.text       start:0x80022478 end:0x80022720
+
+game/gs_title_exact_80022720.c:
+	.text       start:0x80022720 end:0x80022834
+
+game/gs_title_candidate_80022834.c:
+	.text       start:0x80022834 end:0x80022E54
 
 game/gs_title_80022E54.c:
 	.text       start:0x80022E54 end:0x80023DA8
@@ -501,8 +509,11 @@ game/menuNameEntry_exact_80029558.c:
 game/menuShop_island_80029850.c:
 	.text       start:0x80029850 end:0x80029AC8
 
-game/menuShop.c:
-	.text       start:0x80029AC8 end:0x80029EF4
+game/menuShop_exact_80029AC8.c:
+	.text       start:0x80029AC8 end:0x80029CC0
+
+game/menuShop_exact_80029CC0.c:
+	.text       start:0x80029CC0 end:0x80029EF4
 
 game/menuShop_island_80029EF4.c:
 	.text       start:0x80029EF4 end:0x80029FAC
@@ -540,17 +551,20 @@ game/menuShop_candidate_8002B1A0.c:
 game/menuShop_exact_8002B40C.c:
 	.text       start:0x8002B40C end:0x8002B594
 
-game/menuShop_island_8002B594.c:
+game/menuShop_candidate_8002B594.c:
 	.text       start:0x8002B594 end:0x8002B880
 
-game/menuShop_island_8002B880.c:
+game/menuShop_r40_8002B880_gc125n.c:
 	.text       start:0x8002B880 end:0x8002BCE8
 
 game/menuShop_island_8002BCE8.c:
 	.text       start:0x8002BCE8 end:0x8002C284
 
 game/menuShop_candidate_8002C284.c:
-	.text       start:0x8002C284 end:0x8002CE6C
+	.text       start:0x8002C284 end:0x8002C408
+
+game/menuShop_candidate_8002C408.c:
+	.text       start:0x8002C408 end:0x8002CE6C
 
 game/menuShop_island_8002CE6C.c:
 	.text       start:0x8002CE6C end:0x8002D5D4
@@ -559,7 +573,10 @@ game/menuShop_exact_8002D5D4.c:
 	.text       start:0x8002D5D4 end:0x8002D91C
 
 game/menuShop_candidate_8002D91C.c:
-	.text       start:0x8002D91C end:0x8002DD24
+	.text       start:0x8002D91C end:0x8002DC6C
+
+game/menuShop_exact_8002DC6C.c:
+	.text       start:0x8002DC6C end:0x8002DD24
 
 game/menuPokemonChange_r51_8002DD24_o4s.c:
 	.text       start:0x8002DD24 end:0x8002DF10
@@ -569,11 +586,12 @@ game/menuPokemonChange_island_8002DF10.c:
 
 game/menuPokemonChange_r51_8002DF10_suffix.c:
 	.text       start:0x8002E26C end:0x8002E460
+	.bss        start:0x803A2518 end:0x803A3278
 
 game/menuPokemonChange_r41_8002E460_gc125n.c:
 	.text       start:0x8002E460 end:0x8002EA5C
 
-game/menuPokemonChange_exact_8002EA5C.c:
+game/menuPokemonChange_r41_8002EA5C.c:
 	.text       start:0x8002EA5C end:0x8002EE74
 
 game/menuPokemonChange_island_8002EE74.c:
@@ -653,13 +671,8 @@ game/gs_npc_event_candidate_80032ED8.c:
 	.text       start:0x80032ED8 end:0x80033278
 
 game/gs_range_80033278.c:
-	.text       start:0x80033278 end:0x80034280
-
-game/gs_range_exact_80034280.c:
-	.text       start:0x80034280 end:0x80034FB4
-
-game/gs_range_suffix_80034FB4.c:
-	.text       start:0x80034FB4 end:0x80035C48
+	.text       start:0x80033278 end:0x80035C48
+	.bss        start:0x803A3278 end:0x803A3E58
 
 game/gs_exact_80035C48.c:
 	.text       start:0x80035C48 end:0x80035DD4
@@ -686,27 +699,6 @@ game/data/sdata2_8047BCA0.c:
 game/data/sdata2_8047BDA0.c:
 	.sdata2     start:0x8047BDA0 end:0x8047BE08
 
-game/data/bss_803A6498.c:
-	.bss        start:0x803A6498 end:0x803A9E40
-
-game/data/bss_803A9E40.c:
-	.bss        start:0x803A9E40 end:0x803B6E40
-
-game/data/bss_803B6E40.c:
-	.bss        start:0x803B6E40 end:0x803D6E40
-
-game/data/bss_803D6E40.c:
-	.bss        start:0x803D6E40 end:0x803F6E40
-
-game/data/bss_803F6E40.c:
-	.bss        start:0x803F6E40 end:0x803FB380
-
-game/data/bss_803FB380.c:
-	.bss        start:0x803FB380 end:0x803FB4A0
-
-game/data/data_802E51C8.c:
-	.data       start:0x802E51C8 end:0x802E6270
-
 game/data/rodata_80267060.c:
 	.rodata     start:0x80267060 end:0x80267250
 
@@ -728,7 +720,7 @@ game/menu/pda_exact_80037174.c:
 game/menu/pda_exact_800376F8.c:
 	.text       start:0x800376F8 end:0x800379E8
 
-game/menu/pda_exact_800379E8.c:
+game/menu/pda_candidate_800379E8.c:
 	.text       start:0x800379E8 end:0x80037F40
 
 game/menu/pda_candidate_80037F40.c:
@@ -743,20 +735,31 @@ game/menu/pda_candidate_80038170.c:
 game/menu/pda_exact_80038250.c:
 	.text       start:0x80038250 end:0x8003842C
 
-game/menu/pda_candidate_8003842C.c:
-	.text       start:0x8003842C end:0x800388C4
+game/menu/pda_candidate_8003842C.cpp:
+	.text       start:0x8003842C end:0x80038E74
+	.data       start:0x802E51C8 end:0x802E52B8
+	.bss        start:0x803A6498 end:0x803A65B0
 
-game/menu/pda_exact_800388C4.c:
-	.text       start:0x800388C4 end:0x80038990
+game/data/bss_803A6498.c:
+	.bss        start:0x803A65B0 end:0x803A9E40
 
-game/menu/pda_candidate_80038990.c:
-	.text       start:0x80038990 end:0x80038A00
+game/data/bss_803A9E40.c:
+	.bss        start:0x803A9E40 end:0x803B6E40
 
-game/menu/pda_exact_80038A00.c:
-	.text       start:0x80038A00 end:0x80038A0C
+game/data/bss_803B6E40.c:
+	.bss        start:0x803B6E40 end:0x803D6E40
 
-game/menu/pda_candidate_80038A0C.c:
-	.text       start:0x80038A0C end:0x80039004
+game/data/bss_803D6E40.c:
+	.bss        start:0x803D6E40 end:0x803F6E40
+
+game/data/bss_803F6E40.c:
+	.bss        start:0x803F6E40 end:0x803FB380
+
+game/data/data_802E51C8.c:
+	.data       start:0x802E52B8 end:0x802E52C8
+
+game/menu/pda_candidate_80038E74.c:
+	.text       start:0x80038E74 end:0x80039004
 
 game/menu/pda_exact_80039004.c:
 	.text       start:0x80039004 end:0x80039128
@@ -767,7 +770,7 @@ game/menu/pda_candidate_80039128.c:
 game/menu/pda_exact_80039498.c:
 	.text       start:0x80039498 end:0x80039644
 
-game/menu/pda_candidate_80039644.c:
+game/menu/pda_exact_80039644.c:
 	.text       start:0x80039644 end:0x800398D4
 
 game/menu/pda_exact_800398D4.c:
@@ -797,8 +800,11 @@ game/menu/pda_range_r47_8003A6C0.c:
 game/menu/pda_range_r46_8003AFDC_o4s.c:
 	.text       start:0x8003AFDC end:0x8003B2D8
 
-game/menu/pda_range_r46_8003B2D8.c:
-	.text       start:0x8003B2D8 end:0x8003B6D0
+game/menu/pda_exact_8003B2D8.c:
+	.text       start:0x8003B2D8 end:0x8003B478
+
+game/menu/pda_exact_8003B478.c:
+	.text       start:0x8003B478 end:0x8003B6D0
 
 game/menu/pda_candidate_8003B6D0_gc20.c:
 	.text       start:0x8003B6D0 end:0x8003B814
@@ -806,7 +812,7 @@ game/menu/pda_candidate_8003B6D0_gc20.c:
 game/menu/pda_exact_8003B814.c:
 	.text       start:0x8003B814 end:0x8003B85C
 
-game/menu/pda_candidate_8003B85C.c:
+game/menu/pda_exact_8003B85C.c:
 	.text       start:0x8003B85C end:0x8003BF54
 
 game/menu/pda_exact_8003BF54.c:
@@ -815,44 +821,78 @@ game/menu/pda_exact_8003BF54.c:
 game/menu/pda_exact_8003C24C.c:
 	.text       start:0x8003C24C end:0x8003C2B8
 
-game/menu/pda_candidate_8003C2B8.c:
+game/menu/pda_exact_8003C2B8.c:
 	.text       start:0x8003C2B8 end:0x8003C728
 
 game/menu/pda_exact_8003C728.c:
 	.text       start:0x8003C728 end:0x8003C7C0
 
-game/menu/pda_candidate_8003C7C0.c:
+game/menu/pda_exact_8003C7C0.c:
 	.text       start:0x8003C7C0 end:0x8003CE1C
 
 game/menu/pda_exact_8003CE1C.c:
 	.text       start:0x8003CE1C end:0x8003CF38
 
-game/menu/pda_candidate_8003B814_r46_8003CF38_o4s.c:
+game/menu/pda_exact_8003CF38.c:
 	.text       start:0x8003CF38 end:0x8003D1FC
 
 game/menu/pda_exact_8003D1FC.c:
 	.text       start:0x8003D1FC end:0x8003D4C8
 
-game/menu/pda_candidate_8003B814_r46_8003D1FC.c:
-	.text       start:0x8003D4C8 end:0x8003F2DC
+game/menu/pda_exact_8003D4C8.c:
+	.text       start:0x8003D4C8 end:0x8003D818
+
+game/menu/pda_exact_8003D818.c:
+	.text       start:0x8003D818 end:0x8003D8CC
+
+game/menu/pda_exact_8003D8CC.c:
+	.text       start:0x8003D8CC end:0x8003DC54
+
+game/menu/pda_exact_8003DC54.c:
+	.text       start:0x8003DC54 end:0x8003E394
+
+game/menu/pda_exact_8003E394.c:
+	.text       start:0x8003E394 end:0x8003F040
+
+game/menu/pda_exact_8003F040.c:
+	.text       start:0x8003F040 end:0x8003F2DC
 
 game/menu/pda_exact_8003F2DC.c:
 	.text       start:0x8003F2DC end:0x8003F464
 
-game/menu/pda_candidate_8003B814_r46_8003F464.c:
-	.text       start:0x8003F464 end:0x80041114
+game/menu/pda_exact_8003F464.c:
+	.text       start:0x8003F464 end:0x80040018
+	.data       start:0x802E52C8 end:0x802E61D8
+
+game/data/data_802E61D8.c:
+	.data       start:0x802E61D8 end:0x802E6270
+
+game/menu/pda_exact_80040018.c:
+	.text       start:0x80040018 end:0x80040308
+
+game/menu/pda_exact_80040308.c:
+	.text       start:0x80040308 end:0x80041114
 
 game/menu/pda_exact_80041114.c:
 	.text       start:0x80041114 end:0x800411FC
 
-game/menu/pda_candidate_800411FC.c:
+game/menu/pda_exact_800411FC.c:
 	.text       start:0x800411FC end:0x80041B5C
 
 game/menu/pda_exact_80041B5C.c:
 	.text       start:0x80041B5C end:0x80041E48
 
-game/menu/pda_candidate_8003B814_r46_80041B5C.c:
-	.text       start:0x80041E48 end:0x80043CD8
+game/menu/pda_exact_80041E48.c:
+	.text       start:0x80041E48 end:0x80042658
+
+game/menu/pda_exact_80042658.c:
+	.text       start:0x80042658 end:0x80043728
+
+game/menu/pda_exact_80043728.c:
+	.text       start:0x80043728 end:0x800439BC
+
+game/menu/pda_exact_800439BC.c:
+	.text       start:0x800439BC end:0x80043CD8
 
 game/menu/pda_exact_80043CD8.c:
 	.text       start:0x80043CD8 end:0x80043DC0
@@ -869,8 +909,11 @@ game/menu/pda_candidate_8003B814_r46_80043FA8.c:
 game/menu/pda_exact_80044378.c:
 	.text       start:0x80044378 end:0x80044630
 
-game/menu/pda_candidate_8003B814_r46_80044630.c:
-	.text       start:0x80044630 end:0x800472CC
+game/menu/pda_exact_80044630.c:
+	.text       start:0x80044630 end:0x80046168
+
+game/menu/pda_exact_80046168.c:
+	.text       start:0x80046168 end:0x800472CC
 
 game/menu/pda_exact_800472CC.c:
 	.text       start:0x800472CC end:0x800473E0
@@ -893,8 +936,20 @@ game/menu/pda_candidate_8003B814_r46_800484A4.c:
 game/menu/pda_exact_800492CC_gc20.c:
 	.text       start:0x800492CC end:0x800495C8
 
-game/menu/pda_candidate_800495C8.c:
-	.text       start:0x800495C8 end:0x8004B598
+game/menu/pda_exact_800495C8.c:
+	.text       start:0x800495C8 end:0x800499BC
+
+game/menu/pda_exact_800499BC.c:
+	.text       start:0x800499BC end:0x8004A47C
+
+game/menu/pda_exact_8004A47C.c:
+	.text       start:0x8004A47C end:0x8004A7A8
+
+game/menu/pda_exact_8004A7A8.c:
+	.text       start:0x8004A7A8 end:0x8004B278
+
+game/menu/pda_exact_8004B278.c:
+	.text       start:0x8004B278 end:0x8004B598
 
 game/menu/pda_exact_8004B598.c:
 	.text       start:0x8004B598 end:0x8004B7EC
@@ -1232,6 +1287,12 @@ game/menu/menu_middle_range_80069C0C.c:
 game/data/rodata_80267DD8.c:
 	.rodata     start:0x80267DD8 end:0x80267EA8
 
+game/data/rodata_80267EA8.c:
+	.rodata     start:0x80267EA8 end:0x80268708
+
+game/data/rodata_80268708.c:
+	.rodata     start:0x80268708 end:0x80268DC0
+
 game/menu/menu_middle_exact_8006A65C.c:
 	.text       start:0x8006A65C end:0x8006A824
 
@@ -1327,13 +1388,10 @@ game/menu/menu_middle_candidate_8006DC28.c:
 
 game/menu/menu_middle_r59_8006E338_o1.c:
 	.text       start:0x8006E338 end:0x8006E798
+	.sbss2      start:0x8047E708 end:0x8047E710
 
-game/menu/menu_middle_exact_8006E798.c:
+game/menu/menu_middle_r59_8006E798_middle.c:
 	.text       start:0x8006E798 end:0x8006E9A4
-	.rodata     start:0x80267EA8 end:0x80268708
-
-game/data/rodata_80268708.c:
-	.rodata     start:0x80268708 end:0x80268DC0
 
 game/menu/menu_middle_r59_8006E9A4_o1.c:
 	.text       start:0x8006E9A4 end:0x8006EE7C
@@ -1489,7 +1547,7 @@ game/data/sdata2_8047C128.c:
 	.sdata2     start:0x8047C128 end:0x8047C180
 
 game/data/data_802EE608.c:
-	.data       start:0x802EE608 end:0x802EE890
+	.data       start:0x802EE608 end:0x802EE868
 
 game/menu/menu_exact_8007B350.c:
 	.text       start:0x8007B350 end:0x8007B6A4
@@ -1497,7 +1555,7 @@ game/menu/menu_exact_8007B350.c:
 game/menu/menu_exact_8007B6A4.c:
 	.text       start:0x8007B6A4 end:0x8007B6D8
 
-game/menu/menu_candidate_80075390_r46_8007B6D8_o3.c:
+game/menu/menu_exact_8007B6D8.c:
 	.text       start:0x8007B6D8 end:0x8007C23C
 
 game/menu/menu_candidate_80075390_r46_8007C23C.c:
@@ -1523,6 +1581,7 @@ game/menu/menu_carde_matrix_candidate_8007D4FC_gc20.c:
 
 game/menu/menu_carde_matrix_candidate_8007D978.c:
 	.text       start:0x8007D978 end:0x8007FD64
+	.data       start:0x802EE868 end:0x802EE890
 
 game/menu/cardesavedata_exact_8007FD64.c:
 	.text       start:0x8007FD64 end:0x8007FDBC
@@ -1668,7 +1727,10 @@ game/gba/gba_misc_candidate_8008ABE4_r42_8008AC34_gc20.c:
 	.text       start:0x8008AC34 end:0x8008AE18
 
 game/gba/gba_misc_r58_8008AE18_prefix.c:
-	.text       start:0x8008AE18 end:0x8008C5D4
+	.text       start:0x8008AE18 end:0x8008BBDC
+
+game/gba/gba_misc_exact_8008BBDC.c:
+	.text       start:0x8008BBDC end:0x8008C5D4
 
 game/gba/gba_misc_r58_8008C5D4_o1.c:
 	.text       start:0x8008C5D4 end:0x8008C6FC
@@ -1688,8 +1750,14 @@ game/gbaCommunication_candidate_80091DA4.c:
 game/gbaCommunication_exact_80092FC8.c:
 	.text       start:0x80092FC8 end:0x800937F4
 
-game/gbaCommunication_candidate_800937F4.c:
-	.text       start:0x800937F4 end:0x80093F2C
+game/gbaCommunication_exact_800937F4.c:
+	.text       start:0x800937F4 end:0x80093B04
+
+game/gbaCommunication_exact_80093B04.c:
+	.text       start:0x80093B04 end:0x80093B4C
+
+game/gbaCommunication_candidate_80093B4C.c:
+	.text       start:0x80093B4C end:0x80093F2C
 
 game/gbaCommunication_exact_80093F2C.c:
 	.text       start:0x80093F2C end:0x80094650
@@ -1721,6 +1789,7 @@ dolphin/sdk_r48_80098108_prefix.c:
 
 dolphin/sdk_r48_80099400_o2.c:
 	.text       start:0x80099400 end:0x80099790
+	.bss        start:0x803FB3C8 end:0x803FB488
 
 dolphin/sdk_r48_80099790_suffix.c:
 	.text       start:0x80099790 end:0x8009A0E0
@@ -1737,9 +1806,6 @@ dolphin/sdk_range_8009A0F4.c:
 dolphin/os/OSAlarm.c:
 	.text       start:0x8009A27C end:0x8009A92C
 	.sbss       start:0x8047A6E0 end:0x8047A6E8
-
-game/data/sbss_8047A6E8.c:
-	.sbss       start:0x8047A6E8 end:0x8047A710
 
 dolphin/sdk_exact_8009A92C.c:
 	.text       start:0x8009A92C end:0x8009A9D8
@@ -1777,12 +1843,6 @@ dolphin/os/OSError.c:
 	.data       start:0x803109B8 end:0x80310CD8
 	.bss        start:0x803FB4F0 end:0x803FB538
 	.sdata      start:0x80478990 end:0x80478998
-
-game/data/sdata_80478998.c:
-	.sdata      start:0x80478998 end:0x804789A8
-
-game/data/bss_803FB538.c:
-	.bss        start:0x803FB538 end:0x803FB820
 
 game/data/data_80310CD8.c:
 	.data       start:0x80310CD8 end:0x80311818
@@ -1833,9 +1893,6 @@ dolphin/sdk_candidate_8009ED70.c:
 game/data/data_80311868.c:
 	.data       start:0x80311868 end:0x803119B8
 
-game/data/data_803119B8.c:
-	.data       start:0x803119B8 end:0x803119EF
-
 game/data/data_803119F0.c:
 	.data       start:0x803119F0 end:0x80311A24
 
@@ -1860,9 +1917,14 @@ dolphin/sdk_candidate_8009FADC.c:
 dolphin/os/OSState_fn_8009FAEC.c:
 	.text       start:0x8009FAEC end:0x8009FAF8
 
-dolphin/os/OSReset_candidate_prefix.c:
-	.text       start:0x8009FAF8 end:0x8009FF50
+dolphin/os/OSReset_data.c:
 	.bss        start:0x803FB820 end:0x803FB840
+
+dolphin/os/OSReset_candidate_prefix.c:
+	.text       start:0x8009FAF8 end:0x8009FE38
+
+dolphin/os/OSReset_prefix_exact.c:
+	.text       start:0x8009FE38 end:0x8009FF50
 
 dolphin/os/OSReset_exact.c:
 	.text       start:0x8009FF50 end:0x8009FFC0
@@ -1885,9 +1947,6 @@ dolphin/os/OSThread.c:
 	.bss        start:0x803FB898 end:0x803FC290
 	.sdata      start:0x804789A8 end:0x804789AC
 	.sbss       start:0x8047A760 end:0x8047A76C
-
-game/data/sdata_804789B0.c:
-	.sdata      start:0x804789B0 end:0x804789B8
 
 dolphin/os/OSTime_range_800A2778.c:
 	.text       start:0x800A2778 end:0x800A27FC
@@ -1959,27 +2018,15 @@ crt/__start.c:
 	.init       start:0x80003100 end:0x80003458
 	.sbss       start:0x8047A770 end:0x8047A778
 
-game/data/sbss_8047A778.c:
-	.sbss       start:0x8047A778 end:0x8047A780
-
 dolphin/dvd/DVDLow.c:
 	.text       start:0x800A3EB0 end:0x800A4CF0
 	.bss        start:0x803FC290 end:0x803FC360
 	.sdata      start:0x804789B8 end:0x804789BC
 	.sbss       start:0x8047A780 end:0x8047A7C8
 
-game/data/sdata_804789C0.c:
-	.sdata      start:0x804789C0 end:0x804789E8
-
-game/data/bss_803FC360.c:
-	.bss        start:0x803FC360 end:0x803FC3F8
-
 dolphin/dvd/DVDFs.c:
 	.text       start:0x800A4CF0 end:0x800A4D28
 	.sbss       start:0x8047A7C8 end:0x8047A7D8
-
-game/data/sbss_8047A7D8.c:
-	.sbss       start:0x8047A7D8 end:0x8047A838
 
 dolphin/dvd/dvdfs_range_800A4D28.c:
 	.text       start:0x800A4D28 end:0x800A5624
@@ -2068,9 +2115,6 @@ dolphin/dvd/DVD_range_800A7880.c:
 game/data/data_80311C00.c:
 	.data       start:0x80311C00 end:0x80311CB8
 
-game/data/data_80311CB8.c:
-	.data       start:0x80311CB8 end:0x80311D36
-
 game/data/data_80311D38.c:
 	.data       start:0x80311D38 end:0x80311DB8
 
@@ -2106,12 +2150,6 @@ dolphin/vi/vi.c:
 	.bss        start:0x803FC488 end:0x803FC5D0
 	.sdata      start:0x804789F8 end:0x80478A08
 	.sbss       start:0x8047A848 end:0x8047A8A0
-
-game/data/sbss_8047A8A0.c:
-	.sbss       start:0x8047A8A0 end:0x8047A978
-
-game/data/sdata_80478A08.c:
-	.sdata      start:0x80478A08 end:0x80478AB8
 
 game/data/data_80312500.c:
 	.data       start:0x80312500 end:0x80312554
@@ -2157,9 +2195,6 @@ dolphin/dsp_task.c:
 	.text       start:0x800AE9FC end:0x800AF280
 	.data       start:0x80312668 end:0x803127A8
 
-game/data/data_803127A8.c:
-	.data       start:0x803127A8 end:0x803127EE
-
 game/data/data_803127F0_prefix.c:
 	.data       start:0x803127F0 end:0x80312AE0
 
@@ -2175,9 +2210,6 @@ dolphin/card_exact_800AF474.c:
 dolphin/sdk_range_800AF8A0.c:
 	.text       start:0x800AF8A0 end:0x800B016C
 	.bss        start:0x803FC620 end:0x803FC840
-
-game/data/bss_803FC840.c:
-	.bss        start:0x803FC840 end:0x803FC860
 
 dolphin/sdk_exact_800B016C.c:
 	.text       start:0x800B016C end:0x800B0174
@@ -2250,9 +2282,6 @@ dolphin/sdk_candidate_800B5C5C.c:
 	.bss        start:0x803FC860 end:0x803FCDD8
 	.sbss       start:0x8047A978 end:0x8047A9A0
 	.sdata2     start:0x8047C2E0 end:0x8047C308
-
-game/data/bss_803FCDD8.c:
-	.bss        start:0x803FCDD8 end:0x803FED60
 
 dolphin/sdk_exact_800B6FE0.c:
 	.text       start:0x800B6FE0 end:0x800B71F0
@@ -2651,9 +2680,6 @@ crt/global_destructor_chain_exact_800C4668.c:
 	.text       start:0x800C4668 end:0x800C46B0
 	.sbss       start:0x8047A9F0 end:0x8047A9F4
 
-game/data/sbss_8047A9F8.c:
-	.sbss       start:0x8047A9F8 end:0x8047AA1C
-
 crt/runtime.c:
 	.text       start:0x800C46B0 end:0x800C4D8C
 	.rodata     start:0x8026FE58 end:0x8026FE70
@@ -2715,9 +2741,6 @@ crt/printf_residual_800C8864.c:
 
 game/data/sdata2_8047C418.c:
 	.sdata2     start:0x8047C418 end:0x8047C4A0
-
-game/data/sdata_80478AC0.c:
-	.sdata      start:0x80478AC0 end:0x80478AD8
 
 crt/string_range_800CA78C.c:
 	.text       start:0x800CA78C end:0x800CA7FC
@@ -2848,12 +2871,6 @@ dolphin/si/SI_range_800CF764.c:
 	.sdata      start:0x80478AD8 end:0x80478ADC
 	.sbss       start:0x8047AA50 end:0x8047AA60
 
-game/data/sdata_80478AE0.c:
-	.sdata      start:0x80478AE0 end:0x80478AE8
-
-game/data/bss_804001B0.c:
-	.bss        start:0x804001B0 end:0x804007E8
-
 game/data/data_80313F48.c:
 	.data       start:0x80313FB0 end:0x80314060
 
@@ -2975,9 +2992,6 @@ game/gs_gfx_layer_candidate_800D6B00.c:
 	.text       start:0x800D6B00 end:0x800D7230
 	.bss        start:0x804007E8 end:0x80400948
 
-game/data/bss_80400948.c:
-	.bss        start:0x80400948 end:0x80400F30
-
 game/gs_gfx_layer_exact_800D7230.c:
 	.text       start:0x800D7230 end:0x800D76A8
 
@@ -3077,9 +3091,6 @@ game/gs_log.cpp:
 
 game/data/sdata2_8047CAC8.c:
 	.sdata2     start:0x8047CAC8 end:0x8047CAF8
-
-game/data/bss_804011B8.c:
-	.bss        start:0x804011B8 end:0x80401C10
 
 game/data/data_80315490.c:
 	.data       start:0x80315490 end:0x803155B0
@@ -3185,9 +3196,6 @@ game/gs_range_800E0DDC_r40_800E1544_gc125n.c:
 game/gs_mem.c:
 	.text       start:0x800E202C end:0x800E3604
 	.sdata      start:0x80478AF0 end:0x80478AF8
-
-game/data/sdata_80478AF8.c:
-	.sdata      start:0x80478AF8 end:0x80478B00
 
 game/gs_model_main.c:
 	.text       start:0x800E3604 end:0x800E3928
@@ -3493,9 +3501,6 @@ game/gs_vm.c:
 	.sdata2     start:0x8047CCB8 end:0x8047CCC8
 	.sbss2      start:0x8047E710 end:0x8047E718
 
-game/data/sdata_80478B08.c:
-	.sdata      start:0x80478B08 end:0x80478BF8
-
 game/data/rodata_80271300.c:
 	.rodata     start:0x80271300 end:0x80271E00
 
@@ -3678,9 +3683,6 @@ game/win_msg_exact_80105A3C.c:
 	.text       start:0x80105A3C end:0x80106F98
 	.data       start:0x8035B0F8 end:0x8035B3F0
 
-game/data/data_8035B3F0.c:
-	.data       start:0x8035B3F0 end:0x8035B3FE
-
 game/win_sequence.c:
 	.text       start:0x80106F98 end:0x801070F4
 
@@ -3702,9 +3704,6 @@ game/data/bss_80408400_prefix.c:
 game/data/data_8035B430.c:
 	.data       start:0x8035B430 end:0x8035B448
 
-game/data/data_8035B448.c:
-	.data       start:0x8035B448 end:0x8035B466
-
 game/data/data_8035B468.c:
 	.data       start:0x8035B468 end:0x8035B4FC
 
@@ -3716,9 +3715,6 @@ game/data/data_8035B8A0.c:
 
 game/data/data_8035B904.c:
 	.data       start:0x8035B904 end:0x8035B950
-
-game/data/data_8035B950.c:
-	.data       start:0x8035B950 end:0x8035B96B
 
 game/data/data_8035B96C.c:
 	.data       start:0x8035B96C end:0x8035B988
@@ -4431,7 +4427,7 @@ game/effect/effect_visual_candidate_8013F80C.c:
 	.sdata2     start:0x8047D310 end:0x8047D328
 
 game/effect/effect_visual_sdata2_8047D328.c:
-	.sdata2     start:0x8047D328 end:0x8047D340
+	.sdata2     start:0x8047D328 end:0x8047D350
 
 game/effect/effect_visual_exact_8013FBE0.c:
 	.text       start:0x8013FBE0 end:0x8013FF0C
@@ -4444,7 +4440,6 @@ game/effect/effect_visual_exact_80140138.c:
 
 game/effect/effect_visual_candidate_801402AC.c:
 	.text       start:0x801402AC end:0x80140588
-	.sdata2     start:0x8047D340 end:0x8047D350
 
 game/people/people_data_r49_80140588_o4s.c:
 	.text       start:0x80140588 end:0x80140A9C
@@ -4559,9 +4554,6 @@ musyx/runtime/synth.c:
 game/data/sdata2_8047D3B0.c:
 	.sdata2     start:0x8047D3B0 end:0x8047D3B8
 
-game/data/sbss_8047AF60.c:
-	.sbss       start:0x8047AF60 end:0x8047AF66
-
 game/data/bss_80435FF8.c:
 	.bss        start:0x80435FF8 end:0x80445F30
 
@@ -4593,9 +4585,6 @@ musyx/runtime/synthvoice.c:
 	.text       start:0x80157280 end:0x80158BB4
 	.bss        start:0x80445F50 end:0x80446F10
 	.sbss       start:0x8047AFD0 end:0x8047AFE8
-
-game/data/sbss_8047AFE8.c:
-	.sbss       start:0x8047AFE8 end:0x8047B030
 
 game/data/bss_80446F10.c:
 	.bss        start:0x80446F10 end:0x80448440
@@ -4683,9 +4672,6 @@ musyx/runtime/hardware.c:
 	.rodata     start:0x80273448 end:0x80273548
 	.sdata      start:0x80478BF8 end:0x80478C08
 	.sdata2     start:0x8047D4D8 end:0x8047D4F0
-
-game/data/sdata_80478C08.c:
-	.sdata      start:0x80478C08 end:0x80478C38
 
 game/data/rodata_80273548.c:
 	.rodata     start:0x80273548 end:0x802737B8
@@ -4826,12 +4812,6 @@ game/generator.c:
 	.sdata      start:0x80478C38 end:0x80478C40
 	.sbss       start:0x8047B180 end:0x8047B1A0
 	.sdata2     start:0x8047D6B0 end:0x8047D720
-
-game/data/sbss_8047B1A0.c:
-	.sbss       start:0x8047B1A0 end:0x8047B1F0
-
-game/data/sdata_80478C40.c:
-	.sdata      start:0x80478C40 end:0x80478C50
 
 game/data/rodata_80273A00.c:
 	.rodata     start:0x80273A00 end:0x80273D98
@@ -5043,9 +5023,6 @@ game/people/people.c:
 game/data/sdata2_8047D8A8.c:
 	.sdata2     start:0x8047D8A8 end:0x8047D908
 
-game/data/sbss_8047B1F8.c:
-	.sbss       start:0x8047B1F8 end:0x8047B220
-
 game/data/rodata_802741F8.c:
 	.rodata     start:0x802741F8 end:0x802744F0
 
@@ -5148,9 +5125,6 @@ hsd/displayfunc.c:
 
 hsd/hsd_sdata2_8047DA18.c:
 	.sdata2     start:0x8047DA18 end:0x8047DA30
-
-game/data/sbss_8047B260.c:
-	.sbss       start:0x8047B260 end:0x8047B268
 
 game/data/bss_80465378.c:
 	.bss        start:0x80465378 end:0x804653A8
@@ -5329,9 +5303,6 @@ hsd/texpdag.c:
 	.sdata2     start:0x8047DEA8 end:0x8047DEB0
 	.sbss2      start:0x8047E730 end:0x8047E738
 
-game/data/sdata_80478CA8.c:
-	.sdata      start:0x80478CA8 end:0x80478D00
-
 hsd/tobj.c:
 	.text       start:0x801BBAC8 end:0x801BF098
 	.rodata     start:0x80275638 end:0x802756F8
@@ -5367,9 +5338,6 @@ game/battle_sdata2_8047DF90.c:
 
 game/data/bss_80466DE8.c:
 	.bss        start:0x80466DE8 end:0x804670E8
-
-game/data/data_8036DCA8.c:
-	.data       start:0x8036DCA8 end:0x8036DCB7
 
 game/data/rodata_802757F0.c:
 	.rodata     start:0x802757F0 end:0x802758E8
@@ -5605,17 +5573,32 @@ game/wazaViewer_candidate_801D5464.c:
 game/wazaViewer_exact_801D56B0.c:
 	.text       start:0x801D56B0 end:0x801D5A94
 
-game/wazaViewer_exact_801D5A94.c:
+game/wazaViewer_candidate_801D5A94.c:
 	.text       start:0x801D5A94 end:0x801D5DA0
 
-game/wazaViewer_candidate_801D5DA0.c:
-	.text       start:0x801D5DA0 end:0x801D744C
+game/wazaViewer_exact_801D5DA0.c:
+	.text       start:0x801D5DA0 end:0x801D603C
+
+game/wazaViewer_candidate_801D56B0.c:
+	.text       start:0x801D603C end:0x801D624C
+
+game/wazaViewer_exact_801D624C.c:
+	.text       start:0x801D624C end:0x801D6A64
+
+game/wazaViewer_candidate_801D6A64.c:
+	.text       start:0x801D6A64 end:0x801D6E58
+
+game/wazaViewer_exact_801D6E58.c:
+	.text       start:0x801D6E58 end:0x801D744C
 
 game/wazaViewer_exact_801D744C.c:
 	.text       start:0x801D744C end:0x801D7464
 
+game/wazaViewer_exact_801D7464.c:
+	.text       start:0x801D7464 end:0x801D7B94
+
 game/wazaViewer_candidate_801D7464.c:
-	.text       start:0x801D7464 end:0x801D7E58
+	.text       start:0x801D7B94 end:0x801D7E58
 
 game/wazaSequenceEntry_r56_801D7E58_o1.c:
 	.text       start:0x801D7E58 end:0x801D81CC
@@ -6404,9 +6387,6 @@ game/fight_range_exact_8021C034.c:
 	.text       start:0x8021C034 end:0x8021C0F4
 	.data       start:0x8039A068 end:0x8039A088
 
-game/data/data_8039A088.c:
-	.data       start:0x8039A088 end:0x8039A0A8
-
 game/fight_range_exact_8021C0F4.c:
 	.text       start:0x8021C0F4 end:0x8021CA00
 
@@ -6418,6 +6398,7 @@ game/fight_range_exact_8021CB58.c:
 
 game/fight_range_8021D40C.c:
 	.text       start:0x8021D40C end:0x8021D9C0
+	.data       start:0x8039A088 end:0x8039A0A8
 
 game/fight_range_exact_8021D9C0.c:
 	.text       start:0x8021D9C0 end:0x8021FAD4
@@ -6426,14 +6407,12 @@ game/fight_range_8021FAD4.c:
 	.text       start:0x8021FAD4 end:0x80220778
 	.data       start:0x8039A0A8 end:0x8039A0F0
 
-game/data/data_8039A0F0.c:
-	.data       start:0x8039A0F0 end:0x8039A130
-
 game/fight_range_exact_80220778.c:
 	.text       start:0x80220778 end:0x80220868
 
 game/fight_range_80220868.c:
 	.text       start:0x80220868 end:0x80220B8C
+	.data       start:0x8039A0F0 end:0x8039A130
 
 game/fight_range_exact_80220B8C.c:
 	.text       start:0x80220B8C end:0x8022106C
@@ -6595,9 +6574,6 @@ game/fight_trainer_ai_waza_value_candidate_80245FC4.c:
 game/data/data_8039A648.c:
 	.data       start:0x8039A648 end:0x8039A690
 
-game/data/data_8039A690.c:
-	.data       start:0x8039A690 end:0x8039A6A6
-
 game/data/data_8039A6A8.c:
 	.data       start:0x8039A6A8 end:0x8039A6B8
 
@@ -6730,8 +6706,35 @@ game/toolentry_exact_8025DBB0.c:
 game/table_res_bios.c:
 	.text       start:0x8025DBD4 end:0x8025DC2C
 
-game/pokemon_relive.c:
-	.text       start:0x8025DC2C end:0x8025F2FC
+game/pokemon_relive_waitTime_exact.c:
+	.text       start:0x8025DC2C end:0x8025DCBC
+
+game/pokemon_relive_prefix_exact.c:
+	.text       start:0x8025DCBC end:0x8025DF38
+
+game/pokemon_relive_before_particle.c:
+	.text       start:0x8025DF38 end:0x8025E0B0
+
+game/pokemon_relive_sequence_exact.c:
+	.text       start:0x8025E0B0 end:0x8025E534
+
+game/pokemon_relive_particle_exact.c:
+	.text       start:0x8025E534 end:0x8025E640
+
+game/pokemon_relive_exp_candidate.c:
+	.text       start:0x8025E640 end:0x8025E9BC
+
+game/pokemon_relive_ceremony_exact.c:
+	.text       start:0x8025E9BC end:0x8025ED4C
+
+game/pokemon_relive_after_particle.c:
+	.text       start:0x8025ED4C end:0x8025EF58
+
+game/pokemon_relive_pre_main_exact.c:
+	.text       start:0x8025EF58 end:0x8025F2AC
+
+game/pokemon_relive_suffix_exact.c:
+	.text       start:0x8025F2AC end:0x8025F2FC
 
 game/gba/GBA.c:
 	.text       start:0x8025F2FC end:0x8025F524
@@ -6739,17 +6742,8 @@ game/gba/GBA.c:
 	.bss        start:0x804782E0 end:0x804787E0
 	.sbss       start:0x8047B670 end:0x8047B678
 
-game/data/sbss_8047B678.c:
-	.sbss       start:0x8047B678 end:0x8047B684
-
 game/data/bss_804787E0.c:
 	.bss        start:0x804787E0 end:0x80478800
-
-game/data/bss_80478800.c:
-	.bss        start:0x80478800 end:0x80478820
-
-game/data/data_8039A6C8.c:
-	.data       start:0x8039A6C8 end:0x8039A6DB
 
 game/gba/GBARead.c:
 	.text       start:0x8025F524 end:0x8025F618
@@ -6775,10 +6769,13 @@ game/memo_exact_8025FEE4.c:
 game/memo_candidate_8025FF18.c:
 	.text       start:0x8025FF18 end:0x802600E4
 
-game/evolution_r57b_802600E4_prefix.c:
-	.text       start:0x802600E4 end:0x80260EBC
+game/evolution_exact_802600E4.c:
+	.text       start:0x802600E4 end:0x80260910
 
-game/evolution_r57b_80260EBC_o4p.c:
+game/evolution_candidate_80260910.c:
+	.text       start:0x80260910 end:0x80260EBC
+
+game/evolution_exact_80260EBC.c:
 	.text       start:0x80260EBC end:0x802612D0
 
 game/evolution_r57b_802612D0_suffix.c:
@@ -6826,7 +6823,145 @@ game/gs_range_80265EC4_exact.c:
 	.text       start:0x80265EC4 end:0x80265F94
 
 game/gs_range_80265F94_suffix.c:
-	.text       start:0x80265F94 end:0x8026635C
+	.text       start:0x80265F94 end:0x80266250
+
+game/gs_range_80266250_exact.c:
+	.text       start:0x80266250 end:0x8026635C
 
 crt/__start_mem_80003458.c:
-	.init       start:0x80003458 end:0x80005544
+	.init       start:0x80003458 end:0x800034AC
+
+# Original interrupt-vector bytes, not reconstructed source. Keep this named
+# fallback separate from the six exact C helpers on either side.
+crt/interrupt_vectors:
+	.init       start:0x800034AC end:0x800053E0
+
+crt/__start_mem_800053E0.c:
+	.init       start:0x800053E0 end:0x80005544
+
+# Retained upstream source data; disjoint from the completed code owners.
+game/data/data_802E4B78.c:
+	.data       start:0x802E4B78 end:0x802E4B96
+
+game/data/sbss_8047A6E8.c:
+	.sbss       start:0x8047A6E8 end:0x8047A710
+
+game/data/sdata_80478998.c:
+	.sdata      start:0x80478998 end:0x804789A8
+
+game/data/bss_803FB538.c:
+	.bss        start:0x803FB538 end:0x803FB820
+
+game/data/data_803119B8.c:
+	.data       start:0x803119B8 end:0x803119EF
+
+game/data/sdata_804789B0.c:
+	.sdata      start:0x804789B0 end:0x804789B8
+
+game/data/sbss_8047A778.c:
+	.sbss       start:0x8047A778 end:0x8047A780
+
+game/data/sdata_804789C0.c:
+	.sdata      start:0x804789C0 end:0x804789E8
+
+game/data/bss_803FC360.c:
+	.bss        start:0x803FC360 end:0x803FC3F8
+
+game/data/sbss_8047A7D8.c:
+	.sbss       start:0x8047A7D8 end:0x8047A838
+
+game/data/data_80311CB8.c:
+	.data       start:0x80311CB8 end:0x80311D36
+
+game/data/sbss_8047A8A0.c:
+	.sbss       start:0x8047A8A0 end:0x8047A978
+
+game/data/sdata_80478A08.c:
+	.sdata      start:0x80478A08 end:0x80478AB8
+
+game/data/data_803127A8.c:
+	.data       start:0x803127A8 end:0x803127EE
+
+game/data/bss_803FC840.c:
+	.bss        start:0x803FC840 end:0x803FC860
+
+game/data/bss_803FCDD8.c:
+	.bss        start:0x803FCDD8 end:0x803FED60
+
+game/data/sbss_8047A9F8.c:
+	.sbss       start:0x8047A9F8 end:0x8047AA1C
+
+game/data/sdata_80478AC0.c:
+	.sdata      start:0x80478AC0 end:0x80478AD8
+
+game/data/sdata_80478AE0.c:
+	.sdata      start:0x80478AE0 end:0x80478AE8
+
+game/data/bss_804001B0.c:
+	.bss        start:0x804001B0 end:0x804007E8
+
+game/data/bss_80400948.c:
+	.bss        start:0x80400948 end:0x80400F30
+
+game/data/bss_804011B8.c:
+	.bss        start:0x804011B8 end:0x80401C10
+
+game/data/sdata_80478AF8.c:
+	.sdata      start:0x80478AF8 end:0x80478B00
+
+game/data/sdata_80478B08.c:
+	.sdata      start:0x80478B08 end:0x80478BF8
+
+game/data/data_8035B3F0.c:
+	.data       start:0x8035B3F0 end:0x8035B3FE
+
+game/data/data_8035B448.c:
+	.data       start:0x8035B448 end:0x8035B466
+
+game/data/data_8035B950.c:
+	.data       start:0x8035B950 end:0x8035B96B
+
+game/data/sbss_8047AF60.c:
+	.sbss       start:0x8047AF60 end:0x8047AF66
+
+game/data/sbss_8047AFE8.c:
+	.sbss       start:0x8047AFE8 end:0x8047B030
+
+game/data/sdata_80478C08.c:
+	.sdata      start:0x80478C08 end:0x80478C38
+
+game/data/sbss_8047B1A0.c:
+	.sbss       start:0x8047B1A0 end:0x8047B1F0
+
+game/data/sdata_80478C40.c:
+	.sdata      start:0x80478C40 end:0x80478C50
+
+game/data/sbss_8047B1F8.c:
+	.sbss       start:0x8047B1F8 end:0x8047B220
+
+game/data/sbss_8047B260.c:
+	.sbss       start:0x8047B260 end:0x8047B268
+
+game/data/sdata_80478CA8.c:
+	.sdata      start:0x80478CA8 end:0x80478D00
+
+game/data/data_8036DCA8.c:
+	.data       start:0x8036DCA8 end:0x8036DCB7
+
+game/data/data_8039A690.c:
+	.data       start:0x8039A690 end:0x8039A6A6
+
+game/data/sbss_8047B678.c:
+	.sbss       start:0x8047B678 end:0x8047B684
+
+game/data/bss_80478800.c:
+	.bss        start:0x80478800 end:0x80478820
+
+game/data/data_8039A6C8.c:
+	.data       start:0x8039A6C8 end:0x8039A6DB
+
+game/data/bss_803FB380.c:
+	.bss        start:0x803FB380 end:0x803FB3C8
+
+game/data/bss_803FB488.c:
+	.bss        start:0x803FB488 end:0x803FB4A0

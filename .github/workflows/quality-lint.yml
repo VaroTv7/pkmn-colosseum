@@ -1,6 +1,6 @@
 name: Quality Lint
-# Blocks match-cheating patterns in newly added source. Authentic SDK hardware
-# primitives and explicitly scoped paired-single math are the only asm classes.
+# Blocks match-cheating patterns in newly added source. Assembly requires the
+# scoped SDK/paired-single allowlists or the per-function evidence registry.
 # Scans only the PR's added lines.
 on:
   pull_request:

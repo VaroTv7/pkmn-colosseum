@@ -47,9 +47,9 @@ SDATA2 const f32 lbl_8047D3EC = 1.0f;
 /* reverb_candidate_80164520.c owns 0x8047D4F0 - 0x8047D540 (complete reverb.c pool). */
 
 #if defined(SDATA2_8047D3C0_AFTER_SNDMATH)
-SDATA2 const f64 lbl_8047D528 = 4.503601774854144e+15;
-SDATA2 const f32 lbl_8047D530 = 0.6f;
-SDATA2 const f32 lbl_8047D534 = 0.3f;
+SDATA2 const f64 i2fMagic = 4.503601774854144e+15;
+SDATA2 const f32 value0_6 = 0.6f;
+SDATA2 const f32 value0_3 = 0.3f;
 SDATA2 const f32 lbl_8047D538[2] = { 0.5f, 0.0f };
 SDATA2 const f32 lbl_8047D540 = 0.0f;
 SDATA2 const f32 lbl_8047D544 = 1000.0f;

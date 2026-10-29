@@ -12,6 +12,10 @@
  */
 #include "dolphin/types.h"
 #include "game/cursor_bios.h"
+#include "game/win_sprite.h"
+
+/* RULE-EXCEPTION(user-approved): mailGetNbMailInMailbox is defined u16 in mail.c, but every retail caller here uses the result unextended; the u16 prototype adds clrlwi - see docs/RULE_EXCEPTIONS.md */
+extern s32 mailGetNbMailInMailbox(void);
 
 /* Small PDA-mail state byte pair, shared with pda_range_80037158.c
  * (the sibling PDA-body TU) and initialized by fn_8004B7EC. Only
@@ -24,12 +28,15 @@ extern u16* lbl_8047A500;
  * MENU_PDA_MAIL_LIST_ONLY the mailbox list menu (fn_8004D34C),
  * MENU_PDA_MAIL_HIGHLIGHT_ONLY the row highlight callback (fn_8004DA64),
  * MENU_PDA_MAIL_PICKER_ONLY the handle picker input callback (fn_8004DDC0)
- * MENU_PDA_MAIL_ATTACH_ONLY the attachment viewer (fn_8004E9C0)
- * and MENU_PDA_MAIL_SORTLABEL_ONLY the sort label and page arrows
- * (fn_8004C3E4, fn_8004C4A4). */
+ * MENU_PDA_MAIL_ATTACH_ONLY the attachment viewer (fn_8004E9C0),
+ * MENU_PDA_MAIL_PREVIEW_ONLY the attachment preview draw (fn_8004E510)
+ * MENU_PDA_MAIL_SORTLABEL_ONLY the sort label and page arrows
+ * (fn_8004C3E4, fn_8004C4A4) and MENU_PDA_MAIL_OPEN_ONLY the mailbox
+ * scene thread (fn_8004B7EC, built with the unit flag -opt nopeephole). */
 #if defined(MENU_PDA_MAIL_SORT_ONLY) || defined(MENU_PDA_MAIL_LIST_ONLY) || \
     defined(MENU_PDA_MAIL_HIGHLIGHT_ONLY) || defined(MENU_PDA_MAIL_PICKER_ONLY) || \
-    defined(MENU_PDA_MAIL_ATTACH_ONLY) || defined(MENU_PDA_MAIL_SORTLABEL_ONLY)
+    defined(MENU_PDA_MAIL_ATTACH_ONLY) || defined(MENU_PDA_MAIL_SORTLABEL_ONLY) || \
+    defined(MENU_PDA_MAIL_PREVIEW_ONLY) || defined(MENU_PDA_MAIL_OPEN_ONLY)
 #define MENU_PDA_MAIL_PARTIAL
 #endif
 
@@ -116,15 +123,47 @@ typedef struct PdaMailAttachmentConfig {
     s32 x;
 } PdaMailAttachmentConfig;
 
-#ifndef MENU_PDA_MAIL_PARTIAL
+#if !defined(MENU_PDA_MAIL_PARTIAL) || defined(MENU_PDA_MAIL_OPEN_ONLY)
+/* RULE-EXCEPTION(user-approved): single-function inline helper (fn_8004B7EC) - see docs/RULE_EXCEPTIONS.md */
+static inline void pdaMailWaitModel(void* model)
+{
+    if (model == 0) {
+        return;
+    }
+    while (GSmodelIsAnimating(model) != 0) {
+        _threadSwitch();
+    }
+}
+
+static inline void pdaMailWaitTransition(f32* transition, f32* target, f32 value)
+{
+    s32 waiting;
+
+    *target = value;
+    waiting = 1;
+    while (waiting) {
+        if (*transition == *target) {
+            waiting = 0;
+        } else {
+            _threadSwitch();
+        }
+    }
+}
+
+#ifndef MENU_PDA_MAIL_OPEN_ONLY
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma (peephole off) for full-file builds; the linked unit uses the flag -opt nopeephole instead - see docs/RULE_EXCEPTIONS.md */
 #pragma peephole off
+#endif
 void std027_unkMenuSequence27(void)
 {
     PdaMailOpenConfig config;
     s32 menuSelection;
     PdaMailSceneState* state = (PdaMailSceneState*) lbl_803A6A60;
-    register f32* transitionTarget = &state->transitionTarget;
-    register f32* transition = &state->transition;
+    f32* targetField = &state->transitionTarget;
+    f32* transitionField = &state->transition;
+    /* RULE-EXCEPTION(user-approved): pointer carriers refreshed each loop pass (fn_8004B7EC) - see docs/RULE_EXCEPTIONS.md */
+    f32* transitionTarget = targetField;
+    f32* transition = transitionField;
     s32 phase = 0;
     s32 active;
     void* model;
@@ -134,7 +173,9 @@ void std027_unkMenuSequence27(void)
     state->selection = 0;
     state->savedSelection = 0;
     state->menuBusy = 0;
-    state->angles[0] = state->angles[1] = state->angles[2] = lbl_8047BDAC;
+    state->angles[2] = lbl_8047BDAC;
+    state->angles[1] = lbl_8047BDAC;
+    state->angles[0] = lbl_8047BDAC;
     state->field2C = lbl_8047BDA0;
     state->field28 = lbl_8047BDA0;
     *transition = lbl_8047BDF4;
@@ -163,11 +204,7 @@ void std027_unkMenuSequence27(void)
     GSlightStartAnimation(light);
     GSmodelStartAnimation(model);
     soundStartRaw(0x448, 0, 0);
-    if (model != 0) {
-        while (GSmodelIsAnimating(model)) {
-            _threadSwitch();
-        }
-    }
+    pdaMailWaitModel(model);
     GSmodelStopAnimation(model);
     cameraWaitSyncAnime(1);
     GSlightSetActive(light, 0);
@@ -200,21 +237,13 @@ void std027_unkMenuSequence27(void)
         } else {
             phase = ((s8*)lbl_803A6A60)[0];
         }
-        lbl_803A6A60[0] = (s8) phase;
+        ((s8*)lbl_803A6A60)[0] = phase;
         active = 1;
         state->menuBusy = active;
 
         switch (phase) {
         case 0:
-            *transitionTarget = lbl_8047BDFC;
-            active = 1;
-            while (active) {
-                if (*transition == *transitionTarget) {
-                    active = 0;
-                } else {
-                    _threadSwitch();
-                }
-            }
+            pdaMailWaitTransition(transition, transitionTarget, lbl_8047BDFC);
             menuClose(0x97);
             menuCloseSync(0x97, 1);
             *config.message = 0x36B4;
@@ -223,15 +252,7 @@ void std027_unkMenuSequence27(void)
             *transitionTarget = lbl_8047BDAC;
             break;
         case 1:
-            *transitionTarget = lbl_8047BDFC;
-            active = 1;
-            while (active) {
-                if (*transition == *transitionTarget) {
-                    active = 0;
-                } else {
-                    _threadSwitch();
-                }
-            }
+            pdaMailWaitTransition(transition, transitionTarget, lbl_8047BDFC);
             menuClose(0x97);
             menuCloseSync(0x97, 1);
             *config.message = 0x36B5;
@@ -240,15 +261,7 @@ void std027_unkMenuSequence27(void)
             *transitionTarget = lbl_8047BDAC;
             break;
         case 2:
-            *transitionTarget = lbl_8047BDFC;
-            active = 1;
-            while (active) {
-                if (*transition == *transitionTarget) {
-                    active = 0;
-                } else {
-                    _threadSwitch();
-                }
-            }
+            pdaMailWaitTransition(transition, transitionTarget, lbl_8047BDFC);
             menuClose(0x97);
             menuCloseSync(0x97, 1);
             if (!std081_flagCheckTrue(0x3F0)) {
@@ -266,23 +279,31 @@ void std027_unkMenuSequence27(void)
             state->exiting = 1;
             break;
         }
+        /* RULE-EXCEPTION(user-approved): no-op carrier refresh keeps the field pointers in registers (fn_8004B7EC) - see docs/RULE_EXCEPTIONS.md */
+        transitionTarget = targetField;
+        transition = transitionField;
     }
 
-    phase = 0;
-    active = 1;
-    while (active) {
-        switch (phase) {
-        case 0:
-            if (!fadeCheck(0)) {
-                phase = 100;
-            } else {
-                _threadSwitch();
+    {
+        s32 fading;
+        s32 step;
+
+        step = 0;
+        fading = 1;
+        do {
+            switch (step) {
+            case 0:
+                if (!fadeCheck(0)) {
+                    step = 100;
+                } else {
+                    _threadSwitch();
+                }
+                break;
+            case 100:
+                fading = 0;
+                break;
             }
-            break;
-        case 100:
-            active = 0;
-            break;
-        }
+        } while (fading);
     }
 
     if (state->offscreenHidden != 1) {
@@ -296,30 +317,40 @@ void std027_unkMenuSequence27(void)
     menuCloseSync(0xF0, 1);
     menuCloseSync(0x71, 1);
 
-    phase = 0;
-    active = 1;
-    while (active) {
-        switch (phase) {
-        case 0:
-            fadeSet(2, lbl_8047BDA8);
-            phase = 1;
-            break;
-        case 1:
-            if (!fadeCheck(0)) {
-                phase = 100;
-            } else {
-                _threadSwitch();
+    {
+        s32 fading;
+        s32 step;
+
+        step = 0;
+        fading = 1;
+        do {
+            switch (step) {
+            case 0:
+                fadeSet(2, lbl_8047BDA8);
+                step = 1;
+                break;
+            case 1:
+                if (!fadeCheck(0)) {
+                    step = 100;
+                } else {
+                    _threadSwitch();
+                }
+                break;
+            case 100:
+                fading = 0;
+                break;
             }
-            break;
-        case 100:
-            active = 0;
-            break;
-        }
+        } while (fading);
     }
     floorBattleEndTerminateScripts();
     floorSetFadeScript(0, 0);
 }
+#ifndef MENU_PDA_MAIL_OPEN_ONLY
 #pragma peephole reset
+#endif
+#endif /* MENU_PDA_MAIL_PARTIAL || MENU_PDA_MAIL_OPEN_ONLY */
+
+#ifndef MENU_PDA_MAIL_PARTIAL
 
 /* PI/6 and 2*PI -- rotation-angle wrap constants shared by the PDA
  * mail-icon spin/animation helpers. */
@@ -398,13 +429,16 @@ extern void menuButtonNormal(void* p);
 
 /* winSpriteSetDisp (gs_worldmap.c): set a window-sprite field-handle's
  * display/visibility value. */
-extern void winSpriteSetDisp(void* fieldHandle, s32 value);
+extern void winSpriteSetDisp(void* node, u32 enable);
 
 typedef struct PdaMailWindowB {
     u8 pad00[0x60];
     s32* field_0x60;
 } PdaMailWindowB;
 
+#endif /* MENU_PDA_MAIL_PARTIAL */
+
+#if !defined(MENU_PDA_MAIL_PARTIAL) || defined(MENU_PDA_MAIL_PREVIEW_ONLY)
 extern u32 mailGetAttachFileGroup(s32 index);
 extern s32 fn_8017B2CC(u32 fileHandle);
 extern s32 fn_8017B448(u32 fileHandle);
@@ -420,21 +454,24 @@ static inline s32 pdaMailIsAttachReady(s32 index)
     return 1;
 }
 
-/* RULE-EXCEPTION(user-approved): reconstructed inline helper (fn_8004E440, pdaMailAttachDrawTitle, fn_8004E2E0, fn_8004E510) — see docs/RULE_EXCEPTIONS.md */
-static inline s32 pdaMailCountAttachItems(s32* state)
+/* RULE-EXCEPTION(user-approved): reconstructed inline helper (fn_8004E440, fn_8004E180, fn_8004E2E0, fn_8004E510) — see docs/RULE_EXCEPTIONS.md */
+static inline u32 pdaMailGetGroup(s32 index)
+{
+    return mailGetAttachFileGroup(index);
+}
+
+/* RULE-EXCEPTION(user-approved): reconstructed inline helper (fn_8004E440, fn_8004E180, fn_8004E2E0, fn_8004E510) — see docs/RULE_EXCEPTIONS.md */
+static inline s32 pdaMailCountAttachItems(s32 index)
 {
     u32 object;
-    s32 index;
     s32 total;
     s32 count;
     s32 i;
 
-    index = state[1];
-
     if (!pdaMailIsAttachReady(index)) {
         return -1;
     }
-    object = mailGetAttachFileGroup(index);
+    object = pdaMailGetGroup(index);
     total = fn_8017B448(object);
     count = 0;
     for (i = 0; i < total; i++) {
@@ -445,13 +482,15 @@ static inline s32 pdaMailCountAttachItems(s32* state)
     }
     return count;
 }
+#endif /* MENU_PDA_MAIL_PREVIEW_ONLY */
 
+#ifndef MENU_PDA_MAIL_PARTIAL
 #pragma peephole off
 s32 fn_8004E440(PdaMailWindowB* window, void* fieldHandle)
 {
     s32 count;
 
-    count = pdaMailCountAttachItems(window->field_0x60);
+    count = pdaMailCountAttachItems(window->field_0x60[1]);
     if (count <= 0) {
         winSpriteSetDisp(fieldHandle, 0);
     } else {
@@ -524,7 +563,7 @@ s32 pdaMailDrawCursor(void* unused, PdaMailSpriteField* field)
 #endif /* MENU_PDA_MAIL_PARTIAL */
 
 #if !defined(MENU_PDA_MAIL_PARTIAL) || defined(MENU_PDA_MAIL_HIGHLIGHT_ONLY)
-extern void winSpriteSetDisp(void* fieldHandle, s32 value);
+extern void winSpriteSetDisp(void* node, u32 enable);
 
 /* RULE-EXCEPTION(user-approved): local compiler-control pragma (peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma peephole off
@@ -693,7 +732,6 @@ s32 fn_8004CF78(u8* window)
             s8 row;
         } position;
     } PdaMailCursorState;
-    extern s32 mailGetNbMailInMailbox(void);
     PdaMailCursorState cursor;
     u16 persistedPosition;
     u8* input;
@@ -799,7 +837,6 @@ s32 fn_8004D34C(s32 index)
             s8 row;
         } position;
     } PdaMailCursorPosition;
-    extern s32 mailGetNbMailInMailbox(void);
     extern s32 mailGetSortMode(void);
     extern s32 fn_8004DC18(s32 mode);
     extern void fn_8004BFB0(void);
@@ -1108,7 +1145,6 @@ asm void fn_8004BFB0(void) {
 #pragma peephole off
 void fn_8004BFB0(void)
 {
-    extern s32 mailGetNbMailInMailbox(void);
     s32 ascIndex;
     s32 recentIndex;
     s32 alphaCount;
@@ -1232,7 +1268,6 @@ asm s32 fn_8004D7D0(PdaMailWindowA* window) {
 #else
 s32 pdaMailViewKey(PdaMailWindowA* window)
 {
-    extern s32 mailGetNbMailInMailbox(void);
     s32** field = window->field_0x60;
     u8* state = windowGetKeyInfo();
     s32 index = **field;
@@ -1721,7 +1756,7 @@ s32 pdaMailAttachDrawTitle(u8* context, u8* object)
 
     attachmentState = *(u8**)(context + 0x60);
     current = **(s32**)(attachmentState + 8);
-    count = pdaMailCountAttachItems((s32*)attachmentState);
+    count = pdaMailCountAttachItems(((s32*)attachmentState)[1]);
     if (count <= 0) {
         return 0;
     }
@@ -1751,7 +1786,7 @@ s32 fn_8004E2E0(u8* context, u8* object)
     s32 count;
 
     attachmentState = *(u8**)(context + 0x60);
-    count = pdaMailCountAttachItems((s32*)attachmentState);
+    count = pdaMailCountAttachItems(((s32*)attachmentState)[1]);
 
     if (count < 2) {
         winSpriteSetDisp(object, 0);
@@ -1770,7 +1805,9 @@ s32 fn_8004E2E0(u8* context, u8* object)
     return 0;
 }
 #pragma peephole reset
+#endif /* MENU_PDA_MAIL_PARTIAL */
 
+#if !defined(MENU_PDA_MAIL_PARTIAL) || defined(MENU_PDA_MAIL_PREVIEW_ONLY)
 extern u8 fsysIsEntryLoaded(u32 fileHandle, u32 entry);
 extern void gfxSetFlags(u32 mask);
 extern void gfxClearFlags(u32 value);
@@ -1789,14 +1826,14 @@ extern f32 lbl_8047BE4C;
 static inline u32 pdaMailGetAttachEntry(s32* state, s32 selected)
 {
     s32 index;
-    s32 i;
     u32 entry;
-    s32 found;
     s32 count;
     u32 fileHandle;
+    s32 i;
+    s32 found;
 
     index = state[1];
-    count = pdaMailCountAttachItems(state);
+    count = pdaMailCountAttachItems(index);
     if (count <= selected) {
         return -1;
     }
@@ -1814,23 +1851,20 @@ static inline u32 pdaMailGetAttachEntry(s32* state, s32 selected)
     return entry;
 }
 
-#pragma peephole off
 s32 fn_8004E510(u8* context, u8* object)
 {
-    /* RULE-EXCEPTION(user-approved): codegen-only local for the selected attachment, read before the entry lookup - see docs/RULE_EXCEPTIONS.md */
-    s32 selected;
     u8* attachmentState;
     u32 fileHandle;
     u32 entry;
     u32 texture;
 
     attachmentState = *(u8**)(context + 0x60);
-    if (pdaMailCountAttachItems((s32*)attachmentState) <= 0) {
+    if (pdaMailCountAttachItems(((s32*)attachmentState)[1]) <= 0) {
         return 0;
     }
 
-    selected = **(s32**)(attachmentState + 8);
-    entry = pdaMailGetAttachEntry((s32*)attachmentState, selected);
+    entry = pdaMailGetAttachEntry((s32*)attachmentState,
+                                  **(s32**)(attachmentState + 8));
     if (entry == -1) {
         return 0;
     }
@@ -1860,9 +1894,7 @@ s32 fn_8004E510(u8* context, u8* object)
     gfxEnd();
     return 0;
 }
-#pragma peephole reset
-
-#endif /* MENU_PDA_MAIL_PARTIAL */
+#endif /* MENU_PDA_MAIL_PREVIEW_ONLY */
 
 #if !defined(MENU_PDA_MAIL_PARTIAL) || defined(MENU_PDA_MAIL_SORT_ONLY)
 /* RULE-EXCEPTION(user-approved): local compiler-control pragma (peephole off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */

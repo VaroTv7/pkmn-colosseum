@@ -226,7 +226,7 @@ extern s32 fightTrainerAiWazaValueJisin();
 extern s32 fightTrainerAiWazaValueJibaku();
 extern s32 fightTrainerAiWazaValueNull();
 
-/* fightCheckTokuseiWazaKyuushuu */
+/* fn_8022DCB8 */
 #define fn_80207BF4 fightOutPokemonGetTokuseiDataId
 #define fn_8011BEB4 wazaGetStatus
 #define fn_80205134 fightOutPokemonGetWazaZokuseiDataId
@@ -414,7 +414,7 @@ void fn_8022DF08(u32 ctx)
     }
 }
 
-/* fightDoTraceAll */
+/* fn_8022E1C4 */
 #define fn_801F37B0 fightFloorLoopValidFightOutPokemon
 void fightDoTraceAll(void) {
     extern void fn_801F37B0();
@@ -422,7 +422,7 @@ void fightDoTraceAll(void) {
 }
 #undef fn_801F37B0
 
-/* _fightDoTraceSub */
+/* fn_8022E1F8 */
 #define fn_800FA280 GSmsgGetGSchar
 #define fn_8011CB54 pokemonTokuseiDataBiosGetName
 #define fn_8011CB6C pokemonTokuseiDataBiosGetPtr
@@ -495,7 +495,7 @@ u32 _fightDoTraceSub(int r3)
 #undef fn_8011CB54
 #undef fn_800FA280
 
-/* fightDoIkakuAll */
+/* fn_8022E314 */
 #define fn_801F37B0 fightFloorLoopValidFightOutPokemon
 void fightDoIkakuAll(u8 param) {
     extern void fn_801F37B0();
@@ -504,7 +504,7 @@ void fightDoIkakuAll(u8 param) {
 }
 #undef fn_801F37B0
 
-/* _fightDoIkakuSub */
+/* fn_8022E34C */
 #define fn_80207BF4 fightOutPokemonGetTokuseiDataId
 #define fn_802062FC fightOutPokemonCheckFightOut
 #define fn_80202810 fightOutPokemonWriteJoutaiDataId
@@ -546,7 +546,10 @@ u32 _fightDoIkakuSub(u32 r3, u32 r4, char* r5)
 #undef fn_802062FC
 #undef fn_80207BF4
 
-/* fightOutPokemonTokuseiCheckAppear */
+/* fn_8022E410 */
+extern void pokemonSetStatus(u8* obj, u32 id, u32 selector, u32 subindex, u32 value);
+/* RULE-EXCEPTION(user-approved): fightOutPokemonGetUseWazaDataId is defined u16 in fight_out_pokemon.c, but retail keeps the result unextended here (mr, no clrlwi); declared u32 like the file's fn_80205184 - see docs/RULE_EXCEPTIONS.md */
+extern u32 fightOutPokemonGetUseWazaDataId(void* ctx);
 #define fn_801254B4 pokemonSetStatus
 #define fn_8012640C pokemonGetStatus
 #define fn_801F2934 fightFloorWriteJoutaiDataId
@@ -867,7 +870,7 @@ void fightCheckRuiShadowSense(u32 r3, u8 r4)
 #undef fn_8011FC74
 #undef fn_8011F910
 
-/* _fightCheckForecastSub */
+/* fn_8022EB9C */
 /* RULE-EXCEPTION(user-approved): local compiler-control pragma (opt_propagation off) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma opt_propagation off
 #define fn_802062FC fightOutPokemonCheckFightOut
@@ -904,7 +907,7 @@ u32 _fightCheckForecastSub(u32 r3, u32 r4, u8* r5)
 #undef fn_801F4C14
 #undef fn_802062FC
 
-/* fightGetForecastForm */
+/* fn_8022EC40 */
 #pragma opt_propagation reset
 #define fn_802062FC fightOutPokemonCheckFightOut
 #define fn_80203D3C figthOutPokemonGetPokemonDataId
@@ -978,7 +981,7 @@ u8 fightGetForecastForm(void* ctx) {
 #undef fn_80203D3C
 #undef fn_802062FC
 
-/* _fightCheckDarkPokemonAppear */
+/* fn_8022EDEC */
 #define fn_8011FC74 pokemonIsDarkPokemon
 #define fn_8012640C pokemonGetStatus
 #define fn_801F4C14 fightFloorSetStatus

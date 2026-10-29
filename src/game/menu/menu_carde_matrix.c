@@ -28,7 +28,7 @@ extern void __assert();
 extern void* memset(void* dst, int val, u32 size);
 
 /* ===== SDA globals ===== */
-extern u8 lbl_8047A658;
+extern u16 lbl_8047A658[4];
 extern const u32 lbl_8047C130[2];
 extern const u32 lbl_8047C138[2];
 extern u8 lbl_8047C140;
@@ -52,7 +52,7 @@ typedef struct MenuCardEMatrixTable {
     s32 sprites[2][8]; /* [0] cells, [1] row ends */
 } MenuCardEMatrixTable;
 
-#if defined(MENU_CARDE_MATRIX_TU)
+#if defined(MENU_CARDE_MATRIX_TU) || defined(MENU_CARDE_MATRIX_POOL)
 /* The TU's own .rodata (0x80268B88): the item-id tables of the three
  * matrix item groups (a 36-entry row each for the previous and the
  * current entry), then the sprite ids for cells and row ends. Kept as
@@ -104,13 +104,16 @@ static const s32 sCardEMatrixEndSprites[8] = {
     0x20B, 0x20D, 0x20F, 0x211, 0x213, 0x215, 0x217, 0x219,
 };
 
+#define CARDE_MATRIX_IDS(group) ((u16*)sCardEMatrixIds##group[0])
+#define CARDE_MATRIX_CELL_SPRITES sCardEMatrixCellSprites
+#define CARDE_MATRIX_END_SPRITES sCardEMatrixEndSprites
+#endif
+
+#if defined(MENU_CARDE_MATRIX_TU)
 #define CARDE_MATRIX_FILE "menuCardE_Matrix.c"
 #define CARDE_MATRIX_SERIES_N "i < cem->m_seriesN"
 #define CARDE_MATRIX_ANIMATING "!cem->m_isAnimating"
 #define CARDE_MATRIX_ANIM_CUR "s[ANIM_cur]"
-#define CARDE_MATRIX_IDS(group) ((u16*)sCardEMatrixIds##group[0])
-#define CARDE_MATRIX_CELL_SPRITES sCardEMatrixCellSprites
-#define CARDE_MATRIX_END_SPRITES sCardEMatrixEndSprites
 
 extern void GScharLenCpy(void*, const void*, u32);
 extern void qsort(void*, u32, u32, s32 (*)(u32, u32));
@@ -198,9 +201,11 @@ extern u8 lbl_80268DB4[];
 #define CARDE_MATRIX_SERIES_N lbl_80268D8C
 #define CARDE_MATRIX_ANIMATING lbl_80268DA0
 #define CARDE_MATRIX_ANIM_CUR lbl_80268DB4
+#if !defined(MENU_CARDE_MATRIX_POOL)
 #define CARDE_MATRIX_IDS(group) (table->ids[group][0])
 #define CARDE_MATRIX_CELL_SPRITES (table->sprites[0])
 #define CARDE_MATRIX_END_SPRITES ((s32*)((u8*)table + 0x1D0))
+#endif
 #endif
 
 /* ===== Forward declarations ===== */
@@ -235,7 +240,7 @@ void menuCardEMatrixWindowProc(struct MenuCardEWindow* window);
  *   +0x0B5  currentSubIndex
  *   +0x0B6  transitionActive
  *   +0x0B8  transitionFrame
- *   +0x0BC  state/switch selector used by menuCardEMatrixWindowProc
+ *   +0x0BC  state/switch selector used by fn_8007D978
  */
 
 /* ===== Function implementations ===== */
@@ -454,44 +459,68 @@ static inline void menuCardEMatrixFindCard(MenuCardEMatrixContext* context) {
     }
 }
 
-/* Allocate, fill and sort the context's entry-pointer array. */
-static inline void menuCardEMatrixFillEntries(MenuCardEMatrixContext* context,
-                                              s32 count) {
-    extern MenuCardEEntry* fn_80083AF4(void* arena, s32 index);
-    extern void qsort(void* base, u32 count, u32 size, s32 (*compare)(const void*, const void*));
-    extern s32 menuCardE_CompareEntryPtrs(const void* a, const void* b);
+/* Allocate a zeroed, 32-byte aligned arena block for count entry pointers. */
+static inline MenuCardEEntry** menuCardEMatrixAlloc(s32 count) {
     extern u16 GSmemAlloc(u32 size, u32 align);
     extern void* GSmemLock(u16 handle);
-    MenuCardEEntry** entries;
+    MenuCardEEntry** buf;
     u32 size;
     u16 handle;
-    s32 k;
 
     size = count * 4;
     handle = GSmemAlloc((size + 0x1F) & ~0x1F, 0x20);
     if (handle == 0) {
         __assert(CARDE_MATRIX_FILE, 0x1A2, &lbl_8047C140);
     }
-    entries = GSmemLock(handle);
-    memset(entries, 0, size);
-    context->entries = entries;
+    buf = GSmemLock(handle);
+    memset(buf, 0, size);
+    return buf;
+}
+
+/* Allocate, fill and sort the context's entry-pointer array. */
+static inline void menuCardEMatrixFillEntries(MenuCardEMatrixContext* context,
+                                              s32 count) {
+    extern MenuCardEEntry* fn_80083AF4(void* arena, s32 index);
+    extern void qsort(void* base, u32 count, u32 size, s32 (*compare)(const void*, const void*));
+    extern s32 menuCardE_CompareEntryPtrs(const void* a, const void* b);
+    s32 k;
+
+    context->entries = menuCardEMatrixAlloc(count);
     for (k = 0; k < count; k++) {
         context->entries[k] = fn_80083AF4(NULL, k);
     }
     qsort(context->entries, count, 4, menuCardE_CompareEntryPtrs);
 }
 
+/* Step the current sub-selection down to the nearest one the current
+ * entry accepts. */
+static inline void menuCardEMatrixReselectSub(MenuCardEMatrixContext* context) {
+    extern u8 cardeSaveLevelHasCard(MenuCardEEntry* entry, u8 subIndex);
+    u8 subIndex;
+    MenuCardEEntry* entry;
+
+    if (context->entryCount <= 0 || context->currentEntryIndex < 0) {
+        entry = NULL;
+    } else {
+        entry = context->entries[context->currentEntryIndex];
+    }
+    if (entry != NULL) {
+        for (subIndex = context->currentSubIndex; (s8)subIndex > 0; subIndex--) {
+            if (cardeSaveLevelHasCard(entry, subIndex) != 0) {
+                break;
+            }
+        }
+        context->currentSubIndex = subIndex;
+    }
+}
 #endif
 #if defined(MENU_CARDE_R48_8007C7EC_O2_ACTIVE)
-/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
-#pragma push
-#pragma peephole off
+/* Built with the unit flag -opt nopeephole (configure.py). */
 void fn_8007C7EC(void) {
     extern void* windowSearchID(s32 id);
     extern MenuCardEMatrixContext** windowGetFreeWork(void* window);
     extern s32 fn_80083BF8(void* arena);
     extern MenuCardEEntry* fn_80083AF4(void* arena, s32 index);
-    extern u8 cardeSaveLevelHasCard(MenuCardEEntry* entry, u8 subIndex);
     extern void qsort(void* base, u32 count, u32 size, s32 (*compare)(const void*, const void*));
     extern s32 menuCardE_CompareEntryPtrs(const void* a, const void* b);
     extern u16 GSmemAlloc(u32 size, u32 align);
@@ -501,8 +530,6 @@ void fn_8007C7EC(void) {
     extern void GSmemFree(u16 handle);
     MenuCardEMatrixContext* context;
     s32 savedIndex;
-    u8 subIndex;
-    MenuCardEEntry* entry;
 #if !defined(MENU_CARDE_MATRIX_TU)
     u16 handle;
 #endif
@@ -551,19 +578,7 @@ void fn_8007C7EC(void) {
     }
     context->prevEntryIndex = context->currentEntryIndex;
 
-    if (context->entryCount <= 0 || context->currentEntryIndex < 0) {
-        entry = NULL;
-    } else {
-        entry = context->entries[context->currentEntryIndex];
-    }
-    if (entry != NULL) {
-        for (subIndex = context->currentSubIndex; (s8)subIndex > 0; subIndex--) {
-            if (cardeSaveLevelHasCard(entry, subIndex) != 0) {
-                break;
-            }
-        }
-        context->currentSubIndex = subIndex;
-    }
+    menuCardEMatrixReselectSub(context);
 
     if (context->currentEntryIndex == context->prevEntryIndex &&
         (s8)context->currentSubIndex == (s8)context->prevSubIndex) {
@@ -573,7 +588,6 @@ void fn_8007C7EC(void) {
     context->transitionFrame = 0;
     menuCardEWaitTransition();
 }
-#pragma pop
 #endif
 
 /* 0x8007CAB0 | size: 0xA4 */
@@ -626,10 +640,7 @@ void fn_8007CB54(u32 arg) {
 
 /* 0x8007CBB4 | size: 0x948 */
 #if defined(MENU_CARDE_MATRIX_8007CBB4_ACTIVE)
-/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
-#pragma push
-#pragma peephole off
-#define menuCardEDigits ((u16*)&lbl_8047A658)
+#define menuCardEDigits lbl_8047A658
 typedef struct MenuCardEMatrixItem {
     u8 unk_00[6];
     s16 id;
@@ -653,7 +664,7 @@ typedef struct MenuCardEMatrixCell {
     u16 value;
 } MenuCardEMatrixCell;
 
-static inline s32 menuCardEFindItemId(u16* ids, u16 id) {
+static inline s32 menuCardEFindItemId(const u16* ids, u16 id) {
     s32 i;
 
     for (i = 0; i < 36; i++) {
@@ -672,26 +683,19 @@ void fn_8007CBB4(void* window, MenuCardEMatrixItem* item) {
     extern void msgctrlSetValue(u32 id, void* value);
     extern u8* cardeSaveGetLevel(MenuCardEEntry* entry, u8 layer);
     extern MenuCardEMatrixCell* cardeSaveGetCard(MenuCardEEntry* entry, u8 layer, s8 row, s8 column);
-    MenuCardEMatrixSprite* sprite;
-#if !defined(MENU_CARDE_MATRIX_TU)
-    MenuCardEMatrixTable* table;
-#endif
-    MenuCardEMatrixContext* context;
-    s8 row;
-    s32 group;
-    s32 index;
-    MenuCardEEntry* entry;
-    u16* ids;
-    s8 column;
-    s32 which;
     u8 layer;
     u8* rows;
-    MenuCardEMatrixCell* cell;
+    s8 column;
+    s32 which;
+    MenuCardEEntry* entry;
+    MenuCardEMatrixContext* context;
+    s8 row;
     u16 value;
+    s32 index;
+    s32 group;
+    MenuCardEMatrixCell* cell;
+    MenuCardEMatrixSprite* sprite;
 
-#if !defined(MENU_CARDE_MATRIX_TU)
-    table = &lbl_80268B88;
-#endif
     if (window == NULL) {
         window = windowSearchID(0xA6);
     }
@@ -705,23 +709,22 @@ void fn_8007CBB4(void* window, MenuCardEMatrixItem* item) {
         return;
     }
 
-    ids = CARDE_MATRIX_IDS(0);
-    if ((index = menuCardEFindItemId(ids, item->id)) >= 0) {
+    if ((index = menuCardEFindItemId(sCardEMatrixIds0[0], item->id)) >= 0) {
         which = 0;
         group = 0;
-    } else if ((index = menuCardEFindItemId(ids + 36, item->id)) >= 0) {
+    } else if ((index = menuCardEFindItemId(sCardEMatrixIds0[1], item->id)) >= 0) {
         which = 1;
         group = 0;
-    } else if ((index = menuCardEFindItemId(ids = CARDE_MATRIX_IDS(2), item->id)) >= 0) {
+    } else if ((index = menuCardEFindItemId(sCardEMatrixIds2[0], item->id)) >= 0) {
         which = 0;
         group = 1;
-    } else if ((index = menuCardEFindItemId(ids + 36, item->id)) >= 0) {
+    } else if ((index = menuCardEFindItemId(sCardEMatrixIds2[1], item->id)) >= 0) {
         which = 1;
         group = 1;
-    } else if ((index = menuCardEFindItemId(ids = CARDE_MATRIX_IDS(1), item->id)) >= 0) {
+    } else if ((index = menuCardEFindItemId(sCardEMatrixIds1[0], item->id)) >= 0) {
         which = 0;
         group = 2;
-    } else if ((index = menuCardEFindItemId(ids + 36, item->id)) >= 0) {
+    } else if ((index = menuCardEFindItemId(sCardEMatrixIds1[1], item->id)) >= 0) {
         which = 1;
         group = 2;
     } else {
@@ -779,10 +782,10 @@ void fn_8007CBB4(void* window, MenuCardEMatrixItem* item) {
             if (cell->valid != 0) {
                 item->msgId = 0xE5;
                 value = cell->value;
-                menuCardEDigits[3] = 0;
                 menuCardEDigits[0] = '0' + (value / 100) % 10;
                 menuCardEDigits[1] = '0' + (value / 10) % 10;
                 menuCardEDigits[2] = '0' + value % 10;
+                menuCardEDigits[3] = 0;
                 msgctrlSetValue(0x37, menuCardEDigits);
             }
             break;
@@ -799,7 +802,6 @@ void fn_8007CBB4(void* window, MenuCardEMatrixItem* item) {
         item->spriteRect[3] = sprite->rect[3];
     }
 }
-#pragma pop
 
 /* 0x8007D4FC | size: 0x68 */
 #endif
@@ -979,8 +981,7 @@ void fn_8007D89C(void* window, u8* param) {
 #endif
 
 #if defined(MENU_CARDE_MATRIX_8007D978_ACTIVE)
-#pragma push
-#pragma peephole off
+/* Built with the unit flag -opt nopeephole (configure.py). */
 typedef struct MenuCardEColor {
     u8 r;
     u8 g;
@@ -1053,18 +1054,32 @@ typedef struct MenuCardEMatrixWork {
     MenuCardESprite* subArrow[2];       /* 0x4E0 */
 } MenuCardEMatrixWork;
 
-static inline u32 menuCardELerpColor(u32 to, u32 from, f32 t) {
-    u32 result;
+typedef union MenuCardEColorWord {
+    u32 word;
+    MenuCardEColor rgba;
+} MenuCardEColorWord;
 
-    ((MenuCardEColor*)&result)->r =
-        (((MenuCardEColor*)&to)->r - ((MenuCardEColor*)&from)->r) * t + ((MenuCardEColor*)&from)->r;
-    ((MenuCardEColor*)&result)->g =
-        (((MenuCardEColor*)&to)->g - ((MenuCardEColor*)&from)->g) * t + ((MenuCardEColor*)&from)->g;
-    ((MenuCardEColor*)&result)->b =
-        (((MenuCardEColor*)&to)->b - ((MenuCardEColor*)&from)->b) * t + ((MenuCardEColor*)&from)->b;
-    ((MenuCardEColor*)&result)->a =
-        (((MenuCardEColor*)&to)->a - ((MenuCardEColor*)&from)->a) * t + ((MenuCardEColor*)&from)->a;
-    return result;
+static inline u32 menuCardELerpColor(u32 to, u32 from, f32 t) {
+    MenuCardEColorWord src;
+    MenuCardEColorWord dst;
+    MenuCardEColorWord result;
+
+    src.word = from;
+    dst.word = to;
+
+    result.rgba.r = (dst.rgba.r - src.rgba.r) * t + src.rgba.r;
+    result.rgba.g = (dst.rgba.g - src.rgba.g) * t + src.rgba.g;
+    result.rgba.b = (dst.rgba.b - src.rgba.b) * t + src.rgba.b;
+    result.rgba.a = (dst.rgba.a - src.rgba.a) * t + src.rgba.a;
+    return result.word;
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper (work-area getter) for the entry copy - see docs/RULE_EXCEPTIONS.md */
+static inline MenuCardEMatrixWork* menuCardEMatrixGetWork(MenuCardEWindow* window) {
+    extern void* windowSearchID(s32 id);
+    extern MenuCardEMatrixWork** windowGetFreeWork(void* window);
+
+    return *windowGetFreeWork(window == NULL ? windowSearchID(0xA6) : window);
 }
 
 static inline void menuCardEBuzz(MenuCardEMatrixWork* work) {
@@ -1115,41 +1130,45 @@ void menuCardEMatrixWindowProc(MenuCardEWindow* window) {
     extern u8* cardeSaveGetCard(MenuCardEEntry* entry, s8 layer, s8 row, s8 column);
     MenuCardEMatrixWork* work;
     MenuCardEEntry* entries[3];
-    MenuCardEEntry** entryp;
     MenuCardEEntry* entry;
     MenuCardEWindow* other;
     MenuCardESprite* sprite;
     u8* layer;
-    f32 phase;
     f32 slideX;
     f32 slideY;
     f32 slideXr;
     f32 slideYr;
     f32 rt;
+    f32 phase;
     f32 t;
     u32 from;
-    u32 to;
+    MenuCardEEntry** entryp;
     u32 color;
     s32 which;
     s32 j;
     s32 i;
     u32 k;
+    s32 mark;
     u32 gridFrom;
     u32 gridTo;
     u32 tabFrom;
     u32 tabTo;
     s32 index;
     s32 dir;
+    s32 blink;
     s16 baseX;
     s16 baseY;
-    s16 stepX;
     s16 stepY;
+    u32 to;
     s8 row;
     s8 column;
+    s16 stepX;
     s8 count;
     s32 held;
+    u16 key;
+    s32 slot;
 
-    work = *windowGetFreeWork(window == NULL ? windowSearchID(0xA6) : window);
+    work = menuCardEMatrixGetWork(window);
     switch (window->state) {
     case 0:
         if (window->subState == 0) {
@@ -1216,8 +1235,8 @@ void menuCardEMatrixWindowProc(MenuCardEWindow* window) {
         }
     }
 
-    held = windowGetKeyInfo()->held;
-    if ((work->lastKey & 0xF) != ((u16)held & 0xF)) {
+    key = held = windowGetKeyInfo()->held;
+    if ((work->lastKey & 0xF) != (key & 0xF)) {
         work->buzzed = 0;
     }
     work->lastKey = held;
@@ -1240,7 +1259,7 @@ void menuCardEMatrixWindowProc(MenuCardEWindow* window) {
             t = 1.0f;
             work->transitionActive = 0;
         } else {
-            t = work->transitionFrame * 0.0625f;
+            t = work->transitionFrame / 16.0f;
         }
     } else {
         work->entryIndex[0] = work->entryIndex[1];
@@ -1302,8 +1321,9 @@ void menuCardEMatrixWindowProc(MenuCardEWindow* window) {
     }
 
     entryp = entries;
-    entries[0] = menuCardEWorkEntry(work, 0);
-    entries[1] = menuCardEWorkEntry(work, 1);
+    for (i = 0; i < 2; i++) {
+        entries[i] = menuCardEWorkEntry(work, i);
+    }
     rt = 1.0f - t;
     slideX = 48.0f * t;
     slideY = 32.0f * t;
@@ -1314,8 +1334,8 @@ void menuCardEMatrixWindowProc(MenuCardEWindow* window) {
     for (which = 0; which < 2; which++) {
         gridFrom = 0xFFFFFFFF;
         gridTo = 0xFFFFFFFF;
-        stepY = work->rect[0][2];
         stepX = work->rect[0][3];
+        stepY = work->rect[0][2];
         if (entryp[which] != NULL && (work->transitionActive != 0 || which != 0)) {
             baseX = work->rect[0][0] + (stepX * (5 - entryp[which]->columns)) / 2;
             baseY = work->rect[0][1] + (stepY * (6 - entryp[which]->sortGroup)) / 2;
@@ -1351,27 +1371,28 @@ void menuCardEMatrixWindowProc(MenuCardEWindow* window) {
             layer = cardeSaveGetLevel(entryp[which], work->subIndex[which]);
             for (row = 0; row < entryp[which]->sortGroup; row++) {
                 for (column = 0; column < 6; column++) {
-                    work->cell[which][row * 6 + column]->x = baseX + column * stepX;
-                    work->cell[which][row * 6 + column]->y = baseY + row * stepY;
+                    slot = row * 6 + column;
+                    work->cell[which][slot]->x = baseX + column * stepX;
+                    work->cell[which][slot]->y = baseY + row * stepY;
                     if ((column == entryp[which]->columns && layer[row * 0xE + 0x1C] != 0) ||
                         (column < entryp[which]->columns &&
                          cardeSaveGetCard(entryp[which], work->subIndex[which], row, column)[0xC] != 0)) {
                         if (work->state == 0 || work->state == 6 ||
-                            work->gridIndex != row * 6 + column || work->transitionActive == 0) {
-                            winSpriteSetDisp(work->cell[which][row * 6 + column], 1);
-                            winSpriteSetDisp(work->cellFront[which][row * 6 + column], 1);
-                            winSpriteSetDisp(work->cellBack[which][row * 6 + column], 1);
-                            work->cell[which][row * 6 + column]->color = color;
-                            work->cellFront[which][row * 6 + column]->x =
+                            work->gridIndex != slot || work->transitionActive == 0) {
+                            winSpriteSetDisp(work->cell[which][slot], 1);
+                            winSpriteSetDisp(work->cellFront[which][slot], 1);
+                            winSpriteSetDisp(work->cellBack[which][slot], 1);
+                            work->cell[which][slot]->color = color;
+                            work->cellFront[which][slot]->x =
                                 work->rect[1][0] + (baseX + column * stepX) - work->rect[0][0];
-                            work->cellFront[which][row * 6 + column]->y =
+                            work->cellFront[which][slot]->y =
                                 work->rect[1][1] + (baseY + row * stepY) - work->rect[0][1];
-                            work->cellFront[which][row * 6 + column]->color = color;
-                            work->cellBack[which][row * 6 + column]->x =
+                            work->cellFront[which][slot]->color = color;
+                            work->cellBack[which][slot]->x =
                                 work->rect[2][0] + (baseX + column * stepX) - work->rect[0][0];
-                            work->cellBack[which][row * 6 + column]->y =
+                            work->cellBack[which][slot]->y =
                                 work->rect[2][1] + (baseY + row * stepY) - work->rect[0][1];
-                            work->cellBack[which][row * 6 + column]->color = color;
+                            work->cellBack[which][slot]->color = color;
                         }
                     }
                 }
@@ -1382,8 +1403,8 @@ void menuCardEMatrixWindowProc(MenuCardEWindow* window) {
     /* Layer marks of both entries. */
     for (which = 0; which < 2; which++) {
         if ((work->transitionActive != 0 || which != 0) && entryp[which] != NULL) {
-            for (i = 0; i < entryp[which]->layerCount; i++) {
-                if (i == work->subIndex[which]) {
+            for (mark = 0; mark < entryp[which]->layerCount; mark++) {
+                if (mark == work->subIndex[which]) {
                     from = 0xFFFFFFFF;
                 } else {
                     from = 0x024F84FF;
@@ -1397,8 +1418,8 @@ void menuCardEMatrixWindowProc(MenuCardEWindow* window) {
                     from &= 0xFFFFFF00;
                     break;
                 }
-                winSpriteSetDisp(work->layerMark[which][i], 1);
-                work->layerMark[which][i]->color = menuCardELerpColor(to, from, t);
+                winSpriteSetDisp(work->layerMark[which][mark], 1);
+                work->layerMark[which][mark]->color = menuCardELerpColor(to, from, t);
             }
         }
     }
@@ -1480,13 +1501,13 @@ void menuCardEMatrixWindowProc(MenuCardEWindow* window) {
 
     /* Selected-cell animation. */
     if (work->transitionActive == 0) {
-        dir = -1;
+        blink = -1;
         index = work->gridIndex;
         work->stateFrame++;
         switch (work->state) {
         case 1:
             work->cell[1][index]->color =
-                menuCardELerpColor(0xFFFFFFFF, 0xFFFFFF00, work->stateFrame * 0.0625f);
+                menuCardELerpColor(0xFFFFFFFF, 0xFFFFFF00, work->stateFrame / 16.0f);
             winSpriteSetDisp(work->cellFront[1][index], 0);
             winSpriteSetDisp(work->cellBack[1][index], 0);
             if (work->stateFrame == 16) {
@@ -1495,44 +1516,42 @@ void menuCardEMatrixWindowProc(MenuCardEWindow* window) {
             }
             break;
         case 2:
-            dir = 1;
+            blink = 1;
         case 3:
             winSpriteSetDisp(work->cellFront[1][index], 0);
             winSpriteSetDisp(work->cellBack[1][index], 0);
             goto blink;
         case 4:
-            dir = 1;
+            blink = 1;
         case 5:
         blink:
             winSpriteSetDisp(work->cursor, 1);
             work->cursor->x = work->cell[1][index]->x;
             work->cursor->y = work->cell[1][index]->y;
-            if (dir == 1) {
+            if (blink == 1) {
                 work->cursor->color =
-                    menuCardELerpColor(0xFFFFFF77, 0xFFFFFF00, work->stateFrame * 0.0625f);
+                    menuCardELerpColor(0xFFFFFF77, 0xFFFFFF00, work->stateFrame / 16.0f);
             } else {
                 work->cursor->color =
-                    menuCardELerpColor(0xFFFFFF00, 0xFFFFFF77, work->stateFrame * 0.0625f);
+                    menuCardELerpColor(0xFFFFFF00, 0xFFFFFF77, work->stateFrame / 16.0f);
             }
             if (work->stateFrame == 16) {
                 work->stateFrame = 0;
-                work->state += dir;
+                work->state += blink;
             }
             break;
         case 6:
             row = index / 6;
-            entry = entries[1];
-            for (column = 0; column < entry->columns; column++) {
-                if (cardeSaveGetCard(entry, work->subIndex[1], row, column)[0xC] == 0) {
+            for (column = 0; column < entries[1]->columns; column++) {
+                if (cardeSaveGetCard(entries[1], work->subIndex[1], row, column)[0xC] == 0) {
                     winSpriteSetDisp(work->cell[1][row * 6 + column], 1);
-                    phase = work->stateFrame * 0.03125f;
+                    phase = work->stateFrame / 32.0f;
                     if (phase < 1.0f) {
                         work->cell[1][row * 6 + column]->color =
                             menuCardELerpColor(0xFFFFFF77, 0xFFFFFF00, phase);
                     } else {
-                        phase -= 1.0f;
                         work->cell[1][row * 6 + column]->color =
-                            menuCardELerpColor(0xFFFFFF00, 0xFFFFFF77, phase);
+                            menuCardELerpColor(0xFFFFFF00, 0xFFFFFF77, phase - 1.0f);
                     }
                 }
             }
@@ -1545,7 +1564,7 @@ void menuCardEMatrixWindowProc(MenuCardEWindow* window) {
             winSpriteSetDisp(work->cellBack[1][index], 0);
         case 8:
             work->cell[1][index]->color =
-                menuCardELerpColor(0xFFFFFF00, 0xFFFFFFFF, work->stateFrame * 0.0625f);
+                menuCardELerpColor(0xFFFFFF00, 0xFFFFFFFF, work->stateFrame / 16.0f);
             if (work->stateFrame == 16) {
                 work->state = 9;
             }
@@ -1571,7 +1590,6 @@ void menuCardEMatrixWindowProc(MenuCardEWindow* window) {
         }
     }
 }
-#pragma pop
 #endif
 
 #if defined(MENU_CARDE_MATRIX_TU)

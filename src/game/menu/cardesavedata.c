@@ -9,14 +9,22 @@
  */
 #include "dolphin/types.h"
 
-#if !defined(CARDESAVEDATA_GRID_ONLY) && \
+extern void* memset(void* dst, int value, u32 len);
+
+/* Compiled on its own (the game/menu/cardesavedata.c unit), this file
+ * builds only fn_8007FDBC; the tail units define CARDESAVEDATA_ALL. */
+#if !defined(CARDESAVEDATA_ALL) && \
+    !defined(CARDESAVEDATA_GRID_ONLY) && \
     !defined(CARDESAVEDATA_DECODE_TU) && \
     !defined(CARDESAVEDATA_EXACT_8007FD64_ONLY) && \
-    !defined(CARDESAVEDATA_EXACT_800849B4_ONLY)
-#define CARDESAVEDATA_ALL
+    !defined(CARDESAVEDATA_EXACT_800849B4_ONLY) && \
+    !defined(CARDESAVEDATA_EXACT_80084A8C_ONLY) && \
+    !defined(CARDESAVEDATA_80084038_ONLY) && \
+    !defined(CARDESAVEDATA_80087C64_ONLY)
+#define CARDESAVEDATA_8007FDBC_ONLY
 #endif
 
-/* ===== External function declarations (cardeGbaTransfer only) ===== */
+/* ===== External function declarations (fn_80084A8C only) ===== */
 extern void fn_8005CF2C();
 extern void menuRuleCheckPartyAndRule();
 extern void fn_8008ABA0();
@@ -41,7 +49,7 @@ extern void menuOpen();
 extern void windowSearchID();
 extern void _threadSwitch();
 
-/* ===== SDA globals (cardeGbaTransfer only) ===== */
+/* ===== SDA globals (fn_80084A8C only) ===== */
 extern u8 lbl_80478950[4];
 extern s8 lbl_80478954[4];
 extern char lbl_8047C1A0[] __attribute__((section(".sdata2")));
@@ -116,12 +124,12 @@ typedef struct MenuCardEItem {
 #define CARDE_CTX_U32(ctx, off) (*(u32*)((u8*)(ctx) + (off)))
 #define CARDE_CTX_S16(ctx, off) (*(s16*)((u8*)(ctx) + (off)))
 
-#if defined(CARDESAVEDATA_ALL)
-static void menuCardE_SetItem(void* ctx, u32 off, void* window, s32 id) {
+#if defined(CARDESAVEDATA_ALL) || defined(CARDESAVEDATA_8007FDBC_ONLY)
+static inline void menuCardE_SetItem(void* ctx, u32 off, void* window, s32 id) {
     CARDE_CTX_U32(ctx, off) = (u32)windowSearchItemID(window, id);
 }
 
-static void menuCardE_CopyRect(void* ctx, u32 dst, u32 itemOff) {
+static inline void menuCardE_CopyRect(void* ctx, u32 dst, u32 itemOff) {
     MenuCardEItem* item = (MenuCardEItem*)CARDE_CTX_U32(ctx, itemOff);
 
     CARDE_CTX_S16(ctx, dst + 0) = item->x;
@@ -164,6 +172,7 @@ s32 menuCardE_CompareEntryPtrs(u32 r3, u32 r4) {
 #endif
 
 extern void GScharCpy(void* dst, const void* src);
+extern const u8 sCardEHeaderFields[];
 extern const u8 lbl_80478948[8];
 extern u8 cardeSaveApplyField(void** object_ref, const u32* descriptor, s32 index,
                       s32 value, const char* text, s32 subindex);
@@ -183,7 +192,7 @@ typedef struct CardEFieldTable {
     /* 0x360 */ CardEFieldDesc extra[3];
 } CardEFieldTable;
 
-/* Bit reader handed to cardeSaveApplyField; the decoded object comes first. */
+/* Bit reader handed to fn_8008102C; the decoded object comes first. */
 typedef struct CardEReader {
     /* 0x0 */ void* object;
     /* 0x4 */ const u8* packed;
@@ -260,7 +269,7 @@ static inline u8 CardEReadField(CardEReader* reader,
  * separate objects, which retail addresses off one pool base
  * (`addi rX, base, 0x0/0x1E0/0x240/0x360`). */
 #if defined(CARDESAVEDATA_ALL) || defined(CARDESAVEDATA_DECODE_TU)
-static const CardEFieldDesc sCardEHeaderFields[40] = {
+static const CardEFieldDesc sCardEDecodeHeaderFields[40] = {
     { 0, 4, 1 },
     { 1, 3, 1 },
     { 2, 2, 1 },
@@ -350,7 +359,7 @@ static const CardEFieldDesc sCardEExtraFields[3] = {
 #endif
 
 #if defined(CARDESAVEDATA_DECODE_TU)
-/* The rest of the descriptor block: the value domains cardeSaveApplyField checks,
+/* The rest of the descriptor block: the value domains fn_8008102C checks,
  * at 0x80268DC0 + 0x384 .. + 0xDA8, each its own pooled object. */
 static const u16 sCardEDomain384[329] = {
     0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009, 0x000A, 0x000B,
@@ -1599,13 +1608,13 @@ u32 cardeDecode(void* output, const u8* packed, u32 size)
     reader.packed = packed;
     reader.size = size;
     reader.bitPosition = 0;
-    CardEReadField(&reader, sCardEHeaderFields, 0, -1);
+    CardEReadField(&reader, sCardEDecodeHeaderFields, 0, -1);
 
     reader.bitPosition = 0;
     switch (*(s32*)output) {
     case 0:
         for (i = 0; i < 40; i++) {
-            if (!CardEReadField(&reader, sCardEHeaderFields, i, -1)) {
+            if (!CardEReadField(&reader, sCardEDecodeHeaderFields, i, -1)) {
                 valid = 0;
             }
         }
@@ -1696,13 +1705,13 @@ u32 SJIStoGSchar(u16* destination, u8* source)
 #pragma pop
 
 
-/* Range checks inlined into cardeSaveApplyField; the result is materialised. */
+/* Range checks inlined into fn_8008102C; the result is materialised. */
 static inline s32 CardEValueInRange(s32 value, s32 max)
 {
     return value >= 0 && value <= max;
 }
 
-/* Table lookups inlined into cardeSaveApplyField; each result is materialised. */
+/* Table lookups inlined into fn_8008102C; each result is materialised. */
 static inline u8 CardEFindHalf(const u16* entry, s32 count, u16 value)
 {
     s32 i;
@@ -1832,7 +1841,7 @@ u8 cardeSaveApplyField(void** object_ref, const u32* descriptor, s32 index,
 #define card (*(CardERecordData**)object_ref)
     u32 field = descriptor[0];
 #if !defined(CARDESAVEDATA_DECODE_TU)
-    const u8* table = (const u8*)sCardEHeaderFields;
+    const u8* table = sCardEHeaderFields;
 #endif
 
     s32 i;
@@ -2507,13 +2516,13 @@ static inline u8* cardEGetCell(u8* card, s8 pageIndex, s8 row, s8 column)
     return page + 0x76 + index * 0x10;
 }
 
-/* SJIStoGSchar (0x80080ED8) is its own unit:
+/* fn_80080ED8 (0x80080ED8) is its own unit:
  * cardesavedata_candidate_80080ED8_gc125.c. */
 
 /* The grid functions, last to first: built with deferred inlining (see
  * cardesavedata_grid_80082650.c), MWCC emits them in reverse source order,
- * so fn_80082650 lands first at 0x80082650, and cardeSaveRemoveCard/cardeSaveSetCard
- * inline cardeSaveLevelHasCard/cardeSaveGetCard although those come earlier in the file. */
+ * so fn_80082650 lands first at 0x80082650, and fn_80082738/fn_80082CF0
+ * inline fn_80082A88/fn_80082EA4 although those come earlier in the file. */
 void* fn_800836AC(u8* arena, u8* descriptor, u8 create)
 {
     extern void wcscpy(void*, const void*);
@@ -2929,38 +2938,85 @@ s32 fn_80083BF8(void* arena)
     return count;
 }
 #pragma pop
+#endif
 
+#if defined(CARDESAVEDATA_ALL) || defined(CARDESAVEDATA_8007FDBC_ONLY)
+/* The menuCardE_Matrix.c TU's .rodata pool (retail lbl_80268B88): the
+ * item-id tables of the three matrix item groups (a 36-entry row each for
+ * the previous and the current entry), the cell and row-end sprite ids,
+ * then the assert file name. Retail addresses it off one base. */
+static const u16 sCardEMatrixIds0[2][36] = {
+    {
+        0x07A0, 0x07A1, 0x07A2, 0x07A3, 0x102E, 0x102F, 0x1030, 0x1031, 0x1032, 0x1033, 0x1034, 0x1035,
+        0x1036, 0x1037, 0x1038, 0x1039, 0x103A, 0x103B, 0x103C, 0x103D, 0x103E, 0x103F, 0x1040, 0x1041,
+        0x1042, 0x1043, 0x1044, 0x1045, 0x1046, 0x1047, 0x1048, 0x1049, 0x104A, 0x104B, 0x104C, 0x104D,
+    },
+    {
+        0x1127, 0x1128, 0x1129, 0x112A, 0x112B, 0x112C, 0x112D, 0x112E, 0x112F, 0x1130, 0x1131, 0x1132,
+        0x1133, 0x1134, 0x1135, 0x1136, 0x1137, 0x1138, 0x1139, 0x113A, 0x113B, 0x113C, 0x113D, 0x113E,
+        0x113F, 0x1140, 0x1141, 0x1142, 0x1143, 0x1144, 0x1145, 0x1146, 0x1147, 0x1148, 0x1149, 0x114A,
+    },
+};
+
+static const u16 sCardEMatrixIds1[2][36] = {
+    {
+        0x104E, 0x104F, 0x1050, 0x1051, 0x1052, 0x1053, 0x1054, 0x1055, 0x1056, 0x1057, 0x1058, 0x1059,
+        0x105A, 0x105B, 0x105C, 0x105D, 0x105E, 0x105F, 0x1060, 0x1061, 0x1062, 0x1063, 0x1064, 0x1065,
+        0x1066, 0x1067, 0x1068, 0x1069, 0x106A, 0x106B, 0x106C, 0x106D, 0x106E, 0x106F, 0x1070, 0x1071,
+    },
+    {
+        0x114B, 0x114C, 0x114D, 0x114E, 0x114F, 0x1150, 0x1151, 0x1152, 0x1153, 0x1154, 0x1155, 0x1156,
+        0x1157, 0x1158, 0x1159, 0x115A, 0x115B, 0x115C, 0x115D, 0x115E, 0x115F, 0x1160, 0x1161, 0x1162,
+        0x1163, 0x1164, 0x1165, 0x1166, 0x1167, 0x1168, 0x1169, 0x116A, 0x116B, 0x116C, 0x116D, 0x116E,
+    },
+};
+
+static const u16 sCardEMatrixIds2[2][36] = {
+    {
+        0x1072, 0x1073, 0x1074, 0x1075, 0x1076, 0x1077, 0x1078, 0x1079, 0x107A, 0x107B, 0x107C, 0x107D,
+        0x107E, 0x107F, 0x1080, 0x1081, 0x1082, 0x1083, 0x1084, 0x1085, 0x1086, 0x1087, 0x1088, 0x1089,
+        0x108A, 0x108B, 0x108C, 0x108D, 0x108E, 0x108F, 0x1090, 0x1091, 0x1092, 0x1093, 0x1094, 0x1095,
+    },
+    {
+        0x116F, 0x1170, 0x1171, 0x1172, 0x1173, 0x1174, 0x1175, 0x1176, 0x1177, 0x1178, 0x1179, 0x117A,
+        0x117B, 0x117C, 0x117D, 0x117E, 0x117F, 0x1180, 0x1181, 0x1182, 0x1183, 0x1184, 0x1185, 0x1186,
+        0x1187, 0x1188, 0x1189, 0x118A, 0x118B, 0x118C, 0x118D, 0x118E, 0x118F, 0x1190, 0x1191, 0x1192,
+    },
+};
+
+static const s32 sCardEMatrixCellSprites[8] = {
+    0x20A, 0x20C, 0x20E, 0x210, 0x212, 0x214, 0x216, 0x218,
+};
+
+static const s32 sCardEMatrixEndSprites[8] = {
+    0x20B, 0x20D, 0x20F, 0x211, 0x213, 0x215, 0x217, 0x219,
+};
+
+static const char sCardEMatrixFile[] = "menuCardE_Matrix.c";
+
+s32 menuCardE_CompareEntryPtrs(u32 r3, u32 r4);
 
 /* 0x8007FDBC | size: 0x554 */
 /* Both allocations assert on the same source line, so they share a helper. */
-static inline void* menuCardE_Alloc(u32 size, char* pool) {
+static inline void* menuCardE_Alloc(u32 size) {
     void* buf;
     u16 handle;
+    u32 bytes = size;
 
-    handle = GSmemAlloc((size + 0x1F) & ~0x1F, 0x20);
+    size = (size + 0x1F) & ~0x1F;
+    handle = GSmemAlloc(size, 0x20);
     if (handle == 0) {
-        __assert(pool + 0x1F0, 0x1A2, lbl_8047C140);
+        __assert(sCardEMatrixFile, 0x1A2, lbl_8047C140);
     }
     buf = GSmemLock(handle);
-    memset(buf, 0, size);
+    memset(buf, 0, bytes);
     return buf;
 }
 
-static inline void menuCardE_Free(void* buf, char* pool) {
-    u16 handle;
-
-    handle = GSmemGetHandleByPtr(buf);
-    if (handle == 0) {
-        __assert(pool + 0x1F0, 0x1AB, lbl_8047C140);
-    }
-    fn_800E24B0(handle);
-    GSmemFree(handle);
-}
-
-static inline void menuCardE_FillEntries(u8* ctx, s32 count, char* table) {
+static inline void menuCardE_FillEntries(u8* ctx, s32 count) {
     s32 k;
 
-    CARDE_CTX_U32(ctx, 0xB0) = (u32)menuCardE_Alloc(count * 4, table);
+    CARDE_CTX_U32(ctx, 0xB0) = (u32)menuCardE_Alloc(count * 4);
 
     for (k = 0; k < count; k++) {
         ((u32*)CARDE_CTX_U32(ctx, 0xB0))[k] =
@@ -2971,7 +3027,7 @@ static inline void menuCardE_FillEntries(u8* ctx, s32 count, char* table) {
 }
 
 void* fn_8007FDBC(void* window, const void* title) {
-    char* table;
+    u16 handle;
     u16* rowIds0;
     u8* rowItems;
     u8* ctx;
@@ -2985,9 +3041,7 @@ void* fn_8007FDBC(void* window, const void* title) {
     s32 i;
     s32 j;
 
-    table = lbl_80268B88;
-
-    ctx = menuCardE_Alloc(0x4E8, table);
+    ctx = menuCardE_Alloc(0x4E8);
 
     if (title != 0) {
         GScharLenCpy(ctx, title, 0x50);
@@ -2997,13 +3051,18 @@ void* fn_8007FDBC(void* window, const void* title) {
     }
 
     if (CARDE_CTX_U32(ctx, 0xB0) != 0) {
-        menuCardE_Free((void*)CARDE_CTX_U32(ctx, 0xB0), table);
+        handle = GSmemGetHandleByPtr((void*)CARDE_CTX_U32(ctx, 0xB0));
+        if (handle == 0) {
+            __assert(sCardEMatrixFile, 0x1AB, lbl_8047C140);
+        }
+        fn_800E24B0(handle);
+        GSmemFree(handle);
         CARDE_CTX_U32(ctx, 0xB0) = 0;
     }
 
     count = CARDE_CTX_U32(ctx, 0xAC) = fn_80083BF8(0);
     if (count != 0) {
-        menuCardE_FillEntries(ctx, count, table);
+        menuCardE_FillEntries(ctx, count);
     }
 
     CARDE_CTX_U32(ctx, 0xA4) = (s32)CARDE_CTX_U32(ctx, 0xAC) != 0 ? 0 : -1;
@@ -3032,9 +3091,9 @@ void* fn_8007FDBC(void* window, const void* title) {
     menuCardE_SetItem(ctx, 0x16C, window, 0x826);
 
     rowCtx = ctx;
-    ids0 = (u16*)(table + 0);
-    ids1 = (u16*)(table + 0x90);
-    ids2 = (u16*)(table + 0x120);
+    ids0 = (u16*)sCardEMatrixIds0[0];
+    ids1 = (u16*)sCardEMatrixIds1[0];
+    ids2 = (u16*)sCardEMatrixIds2[0];
     for (i = 0; i < 0x24; i++) {
         rowIds0 = ids0;
         rowItems = rowCtx;
@@ -3078,8 +3137,9 @@ void* fn_8007FDBC(void* window, const void* title) {
 
     return ctx;
 }
+#endif
 
-
+#if defined(CARDESAVEDATA_ALL)
 /* 0x80084034 | size: 0x4 */
 void fn_80084034(void) {
 }
@@ -3094,10 +3154,13 @@ void* fn_80083CFC(void* ptr) {
     return ptr != 0 ? ptr : (void*)savedataGetStatus(0, 0xD);
 }
 
+#endif
+
+#if defined(CARDESAVEDATA_ALL) || defined(CARDESAVEDATA_EXACT_80084A8C_ONLY) || \
+    defined(CARDESAVEDATA_80084038_ONLY)
 /* Update the four-controller Card-e connection/status display. */
 typedef struct CardEStatusWork {
-    s32 state[4];
-    s32 previousState[4];
+    s32 state[8]; /* [0..3] current port states, [4..7] last displayed */
     u8 refreshMessages;
     s8 port;
     u8 pad22[2];
@@ -3135,7 +3198,79 @@ static inline CardEStatusWork* CardEGetStatusWork(u8* window)
     return *(CardEStatusWork**)((void* (*)(u8*))windowGetFreeWork)(window);
 }
 
-static inline void CardEShowStatusSprite(void* sprite, u32 bit)
+#endif
+
+#if defined(CARDESAVEDATA_ALL) || defined(CARDESAVEDATA_80084038_ONLY)
+/* The menuGBAC.c TU's .rodata pool (retail lbl_8026F2E8): the per-state
+ * sprite masks, the item messages, then the source file name its asserts use. */
+static const u32 sCardEStatusFlags[28] = {
+    0x0, 0x8, 0x1B, 0x1F, 0x1F, 0xBB, 0x7B, 0x7B, 0x700, 0x700, 0x1700, 0xF00, 0x8, 0x1, 0x0, 0x0, 0x8, 0x1, 0x1, 0x0, 0x8, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1
+};
+
+static const CardEMessageEntry sCardEStatusMessages[46] = {
+    {0x10D0, 0x126, 0x12C},
+    {0x10D1, 0x13C, 0x142},
+    {0x10D2, 0x13C, 0x142},
+    {0x10D3, 0x147, 0x14D},
+    {0x10D4, 0x147, 0x14D},
+    {0x10D5, 0x13C, 0x142},
+    {0x10D6, 0x13C, 0x142},
+    {0x10D7, 0x13C, 0x142},
+    {0x10D8, 0x147, 0x14D},
+    {0x10D9, 0x147, 0x14D},
+    {0x10DA, 0x13C, 0x142},
+    {0x10DB, 0x13C, 0x142},
+    {0x10DC, 0x13C, 0x142},
+    {0x10DD, 0x147, 0x14D},
+    {0x10DE, 0x147, 0x14D},
+    {0x10DF, 0x13C, 0x142},
+    {0x10E0, 0x13C, 0x142},
+    {0x10E1, 0x147, 0x14D},
+    {0x10E2, 0x147, 0x14D},
+    {0x10E3, 0x13C, 0x142},
+    {0x10E4, 0x13C, 0x142},
+    {0x10E5, 0x13C, 0x142},
+    {0x10E6, 0x147, 0x14D},
+    {0x10E7, 0x147, 0x14D},
+    {0x10E8, 0x13C, 0x142},
+    {0x10E9, 0x13C, 0x142},
+    {0x10EA, 0x147, 0x14D},
+    {0x10EB, 0x147, 0x14D},
+    {0x10EC, 0x13C, 0x142},
+    {0x10ED, 0x13C, 0x142},
+    {0x10EE, 0x147, 0x14D},
+    {0x10EF, 0x147, 0x14D},
+    {0x10F0, 0x13C, 0x142},
+    {0x10F1, 0x13C, 0x142},
+    {0x10F2, 0x13C, 0x142},
+    {0x10F3, 0x147, 0x14D},
+    {0x10F4, 0x147, 0x14D},
+    {0x10F5, 0x13C, 0x142},
+    {0x10F6, 0x147, 0x14D},
+    {0x10F7, 0x147, 0x14D},
+    {0x10F8, 0x147, 0x14D},
+    {0x10F9, 0x147, 0x14D},
+    {0x10FA, 0x147, 0x14D},
+    {0x10FB, 0x147, 0x14D},
+    {0x10FC, 0x126, 0x12C},
+    {0x10FD, 0x126, 0x12C},
+};
+
+static const char sCardEStatusFile[] = "menuGBAC.c";
+
+
+/* Show or hide one per-port option sprite. */
+/* RULE-EXCEPTION(user-approved): duplicate helper chosen for register allocation (fn_80084038's option sprites take a u8 enable; the status sprites use CardEShowStatusBit) - see docs/RULE_EXCEPTIONS.md */
+static inline void CardEShowStatusSprite(void* sprite, u8 enable)
+{
+    if (sprite != NULL) {
+        winSpriteSetDisp(sprite, enable);
+    }
+}
+
+/* Show or hide one of the five status sprites from its state-mask bit. */
+/* RULE-EXCEPTION(user-approved): duplicate helper chosen for register allocation (fn_80084038's status sprites take a u32 bit; see CardEShowStatusSprite) - see docs/RULE_EXCEPTIONS.md */
+static inline void CardEShowStatusBit(void* sprite, u32 bit)
 {
     if (sprite != NULL) {
         winSpriteSetDisp(sprite, bit != 0);
@@ -3154,19 +3289,76 @@ static inline void CardESetStatusMessage(u8* window, void* sprite, s32 active)
     }
 }
 
-#pragma push
+/* RULE-EXCEPTION(user-approved): single-use inline helper (fn_80084038's initial item messages) - see docs/RULE_EXCEPTIONS.md */
+static inline void CardEShowInitialMessages(u8* window)
+{
+    u32 n;
+
+    for (n = 0; n < 46; n++) {
+        fn_801081F8(window, sCardEStatusMessages[n].itemId,
+                    sCardEStatusMessages[n].initialMessage);
+    }
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper (fn_80084038's updated item messages) - see docs/RULE_EXCEPTIONS.md */
+static inline void CardEShowUpdatedMessages(u8* window)
+{
+    u32 n;
+
+    for (n = 0; n < 46; n++) {
+        fn_801081F8(window, sCardEStatusMessages[n].itemId,
+                    sCardEStatusMessages[n].updatedMessage);
+    }
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper (fn_80084038's status-work allocation) - see docs/RULE_EXCEPTIONS.md */
+static inline CardEStatusWork* CardEAllocStatus(void)
+{
+    u16 handle = ((u16 (*)(u32, u32))GSmemAlloc)(0xE0, 0x20);
+
+    if (handle == 0) {
+        __assert(sCardEStatusFile, 0xEA, lbl_8047C198);
+    }
+    return ((CardEStatusWork* (*)(u16))GSmemLock)(handle);
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper (fn_80084038's status-work release) - see docs/RULE_EXCEPTIONS.md */
+static inline void CardEFreeStatus(CardEStatusWork* status)
+{
+    u16 handle = ((u16 (*)(void*))GSmemGetHandleByPtr)(status);
+
+    if (handle == 0) {
+        __assert(sCardEStatusFile, 0xF3, lbl_8047C198);
+    }
+    fn_800E24B0(handle);
+    GSmemFree(handle);
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper (fn_80084038's lost-port loop) - see docs/RULE_EXCEPTIONS.md */
+static inline void CardEDropLostPorts(CardEStatusWork* work)
+{
+    s32 i;
+
+    for (i = 0; i <= 3; i++) {
+        if ((work->state[i] == 5 || work->state[i] == 4) &&
+            !((u8 (*)(s32))fn_8008ABA0)(i + 1)) {
+            ((void (*)(u8))menuSetEnablePort)(
+                ((u32 (*)(void))menuGetEnablePort)() & ~lbl_80478950[i]);
+            work->state[i] = 7;
+            work->field28 = 8;
+        }
+    }
+}
+
 void fn_80084038(u8* window)
 {
-    const u8* data = lbl_8026F2E8;
-    CardEStatusWork* work;
-    CardEStatusWork* status;
-    void* sprite;
-    u16 handle;
-    s32 flags;
-    u32 n;
     s32 i;
     u8 changed;
+    CardEStatusWork* status;
+    CardEStatusWork* work;
     u8 selected;
+    s32 flags;
+    void* sprite;
 
     status = CardEGetStatusWork(window);
     work = status;
@@ -3175,16 +3367,12 @@ void fn_80084038(u8* window)
         if ((s8)window[2] != 0) {
             break;
         }
-        handle = ((u16 (*)(u32, u32))GSmemAlloc)(0xE0, 0x20);
-        if (handle == 0) {
-            __assert((const char*)data + 0x184, 0xEA, lbl_8047C198);
-        }
-        status = ((CardEStatusWork* (*)(u16))GSmemLock)(handle);
+        status = CardEAllocStatus();
         memset(status, 0, sizeof(CardEStatusWork));
         work = status;
         *(CardEStatusWork**)(((void* (*)(u8*))windowGetFreeWork)(window)) = status;
         for (i = 0; i < 4; i++) {
-            status->previousState[i] = 0;
+            status->state[i + 4] = 0;
             status->state[i] = 0;
         }
         status->refreshMessages = 1;
@@ -3235,29 +3423,18 @@ void fn_80084038(u8* window)
         FIND_STATUS_SPRITE(optionSprite[7][3], 0x10F4);
 #undef FIND_STATUS_SPRITE
 
-        for (n = 0; n < 46; n++) {
-            fn_801081F8(window, ((const CardEMessageEntry*)(data + 0x70))[n].itemId,
-                        ((const CardEMessageEntry*)(data + 0x70))[n].initialMessage);
-        }
+        CardEShowInitialMessages(window);
         break;
     case 3:
         if ((s8)window[2] != 0) {
             break;
         }
-        for (n = 0; n < 46; n++) {
-            fn_801081F8(window, ((const CardEMessageEntry*)(data + 0x70))[n].itemId,
-                        ((const CardEMessageEntry*)(data + 0x70))[n].updatedMessage);
-        }
+        CardEShowUpdatedMessages(window);
         window[2] = 1;
         status->refreshMessages = 1;
         break;
     case 5:
-        handle = ((u16 (*)(void*))GSmemGetHandleByPtr)(status);
-        if (handle == 0) {
-            __assert((const char*)data + 0x184, 0xF3, lbl_8047C198);
-        }
-        fn_800E24B0(handle);
-        GSmemFree(handle);
+        CardEFreeStatus(status);
         return;
     }
 
@@ -3267,21 +3444,14 @@ void fn_80084038(u8* window)
         changed = 1;
     }
 
-    for (i = 0; i <= 3; i++) {
-        if ((work->state[i] == 5 || work->state[i] == 4) &&
-            !((u8 (*)(s32))fn_8008ABA0)(i + 1)) {
-            ((void (*)(u8))menuSetEnablePort)(
-                ((u32 (*)(void))menuGetEnablePort)() & ~lbl_80478950[i]);
-            work->state[i] = 7;
-            work->field28 = 8;
-        }
-    }
+    CardEDropLostPorts(work);
 
     for (i = 0; i < 4; i++) {
-        if (work->previousState[i] != work->state[i]) {
+        if (work->state[i + 4] != work->state[i]) {
             changed = 1;
         }
-        work->previousState[i] = work->state[i];
+        /* RULE-EXCEPTION(user-approved): codegen-only cast (fn_80084038's state copy reload) - see docs/RULE_EXCEPTIONS.md */
+        work->state[i + 4] = ((CardEStatusWork*)work)->state[i];
     }
     if (!changed) {
         return;
@@ -3294,30 +3464,31 @@ void fn_80084038(u8* window)
         winSpriteSetDisp(work->headerSprite[1], 1);
     }
 
-    flags = ((const u32*)(data + 0))[work->state[0]];
-    CardEShowStatusSprite(work->statusSprite[0], flags & 0x100);
-    CardEShowStatusSprite(work->statusSprite[1], flags & 0x200);
-    CardEShowStatusSprite(work->statusSprite[2], flags & 0x400);
-    CardEShowStatusSprite(work->statusSprite[3], flags & 0x800);
-    CardEShowStatusSprite(work->statusSprite[4], flags & 0x1000);
+    flags = sCardEStatusFlags[work->state[0]];
+    CardEShowStatusBit(work->statusSprite[0], flags & 0x100);
+    CardEShowStatusBit(work->statusSprite[1], flags & 0x200);
+    CardEShowStatusBit(work->statusSprite[2], flags & 0x400);
+    CardEShowStatusBit(work->statusSprite[3], flags & 0x800);
+    CardEShowStatusBit(work->statusSprite[4], flags & 0x1000);
 
     if (work->refreshMessages == 0) {
-        /* i is left at 4 by the loop above. */
+        /* i is left at 4 by the loop above: state[4] is port 0's
+         * last displayed state, just copied from state[0]. */
         selected = work->state[i] == 9;
         CardESetStatusMessage(window, work->statusSprite[0], selected);
         CardESetStatusMessage(window, work->statusSprite[2], selected);
     }
 
     for (i = 0; i <= 3; i++) {
-        flags = ((const u32*)(data + 0))[work->state[i]];
-        CardEShowStatusSprite(work->optionSprite[0][i], flags & 0x01);
-        CardEShowStatusSprite(work->optionSprite[1][i], flags & 0x02);
-        CardEShowStatusSprite(work->optionSprite[2][i], flags & 0x04);
-        CardEShowStatusSprite(work->optionSprite[3][i], flags & 0x08);
-        CardEShowStatusSprite(work->optionSprite[4][i], flags & 0x10);
-        CardEShowStatusSprite(work->optionSprite[5][i], flags & 0x20);
-        CardEShowStatusSprite(work->optionSprite[6][i], flags & 0x40);
-        CardEShowStatusSprite(work->optionSprite[7][i], flags & 0x80);
+        flags = sCardEStatusFlags[work->state[i]];
+        CardEShowStatusSprite(work->optionSprite[0][i], (flags & 0x01) != 0);
+        CardEShowStatusSprite(work->optionSprite[1][i], (flags & 0x02) != 0);
+        CardEShowStatusSprite(work->optionSprite[2][i], (flags & 0x04) != 0);
+        CardEShowStatusSprite(work->optionSprite[3][i], (flags & 0x08) != 0);
+        CardEShowStatusSprite(work->optionSprite[4][i], (flags & 0x10) != 0);
+        CardEShowStatusSprite(work->optionSprite[5][i], (flags & 0x20) != 0);
+        CardEShowStatusSprite(work->optionSprite[6][i], (flags & 0x40) != 0);
+        CardEShowStatusSprite(work->optionSprite[7][i], (flags & 0x80) != 0);
 
         switch (work->state[i]) {
         case 6:
@@ -3348,8 +3519,6 @@ void fn_80084038(u8* window)
         }
     }
 }
-
-#pragma pop
 
 #endif
 
@@ -3387,7 +3556,73 @@ s32 fn_800849B4(s32 mode, s32 command, void* input, void* output)
 #pragma pop
 #endif
 
-#if defined(CARDESAVEDATA_ALL)
+#if defined(CARDESAVEDATA_ALL) || defined(CARDESAVEDATA_EXACT_80084A8C_ONLY)
+
+#pragma push
+/* RULE-EXCEPTION(user-approved): preserve the original shared Card-e pool
+ * while this transfer function is isolated; see docs/RULE_EXCEPTIONS.md. */
+#pragma pool_data on
+#pragma force_active on
+static const u32 cardEStateFlags[12] = {
+    0, 8, 0x1B, 0x1F, 0x1F, 0xBB, 0x7B, 0x7B, 0x700, 0x700, 0x1700, 0xF00,
+};
+static const s32 cardEInitialStates[4][4] = {
+    {8, 1, 0, 0},
+    {8, 1, 1, 0},
+    {8, 1, 1, 1},
+    {1, 1, 1, 1},
+};
+static const CardEMessageEntry cardEMessages[46] = {
+    {0x10D0, 0x126, 0x12C},
+    {0x10D1, 0x13C, 0x142},
+    {0x10D2, 0x13C, 0x142},
+    {0x10D3, 0x147, 0x14D},
+    {0x10D4, 0x147, 0x14D},
+    {0x10D5, 0x13C, 0x142},
+    {0x10D6, 0x13C, 0x142},
+    {0x10D7, 0x13C, 0x142},
+    {0x10D8, 0x147, 0x14D},
+    {0x10D9, 0x147, 0x14D},
+    {0x10DA, 0x13C, 0x142},
+    {0x10DB, 0x13C, 0x142},
+    {0x10DC, 0x13C, 0x142},
+    {0x10DD, 0x147, 0x14D},
+    {0x10DE, 0x147, 0x14D},
+    {0x10DF, 0x13C, 0x142},
+    {0x10E0, 0x13C, 0x142},
+    {0x10E1, 0x147, 0x14D},
+    {0x10E2, 0x147, 0x14D},
+    {0x10E3, 0x13C, 0x142},
+    {0x10E4, 0x13C, 0x142},
+    {0x10E5, 0x13C, 0x142},
+    {0x10E6, 0x147, 0x14D},
+    {0x10E7, 0x147, 0x14D},
+    {0x10E8, 0x13C, 0x142},
+    {0x10E9, 0x13C, 0x142},
+    {0x10EA, 0x147, 0x14D},
+    {0x10EB, 0x147, 0x14D},
+    {0x10EC, 0x13C, 0x142},
+    {0x10ED, 0x13C, 0x142},
+    {0x10EE, 0x147, 0x14D},
+    {0x10EF, 0x147, 0x14D},
+    {0x10F0, 0x13C, 0x142},
+    {0x10F1, 0x13C, 0x142},
+    {0x10F2, 0x13C, 0x142},
+    {0x10F3, 0x147, 0x14D},
+    {0x10F4, 0x147, 0x14D},
+    {0x10F5, 0x13C, 0x142},
+    {0x10F6, 0x147, 0x14D},
+    {0x10F7, 0x147, 0x14D},
+    {0x10F8, 0x147, 0x14D},
+    {0x10F9, 0x147, 0x14D},
+    {0x10FA, 0x147, 0x14D},
+    {0x10FB, 0x147, 0x14D},
+    {0x10FC, 0x126, 0x12C},
+    {0x10FD, 0x126, 0x12C},
+};
+static const char cardEFile[12] = "menuGBAC.c";
+static const char cardETransferFile[16] = "colbtl.bin";
+#pragma force_active reset
 
 /* Typed views of the unprototyped externs used by the transfer flow. */
 #define CardE_threadSwitch() ((void (*)(void))_threadSwitch)()
@@ -3538,9 +3773,11 @@ static inline u8 CardEIsLangArea(u8 lang)
     u32 attest;
 
     if (savedataGetWorkPtr() != 0 && (bios = fn_80128E04()) != NULL &&
-        (attest = gamedataBiosGetGamedataAtttestPtr(bios)) != 0 &&
-        gamedataAttestBiosGetLangareaId((void*)attest) == lang) {
-        return 1;
+        (attest = gamedataBiosGetGamedataAtttestPtr(bios)) != 0) {
+        u8 area = gamedataAttestBiosGetLangareaId((void*)attest);
+        if (area == lang) {
+            return 1;
+        }
     }
     return 0;
 }
@@ -3575,8 +3812,7 @@ static inline u8 CardECheckRegion(u32 region)
 }
 
 /* Open the transfer status window and seed each port's state. */
-static inline CardEStatusWork* CardEOpenStatus(const u8* data, s32 mode,
-                                               s32 command, s32 done)
+static inline CardEStatusWork* CardEOpenStatus(s32 mode, s32 command, s32 done)
 {
     void* window;
     CardEStatusWork* work;
@@ -3587,11 +3823,11 @@ static inline CardEStatusWork* CardEOpenStatus(const u8* data, s32 mode,
     ((void (*)(s32, s32))menuOpen)(0xE4, 0);
     window = ((void* (*)(s32))windowSearchID)(0xE4);
     if (window == NULL) {
-        __assert(data + 0x184, 0x1F4, lbl_8047C1A0);
+        __assert(cardEFile, 0x1F4, lbl_8047C1A0);
     }
     work = CardEGetStatusWork(window);
     work->command = command;
-    initial = (const s32*)(data + 0x30 + mode * 0x10);
+    initial = cardEInitialStates[mode];
     work->mode = mode;
     work->port = lbl_80478954[done];
     for (i = 0; i < 4; i++) {
@@ -3614,24 +3850,23 @@ u8 cardeGbaTransfer(s32 mode, u32 command, void* input, void* output)
     u8 outBuffer[0xD8];
     u8 heroBuffer[0xB1C];
     u32 flags;
-    const u8* data = lbl_8026F2E8;
     void* status;
-    void* hero;
+    s32 k;
     CardEStatusWork* work;
     s32 result;
     s32 n;
     s8 port;
-    s32 k;
+    void* hero;
     u8 ok;
     u8 linked = 0;
     void* out;
 
     CardE_portClose(1);
-    while (!((s32 (*)(s32, const u8*, void*))gbaCommStartTransferFile)(1, data + 0x190,
-                                                          NULL)) {
+    while (!((s32 (*)(s32, const u8*, void*))gbaCommStartTransferFile)(
+        1, (const u8*)cardETransferFile, NULL)) {
         CardE_threadSwitch();
     }
-    work = CardEOpenStatus(data, mode, command, 0);
+    work = CardEOpenStatus(mode, command, 0);
 
     if ((command & 0x10) && (mode == 0 || mode == 2)) {
         status = savedataGetStatus(0, 2);
@@ -3780,7 +4015,7 @@ u8 cardeGbaTransfer(s32 mode, u32 command, void* input, void* output)
                 if ((command & 8) == 0) {
                     return 0;
                 }
-                work = CardEOpenStatus(data, mode, command, k);
+                work = CardEOpenStatus(mode, command, k);
                 work->state[(s8)port] = 6;
                 goto retry;
             }
@@ -3860,6 +4095,10 @@ u8 cardeGbaTransfer(s32 mode, u32 command, void* input, void* output)
     }
 }
 
+#pragma pop
+#endif
+
+#if defined(CARDESAVEDATA_ALL) || defined(CARDESAVEDATA_80087C64_ONLY)
 #define CARDE_GRID_TABLE ((CardEGridTable*)lbl_8026F488)
 #define CARDE_SHOW_MODEL(model_id, anim_id)                                      \
     do {                                                                         \
@@ -3910,9 +4149,8 @@ typedef struct CardGridChoice {
     s32 y;
 } CardGridChoice;
 
-extern const u32 lbl_8047C1C0;
-extern const u32 lbl_8047C1C4;
 extern CardGridKeyInfo* windowGetPortKeyInfo(u32 port);
+extern void GSmodelSetAnimIndex(struct GSmodel* model, u32 index);
 extern void GSmodelSetAnimFrame(void* model, f32 frame);
 extern void GSmodelSetAnimRate(void* model, f32 rate);
 extern void GSmodelStartAnimation(void* model);
@@ -3929,17 +4167,19 @@ static inline void cardGridAnimate(void* model, s16 anim)
     }
 }
 
+/* Animate a grid model if fn_800F92D4 found it. */
+static inline void cardGridPlayModel(void* model, s16 anim)
+{
+    if (model != 0) {
+        cardGridAnimate(model, anim);
+    }
+}
+
 static inline void cardGridSelectCell(CardGridCells cells, s32 x, s32 y)
 {
     if (x >= 0 && x < 3 && y >= 0 && y < 3) {
-        void* model;
-        s32 anim;
-
-        anim = cells.cell[y][x].selectAnim;
-        model = GSresFindById(cells.cell[y][x].modelId);
-        if (model != 0) {
-            cardGridAnimate(model, anim);
-        }
+        s32 anim = cells.cell[y][x].selectAnim;
+        cardGridPlayModel(GSresFindById(cells.cell[y][x].modelId), anim);
     }
 }
 
@@ -3947,10 +4187,7 @@ static inline void cardGridResetCell(CardGridCells cells, s32 x, s32 y)
 {
     if (x >= 0 && x < 3 && y >= 0 && y < 3) {
         s32 anim = cells.cell[y][x].resetAnim;
-        void* model = GSresFindById(cells.cell[y][x].modelId);
-        if (model != 0) {
-            cardGridAnimate(model, anim);
-        }
+        cardGridPlayModel(GSresFindById(cells.cell[y][x].modelId), anim);
     }
 }
 
@@ -3972,76 +4209,78 @@ static inline void cardGridResetAll(const CardGridData* data,
 
 static inline void cardGridShowCount(s32 count)
 {
-    s16 anims[4];
+    s16 anims[4] = {0, 1, 2, 3};
 
-    ((u32*)anims)[0] = lbl_8047C1C0;
-    ((u32*)anims)[1] = lbl_8047C1C4;
     if (count >= 0 && count < 4) {
         s32 anim = anims[count];
-        void* model = GSresFindById(0x107E100B);
-        if (model != 0) {
-            cardGridAnimate(model, anim);
-        }
+        cardGridPlayModel(GSresFindById(0x107E100B), anim);
     }
 }
 
-static inline u16 cardGridTileAt(CardGridTiles tiles, s32 x, s32 y)
+static inline u16 cardGridTileAt(const CardGridTiles* tiles, s32 x, s32 y)
 {
     if (x < 0 || x >= 3 || y < 0 || y >= 3) {
         return 0;
     }
-    return tiles.id[y][x];
+    return tiles->id[y][x];
 }
 
-static inline u16 cardGridTile(CardGridTiles tiles, s32 x, s32 y)
-{
-    return cardGridTileAt(tiles, x, y);
-}
-
-static inline void cardGridCountRow(CardGridTiles tiles, s32* occupied,
-                                    s32 y, const u16* expected, s32* matches)
+static inline void cardGridCountRow(const CardGridTiles* tiles, CardGridTiles* row,
+                                    CardGridTiles* read, s32* occupied, s32 y,
+                                    const u16* expected, s32* matches)
 {
     s32 x;
 
+    /* RULE-EXCEPTION(user-approved): carrier copy (fn_80087C64's tile-grid stack copies, retail slot order) - see docs/RULE_EXCEPTIONS.md */
+    *row = *tiles;
     for (x = 0; x < 3; x++) {
         if (occupied[x] != 0) {
-            u16 tile = cardGridTile(tiles, x, y);
-            if (tile == expected[0]) {
-                (*matches)++;
-            } else if (tile == expected[1]) {
-                (*matches)++;
-            } else if (tile == expected[2]) {
-                (*matches)++;
+            u16 tile;
+            s32 k;
+
+            /* RULE-EXCEPTION(user-approved): carrier copy (fn_80087C64's tile-grid stack copies, retail slot order) - see docs/RULE_EXCEPTIONS.md */
+            *read = *row;
+            tile = cardGridTileAt(read, x, y);
+            for (k = 0; k < 3; k++) {
+                if (tile == expected[k]) {
+                    (*matches)++;
+                    break;
+                }
             }
         }
     }
 }
 
-static inline s32 cardGridCountMatches(CardGridTiles tiles,
-                                       s32 occupied[3][3],
+static inline s32 cardGridCountMatches(CardGridTiles tiles, CardGridTiles* row,
+                                       CardGridTiles* read, s32 occupied[3][3],
                                        const u16* expected)
 {
     s32 y;
     s32 matches = 0;
 
     for (y = 0; y < 3; y++) {
-        cardGridCountRow(tiles, occupied[y], y, expected, &matches);
+        cardGridCountRow(&tiles, row, read, occupied[y], y, expected, &matches);
     }
     return matches;
 }
 
-static inline void cardGridShowCursor(CardGridCursor cursor, s32 x, s32 y)
+/* Animate the cursor model once and wait for the animation to finish. */
+static inline void cardGridPlayCursor(void* model, s16 anim)
+{
+    if (model != 0) {
+        cardGridAnimate(model, anim);
+        GSmodelSetAnimType(model, 0);
+        while (GSmodelIsAnimating(model) != 0) {
+            _threadSwitch();
+        }
+    }
+}
+
+static inline void cardGridShowCursor(const CardGridCursor* cursor, s32 x, s32 y)
 {
     if (x >= 0 && x < 3 && y >= 0 && y < 3) {
-        s32 anim = cursor.anim[y][x];
-        void* model = GSresFindById(0x107E1009);
-        if (model != 0) {
-            cardGridAnimate(model, anim);
-            GSmodelSetAnimType(model, 0);
-            while (GSmodelIsAnimating(model) != 0) {
-                _threadSwitch();
-            }
-        }
+        s32 anim = cursor->anim[y][x];
+        cardGridPlayCursor(GSresFindById(0x107E1009), anim);
     }
 }
 
@@ -4059,12 +4298,52 @@ static inline BOOL cardGridSelect(const CardGridData* data, s32 occupied[3][3],
     return TRUE;
 }
 
+static inline BOOL cardGridMove(const CardGridData* data, CardGridCursor* cursor,
+                                u16 repeat, s32* px, s32* py)
+{
+    s32 x = *px;
+    s32 y = *py;
+    s32 nextX = x;
+    s32 nextY = y;
+    BOOL moved = FALSE;
+
+    if ((repeat & 1) && y > 0) {
+        nextY = y - 1;
+        moved = TRUE;
+    }
+    if ((repeat & 2) && nextY < 2) {
+        nextY++;
+        moved = TRUE;
+    }
+    if ((repeat & 4) && x > 0) {
+        nextX--;
+        moved = TRUE;
+    }
+    if ((repeat & 8) && nextX < 2) {
+        nextX++;
+        moved = TRUE;
+    }
+
+    if (moved) {
+        /* RULE-EXCEPTION(user-approved): carrier copy (fn_80087C64's tile-grid stack copies, retail slot order) - see docs/RULE_EXCEPTIONS.md */
+        *cursor = data->cursor;
+        cardGridShowCursor(cursor, nextX, nextY);
+        *px = nextX;
+        *py = nextY;
+    }
+    return moved;
+}
+
 /* Run the card-e three-tile grid prompt.  A zero return means that three
  * cells were accepted; one means the player backed out before completing it. */
 u32 fn_80087C64(const u16* expected)
 {
     s32 occupied[3][3];
     CardGridChoice choices[3];
+    /* RULE-EXCEPTION(user-approved): carrier copy (fn_80087C64's tile-grid stack copies, retail slot order) - see docs/RULE_EXCEPTIONS.md */
+    CardGridTiles readTiles;
+    CardGridCursor cursor;
+    CardGridTiles rowTiles;
     const CardGridData* data = (const CardGridData*)lbl_8026F488;
     s32 x;
     s32 y;
@@ -4094,7 +4373,7 @@ u32 fn_80087C64(const u16* expected)
                 cardGridShowCount(count);
 
                 if (count >= 3) {
-                    if (cardGridCountMatches(data->tiles, occupied, expected) < 3) {
+                    if (cardGridCountMatches(data->tiles, &rowTiles, &readTiles, occupied, expected) < 3) {
                         soundStartSE(0x26);
                         while (GSsndGetStatus(0x26) == 2) {
                             _threadSwitch();
@@ -4131,33 +4410,7 @@ u32 fn_80087C64(const u16* expected)
         }
 
         if (!handled) {
-            u16 repeat = key->repeat;
-            s32 nextX = x;
-            s32 nextY = y;
-            BOOL moved = FALSE;
-
-            if ((repeat & 1) && y > 0) {
-                nextY = y - 1;
-                moved = TRUE;
-            }
-            if ((repeat & 2) && nextY < 2) {
-                nextY++;
-                moved = TRUE;
-            }
-            if ((repeat & 4) && x > 0) {
-                nextX = x - 1;
-                moved = TRUE;
-            }
-            if ((repeat & 8) && nextX < 2) {
-                nextX++;
-                moved = TRUE;
-            }
-
-            if (moved) {
-                cardGridShowCursor(data->cursor, nextX, nextY);
-                x = nextX;
-                y = nextY;
-            }
+            cardGridMove(data, &cursor, key->repeat, &x, &y);
         }
         _threadSwitch();
     }

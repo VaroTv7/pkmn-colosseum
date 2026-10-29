@@ -625,7 +625,7 @@ extern void GSmsgFontOpen();
 extern void GSmsgOpen();
 extern u8 fn_800FF554(void);
 extern void cms_UnregisterScript();
-extern void GSmsgFontClose();
+extern void fn_800FC2A8();
 extern void GSmsgClose();
 extern u8 lbl_8035BA98[];
 extern u8 lbl_8035BA7C[];

@@ -196,8 +196,8 @@ extern f64 sin(f64);
 static inline u8 fieldSegmentBlocked(const Vec3* from, const Vec3* to,
                                      const Vec3* centerPtr, f32 radius)
 {
-    Vec3 midpoint;
     Vec3 center = *centerPtr;
+    Vec3 midpoint;
 
     if (GSvecDistance(from, to) < lbl_8047E104) {
         return fn_8018D680(from, to, &center, radius);
@@ -213,23 +213,23 @@ static inline u8 fieldSegmentBlocked(const Vec3* from, const Vec3* to,
 static inline u8 fieldPlaneCrossed(const Vec3* fromPtr, const Vec3* toPtr,
                                    const Vec3* lineStart, const Vec3* lineEnd)
 {
-    Vec3 from = *fromPtr;
-    Vec3 to = *toPtr;
-    Vec3 flatTo = to;
-    Vec3 fullDirection;
-    Vec3 flatDirection;
+    Vec3 points[3];
+    Vec3 directions[2];
     Vec3 planeHit;
     Vec3 planeNormal;
     f32 planeT;
 
-    flatTo.y = lbl_8047E100;
-    GSvecSub(&fullDirection, &from, &to);
-    GSvecNormalize(&fullDirection, &fullDirection);
-    GSvecSub(&flatDirection, &from, &flatTo);
-    GSvecNormalize(&flatDirection, &flatDirection);
-    fn_800DFFCC(&planeNormal, &fullDirection, &flatDirection);
-    if (GScolsys2UtilGetCpPlaneLine(&planeHit, &planeT, &planeNormal, &from,
-                                    lineStart, lineEnd) == 0) {
+    points[0] = *fromPtr;
+    points[1] = *toPtr;
+    points[2] = points[1];
+    points[2].y = lbl_8047E100;
+    GSvecSub(&directions[0], &points[0], &points[1]);
+    GSvecNormalize(&directions[0], &directions[0]);
+    GSvecSub(&directions[1], &points[0], &points[2]);
+    GSvecNormalize(&directions[1], &directions[1]);
+    fn_800DFFCC(&planeNormal, &directions[0], &directions[1]);
+    if (GScolsys2UtilGetCpPlaneLine(&planeHit, &planeT, &planeNormal,
+                                    &points[0], lineStart, lineEnd) == 0) {
         return 0;
     }
     if (planeT < lbl_8047E114 || planeT > lbl_8047E100) {
@@ -241,23 +241,25 @@ static inline u8 fieldPlaneCrossed(const Vec3* fromPtr, const Vec3* toPtr,
 static inline void fieldBuildRing(DistanceSortEntry* entries,
                                   const Vec3* center, const Vec3* origin)
 {
+    DistanceSortEntry* entry;
     Vec3 offset;
     f32 angle;
     s32 i;
 
-    for (i = 0; i < 8; i++) {
+    entry = entries;
+    for (i = 0; i < 8; i++, entry++) {
         angle = (f32)i * lbl_8047E10C;
-        entries[i].index = i;
+        entry->index = i;
         offset.x = lbl_8047E110 * (f32)cos(angle);
         offset.y = lbl_8047E114;
         offset.z = lbl_8047E110 * (f32)sin(angle);
-        GSvecAdd(&entries[i].pos, &offset, center);
-        if (colsysWallSweep(center, &entries[i].pos, 0, lbl_8047E118) != 0) {
-            entries[i].blocked = 1;
+        GSvecAdd(&entry->pos, &offset, center);
+        if (colsysWallSweep(center, &entry->pos, 0, lbl_8047E118) != 0) {
+            entry->blocked = 1;
         } else {
-            entries[i].blocked = 0;
+            entry->blocked = 0;
         }
-        entries[i].distance = GSvecDistance(&entries[i].pos, origin);
+        entry->distance = GSvecDistance(&entry->pos, origin);
     }
     qsort(entries, 8, sizeof(DistanceSortEntry), _fnDistanceSortFunc__FPCvPCv);
 }
@@ -316,12 +318,13 @@ s32 std232_characterApproachPlayer(s32 side, s32 slot)
     Vec3 origin = lbl_802758A0;
     Vec3 partner, requested;
     s32 floorId2, resId2, floorId, resId;
-    DistanceSortEntry* entry;
     void* person;
     void* info;
     f32 radius;
+    DistanceSortEntry* entry;
     s32 i, k, wanted;
     u8 done;
+    DistanceSortEntry* alt;
 
     if (heroMoveGetResID(&floorId, &resId, 1) == 0) {
         return 0;
@@ -363,32 +366,33 @@ s32 std232_characterApproachPlayer(s32 side, s32 slot)
             continue;
         }
         if (fieldPlaneCrossed(&partner, &requested, &origin,
-                              &entries[i].pos) == 0) {
+                              &entries[i].pos)) {
             continue;
         }
 
         std076_characterEventFlagsClear(floorId, resId);
-        peopleWalkTo(floorId, resId, 1, &entries[i].pos);
+        entry = &entries[i];
+        peopleWalkTo(floorId, resId, 1, &entry->pos);
         done = fieldWaitPartnerMove();
-        if (done == 0 && (entries[i].index & 1) != 0) {
+        if (done == 0 && (entry->index & 1) != 0) {
             wanted = -1;
-            if (entries[i].index == 3 || entries[i].index == 5) {
+            if (entry->index == 3 || entry->index == 5) {
                 wanted = 4;
             }
-            if (entries[i].index == 1 || entries[i].index == 7) {
+            if (entry->index == 1 || entry->index == 7) {
                 wanted = 0;
             }
-            entry = entries;
+            alt = entries;
             for (k = 0; k < 8; k++) {
-                if (entry->index == wanted) {
+                if (alt->index == wanted) {
                     break;
                 }
-                entry++;
+                alt++;
             }
-            if (entry->blocked == 0 &&
-                fieldSegmentBlocked(&partner, &requested, &entry->pos,
+            if (alt->blocked == 0 &&
+                fieldSegmentBlocked(&partner, &requested, &alt->pos,
                                     lbl_8047E118) == 0) {
-                peopleWalkTo(floorId, resId, 1, &entry->pos);
+                peopleWalkTo(floorId, resId, 1, &alt->pos);
                 done = fieldWaitPartnerMove();
             }
         }
@@ -412,7 +416,7 @@ s32 std232_characterApproachPlayer(s32 side, s32 slot)
             continue;
         }
         if (fieldPlaneCrossed(&partner, &requested, &origin,
-                              &entries[i].pos) == 0) {
+                              &entries[i].pos)) {
             continue;
         }
         if (fieldSegmentBlocked(&partner, &requested, &entries[i].pos,

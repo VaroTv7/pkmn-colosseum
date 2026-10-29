@@ -36,14 +36,19 @@ extern f32 lbl_8047E678;
 extern f32 lbl_8047E67C;
 
 /* SDA1 globals used by asm wrappers */
+#if !defined(POKEMON_RELIVE_MAIN_ONLY)
+/* reliveMain's unit declares this and lbl_804782BC as their real struct types. */
 extern u32 lbl_8047B668;
+#endif
 extern u32 lbl_8047B66C;
 extern u32 lbl_8047B670;
 
 /* Data labels used by asm wrappers */
 extern u8  lbl_8039A6B8[];
 extern u8  lbl_8039A6A8[];
+#if !defined(POKEMON_RELIVE_MAIN_ONLY)
 extern int lbl_804782BC[];
+#endif
 extern u8  lbl_804782E0[];
 extern u8  lbl_804783E0[];
 
@@ -79,7 +84,9 @@ void fightTrainerAiWazaValueHimitunotikara(void* ctx, u32 param1, u32 param2, u3
 s32 fightTrainerAiSelectIrekaeDasuFightPokemon(void* ctx, u32 param1, u32 param2, u32 param3);
 u32 fightTrainerAiWazaHit045(void* trainerCtx, u32 trainerSlot, u32 resultSlot, u32 resultType);
 u32 fightMenuFightTrainerGcHeroOpenMenu(void* ctx, u32 param1, u32 param2);
+extern void reliveCeremonyAll(u32 pokemonIndex);
 
+#if defined(POKEMON_RELIVE_PREFIX_ONLY)
 /* Address: 0x8025DCBC | Size: 0x58 | Ghidra import */
 void reliveRestoreSound(int *param)
 {
@@ -93,9 +100,9 @@ void reliveRestoreSound(int *param)
 }
 
 /* Address: 0x8025DD14 | Size: 0x98 | Ghidra import */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma kept for byte match - see docs/RULE_EXCEPTIONS.md */
 #pragma push
 #pragma use_lmw_stmw off
-#pragma optimize_for_size off
 void reliveSaveSound(int *r3)
 {
     extern int soundGetCurrentSubSound();
@@ -205,8 +212,14 @@ void effectPlayWaza(u32 *r3,u16 *r4,int r5,int r6,int r7,
   return;
 }
 
-/* Address: 0x8025DF38 | Size: 0x178 | Ghidra import */
-u32 effectCreate(u32* r3, u32 r4, u16* r5, int r6)
+#endif
+
+#if defined(POKEMON_RELIVE_PRE_SEQUENCE_ONLY)
+/* Address: 0x8025DF38 | Size: 0x178
+ * The body lives in a single-use inline helper whose parameters and locals
+ * are numbered after the wrapper's, which gives retail's register order. */
+/* RULE-EXCEPTION(user-approved): single-use inline helper carrying the whole body for register numbering - see docs/RULE_EXCEPTIONS.md */
+static inline u32 impl_8025DF38(u32* r3, u32 r4, u16* r5, int r6)
 {
     extern u32 _fadeEffectGetRandom__FUl(u32);
     extern void GSmodelSetBoundCheck(void* model, s32 on);
@@ -223,17 +236,18 @@ u32 effectCreate(u32* r3, u32 r4, u16* r5, int r6)
     extern u8 fn_801DDD28(u32 handle, u16 a, u16 b, s32 c);
     extern u32 fn_801DE190(u32 id, u32 random, s32 flags);
     extern void* wazaSequenceOwnerGetModel(u32 handle);
-    s32 n;
-    void* floor;
-    u32 i;
-    void* model;
-    int k;
+    u16* pair;
     u32 light;
+    int k;
+    u32 id;
+    u32 i;
+    void* floor;
+    u32 count;
+    s32 n;
+    void* model;
+    u32 handle;
     u32 surface;
     u32 surfaces[13];
-    u32 count;
-    u32 handle;
-    u16* pair;
 
     handle = fn_801DE190(r4, _fadeEffectGetRandom__FUl(0xFFFFFFFF), 0);
     *r3 = handle;
@@ -256,7 +270,8 @@ u32 effectCreate(u32* r3, u32 r4, u16* r5, int r6)
             n = 0;
             if (count == 1) {
                 for (i = 0; i < count; i++) {
-                    surface = floorGetResource(std092_getCurrentRoomID(), floorDataBiosGetShadowReciveID(floor, i));
+                    id = floorDataBiosGetShadowReciveID(floor, i);
+                    surface = floorGetResource(std092_getCurrentRoomID(), id);
                     if (surface != 0) {
                         surfaces[n] = surface;
                         n++;
@@ -271,6 +286,27 @@ u32 effectCreate(u32* r3, u32 r4, u16* r5, int r6)
     }
     return 1;
 }
+
+u32 effectCreate(u32* r3, u32 r4, u16* r5, int r6)
+{
+    return impl_8025DF38(r3, r4, r5, r6);
+}
+#endif
+
+#if defined(POKEMON_RELIVE_SEQUENCE_EXACT_ONLY)
+struct GSSceneVec3;
+struct GSRenderCamera;
+extern void* fn_801DE190(u16 index, void* model, u8 variant);
+extern BOOL fn_801DDD28(void* owner, u16 group, u16 index, u8 variant);
+extern void GSscene_GetCameraDirectionVector(struct GSSceneVec3* direction);
+extern void GSscene_GetCameraRotationVector(struct GSSceneVec3* rotation);
+extern void GSscene_GetCameraPositionVector(struct GSSceneVec3* position);
+extern void GSscene_GetCameraViewVector(struct GSSceneVec3* view);
+extern struct GSRenderCamera* GScameraGetActiveCamera(void);
+extern void GScameraGetPerspective(struct GSRenderCamera* camera, f32* fov, f32* aspect,
+                                   f32* near, f32* far);
+extern s32 menuPokemonStatusOpenWazaForget(u32 arg0, u16 arg1);
+void effectPlayWaza(u32 *r3,u16 *r4,int r5,int r6,int r7,int r8);
 
 /* Address: 0x8025E0B0 | Size: 0x10C | Ghidra import */
 u32 loadSequence(int *r3,u32 r4,u16 *r5,int r6)
@@ -298,7 +334,7 @@ u32 loadSequence(int *r3,u32 r4,u16 *r5,int r6)
       uVar1 = pokemonBiosGetRnd(r4);
       uVar2 = (int)pokemonGetStatus(r4,0,0xc1,0);
       uVar2 = (-uVar2 | uVar2) >> 0x1f;
-      iResult = fn_801DE190(sVar6,uVar1,uVar2);
+      iResult = (u32)fn_801DE190(sVar6,(void*)uVar1,uVar2);
       *r3 = iResult;
       if (iResult == 0) {
         uVar1 = 0;
@@ -306,7 +342,7 @@ u32 loadSequence(int *r3,u32 r4,u16 *r5,int r6)
       else {
         u16 *p = r5;
         for (iVar3 = 0; iVar3 < r6; iVar3 = iVar3 + 1) {
-          cVar5 = fn_801DDD28(*r3,*p,p[1],0);
+          cVar5 = fn_801DDD28((void*)*r3,*p,p[1],0);
           if (cVar5 == '\0') {
             return 0;
           }
@@ -335,7 +371,6 @@ static inline u32 *validptr_8025E1BC(u32 *p) {
 }
 
 #pragma push
-#pragma optimize_for_size off
 void std244_spawnEffectAtPosition(float f1, float f2, float f3, float f4, float f5, float f6) {
   extern u32 lbl_8047B658;
   extern u16 lbl_80478DA0;
@@ -385,6 +420,9 @@ void std244_spawnEffectAtPosition(float f1, float f2, float f3, float f4, float 
 }
 #pragma pop
 
+#endif
+
+#if defined(POKEMON_RELIVE_PARTICLE_ONLY)
 /* Address: 0x8025E534 | Size: 0xC0 | Ghidra import */
 void _preReliveDisplayHokoraParticleThreadFunc__Fv(void)
 {
@@ -445,7 +483,10 @@ void preReliveDisplayHokoraParticle(void)
   }
 }
 
-/* Address: 0x8025E640 | Size: 0x37C | Ghidra import */
+#endif
+
+#if defined(POKEMON_RELIVE_EXP_ONLY)
+/* Address: 0x8025E640 | Size: 0x37C */
 typedef struct ReliveLevelUpStatus {
     u8 mode;
     u8 pad;
@@ -457,22 +498,27 @@ typedef struct ReliveLevelUpStatus {
     s16 spDefense;
 } ReliveLevelUpStatus;
 
-int _cbWazaForget__FP7PokemonUsl(u32 r3, u32 r4);
+int _cbWazaForget__FP7PokemonUsl(u8* pokemon, u32 addExp);
 
-u32 _expRecover__FP7PokemonUl(u32 r3,u32 r4)
+static inline s16 expRecoverGetStat(u8* p, u32 id)
+{
+    return (s16)pokemonGetStatus(p, 0, id, 0);
+}
+
+u32 _expRecover__FP7PokemonUl(u8* pokemon, u32 addExp)
 {
     extern void winMsgCloseLevelUpStatus(s32);
     extern void winMsgOpenLevelUpStatus(ReliveLevelUpStatus*, s32);
     extern void winMsgOpenField(s32, s32, s32);
-    extern void pokemonBiosSetExp(u32, u32);
-    extern u32 pokemonBiosGetLevel(u32);
-    extern void pokemonGetFriendFormPokemonFriendFilterId(u32, u32, s32);
-    extern u32 pokemonGetLevelToExp(u32, u8);
-    extern u32 pokemonGetSoubiItemSoubiDataId(u32);
-    extern u32 pokemonGetOboeWazaDataId(u32, u32, u8*);
-    extern s8 pokemonSearchWazaDataId(u32, u32);
-    extern void pokemonWazaCreate(u32, u8, u32);
-    extern void pokemonResetBasisStatus(u32);
+    extern void pokemonBiosSetExp(u8*, u32);
+    extern u32 pokemonBiosGetLevel(u8*);
+    extern void pokemonGetFriendFormPokemonFriendFilterId(u8*, u32, s32);
+    extern u32 pokemonGetLevelToExp(u8*, u8);
+    extern u32 pokemonGetSoubiItemSoubiDataId(u8*);
+    extern u32 pokemonGetOboeWazaDataId(u8*, u32, u8*);
+    extern s8 pokemonSearchWazaDataId(u8*, u32);
+    extern void pokemonWazaCreate(u8*, u8, u32);
+    extern void pokemonResetBasisStatus(u8*);
     extern void msgctrlSetValue(s32, u32);
     extern void std130_soundUnk_801653cc(s32, s32, s32);
     u8 slot;
@@ -484,7 +530,7 @@ u32 _expRecover__FP7PokemonUl(u32 r3,u32 r4)
     u8 level;
     s16 spAttack;
     s16 spDefense;
-    s16 speed;
+    u32 rest;
     ReliveLevelUpStatus status;
     u32 newLevel;
     u32 levelUp;
@@ -492,74 +538,79 @@ u32 _expRecover__FP7PokemonUl(u32 r3,u32 r4)
     u8 wazaIndex;
     u32 waza;
     u32 item;
+    s16 speed;
 
+    /* RULE-EXCEPTION(user-approved): scalar carrier, working copy of addExp chosen for register allocation - see docs/RULE_EXCEPTIONS.md */
+    rest = addExp;
     levelUp = 0;
     wazaIndex = 0;
-    pokemonGetStatus(r3, 0, 0x7A, 0);
+    pokemonGetStatus(pokemon, 0, 0x7A, 0);
     for (;;) {
-        if (r4 == 0) {
-            pokemonSetStatus(r3, 0, 0xC6, 0, r4);
+        if (rest == 0) {
+            pokemonSetStatus(pokemon, 0, 0xC6, 0, rest);
             break;
         }
-        level = (u8)pokemonGetStatus(r3, 0, 0x7A, 0);
+        level = (u8)pokemonGetStatus(pokemon, 0, 0x7A, 0);
         if (level >= 100) {
             break;
         }
-        exp = (u32)pokemonGetStatus(r3, 0, 0x79, 0);
-        next = pokemonGetLevelToExp(r3, level + 1);
-        hp = (s16)pokemonGetStatus(r3, 0, 0x87, 0);
-        attack = (s16)pokemonGetStatus(r3, 0, 0x88, 0);
-        defense = (s16)pokemonGetStatus(r3, 0, 0x89, 0);
-        spAttack = (s16)pokemonGetStatus(r3, 0, 0x8A, 0);
-        spDefense = (s16)pokemonGetStatus(r3, 0, 0x8B, 0);
-        speed = (s16)pokemonGetStatus(r3, 0, 0x8C, 0);
-        exp += r4;
+        exp = (u32)pokemonGetStatus(pokemon, 0, 0x79, 0);
+        next = pokemonGetLevelToExp(pokemon, level + 1);
+        hp = expRecoverGetStat(pokemon, 0x87);
+        attack = expRecoverGetStat(pokemon, 0x88);
+        defense = expRecoverGetStat(pokemon, 0x89);
+        spAttack = expRecoverGetStat(pokemon, 0x8A);
+        spDefense = expRecoverGetStat(pokemon, 0x8B);
+        speed = expRecoverGetStat(pokemon, 0x8C);
+        exp += rest;
         if (exp >= next) {
-        r4 = exp - next;
-        levelUp = 1;
-        pokemonBiosSetExp(r3, next);
-        pokemonResetBasisStatus(r3);
-        item = pokemonGetSoubiItemSoubiDataId(r3);
-        pokemonGetFriendFormPokemonFriendFilterId(r3, item, 0);
-        newLevel = pokemonBiosGetLevel(r3);
-        std130_soundUnk_801653cc(0x4CA, 0, 0xFF);
-        msgctrlSetValue(0x2F, (u8)newLevel);
-        winMsgOpenField(0x44CE, 1, 0);
-        status.hp = (s16)pokemonGetStatus(r3, 0, 0x87, 0);
-        status.attack = (s16)pokemonGetStatus(r3, 0, 0x88, 0);
-        status.defense = (s16)pokemonGetStatus(r3, 0, 0x89, 0);
-        status.spAttack = (s16)pokemonGetStatus(r3, 0, 0x8A, 0);
-        status.spDefense = (s16)pokemonGetStatus(r3, 0, 0x8B, 0);
-        status.speed = (s16)pokemonGetStatus(r3, 0, 0x8C, 0);
-        gain.hp = status.hp - hp;
-        gain.attack = status.attack - attack;
-        gain.defense = status.defense - defense;
-        gain.spAttack = status.spAttack - spAttack;
-        gain.spDefense = status.spDefense - spDefense;
-        gain.speed = status.speed - speed;
-        gain.mode = 1;
-        winMsgOpenLevelUpStatus(&gain, 1);
-        status.mode = 0;
-        winMsgOpenLevelUpStatus(&status, 1);
-        winMsgCloseLevelUpStatus(1);
-        wazaIndex = 0;
-        while ((u16)(waza = pokemonGetOboeWazaDataId(r3, newLevel, &wazaIndex)) != 0) {
-            if (pokemonSearchWazaDataId(r3, waza) == -1 &&
-                (s32)evolutionWazaLearn(r3, waza, &slot, 0, _cbWazaForget__FP7PokemonUsl, 0) != 0) {
-                pokemonWazaCreate(r3, slot, waza);
+            rest = exp - next;
+            levelUp = 1;
+            pokemonBiosSetExp(pokemon, next);
+            pokemonResetBasisStatus(pokemon);
+            item = pokemonGetSoubiItemSoubiDataId(pokemon);
+            pokemonGetFriendFormPokemonFriendFilterId(pokemon, item, 0);
+            newLevel = pokemonBiosGetLevel(pokemon);
+            std130_soundUnk_801653cc(0x4CA, 0, 0xFF);
+            msgctrlSetValue(0x2F, (u8)newLevel);
+            winMsgOpenField(0x44CE, 1, 0);
+            status.hp = expRecoverGetStat(pokemon, 0x87);
+            status.attack = expRecoverGetStat(pokemon, 0x88);
+            status.defense = expRecoverGetStat(pokemon, 0x89);
+            status.spAttack = expRecoverGetStat(pokemon, 0x8A);
+            status.spDefense = expRecoverGetStat(pokemon, 0x8B);
+            status.speed = expRecoverGetStat(pokemon, 0x8C);
+            gain.hp = status.hp - hp;
+            gain.attack = status.attack - attack;
+            gain.defense = status.defense - defense;
+            gain.spAttack = status.spAttack - spAttack;
+            gain.spDefense = status.spDefense - spDefense;
+            gain.speed = status.speed - speed;
+            gain.mode = 1;
+            winMsgOpenLevelUpStatus(&gain, 1);
+            status.mode = 0;
+            winMsgOpenLevelUpStatus(&status, 1);
+            winMsgCloseLevelUpStatus(1);
+            wazaIndex = 0;
+            while ((u16)(waza = pokemonGetOboeWazaDataId(pokemon, newLevel, &wazaIndex)) != 0) {
+                if (pokemonSearchWazaDataId(pokemon, waza) == -1 &&
+                    (s32)evolutionWazaLearn(pokemon, waza, &slot, 0, _cbWazaForget__FP7PokemonUsl, 0) != 0) {
+                    pokemonWazaCreate(pokemon, slot, waza);
+                }
+                wazaIndex++;
             }
-            wazaIndex++;
-        }
         } else {
-            r4 = 0;
-            pokemonSetStatus(r3, 0, 0x79, 0, exp);
+            rest = 0;
+            pokemonSetStatus(pokemon, 0, 0x79, 0, exp);
         }
     }
     return levelUp;
 }
 
-#pragma push
-#pragma optimize_for_size off
+#endif
+
+#if defined(POKEMON_RELIVE_PRE_MAIN_ONLY)
+void reliveSaveSound(int *r3);
 /* Address: 0x8025EF58 | Size: 0x354 | Ghidra import */
 
 typedef struct ReliveSelection {
@@ -705,38 +756,13 @@ void preReliveMain(void)
         ((u32*)&lbl_8047B668)[1] = 0xFFFFFFFF;
     }
 }
-#pragma pop
-
-#if 0
-asm void preReliveInit(void) {
-#include "src/game/colosseum_battle_fn_8025F2AC.inc"
-}
-#else
-void preReliveInit(void) {
-  u32 *p = &lbl_8047B668;
-  p[0] = 0xFFFFFFFF;
-  p[1] = 0xFFFFFFFF;
-}
 #endif
 
-/* Address: 0x8025F2C0 | Size: 0x3C | Ghidra import */
-void preReliveSetParameter(int r3,u32 r4)
-
-{
-    extern u32 lbl_8047B668;
-    u32 *p = &lbl_8047B668;
-    p[0] = r3;
-    p[1] = r4;
-  if ((r3 == 0) || (r3 == 1)) {
-    preReliveMain();
-  }
-  return;
-}
+#if defined(POKEMON_RELIVE_SEQUENCE_EXACT_ONLY)
 #pragma push
-#pragma optimize_for_size off
 /* Address: 0x8025E3B0 | Size: 0x184 | Ghidra import */
 
-int _cbWazaForget__FP7PokemonUsl(u32 r3,u32 r4)
+int _cbWazaForget__FP7PokemonUsl(u32 r3,u16 r4)
 
 {
     extern u8 lbl_80478288[];
@@ -760,12 +786,12 @@ int _cbWazaForget__FP7PokemonUsl(u32 r3,u32 r4)
   
   fadeSet((double)lbl_8047E680,3);
   fadeCheck(1);
-  GSscene_GetCameraDirectionVector(direction);
-  GSscene_GetCameraRotationVector(rotation);
-  GSscene_GetCameraPositionVector(position);
-  GSscene_GetCameraViewVector(view);
-  uVar1 = GScameraGetActiveCamera();
-  GScameraGetPerspective(uVar1,&local_54,auStack_50,auStack_4c,auStack_48);
+  GSscene_GetCameraDirectionVector((struct GSSceneVec3*)direction);
+  GSscene_GetCameraRotationVector((struct GSSceneVec3*)rotation);
+  GSscene_GetCameraPositionVector((struct GSSceneVec3*)position);
+  GSscene_GetCameraViewVector((struct GSSceneVec3*)view);
+  uVar1 = (u32)GScameraGetActiveCamera();
+  GScameraGetPerspective((struct GSRenderCamera*)uVar1,&local_54,(f32*)auStack_50,(f32*)auStack_4c,(f32*)auStack_48);
   snapshot = (u32 *)lbl_80478288;
   snapshot[0] = direction[0];
   snapshot[1] = direction[1];
@@ -795,8 +821,21 @@ int _cbWazaForget__FP7PokemonUsl(u32 r3,u32 r4)
   return (int)(signed char)iVar2;
 }
 #pragma pop
+#endif
+
+#if defined(POKEMON_RELIVE_CEREMONY_ONLY)
+extern u32 heroGetStatus(u8* ptr, u32 selector, u32 index);
+/* RULE-EXCEPTION(user-approved): pokemonBiosGetDarkpokemonDataId is defined u16 in pokemon_data.c, but retail keeps its result in the u32 local unextended; the u16 prototype adds clrlwi - see docs/RULE_EXCEPTIONS.md */
+extern u32 pokemonBiosGetDarkpokemonDataId(u8* ptr);
+extern u32 std130_soundUnk_801653cc(u32 id, void* buffer, u32 size);
+extern void msgctrlSetValue(u32 id, u32 value);
+extern s32 winMsgOpenField(u32 message, u32 wait, u8 pause);
+extern void winMsgCloseField(u32 wait);
+u32 _expRecover__FP7PokemonUl(u8* pokemon, u32 addExp);
+u32 loadSequence(int *r3,u32 r4,u16 *r5,int r6);
+void effectPlayWaza(u32 *r3,u16 *r4,int r5,int r6,int r7,int r8);
+extern u32 exribbonSetNarionalRibbon(u32 r3);
 #pragma push
-#pragma optimize_for_size off
 /* Address: 0x8025E9BC | Size: 0x390 | Ghidra import */
 void reliveCeremonyAll(u32 r3)
 
@@ -844,7 +883,7 @@ void reliveCeremonyAll(u32 r3)
   uVar8 = pokemonCheckValid();
   if (uVar8 == 1) {
     pokemonGetStatus(uVar1,0,0x6e,0);
-    uVar2 = pokemonBiosGetDarkpokemonDataId(uVar1);
+    uVar2 = pokemonBiosGetDarkpokemonDataId((u8*)uVar1);
     darkPokemonSetFlag14(uVar2,1);
     uVar8 = pokemonIsJoutaiDataId(uVar1,0x3e);
     if (uVar8 != 0) {
@@ -867,7 +906,7 @@ void reliveCeremonyAll(u32 r3)
     sVar7 = pokemonBiosGetFriend(uVar1);
     pokemonBiosSetFriend(uVar1,(u16)(sVar7 + pokemonBiosGetPoolFriend(uVar1) + 0x46));
     pokemonBiosSetPoolFriend(uVar1,0);
-    iVar3 = _expRecover__FP7PokemonUl(uVar1,uVar2);
+    iVar3 = _expRecover__FP7PokemonUl((u8*)uVar1,uVar2);
     if (iVar3 == 1) {
       evo = pokemonEvolutionCheck(uVar1,0,0,local_28,auStack_18);
       if (((evo & 0xffff) != 0) && ((evo & 0xffff) != 0xffff)) {
@@ -922,91 +961,103 @@ void reliveCeremonyAll(u32 r3)
   return;
 }
 #pragma pop
+#endif
 
-#pragma push
-#pragma optimize_for_size off
-/* Address: 0x8025ED4C | Ghidra import */
+#if defined(POKEMON_RELIVE_MAIN_ONLY)
+/* Address: 0x8025ED4C | Size: 0x20C */
+
+typedef struct ReliveResetPair {
+    s32 mode;
+    u32 index;
+} ReliveResetPair;
+typedef struct ReliveTargetState {
+    s32 mode;
+    u16 species;
+    u16 pad;
+    u32 index;
+    u8 rest[0x18];
+} ReliveTargetState;
+/* lbl_8047B668: the 8-byte relive selection in .sbss (sda-addressed under -sdata 8). */
+extern ReliveResetPair lbl_8047B668;
+/* lbl_804782BC: the 0x24-byte pending relive request in .bss. */
+extern ReliveTargetState lbl_804782BC;
+extern void* heroGetStatus(s32, s32, u16);
+extern u8 pokemonCheckValid(void*);
+extern void floorBattleEndTerminateScripts(void);
+extern void floorSetFadeScript(s32, s32);
+extern void _threadSwitch(void);
+u32 loadSequence(int* r3, u32 r4, u16* r5, int r6);
+void effectPlayWaza(u32* r3, u16* r4, int r5, int r6, int r7, int r8);
 
 void reliveMain(void)
-
 {
     extern u32 lbl_80478DA8;
-    extern u32 lbl_8047B668;
-    extern u32 lbl_8047B66C;
     extern f32 lbl_8047E680;
-  BOOL bVar1;
+    BOOL ok;
+    void* pokemon;
+    s32 loaded;
+    u8 seq[16];
 
-		  u32 uVar2;
-		  u8 cVar4;
-		  int iVar3;
+    if ((lbl_804782BC.mode == 0) || (lbl_804782BC.mode == 1)) {
+        fn_801DADC0(1);
+        if (lbl_804782BC.mode == 0) {
+            pokemon = heroGetStatus(0, 3, lbl_804782BC.index & 0xffff);
+            if (pokemonCheckValid(pokemon) != 1) {
+                ok = 0;
+            } else {
+                pokemonGetStatus(pokemon, 0, 0x6e, 0);
+                loaded = loadSequence((int*)seq, (u32)pokemon, (u16*)&lbl_80478DA8, 2);
+                if (loaded == 1) {
+                    effectPlayWaza((u32*)seq, (u16*)&lbl_80478DA8, 2, 1, 1, 0);
+                    ok = 1;
+                } else {
+                    ok = 0;
+                }
+            }
+            if (ok == 1) {
+                reliveCeremonyAll(lbl_804782BC.index);
+            }
+        } else if (lbl_804782BC.mode == 1) {
+            pokemon = heroGetStatus(0, 3, lbl_804782BC.index & 0xffff);
+            if (pokemonCheckValid(pokemon) != 1) {
+                ok = 0;
+            } else {
+                pokemonSetStatus(pokemon, 0, 0xc5, 0, 0);
+                pokemonGetStatus(pokemon, 0, 0x6e, 0);
+                loaded = loadSequence((int*)seq, (u32)pokemon, (u16*)lbl_8039A6A8, 4);
+                if (loaded == 1) {
+                    effectPlayWaza((u32*)seq, (u16*)lbl_8039A6A8, 4, 1, 1, 0);
+                    ok = 1;
+                } else {
+                    ok = 0;
+                }
+            }
+            if (ok == 1) {
+                reliveCeremonyAll(lbl_804782BC.index);
+            }
+        }
+        fadeSet((double)lbl_8047E680, 3);
+        fadeCheck(1);
+        wazaSequenceSysRelease();
 
-  u8 auStack_18 [16];
-  
-  if ((lbl_804782BC[0] == 0) || (lbl_804782BC[0] == 1)) {
-    fn_801DADC0(1);
-    if (lbl_804782BC[0] == 0) {
-      uVar2 = heroGetStatus(0,3,lbl_804782BC[2] & 0xffff);
-      cVar4 = pokemonCheckValid();
-      if (cVar4 != '\x01') {
-        bVar1 = 0;
-      }
-      else {
-        pokemonGetStatus(uVar2,0,0x6e,0);
-        iVar3 = loadSequence((int*)auStack_18,uVar2,(u16*)&lbl_80478DA8,2);
-        if (iVar3 == 1) {
-          effectPlayWaza((u32*)auStack_18,(u16*)&lbl_80478DA8,2,1,1,0);
-          bVar1 = 1;
-        }
-        else {
-          bVar1 = 0;
-        }
-      }
-      if (bVar1 == 1) {
-        reliveCeremonyAll(lbl_804782BC[2]);
-      }
+        lbl_8047B668.mode = -1;
+        lbl_8047B668.index = -1;
+        lbl_804782BC.mode = -1;
+        lbl_804782BC.species = 0;
+        lbl_804782BC.index = 0;
+        floorBattleEndTerminateScripts();
+        floorSetFadeScript(0, 0);
+        _threadSwitch();
     }
-    else if (lbl_804782BC[0] == 1) {
-      uVar2 = heroGetStatus(0,3,lbl_804782BC[2] & 0xffff);
-      cVar4 = pokemonCheckValid();
-      if (cVar4 != '\x01') {
-        bVar1 = 0;
-      }
-      else {
-        pokemonSetStatus(uVar2,0,0xc5,0,0);
-        pokemonGetStatus(uVar2,0,0x6e,0);
-        iVar3 = loadSequence((int*)auStack_18,uVar2,(u16*)lbl_8039A6A8,4);
-        if (iVar3 == 1) {
-          effectPlayWaza((u32*)auStack_18,(u16*)lbl_8039A6A8,4,1,1,0);
-          bVar1 = 1;
-        }
-        else {
-          bVar1 = 0;
-        }
-      }
-      if (bVar1 == 1) {
-        reliveCeremonyAll(lbl_804782BC[2]);
-      }
-    }
-    fadeSet((double)lbl_8047E680,3);
-    fadeCheck(1);
-				    wazaSequenceSysRelease();
-						    lbl_804782BC[0] = -1;
-						    lbl_8047B668 = 0xffffffff;
-						    lbl_8047B66C = 0xffffffff;
-				    *(u16 *)((u8 *)lbl_804782BC + 4) = 0;
-    lbl_804782BC[2] = 0;
-    floorBattleEndTerminateScripts();
-    floorSetFadeScript(0,0);
-    _threadSwitch();
-  }
-  return;
 }
-#pragma pop
-
+#endif
 
 /* Address: 0x8025DC2C | Size: 0x90 | Ghidra import (PSQ removed) */
 
 
+#if defined(POKEMON_RELIVE_WAITTIME_ONLY)
+extern void _threadSwitch(void);
+extern u32 GSgetFrameStep(void);
 void waitTime__Ff(float r3)
 
 {
@@ -1028,3 +1079,4 @@ void waitTime__Ff(float r3)
 
   return;
 }
+#endif

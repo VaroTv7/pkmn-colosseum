@@ -284,7 +284,7 @@ void WS_WAZAKOUKA_CHECK(void)
 }
 #undef fn_801F025C
 
-/* wsCmd20 */
+/* fn_80223AF4 */
 /* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
 void wsCmd20(void)
@@ -406,7 +406,7 @@ void WS_SIDECONDITION_CHECK(void)
 #undef fn_801F025C
 #undef fn_801F6E98
 
-/* wsCmd1E */
+/* fn_80223CE8 */
 /* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
 #define fn_801F025C fightTargetGetPtrAsNowFightType
@@ -434,7 +434,7 @@ void wsCmd1E(void) {
 #undef fn_80207BF4
 #undef fn_801F4C14
 
-/* wsCmd1D */
+/* fn_80223D64 */
 /* RULE-EXCEPTION(user-approved): local compiler-control pragma (optimize_for_size on) needed for the byte match of the code it covers - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
 #define fn_801F025C fightTargetGetPtrAsNowFightType
@@ -537,7 +537,7 @@ void WS_CONDITION_CHECK(void)
 #undef fn_80203CCC
 #undef fn_801F025C
 
-/* wsCmd1B */
+/* fn_80223F1C */
 #define fn_801252E0 pokemonInitJoutai
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_801F37B0 fightFloorLoopValidFightOutPokemon
@@ -550,6 +550,14 @@ void WS_CONDITION_CHECK(void)
 #define fn_80205B8C fightOutPokemonGetPokemonPtr
 #define fn_8020912C fightOutPokemonKizetuEffect
 void wsCmd1B(void) {
+    extern void* fightFloorGetFightOutPokemonPtrToFightTrainerPtr(void* obj, void* search_val);
+    extern void fightOutPokemonKizetuEffect(void* r3, u8 r4);
+    extern void fightMenuStatusMenuClose(u32 r3, u32 r4, u8 r5);
+    extern u8 fightFloorLoopValidFightOutPokemon(void* floor, void* callback, void* buf, u8 flag);
+    extern void pokemonInitJoutai(u8* ptr);
+    extern void* fightOutPokemonGetPokemonPtr(void* ctx);
+    extern void fightOutPokemonResetSeqStatus(void* ctx, u16 mode);
+    extern void fightOutPokemonWriteJoutaiDataId(void* ctx, void* typeObj);
     extern u32 fn_801F025C();
     extern u32 fn_801F54A4();
     extern u8 fightOutPokemonIsPokemonJoutaiDataId();
@@ -561,20 +569,20 @@ void wsCmd1B(void) {
     count = (u16)fn_801F54A4(0, 0, 0x14, 0);
     ctx = fn_801F025C(*(u8*)(lbl_8047B610 + 1), 0);
 
-    fn_801F4354(0, ctx);
-    fn_8020912C(ctx, 2);
+    fn_801F4354(0, (void*)ctx);
+    fn_8020912C((void*)ctx, 2);
     fightMenuStatusMenuClose(ctx, count, 0);
-    fn_8020912C(ctx, 3);
-    fn_801F37B0(0, fn_80232FE4, ctx, 0);
-    fn_801252E0(fn_80205B8C(ctx));
-    fn_80202998(ctx, 0);
-    fn_80202810(ctx, 0x17);
+    fn_8020912C((void*)ctx, 3);
+    fn_801F37B0(0, (void*)fn_80232FE4, (void*)ctx, 0);
+    fn_801252E0(fn_80205B8C((void*)ctx));
+    fn_80202998((void*)ctx, 0);
+    fn_80202810((void*)ctx, (void*)0x17);
 
     if ((u8)fn_801FECD4(ctx) == 1) {
         fn_801FE7EC(ctx, 0x7c, 0, 0);
     }
     if ((u8)fightOutPokemonIsPokemonJoutaiDataId(ctx, 0x3e) == 1) {
-        fn_80202810(ctx, 0x3e);
+        fn_80202810((void*)ctx, (void*)0x3e);
         if ((u8)fn_801FECD4(ctx) == 1) {
             fn_801FE7EC(ctx, 0xc8, 0, 0);
         }
@@ -593,7 +601,7 @@ void wsCmd1B(void) {
 #undef fn_80205B8C
 #undef fn_8020912C
 
-/* wsCmd1A */
+/* fn_80224060 */
 #define fn_801F54A4 fightFloorGetStatus
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_801FEF74 fightOutPokemonGetJoutaiMigawariHp
@@ -602,6 +610,7 @@ void wsCmd1B(void) {
 #define fn_8020F108 fightWazaWzxTypeFuncMigawari
 #define fn_8020912C fightOutPokemonKizetuEffect
 void wsCmd1A(void) {
+    extern void fn_80265598(u32 r3, u32 r4, u32 r5);
     extern s32 fn_801FEF74();
     extern void fn_80202810();
     extern void fn_802086B0();

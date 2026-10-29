@@ -13,20 +13,20 @@
 #include "game/trainer.h"
 #include "game/pokemon.h"
 
-extern void* pokemonGetStatus();
+extern u32 pokemonGetStatus(u8* obj, u32 id, u32 selector, u32 d);
 extern u32 savedataGetStatus();
-extern int fadeCheck();
-extern int fadeSet();
-extern void _threadSwitch();
-extern void msgctrlSetValue();
-extern void winMsgOpenField();
-extern void winMsgCloseField();
-extern void wazaSequenceSysUpdate();
+extern s8 fadeCheck(u8 wait);
+extern void fadeSet(u16 type, f32 duration);
+extern void _threadSwitch(void);
+extern void msgctrlSetValue(u32 id, u32 value);
+extern s32 winMsgOpenField(u32 message, u32 wait, u8 pause);
+extern void winMsgCloseField(u32 wait);
+extern void wazaSequenceSysUpdate(void);
 extern void* fn_801DE190(u16 index, void* model, u8 variant);
-extern void fn_801DDD28();
-extern void wazaSequenceOwnerSetVisibility();
-extern void wazaSequenceSysStartWaza();
-extern u8 wazaSequenceSysIsPlayingWaza();
+extern BOOL fn_801DDD28(void* owner, u16 group, u16 index, u8 variant);
+extern void wazaSequenceOwnerSetVisibility(void* effect, u32 visible);
+extern void wazaSequenceSysStartWaza(void* sequence, u16 moveID, u16 variant);
+extern u8 wazaSequenceSysIsPlayingWaza(void* obj, u16 search_key1, u16 search_key2);
 extern void floorSetFadeScript();
 
 #if !defined(GS_RANGE_80265EC4_SPLIT) || defined(GS_RANGE_80265EC4_PREFIX)
@@ -65,107 +65,107 @@ void exribbonInit(u8* data)
 #endif
 
 #if !defined(GS_RANGE_80265EC4_SPLIT) || defined(GS_RANGE_80265F94_SUFFIX)
-static inline u8 d2presentMsgOpen(void)
-{
-    extern s8 winMsgCheck();
-    u8 open;
+extern s8 winMsgCheck(void);
 
-    open = winMsgCheck() == 1;
-    return open;
+static inline u8 fn_80265F94_msgOpen(void)
+{
+    if (winMsgCheck() == 1) {
+        return 1;
+    }
+    return 0;
 }
 
-static inline void d2presentTick(u32 effect, u16 sequence)
+static inline void fn_80265F94_update(void* model, u16 id)
 {
     wazaSequenceSysUpdate();
-    if (wazaSequenceSysIsPlayingWaza(effect, sequence, 4) == 0) {
-        wazaSequenceSysStartWaza(effect, sequence, 4);
+    if (wazaSequenceSysIsPlayingWaza(model, id, 4) == 0) {
+        wazaSequenceSysStartWaza(model, id, 4);
     }
     _threadSwitch();
 }
 
-static inline u32 d2presentCreateEffect(u16 species)
+extern const u16 lbl_8047E6F8;
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper; returning the model through it gives retail's register order - see docs/RULE_EXCEPTIONS.md */
+static inline void* fn_80265F94_create(u16 species)
 {
-    return (u32)fn_801DE190(species, 0, 0);
+    void* model = fn_801DE190(species, NULL, 0);
+    fn_801DDD28(model, lbl_8047E6F8, 4, 0);
+    wazaSequenceOwnerSetVisibility(model, 1);
+    return model;
 }
 
-/* Address: 0x80265F94 | Size: 0x2BC | 99.91%: one register copy short
- * d2present gift scene: effect on the gift Pokemon, fade in, its cry,
- * message 0x44BA then a mode-dependent message (0x44BC/0x44BB/0x44B9),
- * fade out; run by evolutionSequenceEnd after d2presentOpen stores the mode.
- *
- * Remaining diff: retail loads lbl_8047E6F8 into r4 for the first
- * wazaSequenceSysStartWaza call and copies it to r30 (`sequence`); ours
- * loads r30 and copies to r4. Only a volatile extern flips it. */
-#pragma push
-#pragma opt_loop_invariants off
+/* Address: 0x80265F94 | Size: 0x2BC */
 void d2presentPlayGiftScene(int r3)
 {
-    extern u16 pokemonDataBiosGetVoice();
-    extern void* pokemonDataBiosGetPtr();
-    extern int GSsndGetStatus(u32);
-    extern int soundStartSE(u32);
-    extern u16 lbl_8047E6F8;
-    extern f32 lbl_8047E6FC;
-    u16 sequence;
+    extern u16 pokemonDataBiosGetVoice(u8* data);
+    extern void* pokemonDataBiosGetPtr(u16 species);
+    extern s32 GSsndGetStatus(u16 voice);
+    extern void soundStartSE(u16 voice);
+    extern const f32 lbl_8047E6FC;
+    u16 voice;
+    void* model;
     u16 status;
+    u16 id;
     u16 species;
-    u32 effect;
-    u32 message;
-    u32 voice;
+    u8* data;
+    u32 msg;
 
-    status = (u16)(int)pokemonGetStatus(0, 0xfa, 0x66, 0);
+    status = pokemonGetStatus(NULL, 0xfa, 0x66, 0);
     species = 0xFFFF;
     if (status != 0) {
         species = status;
     }
-    effect = d2presentCreateEffect(species);
-    fn_801DDD28(effect, lbl_8047E6F8, 4, 0);
-    wazaSequenceOwnerSetVisibility(effect, 1);
-    sequence = lbl_8047E6F8;
-    wazaSequenceSysStartWaza(effect, sequence, 4);
-    fadeSet((double)lbl_8047E6FC, 2);
-    while ((s8)fadeCheck(0) != 0) {
-        d2presentTick(effect, sequence);
+    model = fn_80265F94_create(species);
+    id = lbl_8047E6F8;
+    wazaSequenceSysStartWaza(model, id, 4);
+    fadeSet(2, lbl_8047E6FC);
+    while (fadeCheck(0) != 0) {
+        fn_80265F94_update(model, id);
     }
-    if (pokemonDataBiosGetPtr(0xfa) == 0) {
+    data = pokemonDataBiosGetPtr(0xfa);
+    if (data == NULL) {
         voice = 0;
     } else {
-        voice = pokemonDataBiosGetVoice();
+        /* RULE-EXCEPTION(user-approved): no-op (u16) cast on the u16 result makes the truncation into voice explicit, as retail's clrlwi - see docs/RULE_EXCEPTIONS.md */
+        voice = (u16)pokemonDataBiosGetVoice(data);
         soundStartSE(voice);
     }
     while (GSsndGetStatus(voice) == 2) {
-        d2presentTick(effect, sequence);
+        fn_80265F94_update(model, id);
     }
     winMsgOpenField(0x44ba, 0, 0);
-    while (d2presentMsgOpen()) {
-        d2presentTick(effect, sequence);
+    while (fn_80265F94_msgOpen()) {
+        fn_80265F94_update(model, id);
     }
     winMsgCloseField(1);
     switch (r3) {
     case 0:
         msgctrlSetValue(0x5d, 0x3d2);
-        message = 0x44bc;
+        msg = 0x44bc;
         break;
     case 1:
         msgctrlSetValue(0x5d, 0x3d2);
-        message = 0x44bb;
+        msg = 0x44bb;
         break;
     default:
-        message = 0x44b9;
+        msg = 0x44b9;
         break;
     }
-    winMsgOpenField(message, 0, 0);
-    while (d2presentMsgOpen()) {
-        d2presentTick(effect, sequence);
+    winMsgOpenField(msg, 0, 0);
+    while (fn_80265F94_msgOpen()) {
+        fn_80265F94_update(model, id);
     }
     winMsgCloseField(1);
-    fadeSet((double)lbl_8047E6FC, 3);
-    while ((s8)fadeCheck(0) != 0) {
-        d2presentTick(effect, sequence);
+    fadeSet(3, lbl_8047E6FC);
+    while (fadeCheck(0) != 0) {
+        fn_80265F94_update(model, id);
     }
 }
-#pragma pop
 
+#endif
+
+#if !defined(GS_RANGE_80265EC4_SPLIT) || defined(GS_RANGE_80266250_EXACT)
 /* RULE-EXCEPTION(user-approved): redundant masks preserve retail's saved-volume register moves; see docs/RULE_EXCEPTIONS.md. */
 /* Address: 0x80266250 | Size: 0xD0 | Ghidra import */
 void evolutionSequenceEnd(void)

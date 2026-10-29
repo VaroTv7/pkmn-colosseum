@@ -1,6 +1,8 @@
 /** Exact shop list callbacks, 0x8002B03C - 0x8002B1A0. */
 #include "dolphin/types.h"
 
+extern s32 GSmsgPrintColor(s32 x, s32 y, s32 color, u32 key);
+
 extern u32 lbl_8047A3E4;
 extern f32 lbl_8047B97C;
 extern f32 lbl_8047A3E8;
@@ -72,4 +74,3 @@ s32 fn_8002B134(void* r3, u8* r4)
 end:
     return 0;
 }
-#pragma peephole on

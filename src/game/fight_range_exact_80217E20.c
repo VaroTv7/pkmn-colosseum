@@ -226,7 +226,9 @@ extern s32 fightTrainerAiWazaValueJisin();
 extern s32 fightTrainerAiWazaValueJibaku();
 extern s32 fightTrainerAiWazaValueNull();
 
-/* 0x80217E20 size 0x1F8: wsCmdB3 (owner line 13060) */
+/* 0x80217E20 size 0x1F8: fn_80217E20 (owner line 13060) */
+/* RULE-EXCEPTION(user-approved): fightOutPokemonGetUseWazaDataId is defined u16 in fight_out_pokemon.c, but retail uses the result here unextended (mr, no clrlwi); declared u32 like the file's fn_80205184 - see docs/RULE_EXCEPTIONS.md */
+extern u32 fightOutPokemonGetUseWazaDataId(void* ctx);
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_8012640C pokemonGetStatus
 #define fn_80205184 fightOutPokemonGetUseWazaDataId
@@ -315,7 +317,8 @@ void wsCmdB3(void)
 #undef fn_8012640C
 #undef fn_801F025C
 
-/* 0x80218018 size 0x1C0: wsCmdB2 (owner line 13139) */
+/* 0x80218018 size 0x1C0: fn_80218018 (owner line 13139) */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma kept for byte match - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
 void wsCmdB2(void)
 
@@ -390,6 +393,7 @@ void wsCmdB2(void)
 }
 
 /* 0x802181D8 size 0x98: _fightSeqWsHorobinoutaSub__FPvUsPv (owner line 13214) */
+/* RULE-EXCEPTION(user-approved): local compiler-control pragma kept for byte match - see docs/RULE_EXCEPTIONS.md */
 #pragma optimize_for_size on
 #define fn_802062FC fightOutPokemonCheckFightOut
 #define fn_80207BF4 fightOutPokemonGetTokuseiDataId
@@ -444,7 +448,7 @@ void WS_MIYABURU(void)
 }
 #undef fn_801F025C
 
-/* 0x802182D4 size 0xE8: wsCmdB0 (owner line 4398) */
+/* 0x802182D4 size 0xE8: fn_802182D4 (owner line 4398) */
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_801F6E44 fightSideCheckWriteJoutaiDataId
 #define fn_801F6E98 fightSideIsJoutaiDataId
@@ -488,7 +492,7 @@ notmatched:
 #undef fn_801F6E44
 #undef fn_801F025C
 
-/* 0x802183BC size 0xC0: wsCmdAF (owner line 1583) */
+/* 0x802183BC size 0xC0: fn_802183BC (owner line 1583) */
 #define fn_801F025C fightTargetGetPtrAsNowFightType
 #define fn_8012640C pokemonGetStatus
 #define fn_80203B5C fightOutPokemonMaxHpWaruValue
@@ -515,7 +519,7 @@ void wsCmdAF(void) {
 #undef fn_8012640C
 #undef fn_801F025C
 
-/* 0x8021847C size 0x3A8: wsCmdAE (owner line 13282) */
+/* 0x8021847C size 0x3A8: fn_8021847C (owner line 13282) */
 #define fn_801248C4 pokemonGetTokuseiDataId
 #define fn_801252E0 pokemonInitJoutai
 #define fn_8012A5B0 heroGetStatus
@@ -685,7 +689,7 @@ void wsCmdAE(void)
 #undef fn_801252E0
 #undef fn_801248C4
 
-/* 0x80218824 size 0x248: wsCmdAD (owner line 13431) */
+/* 0x80218824 size 0x248: fn_80218824 (owner line 13431) */
 void wsCmdAD(void)
 {
     extern u16 GSrand();
@@ -764,7 +768,7 @@ void wsCmdAD(void)
     lbl_8047B610 = (u8*)*(u32*)(lbl_8047B610 + 1);
 }
 
-/* 0x80218A6C size 0x100: wsCmdAC (owner line 13509) */
+/* 0x80218A6C size 0x100: fn_80218A6C (owner line 13509) */
 void wsCmdAC(void)
 {
     extern u32 fightTargetGetPtrAsNowFightType();
@@ -803,7 +807,7 @@ void wsCmdAC(void)
     lbl_8047B610++;
 }
 
-/* 0x80218B6C size 0x68: fightSeqGetJitabataIryoku (owner line 1323) */
+/* 0x80218B6C size 0x68: fn_80218B6C (owner line 1323) */
 u8 fightSeqGetJitabataIryoku(u16 a, u16 b) {
     u8 key = (u8)((a * 0x30) / b);
     s32 offset;

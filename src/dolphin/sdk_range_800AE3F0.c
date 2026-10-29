@@ -408,6 +408,10 @@ extern s32 fn_800B588C(s32 chan, s32 fileNo, CARDDirEntry* entry,
 extern void __ARQInterruptServiceRoutine(void);
 extern void __ARHandler(__OSInterrupt interrupt, OSContext* context);
 extern void __ARChecksize(void);
+extern ARCallback ARRegisterDMACallback(ARCallback callback);
+extern void DCInvalidateRange(void* addr, u32 nBytes);
+extern s32 __CARDSeek(CARDFileInfo* fileInfo, s32 length, s32 offset,
+                      CARDControl** cardOut);
 extern void __DSPHandler(__OSInterrupt interrupt, OSContext* context);
 extern void __DSP_boot_task(DSPTaskInfo* task);
 extern void __DSP_insert_task(DSPTaskInfo* task);
@@ -2621,6 +2625,9 @@ void BlockWriteCallback(s32 chan, s32 result) {
     }
 }
 
+/* RULE-EXCEPTION(user-approved): dont_inline keeps fn_800B19A4 a call in its
+   EraseCallback callers; no unit-level -inline setting reproduces the unit - see
+   docs/RULE_EXCEPTIONS.md */
 #pragma dont_inline on
 s32 __CARDWrite(s32 chan, u32 addr, u32 length, void* buffer, CARDCallback callback) {
     CARDControl* card = &lbl_803FC620[chan];
@@ -2635,7 +2642,7 @@ s32 __CARDWrite(s32 chan, u32 addr, u32 length, void* buffer, CARDCallback callb
     card->buffer = buffer;
     return __CARDWritePage(chan, BlockWriteCallback);
 }
-#pragma dont_inline off
+#pragma dont_inline reset
 
 void* __CARDGetFatBlock(CARDControl* card) {
     return card->fatBlock;

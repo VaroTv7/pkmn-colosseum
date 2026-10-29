@@ -66,7 +66,7 @@
  *   fn_8000815C  GStask_Accessor3           -- 8-byte accessor
  *   fn_80008164  GStask_Accessor4           -- 8-byte accessor
  *   fn_8000816C  GStask_Accessor5           -- 8-byte accessor
- *   dbgMenuFightGetAllManual  GStask_Accessor6           -- 8-byte accessor
+ *   fn_80008174  GStask_Accessor6           -- 8-byte accessor
  *   fn_8000817C  GStask_Accessor7           -- 8-byte accessor
  *   dbgMenuFightGetMsgSpeedToFrame  GStask_FinalizeLoad        -- 0xC0 bytes, finalize resource load
  *   _dbgMenuFightGetFightTrainerAiAddsubValueDataIdSub  GStask_BuildResourceList   -- 0x14C bytes, compile resource table
@@ -454,17 +454,15 @@ extern u8 lbl_8047A286;
 
 /* 0x80008868 | 0x3D8 */
 #if !defined(GS_TASK_RANGE_SPLIT) || defined(GS_TASK_RANGE_RESIDUAL_80008868)
-extern u32 menuDataBiosGetType(u32);
+extern u8 menuDataBiosGetType(u32);
 extern void windowDrawPanel(s32, s32, s32, s32);
 extern void menuDrawRect(s32, s32, s32, s32, s32, s32);
 extern s32 sprintf(char*, const char*, ...);
 extern s32 GSmsgPrintf(s32, s32, s32, ...);
-extern u32 std082_flagGetValue(u32);
-extern u32 lbl_80478F98;
+extern u32 std082_flagGetValue(s32);
 extern u8 lbl_80478838[8];
 extern u8 lbl_803A19C8[];
 extern u8 lbl_80266688[];
-extern u32 lbl_80478F9C;
 extern u8 lbl_8047B6C8[3];
 typedef struct GsTaskFlagConfig {
     u32 count;
@@ -476,6 +474,9 @@ typedef struct GsTaskFlagDef {
     s16 next;
 } GsTaskFlagDef;
 
+extern GsTaskFlagConfig* lbl_80478F98;
+extern GsTaskFlagDef* lbl_80478F9C;
+
 static inline u16 gsTaskFlagGetId(s32 index) {
     s16 id;
     s32 i;
@@ -483,29 +484,24 @@ static inline u16 gsTaskFlagGetId(s32 index) {
     if (index < 0) {
         return 0;
     }
-    if ((u32)index >= ((GsTaskFlagConfig*)lbl_80478F98)->count) {
+    if ((u32)index >= lbl_80478F98->count) {
         return 0;
     }
-    id = ((GsTaskFlagConfig*)lbl_80478F98)->first;
+    id = lbl_80478F98->first;
     if (index != 0) {
         for (i = 0; i < index - 1; i++) {
-            id = ((GsTaskFlagDef*)lbl_80478F9C)[id].next;
+            id = lbl_80478F9C[id].next;
         }
-        id = ((GsTaskFlagDef*)lbl_80478F9C)[id].next;
+        id = lbl_80478F9C[id].next;
     }
     return id;
 }
 
-/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
-#pragma push
-#pragma peephole off
 void fn_80008868(u8* window)
 {
     GsTaskFlagConfig* config;
     s32 flagCount;
-    u16 flagId;
-    s32 right;
-    volatile s32 width;
+    s32 width;
     s32 pageSize;
     s32 row;
     s32 rowHeight;
@@ -518,10 +514,10 @@ void fn_80008868(u8* window)
 
     menuId = *(u32*)(window + 4);
     rowY = 40;
-    pageSize = (u8)menuDataBiosGetType(menuId);
+    pageSize = menuDataBiosGetType(menuId);
     width = 0;
     width = 480;
-    config = (GsTaskFlagConfig*)lbl_80478F98;
+    config = lbl_80478F98;
     flagCount = config->count;
     visibleCount = flagCount;
     if (flagCount > pageSize) {
@@ -529,14 +525,15 @@ void fn_80008868(u8* window)
     }
 
     rowHeight = visibleCount * 13;
-    windowDrawPanel(30, 40, width + 25, rowHeight);
+    /* RULE-EXCEPTION(user-approved): codegen-only identity cast; reading width through its address keeps it a stack local that is reloaded after each call and hoisted out of the row loop, as in retail - see docs/RULE_EXCEPTIONS.md */
+    windowDrawPanel(30, 40, *(s32*)&width + 25, rowHeight);
 
     if (*(s16*)lbl_80478838 > 0) {
         center = width / 2;
         menuDrawRect(center + 20, 33, center + 40, 33, center + 30, 23);
     }
 
-    config = (GsTaskFlagConfig*)lbl_80478F98;
+    config = lbl_80478F98;
     if ((s32)config->count - *(s16*)lbl_80478838 > pageSize) {
         center = width / 2;
         menuDrawRect(center + 20, rowHeight + 47, center + 40,
@@ -544,7 +541,6 @@ void fn_80008868(u8* window)
     }
 
     row = 0;
-    right = width;
     while (row < visibleCount) {
         if (*(s16*)(lbl_80478838 + 2) == row) {
             color = 0xFF0000FF;
@@ -553,62 +549,27 @@ void fn_80008868(u8* window)
         }
 
         flagIndex = row + *(s16*)lbl_80478838;
-        flagId = gsTaskFlagGetId(flagIndex);
-
         sprintf((char*)lbl_803A19C8, (const char*)lbl_80266688, flagIndex,
-                (u16)flagId);
+                gsTaskFlagGetId(flagIndex));
         GSmsgPrintf(30, rowY, color, lbl_803A19C8);
 
-        flagIndex = row + *(s16*)lbl_80478838;
-        flagId = gsTaskFlagGetId(flagIndex);
-
-        GSmsgPrintf(right + 30, rowY, color, lbl_8047B6C8,
-                    std082_flagGetValue((u16)flagId));
+        GSmsgPrintf(width + 30, rowY, color, lbl_8047B6C8,
+                    std082_flagGetValue(gsTaskFlagGetId(row + *(s16*)lbl_80478838)));
         rowY += 13;
         row++;
     }
 }
-#pragma pop
 
 /* 0x80008C40 | 0x538 */
 extern u8* windowGetKeyInfo(void);
-extern void std078_flagSetFalse(u32);
-extern void std079_flagSetTrue(u32);
-extern u32 lbl_80478F98;
-extern u32 lbl_80478F9C;
+extern void std078_flagSetFalse(s32);
+extern void std079_flagSetTrue(s32);
 typedef struct GsTaskFlagCursor {
     s16 top;
     s16 cursor;
 } GsTaskFlagCursor;
 
-static inline u16 gsTaskFlagGetLinkedId(s32 index) {
-    s16 id;
-    s32 i;
-    GsTaskFlagDef* def;
-
-    if (index < 0) {
-        return 0;
-    }
-    if ((u32)index >= ((GsTaskFlagConfig*)lbl_80478F98)->count) {
-        return 0;
-    }
-    id = ((GsTaskFlagConfig*)lbl_80478F98)->first;
-    if (index != 0) {
-        for (i = 0; i < index - 1; i++) {
-            id = ((GsTaskFlagDef*)lbl_80478F9C)[id].next;
-        }
-        def = (GsTaskFlagDef*)lbl_80478F9C;
-        def += id;
-        id = def->next;
-    }
-    return id;
-}
-
-/* RULE-EXCEPTION(user-approved): local peephole-control pragma — see docs/RULE_EXCEPTIONS.md */
-#pragma push
-#pragma peephole off
 void dbgFlagMenuCursor(u8* window) {
-    extern u8 menuDataBiosGetType(u32);
     u16 repeat;
     u16 trigger;
     s16 count;
@@ -617,7 +578,7 @@ void dbgFlagMenuCursor(u8* window) {
 
     repeat = ((const u16*)windowGetKeyInfo())[3];
     trigger = ((const u16*)windowGetKeyInfo())[0];
-    count = (s16)((GsTaskFlagConfig*)lbl_80478F98)->count;
+    count = (s16)lbl_80478F98->count;
     page = menuDataBiosGetType(*(u32*)(window + 4));
     if (count < page) {
         page = count;
@@ -654,15 +615,14 @@ void dbgFlagMenuCursor(u8* window) {
     }
 
     if (trigger & 0x80) {
-        std078_flagSetFalse(gsTaskFlagGetLinkedId(pos.top + pos.cursor));
+        std078_flagSetFalse(gsTaskFlagGetId(pos.top + pos.cursor));
     } else if (trigger & 0x40) {
-        std079_flagSetTrue(gsTaskFlagGetLinkedId(pos.top + pos.cursor));
+        std079_flagSetTrue(gsTaskFlagGetId(pos.top + pos.cursor));
     }
 
     *(GsTaskFlagCursor*)lbl_80478838 = pos;
-    *(u32*)(window + 0x80) = gsTaskFlagGetLinkedId(pos.top + pos.cursor);
+    *(u32*)(window + 0x80) = gsTaskFlagGetId(pos.top + pos.cursor);
 }
-#pragma pop
 #endif /* GS_TASK_RANGE_RESIDUAL_80008868 */
 
 #if !defined(GS_TASK_RANGE_SPLIT) || defined(GS_TASK_RANGE_RESIDUAL_80006908)
@@ -1105,15 +1065,15 @@ extern void* fightFloorGetFightPokemonPtrToFightTrainerPtr(s32 a, u32 ctx);
 extern u8   figthPokemonGetLevel(u32 ctx);
 extern u8   fightTrainerCheckCanIrekaeFightPokemon(void* ptr, u32 ctx);
 extern void* fightTrainerGetFightPokemonPtrToFightOutPokemonPtr(void* ptr, u32 ctx);
-extern u8   fightOutPokemonIsUseHensinBuff(void);
+extern u8   fightOutPokemonIsUseHensinBuff(void* ptr);
 extern void fightOutPokemonGetTokuseiDataId(void* ptr);
 extern void fightOutPokemonGetZokuseiDataId(void* ptr, s32 a);
 extern s32  dbgMenuPokemonEdit(void* ptr, s32 a, u8* b, u8* c, u8* d, u8* e);
 extern u32  pokemonGetStatus(void* ptr, u16 b, s32 c, s32 d);
 extern void menuFaceRequestPokemonFace(void* ptr, s32 a, s32 b);
 extern void _threadSwitch(void);
-extern void pokemonGetFaceSpriteId(void* ptr);
-extern s8   menuFaceIsReady(void);
+extern u16  pokemonGetFaceSpriteId(void* ptr);
+extern s8   menuFaceIsReady(u16 id);
 extern void* pokemonCreateSequence(void* ptr);
 extern void battleGridReplacePokemon(void* ptr, void* src);
 extern void battleGridUpdate(void);
@@ -1128,22 +1088,22 @@ extern void fightOutPokemonSetTokuseiDataId(void* ptr, void* a);
 extern void fightOutPokemonSetZokuseiDataId(void* ptr, u8 a, u16 b);
 extern void fightMenuFightTrainerRenewStatusMenu(void* ptr, u16 a);
 #if !defined(GS_TASK_RANGE_SPLIT) || defined(GS_TASK_RANGE_RESIDUAL_80007364)
-#pragma push
-#pragma peephole off
 s32 menuFightPokemonSelectSub(u32 ctx) {
-    s32 result;
+    u32 i;
     u8 prevLevel;
-    u16 savedId;
-    void* encounter;
     void* archive;
     void* scene;
-    u16 itemId;
+    s32 result;
+    void* encounter;
     u32 subItem;
+    void* animPtr;
+    u32 loopIdx;
+    u16 itemId;
     u8 sp_b;
     u8 sp_a;
     u8 sp_9;
     u8 sp_8;
-    u16 loopIdx;
+    u16 savedId;
 
     sp_b = 0;
     sp_a = 0;
@@ -1165,7 +1125,7 @@ s32 menuFightPokemonSelectSub(u32 ctx) {
 
     if (fightTrainerCheckCanIrekaeFightPokemon(archive, ctx) == 2) {
         encounter = fightTrainerGetFightPokemonPtrToFightOutPokemonPtr(archive, ctx);
-        if (fightOutPokemonIsUseHensinBuff() == 1) {
+        if (fightOutPokemonIsUseHensinBuff(encounter) == 1) {
             return -1;
         }
 
@@ -1182,10 +1142,8 @@ s32 menuFightPokemonSelectSub(u32 ctx) {
             if (encounter != 0) {
                 subItem = pokemonGetStatus(encounter, 0, 0xee, 0);
                 if (subItem != 0) {
-                    void* animPtr;
-
                     menuFaceRequestPokemonFace(scene, 0, 0);
-                    while ((pokemonGetFaceSpriteId(scene), menuFaceIsReady()) == 0) {
+                    while (menuFaceIsReady(pokemonGetFaceSpriteId(scene)) == 0) {
                         _threadSwitch();
                     }
                     animPtr = pokemonCreateSequence(scene);
@@ -1196,25 +1154,15 @@ s32 menuFightPokemonSelectSub(u32 ctx) {
                     wazaSequenceOwnerSetVisibility(animPtr, 1);
                     fightOutPokemonWriteJoutaiDataId(encounter, 0x14);
                 }
-                {
-                    u16 newId;
-
-                    newId = (u16)(u32)fightFloorGetStatus(0, 0, 0x14, 0);
-                    fightMenuFightOutPokemonRenewStatusMenu(encounter, newId, 1);
-                }
+                fightMenuFightOutPokemonRenewStatusMenu(
+                    encounter, (u16)(u32)fightFloorGetStatus(0, 0, 0x14, 0), 1);
                 pokemonSetSequenceStatus(
                     scene, pokemonGetStatus(encounter, 0, 0xee, 0));
                 fightOutPokemonSetTokuseiDataId(
                     encounter, pokemonGetTokuseiDataId(scene));
-                {
-                    u32 i;
-
-                    for (i = 0; (u16)i < 2; i++) {
-                        u16 val;
-
-                        val = pokemonGetStatus(0, itemId, 0x16, i);
-                        fightOutPokemonSetZokuseiDataId(encounter, (u8)i, val);
-                    }
+                for (i = 0; (u16)i < 2; i++) {
+                    fightOutPokemonSetZokuseiDataId(
+                        encounter, (u8)i, pokemonGetStatus(0, itemId, 0x16, i));
                 }
             }
         }
@@ -1229,7 +1177,6 @@ s32 menuFightPokemonSelectSub(u32 ctx) {
     fightMenuFightTrainerRenewStatusMenu(archive, savedId);
     return result;
 }
-#pragma pop
 #endif /* GS_TASK_RANGE_RESIDUAL_80007364 */
 
 #if !defined(GS_TASK_RANGE_SPLIT) || defined(GS_TASK_RANGE_EXACT_8000765C)
@@ -1761,6 +1708,9 @@ extern u8 winMsgCloseCheckFight(void);
 extern u8 lbl_80266678[];
 #if 1
 u32 dbgMenuFightGetMsgSpeedToFrame(u32 value) {
+    extern u32 GSinputButtonsChanged(s32 id);
+    /* RULE-EXCEPTION(user-approved): caller-side prototype returning u32 (input.c defines it returning u16); retail uses the result without re-extending it (and r0,r3,r31, no clrlwi) - see docs/RULE_EXCEPTIONS.md */
+    extern u32 fn_800F7BC4(s32 id);
     u32 buttons;
     u32 held;
     u8 idx;

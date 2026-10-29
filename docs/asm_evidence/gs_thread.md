@@ -83,7 +83,7 @@ Retail address 0x800F0308.
 
 ## cms_CallStdTrampoline
 
-Retail address 0x800F106C (formerly `fn_800F106C`; named in PR #637).
+Retail address 0x800F106C (formerly `cms_CallStdTrampoline`; named in PR #637).
 
 - Why it cannot be C: its prologue stores r0 into the new frame before `mflr` (`stw r0, 0x8(r1)` then `mflr r0`) and restores it in the epilogue, a save that MWCC never emits. The body loads eight integer and eight float arguments in descending order and calls the native function through CTR with `crclr 6` (the variadic-call flag). Under every compiler, the closest C call through a function pointer produces a different prologue, epilogue and load order.
 - Compiler probe: docs/asm_evidence/probes/fn_800F106C.txt (candidate docs/asm_evidence/probes/fn_800F106C.c) ends "verdict: no-match (20 compilers compared)".

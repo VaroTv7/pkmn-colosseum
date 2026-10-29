@@ -5,7 +5,7 @@
  * XD source unit: unknown (best guess GSmodel head, e.g. effects.cpp analog)
  * Address range: 0x800E0DDC - 0x800E202C (3 functions)
  *
- * 3 fns (0x38, 0x730, 0xAE8). GSmemDumpMap(0x730) ~ XD modelDistortionRender(0x798) which LEADS GSmodel/effects.cpp immediately after GSmath in XD - same position as here. In XD the GSmodel/GSpart/GSscratch block spans up to GStexture.cpp, matching our following gs_range_800E202C.c which runs to gs_texture.c at 0x800EF098; this segment is the head of that model block, cut by the existing bucket boundary. Zero anchors -> trivial pass.
+ * 3 fns (0x38, 0x730, 0xAE8). fn_800E0E14(0x730) ~ XD modelDistortionRender(0x798) which LEADS GSmodel/effects.cpp immediately after GSmath in XD - same position as here. In XD the GSmodel/GSpart/GSscratch block spans up to GStexture.cpp, matching our following gs_range_800E202C.c which runs to gs_texture.c at 0x800EF098; this segment is the head of that model block, cut by the existing bucket boundary. Zero anchors -> trivial pass.
  *
  * Split from src/game/gs_render.c (physical XD source-unit split).
  * The dead #ifdef PCPORT reference block (never defined in configure.py,
@@ -133,7 +133,7 @@ extern void GXBegin(u32, u32, u16);
 extern u8 lbl_80314350[];
 extern u8 lbl_804001F0[];
 extern void fn_800D6A80(u16, s32, u32*, u32*);
-extern u8 lbl_804007E8[];
+extern u8 sTex0[];
 extern void GXSetVtxAttrFmt(u32, u32, u32, u32, u8);
 extern void GXClearVtxDesc(void);
 extern void GXSetVtxDesc(u32, u32);
@@ -392,7 +392,8 @@ extern f64 cos(f32);
 extern f32 lbl_8047CB38;
 extern f64 lbl_8047CB40;
 extern u8 lbl_80270658[];
-extern u32 lbl_8047AB30;
+struct GSFreeBlock;
+extern struct GSFreeBlock* lbl_8047AB30;
 extern u32 lbl_8047AB68;
 extern u32 lbl_8047AB64;
 extern u32 lbl_8047AB38;
@@ -412,7 +413,7 @@ extern u32 lbl_8047AB40;
 extern u32 lbl_8047AB44;
 
 
-#if !defined(GS_RANGE_800E0E14_ONLY)
+#if !defined(GS_RANGE_800E0E14_ONLY) && !defined(GS_RANGE_800E1544_ONLY)
 u32 GSmemGetFreeTotal(void)
 {
     typedef struct GSFreeBlock {
@@ -464,7 +465,7 @@ static inline u32 gsMemLargestFree(void) {
     GSFreeBlock* block;
     u32 largest = 0;
 
-    for (block = (GSFreeBlock*)lbl_8047AB30; block != NULL; block = block->next) {
+    for (block = lbl_8047AB30; block != NULL; block = block->next) {
         if (block->size > largest) {
             largest = block->size;
         }
@@ -483,30 +484,52 @@ static inline GSMemHandle* gsMemFindHandle(u8* data) {
     return NULL;
 }
 
-/* Forward copy used to slide allocations down; word-wise when the
- * regions are at least a word apart. */
-static inline void gsMemCopy(u8* dst, u8* src, u32 size) {
-    u32 distance = src - dst;
+/* RULE-EXCEPTION(user-approved): single-use inline helper; passing the table bounds keeps retail's top/bottom copies - see docs/RULE_EXCEPTIONS.md */
+static inline GSMemHandle* gsMemFindHandleIn(GSMemHandle* top, GSMemHandle* bottom, u8* data) {
+    GSMemHandle* handle;
 
+    for (handle = top; handle >= bottom; handle--) {
+        if (handle->used != 0 && handle->data == data) {
+            return handle;
+        }
+    }
+    return NULL;
+}
+
+/* Forward copy of an allocation's bytes (handle->size of them) used to
+ * slide allocations down; word-wise when the regions are at least a word
+ * apart. The size is read inside the helper, so it is a helper local. */
+static inline void gsMemCopy(u8* dst, u8* src, GSMemHandle* handle) {
+    u8* byteSrc;
+    u32* wordSrc;
+    u8* byteDst;
+    u32* wordDst;
+    u32 words;
+    u32 size;
+    u32 distance;
+
+    size = handle->size;
+    distance = src - dst;
     if ((distance > 0 ? distance : -distance) >= 4) {
-        u32* wordDst = (u32*)dst;
-        u32* wordSrc = (u32*)src;
-        u32 words = size >> 2;
-        u32 bytes = size & 3;
-
+        wordSrc = (u32*)src;
+        wordDst = (u32*)dst;
+        words = size >> 2;
+        size = size & 3;
         while (words != 0) {
             *wordDst++ = *wordSrc++;
             words--;
         }
-        dst = (u8*)wordDst;
-        src = (u8*)wordSrc;
-        while (bytes != 0) {
-            *dst++ = *src++;
-            bytes--;
+        byteDst = (u8*)wordDst;
+        byteSrc = (u8*)wordSrc;
+        while (size != 0) {
+            *byteDst++ = *byteSrc++;
+            size--;
         }
     } else {
+        byteSrc = src;
+        byteDst = dst;
         while (size != 0) {
-            *dst++ = *src++;
+            *byteDst++ = *byteSrc++;
             size--;
         }
     }
@@ -523,7 +546,7 @@ static inline void gsMemMergeNext(GSFreeBlock* block) {
 }
 
 static inline void gsMemMergePrev(GSFreeBlock* block) {
-    if (block->prev != NULL && (GSFreeBlock*)((u8*)block->prev + block->prev->size) == block) {
+    if (block->prev != NULL && block == (GSFreeBlock*)((u8*)block->prev + block->prev->size)) {
         block->prev->size += block->size;
         if (block->next != NULL) {
             block->next->prev = block->prev;
@@ -536,7 +559,7 @@ static inline void gsMemInsertFree(GSFreeBlock* block, u32 size) {
     GSFreeBlock* before = NULL;
     GSFreeBlock* scan;
 
-    for (scan = (GSFreeBlock*)lbl_8047AB30; scan != NULL && scan < block; scan = scan->next) {
+    for (scan = lbl_8047AB30; scan != NULL && scan < block; scan = scan->next) {
         before = scan;
     }
     if (before != NULL) {
@@ -544,8 +567,8 @@ static inline void gsMemInsertFree(GSFreeBlock* block, u32 size) {
         block->next = before->next;
     } else {
         block->prev = NULL;
-        block->next = (GSFreeBlock*)lbl_8047AB30;
-        lbl_8047AB30 = (u32)block;
+        block->next = lbl_8047AB30;
+        lbl_8047AB30 = block;
     }
     block->size = size;
     if (block->prev != NULL) {
@@ -624,80 +647,132 @@ static inline u16 gsMemChecksum(GSMemHandle* handle) {
 }
 
 #if !defined(GS_RANGE_800E0E14_ONLY)
+/* RULE-EXCEPTION(user-approved): single-use inline accessor; its result temp numbers block->next where retail's allocator expects it - see docs/RULE_EXCEPTIONS.md */
+static inline GSFreeBlock* gsMemNextOf(GSFreeBlock* block) {
+    return block->next;
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper; returning the slid block from an inline instance gives retail's register for it - see docs/RULE_EXCEPTIONS.md */
+static inline GSFreeBlock* gsMemBlockAfter(GSFreeBlock* block, u32 size) {
+    return (GSFreeBlock*)((u8*)block + size);
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline copy of gsMemCopy for the compaction loop; its byte-only branch uses its own pointers, which gives retail's registers there - see docs/RULE_EXCEPTIONS.md */
+static inline void gsMemCopyMoved(u8* dst, u8* src, GSMemHandle* handle) {
+    u8* byteSrc;
+    u32* wordSrc;
+    u8* byteDst;
+    u32* wordDst;
+    u8* toByte;
+    u8* fromByte;
+    u32 words;
+    u32 size;
+    u32 distance;
+
+    size = handle->size;
+    distance = src - dst;
+    if ((distance > 0 ? distance : -distance) >= 4) {
+        wordSrc = (u32*)src;
+        wordDst = (u32*)dst;
+        words = size >> 2;
+        size = size & 3;
+        while (words != 0) {
+            *wordDst++ = *wordSrc++;
+            words--;
+        }
+        byteDst = (u8*)wordDst;
+        byteSrc = (u8*)wordSrc;
+        while (size != 0) {
+            *byteDst++ = *byteSrc++;
+            size--;
+        }
+    } else {
+        fromByte = src;
+        toByte = dst;
+        while (size != 0) {
+            *toByte++ = *fromByte++;
+            size--;
+        }
+    }
+}
+
 /* Compact the movable allocations in the GS scratch heap. */
 u32 GSmemOptimize(void)
 {
     extern const char lbl_80270BB8[];
-    GSFreeBlock* block;
-    GSFreeBlock* fresh;
-    GSFreeBlock* prev;
-    GSFreeBlock* next;
+    u32 sum;
+    u32 total;
+    u8 wasHead;
     GSMemHandle* desc;
     GSMemHandle* saved;
-    GSMemHandle** entry;
+    GSFreeBlock* before;
     GSMemHandle* top;
-    GSMemHandle* bottom;
-    GSMemHandle* candidates[4];
+    GSFreeBlock* fresh;
     u8* destination;
+    s32 i;
+    s32 k;
+    GSFreeBlock* prevFree;
+    GSFreeBlock* nextFree;
+    GSFreeBlock* scan;
+    s32 j;
+    s32 count;
+    GSFreeBlock* block;
+    GSFreeBlock* next;
+    u8* data;
     u8* source;
-    u32 oldLargest;
     u32 size;
     u32 remaining;
-    u32 total;
-    u32 sum;
-    s32 count;
-    s32 i;
-    s32 j;
-    u8 wasHead;
+    GSFreeBlock* prev;
+    GSMemHandle* candidates[4];
+    u32 oldLargest;
+    GSFreeBlock* freed;
 
     oldLargest = gsMemLargestFree();
-    block = (GSFreeBlock*)lbl_8047AB30;
+    block = lbl_8047AB30;
     if (block != NULL && block->next != NULL) {
         while (block != NULL) {
             size = block->size;
-            bottom = (GSMemHandle*)lbl_8047AB38;
-            if ((u8*)block + size != (u8*)bottom) {
+            data = (u8*)block + size;
+            if (data != (u8*)lbl_8047AB38) {
             top = (GSMemHandle*)lbl_8047AB34;
-            desc = gsMemFindHandle((u8*)block + size);
+            desc = gsMemFindHandleIn(top, (GSMemHandle*)lbl_8047AB38, data);
             if (desc == NULL) {
                 GSlogWrite(lbl_80270BB8);
                 return 0;
             }
             if (desc->locked == 0 && desc->pinned == 0) {
                 wasHead = 0;
-                if ((GSFreeBlock*)lbl_8047AB30 == block) {
+                if (lbl_8047AB30 == block) {
                     wasHead = 1;
                 }
                 prev = block->prev;
-                next = block->next;
-                fresh = (GSFreeBlock*)((u8*)block + desc->size);
+                next = gsMemNextOf(block);
+                fresh = gsMemBlockAfter(block, desc->size);
                 if (block->prev != NULL) {
                     block->prev->next = fresh;
                 }
                 if (block->next != NULL) {
                     block->next->prev = fresh;
                 }
-                gsMemCopy((u8*)block, desc->data, desc->size);
+                gsMemCopy((u8*)block, desc->data, desc);
                 desc->data = (u8*)block;
                 fresh->prev = prev;
                 fresh->next = next;
                 fresh->size = size;
                 gsMemMergeNext(fresh);
                 if (wasHead) {
-                    lbl_8047AB30 = (u32)fresh;
+                    lbl_8047AB30 = fresh;
                 }
-                block = (GSFreeBlock*)lbl_8047AB30;
+                block = lbl_8047AB30;
                 continue;
             }
 
-            candidates[0] = NULL;
-            candidates[1] = NULL;
-            candidates[2] = NULL;
-            candidates[3] = NULL;
-            entry = candidates;
+            for (k = 0; k < 4; k++) {
+                candidates[k] = NULL;
+            }
             count = 0;
             total = 0;
-            for (desc = top; desc >= bottom; desc--) {
+            for (desc = top; desc >= (GSMemHandle*)lbl_8047AB38; desc--) {
                 if (desc->used == 0 || desc->locked != 0 || desc->size > block->size ||
                     desc->data <= (u8*)block || desc->pinned != 0) {
                     continue;
@@ -724,37 +799,57 @@ u32 GSmemOptimize(void)
             }
             if (count > 0) {
 
-            prev = block->prev;
-            next = block->next;
+            prevFree = block->prev;
+            nextFree = block->next;
             remaining = block->size;
-            if (block == (GSFreeBlock*)lbl_8047AB30) {
-                lbl_8047AB30 = (u32)next;
+            if (block == lbl_8047AB30) {
+                lbl_8047AB30 = nextFree;
             }
-            if (prev != NULL) {
-                prev->next = next;
+            if (prevFree != NULL) {
+                prevFree->next = nextFree;
             }
-            if (next != NULL) {
-                next->prev = prev;
+            if (nextFree != NULL) {
+                nextFree->prev = prevFree;
             }
             destination = (u8*)block;
-            for (i = 0; i < count; i++) {
-                source = (*entry)->data;
-                gsMemCopy(destination, source, (*entry)->size);
-                (*entry)->data = destination;
-                destination += (*entry)->size;
-                remaining -= (*entry)->size;
-                gsMemInsertFree((GSFreeBlock*)source, (*entry)->size);
-                entry++;
+            for (k = 0; k < count; k++) {
+                source = candidates[k]->data;
+                gsMemCopyMoved(destination, source, candidates[k]);
+                candidates[k]->data = destination;
+                destination += candidates[k]->size;
+                remaining -= candidates[k]->size;
+                before = NULL;
+                for (scan = lbl_8047AB30; scan != NULL && scan < (GSFreeBlock*)source; scan = scan->next) {
+                    before = scan;
+                }
+                freed = (GSFreeBlock*)source;
+                if (before != NULL) {
+                    freed->prev = before;
+                    freed->next = before->next;
+                } else {
+                    freed->prev = NULL;
+                    freed->next = lbl_8047AB30;
+                    lbl_8047AB30 = freed;
+                }
+                freed->size = candidates[k]->size;
+                if (freed->prev != NULL) {
+                    freed->prev->next = freed;
+                }
+                if (freed->next != NULL) {
+                    freed->next->prev = freed;
+                }
+                gsMemMergeNext(freed);
+                gsMemMergePrev(freed);
             }
             if (remaining >= sizeof(GSFreeBlock)) {
                 fresh = (GSFreeBlock*)destination;
-                fresh->prev = prev;
-                fresh->next = next;
+                fresh->prev = prevFree;
+                fresh->next = nextFree;
                 fresh->size = remaining;
                 if (fresh->prev != NULL) {
                     fresh->prev->next = fresh;
                 } else {
-                    lbl_8047AB30 = (u32)fresh;
+                    lbl_8047AB30 = fresh;
                 }
                 if (fresh->next != NULL) {
                     fresh->next->prev = fresh;
@@ -769,7 +864,7 @@ u32 GSmemOptimize(void)
                     desc->checksum = gsMemChecksum(desc);
                 }
             }
-            block = (GSFreeBlock*)lbl_8047AB30;
+            block = lbl_8047AB30;
             continue;
             }
             }
@@ -780,8 +875,10 @@ u32 GSmemOptimize(void)
 }
 #endif
 
+#if !defined(GS_RANGE_800E1544_ONLY)
 extern u8 lbl_80270658[];
-extern u32 lbl_8047AB30;
+struct GSFreeBlock;
+extern struct GSFreeBlock* lbl_8047AB30;
 extern u32 lbl_8047AB68;
 extern u32 lbl_8047AB64;
 extern u32 lbl_8047AB38;
@@ -816,11 +913,11 @@ u8 GSmemDumpMap(u8 verbose, u8 dumpMap) {
     if (verbose) {
         GSlogWrite("--[ GSmem state check ]--------------------------\n");
     }
-    if ((GSFreeBlock*)lbl_8047AB30 != NULL && ((GSFreeBlock*)lbl_8047AB30)->prev != NULL) {
+    if (lbl_8047AB30 != NULL && (lbl_8047AB30)->prev != NULL) {
         GSlogWrite("!!! first block's previous pointer is not NULL\n");
         ok = 0;
     }
-    for (block = (GSFreeBlock*)lbl_8047AB30; block != NULL; block = block->next) {
+    for (block = lbl_8047AB30; block != NULL; block = block->next) {
         freeCount++;
         if ((u32)block < lbl_8047AB68 || (u32)block > lbl_8047AB64) {
             GSlogWrite("!!! Free block is outside of GSmem area\n");
@@ -924,14 +1021,14 @@ u8 GSmemDumpMap(u8 verbose, u8 dumpMap) {
         GSlogWrite("Active locks:        %d\n", lbl_8047AB48);
         GSlogWrite("Entry table size:    %d bytes\n", lbl_8047AB34 - lbl_8047AB38 + 0x10);
         largest = 0;
-        for (block = (GSFreeBlock*)lbl_8047AB30; block != NULL; block = block->next) {
+        for (block = lbl_8047AB30; block != NULL; block = block->next) {
             if (block->size > largest) {
                 largest = block->size;
             }
         }
         GSlogWrite("Largest free space:  %d bytes\n", largest);
         total = 0;
-        for (block = (GSFreeBlock*)lbl_8047AB30; block != NULL; block = block->next) {
+        for (block = lbl_8047AB30; block != NULL; block = block->next) {
             total += block->size;
         }
         GSlogWrite("Total free space:    %d bytes\n", total);
@@ -950,4 +1047,5 @@ u8 GSmemDumpMap(u8 verbose, u8 dumpMap) {
     }
     return ok;
 }
+#endif /* !GS_RANGE_800E1544_ONLY */
 #endif

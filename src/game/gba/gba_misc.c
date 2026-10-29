@@ -274,7 +274,7 @@ s32 GbaMisc_HasActiveContextState(void);
 s32 std220_gbaUnk_80083bf8(void);
 void fn_80089C84(s32 param);
 s32 GbaMisc_PollEntryStatusA(s32 r31);
-s32 GbaMisc_ResetEntryStatusA(s32 param);
+s32 GbaMisc_ResetEntryStatusA(s32 param, const u8* data);
 void fn_80089D74(s32 param);
 s32 fn_80089D98(s32 r31);
 s32 fn_80089E20(s32 idx, void* obj, u32 packedStatus, u32 highHalf);
@@ -332,9 +332,13 @@ void demoScene00(void);
 
 /* ===== Function implementations ===== */
 
-#if !defined(GBA_MISC_80089E20_ONLY) && !defined(GBA_MISC_80089F78_ONLY)
+#if !defined(GBA_MISC_80089E20_ONLY) && !defined(GBA_MISC_80089F78_ONLY) && \
+    !defined(GBA_MISC_8008AE18_ONLY) && \
+    !defined(GBA_MISC_8008BBDC_ONLY)
 
 #if !defined(GBA_MISC_80089B8C_ONLY)
+
+#if !defined(GBA_MISC_800896E8_ONLY)
 
 /* 0x800895A4 | size: 0x114 */
 void gbaReceiveHero(void) {
@@ -456,79 +460,59 @@ void fn_800896E0(u32 v) {
     *(u32*)&lbl_8047A670 = v;
 }
 
+#endif /* !GBA_MISC_800896E8_ONLY */
+
 /* 0x800896E8 | size: 0x290 */
-s32 std215_battleStartTrainerWithPrompt(void* work, void* arg) {
-    extern void msgctrlSetValue(s32 id, void* value);
-    extern void std054_characterTalk(void* work, void* arg, s32 size);
-    extern void peopleSetVisible(void* work, u8 kind, s32 flag);
-    extern void fadeCheck(s32 mode);
-    extern s32 fieldStartEncount(s32 id, s32 a, s32 b);
-    extern u8 darkPokemonCheckFlag12(u8 id);
-    extern void fightTrainerPokemonDataBiosSetPokemonDataId(u8* pokemon, s32 id);
-    extern u8* fightTrainerPokemonDataBiosGetPtr(void);
+/* RULE-EXCEPTION(user-approved): single-use inline helpers for fn_800896E8 (Trainer nested in Setup, Finish); the nesting depth orders the locals for retail's registers - see docs/RULE_EXCEPTIONS.md */
+static inline u8* fn_800896E8_Trainer(u8* ctx) {
+    extern u8* fightTrainerPokemonDataBiosGetPtr(u16 slot);
     extern void fightTrainerSet10(void* trainer, u8 value);
     extern void fightTrainerSetU16Arr14(void* trainer, u8 slot, u16 value);
     extern void fightTrainerSet06(void* trainer, u16 value);
     extern void fightTrainerSet00(void* trainer, u8 value);
-    extern void fn_801FCC3C(void* trainer);
+    extern u16 fn_801FCC3C(void* trainer);
     extern void fightTrainerDataBiosSetKindDataId(void* trainer, u8 value);
     extern void* fightTrainerDataBiosGetPtr(s32 id);
     extern void* fightEncountDataBiosGetPtr(s32 id);
-    extern s8 std011_dialogDisplayYesNoMenu(void);
-    u8* ctx;
-    /* RULE-EXCEPTION(user-approved): move-table walk through a named pointer, declaration order chosen for register allocation — see docs/RULE_EXCEPTIONS.md */
+    /* RULE-EXCEPTION(user-approved): move-table walk through a named pointer - see docs/RULE_EXCEPTIONS.md */
     u8* p;
-    u8* pokemon;
+    u8* trainer;
     s32 count;
-    s32 i;
-    u32 result;
-    u8 ok;
-
-    ctx = (u8*)fn_80083CFC(0);
-    if (ctx == NULL) {
-        return 0;
-    }
-    if (ctx[0x4000] == 1) {
-        msgctrlSetValue(0x4D, ctx + 0x4004);
-        std054_characterTalk(work, arg, 0xE0);
-    } else {
-        msgctrlSetValue(0x4D, ctx + 0x4060);
-        std054_characterTalk(work, arg, 0xE0);
-        switch (std011_dialogDisplayYesNoMenu()) {
-        case 0:
-            break;
-        case 1:
-        case -1:
-        default:
-            return 0;
-        }
-    }
 
     ctx[0x4000] = 2;
     fightEncountDataBiosGetPtr(0x231);
-    pokemon = fightTrainerDataBiosGetPtr(9);
-    fightTrainerSet00(pokemon, ctx[0x4124]);
-    fightTrainerDataBiosSetKindDataId(pokemon, ctx[0x4125]);
-    fightTrainerSet06(pokemon, *(u16*)(ctx + 0x4134));
-    fightTrainerSet10(pokemon, ctx[0x4136]);
+    trainer = fightTrainerDataBiosGetPtr(9);
+    fightTrainerSet00(trainer, ctx[0x4124]);
+    fightTrainerDataBiosSetKindDataId(trainer, ctx[0x4125]);
+    fightTrainerSet06(trainer, *(u16*)(ctx + 0x4134));
+    fightTrainerSet10(trainer, ctx[0x4136]);
     p = ctx;
     for (count = 0; count < 4; count++) {
-        fightTrainerSetU16Arr14(pokemon, count, *(u16*)(p + 0x4126));
+        fightTrainerSetU16Arr14(trainer, count, *(u16*)(p + 0x4126));
         p += 2;
     }
-    fn_801FCC3C(pokemon);
+    return trainer;
+}
 
-    pokemon = fightTrainerPokemonDataBiosGetPtr();
-    for (i = count = 0; i < 4; i++) {
-        if (gbaBuildTrainerPokemon(pokemon, &((u8(*)[0x2A])&((GbaMiscContext*)ctx)->state_4000)[i][0x138]) == 1) {
-            pokemon += 0x50;
-            count++;
-        }
-    }
-    for (; count < 6; count++) {
-        fightTrainerPokemonDataBiosSetPokemonDataId(pokemon, 0);
-        pokemon += 0x50;
-    }
+/* RULE-EXCEPTION(user-approved): single-use inline helper (depth-1 wrapper so Trainer's locals number after Finish's result) - see docs/RULE_EXCEPTIONS.md */
+static inline u8* fn_800896E8_Setup(u8* ctx) {
+    extern u8* fightTrainerPokemonDataBiosGetPtr(u16 slot);
+    extern u16 fn_801FCC3C(void* trainer);
+    return fightTrainerPokemonDataBiosGetPtr(fn_801FCC3C(fn_800896E8_Trainer(ctx)));
+}
+
+/* RULE-EXCEPTION(user-approved): single-use inline helper; the block locals are declared ahead of result so result numbers above them - see docs/RULE_EXCEPTIONS.md */
+static inline u32 fn_800896E8_Finish(u8* ctx, void* work) {
+    extern void peopleSetVisible(void* work, u8 kind, s32 flag);
+    extern void fadeCheck(s32 mode);
+    extern s32 fieldStartEncount(s32 id, s32 a, s32 b);
+    extern u8 darkPokemonCheckFlag12(u8 id);
+    s32 j;
+    u32 key;
+    GbaMiscContext* cur;
+    u8 kind;
+    u8 ok;
+    u32 result;
 
     *(u8**)&lbl_8047A670 = ctx + 0x4118;
     *(u32*)&lbl_80478960 = 9;
@@ -541,11 +525,6 @@ s32 std215_battleStartTrainerWithPrompt(void* work, void* arg) {
             ok = 0;
         }
         if (ok == 1) {
-            GbaMiscContext* cur;
-            u32 key;
-            s32 j;
-            u8 kind;
-
             fn_800830A4(ctx);
             cur = fn_80083CFC(0);
             if (cur != NULL) {
@@ -567,6 +546,51 @@ s32 std215_battleStartTrainerWithPrompt(void* work, void* arg) {
     fadeCheck(1);
     return result;
 }
+
+s32 std215_battleStartTrainerWithPrompt(void* work, void* arg) {
+    extern void msgctrlSetValue(s32 id, void* value);
+    extern void std054_characterTalk(void* work, void* arg, s32 size);
+    extern s8 std011_dialogDisplayYesNoMenu(void);
+    extern void fightTrainerPokemonDataBiosSetPokemonDataId(u8* pokemon, s32 id);
+    u8* ctx;
+    u8* pokemon;
+    s32 count;
+    s32 i;
+
+    ctx = (u8*)fn_80083CFC(0);
+    if (ctx == NULL) {
+        return 0;
+    }
+    if (ctx[0x4000] == 1) {
+        msgctrlSetValue(0x4D, ctx + 0x4004);
+        std054_characterTalk(work, arg, 0xE0);
+    } else {
+        msgctrlSetValue(0x4D, ctx + 0x4060);
+        std054_characterTalk(work, arg, 0xE0);
+        switch (std011_dialogDisplayYesNoMenu()) {
+        case 0:
+            break;
+        case 1:
+        case -1:
+        default:
+            return 0;
+        }
+    }
+    pokemon = fn_800896E8_Setup(ctx);
+    for (i = count = 0; i < 4; i++) {
+        if (gbaBuildTrainerPokemon(pokemon, &((u8(*)[0x2A])&((GbaMiscContext*)ctx)->state_4000)[i][0x138]) == 1) {
+            pokemon += 0x50;
+            count++;
+        }
+    }
+    for (; count < 6; count++) {
+        fightTrainerPokemonDataBiosSetPokemonDataId(pokemon, 0);
+        pokemon += 0x50;
+    }
+    return fn_800896E8_Finish(ctx, work);
+}
+
+#if !defined(GBA_MISC_800896E8_ONLY)
 
 /* 0x80089978 | size: 0x214 */
 u8 gbaBuildTrainerPokemon(u8* pokemon, u8* entry) {
@@ -631,7 +655,11 @@ u8 gbaBuildTrainerPokemon(u8* pokemon, u8* entry) {
     return 1;
 }
 
+#endif /* !GBA_MISC_800896E8_ONLY */
+
 #endif
+
+#if !defined(GBA_MISC_800896E8_ONLY)
 
 /* 0x80089B8C | size: 0x84 */
 u8 GbaMisc_GetMappedContextByte(void) {
@@ -706,13 +734,13 @@ s32 GbaMisc_PollEntryStatusA(s32 r31) {
 }
 
 /* 0x80089D30 | size: 0x44 */
-s32 GbaMisc_ResetEntryStatusA(s32 param) {
-    extern s32 fn_80071AE4(s32);
+s32 GbaMisc_ResetEntryStatusA(s32 param, const u8* data) {
+    extern s32 fn_80071AE4(s32 chan, const u8* data);
     s32 ret;
     u32 tmp;
     u32 r4;
 
-    ret = fn_80071AE4(param - 1);
+    ret = fn_80071AE4(param - 1, data);
     tmp = GBA_MISC_ENTRY_HALF_OFFSET(param);
     r4 = (u32)&lbl_8047A684;
     r4 = r4 + tmp;
@@ -748,9 +776,14 @@ s32 fn_80089D98(s32 r31) {
 
 #endif
 
+#endif /* !GBA_MISC_800896E8_ONLY */
+
 #endif
 
-#if !defined(GBA_MISC_80089B8C_ONLY) && !defined(GBA_MISC_80089F78_ONLY)
+#if !defined(GBA_MISC_80089B8C_ONLY) && !defined(GBA_MISC_80089F78_ONLY) && \
+    !defined(GBA_MISC_8008AE18_ONLY) && \
+    !defined(GBA_MISC_8008BBDC_ONLY) && \
+    !defined(GBA_MISC_800896E8_ONLY)
 
 /* 0x80089E20 | size: 0x138 */
 s32 fn_80089E20(s32 r30, void* r31, u32 r5, u32 r29) {
@@ -813,9 +846,11 @@ s32 fn_80089E20(s32 r30, void* r31, u32 r5, u32 r29) {
 #endif
 
 #if !defined(GBA_MISC_80089E20_ONLY) && \
-    !defined(GBA_MISC_80089B8C_ONLY)
+    !defined(GBA_MISC_80089B8C_ONLY) && \
+    !defined(GBA_MISC_800896E8_ONLY)
 
-#if !defined(GBA_MISC_80089F78_ONLY)
+#if !defined(GBA_MISC_80089F78_ONLY) && !defined(GBA_MISC_8008AE18_ONLY) && \
+    !defined(GBA_MISC_8008BBDC_ONLY)
 
 /* 0x80089F58 | size: 0x8 */
 u32 fn_80089F58(u32 v) {
@@ -838,6 +873,8 @@ u32 fn_80089F70(u32 v) {
 }
 
 #endif
+
+#if !defined(GBA_MISC_8008BBDC_ONLY)
 
 /*
  * Battle snapshot sent to the GBA when the player opens the GBA command
@@ -893,6 +930,8 @@ typedef struct GbaBattleSnapshot {
 #define GBA_FORM_FROM_ZOKUSEI(z) ((z) == 0xA ? 1 : (z) == 0xB ? 2 : (z) == 0xF ? 3 : 0)
 #define GBA_SWITCH_MODE_FROM_TOKUSEI(t) ((t) == 0x17 ? 2 : (t) == 0x2A ? 3 : (t) == 0x47 ? 4 : 0)
 #define GBA_SWAP16(x) ((u16)(((x) << 8) | ((x) >> 8)))
+
+#if !defined(GBA_MISC_8008AE18_ONLY)
 
 /*
  * Build the battle snapshot for the GBA command menu, send it on the given
@@ -1164,7 +1203,12 @@ u32 fn_80089F78(u32 port, u32 trainer, u32 slot, s32 irekae) {
     }
 }
 
+#endif /* !GBA_MISC_8008AE18_ONLY */
+#endif /* !GBA_MISC_8008BBDC_ONLY */
+
 #if !defined(GBA_MISC_80089F78_ONLY)
+
+#if !defined(GBA_MISC_8008AE18_ONLY) && !defined(GBA_MISC_8008BBDC_ONLY)
 
 /* 0x8008A99C | size: 0x10 */
 s32 fn_8008A99C(void) {
@@ -1403,6 +1447,33 @@ void fn_8008AC34(void) {
     return;
 }
 
+#endif /* !GBA_MISC_8008AE18_ONLY */
+
+#if !defined(GBA_MISC_8008BBDC_ONLY)
+
+/* RULE-EXCEPTION(user-approved): single-use inline copy of gbaPokemonConditonFromGC, which retail expands in fn_8008AE18 — see docs/RULE_EXCEPTIONS.md */
+static inline u16 fn_8008AE18_condition(void* pokemon) {
+    extern s16 pokemonGetJoutaiStack(void* pokemon, s32 kind);
+    extern s8 pokemonGetJoutaiKaisuu(void* pokemon, s32 kind);
+    extern u8 pokemonIsJoutaiDataId(void* pokemon, s32 kind);
+    u16 status = 0;
+
+    if (pokemonIsJoutaiDataId(pokemon, 4) != 0) {
+        status = (pokemonGetJoutaiStack(pokemon, 4) << 8) | 0x80;
+    } else if (pokemonIsJoutaiDataId(pokemon, 5) != 0) {
+        status |= 0x40;
+    } else if (pokemonIsJoutaiDataId(pokemon, 7) != 0) {
+        status |= 0x20;
+    } else if (pokemonIsJoutaiDataId(pokemon, 6) != 0) {
+        status |= 0x10;
+    } else if (pokemonIsJoutaiDataId(pokemon, 3) != 0) {
+        status |= 0x08;
+    } else if (pokemonIsJoutaiDataId(pokemon, 8) != 0) {
+        status = (s16)pokemonGetJoutaiKaisuu(pokemon, 8);
+    }
+    return status;
+}
+
 /* 0x8008AE18 | size: 0xDC4 */
 void pokeconvPokemonToGBA(void* src, void* dst_) {
     extern u8 pokemonBiosGetEventGetFlag(void* pokemon);
@@ -1487,7 +1558,6 @@ void pokeconvPokemonToGBA(void* src, void* dst_) {
     GbaPokemon* dst;
     u8 tmp[12];
     GbaPokemonMisc misc;
-    u32 personality;
     u32 order;
     u32 span;
     u16 status;
@@ -1613,25 +1683,7 @@ void pokeconvPokemonToGBA(void* src, void* dst_) {
     misc.ribbons.amariRibbon = pokemonBiosGetAmariRibbon(src);
     misc.ribbons.eventGet = pokemonBiosGetEventGetFlag(src);
 
-    status = 0;
-    if (pokemonIsJoutaiDataId(src, 4) != 0) {
-        status = (pokemonGetJoutaiStack(src, 4) << 8) | 0x80;
-    } else if (pokemonIsJoutaiDataId(src, 5) != 0) {
-        status |= 0x40;
-    } else if (pokemonIsJoutaiDataId(src, 7) != 0) {
-        status |= 0x20;
-    } else if (pokemonIsJoutaiDataId(src, 6) != 0) {
-        status |= 0x10;
-    } else if (pokemonIsJoutaiDataId(src, 3) != 0) {
-        status |= 0x8;
-    } else if (pokemonIsJoutaiDataId(src, 8) != 0) {
-        status = (s16)pokemonGetJoutaiKaisuu(src, 8);
-    }
-    {
-        /* RULE-EXCEPTION(user-approved): widening copy so the status register is truncated in place — see docs/RULE_EXCEPTIONS.md */
-        u32 value = status;
-        dst->status = GbaSwap32(value) | (pokemonBiosGetConditionAmari(src) & 0xFFFFF000);
-    }
+    dst->status = GbaSwap32(fn_8008AE18_condition(src)) | (pokemonBiosGetConditionAmari(src) & 0xFFFFF000);
 
     dst->level = pokemonBiosGetLevel(src);
     dst->mailId = pokemonBiosGetMailId(src);
@@ -1656,8 +1708,8 @@ void pokeconvPokemonToGBA(void* src, void* dst_) {
         ((u32*)&dst->species)[i] ^= (dst->personality ^ dst->otId);
     }
 
-    personality = GbaSwap32(dst->personality);
-    order = personality % 24;
+    order = GbaSwap32(dst->personality);
+    order = order % 24;
     if (order / 6 != 0) {
         span = (order / 6) * 12;
         memcpy(tmp, (u8*)&dst->species + span, 12);
@@ -1681,6 +1733,9 @@ void pokeconvPokemonToGBA(void* src, void* dst_) {
     }
 }
 
+#endif /* !GBA_MISC_8008BBDC_ONLY */
+
+#if !defined(GBA_MISC_8008AE18_ONLY)
 /* 0x8008BBDC | size: 0x9F4 */
 void pokeconvPokemonFromGBA(void* gc, GbaPokemon* src) {
     extern void pokemonInit(void* pokemon);
@@ -1936,6 +1991,10 @@ void pokeconvPokemonFromGBA(void* gc, GbaPokemon* src) {
     pokemonBiosSetSpeAtk(gc, GbaSwap16(src->speAtk));
     pokemonBiosSetSpeDef(gc, GbaSwap16(src->speDef));
 }
+
+#endif /* !GBA_MISC_8008AE18_ONLY */
+
+#if !defined(GBA_MISC_8008AE18_ONLY) && !defined(GBA_MISC_8008BBDC_ONLY)
 
 /* 0x8008C5D4 | size: 0x128 */
 u16 gbaPokemonConditonFromGC(void* pokemon) {
@@ -8981,6 +9040,8 @@ void demoScene00(void) {
     ((void(*)(void))floorSetFadeScript)();
     return;
 }
+
+#endif /* !GBA_MISC_8008AE18_ONLY */
 
 #endif /* !GBA_MISC_80089F78_ONLY */
 

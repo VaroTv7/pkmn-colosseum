@@ -36,9 +36,9 @@ __declspec(section ".init") void* memset(void* dest, int val, u32 count);
 __declspec(section ".init") void* memcpy(void* dst, const void* src, u32 count);
 __declspec(section ".init") void __fill_mem(void* dest, int val, u32 count);
 
-/* __start.c proper (0x80003100 - 0x80003458) is built with GC/1.2.5n; the
-   MSL/TRK memory helpers that follow in .init (0x80003458 - 0x80005544) are
-   the crt/__start_mem_80003458 object, built with GC/1.3.2. */
+/* __start.c proper (0x80003100 - 0x80003458) is built with GC/1.2.5n.
+   The two GC/1.3.2 memory-helper units surround the original interrupt-vector
+   table at 0x800034AC - 0x800053E0; that table remains an explicit fallback. */
 #if !defined(START_MEM_PART)
 extern void InitMetroTRK(void);
 extern void InitMetroTRK_BBA(void);
@@ -303,6 +303,7 @@ _flush_loop:
 #endif /* !START_MEM_PART */
 
 #if defined(START_MEM_PART)
+#if !defined(START_MEM_SUFFIX)
 /* fn_80003458 - 0x80003458 | size: 0x30 */
 __declspec(section ".init") void* fn_80003458(void* dest, int val, u32 count) {
     TRK_fill_mem_800D6430(dest, val, count);
@@ -324,6 +325,9 @@ __declspec(section ".init") void* fn_80003488(void* dst, const void* src, int le
     return dst;
 }
 
+#endif /* !START_MEM_SUFFIX */
+
+#if !defined(START_MEM_PREFIX)
 /* fn_800053E0 - 0x800053E0 | size: 0x2C */
 __declspec(section ".init") void fn_800053E0(void) {
     OSResetSystem(0, 0, 0);
@@ -418,4 +422,5 @@ __declspec(section ".init") void* memcpy(void* dst, const void* src, u32 count) 
 
     return dst;
 }
+#endif /* !START_MEM_PREFIX */
 #endif /* START_MEM_PART */

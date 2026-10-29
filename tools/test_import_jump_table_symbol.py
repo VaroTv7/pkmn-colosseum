@@ -88,6 +88,66 @@ def owner_object(data=bytes(8), second_addend=8, table_offset=0,
     ])
 
 
+def compiler_object_two(second_table_data=bytes(8), second_text_kind=4,
+                        second_function=None, second_function_size=32):
+    strings = b"\0@first\0@second\0fn_8006F720\0"
+    if second_function:
+        strings += second_function.encode() + b"\0"
+    local = [bytes(16), struct.pack(">IIIBBH", 0, 0, 0, 3, 0, 1),
+             struct.pack(">IIIBBH", 0, 0, 0, 3, 0, 2),
+             symbol(strings, "@first", 0, 8, 1, 2),
+             symbol(strings, "@second", 8, 8, 1, 2)]
+    function_index = len(local)
+    functions = [symbol(strings, "fn_8006F720", 0, 32, 0x12, 1)]
+    if second_function:
+        functions.append(symbol(strings, second_function, 32,
+                                second_function_size, 0x12, 1))
+    symbols = b"".join(local + functions)
+    code_rela = b"".join(struct.pack(">IIi", offset, index << 8 | kind, 0)
+                         for offset, index, kind in
+                         [(2, 3, 6), (6, 3, 4), (10, 4, 6), (14, 4, second_text_kind)])
+    data_rela = b"".join(struct.pack(">IIi", offset,
+                                      (function_index + bool(second_function and offset >= 8)) << 8 | 1,
+                                      addend)
+                         for offset, addend in [(0, 4), (4, 8), (8, 12), (12, 16)])
+    comment = b"CodeWarrior" + bytes(0x2C - 11) + bytes(8 * (function_index + len(functions)))
+    return elf([
+        (".text", bytes(32 + (second_function_size if second_function else 0)),
+         1, 6, 0, 0, 4, 0),
+        (".data", bytes(8) + second_table_data, 1, 3, 0, 0, 8, 0),
+        (".rela.text", code_rela, 4, 0, 5, 1, 4, 12),
+        (".rela.data", data_rela, 4, 0, 5, 2, 4, 12),
+        (".symtab", symbols, 2, 0, 6, function_index, 4, 16),
+        (".strtab", strings, 3, 0, 0, 0, 1, 0),
+        (".comment", comment, 1, 0, 0, 0, 1, 0),
+    ])
+
+
+def owner_object_two(second_table_data=bytes(8), second_function=None):
+    strings = b"\0jumptable_first\0jumptable_second\0fn_8006F720\0"
+    if second_function:
+        strings += second_function.encode() + b"\0"
+    entries = [
+        bytes(16), struct.pack(">IIIBBH", 0, 0, 0, 3, 0, 1),
+        symbol(strings, "jumptable_first", 4, 8, 0x11, 1),
+        symbol(strings, "jumptable_second", 12, 8, 0x11, 1),
+        symbol(strings, "fn_8006F720", 0, 0, 0x10, 0),
+    ]
+    if second_function:
+        entries.append(symbol(strings, second_function, 0, 0, 0x10, 0))
+    symbols = b"".join(entries)
+    data_rela = b"".join(struct.pack(">IIi", offset,
+                                      (4 + bool(second_function and offset >= 12)) << 8 | 1,
+                                      addend)
+                         for offset, addend in [(4, 4), (8, 8), (12, 12), (16, 16)])
+    return elf([
+        (".data", bytes(12) + second_table_data + bytes(4), 1, 3, 0, 0, 4, 0),
+        (".rela.data", data_rela, 4, 0, 3, 1, 4, 12),
+        (".symtab", symbols, 2, 0, 4, 2, 4, 16),
+        (".strtab", strings, 3, 0, 0, 0, 1, 0),
+    ])
+
+
 class JumpTableImportTest(unittest.TestCase):
     def run_import(self, compiled, owner, owner_offset=0):
         with tempfile.TemporaryDirectory() as directory:
@@ -137,6 +197,68 @@ class JumpTableImportTest(unittest.TestCase):
     def test_text_must_use_ha_and_lo(self):
         with self.assertRaisesRegex(ValueError, "one HA and one LO"):
             self.run_import(compiler_object(second_text_kind=6), owner_object())
+
+    def run_multi_import(self, compiled, owner, tables=None):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "compiled.o"
+            owner_path = Path(directory) / "retail.o"
+            path.write_bytes(compiled)
+            owner_path.write_bytes(owner)
+            if tables is None:
+                tables = [("jumptable_first", 4), ("jumptable_second", 12)]
+            changed = importer.import_multiple_tables(
+                path, owner_path, tables, "fn_8006F720")
+            self.assertTrue(changed)
+            result = path.read_bytes()
+            self.assertFalse(importer.import_multiple_tables(
+                path, owner_path, tables, "fn_8006F720"))
+            return result
+
+    def test_two_table_import(self):
+        result = self.run_multi_import(compiler_object_two(), owner_object_two())
+        _, sections = read_elf(result)
+        self.assertNotIn(".data", [s["name"] for s in sections])
+        self.assertNotIn(".rela.data", [s["name"] for s in sections])
+        self.assertEqual(next(s["data"] for s in sections if s["name"] == ".text"), bytes(32))
+        _, symbols = parse_symbols(sections)
+        self.assertEqual({s["name"] for s in symbols if s["shndx"] == 0 and
+                          s["name"].startswith("jumptable_")},
+                         {"jumptable_first", "jumptable_second"})
+
+    def test_two_table_retail_bytes_must_match(self):
+        with self.assertRaisesRegex(ValueError, "differs"):
+            self.run_multi_import(compiler_object_two(),
+                                  owner_object_two(second_table_data=b"\x01" + bytes(7)))
+
+    def test_two_table_relocations_must_match(self):
+        with self.assertRaisesRegex(ValueError, "one HA and one LO"):
+            self.run_multi_import(compiler_object_two(second_text_kind=6), owner_object_two())
+
+    def test_tables_in_different_functions(self):
+        result = self.run_multi_import(
+            compiler_object_two(second_function="second_function"),
+            owner_object_two(second_function="second_function"),
+            [("jumptable_first", 4), ("jumptable_second", 12, "second_function")])
+        _, sections = read_elf(result)
+        self.assertEqual(next(s["data"] for s in sections if s["name"] == ".text"), bytes(64))
+        _, symbols = parse_symbols(sections)
+        self.assertEqual({s["name"] for s in symbols if s["info"] == 0x12},
+                         {"fn_8006F720", "second_function"})
+
+    def test_each_table_must_target_its_own_function(self):
+        with self.assertRaisesRegex(ValueError, "relocation differs"):
+            self.run_multi_import(
+                compiler_object_two(second_function="second_function"),
+                owner_object_two(second_function="second_function"),
+                [("jumptable_first", 4, "second_function"),
+                 ("jumptable_second", 12, "fn_8006F720")])
+
+    def test_each_table_target_must_be_inside_its_function(self):
+        with self.assertRaisesRegex(ValueError, "inside the compiled function"):
+            self.run_multi_import(
+                compiler_object_two(second_function="second_function", second_function_size=16),
+                owner_object_two(second_function="second_function"),
+                [("jumptable_first", 4), ("jumptable_second", 12, "second_function")])
 
 
 if __name__ == "__main__":

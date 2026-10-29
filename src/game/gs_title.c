@@ -23,44 +23,44 @@
  *   fn_800205C8  GStitle_CheckAutodemo        -- 0x44 bytes, check autodemo timer
  *   fn_8002060C  GStitle_ResetTimer           -- 0xC bytes, reset autodemo countdown
  *   fn_80020618  GStitle_RenderFrame          -- 0x304 bytes, render one title frame
- *   titleGetState  GStitle_GetState             -- 0x10 bytes, return title state
+ *   fn_8002091C  GStitle_GetState             -- 0x10 bytes, return title state
  *   fn_8002092C  GStitle_AnimateLogo          -- 0x90 bytes, logo bounce/spin
  *   fn_800209BC  GStitle_AnimatePrompt        -- 0x90 bytes, "Press Start" blink
  *   fn_80020A4C  GStitle_AnimateBackground    -- 0x90 bytes, background scroll
  *   fn_80020ADC  GStitle_FadeIn               -- 0x58 bytes, fade from black
  *   fn_80020B34  GStitle_FadeOut              -- 0x58 bytes, fade to black
  *   fn_80020B8C  GStitle_GetFadeState         -- 0x14 bytes, return fade progress
- *   menuOptionDrawSoundMode  GStitle_HandleInput          -- 0xFC bytes, Start/A button handler
- *   titleNewContinueSelect  GStitle_MenuSelect           -- 0x200 bytes, New/Continue/Options menu
+ *   fn_80020BA0  GStitle_HandleInput          -- 0xFC bytes, Start/A button handler
+ *   fn_80020C9C  GStitle_MenuSelect           -- 0x200 bytes, New/Continue/Options menu
  *   fn_80020E9C  GStitle_ReturnZero           -- 8 bytes, stub
- *   titleDrawOptionHelp  GStitle_OptionsMenu          -- 0xB0 bytes, options sub-menu
- *   titleDrawContinueInfo  GStitle_SaveFileSelect       -- 0x19C bytes, save file selection
- *   titleMenuMain  GStitle_LoadSaveFile         -- 0x4D4 bytes, load save from memcard
+ *   fn_80020EA4  GStitle_OptionsMenu          -- 0xB0 bytes, options sub-menu
+ *   fn_80020F54  GStitle_SaveFileSelect       -- 0x19C bytes, save file selection
+ *   fn_800210F0  GStitle_LoadSaveFile         -- 0x4D4 bytes, load save from memcard
  *   fn_800215C4  GStitle_NewGameSetup         -- 0x60 bytes, initialize new game
  *   fn_80021624  GStitle_SetDifficulty        -- 0x20 bytes, set game difficulty
- *   titleIntroStart  GStitle_IntroSequence        -- 0x9C bytes, start intro sequence
+ *   fn_80021644  GStitle_IntroSequence        -- 0x9C bytes, start intro sequence
  *   fn_800216E0  GStitle_SkipIntro            -- 8 bytes, set skip flag
- *   itemUseFormatMessage  GStitle_NameEntry            -- 0x1D4 bytes, player name input screen
- *   itemFieldUseCologne  GStitle_NameEntryInput       -- 0x1E0 bytes, keyboard input handler
+ *   fn_800216E8  GStitle_NameEntry            -- 0x1D4 bytes, player name input screen
+ *   fn_800218BC  GStitle_NameEntryInput       -- 0x1E0 bytes, keyboard input handler
  *   fn_80021A9C  GStitle_NameEntryConfirm     -- 0x78 bytes, confirm name
- *   itemFieldUseRecover  (item-use handler)           -- 0x53C bytes, field item use on a party Pokemon (see note at definition)
- *   itemFieldUseBall  GStitle_DrawKeyboard         -- 0x12C bytes, keyboard grid
+ *   fn_80021B14  GStitle_NameEntryDraw        -- 0x53C bytes, render keyboard UI
+ *   fn_80022050  GStitle_DrawKeyboard         -- 0x12C bytes, keyboard grid
  *   fn_8002217C  GStitle_DrawNamePreview      -- 0x2FC bytes, live name preview
- *   itemFieldUseParamItem  (item-use handler)           -- 0x2A8 bytes, field item use dispatch (see note at definition)
+ *   fn_80022478  GStitle_DrawCaseSwitch       -- 0x2A8 bytes, upper/lower case switch
  *   fn_80022720  GStitle_CameraFlythrough     -- 0x114 bytes, title camera movement
- *   itemFieldUseTM  GStitle_CameraInterpolate    -- 0x308 bytes, camera spline interp
+ *   fn_80022834  GStitle_CameraInterpolate    -- 0x308 bytes, camera spline interp
  *   fn_80022B3C  GStitle_ParticleEffects      -- 0x318 bytes, title particle system
  *   fn_80022E54  GStitle_GetEffectCount       -- 0x90 bytes, count active particles
- *   itemFieldUseEvolutionStone  GStitle_SpawnEffect          -- 0x184 bytes, spawn new particle
- *   _itemUseHealStatus  GStitle_UpdateEffects        -- 0x20C bytes, update particle positions
+ *   fn_80022EE4  GStitle_SpawnEffect          -- 0x184 bytes, spawn new particle
+ *   fn_80023068  GStitle_UpdateEffects        -- 0x20C bytes, update particle positions
  *   cbForgetWazaSelect__FP7PokemonUsl  GStitle_DestroyEffect        -- 0x7C bytes, remove expired particle
- *   _itemUseRareCandy  GStitle_SoundScheduler       -- 0x470 bytes, title BGM/SE scheduling
+ *   fn_800232F0  GStitle_SoundScheduler       -- 0x470 bytes, title BGM/SE scheduling
  *   fn_80023760  GStitle_CrossfadeBGM         -- 0x208 bytes, BGM crossfade
- *   _itemUsePPRestore  GStitle_PlayTitleBGM         -- 0x234 bytes, play title music
- *   itemFieldUseStatBoost  GStitle_StopTitleBGM         -- 0x20C bytes, fade out title music
- *   itemFieldUseForbidden  GStitle_GetBGMState          -- 0x3C bytes
- *   itemFieldUseMeaningless  GStitle_GetSEState           -- 0x3C bytes
- *   itemFieldUseNotNow  GStitle_GetFadeState2        -- 0x3C bytes
+ *   fn_80023968  GStitle_PlayTitleBGM         -- 0x234 bytes, play title music
+ *   fn_80023B9C  GStitle_StopTitleBGM         -- 0x20C bytes, fade out title music
+ *   fn_80023DA8  GStitle_GetBGMState          -- 0x3C bytes
+ *   fn_80023DE4  GStitle_GetSEState           -- 0x3C bytes
+ *   fn_80023E20  GStitle_GetFadeState2        -- 0x3C bytes
  *   fn_80023E5C  GStitle_Nop                  -- 4 bytes, nop
  *   fn_80023E60  GStitle_AutodemoPlayback     -- 0x300 bytes, replay input recording
  *   fn_80024160  GStitle_AutodemoRecord       -- 0x1A8 bytes, record input (debug)
@@ -178,6 +178,19 @@
  */
 
 #include "dolphin/types.h"
+
+/* Callees used across the title-screen carves, with their definitions' signatures. */
+extern s8 fadeCheck(u8 wait);
+extern void itemUseGetTargetPokemon(s32 arg, s32* out1, s32* out2);
+extern void itemUseClosePartyMenu(u32 value);
+extern s32 itemUseOpenPartyMenu(s32 arg0, s32 arg1);
+extern s32 fn_800D37CC(void);
+extern void msgctrlSetValue(u32 id, u32 value);
+extern u8 pokemonCheckValid(u8* ptr);
+extern s32 winMsgOpen(s8 type, u32 message, u32 wait, u8 pause);
+extern void winSpriteSetDisp(void* node, u32 enable);
+s32 titleGetState(void);
+void titleNewContinueSelect(void);
 
 #if defined(GS_TITLE_SPLIT)
 #pragma force_active on
@@ -408,7 +421,7 @@ static inline s32 titleFindEntry(u8* item) {
     return 0;
 }
 
-/* itemFieldUseForbidden - 0x80023DA8 | size: 0x3c */
+/* fn_80023DA8 - 0x80023DA8 | size: 0x3c */
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80023DA8)
 s32 itemFieldUseForbidden(void) {
     winMsgOpen(2, 0x44c6, 1, 0);
@@ -416,14 +429,14 @@ s32 itemFieldUseForbidden(void) {
     return 1;
 }
 
-/* itemFieldUseMeaningless - 0x80023DE4 | size: 0x3c */
+/* fn_80023DE4 - 0x80023DE4 | size: 0x3c */
 s32 itemFieldUseMeaningless(void) {
     winMsgOpen(2, 0x4261, 1, 0);
     winMsgClose(1);
     return 1;
 }
 
-/* itemFieldUseNotNow - 0x80023E20 | size: 0x3c */
+/* fn_80023E20 - 0x80023E20 | size: 0x3c */
 s32 itemFieldUseNotNow(void) {
     winMsgOpen(2, 0x426a, 1, 0);
     winMsgClose(1);
@@ -663,7 +676,7 @@ void fn_80024438(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
     u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x80));
     if ((result & 0xFF) == 0) {
-        winSpriteSetDisp(arg2, 0);
+        winSpriteSetDisp((void*)arg2, 0);
     }
 }
 
@@ -673,7 +686,7 @@ void fn_80024484(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
     u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x70));
     if ((result & 0xFF) == 0) {
-        winSpriteSetDisp(arg2, 0);
+        winSpriteSetDisp((void*)arg2, 0);
     }
 }
 
@@ -683,7 +696,7 @@ void fn_800244D0(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
     u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x60));
     if ((result & 0xFF) == 0) {
-        winSpriteSetDisp(arg2, 0);
+        winSpriteSetDisp((void*)arg2, 0);
     }
 }
 
@@ -693,7 +706,7 @@ void fn_8002451C(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
     u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x50));
     if ((result & 0xFF) == 0) {
-        winSpriteSetDisp(arg2, 0);
+        winSpriteSetDisp((void*)arg2, 0);
     }
 }
 
@@ -703,7 +716,7 @@ void fn_80024568(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
     u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x40));
     if ((result & 0xFF) == 0) {
-        winSpriteSetDisp(arg2, 0);
+        winSpriteSetDisp((void*)arg2, 0);
     }
 }
 
@@ -713,7 +726,7 @@ void fn_800245B4(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
     u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x30));
     if ((result & 0xFF) == 0) {
-        winSpriteSetDisp(arg2, 0);
+        winSpriteSetDisp((void*)arg2, 0);
     }
 }
 
@@ -723,7 +736,7 @@ void fn_80024600(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
     u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x20));
     if ((result & 0xFF) == 0) {
-        winSpriteSetDisp(arg2, 0);
+        winSpriteSetDisp((void*)arg2, 0);
     }
 }
 
@@ -733,7 +746,7 @@ void fn_8002464C(u32 arg1, u32 arg2) {
     void* ctx = *(void**)&lbl_80478DDC;
     u32 result = (u32)std081_flagCheckTrue(*(void**)((u8*)ctx + 0x10));
     if ((result & 0xFF) == 0) {
-        winSpriteSetDisp(arg2, 0);
+        winSpriteSetDisp((void*)arg2, 0);
     }
 }
 
@@ -742,14 +755,13 @@ void fn_80024698(void) { }
 
 /* 0x8002469C | 0x30 */
 extern void* GSmsgGetGSchar(u32);
-extern void msgctrlSetValue(s32, void*);
 void fn_8002469C(void) {
-    msgctrlSetValue(0x37, GSmsgGetGSchar(0x3cdf));
+    msgctrlSetValue(0x37, (u32)GSmsgGetGSchar(0x3cdf));
 }
 
 /* 0x800246CC | 0x30 */
 void fn_800246CC(void) {
-    msgctrlSetValue(0x37, GSmsgGetGSchar(0x3ce4));
+    msgctrlSetValue(0x37, (u32)GSmsgGetGSchar(0x3ce4));
 }
 #endif
 
@@ -831,7 +843,6 @@ void wmapDrawInfo(u8* arg0, u8* arg1) {
     extern TitleSlot* lbl_80478DE4;
     extern u32 std081_flagCheckTrue(void*);
     extern void* GSmsgGetGSchar(u32);
-    extern void msgctrlSetValue(s32, void*);
     u32 slot;
     s32 index;
 
@@ -840,14 +851,14 @@ void wmapDrawInfo(u8* arg0, u8* arg1) {
             (u8)std081_flagCheckTrue((void*)lbl_80478DE4[slot].flag) != 0) {
             index = titleUpdateCursor(arg0, arg1);
             if ((u32)index < *(u32*)lbl_80478DD8) {
-                msgctrlSetValue(0x37, GSmsgGetGSchar(titleSlotMessage(slot, index)));
+                msgctrlSetValue(0x37, (u32)GSmsgGetGSchar(titleSlotMessage(slot, index)));
                 return;
             }
             break;
         }
     }
 
-    msgctrlSetValue(0x37, GSmsgGetGSchar(1));
+    msgctrlSetValue(0x37, (u32)GSmsgGetGSchar(1));
 }
 
 /* 0x80024A2C | 0x178
@@ -1458,10 +1469,8 @@ LAB_80025564:
  */
 extern void fadeSet(f32, s32);
 extern void soundStop(void);
-extern void fn_800D37CC(void);
 extern void std228_soundGetCurrentBackgroundMusic(void);
 extern void std137_soundStopAll(void);
-extern void fadeCheck(s32);
 extern void menuIsCheck(void);
 extern void menuClose(void);
 extern void GStextureFree(void);
@@ -1473,7 +1482,6 @@ void worldMapPost(void) {
     extern u32 lbl_8047A388;
     extern u32 lbl_8047A38C;
     extern u32 GSgetFrameStep(void);
-    extern s32 fn_800D37CC(void);
     extern void GStextureFree(u32);
     extern void _threadSwitch(void);
     extern u8 menuIsCheck(s32);
@@ -1481,7 +1489,6 @@ void worldMapPost(void) {
     extern u32 std228_soundGetCurrentBackgroundMusic(void);
     extern void std137_soundStopAll(u32, s32, s32);
     extern void soundStop(s32, s32);
-    extern void fadeCheck(s32);
     extern void fadeSet(f32, s32);
     f32 accum;
 
@@ -1689,7 +1696,7 @@ void fn_800259B0_old(void) {
     extern u32 lbl_8047A390;
     extern u32 lbl_8047A3AC;
     extern void floorGetPrevFloorID();
-    extern void fn_801CB954();
+    extern void std114_mapObjectSetVisibility();
     u8 sp[0x10];
     u32 tmp = 0;
     u32 r3 = 0;
@@ -1730,15 +1737,15 @@ void fn_800259B0_old(void) {
     lbl_8047A384 = tmp;
     lbl_8047A388 = tmp;
     lbl_8047A390 = tmp;
-    fn_801CB954();
+    std114_mapObjectSetVisibility();
     r3 = 0xC6A0000;
     r4 = 0x0;
     r3 = r3 + 0x1001;
-    fn_801CB954();
+    std114_mapObjectSetVisibility();
     r3 = 0xC6A0000;
     r4 = 0x0;
     r3 = r3 + 0x1002;
-    fn_801CB954();
+    std114_mapObjectSetVisibility();
     floorGetPrevFloorID();
     lbl_8047A3AC = r3;
     if (r3 == 0x7b) {
@@ -1799,7 +1806,6 @@ extern void wmapDrawCaptureQuad(s32, f32, f32, f32, s32, s32, f32*);
 void gsTitleStrippedCaptureWait(void)
 {
     extern u8 lbl_803A2040[];
-    extern s32 fn_800D37CC(void);
     extern u32 GSgetFrameStep(void);
     extern void gfxSetOrtho(f32, f32, f32, f32);
     u32 frames;
@@ -1889,7 +1895,7 @@ s32 wmapRideOverlay(s32 param_1) {
  *   6. Emit 4 vertices forming a textured quad. Each vertex:
  *        GSvecTransform(vert_out, result_2, uv_corner)  -- compute position
  *        fn_800D6680(vert.x, vert.y, vert.z)         -- write pos
- *        gfxVtxColor4u8(0, 0xff, 0xff, 0xff, scaled)    -- RGBA color
+ *        fn_800D5CB8(0, 0xff, 0xff, 0xff, scaled)    -- RGBA color
  *        fn_800D59B8(0, u, v)                        -- UV
  *      4 UV corners: (0,0) (1,0) (0,1) (1,1) via lbl_8047B8AC/B8B0.
  *   7. fn_800D6728() to flush the primitive.
@@ -2077,7 +2083,6 @@ void worldMapBikeRide(void) {
     extern f32 lbl_8047A3A4;
     extern u32 __cvt_fp2unsigned(f64);
     extern u32 GSgetFrameStep(void);
-    extern s32 fn_800D37CC(void);
     extern void GSgfxBeginBackFBCapture(u32, void*, s32);
     extern void GSmodelSetGSparticleLinkAttachMode(u32, s32);
     extern void GSmodelLinkToGSparticleBank(u32, u32);
@@ -2370,7 +2375,7 @@ s32 fn_80020618(void) {
 }
 #endif
 
-/* titleGetState - 0x8002091C | size: 0x10 */
+/* fn_8002091C - 0x8002091C | size: 0x10 */
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_8002091C)
 s32 titleGetState(void) {
     return *(s32*)lbl_803A1FC8;
@@ -2445,7 +2450,7 @@ void fn_80020B8C(void* r3, u8* r4) {
     *(f32*)(r4 + 0x70) = *(f32*)(lbl_803A1FC8 + 0x10);
 }
 
-/* menuOptionDrawSoundMode - 0x80020BA0 | size: 0xfc */
+/* fn_80020BA0 - 0x80020BA0 | size: 0xfc */
 extern void windowDrawSprite(s32, s32, void*, s32, s32);
 extern u8 lbl_802EF0A8[];
 void menuOptionDrawSoundMode(void* arg0, u8* arg1) {
@@ -2466,10 +2471,9 @@ void menuOptionDrawSoundMode(void* arg0, u8* arg1) {
     windowDrawSprite((s16)(ptr[1] - *(s16*)(arg1 + 0x50)), (s16)(ptr[2] - *(s16*)(arg1 + 0x52)), arg0, 0x192, 0);
 }
 
-/* titleNewContinueSelect - 0x80020C9C | size: 0x200 */
+/* fn_80020C9C - 0x80020C9C | size: 0x200 */
 extern void winSeqCheckMove(void);
 extern void memcardGetFlag41(void);
-extern void winMsgOpen(s32, s32, s32, s32);
 extern void fn_8001E074(void);
 extern void fn_801D0748(void);
 extern void winMsgClose(s32);
@@ -2484,7 +2488,6 @@ void titleNewContinueSelect(void) {
     extern void soundSetOutputMode(u32);
     extern void gamedatasaveSetStatus(s32, s32, s32);
     extern u8 memcardGetFlag41(void);
-    extern void winMsgOpen(s32, s32, s32, s32);
     extern u8 fn_8001E074(s32, s32, s32, s32);
     extern void fn_801D0748(s32, s32, s32);
     extern void winMsgClose(s32);
@@ -2552,7 +2555,7 @@ void titleNewContinueSelect(void) {
 }
 #endif
 
-/* titleDrawOptionHelp - 0x80020EA4 | size: 0xb0 */
+/* fn_80020EA4 - 0x80020EA4 | size: 0xb0 */
 extern u32 lbl_8047A360;
 extern u32 lbl_8047A364;
 extern u32 lbl_802E4EF0[];
@@ -2574,7 +2577,7 @@ void titleDrawOptionHelp(u8* r3, u8* r4) {
 }
 #endif
 
-/* titleDrawContinueInfo - 0x80020F54 | size: 0x19c */
+/* fn_80020F54 - 0x80020F54 | size: 0x19c */
 extern void* menuModelRender(void*);
 extern void gfxVtxPos2s16(void);
 extern s32 darkPokemonCountFlag14(void);
@@ -2644,7 +2647,7 @@ void titleDrawContinueInfo(u8* arg0, u8* arg1) {
 }
 #endif
 
-/* titleMenuMain - 0x800210F0 | size: 0x4d4
+/* fn_800210F0 - 0x800210F0 | size: 0x4d4
  *
  * GStitle_LoadSaveFile: the title menu loop. Exact (2026-09-30). The shapes
  * that decide its registers, each read off the target:
@@ -2835,9 +2838,9 @@ s32 titleMenuMain(void)
             msgVals[0] = fn_80005748();
             msgVals[1] = darkPokemonCountFlag14();
             msgVals[2] = darkPokemonCountFlag12();
-            msgctrlSetValue(0x4C, (void*)msgVals[0]);
-            msgctrlSetValue(0x2F, (void*)msgVals[2]);
-            msgctrlSetValue(0x30, (void*)msgVals[1]);
+            msgctrlSetValue(0x4C, (u32)msgVals[0]);
+            msgctrlSetValue(0x2F, (u32)msgVals[2]);
+            msgctrlSetValue(0x30, (u32)msgVals[1]);
             menuOpen(0x16, 0);
             winMsgOpen(1, 0x3C22, 0, 1);
             answer = (s8)menuSubOpenYesNo(0, 0x3C, 0xD6, 1);
@@ -2906,7 +2909,7 @@ void fn_80021624(void) {
 }
 #endif
 
-/* titleIntroStart - 0x80021644 | size: 0x9c */
+/* fn_80021644 - 0x80021644 | size: 0x9c */
 extern void GSscene_SetMode(void);
 extern u32 lbl_8047A35C;
 extern u32 lbl_8047A358;
@@ -2933,7 +2936,7 @@ void titleIntroStart(void) {
 }
 #endif
 
-/* itemUseFormatMessage - 0x800216E8 | size: 0x1d4 */
+/* fn_800216E8 - 0x800216E8 | size: 0x1d4 */
 extern void GSmsgGetText(void*, s32, void*);
 extern void* pokemonBiosGetNicknamePtr(s32);
 extern u8 lbl_80266C7C[];
@@ -3016,24 +3019,19 @@ void itemUseFormatMessage(void* arg0, s32 arg1, u8* arg2, s16 arg3, s32 arg4) {
     }
 
     name = pokemonBiosGetNicknamePtr(arg4);
-    msgctrlSetValue(0x32, name);
-    msgctrlSetValue(0x2F, (void*)(s32)x);
-    msgctrlSetValue(0x30, (void*)(s32)y);
+    msgctrlSetValue(0x32, (u32)name);
+    msgctrlSetValue(0x2F, (u32)((s32)x));
+    msgctrlSetValue(0x30, (u32)((s32)y));
     GSmsgGetText(arg0, arg1 + 1, (void*)msg);
 }
 
 #if !defined(GS_TITLE_800216E8_ONLY)
-/* itemFieldUseCologne - 0x800218BC | size: 0x1e0 */
-extern void itemUseGetTargetPokemon(s32, void*, void*);
-extern s32 pokemonCheckValid(s32);
-extern s32 itemUseOpenPartyMenu(void*, s32);
-extern void itemUseClosePartyMenu(s32);
+/* fn_800218BC - 0x800218BC | size: 0x1e0 */
 extern u8 lbl_803A1B90[];
 extern u32 lbl_8047B8A0;
 s32 itemFieldUseCologne(u32 arg0, u32* arg1)
 {
     extern f32 pokemonGetDp(void*);
-    extern void winMsgOpen(s32, s32, s32, s32);
     extern void winMsgClose(s32);
     f32 thresh;
     void* sp_c;
@@ -3064,7 +3062,7 @@ s32 itemFieldUseCologne(u32 arg0, u32* arg1)
     thresh = *((f32*) (&lbl_8047B8A0));
     do {
         itemUseGetTargetPokemon(i, &sp_c, &sp_8);
-        if (((u8) pokemonCheckValid((s32) sp_c)) != 0) {
+        if (((u8) pokemonCheckValid((u8*)sp_c)) != 0) {
             if (pokemonIsDarkPokemon((s32) sp_c) != 0) {
                 if (pokemonGetDp(sp_c) > thresh) {
                     break;
@@ -3079,7 +3077,7 @@ s32 itemFieldUseCologne(u32 arg0, u32* arg1)
         winMsgClose(1);
         return 1;
     }
-    idx = itemUseOpenPartyMenu((void*) arg0, 1);
+    idx = itemUseOpenPartyMenu((s32)arg0, 1);
     if (idx >= 0) {
         itemUseGetTargetPokemon(idx, &sp_c, &sp_8);
         ok = 0;
@@ -3125,25 +3123,7 @@ s32 fn_80021A9C(u32 r3, u32* r4) {
 }
 #endif
 
-/* itemFieldUseRecover - 0x80021B14 | size: 0x53c
- *
- * Field item-use handler: dispatches on itemParamGetRecoverType() of the
- * current item, applies it to the chosen party Pokemon and reports through
- * the message window; returns 0 when the item was used (and sets *arg1).
- *
- * STATUS (99.82%, one instruction): the 0/1 `result` of the 3..11 case.
- * Retail builds it in r0 at a join and returns it with `mr r3,r0`; a u8
- * result gives `clrlwi r3,r0,24` and any 32-bit result is coalesced into r3.
- * Ruled out: every result/return type, declaration position, if/else /
- * goto / ternary / shared-return forms, whole-case and tail inline helpers,
- * C++, peephole and compiler version. The only other function with this
- * join is menuPokemonModelIsLoaded, where it comes from a u8 result fed by two
- * expansions of a multi-return inline (faceKeyEqual), so the original
- * probably used a shared inline helper here too (itemFieldUseParamItem ends the same
- * way). Reusing arg0 as the result (permuter lead) builds it in arg0's saved
- * register (r29) instead of r0, and reusing any other case local lands it
- * in r3 or on the stack. Details: Working/refs/upstream-matches-leftovers.tsv.
- */
+/* fn_80021B14 - 0x80021B14 | size: 0x53c */
 extern void fn_80142EF8(void);
 extern void fn_801431AC(void);
 extern s32 fn_80014110(void);
@@ -3154,7 +3134,32 @@ extern void menuPokemonRefresh(void);
 extern u8 lbl_80478890[8];
 extern u8 lbl_80266DB0[];
 extern u8 lbl_80266D78[];
-extern s32 _itemUsePPRestore(u32, u32*);
+extern s32 _itemUsePPRestore(s32, u32*);
+#if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80021B14) || \
+    defined(GS_TITLE_CANDIDATE_80022478)
+/* Healing-item result: when the item took effect, set *arg1 from the item
+ * id and return 0; otherwise return 1. Shared by fn_80021B14 and
+ * fn_80022478. */
+/* RULE-EXCEPTION(user-approved): inline helper, register-only evidence - see docs/RULE_EXCEPTIONS.md */
+static inline s32 gsTitleRecoverItemResult(s32 slot, s16 effect_count, u32 arg0, u32* arg1) {
+    if (slot >= 0 && effect_count > 0) {
+        switch (arg0) {
+        case 0x27:
+        case 0x28:
+        case 0x29:
+        case 0x2A:
+        case 0x2B:
+            *arg1 = 0;
+            break;
+        default:
+            *arg1 = 1;
+            break;
+        }
+        return 0;
+    }
+    return 1;
+}
+#endif
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80021B14)
 s32 itemFieldUseRecover(u32 arg0, u32* arg1) {
     typedef struct TitleEffectEntry {
@@ -3174,10 +3179,9 @@ s32 itemFieldUseRecover(u32 arg0, u32* arg1) {
     } TitleBgmTable;
     extern s32 fn_80144574(void*, s32, s32, u16, u8);
     extern void itemUseFormatMessage(void*, s32, void*, s32, s32);
-    extern s32 itemUseOpenPartyMenu(void*, s32);
     extern u8 pokemonIsJoutaiDataId(s32, s32);
     u8 item_param[0x10];
-    u8 result;
+    s32 result;
 
     itemParamConvertOrigFormat(item_param, lbl_80478890);
     switch ((s32)itemParamGetRecoverType(item_param)) {
@@ -3204,7 +3208,7 @@ s32 itemFieldUseRecover(u32 arg0, u32* arg1) {
         slot = fn_80014110();
         itemUseGetTargetPokemon(slot, &pokemon, &data);
         if (pokemonIsJoutaiDataId(pokemon, 0x3E)) {
-            msgctrlSetValue(0x32, (void*)pokemonBiosGetNicknamePtr(pokemon));
+            msgctrlSetValue(0x32, (u32)pokemonBiosGetNicknamePtr(pokemon));
             winMsgOpen(2, 0x424D, 1, 0);
             winMsgClose(1);
             return 1;
@@ -3247,14 +3251,14 @@ s32 itemFieldUseRecover(u32 arg0, u32* arg1) {
                 text = special.entries[specialIndex].message;
                 x = effects[effectIndex].x;
                 y = effects[effectIndex].y;
-                msgctrlSetValue(0x32, (void*)pokemonBiosGetNicknamePtr(owner));
-                msgctrlSetValue(0x2F, (void*)x);
-                msgctrlSetValue(0x30, (void*)y);
+                msgctrlSetValue(0x32, (u32)pokemonBiosGetNicknamePtr(owner));
+                msgctrlSetValue(0x2F, (u32)x);
+                msgctrlSetValue(0x30, (u32)y);
                 GSmsgGetText(message, 0x41, (void*)text);
             }
         }
 
-        msgctrlSetValue(0x4D, message);
+        msgctrlSetValue(0x4D, (u32)message);
         winMsgOpen(2, 0xE0, 1, 0);
         winMsgClose(1);
         if ((s16)effectCount > 0) {
@@ -3281,7 +3285,7 @@ s32 itemFieldUseRecover(u32 arg0, u32* arg1) {
         s32 pokemon;
         s32 i;
 
-        slot = itemUseOpenPartyMenu((void*)arg0, 1);
+        slot = itemUseOpenPartyMenu((s32)arg0, 1);
         if (slot >= 0) {
             itemUseGetTargetPokemon(slot, &pokemon, &data);
             if (pokemonIsJoutaiDataId(pokemon, 0x3E) == 0) {
@@ -3297,47 +3301,34 @@ s32 itemFieldUseRecover(u32 arg0, u32* arg1) {
                     menuPokemonRefresh();
                 }
                 itemUseFormatMessage(name, 0x40, effects, effect_count, pokemon);
-                msgctrlSetValue(0x4D, name);
+                msgctrlSetValue(0x4D, (u32)name);
                 winMsgOpen(2, 0xE0, 1, 0);
                 winMsgClose(1);
             } else {
-                msgctrlSetValue(0x32, (void*)pokemonBiosGetNicknamePtr(pokemon));
+                msgctrlSetValue(0x32, (u32)pokemonBiosGetNicknamePtr(pokemon));
                 winMsgOpen(2, 0x424D, 1, 0);
                 winMsgClose(1);
                 effect_count = 0;
             }
         }
         itemUseClosePartyMenu(slot);
-        if (slot >= 0 && (s16)effect_count > 0) {
-            switch (arg0) {
-            case 0x27:
-            case 0x28:
-            case 0x29:
-            case 0x2A:
-            case 0x2B:
-                *arg1 = 0;
-                break;
-            default:
-                *arg1 = 1;
-                break;
-            }
-            result = 0;
-        } else {
-            result = 1;
-        }
-        return result;
+        result = gsTitleRecoverItemResult(slot, effect_count, arg0, arg1);
+        break;
     }
     case 21:
-        return _itemUsePPRestore(arg0, arg1);
+        result = _itemUsePPRestore(arg0, arg1);
+        break;
     default:
         winMsgOpen(2, 0x426A, 1, 0);
         winMsgClose(1);
-        return 1;
+        result = 1;
+        break;
     }
+    return result;
 }
 #endif
 
-/* itemFieldUseBall - 0x80022050 | size: 0x12c */
+/* fn_80022050 - 0x80022050 | size: 0x12c */
 extern s32 pcboxGetNbPokemonBox(void);
 extern s32 fn_801347E8(s32, s8);
 extern void fn_800140FC(s32*, s32*);
@@ -3357,7 +3348,7 @@ s32 itemFieldUseBall(s32 arg0, s32* arg1) {
     iVar4 = 0;
     do {
         itemUseGetTargetPokemon(iVar4, &spC, &sp8);
-        if ((u8)pokemonCheckValid(spC) != 0) {
+        if ((u8)pokemonCheckValid((u8*)spC) != 0) {
             iVar3 = iVar3 + 1;
         }
         iVar4 = iVar4 + 1;
@@ -3390,7 +3381,7 @@ s32 itemFieldUseBall(s32 arg0, s32* arg1) {
 #endif
 
 /* fn_8002217C - 0x8002217C | size: 0x2fc */
-#if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_8002217C)
+#if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_EXACT_8002217C)
 s32 fn_8002217C(u32 wazaDataId, u32* result) {
     typedef struct TitleEffectEntry {
         s32 code;
@@ -3432,7 +3423,7 @@ s32 fn_8002217C(u32 wazaDataId, u32* result) {
     itemUseGetTargetPokemon(slot, &pokemon, &data);
     if ((u8)pokemonIsJoutaiDataId(pokemon, 0x3E)) {
         nickname = pokemonBiosGetNicknamePtr(pokemon);
-        msgctrlSetValue(0x32, nickname);
+        msgctrlSetValue(0x32, (u32)nickname);
         winMsgOpen(2, 0x424D, 1, 0);
         winMsgClose(1);
         return 1;
@@ -3477,14 +3468,14 @@ s32 fn_8002217C(u32 wazaDataId, u32* result) {
             text = special.entries[specialIndex].message;
             x = effects[effectIndex].x;
             y = effects[effectIndex].y;
-            msgctrlSetValue(0x32, (void*)pokemonBiosGetNicknamePtr(owner));
-            msgctrlSetValue(0x2F, (void*)x);
-            msgctrlSetValue(0x30, (void*)y);
+            msgctrlSetValue(0x32, (u32)pokemonBiosGetNicknamePtr(owner));
+            msgctrlSetValue(0x2F, (u32)x);
+            msgctrlSetValue(0x30, (u32)y);
             GSmsgGetText(message, 0x41, (void*)text);
         }
     }
 
-    msgctrlSetValue(0x4D, message);
+    msgctrlSetValue(0x4D, (u32)message);
     winMsgOpen(2, 0xE0, 1, 0);
     winMsgClose(1);
     if (effectCount > 0) {
@@ -3493,12 +3484,10 @@ s32 fn_8002217C(u32 wazaDataId, u32* result) {
     }
     return 1;
 }
+#endif
 
-/* itemFieldUseParamItem - 0x80022478 | size: 0x2a8
- *
- * Field item-use handler with the same 0/1 result tail as itemFieldUseRecover
- * (retail `mr r3,r0`, ours `clrlwi`); see the STATUS note there.
- */
+#if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_CANDIDATE_80022478)
+/* fn_80022478 - 0x80022478 | size: 0x2a8 */
 extern void jumptable_802E4F00();
 extern u8 lbl_80478888[8];
 extern s32 _itemUseHealStatus(u32, u32*);
@@ -3517,7 +3506,7 @@ s32 itemFieldUseParamItem(u32 arg0, u32* arg1) {
     s32 slot;
     TitleBgmList bgm;
     s32 i;
-    u8 result;
+    s32 result;
 
     itemParamConvertOrigFormat(item_param, lbl_80478888);
     switch (itemParamGetRecoverType(item_param)) {
@@ -3534,7 +3523,7 @@ s32 itemFieldUseParamItem(u32 arg0, u32* arg1) {
     case 15:
     case 16:
     case 17:
-        slot = itemUseOpenPartyMenu((void*)arg0, 1);
+        slot = itemUseOpenPartyMenu((s32)arg0, 1);
         if (slot >= 0) {
             itemUseGetTargetPokemon(slot, &pokemon, &data);
             if ((u8)pokemonIsJoutaiDataId(pokemon, 0x3E) == 0) {
@@ -3550,51 +3539,43 @@ s32 itemFieldUseParamItem(u32 arg0, u32* arg1) {
                     menuPokemonRefresh();
                 }
                 itemUseFormatMessage(name, 0x40, (u8*)effects, effect_count, pokemon);
-                msgctrlSetValue(0x4D, name);
+                msgctrlSetValue(0x4D, (u32)name);
                 winMsgOpen(2, 0xE0, 1, 0);
                 winMsgClose(1);
             } else {
-                msgctrlSetValue(0x32, (void*)pokemonBiosGetNicknamePtr(pokemon));
+                msgctrlSetValue(0x32, (u32)pokemonBiosGetNicknamePtr(pokemon));
                 winMsgOpen(2, 0x424D, 1, 0);
                 winMsgClose(1);
                 effect_count = 0;
             }
         }
         itemUseClosePartyMenu(slot);
-        if (slot >= 0 && effect_count > 0) {
-            switch (arg0) {
-            case 0x27:
-            case 0x28:
-            case 0x29:
-            case 0x2A:
-            case 0x2B:
-                *arg1 = 0;
-                break;
-            default:
-                *arg1 = 1;
-                break;
-            }
-            result = 0;
-        } else {
-            result = 1;
-        }
-        return result;
+        result = gsTitleRecoverItemResult(slot, effect_count, arg0, arg1);
+        break;
     case 1:
-        return fn_80023760(arg0, arg1);
+        result = fn_80023760(arg0, arg1);
+        break;
     case 2:
-        return _itemUseRareCandy(arg0, arg1);
+        result = _itemUseRareCandy(arg0, arg1);
+        break;
     case 19:
     case 20:
-        return _itemUseHealStatus(arg0, arg1);
+        result = _itemUseHealStatus(arg0, arg1);
+        break;
     case 21:
-        return _itemUsePPRestore(arg0, arg1);
+        result = _itemUsePPRestore(arg0, arg1);
+        break;
     default:
         winMsgOpen(2, 0x426A, 1, 0);
         winMsgClose(1);
-        return 1;
+        result = 1;
+        break;
     }
+    return result;
 }
+#endif
 
+#if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_EXACT_80022720)
 /* fn_80022720 - 0x80022720 | size: 0x114
  *
  * fn_80022720(u32 arg0, u32* arg1) -> s32  -- error-report dispatcher for
@@ -3613,11 +3594,7 @@ s32 itemFieldUseParamItem(u32 arg0, u32* arg1) {
  * Calls winMsgOpen(2, msg_from_row_iVar1, 1, 0) then winMsgClose(1) to
  * print the error message, writes 0 to *arg1, returns 0.
  *
- * Status: 70.5% matched. Blocker: target asm batches ALL 10 lwz loads
- * first THEN ALL stw stores; our CW compile interleaves load-store-load-
- * store. This is CW 1.3 scheduler behavior we have not been able to
- * force from source (tried u32* src, temp-var pair hoist, array init
- * syntax, scheduling pragmas).
+ * The table copy and dispatcher match in the isolated 0x80022720 unit.
  */
 extern u8 lbl_80266C54[];
 typedef struct TitleMsgEnt {
@@ -3643,9 +3620,11 @@ s32 fn_80022720(u32 arg0, u32* arg1) {
     *arg1 = 0;
     return 0;
 }
-#pragma optimization_level 4
+#endif
 
-/* itemFieldUseTM - 0x80022834 | size: 0x308 */
+#if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_CANDIDATE_80022834)
+
+/* fn_80022834 - 0x80022834 | size: 0x308 */
 extern void itemDataBiosGetPtr(void);
 extern void itemDataBiosGetWazaMachineNo(void);
 extern void itemDataBiosGetWazaIDByWazaMachineNo(void);
@@ -3658,6 +3637,62 @@ extern void evolutionWazaLearn(void);
 extern void pokemonWazaCreate(void);
 extern void pokemonGetSoubiItemSoubiDataId(void);
 extern void pokemonGetFriendFormPokemonFriendFilterId(void);
+/* RULE-EXCEPTION(user-approved): single-use inline helper, register-only
+ * evidence - see docs/RULE_EXCEPTIONS.md. Its inlined return temp gives
+ * retail's tmp/effect copy and register numbering for fn_80022834. */
+static inline s32 gsTitleTeachWazaMachine(s32 c, u32 status) {
+    extern u32 itemDataBiosGetWazaIDByWazaMachineNo(u32);
+    extern u32 pokemonBiosGetPokemonWazaDataId(s32, u16);
+    extern void pokemonBiosGetPokemonDataId(s32);
+    extern s32 pokemonDataBiosGetPtr(void);
+    extern u8 pokemonDataBiosGetWazaMcn(s32, s32);
+    extern s32 evolutionWazaLearn(s32, u32, void*, s32, void*, s32);
+    extern void pokemonWazaCreate(s32, u32, u32);
+    extern u32 pokemonGetSoubiItemSoubiDataId(s32);
+    extern void pokemonGetFriendFormPokemonFriendFilterId(s32, u32, s32);
+    extern void cbForgetWazaSelect__FP7PokemonUsl(void);
+    s32 i;
+    s32 tmp;
+    u32 v2;
+    u8 buf;
+
+    if (pokemonIsDarkPokemon(c) != 0) {
+        winMsgOpen(2, 0x424C, 1, 0);
+        winMsgClose(1);
+        return 0;
+    } else {
+        v2 = itemDataBiosGetWazaIDByWazaMachineNo(status);
+        for (i = 0; i < 4; i++) {
+            if ((u16)v2 == (u16)pokemonBiosGetPokemonWazaDataId(c, i)) {
+                break;
+            }
+        }
+        if (i < 4) {
+            msgctrlSetValue(0x32, (u32)pokemonBiosGetNicknamePtr(c));
+            msgctrlSetValue(0x39, (u32)((u16)v2));
+            winMsgOpen(2, 0x4244, 1, 0);
+            winMsgClose(1);
+            return 0;
+        } else {
+            pokemonBiosGetPokemonDataId(c);
+            if (pokemonDataBiosGetWazaMcn(pokemonDataBiosGetPtr(), status) == 0) {
+                msgctrlSetValue(0x32, (u32)pokemonBiosGetNicknamePtr(c));
+                msgctrlSetValue(0x39, (u32)((u16)v2));
+                winMsgOpen(2, 0x423F, 1, 0);
+                winMsgClose(1);
+                return 0;
+            } else {
+                tmp = evolutionWazaLearn(c, v2, &buf, 1, cbForgetWazaSelect__FP7PokemonUsl, 0);
+                if (tmp != 0) {
+                    pokemonWazaCreate(c, buf, v2 & 0xFFFF);
+                    pokemonGetFriendFormPokemonFriendFilterId(c, pokemonGetSoubiItemSoubiDataId(c), 4);
+                }
+            }
+        }
+    }
+    return tmp;
+}
+
 s32 itemFieldUseTM(u32 arg0, u32* arg1) {
     extern void* itemDataBiosGetPtr(u32);
     extern u32 itemDataBiosGetWazaMachineNo(void*);
@@ -3674,25 +3709,20 @@ s32 itemFieldUseTM(u32 arg0, u32* arg1) {
     extern void pokemonGetFriendFormPokemonFriendFilterId(s32, u32, s32);
     extern void cbForgetWazaSelect__FP7PokemonUsl(void);
 
+    u16 value16;
     u8 status;
-    s32 i;
     s32 msg;
     void* handle;
-    s32 c;
-    u16 value16;
     s32 state;
     s32 type_byte;
     s32 action;
-    s32 tmp;
-    u32 v2;
     s32 effect;
     s32 slot;
     u32 sc;
     s32 sd;
-    u8 buf;
 
     handle = itemDataBiosGetPtr((u16)arg0);
-    status = (u8)itemDataBiosGetWazaMachineNo(handle);
+    status = itemDataBiosGetWazaMachineNo(handle) & 0xFF;
     value16 = itemDataBiosGetWazaIDByWazaMachineNo(status);
     soundStart(0x4CB, 0, 0xFF, 0);
     type_byte = itemDataBiosGetHidenMachineNo(handle);
@@ -3701,7 +3731,7 @@ s32 itemFieldUseTM(u32 arg0, u32* arg1) {
     } else {
         msg = 0x4265;
     }
-    msgctrlSetValue(0x39, (void*)value16);
+    msgctrlSetValue(0x39, (u32)value16);
     winMsgOpen(2, msg, 1, 0);
     winMsgClose(1);
     winMsgOpen(2, 0x426B, 1, 0);
@@ -3716,45 +3746,10 @@ s32 itemFieldUseTM(u32 arg0, u32* arg1) {
         return 1;
     }
 
-    slot = itemUseOpenPartyMenu((void*)arg0, 1);
+    slot = itemUseOpenPartyMenu((s32)arg0, 1);
     if (slot >= 0) {
-        itemUseGetTargetPokemon(slot, &sc, &sd);
-        c = sc;
-        if (pokemonIsDarkPokemon(c) != 0) {
-            winMsgOpen(2, 0x424C, 1, 0);
-            winMsgClose(1);
-            tmp = 0;
-        } else {
-            v2 = itemDataBiosGetWazaIDByWazaMachineNo(status);
-            for (i = 0; i < 4; i++) {
-                if ((u16)v2 == (u16)pokemonBiosGetPokemonWazaDataId(c, i)) {
-                    break;
-                }
-            }
-            if (i < 4) {
-                msgctrlSetValue(0x32, pokemonBiosGetNicknamePtr(c));
-                msgctrlSetValue(0x39, (void*)(u16)v2);
-                winMsgOpen(2, 0x4244, 1, 0);
-                winMsgClose(1);
-                tmp = 0;
-            } else {
-                pokemonBiosGetPokemonDataId(c);
-                if (pokemonDataBiosGetWazaMcn(pokemonDataBiosGetPtr(), status) == 0) {
-                    msgctrlSetValue(0x32, pokemonBiosGetNicknamePtr(c));
-                    msgctrlSetValue(0x39, (void*)(u16)v2);
-                    winMsgOpen(2, 0x423F, 1, 0);
-                    winMsgClose(1);
-                    tmp = 0;
-                } else {
-                    tmp = evolutionWazaLearn(c, v2, &buf, 1, cbForgetWazaSelect__FP7PokemonUsl, 0);
-                    if (tmp != 0) {
-                        pokemonWazaCreate(c, buf, v2 & 0xFFFF);
-                        pokemonGetFriendFormPokemonFriendFilterId(c, pokemonGetSoubiItemSoubiDataId(c), 4);
-                    }
-                }
-            }
-        }
-        effect = tmp;
+        itemUseGetTargetPokemon(slot, (s32*)&sc, (s32*)&sd);
+        effect = gsTitleTeachWazaMachine(sc, status);
     }
 
     itemUseClosePartyMenu(slot);
@@ -3777,6 +3772,46 @@ extern void pokemonInitPersistentJoutai(s32, s32);
 extern void pokemonAddDpFormPokemonDpFilterId(s32, s32, s32);
 extern u8 lbl_80266C30[];
 extern u32 lbl_8047B8A0;
+/* Pokémon data pointer of a party Pokémon, or 0 when the slot is empty or
+ * invalid. */
+/* RULE-EXCEPTION(user-approved): single-use inline helper, register-only evidence - see docs/RULE_EXCEPTIONS.md */
+static inline void* gsTitlePokemonDataPtr(u32 target) {
+    extern void pokemonBiosGetPokemonDataId(s32);
+    extern void* pokemonDataBiosGetPtr(void);
+
+    if (target == 0) {
+        return 0;
+    }
+    if ((u8)pokemonCheckValid((u8*)target) == 0) {
+        return 0;
+    }
+    pokemonBiosGetPokemonDataId(target);
+    return pokemonDataBiosGetPtr();
+}
+
+/* Starts the Pokémon's cry and returns its voice id (0 without data). */
+/* RULE-EXCEPTION(user-approved): single-use inline helper, register-only evidence - see docs/RULE_EXCEPTIONS.md */
+static inline s32 gsTitlePlayPokemonVoice(void* bios) {
+    extern u16 pokemonDataBiosGetVoice(void*);
+    s32 voice;
+
+    if (bios == 0) {
+        return 0;
+    }
+    voice = pokemonDataBiosGetVoice(bios);
+    soundStartSE(voice);
+    return voice;
+}
+
+/* Yields to other threads for the given number of frames. */
+static inline void gsTitleWaitFrames(s32 frames) {
+    s32 wait;
+
+    for (wait = 0; wait < frames; wait += GSgetFrameStep()) {
+        _threadSwitch();
+    }
+}
+
 s32 std163_useCologne(s32 arg0, s32 arg1) {
     typedef struct TitleItemMessage {
         u16 item;
@@ -3794,8 +3829,6 @@ s32 std163_useCologne(s32 arg0, s32 arg1) {
     TitleItemMessageTable table;
     s32 i;
     s32 entryOffset;
-    u32 target;
-    s32 wait;
     s32 voice;
     void* bios;
     s32 j;
@@ -3803,7 +3836,7 @@ s32 std163_useCologne(s32 arg0, s32 arg1) {
 
     table = *(TitleItemMessageTable*)lbl_80266C30;
     itemUseGetTargetPokemon(arg1, &pokemon, &data);
-    if ((u8)pokemonCheckValid(pokemon) == 0) {
+    if ((u8)pokemonCheckValid((u8*)pokemon) == 0) {
         return 1;
     }
 
@@ -3816,8 +3849,8 @@ s32 std163_useCologne(s32 arg0, s32 arg1) {
         return 1;
     }
     nickname = pokemonBiosGetNicknamePtr(pokemon);
-    msgctrlSetValue(0x32, nickname);
-    msgctrlSetValue(0x2D, (void*)arg0);
+    msgctrlSetValue(0x32, (u32)nickname);
+    msgctrlSetValue(0x2D, (u32)arg0);
     entryOffset = i * sizeof(TitleItemMessage);
     winMsgOpen(2, *(u32*)((u8*)&table.entry[0].useMessage + entryOffset), 1, 0);
     winMsgClose(1);
@@ -3825,36 +3858,20 @@ s32 std163_useCologne(s32 arg0, s32 arg1) {
     if (gamedatasaveGetStatus(0, 9) == 0) {
         for (j = 0; j < 2; j++) {
             GSinputMotorStart(1, 0, 0xFF, 0x15, 0);
-            for (wait = 0; wait < 0x3C; wait += GSgetFrameStep()) {
-                _threadSwitch();
-            }
+            gsTitleWaitFrames(0x3C);
         }
         GSinputMotorStart(1, 0, 0xFF, 0x30, 0);
-        for (wait = 0; wait < 0x60; wait += GSgetFrameStep()) {
-            _threadSwitch();
-        }
+        gsTitleWaitFrames(0x60);
     }
 
-    target = pokemon;
-    if (target == 0) {
-        bios = 0;
-    } else if ((u8)pokemonCheckValid(target) == 0) {
-        bios = 0;
-    } else {
-        pokemonBiosGetPokemonDataId(target);
-        bios = pokemonDataBiosGetPtr();
-    }
-    if (bios == 0) {
-        voice = 0;
-    } else {
-        voice = pokemonDataBiosGetVoice(bios);
-        soundStartSE(voice);
-    }
+    bios = gsTitlePokemonDataPtr(pokemon);
+    voice = gsTitlePlayPokemonVoice(bios);
     while (GSsndGetStatus(voice) == 2) {
         _threadSwitch();
     }
 
-    msgctrlSetValue(0x32, pokemonBiosGetNicknamePtr(pokemon));
+    nickname = pokemonBiosGetNicknamePtr(pokemon);
+    msgctrlSetValue(0x32, (u32)nickname);
     winMsgOpen(2, 0x3AF7, 1, 0);
     winMsgClose(1);
     if ((u8)pokemonIsJoutaiDataId(pokemon, 0x3E) != 0) {
@@ -3864,7 +3881,8 @@ s32 std163_useCologne(s32 arg0, s32 arg1) {
     }
     if (pokemonGetDp((void*)pokemon) > *(f32*)&lbl_8047B8A0) {
         pokemonAddDpFormPokemonDpFilterId(pokemon, (u16)arg0, 4);
-        msgctrlSetValue(0x32, pokemonBiosGetNicknamePtr(pokemon));
+        nickname = pokemonBiosGetNicknamePtr(pokemon);
+        msgctrlSetValue(0x32, (u32)nickname);
         winMsgOpen(2, *(u32*)((u8*)&table.entry[0].dpMessage + entryOffset), 1, 0);
         winMsgClose(1);
     }
@@ -3883,9 +3901,9 @@ s32 fn_80022E54(void* r3, u32* r4) {
     u32 sc, sd;
     r29 = r3;
     r30 = r4;
-    r31 = itemUseOpenPartyMenu(r29, 1);
+    r31 = itemUseOpenPartyMenu((s32)r29, 1);
     if (r31 >= 0) {
-        itemUseGetTargetPokemon(r31, &sc, &sd);
+        itemUseGetTargetPokemon(r31, (s32*)&sc, (s32*)&sd);
     }
     itemUseClosePartyMenu(r31);
     if (r31 >= 0) {
@@ -3896,7 +3914,7 @@ s32 fn_80022E54(void* r3, u32* r4) {
     return 1;
 }
 
-/* itemFieldUseEvolutionStone - 0x80022EE4 | size: 0x184 */
+/* fn_80022EE4 - 0x80022EE4 | size: 0x184 */
 extern s32 pokemonEvolutionCheck(s32, s32, u16, void*, void*);
 extern void menuOffScreenSetDisp(s32);
 extern void pokemonEvolutionAll(s32, s32, u16, void*, s32, s32, s32, s32);
@@ -3910,9 +3928,9 @@ s32 itemFieldUseEvolutionStone(u32 arg0, u32* arg1) {
     u16 sp8;
     u32 spC;
 
-    slot = itemUseOpenPartyMenu((void*)arg0, 1);
+    slot = itemUseOpenPartyMenu((s32)arg0, 1);
     if (slot >= 0) {
-        itemUseGetTargetPokemon(slot, &sc, &sd);
+        itemUseGetTargetPokemon(slot, (s32*)&sc, (s32*)&sd);
         if ((u8)pokemonIsDarkPokemon(sc) == 0) {
             effect = fn_80144574(text_buf, sc, sd, (u16)arg0, 0);
             if ((s16)effect <= 0) {
@@ -3944,7 +3962,7 @@ s32 itemFieldUseEvolutionStone(u32 arg0, u32* arg1) {
 }
 #endif
 
-/* _itemUseHealStatus - 0x80023068 | size: 0x20c */
+/* fn_80023068 - 0x80023068 | size: 0x20c */
 extern s32 fn_80019B48(s32);
 extern void fn_80019B1C(void);
 #if !defined(GS_TITLE_SPLIT) || defined(GS_TITLE_RANGE_80023068)
@@ -3954,7 +3972,6 @@ s32 _itemUseHealStatus(u32 arg0, u32* arg1) {
     } TitleBgmList;
     extern s32 fn_80144574(void*, s32, s32, u16, u8);
     extern void itemUseFormatMessage(void*, s32, void*, s32, s32);
-    extern s32 itemUseOpenPartyMenu(void*, s32);
     extern u8 pokemonIsJoutaiDataId(s32, s32);
     s32 pokemon;
     s32 slot;
@@ -3970,7 +3987,7 @@ s32 _itemUseHealStatus(u32 arg0, u32* arg1) {
 
     blocked = 0;
     do {
-        slot = itemUseOpenPartyMenu((void*)arg0, 1);
+        slot = itemUseOpenPartyMenu((s32)arg0, 1);
         if (slot < 0) {
             break;
         }
@@ -3986,7 +4003,7 @@ s32 _itemUseHealStatus(u32 arg0, u32* arg1) {
     if (slot >= 0) {
         if (blocked != 0) {
             nickname = pokemonBiosGetNicknamePtr(pokemon);
-            msgctrlSetValue(0x32, nickname);
+            msgctrlSetValue(0x32, (u32)nickname);
             winMsgOpen(2, 0x424D, 1, 0);
             winMsgClose(1);
             effect_count = 0;
@@ -4003,7 +4020,7 @@ s32 _itemUseHealStatus(u32 arg0, u32* arg1) {
                 menuPokemonRefresh();
             }
             itemUseFormatMessage(name, 0x40, effects, effect_count, pokemon);
-            msgctrlSetValue(0x4D, name);
+            msgctrlSetValue(0x4D, (u32)name);
             winMsgOpen(2, 0xE0, 1, 0);
             winMsgClose(1);
         }
@@ -4036,7 +4053,7 @@ s32 cbForgetWazaSelect__FP7PokemonUsl(s32 r3, s32 r4) {
 }
 #endif
 
-/* _itemUseRareCandy - 0x800232F0 | size: 0x470 */
+/* fn_800232F0 - 0x800232F0 | size: 0x470 */
 extern s32 pokemonGetStatus(u32, s32, s32, s32);
 extern void std130_soundUnk_801653cc(s32, s32, s32);
 extern void pokemonBiosGetLevel(void);
@@ -4081,7 +4098,6 @@ s32 _itemUseRareCandy(u32 wazaDataId, u32* result) {
         s16 spAttack;
         s16 spDefense;
     } TitleLevelUpStatus;
-    extern s32 itemUseOpenPartyMenu(void*, s32);
     extern s32 fn_80144574(void*, s32, s32, u16, u8);
     s32 pokemon;
     s32 data;
@@ -4107,7 +4123,7 @@ s32 _itemUseRareCandy(u32 wazaDataId, u32* result) {
     void* nickname;
 
     index = 0;
-    slot = itemUseOpenPartyMenu((void*)wazaDataId, 1);
+    slot = itemUseOpenPartyMenu((s32)wazaDataId, 1);
     if (slot >= 0) {
         itemUseGetTargetPokemon(slot, &pokemon, &data);
         if (pokemonIsDarkPokemon(pokemon) == 0) {
@@ -4139,9 +4155,9 @@ s32 _itemUseRareCandy(u32 wazaDataId, u32* result) {
         default:
             std130_soundUnk_801653cc(0x4CA, 0, 0xFF);
             nickname = pokemonBiosGetNicknamePtr(pokemon);
-            msgctrlSetValue(0x32, nickname);
+            msgctrlSetValue(0x32, (u32)nickname);
             level = pokemonBiosGetLevel(pokemon);
-            msgctrlSetValue(0x2F, (void*)(u8)level);
+            msgctrlSetValue(0x2F, (u32)((u8)level));
             winMsgOpen(2, 0x423E, 1, 0);
             winMsgClose(1);
 
@@ -4203,7 +4219,6 @@ s32 fn_80023760(u32 arg0, u32* arg1) {
     } TitleBgmList;
     extern s32 fn_80144574(void*, s32, s32, u16, u8);
     extern void itemUseFormatMessage(void*, s32, void*, s32, s32);
-    extern s32 itemUseOpenPartyMenu(void*, s32);
     extern u8 pokemonIsJoutaiDataId(s32, s32);
     s32 pokemon;
     u8* text;
@@ -4218,11 +4233,11 @@ s32 fn_80023760(u32 arg0, u32* arg1) {
     s32 data;
 
     total = 0;
-    itemUseOpenPartyMenu((void*)arg0, 0);
+    itemUseOpenPartyMenu((s32)arg0, 0);
     text = name;
     for (slot = 0; slot < 6; slot++) {
         itemUseGetTargetPokemon(slot, &pokemon, &data);
-        if ((u8)pokemonCheckValid(pokemon) == 0) {
+        if ((u8)pokemonCheckValid((u8*)pokemon) == 0) {
             continue;
         }
         if ((s32)pokemonGetStatus(pokemon, 0, 0x83, 0) > 0) {
@@ -4244,7 +4259,7 @@ s32 fn_80023760(u32 arg0, u32* arg1) {
         soundStart(i < 5 ? 0x466 : 0x465, 0, 0xFF, 0);
         menuPokemonRefresh();
         itemUseFormatMessage(name, 0x40, effects, effect_count, pokemon);
-        msgctrlSetValue(0x4D, text);
+        msgctrlSetValue(0x4D, (u32)text);
         winMsgOpen(2, 0xE0, 1, 0);
         winMsgClose(1);
         total += effect_count;
@@ -4265,17 +4280,17 @@ s32 fn_80023760(u32 arg0, u32* arg1) {
     return 0;
 }
 
-/* _itemUsePPRestore - 0x80023968 | size: 0x234 */
+/* fn_80023968 - 0x80023968 | size: 0x234 */
 extern void* itemDataBiosGetItemEffectParam(void*);
 extern void* itemParamGetPtr(void*);
 extern u8 itemParamGetPPSelectFlag(void*);
-s32 _itemUsePPRestore(u32 arg0, u32* arg1) {
+/* RULE-EXCEPTION(user-approved): arg0 is s32 so the real s32 fn_800141BC call keeps retail's register allocation; the BGM-table compare goes through (u32) to keep retail's unsigned cmplw - see docs/RULE_EXCEPTIONS.md */
+s32 _itemUsePPRestore(s32 arg0, u32* arg1) {
     typedef struct TitleBgmList {
         u16 entries[5];
     } TitleBgmList;
     extern s32 fn_80144574(void*, s32, s32, u16, u8);
     extern void itemUseFormatMessage(void*, s32, void*, s32, s32);
-    extern s32 itemUseOpenPartyMenu(void*, s32);
     extern u8 pokemonIsJoutaiDataId(s32, s32);
     extern void* itemDataBiosGetPtr(u16);
     s32 pokemon;
@@ -4292,7 +4307,7 @@ s32 _itemUsePPRestore(u32 arg0, u32* arg1) {
 
     blocked = 0;
     do {
-        slot = itemUseOpenPartyMenu((void*)arg0, 1);
+        slot = itemUseOpenPartyMenu(arg0, 1);
         if (slot < 0) {
             break;
         }
@@ -4313,7 +4328,7 @@ s32 _itemUsePPRestore(u32 arg0, u32* arg1) {
     if (slot >= 0) {
         if (blocked != 0) {
             nickname = pokemonBiosGetNicknamePtr(pokemon);
-            msgctrlSetValue(0x32, nickname);
+            msgctrlSetValue(0x32, (u32)nickname);
             winMsgOpen(2, 0x424D, 1, 0);
             winMsgClose(1);
             effect_count = 0;
@@ -4322,7 +4337,7 @@ s32 _itemUsePPRestore(u32 arg0, u32* arg1) {
             if ((s16)effect_count > 0) {
                 bgm = *(TitleBgmList*)lbl_80266DB0;
                 for (i = 0; i < 5; i++) {
-                    if (arg0 == bgm.entries[i]) {
+                    if ((u32)arg0 == bgm.entries[i]) {
                         break;
                     }
                 }
@@ -4330,7 +4345,7 @@ s32 _itemUsePPRestore(u32 arg0, u32* arg1) {
                 menuPokemonRefresh();
             }
             itemUseFormatMessage(name, 0x40, effects, effect_count, pokemon);
-            msgctrlSetValue(0x4D, name);
+            msgctrlSetValue(0x4D, (u32)name);
             winMsgOpen(2, 0xE0, 1, 0);
             winMsgClose(1);
         }
@@ -4344,14 +4359,13 @@ s32 _itemUsePPRestore(u32 arg0, u32* arg1) {
     return 1;
 }
 
-/* itemFieldUseStatBoost - 0x80023B9C | size: 0x20c */
+/* fn_80023B9C - 0x80023B9C | size: 0x20c */
 s32 itemFieldUseStatBoost(u32 arg0, u32* arg1) {
     typedef struct TitleBgmList {
         u16 entries[5];
     } TitleBgmList;
     extern s32 fn_80144574(void*, s32, s32, u16, u8);
     extern void itemUseFormatMessage(void*, s32, void*, s32, s32);
-    extern s32 itemUseOpenPartyMenu(void*, s32);
     extern u8 pokemonIsJoutaiDataId(s32, s32);
     s32 pokemon;
     s32 data;
@@ -4363,7 +4377,7 @@ s32 itemFieldUseStatBoost(u32 arg0, u32* arg1) {
     s32 i;
     void* nickname;
 
-    slot = itemUseOpenPartyMenu((void*)arg0, 1);
+    slot = itemUseOpenPartyMenu((s32)arg0, 1);
     if (slot >= 0) {
         itemUseGetTargetPokemon(slot, &pokemon, &data);
         if (pokemonIsJoutaiDataId(pokemon, 0x3E) == 0) {
@@ -4379,12 +4393,12 @@ s32 itemFieldUseStatBoost(u32 arg0, u32* arg1) {
                 menuPokemonRefresh();
             }
             itemUseFormatMessage(name, 0x40, effects, effect_count, pokemon);
-            msgctrlSetValue(0x4D, name);
+            msgctrlSetValue(0x4D, (u32)name);
             winMsgOpen(2, 0xE0, 1, 0);
             winMsgClose(1);
         } else {
             nickname = pokemonBiosGetNicknamePtr(pokemon);
-            msgctrlSetValue(0x32, nickname);
+            msgctrlSetValue(0x32, (u32)nickname);
             winMsgOpen(2, 0x424D, 1, 0);
             winMsgClose(1);
             effect_count = 0;

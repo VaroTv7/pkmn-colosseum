@@ -3,6 +3,10 @@
 
 import contextlib
 import io
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
 import unittest
 
 import quality_scan
@@ -397,6 +401,45 @@ const char* text = "#include \\"fake.inc\\"";
                 ],
             },
         )
+
+
+class QualityScanDiscoveryTests(unittest.TestCase):
+    def test_added_c_and_cpp_source_and_headers_are_scanned(self) -> None:
+        script = Path(quality_scan.__file__).resolve()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+
+            def git(*args):
+                return subprocess.run(
+                    ["git", "-c", "user.name=Quality scan test",
+                     "-c", "user.email=quality-test@example.invalid",
+                     "-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null",
+                     *args], cwd=root, check=True, capture_output=True, text=True).stdout.strip()
+
+            git("init", "-q")
+            (root / "src" / "nested").mkdir(parents=True)
+            unchanged = root / "src" / "unchanged.hpp"
+            unchanged.write_text('#include "existing.inc"\n')
+            changed_header = root / "src" / "nested" / "changed.hpp"
+            changed_header.write_text("int existing;\n")
+            git("add", ".")
+            git("commit", "-qm", "baseline")
+            base = git("rev-parse", "HEAD")
+
+            paths = ["src/nested/new.c", "src/nested/new.h",
+                     "src/nested/new.cpp", "src/nested/changed.hpp"]
+            for path in paths:
+                with (root / path).open("a") as out:
+                    out.write('#include "forbidden.inc"\n')
+            git("add", ".")
+            git("commit", "-qm", "added source")
+            result = subprocess.run(
+                [sys.executable, str(script), base, "HEAD"], cwd=root,
+                capture_output=True, text=True)
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            for path in paths:
+                self.assertIn(".inc include added in " + path + ":", result.stdout)
+            self.assertNotIn("src/unchanged.hpp", result.stdout)
 
 
 if __name__ == "__main__":

@@ -70,14 +70,21 @@ jobs:
           python3 .github/scripts/check_metric_integrity.py \
               "$RUNNER_TEMP/head_report.json" orig/${{ matrix.version }}/sys/main.dol
 
+      - name: Stage report-only regression evidence
+        if: always()
+        run: |
+          mkdir -p build/regression-evidence
+          for evidence_file in base_report.json head_report.json regression-audit.json; do
+            if [ -f "$RUNNER_TEMP/$evidence_file" ]; then
+              cp "$RUNNER_TEMP/$evidence_file" "build/regression-evidence/$evidence_file"
+            fi
+          done
+
       - name: Upload report-only regression evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.version }}_regression_audit
-          path: |
-            ${{ runner.temp }}/base_report.json
-            ${{ runner.temp }}/head_report.json
-            ${{ runner.temp }}/regression-audit.json
+          path: build/regression-evidence/*.json
           if-no-files-found: ignore
           retention-days: 7

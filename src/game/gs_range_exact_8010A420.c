@@ -1,6 +1,6 @@
 /**
  * @file gs_range_exact_8010A420.c
- * @brief menuModelTerm, 0x8010A420 - 0x8010A5BC.
+ * @brief fn_8010A420, 0x8010A420 - 0x8010A5BC.
  *
  * Function-boundary carve of gs_range_80109C88.c. Text only; state and
  * resource globals remain extern-owned by the range data objects.
@@ -8,7 +8,7 @@
 #include "dolphin/types.h"
 
 /* 0x8010A420 | 0x19C */
-/* RULE-EXCEPTION(user-approved): local peephole control -- see docs/RULE_EXCEPTIONS.md. */
+/* Built with the unit flag -opt nopeephole (configure.py); no local pragma. */
 s32 menuModelTerm(void* obj)
 {
     typedef struct Obj {

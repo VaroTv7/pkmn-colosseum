@@ -56,6 +56,14 @@ jobs:
             --manifest config/${{ matrix.version }}/build.sha1 \
             --orig orig/${{ matrix.version }} --outputs
 
+    - name: Verify registered assembly branch targets
+      run: |
+        test -d build/${{ matrix.version }}/asm
+        python3 .github/scripts/verify_asm_branch_targets.py \
+            build/${{ matrix.version }}/asm
+        python3 .github/scripts/asm_evidence_summary.py \
+            build/${{ matrix.version }}/report.json
+
     - name: Require metric and topology integrity
       run: |
         python3 .github/scripts/check_metric_integrity.py \
@@ -72,10 +80,12 @@ jobs:
         path: build/${{ matrix.version }}/**/*.MAP
 
     - name: Upload report
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.version }}_report
         path: build/${{ matrix.version }}/report.json
+        if-no-files-found: ignore
 
     # Chart history contains report measurements only, never original bytes.
     - name: Render progress chart
