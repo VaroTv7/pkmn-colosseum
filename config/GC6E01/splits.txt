@@ -6829,7 +6829,15 @@ game/gs_range_80266250_exact.c:
 	.text       start:0x80266250 end:0x8026635C
 
 crt/__start_mem_80003458.c:
-	.init       start:0x80003458 end:0x80005544
+	.init       start:0x80003458 end:0x800034AC
+
+# Original interrupt-vector bytes, not reconstructed source. Keep this named
+# fallback separate from the six exact C helpers on either side.
+crt/interrupt_vectors:
+	.init       start:0x800034AC end:0x800053E0
+
+crt/__start_mem_800053E0.c:
+	.init       start:0x800053E0 end:0x80005544
 
 # Retained upstream source data; disjoint from the completed code owners.
 game/data/data_802E4B78.c:

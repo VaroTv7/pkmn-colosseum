@@ -7765,8 +7765,14 @@ config.libs = [
                 progress_category="runtime",
             ),
             Object(
-                CodeCandidate,
+                Matching,
                 "crt/__start_mem_80003458.c",
+                mw_version="GC/1.3.2",
+                progress_category="runtime",
+            ),
+            Object(
+                Matching,
+                "crt/__start_mem_800053E0.c",
                 mw_version="GC/1.3.2",
                 progress_category="runtime",
             ),
