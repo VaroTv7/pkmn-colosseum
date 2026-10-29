@@ -139,6 +139,8 @@ class SourceComparisonConfigTests(unittest.TestCase):
         self.assertNotIn('originals/sound.o', edge)
         self.assertIn('source_data_aliases build/GC6E01/src/sound.o originals/sound.o', ninja)
         self.assertIn('config/GC6E01/data_aliases/sound.json', ninja)
+        self.assertIn('--objcopy $alias_objcopy', ninja)
+        self.assertIn('alias_objcopy = build/binutils/powerpc-eabi-objcopy', ninja)
 
     def test_array_aliases_cannot_hide_code_or_promote_candidates(self):
         options = dict(mw_version='GC/1.2.5n',

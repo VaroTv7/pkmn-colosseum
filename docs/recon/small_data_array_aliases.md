@@ -10,10 +10,11 @@ bytes**. The independent damage-operand investigation below also verifies
 the remaining **12 physical bytes** as two separate scalar constants and
 four bytes of linker alignment. Together, these local checks cover all 40
 previously retained small-data bytes. Private CI also compiles all source
-owners and retains all 8,677 exact function identities. Final linking with the
-corrected alias metadata and all 26 unchanged canonical output hashes are
-**pending private-input CI**. The isolated report is evidence for these source
-objects, not a completed project build or runtime test.
+owners and retains all 8,677 exact function identities. An isolated link using
+only source-derived alias copies with their `.comment` sections removed also
+produces the exact canonical DOL hash. The normal production build and all
+26 unchanged canonical output hashes are **pending private-input CI**. These
+checks are not a completed project build or runtime test.
 
 The native definitions retain complete C arrays. The existing symbol map
 describes some of these arrays as smaller, adjacent historical fragments.
@@ -124,9 +125,12 @@ Before producing either view, the helper requires:
 The **link view** preserves every native C symbol's value, size, binding and
 type. It adds the explicitly registered original interior names as global
 `STT_NOTYPE` labels with size zero. These labels allocate no storage and do
-not divide the host array. Their eight-byte CodeWarrior symbol records are
-all zero: no alignment, visibility, force-active or reserved bits. Native
-array hosts retain their original compiler records and full bounds.
+not divide the host array. The final link copy has no CodeWarrior `.comment`
+section. The native compiler object retains its original metadata and full
+bounds; the comparison copy also retains its compiler metadata. The link-only
+removal prevents MWLD's compiler-specific object processing from stalling on
+complete arrays with interior labels, as established by the isolated CI
+experiment below.
 
 The **comparison view** describes the same native bytes using the target's
 historical nonoverlapping object fragments and verified generated zero gaps.
@@ -139,10 +143,17 @@ native C type layout and is not used for linking.
 
 Both views leave allocated section bytes, section allocation and alignment,
 existing symbol indices and relocation records unchanged. Only
-symbol/string/CodeWarrior-comment metadata is rewritten or appended. The
-helper validates these invariants after producing each view, requires
-distinct input and output paths, and never imports target payload into an
-output object.
+symbol/string/CodeWarrior-comment metadata and its physical ELF file layout
+change. The production CLI requires an explicit `--objcopy` tool and invokes
+`objcopy --remove-section=.comment` on a temporary copy of the verified link
+view. Before writing either output, it independently checks all allocated
+bytes, every symbol record and full extent, section type/flags/size/alignment,
+ELF identity and flags, and all relocation records and their meaning. The only
+permitted section removal is `.comment`; section names and file offsets may
+be reserialized, and GNU objcopy's string-table entry size changes from one
+to zero are accepted. Symbol string offsets and string-table contents still
+must be identical. The helper requires distinct input and output paths and
+never imports target payload into an output object.
 
 The linked-address diagnostic can consume the same three registrations through
 `tools/data_link_diagnostics.py --array-aliases config/GC6E01/data_aliases`.
@@ -183,14 +194,17 @@ report measures `total_data = matched_data = complete_data = 200`, with all
 three units complete. This verifies the physical accounting and the 28-byte
 gain without adding credit for overlapping link labels.
 
-The helper's 15 synthetic tests cover complete native bounds, zero-sized
+The helper's 19 synthetic tests cover complete native bounds, zero-sized
 link aliases, exact comparison partitions, unchanged allocated bytes and
 relocations, input-path protection, and rejection of incorrect bytes,
 relocations, extents, alias registrations, gaps or compiler metadata. The
-tests also check that added link labels have all-zero CodeWarrior records,
-positive-sized comparison fragments retain their active-object records,
-and all pre-existing native records remain unchanged. They contain synthetic
-objects only:
+tests also check that intermediate link labels have all-zero CodeWarrior
+records, positive-sized comparison fragments retain their active-object
+records, and all pre-existing native records remain unchanged. The production
+normalization tests permit only compiler-metadata removal and ELF metadata
+serialization. They reject altered data, full host bounds, alias sizes or
+offsets, relocations, alignment and ELF flags. A failed normalization leaves
+both output files unchanged. The tests contain synthetic objects only:
 
 ```sh
 python3 -m unittest discover -s .github/scripts -p test_source_data_aliases.py
@@ -225,13 +239,34 @@ and `gTRKInterruptVectorTableEnd` labels instead use `(0, 0, 0, 0)`.
 Pinned DTK 1.8.3's `CommentSym::from` likewise gives unknown/label symbols
 zero default alignment and does not set their active bit through `export_all`.
 
-The correction changes **only the six newly added link-label comment records
-to all zero**. Link-label names, offsets, zero sizes, types, bindings and order
-stay unchanged. Every native C symbol and its metadata, all allocated bytes,
-section allocation/alignment, relocation records and comparison-view records
-remain unchanged. The focused synthetic test exercises this distinction.
-Acceptance of the corrected link metadata and all 26 unchanged canonical
-output hashes remain **pending private-input CI**.
+Changing only those six records to zero retained every symbol, byte and
+relocation, but the next bounded CI run still stalled. A second experiment
+therefore compared three source-derived representations in one run:
+
+| Source representation | MWLD result | DOL result |
+| --- | --- | --- |
+| Original symbol order and zero label comment records | Timed out after 30 seconds | Not convertible |
+| Remove only `.comment` | Completed in 4.331 seconds | Exact canonical hash |
+| Order globals by offset, with paired comment records and remapped relocation indices | Timed out after 30 seconds | Not convertible |
+| Reorder globals and remove `.comment` | Completed in 4.320 seconds | Exact canonical hash |
+
+Both successful source-derived DOLs have the canonical SHA-256 listed above.
+All candidate objects were checked before linking: 200 allocated bytes,
+five complete native arrays, six global zero-size labels, all symbol
+identities and bounds, `.sdata` flags and alignment, ELF flags and relocation
+meaning were unchanged. The isolated original-target control also matched.
+The experiment identifies removal of `.comment` as sufficient; production
+therefore does **not** reorder any symbols.
+
+The production CLI now applies this exact link-only normalization using an
+explicit PowerPC objcopy path. A local run of that CLI on all three actual
+pinned-compiler objects passes its strict validation, preserves all native
+and original target inputs, and produces comparison objects byte-identical
+to the existing 200/200 matching report. The five array hosts and six original
+interior names remain in the existing `FORCEACTIVE` retention list. No
+diagnostic substitution is used by the production build. Normal production
+linking and all 26 unchanged canonical output hashes remain **pending
+private-input CI**.
 
 ## Two independent damage constants and linker padding
 

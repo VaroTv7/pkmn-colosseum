@@ -867,7 +867,7 @@ def generate_build_ninja(
     source_aliases = config.tools_dir / "source_data_aliases.py"
     n.rule(
         name="source_data_aliases",
-        command=f"$python {source_aliases} --source $source --target $target --groups $groups --link-output $link_output --comparison-output $comparison_output",
+        command=f"$python {source_aliases} --source $source --target $target --groups $groups --objcopy $alias_objcopy --link-output $link_output --comparison-output $comparison_output",
         description="Verify complete source arrays and interior aliases $source",
     )
 
@@ -1586,10 +1586,12 @@ def generate_build_ninja(
                     outputs=[obj.link_obj_path, obj.comparison_obj_path],
                     rule="source_data_aliases",
                     inputs=[built_obj_path, Path(obj_path), groups],
-                    implicit=[source_aliases, source_metadata],
+                    implicit=[source_aliases, source_metadata,
+                              binutils_implicit or binutils / f"powerpc-eabi-objcopy{EXE}"],
                     variables={"source": built_obj_path, "target": Path(obj_path),
                                "groups": groups, "link_output": obj.link_obj_path,
-                               "comparison_output": obj.comparison_obj_path},
+                               "comparison_output": obj.comparison_obj_path,
+                               "alias_objcopy": binutils / f"powerpc-eabi-objcopy{EXE}"},
                 )
                 source_inputs.extend([obj.link_obj_path, obj.comparison_obj_path])
                 built_obj_path = obj.link_obj_path

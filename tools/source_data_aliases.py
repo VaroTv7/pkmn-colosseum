@@ -5,6 +5,8 @@ The native compiler object remains immutable. A link view adds zero-size ELF
 labels inside explicitly registered arrays; every original C object keeps its
 full extent. A separate comparison view describes the same source bytes using
 the target's historical nonoverlapping fragments and verified zero gaps.
+The production link view removes CodeWarrior .comment metadata with an
+explicit objcopy tool, retaining complete arrays and their interior labels.
 Only symbol/string/CodeWarrior-comment metadata changes in either view. No
 target payload, code, relocation, section alignment or allocated byte is copied
 or changed. Full native array bounds are validated before either view exists.
@@ -15,6 +17,7 @@ import json
 from pathlib import Path
 import re
 import struct
+import subprocess
 import tempfile
 
 if __package__:
@@ -235,6 +238,86 @@ def create_views(source_blob, target_blob, groups):
     }
 
 
+def verify_plain_link(before_blob, after_blob):
+    """Allow only removal of .comment and the resulting ELF table/file layout.
+
+The input is the already verified source-derived link view. Every symbol,
+including full C hosts and zero-size interior names, must retain its record
+and index. No target data is an input to this normalization.
+"""
+    before, after = Elf(before_blob), Elf(after_blob)
+    comment_records(before)
+    require(".comment" not in before.allocated
+            and after.names == [name for name in before.names if name != ".comment"],
+            "Link normalization must remove only the compiler metadata section")
+    require(before.header[:6] == after.header[:6]
+            and before.header[7:12] == after.header[7:12]
+            and after.header[12] == before.header[12] - 1
+            and before.names[before.header[13]] == after.names[after.header[13]],
+            "Link normalization changed ELF identity, flags or header semantics")
+
+    def remap(index):
+        return after.names.index(before.names[index]) if 0 < index < len(before.sections) else index
+
+    require(len(before.symbols) == len(after.symbols),
+            "Link normalization changed the symbol count")
+    for (name, source), (actual_name, actual) in zip(before.symbols, after.symbols):
+        require(name == actual_name and source[:5] == actual[:5]
+                and remap(source[5]) == actual[5],
+                "Link normalization changed a symbol identity, index or full extent")
+    for i, (name, section) in enumerate(zip(before.names, before.sections)):
+        if name == ".comment":
+            continue
+        j = after.names.index(name)
+        other = after.sections[j]
+        # Section names and file offsets are serialized afresh. Only the
+        # section-name table may change size or payload; section references
+        # are renumbered if removing .comment moved their indices.
+        expected = list(section)
+        expected[0], expected[4] = other[0], other[4]
+        expected[6] = remap(section[6])
+        if section[1] == 3:
+            # GNU objcopy writes zero sh_entsize for string tables; MWCC
+            # writes one. Neither table has fixed-size records. Its bytes
+            # and every symbol string offset are still checked separately.
+            require(section[9] in (0, 1) and other[9] == 0,
+                    "Unexpected string-table metadata normalization")
+            expected[9] = 0
+        if section[1] in (4, 9):
+            expected[7] = remap(section[7])
+        if i == before.header[13]:
+            expected[5] = other[5]
+        require(tuple(expected) == other,
+                "Link normalization changed section allocation, alignment or semantics")
+        if i not in (before.symtab, before.header[13]):
+            require(before.payload(i) == after.payload(j),
+                    "Link normalization changed storage, strings or relocation records")
+    require(before.data_relocations() == after.data_relocations(),
+            "Link normalization changed relocation semantics")
+    return {"link_compiler_metadata_removed": True,
+            "link_symbol_records_preserved": len(before.symbols),
+            "link_elf_flags": after.header[7],
+            "link_allocated_bytes_verified": sum(after.sections[i][5]
+                                                  for i in after.allocated.values())}
+
+
+def plain_link_view(link_blob, objcopy):
+    """Strip only a temporary link copy, then verify before publishing it."""
+    with tempfile.TemporaryDirectory(prefix="source-data-aliases-") as directory:
+        source, output = Path(directory) / "link.o", Path(directory) / "plain.o"
+        source.write_bytes(link_blob)
+        try:
+            subprocess.run([str(objcopy), "--remove-section=.comment", str(source), str(output)],
+                           check=True, capture_output=True, timeout=30)
+        except (OSError, subprocess.SubprocessError) as exc:
+            raise ValueError("objcopy could not remove link-only compiler metadata") from exc
+        require(source.read_bytes() == link_blob,
+                "Link normalization modified its temporary input")
+        result = output.read_bytes()
+        metadata = verify_plain_link(link_blob, result)
+    return result, metadata
+
+
 def write_output(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as handle:
@@ -248,17 +331,21 @@ def main():
     parser.add_argument("--source", required=True, type=Path)
     parser.add_argument("--target", required=True, type=Path)
     parser.add_argument("--groups", required=True, type=Path)
+    parser.add_argument("--objcopy", required=True, type=Path,
+                        help="PowerPC objcopy used only to remove link-view .comment metadata")
     parser.add_argument("--link-output", required=True, type=Path)
     parser.add_argument("--comparison-output", required=True, type=Path)
     parser.add_argument("--metadata", type=Path)
     args = parser.parse_args()
-    paths = [args.source, args.target, args.groups, args.link_output,
+    paths = [args.source, args.target, args.groups, args.objcopy, args.link_output,
              args.comparison_output] + ([args.metadata] if args.metadata else [])
     require(len({p.resolve() for p in paths}) == len(paths),
             "Inputs and output views must be distinct paths")
     link, comparison, metadata = create_views(args.source.read_bytes(),
                                             args.target.read_bytes(),
                                             json.loads(args.groups.read_text()))
+    link, link_metadata = plain_link_view(link, args.objcopy)
+    metadata.update(link_metadata)
     write_output(args.link_output, link)
     write_output(args.comparison_output, comparison)
     if args.metadata:

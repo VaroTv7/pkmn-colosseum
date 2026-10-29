@@ -8,10 +8,12 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from tools.source_data_aliases import comment_records, create_views
+from tools.source_data_aliases import comment_records, create_views, plain_link_view, verify_plain_link
+from tools import source_data_aliases
 from tools.source_object_metadata import Elf
 
 GROUPS = [{"base": "flags", "size": 8, "aliases": [
@@ -83,6 +85,27 @@ def symbol_patch(blob, name, field_offset, fmt, value):
     return bytes(output)
 
 
+def without_comment(blob):
+    """Serialize a synthetic fixture without its final .comment section."""
+    elf = Elf(blob)
+    assert elf.names[-1] == ".comment"
+    output, sections = bytearray(52), [(0,) * 10]
+    for index, section in enumerate(elf.sections[1:-1], 1):
+        output.extend(bytes(-len(output) % max(section[8], 1)))
+        record = list(section)
+        record[4] = len(output)
+        if section[1] == 3:
+            record[9] = 0
+        sections.append(tuple(record))
+        output.extend(elf.payload(index))
+    output.extend(bytes(-len(output) % 4))
+    header = list(elf.header)
+    header[6], header[12] = len(output), len(sections)
+    output.extend(b"".join(struct.pack(">10I", *section) for section in sections))
+    struct.pack_into(">16sHHIIIIIHHHHHH", output, 0, *header)
+    return bytes(output)
+
+
 class SourceArrayAliasTests(unittest.TestCase):
     def setUp(self):
         self.source, self.target = fixture(), fixture(False)
@@ -127,6 +150,96 @@ class SourceArrayAliasTests(unittest.TestCase):
             for name in ("status", "mode"):
                 index, _ = view.unique_symbol(name)
                 self.assertEqual(comment[44 + 8 * index:52 + 8 * index], label_record)
+
+    def test_plain_link_allows_only_compiler_section_and_file_layout_removal(self):
+        link, comparison, _ = create_views(self.source, self.target, GROUPS)
+        # Model native MWCC's string-table entry size; objcopy normalizes it
+        # to zero while preserving symbol string offsets and table payloads.
+        link = bytearray(link)
+        original = Elf(link)
+        for index, section in enumerate(original.sections):
+            if section[1] == 3:
+                struct.pack_into(">I", link, original.header[6] + 40 * index + 36, 1)
+        link = bytes(link)
+        plain = without_comment(link)
+        metadata = verify_plain_link(link, plain)
+        self.assertTrue(metadata["link_compiler_metadata_removed"])
+        self.assertEqual(metadata["link_allocated_bytes_verified"], 12)
+        self.assertNotIn(".comment", Elf(plain).names)
+        self.assertEqual(Elf(link).symbols, Elf(plain).symbols)
+        self.assertEqual(Elf(plain).unique_symbol("flags")[1][2], 8)
+        self.assertEqual(Elf(plain).unique_symbol("status")[1][1:4], (3, 0, 0x10))
+        self.assertIn(".comment", Elf(comparison).names)
+
+    def test_plain_link_rejects_payload_bounds_labels_relocations_and_flags_changes(self):
+        link, _, _ = create_views(self.source, self.target, GROUPS)
+        plain = without_comment(link)
+        for field in ("payload", "host_size", "label_size", "label_offset",
+                      "relocation", "alignment", "elf_flags"):
+            candidate = bytearray(plain)
+            elf = Elf(plain)
+            if field == "payload":
+                candidate[elf.sections[1][4]] ^= 1
+            elif field == "host_size":
+                candidate = symbol_patch(plain, "flags", 8, ">I", 7)
+            elif field == "label_size":
+                candidate = symbol_patch(plain, "status", 8, ">I", 1)
+            elif field == "label_offset":
+                candidate = symbol_patch(plain, "status", 4, ">I", 4)
+            elif field == "relocation":
+                struct.pack_into(">i", candidate, elf.sections[2][4] + 8, 13)
+            elif field == "alignment":
+                struct.pack_into(">I", candidate, elf.header[6] + 40 + 32, 4)
+            else:
+                struct.pack_into(">I", candidate, 36, elf.header[7] ^ 0x80000000)
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                verify_plain_link(link, bytes(candidate))
+        with self.assertRaisesRegex(ValueError, "remove only"):
+            verify_plain_link(link, link)
+
+    def test_objcopy_only_receives_temporary_source_link_view(self):
+        link, comparison, _ = create_views(self.source, self.target, GROUPS)
+
+        def objcopy(command, **kwargs):
+            self.assertEqual(command[:2], ["objcopy", "--remove-section=.comment"])
+            self.assertTrue(kwargs["check"])
+            self.assertEqual(Path(command[2]).read_bytes(), link)
+            Path(command[3]).write_bytes(without_comment(link))
+
+        with mock.patch.object(source_data_aliases.subprocess, "run", side_effect=objcopy):
+            plain, _ = plain_link_view(link, Path("objcopy"))
+        self.assertNotIn(".comment", Elf(plain).names)
+        self.assertEqual(comparison, create_views(self.source, self.target, GROUPS)[1])
+        self.assertEqual((self.source, self.target), (fixture(), fixture(False)))
+
+    def test_failed_normalization_leaves_both_cli_outputs_unmodified(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, target, groups = root / "source.o", root / "target.o", root / "groups.json"
+            source.write_bytes(self.source)
+            target.write_bytes(self.target)
+            import json
+            groups.write_text(json.dumps(GROUPS))
+            link, comparison = root / "link.o", root / "comparison.o"
+            link.write_bytes(b"existing link")
+            comparison.write_bytes(b"existing comparison")
+            argv = ["source_data_aliases.py", "--source", str(source), "--target", str(target),
+                    "--groups", str(groups), "--objcopy", str(root / "objcopy"),
+                    "--link-output", str(link), "--comparison-output", str(comparison)]
+
+            def corrupt_output(command, **kwargs):
+                blob = bytearray(without_comment(Path(command[2]).read_bytes()))
+                blob[Elf(blob).sections[1][4]] ^= 1
+                Path(command[3]).write_bytes(blob)
+
+            with mock.patch.object(sys, "argv", argv), \
+                    mock.patch.object(source_data_aliases.subprocess, "run", side_effect=corrupt_output), \
+                    self.assertRaises(ValueError):
+                source_data_aliases.main()
+            self.assertEqual(link.read_bytes(), b"existing link")
+            self.assertEqual(comparison.read_bytes(), b"existing comparison")
+            self.assertEqual(source.read_bytes(), self.source)
+            self.assertEqual(target.read_bytes(), self.target)
 
     def test_source_byte_mismatch_rejected(self):
         source = bytearray(self.source)
@@ -216,7 +329,8 @@ class SourceArrayAliasTests(unittest.TestCase):
             command = [sys.executable, str(ROOT / "tools/source_data_aliases.py"),
                        "--source", str(source), "--target", str(root / "target.o"),
                        "--groups", str(root / "groups.json"), "--link-output", str(source),
-                       "--comparison-output", str(root / "comparison.o")]
+                       "--comparison-output", str(root / "comparison.o"),
+                       "--objcopy", str(root / "objcopy")]
             process = subprocess.run(command, capture_output=True, text=True)
             self.assertNotEqual(process.returncode, 0)
             self.assertIn("distinct paths", process.stderr)

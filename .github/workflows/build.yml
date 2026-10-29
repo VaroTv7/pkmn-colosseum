@@ -51,23 +51,6 @@ jobs:
             --binutils /binutils --compilers /compilers
         ninja -j2 all_source build/${{ matrix.version }}/report.json
 
-    - name: Diagnose source-link object compatibility
-      run: |
-        ninja -j2 build/${{ matrix.version }}.main.forceactive.lcf \
-            build/${{ matrix.version }}/link/crt/interrupt_vectors.o
-        python3 tools/probe_source_data_link.py --link-timeout 30 --convert-timeout 20 \
-            --objcopy /binutils/powerpc-eabi-objcopy
-
-    # Only metadata from isolated variants; their fallback objects and output
-    # files never feed the normal link/report and must never be uploaded.
-    - name: Upload source-link compatibility diagnostics
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ matrix.version }}_source_link_diagnostics
-        path: build/${{ matrix.version }}/probe/link-isolation/summary.json
-        if-no-files-found: ignore
-
     - name: Link full retail outputs and verify canonical hashes
       run: |
         # A stalled legacy linker must fail with logs while report diagnostics

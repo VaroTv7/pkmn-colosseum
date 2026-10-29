@@ -35,12 +35,23 @@ Replacing the battle owners alone did not resolve the timeout. These private
 fallback variants are diagnostics only and never feed the normal build,
 report or source credit.
 
-The six new zero-size linker labels had incorrectly received active-storage
-CodeWarrior metadata. Existing successfully linked zero-size vector labels
-use zero metadata records. The narrow correction uses that existing label
-representation while preserving native complete C arrays, every source byte,
-all symbol addresses, and the separate comparison view. A fresh normal build
-must verify this correction and all 26 canonical outputs.
+Giving the six zero-size labels the zero CodeWarrior records used by existing
+vector labels did not resolve the timeout. The
+[source-derived representation experiment](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40966529539/artifacts/12938023071)
+then tested explicit `.comment` removal, paired symbol/metadata reordering,
+and both transformations. Removing only `.comment` linked in 4.331 seconds
+and produced the canonical DOL hash above with all new source owners intact.
+Reordering alone still timed out; combining it with metadata removal yielded
+the same canonical result, so reordering is unnecessary.
+
+The normal alias helper now removes that compiler-specific section only from
+the source-derived link copy, using the configured GNU objcopy. It verifies
+every allocated byte, full array and alias identity, relocation, alignment
+and ELF flag before writing. The immutable native compiler object and the
+comparison view retain their existing metadata and bounds. Temporary probe
+steps and tooling have been removed from the final tree; their committed
+history and metadata-only artifacts retain the experiment. The normal build
+must independently verify this representation and all 26 canonical outputs.
 
 | Reconstructed source | Additional bytes | Evidence |
 | --- | ---: | --- |
