@@ -1,5 +1,11 @@
 # Current state (2026-09-28)
 
+> Historical native-runtime snapshot. For current matching and linking results,
+> see [the README](../README.md) and [Count-Sheep integration validation](COUNT_SHEEP_INTEGRATION.md).
+> Current matching acceptance is defined in [AGENTS.md](../AGENTS.md).
+> The native-runtime milestones and campaign status below describe September 28;
+> they are preserved as historical evidence.
+
 A snapshot of where the decompilation stands for the native recomp's
 title-screen milestone, and how to pick the work back up.
 

@@ -8,59 +8,78 @@ A matching decompilation project for the GameCube game **Pokémon Colosseum**
 
 ## Status
 
-![Progress over time](https://raw.githubusercontent.com/dougchansan/pkmn-colosseum/progress-chart/progress.png)
-
-Every point on the chart is a real `objdiff` measurement. Points from
-2026-07-01 onward come from the report built in CI (or, for that first stretch,
-from this table's own git history); earlier points were recovered by checking
-out each historical commit and running the build against it. The campaign
-starts on 2026-06-27, when `config/GC6E01/splits.txt` grew past its stub and
-units first became matchable — before that date this metric did not exist, and
-the work of that period was measured a different way.
-
-The build workflow republishes the chart on every push to master, to the
-[`progress-chart`](https://github.com/dougchansan/pkmn-colosseum/tree/progress-chart)
-branch — master is protection-gated, so CI cannot commit there, and keeping the
-regenerated image off master stops its history growing a copy per push. Render
-one locally with:
-
-```bash
-uv run --with matplotlib tools/plot_progress.py -o /tmp/progress.png
-```
+**All 8,677 tracked functions and all 2,504,940 tracked code bytes match and
+link from source (100%) across the DOL and all 25 configured REL modules.**
+This includes accepted assembly implementations with recorded evidence. Data
+matching remains partial at **83.30%**.
 
 | Metric | Value |
 |---|---|
-| Fuzzy match | 99.71% |
-| Function match | 98.58% (8,554 / 8,677 functions) |
-| Code match | 92.32% (2,312,648 / 2,504,940 matched code bytes) |
+| Fuzzy match | 100.00% |
+| Function match | 100.00% (8,677 / 8,677 functions) |
+| Code match | 100.00% (2,504,940 / 2,504,940 matched code bytes) |
 | Data match | 83.30% (2,970,480 / 3,565,996 matched data bytes) |
-| Source-linked | 1,984 / 2,202 scoring units (91.61% of code) |
+| Source-linked | 2,121 / 2,244 scoring units (100.00% of code) |
 
-These measurements cover the **DOL and all 25 configured REL modules**, from the
-full `build/GC6E01/report.json` for the #642 integration, matching batches 2
-and 3, the corrected [#645 data reconstruction](docs/REL_MODULES.md#rel-125-source),
-the #646 name port, and the [#647 Count-Sheep delta](https://github.com/dougchansan/pkmn-colosseum/pull/647)
-(2026-10-18).
-All 26 rebuilt binaries passed their unchanged canonical hashes and direct byte
-comparisons against the originals in the private build image. This is a
-matching reconstruction with original fallback objects where required, not a
-claim of 100% decompilation or gameplay testing. See
-[`docs/COUNT_SHEEP_INTEGRATION.md`](docs/COUNT_SHEEP_INTEGRATION.md) for validation
-scope and provenance.
+The completed Count-Sheep import was verified at source revision
+[`ace8ed58268e46584415fe5e03486e7a00768e67`](https://github.com/dougchansan/pkmn-colosseum/commit/ace8ed58268e46584415fe5e03486e7a00768e67).
+Its [source-validation run](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40833777512/job/123313705577)
+compiled and linked all outputs, passed all **26 unchanged canonical hashes
+and direct original/rebuilt byte comparisons**, and passed the assembly
+branch-target checks. That run's overall result was red solely because its
+topology freeze still described the previous split layout. This metadata
+refresh updates the freeze after auditing unchanged function identities,
+denominators and physical coverage; the required checks still apply to the
+final PR head. The final integration checks are recorded in
+[PR #662](https://github.com/dougchansan/pkmn-colosseum/pull/662).
 
-The DOL alone is 92.12% code-matched and 98.56% data-matched. The combined data
-percentage includes the 561,032-byte `common_rel` resource region supplied by
-original-object fallback. Those resource bytes remain in the denominator and
-do not count as reconstructed source data. On the chart, points from the PR
-#638 merge onward use this DOL + REL scope; the data line reflects that scope
-change and is not comparable to an older DOL-only data percentage.
+The table comes from that run's
+[`GC6E01_report` artifact](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40833777512/artifacts/12880330757).
+For subsequent builds, the authoritative report is
+`build/GC6E01/report.json`; the root-level `report.json` is historical. See
+[`docs/COUNT_SHEEP_INTEGRATION.md`](docs/COUNT_SHEEP_INTEGRATION.md) for exact
+provenance, assembly accounting and the retained import history.
+
+The scope of 100% is the project's tracked code and function denominator.
+The **7,988-byte interrupt-vector template** remains an explicit original-object
+fallback outside that historical denominator. Its full physical interval is
+retained and its bytes are covered by the final binary comparisons. The
+**561,032-byte `common_rel` resource fallback** remains inside the data
+denominator and receives no reconstructed-source credit. The DOL alone is
+100% code-matched and 98.56% data-matched; combined source-linked data is
+1,897,440 / 3,565,996 bytes (53.21%). These results do not establish a pure-C
+percentage or gameplay testing.
 
 **Scoring units are not translation units.** An original source region may be
 split into address-owned units with different compiler flags, compiled through
 one-line `#include` shims. The full report contains 8,677 distinct module/address
 function identities, with no duplicate claims. Its 2,504,940-byte code denominator
-contains 2,495,112 DOL bytes and 9,828 REL bytes; source-linked coverage is measured
-across those same outputs. The freeze tracks their exact section topology.
+contains 2,495,112 DOL bytes and 9,828 REL bytes, all matched and source-linked.
+The freeze tracks the section topology of all 2,244 scoring units, including
+units that contain data or original fallback regions.
+
+The historical function worklist now has no remaining rows.
+[`docs/completed-functions.csv`](docs/completed-functions.csv) retains all
+217 campaign entries and their evidence notes. This worklist is a historical
+campaign queue, separate from the report's complete function inventory.
+
+![Progress over time](https://raw.githubusercontent.com/dougchansan/pkmn-colosseum/progress-chart/progress.png)
+
+The chart plots fuzzy matching, code matching and function matching. Every
+point is an `objdiff` measurement. Points from 2026-07-01 onward come from CI
+reports (or, for the first stretch, this table's git history); earlier points
+were recovered by building historical commits. The campaign starts on
+2026-06-27, when units first became matchable. Points from the PR #638 merge
+onward cover the DOL plus REL modules; earlier points have DOL-only scope.
+
+The build workflow republishes the image on every push to master in the
+[`progress-chart`](https://github.com/dougchansan/pkmn-colosseum/tree/progress-chart)
+branch. Keeping generated images there avoids repeated image commits on the
+protected master branch. Render one locally with:
+
+```bash
+uv run --with matplotlib tools/plot_progress.py -o /tmp/progress.png
+```
 
 After rebuilding the report, refresh the table with:
 

@@ -1,57 +1,173 @@
 # Count-Sheep integration validation
 
-## Completion import — 2026-10-28 (validation pending)
+## Completion import — 2026-10-29
 
-This integration brings the remaining Count-Sheep history through
+**The integrated tree matches and links 100% of the project's tracked code:
+8,677 functions and 2,504,940 bytes across the DOL and all 25 configured REL
+modules. All 26 rebuilt outputs pass their unchanged canonical hashes and
+direct byte comparisons against the private originals.** These figures include
+accepted assembly implementations. Data matching remains 83.30%, and the
+original vector-template and resource fallbacks remain explicitly disclosed
+below. A pure-C percentage or gameplay result is not established by this build.
+
+### Revisions, attribution and build evidence
+
+This integration brings Count-Sheep history through
 `51bfe4314a218dfaf9592fc80723c50498d0ee55` onto upstream
-`876de33adc88acdbac119b846c5115ee41e54ccb`. Both parents, all 751 donor commits and their contributor
-attribution are retained. The README explicitly credits Count-Sheep. The donor describes its final tree as 100% matched
-and linked **code**; its README and tracked reports are older measurements.
-That donor claim is not a measurement of this combined tree. A fresh private
-CI build must establish the integrated result before it is accepted.
+`876de33adc88acdbac119b846c5115ee41e54ccb`. Both parents, all **751 donor
+commits** and their original author attribution are retained. The README
+credits [Count-Sheep](https://github.com/Count-Sheep), and integration commits
+include the account-linked coauthor identity
+`Count-Sheep <143969516+Count-Sheep@users.noreply.github.com>`.
 
-The verified upstream baseline report (Build run `39548218157`, artifact
-`12322732309`, archive SHA-256
-`fc533e590d936e23306db302a039d750a4cd12dcddfca12f588135347573b7d4`) contains:
+The combined source was verified at
+[`ace8ed58268e46584415fe5e03486e7a00768e67`](https://github.com/dougchansan/pkmn-colosseum/commit/ace8ed58268e46584415fe5e03486e7a00768e67),
+using the existing private-input build workflow and pinned tools. In
+[Build run 40833777512, job 123313705577](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40833777512/job/123313705577),
+the complete source build, final links, **26 canonical hash checks, 26 direct
+byte comparisons and registered assembly branch-target checks all passed**.
+That job's overall result was red solely at the obsolete object-topology
+freeze: it still described 2,202 units, while the completed source layout has
+2,244. The metadata refresh updates that freeze after the interval audit below;
+required checks remain enabled for the final PR head.
+The final integration checks are recorded in
+[PR #662](https://github.com/dougchansan/pkmn-colosseum/pull/662).
 
-| Measure | Upstream baseline |
-| --- | ---: |
-| Exact code | 2,312,648 / 2,504,940 bytes |
-| Exact functions | 8,554 / 8,677 |
-| Source-linked code | 2,294,704 bytes |
-| Matched data | 2,970,480 / 3,565,996 bytes |
-| Source-linked data | 1,890,688 bytes |
+The metrics-only
+[`GC6E01_report` artifact, ID 12880330757](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40833777512/artifacts/12880330757),
+contains the freshly generated `build/GC6E01/report.json`:
 
-The reconciliation preserves all 42 runtime-evidence names and 2,095 improved
-upstream function names absent from the donor spelling. Name mapping uses the
+- Artifact archive SHA-256:
+  `910d40fb67a59c642330198ac63e970a55675a95e4b155bbcea0649d17a68e01`.
+- Report JSON SHA-256:
+  `898380a43cce0515e7936ccc2fbf6c4a0cf2d8d3d058196242b83e769a646114`.
+
+The authoritative current measurement comes from that generated report or a
+subsequent verified CI artifact. The root-level `report.json` and the dated
+sections below are historical records.
+
+### Progress and preservation audit
+
+The verified upstream baseline is
+[Build run 39548218157](https://github.com/dougchansan/pkmn-colosseum/actions/runs/39548218157),
+artifact `12322732309`, with archive SHA-256
+`fc533e590d936e23306db302a039d750a4cd12dcddfca12f588135347573b7d4`.
+
+| Measure | Upstream baseline | Completed import |
+| --- | ---: | ---: |
+| Exact code | 2,312,648 / 2,504,940 bytes | 2,504,940 / 2,504,940 bytes (100%) |
+| Exact functions | 8,554 / 8,677 | 8,677 / 8,677 (100%) |
+| Source-linked code | 2,294,704 bytes | 2,504,940 bytes (100%) |
+| Matched data | 2,970,480 / 3,565,996 bytes | 2,970,480 / 3,565,996 bytes (83.30%) |
+| Source-linked data | 1,890,688 bytes | 1,897,440 bytes (53.21%) |
+
+The DOL contributes 2,495,112 matched and source-linked code bytes and 8,602
+exact functions; the RELs contribute 9,828 bytes and 75 exact functions. All
+**8,677 baseline module/address/size/name identities are preserved**. The
+code-byte, data-byte and function denominators are unchanged. Audits of the
+actual section intervals found no loss of physical, source-owned, linked or
+matched coverage. The refreshed strict freeze records the new 2,244-unit
+topology, with 2,121 complete scoring units. Units containing remaining data
+or original fallbacks explain why complete-unit count is below total units
+despite complete tracked-code coverage.
+
+The reconciliation retains all **42 runtime-evidence names and 2,095 improved
+upstream function names** absent from the donor spelling. Mapping uses the
 original address and size, with simultaneous identifier replacement so aliases
 such as donor `OSLink`/upstream `Relocate` cannot cascade. Game string literals
-and historical disabled assembly wrappers are unchanged.
+and historical disabled assembly wrappers retain their original spellings.
 
-Donor source owners and compiler profiles replace superseded code carves. The
-upstream common_rel reconstruction, false-relocation exclusions, callable DOL
-exports, loose-REL support, canonical hashes and private-input CI remain intact.
-Forty upstream data-only units are retained where the donor has no explicit
-owner. The SDK EXI control block now belongs to its exact code owner; its adjacent
-72-byte prefix and 24-byte tail remain separate zero-initialized source units.
-These 42 data units cover 16,574 bytes already present in the baseline. They
-are preservation, not newly claimed progress. The 561,032-byte original
-resource fallback remains uncredited as reconstructed source.
+Donor source owners and compiler profiles replace superseded code carves.
+Merge repairs restore exact source guards, retail data boundaries, typed menu
+constant pools and OSReset ownership. Upstream common_rel reconstruction,
+false-relocation exclusions, callable DOL exports, loose-REL support, canonical
+hashes and private-input CI remain intact. Forty upstream data-only units are
+retained where the donor has no explicit owner. The SDK EXI control block
+belongs to its exact code owner; its adjacent 72-byte prefix and 24-byte tail
+remain separate zero-initialized source units. These **42 data units preserve
+16,574 baseline bytes** and add no newly claimed coverage.
 
-The donor adds 28 evidenced library-assembly registry entries (hardware
-primitives and THP helpers), with no new first-party assembly entries. The
-registry and its evidence remain separate from claims about decompiled C/C++.
-Build now verifies registered branch targets against freshly generated retail
-assembly. Quality Lint covers new C++ source/header files as well as C files.
+The 561,032-byte `common_rel` resource region remains an original-object
+fallback inside the data denominator, without reconstructed-source credit.
+All data matching percentages and the lower 53.21% source-linked data figure
+remain visible rather than being folded into the code-completion claim.
 
-Local validation covers configuration generation, checker tests, jump-table
-importer tests, added-source quality, live-wrapper scanning and whitespace.
-This checkout has no retail inputs, so it cannot reproduce byte matching.
-The original README and denominator freeze remain in place until the fresh
-report can be audited and used to update them. CI uploads its metrics-only
-report even after a later consistency failure; no required gate is bypassed.
-No original binaries, extracted objects, compiler binaries or gameplay results
-are published by this integration.
+### Startup helpers and the original vector fallback
+
+The final six startup helpers occupy two source-owned `.init` intervals:
+
+| Interval (end exclusive) | Functions | Bytes |
+| --- | ---: | ---: |
+| `0x80003458–0x800034AC` | 2 | 84 |
+| `0x800053E0–0x80005544` | 4 | 356 |
+
+The intervening **7,988 bytes at `0x800034AC–0x800053E0`** are the original
+interrupt-vector templates. They remain a named, source-less
+`crt/interrupt_vectors` fallback, with no counted function, matched-code or
+source-linked credit. This interval was already outside the historical code
+and function denominator; the complete physical `.init` region and its bytes
+are retained in the rebuilt DOL.
+
+Pinned [DTK 1.8.3's padding pass](https://github.com/encounter/decomp-toolkit/blob/e4219e7644fb7b96d920d5bc3d1d950f5569dcaf/src/util/split.rs)
+requires a Function-kind symbol at the beginning of a code split. Moving the
+template gap into its own split would otherwise introduce a new visible
+`pad_00_800034AC_init` function. The configuration explicitly declares that
+synthetic marker as global, hidden and `noreloc`, with exactly the template's
+extent. Its hidden status preserves the baseline measurement scope under
+[objdiff 3.6.1's report rules](https://github.com/encounter/objdiff/blob/66c879a95d45c1170a0834071cab58655fd9773b/objdiff-cli/src/cmd/report.rs);
+`noreloc` prevents inferred outgoing relocations through the raw templates.
+The real table labels, incoming references, following helper and physical
+fallback remain present. This marker describes tooling padding, not an
+additional reconstructed function. Gap filling remains enabled and no report
+totals are rewritten after measurement.
+
+The legacy linker stalled with that global synthetic marker. A narrowly scoped
+[link-copy helper](../tools/link_vector_object.py) gives only this marker local,
+default-visibility metadata in a **separate linker input**. It leaves the
+original objdiff comparison object untouched. The helper validates the exact
+PowerPC ELF layout and boundaries, preserves every allocated byte and section
+offset, and remaps the symbol table, CodeWarrior records, DTK virtual-address
+records and relocation symbol indexes consistently. Public vector labels and
+relocation semantics remain unchanged; unexpected layouts fail closed. Only
+the original vector fallback takes this path. The verified full build above
+then proves that all 26 final outputs still equal the originals.
+
+### Assembly accounting and completion records
+
+The donor adds **28 evidenced library-assembly registry entries** for hardware
+primitives and THP helpers, with no new first-party assembly entries. The
+summary includes the separate paired-single allowlist and resolves entries
+against module, source and original address where possible. Its byte totals
+measure **whole retail function spans associated with assembly**, not the
+number of assembly instructions:
+
+| Evidence category | Resolved entries | Unique whole-function spans | Span bytes |
+| --- | ---: | ---: | ---: |
+| First-party registry | 10 / 10 | 10 | 1,372 |
+| Library registry | 113 / 123 | 113 | 16,712 |
+| Paired-single allowlist | 26 / 26 | 26 | 2,336 |
+| Combined, deduplicated | 149 / 159 | 149 | 20,420 |
+
+All 149 resolved spans match and link. Ten inline, inactive or ambiguous
+entries remain unresolved and are disclosed without assigning them bytes.
+Whole-function spans do not isolate inline assembly or assembly instruction
+bytes, so subtracting them from matched code would not establish a pure-C
+percentage.
+
+Validation includes **108 checker tests and 13 jump-table importer tests**,
+configuration generation, C/C++ added-source quality, the whole-tree
+live-wrapper scan and whitespace checks. The build verifies registered branch
+targets against freshly generated retail assembly. Required canonical hashes,
+metric integrity, regression coverage, strict topology and README/report
+consistency checks remain in force.
+
+The verified report refreshes the README, topology freeze and historical
+function worklists. The remaining list has zero entries; the completed list
+retains all **217 historical campaign rows**, including the original evidence
+columns and notes. This closes that queue without presenting it as the full
+8,677-function inventory. No original binaries, extracted objects, compiler
+binaries or generated retail outputs are published, and no gameplay validation
+is claimed. The original integration record below is preserved verbatim.
 
 ## Original integration — 2026-10-12
 
