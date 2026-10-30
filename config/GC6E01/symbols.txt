@@ -10,11 +10,11 @@ fn_80003458 = .init:0x80003458; // type:function size:0x30
 fn_80003488 = .init:0x80003488; // type:function size:0x24
 gTRKInterruptVectorTable = .init:0x800034AC; // type:label scope:global
 # DTK requires a Function-kind padding marker at the start of a code-only split.
-# This is the existing 7,988-byte original vector-table fallback, not a function.
-# Hide only its synthetic marker from function scoring, preserving the baseline
-# denominator; the named fallback and full physical .init interval remain visible.
-# Keep the raw templates free of inferred outgoing relocations, as they were
-# before the marker existed during DTK's function-analysis pass.
+# This synthetic target marker describes the 7,988-byte hardware-vector template,
+# not a callable function. Preserve its hidden status and the frozen denominator.
+# The source owner is reconstructed assembly in src/crt/interrupt_vectors.s; its
+# full physical .init interval is validated independently. Keep target analysis
+# free of inferred outgoing relocations, as before this marker existed.
 pad_00_800034AC_init = .init:0x800034AC; // type:function size:0x1F34 scope:global hidden noreloc
 lbl_80003FF0 = .init:0x80003FF0; // type:label
 lbl_80004000 = .init:0x80004000; // type:label

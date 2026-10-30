@@ -51,6 +51,14 @@ jobs:
             --binutils /binutils --compilers /compilers
         ninja -j2 all_source build/${{ matrix.version }}/report.json
 
+    - name: Verify reconstructed interrupt-vector source
+      run: |
+        python3 tools/verify_interrupt_vector_source.py \
+            --object build/${{ matrix.version }}/src/crt/interrupt_vectors.o \
+            --orig orig/${{ matrix.version }}/sys/main.dol \
+            --report build/${{ matrix.version }}/report.json \
+            --output build/${{ matrix.version }}/interrupt_vector_validation.json
+
     - name: Link full retail outputs and verify canonical hashes
       run: |
         # A stalled legacy linker must fail with logs while report diagnostics
@@ -123,6 +131,7 @@ jobs:
           build/${{ matrix.version }}/data_link_diagnostics.json
           build/${{ matrix.version }}/mwcc_data_alignment.json
           build/${{ matrix.version }}/small_data_reference_diagnostics.json
+          build/${{ matrix.version }}/interrupt_vector_validation.json
         if-no-files-found: ignore
 
     - name: Verify registered assembly branch targets

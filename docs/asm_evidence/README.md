@@ -69,3 +69,21 @@ probe instead:
 First-party asm is not decompiled C: `.github/scripts/asm_evidence_summary.py`
 reports registered asm by tier so progress figures can keep it separate.
 
+## Executable assembly templates
+
+Hardware-entry templates that are not callable functions use the separate,
+narrowly scoped `templates.json` registry. The MetroTRK vector owner is
+registered in `interrupt_vectors.md`: its 7,988 physical bytes contain a
+debugger banner, reserved slots and hardware exception-entry instructions.
+They remain separate from the existing tracked function/code denominator.
+
+`tools/verify_interrupt_vector_source.py --source-only` enforces the registered
+source and evidence, instruction vocabulary and readable assembly form.
+It rejects binary includes and instruction-word payloads. The full Build gate
+additionally validates the entire native object, exact public labels, slot
+contents, reset and SRR-mediated handler transfers, and all 49 symbolic
+relocations against the original DOL. It requires source-complete ownership
+in the fresh report and emits metadata only. All 26 canonical output checks
+remain required. A template registration grants no general assembly exception
+and adds no C/C++ or callable-function credit.
+
