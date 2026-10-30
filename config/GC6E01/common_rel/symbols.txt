@@ -99,7 +99,7 @@ lbl_125_data_2D2C = .data:0x00002D2C; // type:object size:0x42D60
 lbl_125_data_45A8C = .data:0x00045A8C; // type:object size:0x8
 lbl_125_data_45A94 = .data:0x00045A94; // type:object size:0x3A50
 lbl_125_data_494E4 = .data:0x000494E4; // type:object size:0xEB60
-// Message resource 0x58044..0x647B4: typed prefix, source templates and explicit original storage.
+// Message resource 0x58044..0x647B4: typed prefix, source templates and readable catalogues.
 // Full resource coverage remains recorded in docs/DATA_MATCHING.md.
 lbl_125_data_58044 = .data:0x00058044; // type:object size:0x3F20
 lbl_125_data_5BF64 = .data:0x0005BF64; // type:object size:0x90

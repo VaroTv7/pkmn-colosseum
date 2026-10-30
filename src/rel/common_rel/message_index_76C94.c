@@ -4,8 +4,9 @@
  *
  * The original resource spans 0x76C94-0x89CFC. This source owns
  * only its 0x4568-byte header/index prefix; storage at
- * 0x7B1FC-0x89CFC is partitioned into reconstructed templates and original storage. Entry offsets
- * remain relative to the unchanged resource base. This owner defines only the header and index.
+ * 0x7B1FC-0x89CFC is partitioned into source templates and readable message
+ * catalogues. Entry offsets remain relative to the unchanged resource base.
+ * This owner defines only the header and index.
  * Prefix SHA-256: f3e702439d6589668cd0dfff9e0fd72f47ec5c53b1ea7378f8d9343ae332f1c0
  * See docs/DATA_MATCHING.md for the exact coverage and validation audit.
  */

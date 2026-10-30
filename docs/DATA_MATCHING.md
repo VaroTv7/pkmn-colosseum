@@ -1,6 +1,64 @@
-# Remaining data matching
+# Data matching completion
 
-## Verified script and small-data continuation
+## Verified message-catalogue completion
+
+The fresh [normal Build report](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40980024867/artifacts/12944233546) at source revision
+[`8c3c0d8845846b9b4b76e35d800cd2ff7cd8a486`](https://github.com/dougchansan/pkmn-colosseum/commit/8c3c0d8845846b9b4b76e35d800cd2ff7cd8a486)
+verifies **100% matched and source-linked data: 3,565,996 / 3,565,996 bytes**.
+All 8,677 tracked functions and all 2,504,940 tracked code bytes remain exact
+and source-linked. The [full build](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40980024867/job/123817499088) compiles the complete project,
+links all outputs and passes all **26 unchanged canonical hashes and direct
+original/rebuilt byte comparisons**.
+
+| Measure | Accepted PR #664 baseline | Catalogue completion | Change |
+| --- | ---: | ---: | ---: |
+| Matched data | 3,474,575 / 3,565,996 bytes | 3,565,996 / 3,565,996 bytes | +91,421 bytes |
+| Source-linked data | 3,474,575 / 3,565,996 bytes | 3,565,996 / 3,565,996 bytes | +91,421 bytes |
+| Source-backed and complete units | 2,258 / 2,272 | 2,271 / 2,272 | +13 owners |
+| Exact/source-linked code | 2,504,940 bytes | 2,504,940 bytes | Unchanged |
+| Exact/source-linked functions | 8,677 | 8,677 | Unchanged |
+
+On 2026-10-29 the maintainer explicitly approved completing these remaining
+message-data bytes from their supplied private originals. The catalogue
+preserves that content as readable UTF-8 text and named, typed formatting
+controls in `src/rel/common_rel/message_catalog.json`. It is reconstructed
+message **data**, not newly authored dialogue or additional native program
+code. Its production compiler has no original-file input or opaque byte-array
+escape.
+
+The same 13 physical owners retain all 4,018 indexed entries, three complete
+strings stored after indexed terminators, and two bytes of final bank
+alignment. The existing 219 template entries are not counted again. Independent
+source/native comparisons and the pinned 13-owner report verify every one of
+the 91,421 bytes. All 290 checker tests, 13 jump-table tests and Quality Lint
+pass. See [the catalogue evidence](recon/message_catalog.md).
+
+An independent audit of the fresh whole-project report verifies all function
+identities and sizes, exact source-complete code, and the physical interval
+union unchanged across all 26 modules. Every data owner is exact and
+source-complete. Exactly the 13 catalogue owners gain source-backed status;
+there are no other source-status changes, overlapping intervals, omitted bytes,
+new physical intervals, renames or altered function boundaries. The full
+`unit_topology` and all code/function/data/unit denominators are unchanged.
+
+The initial source-measurement job passed all canonical outputs, 34 zero-data
+layout checks, registered assembly branch checks and metric integrity, then
+stopped at the old strict-freeze source-backed count (2,258 versus 2,271).
+The follow-up refresh changes that verified count and its informational data
+progress, without changing any denominator or topology. The final required
+checks and integration are recorded in [PR #665](https://github.com/dougchansan/pkmn-colosseum/pull/665).
+
+The complete report SHA-256 is
+`14bbb9b3f8e9099521db7d1f66b9527a4341a3786aa6d672b305e7380d958c39`;
+the artifact archive SHA-256 is
+`524f85f39c13a1be56ff9ab049c5c0af2bb5d247a3e674044cf28a7e2e78d676`.
+The previously disclosed 7,988-byte interrupt-vector template and four bytes
+of alignment remain original fallback outside the historical tracked-code
+denominator. The vector owner's report record is unchanged and is the sole
+incomplete scoring unit; all tracked data is now source-linked. Runtime
+playtesting and a pure-C percentage are outside this verification.
+
+## Historical PR #664 script and small-data checkpoint
 
 The normal private-input
 [Build job](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/job/123777997002)
@@ -93,11 +151,11 @@ bytes. The generated-source report SHA-256 is
 Generated C, data assembly and objects remain ignored build outputs; authored
 source and source-only compilers are the tracked inputs.
 
-The measured residual is 91,421 message-content bytes in 13 explicit original
-fallback intervals. Reconstructing a message decoder or its formatting rules
-does not reconstruct the unique message contents. Those bytes remain in the
-3,565,996-byte scope and receive no source or matching credit. README progress
-and the topology freeze describe the verified normal Build report, whose
+At this PR #664 checkpoint, the measured residual was 91,421 message-content
+bytes in 13 explicit original fallback intervals. Reconstructing a message decoder or its formatting rules
+does not reconstruct the unique message contents. Those bytes remained in the
+3,565,996-byte scope and received no source or matching credit at that checkpoint.
+Its README progress and topology freeze described the verified normal Build report, whose
 SHA-256 is
 `c4e3995c1d8155a5b9536a4de02dae2580ff2b9a8a265cdcf4426e897680e09b`.
 The [normal Build report artifact](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/artifacts/12939685347)

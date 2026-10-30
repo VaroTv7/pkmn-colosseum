@@ -20,13 +20,22 @@ import subprocess
 # IDs and parameter widths follow msgctrlcode and the respective callbacks.
 CONTROLS = {
     "line_break": (0, "msgctrlCR", 0),
+    "key_end": (2, "msgctrlKeyEnd", 0),
     "font": (7, "msgctrlFont", 1),
+    "color": (8, "msgctrlColor", 4),
     "event_string_0": (13, "msgctrlEvStrBuf0", 0),
     "event_string_1": (14, "msgctrlEvStrBuf1", 0),
+    "my_name": (19, "msgctrlMyName", 0),
+    "my_pokemon": (20, "msgctrlMyMons", 0),
+    "my_pokemon_2": (21, "msgctrlMyMons2", 0),
+    "trainer_name": (35, "msgctrlTrainerName", 0),
+    "move_name": (40, "msgctrlWazaName", 0),
+    "item_name": (41, "msgctrlItemName", 0),
     "hero_name": (43, "msgctrlHero", 0),
     "digit": (47, "msgctrlDigit", 0),
     "menu_digit": (52, "msgctrlMenuDigit", 0),
     "menu_message": (55, "msgctrlMenuMsg", 0),
+    "event_string_2": (65, "msgctrlEvStrBuf2", 0),
     "menu_unsigned": (69, "msgctrlMenuUDigit", 0),
     "menu_hex": (71, "msgctrlMenuHex", 0),
     "menu_zero_digit": (73, "msgctrlMenuZDigit", 0),
@@ -53,18 +62,25 @@ def encode_parts(parts):
                     "Text must contain ordinary 16-bit glyphs, not terminators or escapes")
             out.extend(part.encode("utf-16-be"))
             continue
-        require(isinstance(part, dict) and "control" in part
-                and set(part) <= {"control", "value"}, "Unknown message operation")
+        require(isinstance(part, dict) and isinstance(part.get("control"), str),
+                "Unknown message operation")
         require(part["control"] in CONTROLS, "Unknown message control")
         code, _, width = CONTROLS[part["control"]]
         out.extend((0xFF, 0xFF, code))
-        if width:
+        if width == 4:
+            channels = ("red", "green", "blue", "alpha")
+            require(set(part) == {"control", *channels}
+                    and all(type(part[name]) is int and 0 <= part[name] <= 255
+                            for name in channels), "Color requires four unsigned byte channels")
+            out.extend(part[name] for name in channels)
+        elif width:
             lower, upper = (-128, 127) if width < 0 else (0, 255)
-            require(type(part.get("value")) is int and lower <= part["value"] <= upper,
+            require(set(part) == {"control", "value"}
+                    and type(part.get("value")) is int and lower <= part["value"] <= upper,
                     "Control byte parameter is missing or outside its declared type")
             out.append(part["value"] & 255)
         else:
-            require("value" not in part, "This control has no parameter")
+            require(set(part) == {"control"}, "This control has no parameter")
     return bytes(out) + b"\0\0"
 
 
