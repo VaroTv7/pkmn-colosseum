@@ -14208,8 +14208,8 @@ config.libs = [
             # Source/native REL and canonical-output checks remain required.
             Object(Matching, "rel/common_rel/shared_font_data.c"),
             Object(Matching, "rel/common_rel/shared_message_data.c"),
-            # Typed MessageGroup headers and indices; message storage stays
-            # in adjacent original objects with the full resource coverage.
+            # Typed MessageGroup headers and indices retain the original bases;
+            # adjacent source catalogues preserve every message-storage byte.
             Object(Matching, "rel/common_rel/message_index_58044.c"),
             Object(Matching, "rel/common_rel/message_index_76C94.c"),
             Object(Matching, "rel/common_rel/script_structure_89CFC.c"),
@@ -14235,9 +14235,31 @@ config.libs = [
                 for address in ("5BFF4", "61A12", "61A5C", "61D8B", "61E46", "63069",
                                 "64102", "7B1FC", "80AB1", "811F1", "85FFD", "89788")
             ],
-            # Every remaining message byte stays in an explicit original interval.
+            # Maintainer-approved readable message content and typed controls.
+            # Existing physical owners and the complete data scope are unchanged.
             *[
-                Object(NonMatching, f"rel/common_rel/message_storage_{address}.c")
+                Object(
+                    Matching,
+                    f"rel/common_rel/message_storage_{address}.c",
+                    source="rel/common_rel/message_catalog.json",
+                    source_generator={
+                        "kind": "object", "tool": "tools/message_catalog_source.py",
+                        "args": [
+                            "--unit", f"message_storage_{address}",
+                            "--symbols", "config/GC6E01/common_rel/symbols.txt",
+                            "--index-source", "src/rel/common_rel/message_index_58044.c",
+                            "--index-source", "src/rel/common_rel/message_index_76C94.c",
+                        ],
+                        "dependencies": [
+                            "tools/source_object_metadata.py",
+                            "tools/message_template_source.py",
+                            "config/GC6E01/common_rel/symbols.txt",
+                            "src/rel/common_rel/message_index_58044.c",
+                            "src/rel/common_rel/message_index_76C94.c",
+                        ],
+                        "assembler": True,
+                    },
+                )
                 for address in ("5BF64", "5C090", "61A40", "61A7B", "61D94", "61E77",
                                 "6306E", "6410E", "7B268", "810E1", "81609", "86014", "899BC")
             ],

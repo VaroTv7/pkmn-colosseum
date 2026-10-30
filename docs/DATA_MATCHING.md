@@ -1,5 +1,25 @@
 # Remaining data matching
 
+## Approved message-catalogue completion
+
+On 2026-10-29 the maintainer explicitly approved completing the remaining
+91,421 message-data bytes. This continuation represents their actual content
+as readable UTF-8 text and named, typed formatting controls in
+`src/rel/common_rel/message_catalog.json`, using the supplied private originals
+for comparison. It is reconstructed message **data**, not newly authored
+dialogue or additional native program code. The source compiler has no
+original-file input or opaque byte-array escape.
+
+The catalogue retains the same 13 physical owners, all 4,018 indexed entries,
+three complete strings stored after indexed terminators, and two bytes of
+final bank alignment. The existing 219 template entries are not counted
+again. All 3,565,996 data bytes remain in scope. Independent source/native
+comparisons and the pinned 13-owner report verify all 91,421 bytes exact and
+source-complete. All 290 checker tests and 13 jump-table tests pass locally.
+Full canonical build and fresh whole-project report acceptance are pending;
+the verified 97.44% checkpoint below remains the baseline until those checks pass.
+See [the catalogue evidence](recon/message_catalog.md).
+
 ## Verified script and small-data continuation
 
 The normal private-input

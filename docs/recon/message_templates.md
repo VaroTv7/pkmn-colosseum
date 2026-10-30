@@ -1,6 +1,6 @@
 # Packed message controls and generated labels
 
-## Verified native and integrated result
+## Verified template-stage result
 
 `src/rel/common_rel/message_templates.json` reconstructs **219 complete message
 entries totaling 3,635 bytes** in 12 `common_rel .data` owners. Independent
@@ -33,11 +33,12 @@ the downloaded artifact archive SHA-256 is
 These results establish native output equality and source accounting;
 runtime gameplay testing was outside this verification.
 
-This reconstruction covers formatting controls, simple UI states, complete
+This template-stage reconstruction covers formatting controls, simple UI states, complete
 entries already represented by existing source, and regular counter-label
-families. It does not publish a decoded catalog of the remaining message
-resources. Unreconstructed intervals remain adjacent fallback and receive
-no source credit.
+families. At this checkpoint, the remaining message resources stayed in
+adjacent fallback and received no source credit. The separately approved
+[message catalogue completion](message_catalog.md) records their subsequent
+readable text and control-source reconstruction and its own acceptance checks.
 
 ## Source provenance and entry counts
 
@@ -186,8 +187,10 @@ checks for the actual source selection:
 - Confirmed that the source-owner intervals do not overlap and that every
   native section remains byte-identical to its complete original interval.
 
-Only counts, boundaries, identities, hashes and equality results are suitable
-as public verification metadata. Private originals and decoded catalogs are
-not documentation or build inputs. The normal integrated build cited above
-verified that these source owners preserve the unchanged complete resources,
-canonical outputs and physical progress scope.
+Verification artifacts contain counts, boundaries, identities, hashes and
+equality results. Private original binaries and target objects remain outside
+the tracked source. The later maintainer-approved catalogue represents the
+remaining message text separately; it does not add template-stage credit.
+The normal integrated build cited above verified that these template owners
+preserve the unchanged complete resources, canonical outputs and physical
+progress scope.

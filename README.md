@@ -193,16 +193,17 @@ compiler binaries, or asm-wrapper bodies as decompilation progress.
 
 ## Contributors
 
-[Count-Sheep](https://github.com/Count-Sheep) contributed the extensive matching
-and linking campaign integrated from their
-[Pokémon Colosseum fork](https://github.com/Count-Sheep/pkmn-colosseum), including
-source reconstruction, compiler analysis, matching tools and supporting evidence.
-The integration preserves their original commits and author attribution. See
-[`docs/COUNT_SHEEP_INTEGRATION.md`](docs/COUNT_SHEEP_INTEGRATION.md) for the import
-history and validation scope.
+- [Count-Sheep](https://github.com/Count-Sheep)
+- [wastelandgunner](https://github.com/wastelandgunner)
+- [metaisfacil](https://github.com/metaisfacil)
+- [pixelpush-io](https://github.com/pixelpush-io)
 
 ## License
 
-The decompiled source in this repository is released under the
-[MIT license](LICENSE). The Pokémon Colosseum game, assets, and toolchain are
-owned by their respective rights holders and are not distributed here.
+The project's reverse-engineered code and authored tools are released under
+the [MIT license](LICENSE). The readable message catalogue preserves original
+game text; that text is not newly authored dialogue, and this project does not
+claim to relicense it under MIT. Pokémon Colosseum and its original content
+remain owned by their respective rights holders. Original game binaries,
+extracted target objects, and proprietary compiler binaries are not distributed
+here.
