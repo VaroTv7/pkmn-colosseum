@@ -3,9 +3,10 @@
 The `crt/interrupt_vectors` owner is the **7,988-byte** interval
 `0x800034AC–0x800053E0` in `.init`. It is a table of executable exception-entry
 templates, reserved slots and a debugger identification string, not an ordinary
-C function. The four other alignment bytes mentioned in earlier completion
-reports are outside this interval; do not append four bytes to this object or
-include them in its size.
+C function. The four other physical alignment bytes mentioned in earlier
+completion reports belong to the already-complete
+`main/trk/TRKTarget_residual_800C25FC` owner. They are outside this interval;
+do not append four bytes to this object or include them in its size.
 
 ## Source family and provenance
 
@@ -115,3 +116,44 @@ Report the reconstructed executable template as assembly separately from C/C++.
 Full source-backed unit completion requires the fresh whole-project report and
 its normal source-status/topology checks; it does not follow solely from a
 matching final DOL or imply runtime gameplay testing.
+
+## Verified source-completion result
+
+The [normal full Build](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40986293627/job/123837998946)
+at source revision
+[`ce09b514e43171ccb1b3c335dcc898dc22ae6963`](https://github.com/dougchansan/pkmn-colosseum/commit/ce09b514e43171ccb1b3c335dcc898dc22ae6963)
+compiles this source through GNU assembly and the normal DTK ELF fixup, passes
+the dedicated vector gate, and links all 26 outputs with unchanged canonical
+hashes and direct byte equality to the private originals. The
+[fresh report](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40986293627/artifacts/12947501389)
+has **2,272 / 2,272 complete, source-backed units**, with all 8,677 tracked
+functions, 2,504,940 tracked code bytes and 3,565,996 tracked data bytes still
+exact and source-linked. Only the vector owner's source status changes.
+
+| Verified property | Result |
+| --- | ---: |
+| Complete `.init` owner | 7,988 bytes, alignment 4 |
+| Executable instructions | 365 / 1,460 bytes |
+| Identifying text including terminator | 46 bytes |
+| Reserved and alignment zeros | 6,482 bytes |
+| Public labels | 4, exact offsets and `NOTYPE` metadata |
+| Callable function symbols | 0 |
+| Symbolic relocations | 1 `REL24`, 24 `ADDR16_HI`, 24 `ADDR16_LO` |
+| Direct branch destinations | 5, all verified |
+| SRR-mediated debugger entries | 24, all verified |
+| Entire relocated span versus original | Equal |
+
+An independent native audit reproduces the complete-span comparison without
+using the production verifier's ELF parser. The checker suite passes all
+307 tests, including 17 vector tests for invalid relocations, targets, source
+escapes, local function symbols, padding and incomplete reports; the separate
+13 jump-table tests also pass. The resolved table SHA-256 is
+`0b9e59e77ccc383067155f629cb44c9645323255e44608c6970df89eec58e157`.
+The full report SHA-256 is
+`b3d16289a1b16caed16c311bd4db447484a937749121308c469147a26a611b32`.
+
+The initial source-measurement build stops only when the strict source-status
+freeze still expects 2,271 source-backed units. The follow-up changes that
+verified count to 2,272 and refreshes the README; no topology or denominator
+changes. Final required checks and integration are recorded in
+[PR #666](https://github.com/dougchansan/pkmn-colosseum/pull/666).
