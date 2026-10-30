@@ -1,9 +1,9 @@
-# Remaining message catalogue: readable source reconstruction
+# Completed message catalogue: readable source reconstruction
 
 ## Scope and verification status
 
 [`src/rel/common_rel/message_catalog.json`](../../src/rel/common_rel/message_catalog.json)
-represents the remaining **91,421 bytes** of message storage in **13 existing
+represents the final **91,421 bytes** of message storage in **13 existing
 `common_rel .data` owners**. It contains **4,018 indexed messages**, **three
 retained strings without lookup entries**, **314 named formatting-control
 operations**, and **41,093 ordinary BMP glyphs**. The original owner names,
@@ -16,9 +16,13 @@ all keys, offsets, first terminators, retained strings and alignment without
 importing the authoring code or production encoder. Both comparisons matched
 all **91,421 bytes**. All 13 production objects, including the normal object
 fixup, also passed independent whole-owner comparisons, symbol/size checks,
-alignment-1 checks and zero-relocation checks. **Full integrated canonical CI
-is still pending** for this catalogue. A completed source-progress gain awaits
-that gate. Runtime gameplay testing is outside these checks.
+alignment-1 checks and zero-relocation checks. The normal
+[integrated Build](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40980024867/job/123817499088) at source revision
+[`8c3c0d8845846b9b4b76e35d800cd2ff7cd8a486`](https://github.com/dougchansan/pkmn-colosseum/commit/8c3c0d8845846b9b4b76e35d800cd2ff7cd8a486)
+then passed all **26 unchanged canonical output hashes and direct byte
+comparisons**. Its complete report verifies the full **91,421-byte matched and
+source-linked data gain**, completing all **3,565,996 tracked data bytes**.
+Runtime gameplay testing is outside these checks.
 
 ## Provenance and maintainer authorization
 
@@ -197,13 +201,20 @@ complete and zero native functions or code bytes. Its SHA-256 is
 The catalogue source SHA-256 is
 `95307572fe153ad766045f119bb9fada92a8dde5243138307dc09350c3cce5cf`.
 
-Acceptance still requires a normal integrated build with all 26
-unchanged canonical output hashes and direct byte comparisons. Metric
-integrity must retain the exact physical interval union, all 8,677 function
-identities, the 2,504,940-byte code denominator and the **3,565,996-byte data
-denominator**.
+The normal integrated source build passed all 26 unchanged canonical output
+hashes and direct byte comparisons. Its
+[whole-project report](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40980024867/artifacts/12944233546) has SHA-256
+`14bbb9b3f8e9099521db7d1f66b9527a4341a3786aa6d672b305e7380d958c39`.
+The independent report audit preserves the exact physical interval union,
+all 8,677 function identities and sizes, the 2,504,940-byte code denominator,
+the **3,565,996-byte data denominator**, and the entire 2,272-unit topology.
+There are no overlaps, omitted bytes or other source-status changes.
 
-Successful integration contributes these 91,421 bytes as matched and
-source-linked **data**. It adds no PowerPC functions or code credit and does
-not shrink the denominator. Full integrated acceptance remains pending until
-fresh build and report evidence is recorded here.
+These 91,421 bytes contribute matched and source-linked **data**, bringing both
+data measures to **100%**. They add no PowerPC functions or code credit and do
+not shrink the denominator. Source-backed and complete units rise from 2,258
+to 2,271. The sole remaining incomplete owner is the unchanged interrupt-vector
+template outside the historical tracked-code denominator. The initial build's
+strict-freeze failure records exactly the expected source-status increase;
+the documentation/freeze refresh and final required checks are recorded in
+[PR #665](https://github.com/dougchansan/pkmn-colosseum/pull/665).

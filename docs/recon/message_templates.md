@@ -19,9 +19,9 @@ integrity, the strict topology freeze and the README progress-table check.
 
 The [fresh report artifact 12939685347](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40968205519/artifacts/12939685347)
 records all 12 owners as complete, with a **3,635-byte matched and
-source-linked data gain**. This reduces the outstanding message payload from
-95,056 to **91,421 bytes**. Those remaining bytes retain their fallback owners
-and stay in the full **3,565,996-byte data denominator**. Across the checkpoint,
+source-linked data gain**. At this checkpoint, it reduced the outstanding message
+payload from 95,056 to **91,421 bytes**. Those remaining bytes retained their
+fallback owners and stayed in the full **3,565,996-byte data denominator**. Across the checkpoint,
 matched and source-linked data are both **3,474,575 bytes (97.436320%)**.
 
 An independent audit of that report confirmed all **8,677 function identities**,
