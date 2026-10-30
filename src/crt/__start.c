@@ -37,8 +37,8 @@ __declspec(section ".init") void* memcpy(void* dst, const void* src, u32 count);
 __declspec(section ".init") void __fill_mem(void* dest, int val, u32 count);
 
 /* __start.c proper (0x80003100 - 0x80003458) is built with GC/1.2.5n.
-   The two GC/1.3.2 memory-helper units surround the original interrupt-vector
-   table at 0x800034AC - 0x800053E0; that table remains an explicit fallback. */
+   The two GC/1.3.2 memory-helper units surround the MetroTRK vector assembly
+   at 0x800034AC - 0x800053E0, reconstructed in interrupt_vectors.s. */
 #if !defined(START_MEM_PART)
 extern void InitMetroTRK(void);
 extern void InitMetroTRK_BBA(void);

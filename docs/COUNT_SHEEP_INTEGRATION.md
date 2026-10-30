@@ -1,12 +1,17 @@
 # Count-Sheep integration validation
 
 This document records the completed fork import and its historical checkpoints.
-Subsequent source reconstruction raises matched and source-linked data to
-**100%** while retaining the import's code coverage, donor history and
-attribution. See [the current data evidence](DATA_MATCHING.md) and
-[PR #665](https://github.com/dougchansan/pkmn-colosseum/pull/665).
+Subsequent source reconstruction completed all tracked data at **100%** and
+then reconstructed the **7,988-byte interrupt-vector template**. The fresh
+source-build report verifies **2,272 / 2,272 scoring units source-backed and
+complete**, with the import's tracked code coverage, donor history and
+attribution unchanged. See [the current data evidence](DATA_MATCHING.md),
+[the vector evidence](asm_evidence/interrupt_vectors.md), and the catalogue
+integration in [PR #665](https://github.com/dougchansan/pkmn-colosseum/pull/665).
+Final vector-completion checks and integration are tracked in
+[PR #666](https://github.com/dougchansan/pkmn-colosseum/pull/666).
 
-## Completion import — 2026-10-29
+## Historical completion import — 2026-10-29
 
 **The integrated tree matches and links 100% of the project's tracked code:
 8,677 functions and 2,504,940 bytes across the DOL and all 25 configured REL
@@ -99,6 +104,11 @@ All data matching percentages and the lower 53.21% source-linked data figure
 remain visible rather than being folded into the code-completion claim.
 
 ### Startup helpers and the original vector fallback
+
+This subsection records the original fallback and linker handling at the
+PR #662 checkpoint. Subsequent source reconstruction superseded that fallback;
+the current implementation and validation are documented in
+[the vector evidence](asm_evidence/interrupt_vectors.md).
 
 The final six startup helpers occupy two source-owned `.init` intervals:
 
@@ -309,9 +319,9 @@ versus the imported 94.94608%, a 51,619-byte report decrease retained and disclo
 throughout this integration. Zero function regressions is not a claim that every
 reported data metric improved.
 
-A byte-identical reconstruction still uses original fallback objects for
-unreconstructed regions. It does not mean all game source or data is decompiled,
-and no gameplay validation is claimed.
+The October 12 reconstruction still used original fallback objects for
+unreconstructed regions. That checkpoint did not establish complete source
+coverage, and no gameplay validation was claimed.
 
 ## Reconciliation with master `fd207bc8` (PR #637) — 2026-10-14
 

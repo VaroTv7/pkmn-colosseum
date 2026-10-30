@@ -1,6 +1,43 @@
 # Data matching completion
 
-## Verified message-catalogue completion
+## Verified final scoring-unit completion
+
+The fresh [normal Build report](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40986293627/artifacts/12947501389)
+at source revision
+[`ce09b514e43171ccb1b3c335dcc898dc22ae6963`](https://github.com/dougchansan/pkmn-colosseum/commit/ce09b514e43171ccb1b3c335dcc898dc22ae6963)
+verifies **2,272 / 2,272 scoring units source-backed and complete**. All
+**8,677 tracked functions**, **2,504,940 tracked code bytes** and
+**3,565,996 tracked data bytes** remain exact and source-linked at **100%**.
+
+The final `crt/interrupt_vectors` owner is reconstructed as **7,988 bytes of
+symbolic assembly**, retaining its physical interval, public labels and
+hardware entry behavior. The vector gate validates all 49 relocations and
+compares all 7,988 bytes with the private original. This owner remains outside
+the historical tracked-code denominator: its completion adds zero tracked
+functions, code bytes or data bytes. See [the vector evidence](asm_evidence/interrupt_vectors.md).
+
+Earlier reports grouped four additional physical alignment bytes with the
+vector fallback. Those bytes belong to the already-complete
+`trk/TRKTarget_residual_800C25FC` owner and are not part of the vector table.
+All physical intervals and the existing 2,272-unit topology remain unchanged.
+
+The [normal Build job](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40986293627/job/123837998946)
+compiled and linked the project, passed the vector gate, and passed all
+**26 unchanged canonical hashes and direct original/rebuilt byte comparisons**.
+It then stopped at the old strict-freeze source-backed count of 2,271 versus
+the verified 2,272. The documentation/freeze refresh updates that count without
+changing any denominator or topology. All **307 checker tests** and **13
+jump-table tests** pass. Final required checks and integration are tracked in
+[PR #666](https://github.com/dougchansan/pkmn-colosseum/pull/666).
+
+The report SHA-256 is
+`b3d16289a1b16caed16c311bd4db447484a937749121308c469147a26a611b32`;
+the artifact archive SHA-256 is
+`6a7d380dd34522644b3843a6b5ccad86039b8826cd7295fb59e21f5a2d4ddac3`.
+These results verify source completion and binary identity, not a pure-C
+percentage or runtime gameplay testing.
+
+## Historical PR #665 message-catalogue completion
 
 The fresh [normal Build report](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40980024867/artifacts/12944233546) at source revision
 [`8c3c0d8845846b9b4b76e35d800cd2ff7cd8a486`](https://github.com/dougchansan/pkmn-colosseum/commit/8c3c0d8845846b9b4b76e35d800cd2ff7cd8a486)
@@ -52,11 +89,13 @@ The complete report SHA-256 is
 `14bbb9b3f8e9099521db7d1f66b9527a4341a3786aa6d672b305e7380d958c39`;
 the artifact archive SHA-256 is
 `524f85f39c13a1be56ff9ab049c5c0af2bb5d247a3e674044cf28a7e2e78d676`.
-The previously disclosed 7,988-byte interrupt-vector template and four bytes
-of alignment remain original fallback outside the historical tracked-code
-denominator. The vector owner's report record is unchanged and is the sole
-incomplete scoring unit; all tracked data is now source-linked. Runtime
-playtesting and a pure-C percentage are outside this verification.
+At this PR #665 checkpoint, the 7,988-byte interrupt-vector template remained
+the sole incomplete scoring unit, outside the historical tracked-code
+denominator. All tracked data was source-linked. The four additional physical
+alignment bytes mentioned in earlier reporting belong to the already-complete
+`trk/TRKTarget_residual_800C25FC` owner, not this vector fallback. Subsequent
+vector completion is recorded above. Runtime playtesting and a pure-C
+percentage are outside this verification.
 
 ## Historical PR #664 script and small-data checkpoint
 
@@ -166,11 +205,12 @@ record the canonical output comparisons, zero-data layouts and linked symbols.
 An independent audit of this fresh report verifies all 8,677 function
 identities and the same physical interval union across all 26 modules: no
 overlapping intervals, removed physical bytes, added physical bytes or renamed
-functions. The code, function and data denominators are unchanged. The
-separate 7,992-byte physical interrupt-vector fallback remains disclosed
-below and receives no tracked-code or source credit.
+functions. The code, function and data denominators were unchanged. At this
+checkpoint, the separate 7,988-byte interrupt-vector template remained original
+fallback and received no tracked-code or source credit. The four separately
+reported alignment bytes were outside that vector owner.
 
-## Verified PR #663 source result
+## Historical PR #663 verified source result
 
 The ninth private-input build verifies source revision
 [`dcdfc947cd77221ff38159679f07e704be77d9e4`](https://github.com/dougchansan/pkmn-colosseum/commit/dcdfc947cd77221ff38159679f07e704be77d9e4).
@@ -200,11 +240,13 @@ also passes all 26 outputs. Its report SHA-256 is
 An independent audit of the baseline and new reports verifies all 8,677 function
 identities and the physical interval union unchanged across all 26 modules: no overlapping
 intervals, removed physical bytes, added physical bytes or renamed functions.
-The 3,565,996-byte data denominator is unchanged. The historical tracked-code
-denominator remains 2,504,940 bytes; the separate 7,988-byte interrupt-vector
-template and four-byte alignment padding remain explicit original fallback
-outside that tracked-code denominator. Those 7,992 physical bytes are retained
-and receive no function, matching-code or source-linked credit.
+The 3,565,996-byte data denominator was unchanged. The historical tracked-code
+denominator remained 2,504,940 bytes; the separate 7,988-byte interrupt-vector
+template remained explicit original fallback outside that denominator. Four
+further physical alignment bytes belonged to the already-complete
+`trk/TRKTarget_residual_800C25FC` owner. All physical intervals were retained;
+the vector template received no function, matching-code or source-linked credit
+at this checkpoint.
 
 The ninth Build established the source result above. The subsequent
 documentation and topology-freeze refresh passed all required checks on the

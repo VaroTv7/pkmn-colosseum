@@ -6826,8 +6826,8 @@ game/gs_range_80266250_exact.c:
 crt/__start_mem_80003458.c:
 	.init       start:0x80003458 end:0x800034AC
 
-# Original interrupt-vector bytes, not reconstructed source. Keep this named
-# fallback separate from the six exact C helpers on either side.
+# Reconstructed MetroTRK hardware-vector assembly. Keep its physical owner
+# separate from the six exact C helpers on either side.
 crt/interrupt_vectors:
 	.init       start:0x800034AC end:0x800053E0
 

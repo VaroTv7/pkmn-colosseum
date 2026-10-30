@@ -397,25 +397,10 @@ config.custom_build_rules = [
         "command": "$python tools/fsys_extract.py extract $in $members -o $out_dir",
         "description": "FSYS $in -> $members",
     },
-    {
-        "name": "vector_link_visibility",
-        "command": "$python tools/link_vector_object.py $in $out",
-        "description": "VECTOR LINK COPY $out",
-    },
 ]
-# Preserve the original hidden padding marker for report accounting. Only the
-# separate linker input restores its native local binding and visibility;
-# the 7,988 vector bytes remain original fallback, with no source credit.
-# The helper preserves allocated bytes and section offsets while keeping
-# relocation indices, CodeWarrior records and DTK address metadata aligned
-# with the reordered symbols. Public vector boundary labels stay global.
-config.fallback_link_overrides = {
-    ("main", "crt/interrupt_vectors"): {
-        "rule": "vector_link_visibility",
-        "output": config.out_path() / "link/crt/interrupt_vectors.o",
-        "implicit": [Path("tools/link_vector_object.py")],
-    },
-}
+# All owners now use source. The vector template uses the normal GNU assembly
+# path; its synthetic target marker remains comparison-only metadata.
+config.fallback_link_overrides = {}
 # Accept validated loose RELs as an alternative to retaining entire FSYS
 # archives. An available archive stays a Ninja dependency and is authoritative.
 from tools.fsys_inputs import extraction_steps
@@ -8091,6 +8076,13 @@ config.libs = [
                 Matching,
                 "crt/__start_mem_80003458.c",
                 mw_version="GC/1.3.2",
+                progress_category="runtime",
+            ),
+            Object(
+                Matching,
+                "crt/interrupt_vectors",
+                source="crt/interrupt_vectors.s",
+                extra_asflags=["-mregnames"],
                 progress_category="runtime",
             ),
             Object(

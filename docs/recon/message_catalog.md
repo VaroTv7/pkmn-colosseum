@@ -210,11 +210,13 @@ all 8,677 function identities and sizes, the 2,504,940-byte code denominator,
 the **3,565,996-byte data denominator**, and the entire 2,272-unit topology.
 There are no overlaps, omitted bytes or other source-status changes.
 
-These 91,421 bytes contribute matched and source-linked **data**, bringing both
-data measures to **100%**. They add no PowerPC functions or code credit and do
-not shrink the denominator. Source-backed and complete units rise from 2,258
-to 2,271. The sole remaining incomplete owner is the unchanged interrupt-vector
-template outside the historical tracked-code denominator. The initial build's
-strict-freeze failure records exactly the expected source-status increase;
-the documentation/freeze refresh and final required checks are recorded in
+These 91,421 bytes contributed matched and source-linked **data**, bringing both
+data measures to **100%**. They added no PowerPC functions or code credit and
+did not shrink the denominator. At the PR #665 checkpoint, source-backed and
+complete units rose from 2,258 to 2,271; the unchanged interrupt-vector template
+was the sole incomplete owner outside the historical tracked-code denominator.
+Its subsequent reconstruction completes the final scoring unit; see
+[the vector evidence](../asm_evidence/interrupt_vectors.md). The initial
+catalogue build's strict-freeze failure recorded its expected source-status
+increase; the documentation/freeze refresh and final required checks are recorded in
 [PR #665](https://github.com/dougchansan/pkmn-colosseum/pull/665).

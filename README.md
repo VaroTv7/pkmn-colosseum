@@ -10,8 +10,9 @@ A matching decompilation project for the GameCube game **Pokémon Colosseum**
 
 **All 8,677 tracked functions, all 2,504,940 tracked code bytes, and all
 3,565,996 tracked data bytes match and link from source (100%) across the DOL
-and all 25 configured REL modules.** The code totals include accepted assembly
-implementations with recorded evidence.
+and all 25 configured REL modules. All 2,272 scoring units are complete and
+source-backed.** The code totals include accepted assembly implementations
+with recorded evidence.
 
 | Metric | Value |
 |---|---|
@@ -19,46 +20,48 @@ implementations with recorded evidence.
 | Function match | 100.00% (8,677 / 8,677 functions) |
 | Code match | 100.00% (2,504,940 / 2,504,940 matched code bytes) |
 | Data match | 100.00% (3,565,996 / 3,565,996 matched data bytes) |
-| Source-linked | 2,271 / 2,272 scoring units (100.00% of code) |
+| Source-linked | 2,272 / 2,272 scoring units (100.00% of code) |
 
-Source-linked data is **3,565,996 / 3,565,996 bytes (100%)**. The final
-**91,421-byte** gain reconstructs 4,018 indexed messages, three retained strings
-and alignment in 13 existing data owners. The catalogue preserves original
-message text and typed formatting controls; it is reconstructed data, not
+Source-linked data is **3,565,996 / 3,565,996 bytes (100%)**. The catalogue
+completed the last **91,421 tracked data bytes**, reconstructing 4,018 indexed
+messages, three retained strings and alignment in 13 existing data owners.
+The catalogue preserves original message text and typed formatting controls;
+it is reconstructed data, not
 newly authored dialogue or additional native program code. No tracked data
 bytes remain in original fallback.
 
-The fresh [normal Build report](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40980024867/artifacts/12944233546) at source revision
-[`8c3c0d8845846b9b4b76e35d800cd2ff7cd8a486`](https://github.com/dougchansan/pkmn-colosseum/commit/8c3c0d8845846b9b4b76e35d800cd2ff7cd8a486)
-records these results. Its [full build](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40980024867/job/123817499088) compiled and linked all outputs,
+The fresh [normal Build report](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40986293627/artifacts/12947501389) at source revision
+[`ce09b514e43171ccb1b3c335dcc898dc22ae6963`](https://github.com/dougchansan/pkmn-colosseum/commit/ce09b514e43171ccb1b3c335dcc898dc22ae6963)
+records these results. Its [full build](https://github.com/dougchansan/pkmn-colosseum/actions/runs/40986293627/job/123837998946) compiled and linked all outputs,
 passed all **26 unchanged canonical hashes and direct original/rebuilt byte
-comparisons**, and passed the zero-data layout and registered assembly
-branch-target checks. An independent report audit confirms every function
-identity and bound, the exact physical interval union, and all denominators
+comparisons**, and passed the zero-data layout, registered assembly
+branch-target and complete vector-template checks. An independent report audit
+confirms every function identity and bound, the exact physical interval union, and all denominators
 are unchanged, with no overlapping or omitted bytes. Final documentation,
-source-status and integration checks are recorded in [PR #665](https://github.com/dougchansan/pkmn-colosseum/pull/665).
+source-status and integration checks are recorded in [PR #666](https://github.com/dougchansan/pkmn-colosseum/pull/666).
 
 The report SHA-256 is
-`14bbb9b3f8e9099521db7d1f66b9527a4341a3786aa6d672b305e7380d958c39`.
+`b3d16289a1b16caed16c311bd4db447484a937749121308c469147a26a611b32`.
 For subsequent builds, the authoritative report is
 `build/GC6E01/report.json`; the root-level `report.json` is historical.
 [`docs/DATA_MATCHING.md`](docs/DATA_MATCHING.md) records the completed data
 reconstruction, historical checkpoints and validation scope.
 
-The scope of 100% is the project's tracked code, function and data denominators.
-The **7,988-byte interrupt-vector template**, plus its four-byte alignment
-padding, remains explicit original fallback outside the historical tracked-code
-denominator. Its physical interval is unchanged and covered by the final binary
-comparisons. The vector template is the sole incomplete scoring unit. These
-results do not establish a pure-C percentage or runtime gameplay testing.
+The final scoring unit, the **7,988-byte MetroTRK interrupt-vector template**,
+is [reconstructed symbolic assembly](docs/asm_evidence/interrupt_vectors.md).
+It remains outside the historical tracked-code denominator and adds no tracked
+functions, code bytes or data bytes. All physical intervals remain unchanged
+and covered by the final binary comparisons. These results do not establish a
+pure-C percentage or runtime gameplay testing.
 
 **Scoring units are not translation units.** An original source region may be
 split into address-owned units with different compiler flags, compiled through
 one-line `#include` shims. The report has 8,677 distinct module/address function
 identities, with no duplicate claims. Its code denominator contains 2,495,112
 DOL bytes and 9,828 REL bytes, all matched and source-linked. The existing
-**2,272-unit topology** is unchanged; the final catalogue increases source-backed
-and complete units from 2,258 to 2,271 without changing physical coverage.
+**2,272-unit topology** is unchanged. The catalogue raised source-backed and
+complete units from 2,258 to 2,271; reconstructing the vector owner completes
+the final unit without changing physical coverage or any denominator.
 
 The completed fork import and Count-Sheep's retained original history are
 recorded in [PR #662](https://github.com/dougchansan/pkmn-colosseum/pull/662) and
